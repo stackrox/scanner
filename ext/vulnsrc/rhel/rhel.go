@@ -21,9 +21,11 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -84,6 +86,53 @@ type criterion struct {
 
 type updater struct{}
 
+const (
+	maxRetries             = 100
+	initialBackoffDuration = time.Second
+	backoffMultiplier      = 2
+	maxBackoffDuration     = 30 * time.Second
+)
+
+var (
+	client = &http.Client{Timeout: 10 * time.Second}
+)
+
+func httpGet(url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.WithError(err).Error("could not download RHEL's update list")
+		return nil, err
+	}
+
+	if !httputil.Status2xx(resp) {
+		log.WithField("StatusCode", resp.StatusCode).Error("Failed to update RHEL")
+		return nil, fmt.Errorf("failed to update RHEL: got status code %d", resp.StatusCode)
+	}
+
+	return resp, nil
+}
+
+func getWithRetriesAndBackoff(url string) (*http.Response, error) {
+	currentBackoffDuration := initialBackoffDuration
+	for i := 0; i < maxRetries; i++ {
+		resp, err := httpGet(url)
+		if err == nil {
+			return resp, nil
+		}
+		log.WithField("FailedAttempts", i+1).WithField("url", url).Info("Failed to make request to RHEL. Retrying...")
+		currentBackoffDuration *= backoffMultiplier
+		if currentBackoffDuration > maxBackoffDuration {
+			currentBackoffDuration = maxBackoffDuration
+		}
+	}
+	return nil, fmt.Errorf("failed to make request to URL %s after retries", url)
+}
+
 func init() {
 	vulnsrc.RegisterUpdater("rhel", &updater{})
 }
@@ -101,17 +150,12 @@ func (u *updater) Update(datastore database.Datastore) (resp vulnsrc.UpdateRespo
 	}
 
 	// Fetch the update list.
-	r, err := httputil.GetWithUserAgent(ovalURI)
+	r, err := getWithRetriesAndBackoff(ovalURI)
 	if err != nil {
 		log.WithError(err).Error("could not download RHEL's update list")
 		return resp, commonerr.ErrCouldNotDownload
 	}
 	defer r.Body.Close()
-
-	if !httputil.Status2xx(r) {
-		log.WithField("StatusCode", r.StatusCode).Error("Failed to update RHEL")
-		return resp, commonerr.ErrCouldNotDownload
-	}
 
 	// Get the list of RHSAs that we have to process.
 	var rhsaList []int
@@ -129,17 +173,12 @@ func (u *updater) Update(datastore database.Datastore) (resp vulnsrc.UpdateRespo
 
 	for _, rhsa := range rhsaList {
 		// Download the RHSA's XML file.
-		r, err := httputil.GetWithUserAgent(ovalURI + rhsaFilePrefix + strconv.Itoa(rhsa) + ".xml")
+		r, err := getWithRetriesAndBackoff(ovalURI + rhsaFilePrefix + strconv.Itoa(rhsa) + ".xml")
 		if err != nil {
 			log.WithError(err).Error("could not download RHEL's update list")
 			return resp, commonerr.ErrCouldNotDownload
 		}
 		defer r.Body.Close()
-
-		if !httputil.Status2xx(r) {
-			log.WithField("StatusCode", r.StatusCode).Error("Failed to update RHEL")
-			return resp, commonerr.ErrCouldNotDownload
-		}
 
 		// Parse the XML.
 		vs, err := parseRHSA(r.Body)
