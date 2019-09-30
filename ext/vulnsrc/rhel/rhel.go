@@ -129,6 +129,7 @@ func getWithRetriesAndBackoff(url string) (*http.Response, error) {
 		if currentBackoffDuration > maxBackoffDuration {
 			currentBackoffDuration = maxBackoffDuration
 		}
+		time.Sleep(currentBackoffDuration)
 	}
 	return nil, fmt.Errorf("failed to make request to URL %s after retries", url)
 }
@@ -171,7 +172,11 @@ func (u *updater) Update(datastore database.Datastore) (resp vulnsrc.UpdateRespo
 		}
 	}
 
-	for _, rhsa := range rhsaList {
+	log.WithField("count", len(rhsaList)).Info("Obtained RHSA list")
+
+	const printEvery = 100
+
+	for i, rhsa := range rhsaList {
 		// Download the RHSA's XML file.
 		r, err := getWithRetriesAndBackoff(ovalURI + rhsaFilePrefix + strconv.Itoa(rhsa) + ".xml")
 		if err != nil {
@@ -190,6 +195,9 @@ func (u *updater) Update(datastore database.Datastore) (resp vulnsrc.UpdateRespo
 		for _, v := range vs {
 			resp.Vulnerabilities = append(resp.Vulnerabilities, v)
 		}
+		if i % printEvery == 0 {
+			log.Infof("Finished collecting %d/%d RHSAs", i, len(rhsaList))
+		}
 	}
 
 	// Set the flag if we found anything.
@@ -197,7 +205,7 @@ func (u *updater) Update(datastore database.Datastore) (resp vulnsrc.UpdateRespo
 		resp.FlagName = updaterFlag
 		resp.FlagValue = strconv.Itoa(rhsaList[len(rhsaList)-1])
 	} else {
-		log.WithField("package", "Red Hat").Debug("no update")
+		log.WithField("package", "Red Hat").Info("no update")
 	}
 
 	return resp, nil
