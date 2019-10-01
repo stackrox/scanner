@@ -19,13 +19,20 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/coreos/clair/pkg/version"
 )
 
+const (
+	clientTimeout = 1 * time.Minute
+)
+
 // GetWithUserAgent performs an HTTP GET with the proper Clair User-Agent.
 func GetWithUserAgent(url string) (*http.Response, error) {
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: clientTimeout,
+	}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

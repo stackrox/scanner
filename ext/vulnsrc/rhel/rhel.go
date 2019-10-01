@@ -195,7 +195,7 @@ func (u *updater) Update(datastore database.Datastore) (resp vulnsrc.UpdateRespo
 		for _, v := range vs {
 			resp.Vulnerabilities = append(resp.Vulnerabilities, v)
 		}
-		if i % printEvery == 0 {
+		if i%printEvery == 0 {
 			log.Infof("Finished collecting %d/%d RHSAs", i, len(rhsaList))
 		}
 	}
