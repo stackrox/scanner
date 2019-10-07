@@ -62,9 +62,11 @@ type NVDMetadata struct {
 }
 
 type NVDmetadataCVSSv2 struct {
-	PublishedDateTime string
-	Vectors           string
-	Score             float64
+	PublishedDateTime   string
+	Vectors             string
+	Score               float64
+	ExploitabilityScore float64
+	ImpactScore         float64
 }
 
 type NVDmetadataCVSSv3 struct {
