@@ -54,8 +54,10 @@ func TestNVDParser(t *testing.T) {
 	assert.True(t, ok)
 	wantMetadata = NVDMetadata{
 		CVSSv2: NVDmetadataCVSSv2{
-			Vectors: "AV:N/AC:L/Au:S/C:P/I:N/A:N",
-			Score:   4.0,
+			Vectors:              "AV:N/AC:L/Au:S/C:P/I:N/A:N",
+			Score:                4.0,
+			ExploitabilityScore : 8.0,
+			ImpactScore : 		  2.9,
 		},
 	}
 	assert.Equal(t, wantMetadata, gotMetadata)
@@ -65,8 +67,10 @@ func TestNVDParser(t *testing.T) {
 	assert.True(t, ok)
 	wantMetadata = NVDMetadata{
 		CVSSv2: NVDmetadataCVSSv2{
-			Vectors: "AV:N/AC:L/Au:N/C:P/I:P/A:P",
-			Score:   7.5,
+			Vectors:             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+			Score:               7.5,
+			ExploitabilityScore: 10.0,
+			ImpactScore:         6.4,
 		},
 		CVSSv3: NVDmetadataCVSSv3{
 			Vectors:             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
