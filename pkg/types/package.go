@@ -1,8 +1,15 @@
 package types
 
+type ComponentType int
+
+const (
+	JAR ComponentType = iota
+)
+
 type Component struct {
 	Name        string
 	Version     string
+	Type        ComponentType
 	JavaPackage *JavaPackage
 }
 
