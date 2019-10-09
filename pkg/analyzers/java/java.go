@@ -25,7 +25,7 @@ func getOrigin(mf parsedManifestMF) string {
 	return mf.implementationVendor
 }
 
-func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]types.JavaPackage, error) {
+func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*types.JavaPackage, error) {
 	var manifestFile *zip.File
 	var subArchives []*zip.File
 	var pomProperties []*zip.File
@@ -52,8 +52,6 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]types.Jav
 	fileNameWithExtension := locationSoFar[strings.LastIndex(locationSoFar, "/")+1:]
 	fileName := strings.TrimSuffix(fileNameWithExtension, filepath.Ext(fileNameWithExtension))
 
-	var allPackages []types.JavaPackage
-
 	topLevelJavaPackage := types.JavaPackage{
 		ImplementationVersion: manifest.implementationVersion,
 		SpecificationVersion:  manifest.specificationVersion,
@@ -62,7 +60,7 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]types.Jav
 		Origin:                getOrigin(manifest),
 	}
 
-	allPackages = append(allPackages, topLevelJavaPackage)
+	allPackages := []*types.JavaPackage{&topLevelJavaPackage}
 
 	for _, pomPropsF := range pomProperties {
 		parsedPomProps, err := parseMavenPomProperties(pomPropsF)
@@ -71,7 +69,7 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]types.Jav
 		}
 		var currentJavaPackage *types.JavaPackage
 		// The maven properties is for the same package as the manifest was.
-		if strings.HasPrefix(parsedPomProps.artifactID, fileName) {
+		if strings.HasPrefix(fileName, parsedPomProps.artifactID) {
 			currentJavaPackage = &topLevelJavaPackage
 		} else {
 			currentJavaPackage = new(types.JavaPackage)
@@ -84,8 +82,9 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]types.Jav
 			currentJavaPackage.Name = parsedPomProps.artifactID
 		}
 		currentJavaPackage.MavenVersion = parsedPomProps.version
+		// fmt.Println(currentJavaPackage, &topLevelJavaPackage, len(allPackages))
 		if currentJavaPackage != &topLevelJavaPackage {
-			allPackages = append(allPackages, *currentJavaPackage)
+			allPackages = append(allPackages, currentJavaPackage)
 		}
 	}
 
@@ -109,7 +108,7 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]types.Jav
 	return allPackages, nil
 }
 
-func parseContents(locationSoFar string, contents []byte) ([]types.JavaPackage, error) {
+func parseContents(locationSoFar string, contents []byte) ([]*types.JavaPackage, error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(contents), int64(len(contents)))
 	if err != nil {
 		return nil, err
@@ -133,9 +132,10 @@ func (a Analyzer) Extract(fileMap filemap.FileMap) ([]types.Component, error) {
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println("Filepath", filePath, "len(packages)", len(packages))
 		for _, p := range packages {
 			allComponents = append(allComponents, types.Component{
-				JavaPackage: &p,
+				JavaPackage: p,
 			})
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stackrox/scanner/pkg/analyzers"
 	"github.com/stackrox/scanner/pkg/analyzers/java"
 	"github.com/stackrox/scanner/pkg/analyzers/simple"
@@ -23,11 +24,10 @@ func TestAnalyzeLayerWithExtractor(t *testing.T) {
 		if fileInfo.IsDir() || len(fileInfo.Name()) != 64 {
 			continue
 		}
-		fmt.Println(fileInfo.Name())
 		f, err := os.Open(filepath.Join(dir, fileInfo.Name()))
 		require.NoError(t, err)
 		components, err := AnalyzeLayerWithExtractor(f, extractors.DockerExtractor{}, []analyzers.Analyzer{simple.Analyzer{}, java.Analyzer{}})
 		require.NoError(t, err)
-		fmt.Printf("Filename: %s\nComponents: %+v\n\n", fileInfo.Name(), components)
+		fmt.Printf("Filename: %s\nComponents: %s\n\n", fileInfo.Name(), spew.Sdump(components))
 	}
 }

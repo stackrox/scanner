@@ -3,7 +3,6 @@ package java
 import (
 	"archive/zip"
 	"bufio"
-	"log"
 	"strings"
 )
 
@@ -82,9 +81,9 @@ func parseManifestMF(f *zip.File) (parsedManifestMF, error) {
 	if err := scanner.Err(); err != nil {
 		return parsedManifestMF{}, err
 	}
-	// TODO(viswa): Improve logging.
-	if currentValueToSet == nil {
-		log.Print("ERROR: CurrentValueToSet was not nil")
+	if currentValueToSet != nil {
+		*currentValueToSet = strings.TrimSpace(currentValue)
+		currentValueToSet = nil
 	}
 	return manifest, nil
 }
