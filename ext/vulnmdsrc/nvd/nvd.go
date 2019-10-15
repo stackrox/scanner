@@ -56,12 +56,13 @@ type appender struct {
 }
 
 type Metadata struct {
-	CVSSv2 NVDmetadataCVSSv2
-	CVSSv3 NVDmetadataCVSSv3
+	PublishedDateTime    string
+	LastModifiedDateTime string
+	CVSSv2               NVDmetadataCVSSv2
+	CVSSv3               NVDmetadataCVSSv3
 }
 
 type NVDmetadataCVSSv2 struct {
-	PublishedDateTime   string
 	Vectors             string
 	Score               float64
 	ExploitabilityScore float64
