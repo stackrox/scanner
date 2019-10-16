@@ -26,9 +26,10 @@ type nvd struct {
 }
 
 type nvdEntry struct {
-	CVE               nvdCVE    `json:"cve"`
-	Impact            nvdImpact `json:"impact"`
-	PublishedDateTime string    `json:"publishedDate"`
+	CVE                  nvdCVE    `json:"cve"`
+	Impact               nvdImpact `json:"impact"`
+	PublishedDateTime    string    `json:"publishedDate"`
+	LastModifiedDateTime string    `json:"lastModifiedDate"`
 }
 
 type nvdCVE struct {
@@ -100,8 +101,9 @@ var vectorValuesToLetters = map[string]string{
 
 func (n *nvdEntry) Metadata() *NVDMetadata {
 	metadata := &NVDMetadata{
+		PublishedDateTime:    n.PublishedDateTime,
+		LastModifiedDateTime: n.LastModifiedDateTime,
 		CVSSv2: NVDmetadataCVSSv2{
-			PublishedDateTime:   n.PublishedDateTime,
 			Vectors:             n.Impact.BaseMetricV2.CVSSv2.String(),
 			Score:               n.Impact.BaseMetricV2.CVSSv2.Score,
 			ExploitabilityScore: n.Impact.BaseMetricV2.ExploitabilityScore,
