@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/clair/pkg/version"
+	"github.com/stackrox/scanner/pkg/version"
 )
 
 const (

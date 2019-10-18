@@ -19,10 +19,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/pkg/commonerr"
 	"github.com/guregu/null/zero"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/commonerr"
 )
 
 func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities bool) (database.Layer, error) {

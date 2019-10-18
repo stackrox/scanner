@@ -21,8 +21,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/coreos/clair/database"
 	"github.com/pborman/uuid"
+	"github.com/stackrox/scanner/database"
 )
 
 func openDatabaseForTest(testName string, loadFixture bool) (*pgSQL, error) {

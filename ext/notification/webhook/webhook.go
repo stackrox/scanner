@@ -27,8 +27,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/notification"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/notification"
 	"gopkg.in/yaml.v2"
 )
 

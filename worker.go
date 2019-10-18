@@ -17,13 +17,13 @@ package clair
 import (
 	"regexp"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/featurefmt"
-	"github.com/coreos/clair/ext/featurens"
-	"github.com/coreos/clair/ext/imagefmt"
-	"github.com/coreos/clair/pkg/commonerr"
-	"github.com/coreos/clair/pkg/tarutil"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/ext/featurens"
+	"github.com/stackrox/scanner/ext/imagefmt"
+	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 const (

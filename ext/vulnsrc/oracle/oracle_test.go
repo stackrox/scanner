@@ -20,8 +20,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/versionfmt/rpm"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -20,11 +20,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/coreos/clair"
-	"github.com/coreos/clair/api"
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/notification"
 	"github.com/fernet/fernet-go"
+	clair "github.com/stackrox/scanner"
+	"github.com/stackrox/scanner/api"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/notification"
 	"gopkg.in/yaml.v2"
 )
 

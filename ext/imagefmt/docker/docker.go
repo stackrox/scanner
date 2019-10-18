@@ -19,8 +19,8 @@ package docker
 import (
 	"io"
 
-	"github.com/coreos/clair/ext/imagefmt"
-	"github.com/coreos/clair/pkg/tarutil"
+	"github.com/stackrox/scanner/ext/imagefmt"
+	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 type format struct{}

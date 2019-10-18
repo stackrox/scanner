@@ -26,12 +26,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/versionfmt"
-	"github.com/coreos/clair/ext/versionfmt/dpkg"
-	"github.com/coreos/clair/ext/vulnsrc"
-	"github.com/coreos/clair/pkg/commonerr"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/versionfmt"
+	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/ext/vulnsrc"
+	"github.com/stackrox/scanner/pkg/commonerr"
 )
 
 const (

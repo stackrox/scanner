@@ -18,8 +18,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/coreos/clair/pkg/commonerr"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/pkg/commonerr"
 )
 
 // InsertKeyValue stores (or updates) a single key / value tuple.

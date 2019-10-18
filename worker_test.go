@@ -19,16 +19,16 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/versionfmt/dpkg"
-	"github.com/coreos/clair/pkg/commonerr"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stretchr/testify/assert"
 
 	// Register the required detectors.
-	_ "github.com/coreos/clair/ext/featurefmt/dpkg"
-	_ "github.com/coreos/clair/ext/featurens/aptsources"
-	_ "github.com/coreos/clair/ext/featurens/osrelease"
-	_ "github.com/coreos/clair/ext/imagefmt/docker"
+	_ "github.com/stackrox/scanner/ext/featurefmt/dpkg"
+	_ "github.com/stackrox/scanner/ext/featurens/aptsources"
+	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
+	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
 )
 
 type mockDatastore struct {

@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/coreos/clair/database"
+	"github.com/stackrox/scanner/database"
 	"github.com/stretchr/testify/assert"
 )
 

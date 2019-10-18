@@ -23,14 +23,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/database/pgsql/migrations"
-	"github.com/coreos/clair/pkg/commonerr"
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/remind101/migrate"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/database/pgsql/migrations"
+	"github.com/stackrox/scanner/pkg/commonerr"
 	"gopkg.in/yaml.v2"
 )
 

@@ -29,9 +29,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/coreos/clair/pkg/commonerr"
-	"github.com/coreos/clair/pkg/tarutil"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 var (
