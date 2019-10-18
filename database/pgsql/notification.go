@@ -18,12 +18,11 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/coreos/clair/database"
+	"github.com/coreos/clair/pkg/commonerr"
 	"github.com/guregu/null/zero"
 	"github.com/pborman/uuid"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/pkg/commonerr"
 )
 
 // do it in tx so we won't insert/update a vuln without notification and vice-versa.

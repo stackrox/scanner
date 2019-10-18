@@ -26,13 +26,12 @@ import (
 	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/versionfmt"
 	"github.com/coreos/clair/ext/versionfmt/dpkg"
 	"github.com/coreos/clair/ext/vulnsrc"
 	"github.com/coreos/clair/pkg/commonerr"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -310,8 +309,7 @@ func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability
 				var version string
 				if md["status"] == "released" {
 					if md["note"] != "" {
-						var err error
-						err = versionfmt.Valid(dpkg.ParserName, md["note"])
+						err := versionfmt.Valid(dpkg.ParserName, md["note"])
 						if err != nil {
 							log.WithError(err).WithField("version", md["note"]).Warning("could not parse package version. skipping")
 						}

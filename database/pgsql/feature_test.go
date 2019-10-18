@@ -17,10 +17,9 @@ package pgsql
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/versionfmt/dpkg"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInsertFeature(t *testing.T) {

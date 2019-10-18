@@ -31,12 +31,11 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/vulnmdsrc"
 	"github.com/coreos/clair/pkg/commonerr"
 	"github.com/coreos/clair/pkg/httputil"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -53,10 +52,10 @@ const (
 type appender struct {
 	localPath      string
 	dataFeedHashes map[string]string
-	metadata       map[string]NVDMetadata
+	metadata       map[string]Metadata
 }
 
-type NVDMetadata struct {
+type Metadata struct {
 	CVSSv2 NVDmetadataCVSSv2
 	CVSSv3 NVDmetadataCVSSv3
 }
@@ -82,7 +81,7 @@ func init() {
 
 func (a *appender) BuildCache(datastore database.Datastore) error {
 	var err error
-	a.metadata = make(map[string]NVDMetadata)
+	a.metadata = make(map[string]Metadata)
 
 	// Init if necessary.
 	if a.localPath == "" {

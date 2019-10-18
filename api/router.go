@@ -18,11 +18,10 @@ import (
 	"net/http"
 	"strings"
 
+	v1 "github.com/coreos/clair/api/v1"
+	"github.com/coreos/clair/database"
 	"github.com/julienschmidt/httprouter"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/coreos/clair/api/v1"
-	"github.com/coreos/clair/database"
 )
 
 // router is an HTTP router that forwards requests to the appropriate sub-router
@@ -45,7 +44,7 @@ func (rtr router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		version = urlStr[:apiVersionLength]
 	}
 
-	if router, _ := rtr[version]; router != nil {
+	if router := rtr[version]; router != nil {
 		// Remove the version number from the request path to let the router do its
 		// job but do not update the RequestURI
 		r.URL.Path = strings.Replace(r.URL.Path, version, "", 1)

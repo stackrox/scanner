@@ -27,10 +27,9 @@ import (
 	"net/url"
 	"time"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/notification"
+	"gopkg.in/yaml.v2"
 )
 
 const timeout = 5 * time.Second

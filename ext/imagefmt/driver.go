@@ -24,16 +24,14 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"math"
 	"net/http"
 	"os"
 	"strings"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair/pkg/commonerr"
 	"github.com/coreos/clair/pkg/tarutil"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -113,10 +111,8 @@ func Extract(format, path string, headers map[string]string, toExtract []string)
 		}
 
 		// Set any provided HTTP Headers.
-		if headers != nil {
-			for k, v := range headers {
-				request.Header.Set(k, v)
-			}
+		for k, v := range headers {
+			request.Header.Set(k, v)
 		}
 
 		// Send the request and handle the response.
@@ -132,7 +128,7 @@ func Extract(format, path string, headers map[string]string, toExtract []string)
 		}
 
 		// Fail if we don't receive a 2xx HTTP status code.
-		if math.Floor(float64(r.StatusCode/100)) != 2 {
+		if r.StatusCode/100 != 2 {
 			log.WithField("status code", r.StatusCode).Warning("could not download layer: expected 2XX")
 			return nil, ErrCouldNotFindLayer
 		}

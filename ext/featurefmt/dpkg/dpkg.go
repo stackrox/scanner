@@ -20,13 +20,12 @@ import (
 	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/featurefmt"
 	"github.com/coreos/clair/ext/versionfmt"
 	"github.com/coreos/clair/ext/versionfmt/dpkg"
 	"github.com/coreos/clair/pkg/tarutil"
+	log "github.com/sirupsen/logrus"
 )
 
 var (

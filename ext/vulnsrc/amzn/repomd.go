@@ -14,7 +14,6 @@
 
 // Package amzn implements a vulnerability source updater using
 // ALAS (Amazon Linux Security Advisories).
-
 package amzn
 
 type RepoMd struct {

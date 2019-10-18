@@ -27,7 +27,7 @@ type Stopper struct {
 
 // NewStopper initializes a new Stopper instance
 func NewStopper() *Stopper {
-	return &Stopper{stop: make(chan struct{}, 0)}
+	return &Stopper{stop: make(chan struct{})}
 }
 
 // Begin indicates that a new goroutine has started.

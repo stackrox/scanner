@@ -19,11 +19,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/guregu/null/zero"
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/pkg/commonerr"
+	"github.com/guregu/null/zero"
+	log "github.com/sirupsen/logrus"
 )
 
 func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities bool) (database.Layer, error) {
@@ -402,7 +401,7 @@ func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer, existingLayer *
 }
 
 func createNV(features []database.FeatureVersion) (map[string]*database.FeatureVersion, []string) {
-	mapNV := make(map[string]*database.FeatureVersion, 0)
+	mapNV := make(map[string]*database.FeatureVersion)
 	sliceNV := make([]string, 0, len(features))
 
 	for i := 0; i < len(features); i++ {

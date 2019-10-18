@@ -24,14 +24,13 @@ import (
 	"io"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/versionfmt"
 	"github.com/coreos/clair/ext/versionfmt/dpkg"
 	"github.com/coreos/clair/ext/vulnsrc"
 	"github.com/coreos/clair/pkg/commonerr"
 	"github.com/coreos/clair/pkg/httputil"
+	log "github.com/sirupsen/logrus"
 )
 
 const (

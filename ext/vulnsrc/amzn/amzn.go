@@ -25,14 +25,13 @@ import (
 	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/versionfmt"
 	"github.com/coreos/clair/ext/versionfmt/rpm"
 	"github.com/coreos/clair/ext/vulnsrc"
 	"github.com/coreos/clair/pkg/commonerr"
 	"github.com/coreos/clair/pkg/httputil"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -156,15 +155,15 @@ func (u *updater) getUpdateInfo() (UpdateInfo, error) {
 	}
 
 	// Decompress updateinfo.xml.gz.
-	updateInfoXml, err := gzip.NewReader(updateInfoResponse.Body)
+	updateInfoXML, err := gzip.NewReader(updateInfoResponse.Body)
 	if err != nil {
 		log.WithError(err).Error("could not decompress updateinfo.xml.gz")
 		return UpdateInfo{}, commonerr.ErrCouldNotParse
 	}
-	defer updateInfoXml.Close()
+	defer updateInfoXML.Close()
 
 	// Decode updateinfo.xml.
-	updateInfo, err := decodeUpdateInfo(updateInfoXml)
+	updateInfo, err := decodeUpdateInfo(updateInfoXML)
 	if err != nil {
 		log.WithError(err).Error("could not decode updateinfo.xml")
 		return UpdateInfo{}, commonerr.ErrCouldNotParse
@@ -190,7 +189,7 @@ func (u *updater) getUpdateInfoURI() (string, error) {
 	// Parse the URI of the first mirror.
 	scanner := bufio.NewScanner(mirrorListResponse.Body)
 	success := scanner.Scan()
-	if success != true {
+	if !success {
 		log.WithError(err).Error("could not parse mirror list")
 	}
 	mirrorURI := scanner.Text()
@@ -263,18 +262,18 @@ func (u *updater) alasListToVulnerabilities(alasList []ALAS) []database.Vulnerab
 }
 
 func (u *updater) alasToName(alas ALAS) string {
-	return alas.Id
+	return alas.ID
 }
 
 func (u *updater) alasToLink(alas ALAS) string {
 	if u.Name == amazonLinux1Name {
-		return fmt.Sprintf(u.LinkFormat, alas.Id)
+		return fmt.Sprintf(u.LinkFormat, alas.ID)
 	}
 
 	if u.Name == amazonLinux2Name {
 		// "ALAS2-2018-1097" becomes "https://alas.aws.amazon.com/AL2/ALAS-2018-1097.html".
 		re := regexp.MustCompile(`^ALAS2-(.+)$`)
-		return fmt.Sprintf(u.LinkFormat, "ALAS-"+re.FindStringSubmatch(alas.Id)[1])
+		return fmt.Sprintf(u.LinkFormat, "ALAS-"+re.FindStringSubmatch(alas.ID)[1])
 	}
 
 	return ""

@@ -1,0 +1,36 @@
+version: 2
+
+defaults: &defaults
+  docker:
+    - image: docker.io/stackrox/apollo-ci:0.2.3
+      auth:
+        username: $DOCKER_IO_PULL_USERNAME
+        password: $DOCKER_IO_PULL_PASSWORD
+  working_directory: /go/src/github.com/stackrox/scanner
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+    - add_ssh_keys
+    - checkout
+    - setup_remote_docker
+
+    - run:
+        name: Install dependencies
+        command: make deps
+
+    - run:
+        name: Run style checks
+        command: make style
+
+workflows:
+  version: 2
+
+  build:
+    jobs:
+    - build:
+        context: docker-io-pull
+        filters:
+          tags:
+            only: /.*/
