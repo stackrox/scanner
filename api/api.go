@@ -23,9 +23,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/pkg/stopper"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/stopper"
 	"github.com/tylerb/graceful"
 )
 

@@ -31,11 +31,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/vulnmdsrc"
-	"github.com/coreos/clair/pkg/commonerr"
-	"github.com/coreos/clair/pkg/httputil"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/httputil"
 )
 
 const (

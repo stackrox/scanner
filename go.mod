@@ -4,7 +4,6 @@ go 1.13
 
 require (
 	github.com/beorn7/perks v0.0.0-20160804104726-4c0e84591b9a // indirect
-	github.com/coreos/clair v2.0.9+incompatible
 	github.com/coreos/pkg v0.0.0-20160727233714-3ac0863d7acf
 	github.com/davecgh/go-spew v1.0.1-0.20160907170601-6d212800a42e // indirect
 	github.com/fernet/fernet-go v0.0.0-20151007213151-1b2437bc582b

@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/versionfmt/dpkg"
-	"github.com/coreos/clair/pkg/commonerr"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stretchr/testify/assert"
 )
 

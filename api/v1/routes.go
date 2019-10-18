@@ -22,13 +22,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coreos/clair"
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/pkg/commonerr"
-	"github.com/coreos/clair/pkg/tarutil"
 	"github.com/julienschmidt/httprouter"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	clair "github.com/stackrox/scanner"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 const (

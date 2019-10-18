@@ -20,14 +20,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/vulnmdsrc"
-	"github.com/coreos/clair/ext/vulnsrc"
-	"github.com/coreos/clair/pkg/stopper"
-	"github.com/coreos/clair/pkg/timeutil"
 	"github.com/pborman/uuid"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/ext/vulnsrc"
+	"github.com/stackrox/scanner/pkg/stopper"
+	"github.com/stackrox/scanner/pkg/timeutil"
 )
 
 const (

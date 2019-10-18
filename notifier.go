@@ -17,14 +17,14 @@ package clair
 import (
 	"time"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/notification"
-	"github.com/coreos/clair/pkg/commonerr"
-	"github.com/coreos/clair/pkg/stopper"
 	"github.com/coreos/pkg/timeutil"
 	"github.com/pborman/uuid"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/notification"
+	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/stopper"
 )
 
 const (

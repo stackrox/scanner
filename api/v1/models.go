@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/versionfmt"
 	"github.com/fernet/fernet-go"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/versionfmt"
 )
 
 type Error struct {

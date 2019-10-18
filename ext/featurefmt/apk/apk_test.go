@@ -17,9 +17,9 @@ package apk
 import (
 	"testing"
 
-	"github.com/coreos/clair/database"
-	"github.com/coreos/clair/ext/featurefmt"
-	"github.com/coreos/clair/pkg/tarutil"
+	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 func TestAPKFeatureDetection(t *testing.T) {

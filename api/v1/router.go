@@ -20,10 +20,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/coreos/clair/database"
 	"github.com/julienschmidt/httprouter"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database"
 )
 
 var (

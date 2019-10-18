@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/clair/database"
+	"github.com/stackrox/scanner/database"
 )
 
 var (
