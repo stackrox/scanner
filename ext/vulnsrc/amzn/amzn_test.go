@@ -47,10 +47,10 @@ func TestAmazonLinux1(t *testing.T) {
 	expectedDescription1Bytes, _ := ioutil.ReadFile(path + "/testdata/amazon_linux_1_description_1.txt")
 	expectedDescription1 := string(expectedDescription1Bytes)
 
-	updateInfoXml, _ := os.Open(path + "/testdata/amazon_linux_1_updateinfo.xml")
-	defer updateInfoXml.Close()
+	updateInfoXML, _ := os.Open(path + "/testdata/amazon_linux_1_updateinfo.xml")
+	defer updateInfoXML.Close()
 
-	updateInfo, err := decodeUpdateInfo(updateInfoXml)
+	updateInfo, err := decodeUpdateInfo(updateInfoXML)
 	assert.Nil(t, err)
 
 	vulnerabilities := amazonLinux1Updater.alasListToVulnerabilities(updateInfo.ALASList)
@@ -140,10 +140,10 @@ func TestAmazonLinux2(t *testing.T) {
 	expectedDescription1Bytes, _ := ioutil.ReadFile(path + "/testdata/amazon_linux_2_description_1.txt")
 	expectedDescription1 := string(expectedDescription1Bytes)
 
-	updateInfoXml, _ := os.Open(path + "/testdata/amazon_linux_2_updateinfo.xml")
-	defer updateInfoXml.Close()
+	updateInfoXML, _ := os.Open(path + "/testdata/amazon_linux_2_updateinfo.xml")
+	defer updateInfoXML.Close()
 
-	updateInfo, err := decodeUpdateInfo(updateInfoXml)
+	updateInfo, err := decodeUpdateInfo(updateInfoXML)
 	assert.Nil(t, err)
 
 	vulnerabilities := amazonLinux2Updater.alasListToVulnerabilities(updateInfo.ALASList)

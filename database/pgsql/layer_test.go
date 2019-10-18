@@ -18,11 +18,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/versionfmt/dpkg"
 	"github.com/coreos/clair/pkg/commonerr"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFindLayer(t *testing.T) {

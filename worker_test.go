@@ -19,11 +19,10 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/versionfmt/dpkg"
 	"github.com/coreos/clair/pkg/commonerr"
+	"github.com/stretchr/testify/assert"
 
 	// Register the required detectors.
 	_ "github.com/coreos/clair/ext/featurefmt/dpkg"

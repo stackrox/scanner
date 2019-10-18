@@ -27,14 +27,13 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/versionfmt"
 	"github.com/coreos/clair/ext/versionfmt/rpm"
 	"github.com/coreos/clair/ext/vulnsrc"
 	"github.com/coreos/clair/pkg/commonerr"
 	"github.com/coreos/clair/pkg/httputil"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -192,9 +191,7 @@ func (u *updater) Update(datastore database.Datastore) (resp vulnsrc.UpdateRespo
 		}
 
 		// Collect vulnerabilities.
-		for _, v := range vs {
-			resp.Vulnerabilities = append(resp.Vulnerabilities, v)
-		}
+		resp.Vulnerabilities = append(resp.Vulnerabilities, vs...)
 		if i%printEvery == 0 {
 			log.Infof("Finished collecting %d/%d RHSAs", i, len(rhsaList))
 		}
@@ -234,9 +231,7 @@ func parseRHSA(ovalReader io.Reader) (vulnerabilities []database.Vulnerability, 
 				Severity:    severity(definition),
 				Description: description(definition),
 			}
-			for _, p := range pkgs {
-				vulnerability.FixedIn = append(vulnerability.FixedIn, p)
-			}
+			vulnerability.FixedIn = append(vulnerability.FixedIn, pkgs...)
 			vulnerabilities = append(vulnerabilities, vulnerability)
 		}
 	}
@@ -290,9 +285,7 @@ func getPossibilities(node criteria) [][]criterion {
 
 	var possibilities [][]criterion
 	if node.Operator == "AND" {
-		for _, possibility := range possibilitiesToCompose[0] {
-			possibilities = append(possibilities, possibility)
-		}
+		possibilities = append(possibilities, possibilitiesToCompose[0]...)
 
 		for _, possibilityGroup := range possibilitiesToCompose[1:] {
 			var newPossibilities [][]criterion
@@ -310,9 +303,7 @@ func getPossibilities(node criteria) [][]criterion {
 		}
 	} else if node.Operator == "OR" {
 		for _, possibilityGroup := range possibilitiesToCompose {
-			for _, possibility := range possibilityGroup {
-				possibilities = append(possibilities, possibility)
-			}
+			possibilities = append(possibilities, possibilityGroup...)
 		}
 	}
 

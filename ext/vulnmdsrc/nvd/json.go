@@ -98,8 +98,8 @@ var vectorValuesToLetters = map[string]string{
 	"UNCHANGED": "U",
 }
 
-func (n *nvdEntry) Metadata() *NVDMetadata {
-	metadata := &NVDMetadata{
+func (n *nvdEntry) Metadata() *Metadata {
+	metadata := &Metadata{
 		CVSSv2: NVDmetadataCVSSv2{
 			PublishedDateTime:   n.PublishedDateTime,
 			Vectors:             n.Impact.BaseMetricV2.CVSSv2.String(),

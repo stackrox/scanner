@@ -18,10 +18,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/versionfmt/dpkg"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInsertNamespace(t *testing.T) {

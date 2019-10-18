@@ -20,15 +20,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pborman/uuid"
-	"github.com/prometheus/client_golang/prometheus"
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/vulnmdsrc"
 	"github.com/coreos/clair/ext/vulnsrc"
 	"github.com/coreos/clair/pkg/stopper"
 	"github.com/coreos/clair/pkg/timeutil"
+	"github.com/pborman/uuid"
+	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -92,7 +91,7 @@ func RunUpdater(config *UpdaterConfig, datastore database.Datastore, st *stopper
 		if err != nil {
 			log.WithError(err).Error("an error occured while getting the last update time")
 			nextUpdate = nextUpdate.Add(config.Interval)
-		} else if firstUpdate == false {
+		} else if !firstUpdate {
 			nextUpdate = lastUpdate.Add(config.Interval)
 		}
 
@@ -177,7 +176,7 @@ func sleepUpdater(approxWakeup time.Time, st *stopper.Stopper) (stopped bool) {
 	waitUntil := approxWakeup.Add(time.Duration(rand.ExpFloat64()/0.5) * time.Second)
 	log.WithField("scheduled time", waitUntil).Debug("updater sleeping")
 	if !waitUntil.Before(time.Now().UTC()) {
-		if !st.Sleep(waitUntil.Sub(time.Now())) {
+		if !st.Sleep(time.Until(waitUntil)) {
 			return true
 		}
 	}
@@ -237,7 +236,7 @@ func fetch(datastore database.Datastore) (bool, []database.Vulnerability, map[st
 
 	// Fetch updates in parallel.
 	log.Info("fetching vulnerability updates")
-	var responseC = make(chan *vulnsrc.UpdateResponse, 0)
+	var responseC = make(chan *vulnsrc.UpdateResponse)
 	for n, u := range vulnsrc.Updaters() {
 		go func(name string, u vulnsrc.Updater) {
 			response, err := u.Update(datastore)

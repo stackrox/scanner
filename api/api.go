@@ -23,11 +23,10 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/tylerb/graceful"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/pkg/stopper"
+	log "github.com/sirupsen/logrus"
+	"github.com/tylerb/graceful"
 )
 
 const timeoutResponse = `{"Error":{"Message":"Clair failed to respond within the configured timeout window.","Type":"Timeout"}}`

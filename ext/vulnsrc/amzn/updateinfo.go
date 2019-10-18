@@ -14,7 +14,6 @@
 
 // Package amzn implements a vulnerability source updater using
 // ALAS (Amazon Linux Security Advisories).
-
 package amzn
 
 type UpdateInfo struct {
@@ -22,7 +21,7 @@ type UpdateInfo struct {
 }
 
 type ALAS struct {
-	Id          string    `xml:"id"`
+	ID          string    `xml:"id"`
 	Updated     Updated   `xml:"updated"`
 	Severity    string    `xml:"severity"`
 	Description string    `xml:"description"`

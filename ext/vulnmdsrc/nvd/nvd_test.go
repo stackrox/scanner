@@ -35,14 +35,14 @@ func TestNVDParser(t *testing.T) {
 	defer testData.Close()
 
 	a := &appender{}
-	a.metadata = make(map[string]NVDMetadata)
+	a.metadata = make(map[string]Metadata)
 
 	err = a.parseDataFeed(testData)
 	if err != nil {
 		t.Fatalf("Error parsing %q: %v", dataFilePath, err)
 	}
 
-	var gotMetadata, wantMetadata NVDMetadata
+	var gotMetadata, wantMetadata Metadata
 
 	// Items without CVSSv2 aren't returned.
 	assert.Len(t, a.metadata, 2)
@@ -52,7 +52,7 @@ func TestNVDParser(t *testing.T) {
 	// Item with only CVSSv2.
 	gotMetadata, ok = a.metadata["CVE-2012-0001"]
 	assert.True(t, ok)
-	wantMetadata = NVDMetadata{
+	wantMetadata = Metadata{
 		CVSSv2: NVDmetadataCVSSv2{
 			Vectors:             "AV:N/AC:L/Au:S/C:P/I:N/A:N",
 			Score:               4.0,
@@ -65,7 +65,7 @@ func TestNVDParser(t *testing.T) {
 	// Item with both CVSSv2 and CVSSv3 has CVSSv2 information returned.
 	gotMetadata, ok = a.metadata["CVE-2018-0001"]
 	assert.True(t, ok)
-	wantMetadata = NVDMetadata{
+	wantMetadata = Metadata{
 		CVSSv2: NVDmetadataCVSSv2{
 			Vectors:             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 			Score:               7.5,
@@ -94,7 +94,7 @@ func TestNVDParserErrors(t *testing.T) {
 	defer testData.Close()
 
 	a := &appender{}
-	a.metadata = make(map[string]NVDMetadata)
+	a.metadata = make(map[string]Metadata)
 
 	err = a.parseDataFeed(testData)
 	if err == nil {

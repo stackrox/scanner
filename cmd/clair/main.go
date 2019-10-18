@@ -16,6 +16,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -25,14 +26,13 @@ import (
 	"syscall"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair"
 	"github.com/coreos/clair/api"
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/imagefmt"
 	"github.com/coreos/clair/pkg/formatter"
 	"github.com/coreos/clair/pkg/stopper"
+	log "github.com/sirupsen/logrus"
 
 	// Register database driver.
 	_ "github.com/coreos/clair/database/pgsql"
@@ -144,6 +144,10 @@ func main() {
 	// Initialize logging system
 
 	logLevel, err := log.ParseLevel(strings.ToUpper(*flagLogLevel))
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Invalid log level: %v", err)
+		logLevel = log.InfoLevel
+	}
 	log.SetLevel(logLevel)
 	log.SetOutput(os.Stdout)
 	log.SetFormatter(&formatter.JSONExtendedFormatter{ShowLn: true})

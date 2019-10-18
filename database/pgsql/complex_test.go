@@ -23,11 +23,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pborman/uuid"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/coreos/clair/database"
 	"github.com/coreos/clair/ext/versionfmt/dpkg"
+	"github.com/pborman/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 const (

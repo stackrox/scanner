@@ -17,9 +17,8 @@ package pgsql
 import (
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/coreos/clair/pkg/commonerr"
+	log "github.com/sirupsen/logrus"
 )
 
 // Lock tries to set a temporary lock in the database.
