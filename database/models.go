@@ -78,6 +78,8 @@ type Vulnerability struct {
 	// For output purposes. Only make sense when the vulnerability
 	// is already about a specific Feature/FeatureVersion.
 	FixedBy string `json:",omitempty"`
+
+	SubCVEs []string
 }
 
 type MetadataMap map[string]interface{}
