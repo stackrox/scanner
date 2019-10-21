@@ -32,8 +32,18 @@ type nvdEntry struct {
 	LastModifiedDateTime string    `json:"lastModifiedDate"`
 }
 
+type nvdDescription struct {
+	DescriptionData []descriptionItem `json:"description_data"`
+}
+
+type descriptionItem struct {
+	Lang  string `json:"lang"`
+	Value string `json:"value"`
+}
+
 type nvdCVE struct {
-	Metadata nvdCVEMetadata `json:"CVE_data_meta"`
+	Metadata    nvdCVEMetadata `json:"CVE_data_meta"`
+	Description nvdDescription `json:"description"`
 }
 
 type nvdCVEMetadata struct {
@@ -99,7 +109,19 @@ var vectorValuesToLetters = map[string]string{
 	"UNCHANGED": "U",
 }
 
+func (n *nvdEntry) Summary() string {
+	for _, desc := range n.CVE.Description.DescriptionData {
+		if desc.Lang == "en" {
+			return desc.Value
+		}
+	}
+	return ""
+}
+
 func (n *nvdEntry) Metadata() *NVDMetadata {
+	if n.Impact.BaseMetricV2.CVSSv2.String() == "" {
+		return nil
+	}
 	metadata := &NVDMetadata{
 		PublishedDateTime:    n.PublishedDateTime,
 		LastModifiedDateTime: n.LastModifiedDateTime,
@@ -115,10 +137,6 @@ func (n *nvdEntry) Metadata() *NVDMetadata {
 			ExploitabilityScore: n.Impact.BaseMetricV3.ExploitabilityScore,
 			ImpactScore:         n.Impact.BaseMetricV3.ImpactScore,
 		},
-	}
-
-	if metadata.CVSSv2.Vectors == "" {
-		return nil
 	}
 
 	return metadata

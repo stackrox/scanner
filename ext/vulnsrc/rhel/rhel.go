@@ -67,11 +67,20 @@ type definition struct {
 	Description string      `xml:"metadata>description"`
 	References  []reference `xml:"metadata>reference"`
 	Criteria    criteria    `xml:"criteria"`
+	Severity    string      `xml:"metadata>advisory>severity"`
+	CVEs        []cve       `xml:"metadata>advisory>cve"`
 }
 
 type reference struct {
 	Source string `xml:"source,attr"`
 	URI    string `xml:"ref_url,attr"`
+	ID     string `xml:"ref_id,attr"`
+}
+
+type cve struct {
+	Impact string `xml:"impact,attr"`
+	Href   string `xml:"href,attr"`
+	ID     string `xml:",chardata"`
 }
 
 type criteria struct {
@@ -228,16 +237,34 @@ func parseRHSA(ovalReader io.Reader) (vulnerabilities []database.Vulnerability, 
 	for _, definition := range ov.Definitions {
 		pkgs := toFeatureVersions(definition.Criteria)
 		if len(pkgs) > 0 {
-			vulnerability := database.Vulnerability{
+			rhsaVuln := database.Vulnerability{
 				Name:        name(definition),
 				Link:        link(definition),
 				Severity:    severity(definition),
 				Description: description(definition),
 			}
 			for _, p := range pkgs {
-				vulnerability.FixedIn = append(vulnerability.FixedIn, p)
+				rhsaVuln.FixedIn = append(rhsaVuln.FixedIn, p)
 			}
-			vulnerabilities = append(vulnerabilities, vulnerability)
+			subCVEs := make([]string, 0, len(definition.CVEs))
+			for _, c := range definition.CVEs {
+				subCVEs = append(subCVEs, c.ID)
+			}
+			rhsaVuln.SubCVEs = subCVEs
+
+			vulnerabilities = append(vulnerabilities, rhsaVuln)
+
+			// Add all of the CVE based vulns
+			for _, c := range definition.CVEs {
+				vulnerabilities = append(vulnerabilities, database.Vulnerability{
+					Name:      c.ID,
+					Namespace: rhsaVuln.Namespace,
+					Link:      c.Href,
+					FixedIn:   rhsaVuln.FixedIn,
+					FixedBy:   rhsaVuln.FixedBy,
+					Severity:  database.UnknownSeverity,
+				})
+			}
 		}
 	}
 

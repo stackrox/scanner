@@ -53,7 +53,27 @@ const (
 type appender struct {
 	localPath      string
 	dataFeedHashes map[string]string
-	metadata       map[string]NVDMetadata
+	metadata       map[string]*metadataEnricher
+}
+
+type metadataEnricher struct {
+	metadata *NVDMetadata
+	summary  string
+}
+
+func (m *metadataEnricher) Metadata() interface{} {
+	return m.metadata
+}
+
+func (m *metadataEnricher) Summary() string {
+	return m.summary
+}
+
+func newMetadataEnricher(nvd *nvdEntry) *metadataEnricher {
+	return &metadataEnricher{
+		metadata: nvd.Metadata(),
+		summary:  nvd.Summary(),
+	}
 }
 
 type NVDMetadata struct {
@@ -83,7 +103,7 @@ func init() {
 
 func (a *appender) BuildCache(datastore database.Datastore) error {
 	var err error
-	a.metadata = make(map[string]NVDMetadata)
+	a.metadata = make(map[string]*metadataEnricher)
 
 	// Init if necessary.
 	if a.localPath == "" {
@@ -129,19 +149,42 @@ func (a *appender) parseDataFeed(r io.Reader) error {
 
 	for _, nvdEntry := range nvd.Entries {
 		// Create metadata entry.
-		if metadata := nvdEntry.Metadata(); metadata != nil {
-			a.metadata[nvdEntry.Name()] = *metadata
+		enricher := newMetadataEnricher(&nvdEntry)
+		if enricher.metadata != nil {
+			a.metadata[nvdEntry.Name()] = enricher
 		}
 	}
 
 	return nil
 }
 
-func (a *appender) Append(vulnName string, appendFunc vulnmdsrc.AppendFunc) error {
-	if nvdMetadata, ok := a.metadata[vulnName]; ok {
-		appendFunc(appenderName, nvdMetadata, SeverityFromCVSS(nvdMetadata.CVSSv2.Score))
+func (a *appender) getHighestCVSSMetadata(cves []string) *NVDMetadata {
+	var maxScore float64
+	var maxMetadata *NVDMetadata
+	for _, cve := range cves {
+		if enricher, ok := a.metadata[cve]; ok {
+			nvdMetadata := enricher.metadata
+			if nvdMetadata.CVSSv3.Score != 0 && nvdMetadata.CVSSv3.Score > maxScore {
+				maxScore = nvdMetadata.CVSSv3.Score
+				maxMetadata = nvdMetadata
+			} else if nvdMetadata.CVSSv2.Score > maxScore {
+				maxScore = nvdMetadata.CVSSv2.Score
+				maxMetadata = nvdMetadata
+			}
+		}
 	}
 
+	return maxMetadata
+}
+
+func (a *appender) Append(name string, subCVEs []string, appendFunc vulnmdsrc.AppendFunc) error {
+	if enricher, ok := a.metadata[name]; ok {
+		appendFunc(appenderName, enricher, SeverityFromCVSS(enricher.metadata))
+		return nil
+	}
+	if nvdMetadata := a.getHighestCVSSMetadata(subCVEs); nvdMetadata != nil {
+		appendFunc(appenderName, &metadataEnricher{metadata: nvdMetadata}, SeverityFromCVSS(nvdMetadata))
+	}
 	return nil
 }
 
@@ -292,7 +335,11 @@ func getHashFromMetaURL(metaURL string) (string, error) {
 //
 // The Negligible level is set for CVSS scores between [0, 1), replacing the
 // specified None level, originally used for a score of 0.
-func SeverityFromCVSS(score float64) database.Severity {
+func SeverityFromCVSS(meta *NVDMetadata) database.Severity {
+	score := meta.CVSSv3.Score
+	if score == 0 {
+		score = meta.CVSSv2.Score
+	}
 	switch {
 	case score < 1.0:
 		return database.NegligibleSeverity

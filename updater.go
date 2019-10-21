@@ -303,7 +303,7 @@ func addMetadata(datastore database.Datastore, vulnerabilities []database.Vulner
 
 			// Append vulnerability metadata  to each vulnerability.
 			for _, vulnerability := range lockableVulnerabilities {
-				appender.Append(vulnerability.Name, vulnerability.appendFunc)
+				appender.Append(vulnerability.Name, vulnerability.SubCVEs, vulnerability.appendFunc)
 			}
 
 			// Purge the metadata cache.
@@ -340,7 +340,7 @@ type lockableVulnerability struct {
 	sync.Mutex
 }
 
-func (lv *lockableVulnerability) appendFunc(metadataKey string, metadata interface{}, severity database.Severity) {
+func (lv *lockableVulnerability) appendFunc(metadataKey string, enricher vulnmdsrc.MetadataEnricher, severity database.Severity) {
 	lv.Lock()
 	defer lv.Unlock()
 
@@ -350,7 +350,10 @@ func (lv *lockableVulnerability) appendFunc(metadataKey string, metadata interfa
 	}
 
 	// Append the metadata.
-	lv.Metadata[metadataKey] = metadata
+	lv.Metadata[metadataKey] = enricher.Metadata()
+	if lv.Description == "" {
+		lv.Description = enricher.Summary()
+	}
 
 	// If necessary, provide a severity for the vulnerability.
 	if lv.Severity == database.UnknownSeverity {
