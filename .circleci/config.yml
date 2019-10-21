@@ -30,7 +30,7 @@ workflows:
   build:
     jobs:
     - build:
-        context: docker-io-pull
+        context: docker-io-and-stackrox-io-push
         filters:
           tags:
             only: /.*/

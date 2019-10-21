@@ -1,0 +1,3 @@
+FROM postgres:12.0-alpine
+
+COPY ./dump/clair_definitions_*.gz /docker-entrypoint-initdb.d/
