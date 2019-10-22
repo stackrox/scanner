@@ -93,17 +93,18 @@ func Boot(config *Config) {
 
 	// Open database
 	var db database.Datastore
+	var err error
 	for try := 1; ; try++ {
-		var err error
 		db, err = database.Open(config.Database)
-		if err == nil {
+		if err == nil || try == 5 {
 			break
-		}
-		if try == 5 {
-			log.WithError(err).Fatal("Failed to open database")
 		}
 		log.WithError(err).WithField("Attempts", try).Error("Failed to open database. Retrying...")
 		time.Sleep(10 * time.Second)
+	}
+
+	if err != nil {
+		log.WithError(err).Fatal("Failed to open database despite multiple retries...")
 	}
 	defer db.Close()
 
