@@ -41,7 +41,7 @@ func main() {
 			break
 		}
 		logrus.Errorf("Error accessing Postgres: %s", err)
-		time.Sleep(2 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
 	if err != nil {
 		log.Fatal(err)
