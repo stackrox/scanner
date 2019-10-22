@@ -37,6 +37,7 @@ spec:
           image:  {{ .Values.scannerImage}}:{{ .Values.tag }}
           command:
             - /clairify
+            - "-no-mtls"
           resources:
             limits:
               cpu: 2

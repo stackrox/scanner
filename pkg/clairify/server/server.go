@@ -1,11 +1,13 @@
 package server
 
 import (
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -14,6 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/db"
+	"github.com/stackrox/scanner/pkg/clairify/server/mtls"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 )
 
@@ -223,7 +226,7 @@ func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
 }
 
 // Start starts the server listening.
-func (s *Server) Start() error {
+func (s *Server) Start(noMTLS bool) error {
 	r := mux.NewRouter()
 	r.HandleFunc("/clairify/ping", s.Ping).Methods("GET")
 	r.HandleFunc("/clairify/image", s.ScanImage).Methods("POST")
@@ -232,14 +235,37 @@ func (s *Server) Start() error {
 	r.HandleFunc("/clairify/image/{registry}/{remote}/{tag}", s.GetResultsByImage).Methods("GET")
 	r.HandleFunc("/clairify/image/{registry}/{namespace}/{repo}/{tag}", s.GetResultsByImage).Methods("GET")
 
+	var tlsConfig *tls.Config
+	var listener net.Listener
+	var addr string
+	if !noMTLS {
+		var err error
+		tlsConfig, err = mtls.TLSConfig()
+		if err != nil {
+			return err
+		}
+
+		listener, err = tls.Listen("tcp", s.endpoint, tlsConfig)
+		if err != nil {
+			return err
+		}
+		addr = listener.Addr().String()
+	} else {
+		addr = s.endpoint
+	}
+
 	srv := &http.Server{
 		Handler:      r,
-		Addr:         s.endpoint,
+		Addr:         addr,
 		WriteTimeout: 5 * time.Minute,
 		ReadTimeout:  15 * time.Second,
+		TLSConfig:    tlsConfig,
 	}
 	s.httpServer = srv
 	logrus.Infof("Listening on %s", s.endpoint)
+	if listener != nil {
+		return srv.Serve(listener)
+	}
 	return srv.ListenAndServe()
 }
 
