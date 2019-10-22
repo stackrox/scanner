@@ -73,7 +73,7 @@ jobs:
       - run:
           name: Create GKE Cluster
           command: |
-            cci-export CLUSTER_NAME="stackrox-scanner-ci-${CIRCLE_WORKFLOW_ID}"
+            cci-export CLUSTER_NAME "stackrox-scanner-ci-${CIRCLE_WORKFLOW_ID}"
             source .circleci/create-cluster.sh && create-cluster
 
       - run:
