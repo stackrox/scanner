@@ -144,11 +144,29 @@ jobs:
             kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=1m
 
       - run:
+          name: Collect k8s logs
+          command: |
+            .circleci/collect-service-logs.sh stackrox
+            .circleci/collect-service-logs.sh kube-system
+
+      - store_artifacts:
+          path: /tmp/k8s-service-logs
+          destination: k8s-service-logs
+
+      - run:
+          name: Verify the scanner did not restart
+          command: |
+            if [[ "$(ls /tmp/k8s-service-logs/stackrox/*-previous.log | wc -l)" != 0 ]]; then
+                ls /tmp/k8s-service-logs/stackrox/*-previous.log
+                exit 1
+            fi
+          when: always
+
+      - run:
           name: Tear down cluster
           command: |
             gcloud container clusters delete "$CLUSTER_NAME" --async
           when: always
-
 
 workflows:
   version: 2
