@@ -1,0 +1,262 @@
+package server
+
+import (
+	"crypto/tls"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
+	v1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/pkg/clairify/db"
+	"github.com/stackrox/scanner/pkg/clairify/server/mtls"
+	"github.com/stackrox/scanner/pkg/clairify/types"
+)
+
+// Server is the HTTP server for Clairify.
+type Server struct {
+	cc                      types.ClairClient
+	registryCreator         types.RegistryClientCreator
+	insecureRegistryCreator types.RegistryClientCreator
+	endpoint                string
+	storage                 db.DB
+	httpServer              *http.Server
+}
+
+// New returns a new instantiation of the Server.
+func New(serverEndpoint string, client types.ClairClient, storage db.DB, creator, insecureCreator types.RegistryClientCreator) *Server {
+	return &Server{
+		cc:                      client,
+		registryCreator:         creator,
+		insecureRegistryCreator: insecureCreator,
+		endpoint:                serverEndpoint,
+		storage:                 storage,
+	}
+}
+
+func clairErrorString(w http.ResponseWriter, status int, template string, args ...interface{}) {
+	msg := fmt.Sprintf(template, args...)
+	logrus.Debugf("error %s with status code %d", msg, status)
+	envelope := v1.LayerEnvelope{
+		Error: &v1.Error{
+			Message: msg,
+		},
+	}
+	bytes, _ := json.Marshal(envelope)
+	w.WriteHeader(status)
+	w.Write(bytes)
+}
+
+func clairError(w http.ResponseWriter, status int, err error) {
+	clairErrorString(w, status, err.Error())
+}
+
+func (s *Server) getClairLayer(w http.ResponseWriter, r *http.Request, layer string) {
+	data, exists, err := s.cc.RetrieveLayerData(layer, r.URL.Query())
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+	if !exists {
+		clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layer)
+		return
+	}
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(bytes)
+}
+
+// GetResultsBySHA implements retrieving scan data via image SHA.
+func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	sha, ok := vars[`sha`]
+	if !ok {
+		clairErrorString(w, http.StatusBadRequest, "sha must be provided")
+		return
+	}
+	layer, exists, err := s.storage.GetLayerBySHA(sha)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+	if !exists {
+		clairErrorString(w, http.StatusNotFound, "Could not find sha %q", sha)
+		return
+	}
+	s.getClairLayer(w, r, layer)
+}
+
+// GetResultsByImage implements retrieving scan data via image name.
+func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	var remote string
+	var ok bool
+	remote, ok = vars[`remote`]
+	if !ok {
+		namespace, ok := vars[`namespace`]
+		if !ok {
+			clairErrorString(w, http.StatusBadRequest, "image remote or both namespace and repo must be provided")
+			return
+		}
+		repo, ok := vars[`repo`]
+		if !ok {
+			clairErrorString(w, http.StatusBadRequest, "image remote or both namespace and repo must be provided")
+			return
+		}
+		remote = fmt.Sprintf("%s/%s", namespace, repo)
+	}
+
+	registry, ok := vars[`registry`]
+	if !ok {
+		clairErrorString(w, http.StatusBadRequest, "image registry must be provided")
+		return
+	}
+
+	tag, ok := vars[`tag`]
+	if !ok {
+		clairErrorString(w, http.StatusBadRequest, "image tag must be provided")
+		return
+	}
+	image := fmt.Sprintf("%s/%s:%s", registry, remote, tag)
+	logrus.Debugf("Getting layer sha by name %s", image)
+	layer, exists, err := s.storage.GetLayerByName(image)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+	if !exists {
+		clairErrorString(w, http.StatusNotFound, "Could not find image %q", image)
+		return
+	}
+	s.getClairLayer(w, r, layer)
+}
+
+func getAuth(authHeader string) (string, string, error) {
+	// If no auth was passed, return an error
+	if authHeader == "" {
+		return "", "", fmt.Errorf("Username and password passed via Basic Auth required")
+	}
+	if !strings.HasPrefix(authHeader, "Basic ") {
+		return "", "", errors.New("only basic auth is currently supported")
+	}
+	decoded, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(authHeader, "Basic "))
+	if err != nil {
+		return "", "", err
+	}
+	spl := strings.SplitN(string(decoded), ":", 2)
+	if len(spl) != 2 {
+		return "", "", fmt.Errorf("malformed basic auth")
+	}
+	return strings.TrimSpace(spl[0]), strings.TrimSpace(spl[1]), nil
+}
+
+// ScanImage implements pushing an image's layers to Clair.
+func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	var imageRequest types.ImageRequest
+	if err := json.Unmarshal(data, &imageRequest); err != nil {
+		clairError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	image, err := types.GenerateImageFromString(imageRequest.Image)
+	if err != nil {
+		clairErrorString(w, http.StatusBadRequest, "could not parse image %q: %s", imageRequest.Image, err)
+		return
+	}
+
+	username, password, err := getAuth(r.Header.Get("Authorization"))
+	if err != nil {
+		clairError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	var reg types.Registry
+	if imageRequest.Insecure {
+		reg, err = s.insecureRegistryCreator(imageRequest.Registry, username, password)
+	} else {
+		reg, err = s.registryCreator(imageRequest.Registry, username, password)
+	}
+
+	if err != nil {
+		clairError(w, http.StatusBadRequest, err)
+		return
+	}
+	sha, layer, err := s.process(image, reg)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+	image.SHA = sha
+	if err := s.storage.AddImage(layer, *image); err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+	imageEnvelope := types.ImageEnvelope{
+		Image: image,
+	}
+	data, err = json.Marshal(imageEnvelope)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+	w.Write(data)
+}
+
+// Ping implements a simple handler for verifying that Clairify is up.
+func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("{}"))
+}
+
+// Start starts the server listening.
+func (s *Server) Start() error {
+	r := mux.NewRouter()
+	r.HandleFunc("/clairify/ping", s.Ping).Methods("GET")
+	r.HandleFunc("/clairify/image", s.ScanImage).Methods("POST")
+
+	r.HandleFunc("/clairify/sha/{sha}", s.GetResultsBySHA).Methods("GET")
+	r.HandleFunc("/clairify/image/{registry}/{remote}/{tag}", s.GetResultsByImage).Methods("GET")
+	r.HandleFunc("/clairify/image/{registry}/{namespace}/{repo}/{tag}", s.GetResultsByImage).Methods("GET")
+
+	tlsConfig, err := mtls.TLSConfig()
+	if err != nil {
+		return err
+	}
+
+	listener, err := tls.Listen("tcp", s.endpoint, tlsConfig)
+	if err != nil {
+		return err
+	}
+
+	srv := &http.Server{
+		Handler:      r,
+		Addr:         listener.Addr().String(),
+		WriteTimeout: 5 * time.Minute,
+		ReadTimeout:  15 * time.Second,
+		TLSConfig:    tlsConfig,
+	}
+	s.httpServer = srv
+	logrus.Infof("Listening on %s", s.endpoint)
+	return srv.Serve(listener)
+}
+
+// Close closes the server's connections
+func (s *Server) Close() {
+	s.httpServer.Close()
+}
