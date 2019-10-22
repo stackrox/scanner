@@ -21,6 +21,7 @@ commands:
             gcloud auth activate-service-account --key-file "${GOOGLE_APPLICATION_CREDENTIALS}"
             gcloud auth list
             gcloud auth configure-docker
+            gcloud config set project stackrox-ci
 
 jobs:
   style-checks:
