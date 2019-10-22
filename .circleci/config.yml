@@ -22,12 +22,10 @@ commands:
             gcloud auth list
             gcloud auth configure-docker
 
-
 jobs:
   style-checks:
     <<: *defaults
     steps:
-      - add_ssh_keys
       - checkout
 
       - run:
@@ -41,7 +39,6 @@ jobs:
   build:
     <<: *defaults
     steps:
-    - add_ssh_keys
     - checkout
     - setup_remote_docker
 
@@ -64,6 +61,75 @@ jobs:
           docker push "us.gcr.io/stackrox-ci/scanner:${TAG}"
           docker push "us.gcr.io/stackrox-ci/scanner-db:${TAG}"
 
+
+  provision-cluster:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker
+      - setup-gcp
+
+      - run:
+          name: Create GKE Cluster
+          command: |
+            cci-export CLUSTER_NAME="stackrox-scanner-ci-${CIRCLE_WORKFLOW_ID}"
+            source .circleci/create-cluster.sh && create-cluster
+
+      - run:
+          name: Save cluster config
+          command: |
+            CONFIG_DIR=/tmp/saved_config
+            mkdir -p "${CONFIG_DIR}"
+            echo "${CLUSTER_NAME}" > "${CONFIG_DIR}/name"
+            gcloud config get-value compute/zone > "${CONFIG_DIR}/zone"
+
+      - run:
+          name: Tear down cluster upon failure
+          command: |
+            gcloud container clusters delete "$CLUSTER_NAME" --async
+          when: on_fail
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - saved_config
+
+  e2e-tests:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker
+      - setup-gcp
+      - run:
+          name: Restore cluster config
+          command: |
+            CONFIG_DIR=/tmp/saved_config
+            cci-export CLUSTER_NAME "$(cat "${CONFIG_DIR}/name")"
+            [[ -n "${CLUSTER_NAME}" ]]
+            cci-export ZONE "$(cat "${CONFIG_DIR}/name")"
+            [[ -n "${ZONE}" ]]
+            gcloud config set compute/zone "${ZONE}"
+            cmd=(gcloud container clusters get-credentials --project stackrox-ci --zone "$ZONE" "$CLUSTER_NAME")
+            "${cmd[@]}"
+            echo "Restored config for cluster ${CLUSTER_NAME}"
+            echo
+            echo "Run the following command to attach to the cluster:"
+            echo
+            printf " %q" "${cmd[@]}"
+            echo
+
+      - run:
+          name: Wait for cluster to stabilize
+          command: |
+            source .circleci/create-cluster.sh && wait-for-cluster
+
+      - run:
+          name: Tear down cluster
+          command: |
+            gcloud container clusters delete "$CLUSTER_NAME" --async
+          when: always
+
+
 workflows:
   version: 2
 
@@ -76,6 +142,19 @@ workflows:
             only: /.*/
     - build:
         context: docker-io-and-stackrox-io-push
+        filters:
+          tags:
+            only: /.*/
+    - provision-cluster:
+        context: docker-io-pull
+        filters:
+          tags:
+            only: /.*/
+    - e2e-tests:
+        context: docker-io-pull
+        requires:
+          - build
+          - provision-cluster
         filters:
           tags:
             only: /.*/
