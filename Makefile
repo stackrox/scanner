@@ -133,7 +133,7 @@ install-dev-tools:
 image: scanner-image db-image
 
 .PHONY: scanner-image
-scanner-image:
+scanner-image: deps
 	@echo "+ $@"
 	GOOS=linux GOARCH=amd64 go build -o image/bin/scanner ./cmd/clair
 	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/Dockerfile.scanner image/
