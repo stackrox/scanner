@@ -22,6 +22,7 @@ commands:
             gcloud auth list
             gcloud auth configure-docker
             gcloud config set project stackrox-ci
+            gcloud config set core/disable_prompts True
 
 jobs:
   style-checks:
