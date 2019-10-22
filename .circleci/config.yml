@@ -130,6 +130,20 @@ jobs:
             source .circleci/create-cluster.sh && wait-for-cluster
 
       - run:
+          name: Deploy into the cluster
+          command: make deploy
+
+      - run:
+          name: Make sure the pod is running
+          command: |
+            sleep 5
+            kubectl -n stackrox get pod
+            POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner")].metadata.name}')"
+            [[ -n "${POD}" ]]
+            echo "${POD}"
+            kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=1m
+
+      - run:
           name: Tear down cluster
           command: |
             gcloud container clusters delete "$CLUSTER_NAME" --async
