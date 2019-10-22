@@ -57,6 +57,13 @@ jobs:
 
     - setup-gcp
 
+    - run:
+        name: Push images
+        command: |
+          TAG="$(./get-tag)"
+          docker push "us.gcr.io/stackrox-ci/scanner:${TAG}"
+          docker push "us.gcr.io/stackrox-ci/scanner-db:${TAG}"
+
 workflows:
   version: 2
 
