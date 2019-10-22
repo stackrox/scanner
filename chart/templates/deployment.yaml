@@ -33,6 +33,19 @@ spec:
             - name: config
               mountPath: /etc/clair
               readOnly: true
+        - name: clairify
+          image:  {{ .Values.scannerImage}}:{{ .Values.tag }}
+          command:
+            - /clairify
+          resources:
+            limits:
+              cpu: 2
+              memory: 4Gi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          securityContext:
+            runAsUser: 4000
         - name: db
           image: {{.Values.scannerDBImage}}:{{.Values.tag}}
           resources:
