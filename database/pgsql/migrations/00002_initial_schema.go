@@ -25,6 +25,10 @@ func init() {
         id SERIAL PRIMARY KEY,
         name VARCHAR(128) NULL);`,
 
+			`CREATE TABLE IF NOT EXISTS LanguageLayer (
+        layer_name VARCHAR(128) NOT NULL UNIQUE,
+	    component_data BYTEA NOT NULL);`,
+
 			`CREATE TABLE IF NOT EXISTS Layer (
         id SERIAL PRIMARY KEY,
         name VARCHAR(128) NOT NULL UNIQUE,

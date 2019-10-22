@@ -67,7 +67,11 @@ func (s *Server) getClairLayer(w http.ResponseWriter, r *http.Request, layerName
 		return
 	}
 
-	layer := v1.LayerFromDatabaseModel(dbLayer, true, true)
+	layer, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, true, true)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
 	env := &v1.LayerEnvelope{
 		Layer: &layer,
 	}

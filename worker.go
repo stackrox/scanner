@@ -25,6 +25,7 @@ import (
 	"github.com/stackrox/scanner/ext/imagefmt"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/singletons/analyzers"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
@@ -113,7 +114,29 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 		return err
 	}
 
-	return datastore.InsertLayer(layer)
+	if err := datastore.InsertLayer(layer); err != nil {
+		return err
+	}
+
+	// Get Package specifics
+	languagePackages := getPkgs()
+
+	return datastore.InsertLayerComponents(layer, languagePackages)
+}
+
+func getPkgs() []*component.Component {
+	return []*component.Component{
+		{
+			JavaPkgMetadata: &component.JavaPkgMetadata{
+				ImplementationVersion: "2.3.12",
+				Location:              "",
+				MavenVersion:          "2.3.12",
+				Name:                  "struts",
+				Origin:                "org.apache.struts",
+				SpecificationVersion:  "2.3.12",
+			},
+		},
+	}
 }
 
 // detectContent downloads a layer's archive and extracts its Namespace and

@@ -20,6 +20,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/stackrox/scanner/pkg/component"
 )
 
 var (
@@ -188,4 +190,7 @@ type Datastore interface {
 	GetLayerBySHA(sha string) (string, bool, error)
 	GetLayerByName(name string) (string, bool, error)
 	AddImage(layer string, digest, name string) error
+	InsertLayerComponents(l Layer, c []*component.Component) error
+
+	GetLayerLanguageComponents(layer string) ([]*component.Component, error)
 }
