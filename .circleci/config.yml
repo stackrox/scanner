@@ -9,6 +9,20 @@ defaults: &defaults
   working_directory: /go/src/github.com/stackrox/scanner
 
 jobs:
+  style-checks:
+    <<: *defaults
+    steps:
+      - add_ssh_keys
+      - checkout
+
+      - run:
+          name: Install dependencies
+          command: make deps
+
+      - run:
+          name: Run style checks
+          command: make style
+
   build:
     <<: *defaults
     steps:
@@ -17,18 +31,23 @@ jobs:
     - setup_remote_docker
 
     - run:
-        name: Install dependencies
-        command: make deps
+        name: Pull definitions dump
+        command: curl -u "$STACKROX_IO_PUSH_USERNAME:$STACKROX_IO_PUSH_PASSWORD"  -L https://install.stackrox.io/scanner/definitions.sql.gz --output image/dump/definitions.sql.gz
 
     - run:
-        name: Run style checks
-        command: make style
+        name: Build images
+        command: make image
 
 workflows:
   version: 2
 
   build:
     jobs:
+    - style-checks:
+        context: docker-io-pull
+        filters:
+          tags:
+            only: /.*/
     - build:
         context: docker-io-and-stackrox-io-push
         filters:

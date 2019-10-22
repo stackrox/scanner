@@ -141,6 +141,7 @@ scanner-image:
 .PHONY: db-image
 db-image:
 	@echo "+ $@"
+	@test -f image/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
 	@docker build -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/Dockerfile.db image/
 
 .PHONY: deploy
