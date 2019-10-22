@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.appName }}
+spec:
+  replicas: 1
+  minReadySeconds: 15
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+  template:
+    metadata:
+      namespace: {{ .Values.namespace }}
+      labels:
+        app: {{ .Values.appName }}
+    spec:
+      containers:
+        - name: scanner
+          image:  {{ .Values.scannerImage}}:{{ .Values.tag }}
+          resources:
+            limits:
+              cpu: 2
+              memory: 4Gi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          securityContext:
+            runAsUser: 4000
+          volumeMounts:
+            - name: config
+              mountPath: /etc/clair
+              readOnly: true
+        - name: clairify
+          image:  {{ .Values.scannerImage}}:{{ .Values.tag }}
+          command:
+            - /clairify
+            - "-no-mtls"
+          resources:
+            limits:
+              cpu: 2
+              memory: 4Gi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          securityContext:
+            runAsUser: 4000
+        - name: db
+          image: {{.Values.scannerDBImage}}:{{.Values.tag}}
+          resources:
+            limits:
+              cpu: 2
+              memory: 4Gi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.appName }}-config
+        - name: db-data
+          emptyDir: {}

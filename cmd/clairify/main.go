@@ -24,9 +24,11 @@ const (
 
 func main() {
 	var (
-		port int
+		port   int
+		noMTLS bool
 	)
 	flag.IntVar(&port, "port", 8080, "Port for Clairify to listen on")
+	flag.BoolVar(&noMTLS, "no-mtls", false, "Whether to run without mTLS")
 	flag.Parse()
 
 	client := clair.NewClient(clairEndpoint)
@@ -41,7 +43,7 @@ func main() {
 			break
 		}
 		logrus.Errorf("Error accessing Postgres: %s", err)
-		time.Sleep(2 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +51,7 @@ func main() {
 
 	listenAddr := fmt.Sprintf(":%d", port)
 	serv := server.New(listenAddr, client, database, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
-	if err := serv.Start(); err != nil {
+	if err := serv.Start(noMTLS); err != nil {
 		log.Fatal(err)
 	}
 }

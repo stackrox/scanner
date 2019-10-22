@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 defaults: &defaults
   docker:
@@ -8,7 +8,36 @@ defaults: &defaults
         password: $DOCKER_IO_PULL_PASSWORD
   working_directory: /go/src/github.com/stackrox/scanner
 
+commands:
+  setup-gcp:
+    description: Set up GCP service account and configure gcloud
+    steps:
+      - run:
+          name: Configure GCP service account and gcloud
+          command: |
+            cci-export GOOGLE_APPLICATION_CREDENTIALS /tmp/gcp.json
+            echo "${GOOGLE_SA_CIRCLECI_SCANNER}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
+            chmod 0600 "${GOOGLE_APPLICATION_CREDENTIALS}"
+            gcloud auth activate-service-account --key-file "${GOOGLE_APPLICATION_CREDENTIALS}"
+            gcloud auth list
+            gcloud auth configure-docker
+
+
 jobs:
+  style-checks:
+    <<: *defaults
+    steps:
+      - add_ssh_keys
+      - checkout
+
+      - run:
+          name: Install dependencies
+          command: make deps
+
+      - run:
+          name: Run style checks
+          command: make style
+
   build:
     <<: *defaults
     steps:
@@ -17,20 +46,36 @@ jobs:
     - setup_remote_docker
 
     - run:
-        name: Install dependencies
-        command: make deps
+        name: Pull definitions dump
+        command: |
+          status_code="$(curl -w '%{http_code}' -u "${STACKROX_IO_PUSH_USERNAME}:${STACKROX_IO_PUSH_PASSWORD}" -L https://install.stackrox.io/scanner/definitions.sql.gz --output image/dump/definitions.sql.gz)"
+          [[ "${status_code}" -eq 200 ]] || { echo "Failed to pull the definitions dump. Status code ${status_code}. File contents: $(head image/dump/definitions.sql.gz)"; exit 1; }
 
     - run:
-        name: Run style checks
-        command: make style
+        name: Build images
+        command: make image
+
+    - setup-gcp
+
+    - run:
+        name: Push images
+        command: |
+          TAG="$(./get-tag)"
+          docker push "us.gcr.io/stackrox-ci/scanner:${TAG}"
+          docker push "us.gcr.io/stackrox-ci/scanner-db:${TAG}"
 
 workflows:
   version: 2
 
   build:
     jobs:
-    - build:
+    - style-checks:
         context: docker-io-pull
+        filters:
+          tags:
+            only: /.*/
+    - build:
+        context: docker-io-and-stackrox-io-push
         filters:
           tags:
             only: /.*/

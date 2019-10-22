@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -143,9 +144,9 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAuth(authHeader string) (string, string, error) {
-	// If no auth was passed, return an error
+	// If no auth was passed, we'll assume it isn't necessary.
 	if authHeader == "" {
-		return "", "", fmt.Errorf("Username and password passed via Basic Auth required")
+		return "", "", nil
 	}
 	if !strings.HasPrefix(authHeader, "Basic ") {
 		return "", "", errors.New("only basic auth is currently supported")
@@ -225,7 +226,7 @@ func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
 }
 
 // Start starts the server listening.
-func (s *Server) Start() error {
+func (s *Server) Start(noMTLS bool) error {
 	r := mux.NewRouter()
 	r.HandleFunc("/clairify/ping", s.Ping).Methods("GET")
 	r.HandleFunc("/clairify/image", s.ScanImage).Methods("POST")
@@ -234,26 +235,38 @@ func (s *Server) Start() error {
 	r.HandleFunc("/clairify/image/{registry}/{remote}/{tag}", s.GetResultsByImage).Methods("GET")
 	r.HandleFunc("/clairify/image/{registry}/{namespace}/{repo}/{tag}", s.GetResultsByImage).Methods("GET")
 
-	tlsConfig, err := mtls.TLSConfig()
-	if err != nil {
-		return err
-	}
+	var tlsConfig *tls.Config
+	var listener net.Listener
+	var addr string
+	if !noMTLS {
+		var err error
+		tlsConfig, err = mtls.TLSConfig()
+		if err != nil {
+			return err
+		}
 
-	listener, err := tls.Listen("tcp", s.endpoint, tlsConfig)
-	if err != nil {
-		return err
+		listener, err = tls.Listen("tcp", s.endpoint, tlsConfig)
+		if err != nil {
+			return err
+		}
+		addr = listener.Addr().String()
+	} else {
+		addr = s.endpoint
 	}
 
 	srv := &http.Server{
 		Handler:      r,
-		Addr:         listener.Addr().String(),
+		Addr:         addr,
 		WriteTimeout: 5 * time.Minute,
 		ReadTimeout:  15 * time.Second,
 		TLSConfig:    tlsConfig,
 	}
 	s.httpServer = srv
 	logrus.Infof("Listening on %s", s.endpoint)
-	return srv.Serve(listener)
+	if listener != nil {
+		return srv.Serve(listener)
+	}
+	return srv.ListenAndServe()
 }
 
 // Close closes the server's connections

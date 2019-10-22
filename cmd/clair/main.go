@@ -92,9 +92,19 @@ func Boot(config *Config) {
 	st := stopper.NewStopper()
 
 	// Open database
-	db, err := database.Open(config.Database)
+	var db database.Datastore
+	var err error
+	for try := 1; ; try++ {
+		db, err = database.Open(config.Database)
+		if err == nil || try == 5 {
+			break
+		}
+		log.WithError(err).WithField("Attempts", try).Error("Failed to open database. Retrying...")
+		time.Sleep(10 * time.Second)
+	}
+
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).Fatal("Failed to open database despite multiple retries...")
 	}
 	defer db.Close()
 
