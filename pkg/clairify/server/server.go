@@ -141,9 +141,9 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAuth(authHeader string) (string, string, error) {
-	// If no auth was passed, return an error
+	// If no auth was passed, we'll assume it isn't necessary.
 	if authHeader == "" {
-		return "", "", fmt.Errorf("Username and password passed via Basic Auth required")
+		return "", "", nil
 	}
 	if !strings.HasPrefix(authHeader, "Basic ") {
 		return "", "", errors.New("only basic auth is currently supported")
