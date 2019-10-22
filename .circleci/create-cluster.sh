@@ -19,7 +19,6 @@ create-cluster() {
   zones=$(gcloud compute zones list --filter="region=$REGION" | grep UP | cut -f1 -d' ')
   success=0
   for zone in $zones; do
-      "$(dirname "${BASH_SOURCE[0]}")/check-workflow-live.sh" || return 1
       echo "Trying zone $zone"
       gcloud config set compute/zone "${zone}"
       timeout 420 gcloud beta container clusters create \
