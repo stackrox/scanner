@@ -8,6 +8,21 @@ defaults: &defaults
         password: $DOCKER_IO_PULL_PASSWORD
   working_directory: /go/src/github.com/stackrox/scanner
 
+commands:
+  setup-gcp:
+    description: Set up GCP service account and configure gcloud
+    steps:
+      - run:
+          name: Configure GCP service account and gcloud
+          command: |
+            cci-export GOOGLE_APPLICATION_CREDENTIALS /tmp/gcp.json
+            echo "${GOOGLE_SA_CIRCLECI_SCANNER}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
+            chmod 0600 "${GOOGLE_APPLICATION_CREDENTIALS}"
+            gcloud auth activate-service-account --key-file "${GOOGLE_APPLICATION_CREDENTIALS}"
+            gcloud auth list
+            gcloud auth configure-docker
+
+
 jobs:
   style-checks:
     <<: *defaults
@@ -40,15 +55,7 @@ jobs:
         name: Build images
         command: make image
 
-    - run:
-        name: Set up GCloud
-        command: |
-          cci-export GOOGLE_APPLICATION_CREDENTIALS /tmp/gcp.json
-          echo "${GOOGLE_SA_CIRCLECI_SCANNER}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
-          chmod 0600 "${GOOGLE_APPLICATION_CREDENTIALS}"
-          gcloud auth activate-service-account --key-file "${GOOGLE_APPLICATION_CREDENTIALS}"
-          gcloud auth list
-          gcloud auth configure-docker
+    - setup-gcp
 
 workflows:
   version: 2
