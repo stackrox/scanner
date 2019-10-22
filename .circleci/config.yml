@@ -74,7 +74,7 @@ jobs:
       - run:
           name: Create GKE Cluster
           command: |
-            cci-export CLUSTER_NAME "stackrox-scanner-ci-${CIRCLE_WORKFLOW_ID}"
+            cci-export CLUSTER_NAME "stackrox-scanner-ci-${CIRCLE_BUILD_NUM}"
             source .circleci/create-cluster.sh && create-cluster
 
       - run:
@@ -102,6 +102,10 @@ jobs:
       - checkout
       - setup_remote_docker
       - setup-gcp
+
+      - attach_workspace:
+          at: /tmp
+
       - run:
           name: Restore cluster config
           command: |
