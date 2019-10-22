@@ -1,7 +1,6 @@
 package server
 
 import (
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -15,7 +14,6 @@ import (
 	"github.com/sirupsen/logrus"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/db"
-	"github.com/stackrox/scanner/pkg/clairify/server/mtls"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 )
 
@@ -234,26 +232,15 @@ func (s *Server) Start() error {
 	r.HandleFunc("/clairify/image/{registry}/{remote}/{tag}", s.GetResultsByImage).Methods("GET")
 	r.HandleFunc("/clairify/image/{registry}/{namespace}/{repo}/{tag}", s.GetResultsByImage).Methods("GET")
 
-	tlsConfig, err := mtls.TLSConfig()
-	if err != nil {
-		return err
-	}
-
-	listener, err := tls.Listen("tcp", s.endpoint, tlsConfig)
-	if err != nil {
-		return err
-	}
-
 	srv := &http.Server{
 		Handler:      r,
-		Addr:         listener.Addr().String(),
+		Addr:         s.endpoint,
 		WriteTimeout: 5 * time.Minute,
 		ReadTimeout:  15 * time.Second,
-		TLSConfig:    tlsConfig,
 	}
 	s.httpServer = srv
 	logrus.Infof("Listening on %s", s.endpoint)
-	return srv.Serve(listener)
+	return srv.ListenAndServe()
 }
 
 // Close closes the server's connections
