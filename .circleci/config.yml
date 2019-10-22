@@ -40,6 +40,16 @@ jobs:
         name: Build images
         command: make image
 
+    - run:
+        name: Set up GCloud
+        command: |
+          cci-export GOOGLE_APPLICATION_CREDENTIALS /tmp/gcp.json
+          echo "${GOOGLE_SA_CIRCLECI_SCANNER}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
+          chmod 0600 "${GOOGLE_APPLICATION_CREDENTIALS}"
+          gcloud auth activate-service-account --key-file "${GOOGLE_APPLICATION_CREDENTIALS}"
+          gcloud auth list
+          gcloud auth configure-docker
+
 workflows:
   version: 2
 
