@@ -112,7 +112,7 @@ jobs:
             CONFIG_DIR=/tmp/saved_config
             cci-export CLUSTER_NAME "$(cat "${CONFIG_DIR}/name")"
             [[ -n "${CLUSTER_NAME}" ]]
-            cci-export ZONE "$(cat "${CONFIG_DIR}/name")"
+            cci-export ZONE "$(cat "${CONFIG_DIR}/zone")"
             [[ -n "${ZONE}" ]]
             gcloud config set compute/zone "${ZONE}"
             cmd=(gcloud container clusters get-credentials --project stackrox-ci --zone "$ZONE" "$CLUSTER_NAME")
