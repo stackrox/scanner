@@ -134,7 +134,7 @@ jobs:
           command: make deploy
 
       - run:
-          name: Make sure the pod is running
+          name: Wait for the pod to be running, and port-forward
           command: |
             sleep 5
             kubectl -n stackrox get pod
@@ -142,12 +142,29 @@ jobs:
             [[ -n "${POD}" ]]
             echo "${POD}"
             kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=1m
+            kubectl -n stackrox get pod
+            nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" &
+            # It looks like we need this sleep, otherwise the port forward never starts.
+            sleep 5
+
+      - run:
+          name: Wait for API to be available
+          command: |
+            curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -f 'http://localhost:8080/clairify/ping'
+            cat nohup.out || true
+
+      - run:
+          name: Run sanity tests
+          command: |
+            export SCANNER_ENDPOINT=http://localhost:8080
+            make e2e-tests
 
       - run:
           name: Collect k8s logs
           command: |
             .circleci/collect-service-logs.sh stackrox
             .circleci/collect-service-logs.sh kube-system
+          when: always
 
       - store_artifacts:
           path: /tmp/k8s-service-logs
@@ -160,6 +177,7 @@ jobs:
                 ls /tmp/k8s-service-logs/stackrox/*-previous.log
                 exit 1
             fi
+            cat nohup.out || true
           when: always
 
       - run:

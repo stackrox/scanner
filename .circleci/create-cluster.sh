@@ -74,7 +74,7 @@ wait-for-cluster() {
   	sleep 1
   done
 
-  GRACE_PERIOD=30
+  GRACE_PERIOD=0
   while true; do
     NUMSTARTING=$(kubectl -n kube-system get pod -o json | jq '[(.items[].status.containerStatuses // [])[].ready | select(. | not)] | length')
     if (( NUMSTARTING == 0 )); then
@@ -87,6 +87,7 @@ wait-for-cluster() {
       echo "Waiting for another $REMAINING_GRACE_PERIOD seconds for kube-system pods to stabilize"
       sleep "$REMAINING_GRACE_PERIOD"
     fi
+    GRACE_PERIOD=30
 
     echo "Waiting for ${NUMSTARTING} kube-system containers to be initialized"
     sleep 10
