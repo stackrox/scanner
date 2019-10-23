@@ -119,9 +119,42 @@ func TestImageSanity(t *testing.T) {
 			})
 			require.Equal(t, len(matching.Vulnerabilities), len(feature.Vulnerabilities))
 			for i, matchingVuln := range matching.Vulnerabilities {
-				assert.Equal(t, feature.Vulnerabilities[i], matchingVuln, "Failed for vuln %s", matchingVuln.Name)
+				expectedVuln := feature.Vulnerabilities[i]
+				for _, keys := range [][]string{
+					{"NVD", "CVSSv2", "ExploitabilityScore"},
+					{"NVD", "CVSSv2", "Score"},
+					{"NVD", "CVSSv2", "ImpactScore"},
+					{"NVD", "CVSSv2", "Vectors"},
+					{"NVD", "CVSSv3", "ExploitabilityScore"},
+					{"NVD", "CVSSv3", "Score"},
+					{"NVD", "CVSSv3", "ImpactScore"},
+					{"NVD", "CVSSv3", "Vectors"},
+				} {
+					assert.NotNil(t, deepGet(expectedVuln.Metadata, keys...), "Value for nil for %+v", keys)
+					assert.Equal(t, deepGet(expectedVuln.Metadata, keys...), deepGet(matchingVuln.Metadata, keys...), "Failed for %+v", keys)
+				}
+				expectedVuln.Metadata = nil
+				matchingVuln.Metadata = nil
+				assert.Equal(t, expectedVuln, matchingVuln)
 			}
+			matching.Vulnerabilities = nil
+			feature.Vulnerabilities = nil
 			assert.Equal(t, matching, feature)
 		})
 	}
+}
+
+func deepGet(m map[string]interface{}, keys ...string) interface{} {
+	var currVal interface{} = m
+	for _, k := range keys {
+		if currVal == nil {
+			return nil
+		}
+		asMap := currVal.(map[string]interface{})
+		if asMap == nil {
+			return nil
+		}
+		currVal = asMap[k]
+	}
+	return currVal
 }
