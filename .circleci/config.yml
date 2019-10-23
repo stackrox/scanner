@@ -143,7 +143,7 @@ jobs:
             echo "${POD}"
             kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=1m
             kubectl -n stackrox get pod
-            nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" 1>/dev/null 2>&1 &
+            nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" &
 
       - run:
           name: Run sanity tests
@@ -174,7 +174,6 @@ jobs:
           name: Tear down cluster
           command: |
             gcloud container clusters delete "$CLUSTER_NAME" --async
-          when: always
 
 workflows:
   version: 2
