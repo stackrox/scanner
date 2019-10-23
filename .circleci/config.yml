@@ -184,6 +184,7 @@ jobs:
           name: Tear down cluster
           command: |
             gcloud container clusters delete "$CLUSTER_NAME" --async
+          when: always
 
 workflows:
   version: 2
