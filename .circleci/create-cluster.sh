@@ -29,7 +29,7 @@ create-cluster() {
           --services-ipv4-cidr=/24 \
           --enable-ip-alias \
           --tags="stackrox-scanner-ci,stackrox-scanner-ci-${CIRCLE_JOB}" \
-          --labels="stackrox-scanner-ci=true,stackrox-scanner-ci-job=${CIRCLE_JOB},stackrox-scanner-ci-workflow=${CIRCLE_WORKFLOW_ID}" \
+          --labels="stackrox-ci=true,stackrox-scanner-ci=true,stackrox-scanner-ci-job=${CIRCLE_JOB},stackrox-scanner-ci-workflow=${CIRCLE_WORKFLOW_ID}" \
           "${CLUSTER_NAME}"
       status="$?"
       if [[ "${status}" == 0 ]];
