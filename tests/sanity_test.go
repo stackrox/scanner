@@ -1,7 +1,9 @@
 package tests
 
 import (
+	"fmt"
 	"os"
+	"sort"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/api/v1"
@@ -11,8 +13,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func getMatchingFeature(featureList []v1.Feature, featureToFind v1.Feature, t *testing.T) v1.Feature {
+	candidateIdx := -1
+	for i, f := range featureList {
+		if f.Name == featureToFind.Name && f.Version == featureToFind.Version {
+			require.Equal(t, -1, candidateIdx, "Found multiple features for %s/%s", f.Name, f.Version)
+			candidateIdx = i
+		}
+	}
+	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list", featureToFind)
+	return featureList[candidateIdx]
+}
+
 func TestImageSanity(t *testing.T) {
 	endpoint := os.Getenv("SCANNER_ENDPOINT")
+	endpoint = "http://localhost:8080"
 	require.NotEmpty(t, endpoint, "no scanner endpoint specified")
 
 	cli := client.New(endpoint, true)
@@ -97,6 +112,19 @@ func TestImageSanity(t *testing.T) {
 	}
 
 	for _, feature := range expectedFeatures {
-		assert.Contains(t, env.Layer.Features, feature)
+		t.Run(fmt.Sprintf("%s/%s", feature.Name, feature.Version), func(t *testing.T) {
+			matching := getMatchingFeature(env.Layer.Features, feature, t)
+			sort.Slice(matching.Vulnerabilities, func(i, j int) bool {
+				return matching.Vulnerabilities[i].Name < matching.Vulnerabilities[j].Name
+			})
+			require.Equal(t, len(matching.Vulnerabilities), len(feature.Vulnerabilities))
+			for i, matchingVuln := range matching.Vulnerabilities {
+				assert.Equal(t, feature.Vulnerabilities[i], matchingVuln, "Failed for %d", i)
+			}
+
+			matching.Vulnerabilities = nil
+			feature.Vulnerabilities = nil
+			assert.Equal(t, matching, feature)
+		})
 	}
 }

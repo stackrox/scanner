@@ -144,6 +144,7 @@ jobs:
             kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=1m
             kubectl -n stackrox get pod
             nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" &
+            sleep 5
 
       - run:
           name: Run sanity tests
