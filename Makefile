@@ -135,8 +135,8 @@ image: scanner-image db-image
 .PHONY: scanner-image
 scanner-image: deps
 	@echo "+ $@"
-	GOOS=linux GOARCH=amd64 go build -o image/bin/scanner ./cmd/clair
-	GOOS=linux GOARCH=amd64 go build -o image/bin/clairify ./cmd/clairify
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o image/bin/scanner ./cmd/clair
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o image/bin/clairify ./cmd/clairify
 	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/Dockerfile.scanner image/
 
 .PHONY: db-image
@@ -148,6 +148,7 @@ db-image:
 .PHONY: deploy
 deploy: clean-helm-rendered
 	@echo "+ $@"
+	kubectl create namespace stackrox || true
 	helm template chart/ --name scanner --set tag=$(TAG) --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
