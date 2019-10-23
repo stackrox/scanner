@@ -93,7 +93,7 @@ func TestImageSanity(t *testing.T) {
 								"ExploitabilityScore": 3.4,
 								"ImpactScore":         2.9,
 								"Score":               1.9,
-								"Vectors":             "A:L/AC:M/Au:N/C:N/I:P/A:N",
+								"Vectors":             "AV:L/AC:M/Au:N/C:N/I:P/A:N",
 							},
 							"CVSSv3": map[string]interface{}{
 								"ExploitabilityScore": 1.0,
