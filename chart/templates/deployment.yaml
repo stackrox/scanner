@@ -47,6 +47,14 @@ spec:
               memory: 200Mi
           securityContext:
             runAsUser: 4000
+          readinessProbe:
+            httpGet:
+              path: /clairify/ping
+              port: 8080
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
         - name: db
           image: {{.Values.scannerDBImage}}:{{.Values.tag}}
           resources:
