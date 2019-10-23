@@ -27,7 +27,6 @@ func getMatchingFeature(featureList []v1.Feature, featureToFind v1.Feature, t *t
 
 func TestImageSanity(t *testing.T) {
 	endpoint := os.Getenv("SCANNER_ENDPOINT")
-	endpoint = "http://localhost:8080"
 	require.NotEmpty(t, endpoint, "no scanner endpoint specified")
 
 	cli := client.New(endpoint, true)
@@ -93,7 +92,6 @@ func TestImageSanity(t *testing.T) {
 							"CVSSv2": map[string]interface{}{
 								"ExploitabilityScore": 3.4,
 								"ImpactScore":         2.9,
-								"PublishedDateTime":   "2018-01-04T04:29Z",
 								"Score":               1.9,
 								"Vectors":             "AV:L/AC:M/Au:N/C:N/I:P/A:N",
 							},
@@ -103,6 +101,8 @@ func TestImageSanity(t *testing.T) {
 								"Score":               4.7,
 								"Vectors":             "CVSS:3.0/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:N",
 							},
+							"PublishedDateTime":    "2018-01-04T04:29Z",
+							"LastModifiedDateTime": "2018-01-19T15:46Z",
 						},
 					},
 				},
@@ -119,11 +119,8 @@ func TestImageSanity(t *testing.T) {
 			})
 			require.Equal(t, len(matching.Vulnerabilities), len(feature.Vulnerabilities))
 			for i, matchingVuln := range matching.Vulnerabilities {
-				assert.Equal(t, feature.Vulnerabilities[i], matchingVuln, "Failed for %d", i)
+				assert.Equal(t, feature.Vulnerabilities[i], matchingVuln, "Failed for vuln %s", matchingVuln.Name)
 			}
-
-			matching.Vulnerabilities = nil
-			feature.Vulnerabilities = nil
 			assert.Equal(t, matching, feature)
 		})
 	}
