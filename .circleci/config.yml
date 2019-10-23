@@ -134,7 +134,7 @@ jobs:
           command: make deploy
 
       - run:
-          name: Make sure the pod is running
+          name: Wait for the pod to be running, and port-forward
           command: |
             sleep 5
             kubectl -n stackrox get pod
@@ -142,6 +142,14 @@ jobs:
             [[ -n "${POD}" ]]
             echo "${POD}"
             kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=1m
+            kubectl -n stackrox get pod
+            nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" 1>/dev/null 2>&1 &
+
+      - run:
+          name: Run sanity tests
+          command: |
+            export SCANNER_ENDPOINT=http://localhost:8080
+            make e2e-tests
 
       - run:
           name: Collect k8s logs

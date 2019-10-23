@@ -8,10 +8,12 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestImageSanity(t *testing.T) {
 	endpoint := os.Getenv("SCANNER_ENDPOINT")
+	require.NotEmpty(t, endpoint, "no scanner endpoint specified")
 
 	cli := client.New(endpoint, true)
 
@@ -20,11 +22,11 @@ func TestImageSanity(t *testing.T) {
 		Registry: "https://registry-1.docker.io",
 		Insecure: false,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	env, err := cli.RetrieveImageDataBySHA(img.SHA, true, true)
-	assert.NoError(t, err)
-	assert.Nil(t, env.Error)
+	require.NoError(t, err)
+	require.Nil(t, env.Error)
 
 	expectedFeatures := []v1.Feature{
 		{

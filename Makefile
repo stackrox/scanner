@@ -153,6 +153,15 @@ deploy: clean-helm-rendered
 	kubectl apply -R -f rendered-chart
 
 ###########
+## Tests ##
+###########
+
+.PHONY: e2e-tests
+e2e-tests:
+	@echo "+ $@"
+	go test ./tests/...
+
+###########
 ## Clean ##
 ###########
 .PHONY: clean
