@@ -88,7 +88,7 @@ func (suite *ClientTestSuite) TestRetrieveImageDataBySHA() {
 	suite.NotNil(envelope)
 
 	image.Tag = "badtag"
-	envelope, err = suite.client.RetrieveImageDataByName(image, true, true)
+	_, err = suite.client.RetrieveImageDataByName(image, true, true)
 	suite.Error(err)
 }
 
@@ -97,6 +97,6 @@ func (suite *ClientTestSuite) TestRetrieveImageDataByName() {
 	suite.NoError(err)
 	suite.NotNil(envelope)
 
-	envelope, err = suite.client.RetrieveImageDataBySHA("badsha", true, true)
+	_, err = suite.client.RetrieveImageDataBySHA("badsha", true, true)
 	suite.Error(err)
 }
