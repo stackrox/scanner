@@ -14,17 +14,11 @@ style:
 	fi ; \
 	exit $$STATUS
 
-.PHONY: style-fix
-style-fix:
-	@echo "+ $@"
-	@scripts/fix_lint.py .
-
 .PHONY: proto-generated-srcs
 proto-generated-srcs:
 	@echo "+ $@"
 	-rm -r src/main/proto
-	@scripts/migrate_protos.sh
-	gradle --stacktrace generateProto generateTestProto
+	gradle generateProto generateTestProto
 
 .PHONY: clean-generated-srcs
 clean-generated-srcs:
@@ -34,4 +28,4 @@ clean-generated-srcs:
 .PHONY: test
 test: proto-generated-srcs
 	@echo "+ $@"
-	gradle --stacktrace test
+	gradle test
