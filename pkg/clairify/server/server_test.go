@@ -18,7 +18,7 @@ func TestGetAuth(t *testing.T) {
 	assert.Equal(t, expectedPassword, pass)
 
 	_, _, err = getAuth("")
-	assert.Error(t, err)
+	assert.NoError(t, err)
 
 	_, _, err = getAuth("Bearer dXNlcm5hbWU6cGFzc3dvcmQK")
 	assert.Error(t, err)

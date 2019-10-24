@@ -31,6 +31,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -50,7 +51,7 @@ var (
 // image format.
 type Extractor interface {
 	// ExtractFiles produces a tarutil.FilesMap from a image layer.
-	ExtractFiles(layer io.ReadCloser, filenames []string) (tarutil.FilesMap, error)
+	ExtractFiles(layer io.ReadCloser, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error)
 }
 
 // RegisterExtractor makes an extractor available by the provided name.
@@ -101,7 +102,7 @@ func UnregisterExtractor(name string) {
 
 // Extract streams an image layer from disk or over HTTP, determines the
 // image format, then extracts the files specified.
-func Extract(format, path string, headers map[string]string, toExtract []string) (tarutil.FilesMap, error) {
+func Extract(format, path string, headers map[string]string, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error) {
 	var layerReader io.ReadCloser
 	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
 		// Create a new HTTP request object.
@@ -144,7 +145,7 @@ func Extract(format, path string, headers map[string]string, toExtract []string)
 	defer layerReader.Close()
 
 	if extractor, exists := Extractors()[strings.ToLower(format)]; exists {
-		files, err := extractor.ExtractFiles(layerReader, toExtract)
+		files, err := extractor.ExtractFiles(layerReader, filenameMatcher)
 		if err != nil {
 			return nil, err
 		}

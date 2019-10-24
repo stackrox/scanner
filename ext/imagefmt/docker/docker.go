@@ -20,6 +20,7 @@ import (
 	"io"
 
 	"github.com/stackrox/scanner/ext/imagefmt"
+	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -29,6 +30,6 @@ func init() {
 	imagefmt.RegisterExtractor("docker", &format{})
 }
 
-func (f format) ExtractFiles(layerReader io.ReadCloser, toExtract []string) (tarutil.FilesMap, error) {
-	return tarutil.ExtractFiles(layerReader, toExtract)
+func (f format) ExtractFiles(layerReader io.ReadCloser, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error) {
+	return tarutil.ExtractFiles(layerReader, filenameMatcher)
 }
