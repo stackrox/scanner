@@ -82,8 +82,7 @@ func RunClairify(cfg *Config, store database.Datastore, st *stopper.Stopper) {
 	defer st.End()
 
 	serv := server.New(fmt.Sprintf(":%d", cfg.ClairifyPort), store, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
-	noMTLS := false
-	if err := serv.Start(noMTLS); err != nil {
+	if err := serv.Start(!cfg.MTLS); err != nil {
 		log.Fatal(err)
 	}
 }
