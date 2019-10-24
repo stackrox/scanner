@@ -38,6 +38,10 @@ jobs:
           name: Run style checks
           command: make style
 
+      - run:
+          name: Run style checks on test code
+          command: make -C qa-tests style
+
   build:
     <<: *defaults
     steps:
