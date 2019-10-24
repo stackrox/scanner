@@ -18,18 +18,9 @@ func (p *psql) createTable(query string) error {
 	return err
 }
 
-func (p *psql) initializeTables() error {
-	return p.createTable(`CREATE TABLE IF NOT EXISTS clairify(
-		layer varchar,
-		name varchar,
-		sha  varchar,
-		PRIMARY KEY( sha )
-	);`)
-}
-
 // GetLayerByName fetches the latest layer for an image by the image SHA.
 func (p *psql) GetLayerBySHA(sha string) (string, bool, error) {
-	rows, err := p.Query("SELECT layer FROM clairify WHERE sha = $1", sha)
+	rows, err := p.Query("SELECT layer FROM ImageToLayer WHERE sha = $1", sha)
 	if err != nil {
 		return "", false, err
 	}
@@ -44,7 +35,7 @@ func (p *psql) GetLayerBySHA(sha string) (string, bool, error) {
 
 // GetLayerByName fetches the latest layer for an image by the image name.
 func (p *psql) GetLayerByName(name string) (string, bool, error) {
-	rows, err := p.Query("SELECT layer FROM clairify WHERE name = $1", name)
+	rows, err := p.Query("SELECT layer FROM ImageToLayer WHERE name = $1", name)
 	if err != nil {
 		return "", false, err
 	}
@@ -67,7 +58,7 @@ func (p *psql) AddImage(layer string, image types.Image) error {
 	if exists {
 		return nil
 	}
-	_, err = p.Exec(`INSERT INTO clairify(layer, name, sha)
+	_, err = p.Exec(`INSERT INTO ImageToLayer(layer, name, sha)
 	VALUES ($1, $2, $3); `, layer, image.TaggedName(), image.SHA)
 	return err
 }
@@ -91,9 +82,6 @@ func New(endpoint, username, password, sslMode string) (db.DB, error) {
 	}
 	if err := postgres.Ping(); err != nil {
 		postgres.Close()
-		return nil, err
-	}
-	if err := postgres.initializeTables(); err != nil {
 		return nil, err
 	}
 	return &postgres, nil
