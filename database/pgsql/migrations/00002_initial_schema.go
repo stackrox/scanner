@@ -25,12 +25,6 @@ func init() {
         id SERIAL PRIMARY KEY,
         name VARCHAR(128) NULL);`,
 
-			`CREATE TABLE IF NOT EXISTS ImageToLayer(
-		layer varchar,
-		name varchar,
-		sha  varchar,
-		PRIMARY KEY( sha, name ));`,
-
 			`CREATE TABLE IF NOT EXISTS Layer (
         id SERIAL PRIMARY KEY,
         name VARCHAR(128) NOT NULL UNIQUE,

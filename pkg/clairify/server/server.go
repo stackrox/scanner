@@ -15,7 +15,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	v1 "github.com/stackrox/scanner/api/v1"
-	"github.com/stackrox/scanner/pkg/clairify/db"
+	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/server/mtls"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 )
@@ -26,18 +26,17 @@ type Server struct {
 	registryCreator         types.RegistryClientCreator
 	insecureRegistryCreator types.RegistryClientCreator
 	endpoint                string
-	storage                 db.DB
+	storage                 database.Datastore
 	httpServer              *http.Server
 }
 
 // New returns a new instantiation of the Server.
-func New(serverEndpoint string, client types.ClairClient, storage db.DB, creator, insecureCreator types.RegistryClientCreator) *Server {
+func New(serverEndpoint string, db database.Datastore, creator, insecureCreator types.RegistryClientCreator) *Server {
 	return &Server{
-		cc:                      client,
 		registryCreator:         creator,
 		insecureRegistryCreator: insecureCreator,
 		endpoint:                serverEndpoint,
-		storage:                 storage,
+		storage:                 db,
 	}
 }
 
@@ -205,7 +204,7 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	image.SHA = sha
-	if err := s.storage.AddImage(layer, *image); err != nil {
+	if err := s.storage.AddImage(layer, image.SHA, image.TaggedName()); err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}

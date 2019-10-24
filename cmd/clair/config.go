@@ -52,9 +52,11 @@ func DefaultConfig() Config {
 			Interval: 1 * time.Hour,
 		},
 		API: &api.Config{
-			Port:       6060,
-			HealthPort: 6061,
-			Timeout:    900 * time.Second,
+			Port:         6060,
+			HealthPort:   6061,
+			ClairifyPort: 8080,
+			MTLS:         false,
+			Timeout:      900 * time.Second,
 		},
 		Notifier: &notification.Config{
 			Attempts:         5,

@@ -26,13 +26,23 @@ data:
           # Multiple clair instances in the same cluster need the same value.
           paginationkey:
 
+	Port                      int
+	HealthPort                int
+	ClairifyPort              int
+	MTLS                      bool
+	Timeout                   time.Duration
+	PaginationKey             string
+	CertFile, KeyFile, CAFile string
+
       api:
         # v3 grpc/RESTful API server address
-        addr: "0.0.0.0:6060"
+        port: 6060
 
         # Health server address
         # This is an unencrypted endpoint useful for load balancers to check to healthiness of the clair server.
-        healthaddr: "0.0.0.0:6061"
+        healthPort: 6061
+        clairifyPort: 8080
+        mtls: false
 
         # Deadline before an API request will respond with a 503
         timeout: 900s
