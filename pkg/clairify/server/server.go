@@ -18,11 +18,11 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/server/mtls"
 	"github.com/stackrox/scanner/pkg/clairify/types"
+	"github.com/stackrox/scanner/pkg/commonerr"
 )
 
 // Server is the HTTP server for Clairify.
 type Server struct {
-	cc                      types.ClairClient
 	registryCreator         types.RegistryClientCreator
 	insecureRegistryCreator types.RegistryClientCreator
 	endpoint                string
@@ -57,17 +57,22 @@ func clairError(w http.ResponseWriter, status int, err error) {
 	clairErrorString(w, status, err.Error())
 }
 
-func (s *Server) getClairLayer(w http.ResponseWriter, r *http.Request, layer string) {
-	data, exists, err := s.cc.RetrieveLayerData(layer, r.URL.Query())
-	if err != nil {
+func (s *Server) getClairLayer(w http.ResponseWriter, r *http.Request, layerName string) {
+	dbLayer, err := s.storage.FindLayer(layerName, true, true)
+	if err == commonerr.ErrNotFound {
+		clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layerName)
+		return
+	} else if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
-	if !exists {
-		clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layer)
-		return
+
+	layer := v1.LayerFromDatabaseModel(dbLayer, true, true)
+	env := &v1.LayerEnvelope{
+		Layer: &layer,
 	}
-	bytes, err := json.Marshal(data)
+
+	bytes, err := json.Marshal(env)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
