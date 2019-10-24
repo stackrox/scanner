@@ -46,7 +46,6 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurens/lsbrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/redhatrelease"
-	_ "github.com/stackrox/scanner/ext/imagefmt/aci"
 	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
 	_ "github.com/stackrox/scanner/ext/notification/webhook"
 	_ "github.com/stackrox/scanner/ext/vulnmdsrc/nvd"

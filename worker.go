@@ -24,6 +24,7 @@ import (
 	"github.com/stackrox/scanner/ext/imagefmt"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/singletons/requiredfilenames"
 )
 
 const (
@@ -115,8 +116,7 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 // detectContent downloads a layer's archive and extracts its Namespace and
 // Features.
 func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, err error) {
-	totalRequiredFiles := append(featurefmt.RequiredFilenames(), featurens.RequiredFilenames()...)
-	files, err := imagefmt.Extract(imageFormat, path, headers, totalRequiredFiles)
+	files, err := imagefmt.Extract(imageFormat, path, headers, requiredfilenames.SingletonMatcher())
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{logLayerName: name, "path": cleanURL(path)}).Error("failed to extract data from path")
 		return

@@ -26,6 +26,8 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"strings"
+
+	"github.com/stackrox/scanner/pkg/matcher"
 )
 
 var (
@@ -51,7 +53,7 @@ type FilesMap map[string][]byte
 
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
-func ExtractFiles(r io.Reader, filenames []string) (FilesMap, error) {
+func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error) {
 	data := make(map[string][]byte)
 
 	// Decompress the archive.
@@ -72,29 +74,21 @@ func ExtractFiles(r io.Reader, filenames []string) (FilesMap, error) {
 		}
 
 		// Get element filename
-		filename := hdr.Name
-		filename = strings.TrimPrefix(filename, "./")
+		filename := strings.TrimPrefix(hdr.Name, "./")
 
-		// Determine if we should extract the element
-		toBeExtracted := false
-		for _, s := range filenames {
-			if strings.HasPrefix(filename, s) {
-				toBeExtracted = true
-				break
-			}
+		if !filenameMatcher.Match(filename) {
+			continue
 		}
 
-		if toBeExtracted {
-			// File size limit
-			if hdr.Size > MaxExtractableFileSize {
-				return data, ErrExtractedFileTooBig
-			}
+		// File size limit
+		if hdr.Size > MaxExtractableFileSize {
+			return data, ErrExtractedFileTooBig
+		}
 
-			// Extract the element
-			if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
-				d, _ := ioutil.ReadAll(tr)
-				data[filename] = d
-			}
+		// Extract the element
+		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
+			d, _ := ioutil.ReadAll(tr)
+			data[filename] = d
 		}
 	}
 
