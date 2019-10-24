@@ -15,6 +15,5 @@ RUN apk update && \
 
 
 COPY ./bin/scanner /
-COPY ./bin/clairify /
 
 ENTRYPOINT ["/scanner"]
