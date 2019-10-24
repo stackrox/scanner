@@ -13,11 +13,6 @@ type psql struct {
 	*sql.DB
 }
 
-func (p *psql) createTable(query string) error {
-	_, err := p.Exec(query)
-	return err
-}
-
 // GetLayerByName fetches the latest layer for an image by the image SHA.
 func (p *psql) GetLayerBySHA(sha string) (string, bool, error) {
 	rows, err := p.Query("SELECT layer FROM ImageToLayer WHERE sha = $1", sha)
