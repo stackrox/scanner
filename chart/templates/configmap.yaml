@@ -26,14 +26,6 @@ data:
           # Multiple clair instances in the same cluster need the same value.
           paginationkey:
 
-	Port                      int
-	HealthPort                int
-	ClairifyPort              int
-	MTLS                      bool
-	Timeout                   time.Duration
-	PaginationKey             string
-	CertFile, KeyFile, CAFile string
-
       api:
         # v3 grpc/RESTful API server address
         port: 6060
