@@ -41,6 +41,6 @@ func (pgSQL *pgSQL) AddImage(layer string, digest, name string) error {
 		return nil
 	}
 	_, err = pgSQL.Exec(`INSERT INTO ImageToLayer(layer, name, sha)
-	VALUES ($1, $2, $3); `, layer, name, digest)
+	VALUES ($1, $2, $3) ON CONFLICT DO NOTHING;`, layer, name, digest)
 	return err
 }

@@ -230,7 +230,7 @@ func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
 }
 
 // Start starts the server listening.
-func (s *Server) Start(noMTLS bool) error {
+func (s *Server) Start(mtlsEnabled bool) error {
 	r := mux.NewRouter()
 	r.HandleFunc("/clairify/ping", s.Ping).Methods("GET")
 	r.HandleFunc("/clairify/image", s.ScanImage).Methods("POST")
@@ -242,7 +242,7 @@ func (s *Server) Start(noMTLS bool) error {
 	var tlsConfig *tls.Config
 	var listener net.Listener
 	var addr string
-	if !noMTLS {
+	if mtlsEnabled {
 		var err error
 		tlsConfig, err = mtls.TLSConfig()
 		if err != nil {

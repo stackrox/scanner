@@ -37,7 +37,7 @@ func (s *Server) analyzeLayers(registryURL string, image *types.Image, layers []
 		fullURL := fmt.Sprintf("%s/v2/%s/blobs/%s", registryURL, image.Remote, layer)
 		err := clair.ProcessLayer(s.storage, "Docker", layer, prevLayer, fullURL, headers)
 		if err != nil {
-			logrus.Errorf("Error analyzing layer: %v", err.Error())
+			logrus.Errorf("Error analyzing layer: %v", err)
 			return err
 		}
 		prevLayer = layer
