@@ -195,7 +195,7 @@ func update(datastore database.Datastore, firstUpdate bool) (updateSuccessful bo
 
 	// Insert vulnerabilities.
 	log.WithField("count", len(vulnerabilities)).Debug("inserting vulnerabilities for update")
-	err := datastore.InsertVulnerabilities(vulnerabilities, !firstUpdate)
+	err := datastore.InsertVulnerabilities(vulnerabilities)
 	if err != nil {
 		promUpdaterErrorsTotal.Inc()
 		log.WithError(err).Error("an error occured when inserting vulnerabilities for update")

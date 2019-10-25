@@ -15,7 +15,6 @@
 package pgsql
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stackrox/scanner/database"
@@ -48,26 +47,4 @@ func TestInsertNamespace(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	assert.Equal(t, id1, id2)
-}
-
-func TestListNamespace(t *testing.T) {
-	datastore, err := openDatabaseForTest("ListNamespaces", true)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	defer datastore.Close()
-
-	namespaces, err := datastore.ListNamespaces()
-	assert.Nil(t, err)
-	if assert.Len(t, namespaces, 2) {
-		for _, namespace := range namespaces {
-			switch namespace.Name {
-			case "debian:7", "debian:8":
-				continue
-			default:
-				assert.Error(t, fmt.Errorf("ListNamespaces should not have returned '%s'", namespace.Name))
-			}
-		}
-	}
 }

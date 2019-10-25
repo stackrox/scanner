@@ -73,9 +73,6 @@ func Open(cfg RegistrableComponentConfig) (Datastore, error) {
 // Datastore represents the required operations on a persistent data store for
 // a Clair deployment.
 type Datastore interface {
-	// ListNamespaces returns the entire list of known Namespaces.
-	ListNamespaces() ([]Namespace, error)
-
 	// InsertLayer stores a Layer in the database.
 	//
 	// A Layer is uniquely identified by its Name.
@@ -129,7 +126,7 @@ type Datastore interface {
 	// Each vulnerability insertion or update has to create a Notification that
 	// will contain the old and the updated Vulnerability, unless
 	// createNotification equals to true.
-	InsertVulnerabilities(vulnerabilities []Vulnerability, createNotification bool) error
+	InsertVulnerabilities(vulnerabilities []Vulnerability) error
 
 	// FindVulnerability retrieves a Vulnerability from the database, including
 	// the FixedIn list.
@@ -154,38 +151,6 @@ type Datastore interface {
 	// It has has to create a Notification that will contain the old and the
 	// updated Vulnerability.
 	DeleteVulnerabilityFix(vulnerabilityNamespace, vulnerabilityName, featureName string) error
-
-	// GetAvailableNotification returns the Name, Created, Notified and Deleted
-	// fields of a Notification that should be handled.
-	//
-	// The renotify interval defines how much time after being marked as Notified
-	// by SetNotificationNotified, a Notification that hasn't been deleted should
-	// be returned again by this function.
-	// A Notification for which there is a valid Lock with the same Name should
-	// not be returned.
-	GetAvailableNotification(renotifyInterval time.Duration) (VulnerabilityNotification, error)
-
-	// GetNotification returns a Notification, including its OldVulnerability and
-	// NewVulnerability fields.
-	//
-	// On these Vulnerabilities, LayersIntroducingVulnerability should be filled
-	// with every Layer that introduces the Vulnerability (i.e. adds at least one
-	// affected FeatureVersion).
-	// The Limit and page parameters are used to paginate
-	// LayersIntroducingVulnerability. The first given page should be
-	// VulnerabilityNotificationFirstPage. The function will then return the next
-	// available page. If there is no more page, NoVulnerabilityNotificationPage
-	// has to be returned.
-	GetNotification(name string, limit int, page VulnerabilityNotificationPageNumber) (VulnerabilityNotification, VulnerabilityNotificationPageNumber, error)
-
-	// SetNotificationNotified marks a Notification as notified and thus, makes
-	// it unavailable for GetAvailableNotification, until the renotify duration
-	// is elapsed.
-	SetNotificationNotified(name string) error
-
-	// DeleteNotification marks a Notification as deleted, and thus, makes it
-	// unavailable for GetAvailableNotification.
-	DeleteNotification(name string) error
 
 	// InsertKeyValue stores or updates a simple key/value pair in the database.
 	InsertKeyValue(key, value string) error

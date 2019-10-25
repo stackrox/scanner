@@ -21,7 +21,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"runtime/pprof"
 	"strings"
 	"syscall"
 	"time"
@@ -63,28 +62,6 @@ func waitForSignals(signals ...os.Signal) {
 	<-interrupts
 }
 
-func startCPUProfiling(path string) *os.File {
-	f, err := os.Create(path)
-	if err != nil {
-		log.WithError(err).Fatal("failed to create profile file")
-	}
-
-	err = pprof.StartCPUProfile(f)
-	if err != nil {
-		log.WithError(err).Fatal("failed to start CPU profiling")
-	}
-
-	log.Info("started CPU profiling")
-
-	return f
-}
-
-func stopCPUProfiling(f *os.File) {
-	pprof.StopCPUProfile()
-	f.Close()
-	log.Info("stopped CPU profiling")
-}
-
 // Boot starts Clair instance with the provided config.
 func Boot(config *Config) {
 	rand.Seed(time.Now().UnixNano())
@@ -107,16 +84,7 @@ func Boot(config *Config) {
 	}
 	defer db.Close()
 
-	// Start notifier
-	st.Begin()
-	go clair.RunNotifier(config.Notifier, db, st)
-
-	// Start API
-	st.Begin()
-	go api.RunHealth(config.API, db, st)
-
-	st.Begin()
-	go api.RunClairify(config.API, db, st)
+	go api.RunClairify(config.API, db)
 
 	// Start updater
 	st.Begin()
@@ -132,7 +100,6 @@ func main() {
 	// Parse command-line arguments
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	flagConfigPath := flag.String("config", "/etc/clair/config.yaml", "Load configuration from the specified file.")
-	flagCPUProfilePath := flag.String("cpu-profile", "", "Write a CPU profile to the specified file before exiting.")
 	flagLogLevel := flag.String("log-level", "info", "Define the logging level.")
 	flagInsecureTLS := flag.Bool("insecure-tls", false, "Disable TLS server's certificate chain and hostname verification when pulling layers.")
 	flag.Parse()
@@ -161,11 +128,6 @@ func main() {
 	log.SetLevel(logLevel)
 	log.SetOutput(os.Stdout)
 	log.SetFormatter(&formatter.JSONExtendedFormatter{ShowLn: true})
-
-	// Enable CPU Profiling if specified
-	if *flagCPUProfilePath != "" {
-		defer stopCPUProfiling(startCPUProfiling(*flagCPUProfilePath))
-	}
 
 	// Enable TLS server's certificate chain and hostname verification
 	// when pulling layers if specified
