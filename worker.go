@@ -17,13 +17,16 @@ package clair
 import (
 	"regexp"
 
+	"github.com/davecgh/go-spew/spew"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/imagefmt"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/singletons/analyzers"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
 )
 
@@ -134,6 +137,19 @@ func detectContent(imageFormat, name, path string, headers map[string]string, pa
 	}
 	if len(featureVersions) > 0 {
 		log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
+	}
+
+	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())
+	if err != nil {
+		log.WithError(err).Errorf("Failed to analyze image: %s", name)
+	} else {
+		log.Infof("Found %d components with Rox analyzers", len(allComponents))
+		if len(allComponents) > 0 {
+			if len(allComponents) > 5 {
+				allComponents = allComponents[:5]
+			}
+			log.Infof("First %d components were %s", len(allComponents), spew.Sdump(allComponents))
+		}
 	}
 
 	return

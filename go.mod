@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/beorn7/perks v1.0.0 // indirect
+	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
 	github.com/fernet/fernet-go v0.0.0-20180830025343-9eac43b88a5e
