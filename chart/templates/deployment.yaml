@@ -29,24 +29,6 @@ spec:
               memory: 200Mi
           securityContext:
             runAsUser: 4000
-          volumeMounts:
-            - name: config
-              mountPath: /etc/clair
-              readOnly: true
-        - name: clairify
-          image:  {{ .Values.scannerImage}}:{{ .Values.tag }}
-          command:
-            - /clairify
-            - "-no-mtls"
-          resources:
-            limits:
-              cpu: 2
-              memory: 4Gi
-            requests:
-              cpu: 200m
-              memory: 200Mi
-          securityContext:
-            runAsUser: 4000
           readinessProbe:
             httpGet:
               path: /clairify/ping
@@ -55,6 +37,10 @@ spec:
             periodSeconds: 10
             failureThreshold: 3
             successThreshold: 1
+          volumeMounts:
+            - name: config
+              mountPath: /etc/clair
+              readOnly: true
         - name: db
           image: {{.Values.scannerDBImage}}:{{.Values.tag}}
           resources:

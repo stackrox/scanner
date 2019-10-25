@@ -113,9 +113,10 @@ func Boot(config *Config) {
 
 	// Start API
 	st.Begin()
-	go api.Run(config.API, db, st)
-	st.Begin()
 	go api.RunHealth(config.API, db, st)
+
+	st.Begin()
+	go api.RunClairify(config.API, db, st)
 
 	// Start updater
 	st.Begin()

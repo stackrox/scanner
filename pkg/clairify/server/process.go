@@ -9,6 +9,7 @@ import (
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/heroku/docker-registry-client/registry"
 	"github.com/sirupsen/logrus"
+	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 )
 
@@ -28,6 +29,21 @@ func getAuthHeaders(method, prefix, auth string) authHeader {
 			"Authorization": fmt.Sprintf("%s %s", prefix, auth),
 		},
 	}
+}
+
+func (s *Server) analyzeLayers(registryURL string, image *types.Image, layers []string, headers map[string]string) error {
+	var prevLayer string
+	for _, layer := range layers {
+		fullURL := fmt.Sprintf("%s/v2/%s/blobs/%s", registryURL, image.Remote, layer)
+		err := clair.ProcessLayer(s.storage, "Docker", layer, prevLayer, fullURL, headers)
+		if err != nil {
+			logrus.Errorf("Error analyzing layer: %v", err)
+			return err
+		}
+		prevLayer = layer
+	}
+	logrus.Infof("Finished analyzing all layers for image %s", image)
+	return nil
 }
 
 func (s *Server) process(image *types.Image, reg types.Registry) (string, string, error) {
@@ -55,7 +71,7 @@ func (s *Server) process(image *types.Image, reg types.Registry) (string, string
 
 	logrus.Infof("Found %v layers for image %v", len(layers), image)
 	for _, authHeader := range possibleAuthorizationHeaders {
-		if err = s.cc.AnalyzeImage(reg.GetURL(), image, layers, authHeader.Headers); err != nil {
+		if err = s.analyzeLayers(reg.GetURL(), image, layers, authHeader.Headers); err != nil {
 			logrus.Warnf("Failed to analyze image %q with method %q", image.String(), authHeader.Method)
 			continue
 		}

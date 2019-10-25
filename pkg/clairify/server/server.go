@@ -15,29 +15,28 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	v1 "github.com/stackrox/scanner/api/v1"
-	"github.com/stackrox/scanner/pkg/clairify/db"
+	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/server/mtls"
 	"github.com/stackrox/scanner/pkg/clairify/types"
+	"github.com/stackrox/scanner/pkg/commonerr"
 )
 
 // Server is the HTTP server for Clairify.
 type Server struct {
-	cc                      types.ClairClient
 	registryCreator         types.RegistryClientCreator
 	insecureRegistryCreator types.RegistryClientCreator
 	endpoint                string
-	storage                 db.DB
+	storage                 database.Datastore
 	httpServer              *http.Server
 }
 
 // New returns a new instantiation of the Server.
-func New(serverEndpoint string, client types.ClairClient, storage db.DB, creator, insecureCreator types.RegistryClientCreator) *Server {
+func New(serverEndpoint string, db database.Datastore, creator, insecureCreator types.RegistryClientCreator) *Server {
 	return &Server{
-		cc:                      client,
 		registryCreator:         creator,
 		insecureRegistryCreator: insecureCreator,
 		endpoint:                serverEndpoint,
-		storage:                 storage,
+		storage:                 db,
 	}
 }
 
@@ -58,17 +57,22 @@ func clairError(w http.ResponseWriter, status int, err error) {
 	clairErrorString(w, status, err.Error())
 }
 
-func (s *Server) getClairLayer(w http.ResponseWriter, r *http.Request, layer string) {
-	data, exists, err := s.cc.RetrieveLayerData(layer, r.URL.Query())
-	if err != nil {
+func (s *Server) getClairLayer(w http.ResponseWriter, r *http.Request, layerName string) {
+	dbLayer, err := s.storage.FindLayer(layerName, true, true)
+	if err == commonerr.ErrNotFound {
+		clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layerName)
+		return
+	} else if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
-	if !exists {
-		clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layer)
-		return
+
+	layer := v1.LayerFromDatabaseModel(dbLayer, true, true)
+	env := &v1.LayerEnvelope{
+		Layer: &layer,
 	}
-	bytes, err := json.Marshal(data)
+
+	bytes, err := json.Marshal(env)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
@@ -205,7 +209,7 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	image.SHA = sha
-	if err := s.storage.AddImage(layer, *image); err != nil {
+	if err := s.storage.AddImage(layer, image.SHA, image.TaggedName()); err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -226,7 +230,7 @@ func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
 }
 
 // Start starts the server listening.
-func (s *Server) Start(noMTLS bool) error {
+func (s *Server) Start(mtlsEnabled bool) error {
 	r := mux.NewRouter()
 	r.HandleFunc("/clairify/ping", s.Ping).Methods("GET")
 	r.HandleFunc("/clairify/image", s.ScanImage).Methods("POST")
@@ -238,7 +242,7 @@ func (s *Server) Start(noMTLS bool) error {
 	var tlsConfig *tls.Config
 	var listener net.Listener
 	var addr string
-	if !noMTLS {
+	if mtlsEnabled {
 		var err error
 		tlsConfig, err = mtls.TLSConfig()
 		if err != nil {

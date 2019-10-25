@@ -218,4 +218,9 @@ type Datastore interface {
 
 	// Close closes the database and frees any allocated resource.
 	Close()
+
+	// Image
+	GetLayerBySHA(sha string) (string, bool, error)
+	GetLayerByName(name string) (string, bool, error)
+	AddImage(layer string, digest, name string) error
 }

@@ -17,6 +17,7 @@ package api
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -25,6 +26,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/clairify/server"
+	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/stopper"
 	"github.com/tylerb/graceful"
 )
@@ -35,6 +38,8 @@ const timeoutResponse = `{"Error":{"Message":"Clair failed to respond within the
 type Config struct {
 	Port                      int
 	HealthPort                int
+	ClairifyPort              int
+	MTLS                      bool
 	Timeout                   time.Duration
 	PaginationKey             string
 	CertFile, KeyFile, CAFile string
@@ -71,6 +76,15 @@ func Run(cfg *Config, store database.Datastore, st *stopper.Stopper) {
 	listenAndServeWithStopper(srv, st, cfg.CertFile, cfg.KeyFile)
 
 	log.Info("main API stopped")
+}
+
+func RunClairify(cfg *Config, store database.Datastore, st *stopper.Stopper) {
+	defer st.End()
+
+	serv := server.New(fmt.Sprintf(":%d", cfg.ClairifyPort), store, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
+	if err := serv.Start(cfg.MTLS); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func RunHealth(cfg *Config, store database.Datastore, st *stopper.Stopper) {
