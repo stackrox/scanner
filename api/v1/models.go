@@ -15,13 +15,6 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"time"
-
-	"github.com/fernet/fernet-go"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 )
@@ -130,25 +123,6 @@ func (v Vulnerability) DatabaseModel() (database.Vulnerability, error) {
 	}, nil
 }
 
-func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability, withFixedIn bool) Vulnerability {
-	vuln := Vulnerability{
-		Name:          dbVuln.Name,
-		NamespaceName: dbVuln.Namespace.Name,
-		Description:   dbVuln.Description,
-		Link:          dbVuln.Link,
-		Severity:      string(dbVuln.Severity),
-		Metadata:      dbVuln.Metadata,
-	}
-
-	if withFixedIn {
-		for _, dbFeatureVersion := range dbVuln.FixedIn {
-			vuln.FixedIn = append(vuln.FixedIn, FeatureFromDatabaseModel(dbFeatureVersion))
-		}
-	}
-
-	return vuln
-}
-
 type Feature struct {
 	Name            string          `json:"Name,omitempty"`
 	NamespaceName   string          `json:"NamespaceName,omitempty"`
@@ -156,21 +130,6 @@ type Feature struct {
 	Version         string          `json:"Version,omitempty"`
 	Vulnerabilities []Vulnerability `json:"Vulnerabilities,omitempty"`
 	AddedBy         string          `json:"AddedBy,omitempty"`
-}
-
-func FeatureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) Feature {
-	version := dbFeatureVersion.Version
-	if version == versionfmt.MaxVersion {
-		version = "None"
-	}
-
-	return Feature{
-		Name:          dbFeatureVersion.Feature.Name,
-		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
-		VersionFormat: dbFeatureVersion.Feature.Namespace.VersionFormat,
-		Version:       version,
-		AddedBy:       dbFeatureVersion.AddedBy.Name,
-	}
 }
 
 func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {
@@ -199,62 +158,6 @@ func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {
 	return
 }
 
-type Notification struct {
-	Name     string                   `json:"Name,omitempty"`
-	Created  string                   `json:"Created,omitempty"`
-	Notified string                   `json:"Notified,omitempty"`
-	Deleted  string                   `json:"Deleted,omitempty"`
-	Limit    int                      `json:"Limit,omitempty"`
-	Page     string                   `json:"Page,omitempty"`
-	NextPage string                   `json:"NextPage,omitempty"`
-	Old      *VulnerabilityWithLayers `json:"Old,omitempty"`
-	New      *VulnerabilityWithLayers `json:"New,omitempty"`
-}
-
-func NotificationFromDatabaseModel(dbNotification database.VulnerabilityNotification, limit int, pageToken string, nextPage database.VulnerabilityNotificationPageNumber, key string) Notification {
-	var oldVuln *VulnerabilityWithLayers
-	if dbNotification.OldVulnerability != nil {
-		v := VulnerabilityWithLayersFromDatabaseModel(*dbNotification.OldVulnerability)
-		oldVuln = &v
-	}
-
-	var newVuln *VulnerabilityWithLayers
-	if dbNotification.NewVulnerability != nil {
-		v := VulnerabilityWithLayersFromDatabaseModel(*dbNotification.NewVulnerability)
-		newVuln = &v
-	}
-
-	var nextPageStr string
-	if nextPage != database.NoVulnerabilityNotificationPage {
-		nextPageBytes, _ := tokenMarshal(nextPage, key)
-		nextPageStr = string(nextPageBytes)
-	}
-
-	var created, notified, deleted string
-	if !dbNotification.Created.IsZero() {
-		created = fmt.Sprintf("%d", dbNotification.Created.Unix())
-	}
-	if !dbNotification.Notified.IsZero() {
-		notified = fmt.Sprintf("%d", dbNotification.Notified.Unix())
-	}
-	if !dbNotification.Deleted.IsZero() {
-		deleted = fmt.Sprintf("%d", dbNotification.Deleted.Unix())
-	}
-
-	// TODO(jzelinskie): implement "changed" key
-	return Notification{
-		Name:     dbNotification.Name,
-		Created:  created,
-		Notified: notified,
-		Deleted:  deleted,
-		Limit:    limit,
-		Page:     pageToken,
-		NextPage: nextPageStr,
-		Old:      oldVuln,
-		New:      newVuln,
-	}
-}
-
 type VulnerabilityWithLayers struct {
 	Vulnerability *Vulnerability `json:"Vulnerability,omitempty"`
 
@@ -271,34 +174,9 @@ type OrderedLayerName struct {
 	LayerName string `json:"LayerName"`
 }
 
-func VulnerabilityWithLayersFromDatabaseModel(dbVuln database.Vulnerability) VulnerabilityWithLayers {
-	vuln := VulnerabilityFromDatabaseModel(dbVuln, true)
-
-	var layers []string
-	var orderedLayers []OrderedLayerName
-	for _, layer := range dbVuln.LayersIntroducingVulnerability {
-		layers = append(layers, layer.Name)
-		orderedLayers = append(orderedLayers, OrderedLayerName{
-			Index:     layer.ID,
-			LayerName: layer.Name,
-		})
-	}
-
-	return VulnerabilityWithLayers{
-		Vulnerability:                         &vuln,
-		OrderedLayersIntroducingVulnerability: orderedLayers,
-		LayersIntroducingVulnerability:        layers,
-	}
-}
-
 type LayerEnvelope struct {
 	Layer *Layer `json:"Layer,omitempty"`
 	Error *Error `json:"Error,omitempty"`
-}
-
-type NamespaceEnvelope struct {
-	Namespaces *[]Namespace `json:"Namespaces,omitempty"`
-	Error      *Error       `json:"Error,omitempty"`
 }
 
 type VulnerabilityEnvelope struct {
@@ -308,34 +186,8 @@ type VulnerabilityEnvelope struct {
 	Error           *Error           `json:"Error,omitempty"`
 }
 
-type NotificationEnvelope struct {
-	Notification *Notification `json:"Notification,omitempty"`
-	Error        *Error        `json:"Error,omitempty"`
-}
-
 type FeatureEnvelope struct {
 	Feature  *Feature   `json:"Feature,omitempty"`
 	Features *[]Feature `json:"Features,omitempty"`
 	Error    *Error     `json:"Error,omitempty"`
-}
-
-func tokenUnmarshal(token string, key string, v interface{}) error {
-	k, _ := fernet.DecodeKey(key)
-	msg := fernet.VerifyAndDecrypt([]byte(token), time.Hour, []*fernet.Key{k})
-	if msg == nil {
-		return errors.New("invalid or expired pagination token")
-	}
-
-	return json.NewDecoder(bytes.NewBuffer(msg)).Decode(&v)
-}
-
-func tokenMarshal(v interface{}, key string) ([]byte, error) {
-	var buf bytes.Buffer
-	err := json.NewEncoder(&buf).Encode(v)
-	if err != nil {
-		return nil, err
-	}
-
-	k, _ := fernet.DecodeKey(key)
-	return fernet.EncryptAndSign(buf.Bytes(), k)
 }

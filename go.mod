@@ -4,7 +4,6 @@ go 1.13
 
 require (
 	github.com/beorn7/perks v1.0.0 // indirect
-	github.com/coreos/pkg v0.0.0-20180108230652-97fdf19511ea
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
 	github.com/fernet/fernet-go v0.0.0-20180830025343-9eac43b88a5e
@@ -14,7 +13,6 @@ require (
 	github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible
 	github.com/hashicorp/golang-lru v0.5.1
 	github.com/heroku/docker-registry-client v0.0.0
-	github.com/julienschmidt/httprouter v1.2.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
@@ -29,11 +27,8 @@ require (
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.4.0
-	github.com/tylerb/graceful v1.2.15
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de
-	golang.org/x/net v0.0.0-20191014212845-da9a3fd4c582 // indirect
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
-	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/tools v0.0.0-20191018203202-04252eccb9d5
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.2.3

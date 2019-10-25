@@ -181,51 +181,6 @@ const (
           AND deleted_at IS NULL
     RETURNING id`
 
-	// notification.go
-	insertNotification = `
-		INSERT INTO Vulnerability_Notification(name, created_at, old_vulnerability_id, new_vulnerability_id)
-    VALUES($1, CURRENT_TIMESTAMP, $2, $3)`
-
-	updatedNotificationNotified = `
-		UPDATE Vulnerability_Notification
-		SET notified_at = CURRENT_TIMESTAMP
-		WHERE name = $1`
-
-	removeNotification = `
-		UPDATE Vulnerability_Notification
-	  SET deleted_at = CURRENT_TIMESTAMP
-	  WHERE name = $1`
-
-	searchNotificationAvailable = `
-		SELECT id, name, created_at, notified_at, deleted_at
-		FROM Vulnerability_Notification
-		WHERE (notified_at IS NULL OR notified_at < $1)
-					AND deleted_at IS NULL
-					AND name NOT IN (SELECT name FROM Lock)
-		ORDER BY Random()
-		LIMIT 1`
-
-	searchNotification = `
-		SELECT id, name, created_at, notified_at, deleted_at, old_vulnerability_id, new_vulnerability_id
-		FROM Vulnerability_Notification
-		WHERE name = $1`
-
-	searchNotificationLayerIntroducingVulnerability = `
-		WITH LDFV AS (
-		  SELECT DISTINCT ldfv.layer_id
-		  FROM Vulnerability_Affects_FeatureVersion vafv, FeatureVersion fv, Layer_diff_FeatureVersion ldfv
-		  WHERE ldfv.layer_id >= $2
-		    AND vafv.vulnerability_id = $1
-		    AND vafv.featureversion_id = fv.id
-		    AND ldfv.featureversion_id = fv.id
-		    AND ldfv.modification = 'add'
-		  ORDER BY ldfv.layer_id
-		)
-		SELECT l.id, l.name
-		FROM LDFV, Layer l
-		WHERE LDFV.layer_id = l.id
-		LIMIT $3`
-
 	// complex_test.go
 	searchComplexTestFeatureVersionAffects = `
 		SELECT v.name
