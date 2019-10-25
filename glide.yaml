@@ -29,3 +29,13 @@ import:
 - package: github.com/tylerb/graceful
   version: ^1.2.15
 - package: gopkg.in/yaml.v2
+- package: github.com/ghodss/yaml
+- package: github.com/stackrox/rox
+  subpackages:
+  - pkg/concurrency
+  - pkg/debug
+  - pkg/httputil
+  - pkg/k8scfgwatch
+  - pkg/logging
+  - pkg/sync
+- package: github.com/pkg/errors
