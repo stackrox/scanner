@@ -26,3 +26,21 @@ func (w *whitelistMatcher) Match(fileName string) bool {
 func NewPrefixWhitelistMatcher(whitelist ...string) Matcher {
 	return &whitelistMatcher{whitelist: whitelist}
 }
+
+type orMatcher struct {
+	matchers []Matcher
+}
+
+func (o *orMatcher) Match(fileName string) bool {
+	for _, subMatcher := range o.matchers {
+		if subMatcher.Match(fileName) {
+			return true
+		}
+	}
+	return false
+}
+
+// NewOrMatcher returns a matcher that matches if and only if any of the passed submatchers does.
+func NewOrMatcher(subMatchers ...Matcher) Matcher {
+	return &orMatcher{matchers: subMatchers}
+}
