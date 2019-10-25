@@ -81,7 +81,6 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*componen
 			currentJavaPackage.Name = parsedPomProps.artifactID
 		}
 		currentJavaPackage.MavenVersion = parsedPomProps.version
-		// fmt.Println(currentJavaPackage, &topLevelJavaPackage, len(allPackages))
 		if currentJavaPackage != &topLevelJavaPackage {
 			allPackages = append(allPackages, currentJavaPackage)
 		}
