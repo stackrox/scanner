@@ -158,7 +158,7 @@ deploy: clean-helm-rendered
 .PHONY: e2e-tests
 e2e-tests:
 	@echo "+ $@"
-	go test ./tests/...
+	go test -count=1 ./tests/...
 
 ###########
 ## Clean ##

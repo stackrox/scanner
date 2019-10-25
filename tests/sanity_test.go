@@ -180,7 +180,7 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "debian:8",
 							Description:   "Incorrect sanitation of the 302 redirect field in HTTP transport method of apt versions 1.4.8 and earlier can lead to content injection by a MITM attacker, potentially leading to remote code execution on the target machine.",
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2019-3462",
-							Severity:      "Critical",
+							Severity:      "High",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
