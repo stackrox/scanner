@@ -20,18 +20,15 @@ import (
 	"net/http/pprof"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/clairify/types"
-	"github.com/stackrox/scanner/pkg/stopper"
-	"github.com/tylerb/graceful"
 )
 
 // Config is the configuration for the API service.
 type Config struct {
-	HealthPort                int
+	DebugPort                 int
 	ClairifyPort              int
 	MTLS                      bool
 	Timeout                   time.Duration
@@ -46,23 +43,19 @@ func RunClairify(cfg *Config, store database.Datastore) {
 	}
 }
 
-func RunDebug(cfg *Config, st *stopper.Stopper) {
-	defer st.End()
-
-	log.WithField("port", "6062").Info("starting debug API")
-
-	srv := &graceful.Server{
-		Timeout:          10 * time.Second, // Interrupt health checks when stopping
-		NoSignalHandling: true,             // We want to use our own Stopper
-		Server: &http.Server{
-			Addr:    "127.0.0.1:6062",
-			Handler: http.TimeoutHandler(newDebugHandler(), cfg.Timeout, timeoutResponse),
-		},
+func RunDebug() {
+	mux := http.NewServeMux()
+	for route, handler := range debugRoutes {
+		mux.Handle(route, handler)
 	}
 
-	listenAndServeWithStopper(srv, st, "", "")
-
-	log.Info("debug API stopped")
+	srv := &http.Server{
+		Handler:      mux,
+		Addr:         "127.0.0.1:6060",
+		WriteTimeout: 5 * time.Minute,
+		ReadTimeout:  5 * time.Minute,
+	}
+	panic(srv.ListenAndServe())
 }
 
 var debugRoutes = map[string]http.Handler{
@@ -76,12 +69,4 @@ var debugRoutes = map[string]http.Handler{
 	"/debug/heap":          pprof.Handler(`heap`),
 	"/debug/mutex":         pprof.Handler(`mutex`),
 	"/debug/threadcreate":  pprof.Handler(`threadcreate`),
-}
-
-func newDebugHandler() http.Handler {
-	router := httprouter.New()
-	for route, handler := range debugRoutes {
-		router.Handler(http.MethodGet, route, handler)
-	}
-	return router
 }

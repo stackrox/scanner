@@ -45,6 +45,34 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 	return features, nil
 }
 
+func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability {
+	vuln := Vulnerability{
+		Name:          dbVuln.Name,
+		NamespaceName: dbVuln.Namespace.Name,
+		Description:   dbVuln.Description,
+		Link:          dbVuln.Link,
+		Severity:      string(dbVuln.Severity),
+		Metadata:      dbVuln.Metadata,
+	}
+
+	return vuln
+}
+
+func FeatureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) Feature {
+	version := dbFeatureVersion.Version
+	if version == versionfmt.MaxVersion {
+		version = "None"
+	}
+
+	return Feature{
+		Name:          dbFeatureVersion.Feature.Name,
+		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
+		VersionFormat: dbFeatureVersion.Feature.Namespace.VersionFormat,
+		Version:       version,
+		AddedBy:       dbFeatureVersion.AddedBy.Name,
+	}
+}
+
 func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, error) {
 	layer := Layer{
 		Name:             dbLayer.Name,
@@ -61,10 +89,10 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 
 	if withFeatures || withVulnerabilities && dbLayer.Features != nil {
 		for _, dbFeatureVersion := range dbLayer.Features {
-			feature := convertDBFeatureVersionToFeature(dbFeatureVersion)
+			feature := FeatureFromDatabaseModel(dbFeatureVersion)
 
 			for _, dbVuln := range dbFeatureVersion.AffectedBy {
-				vuln := convertDBVulnToVuln(dbVuln)
+				vuln := VulnerabilityFromDatabaseModel(dbVuln)
 
 				if dbVuln.FixedBy != versionfmt.MaxVersion {
 					vuln.FixedBy = dbVuln.FixedBy
@@ -80,15 +108,10 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 			return layer, err
 		}
 		for _, dbFeatureVersion := range languageFeatures {
-			feature := convertDBFeatureVersionToFeature(dbFeatureVersion)
+			feature := FeatureFromDatabaseModel(dbFeatureVersion)
 
 			for _, dbVuln := range dbFeatureVersion.AffectedBy {
-				vuln := convertDBVulnToVuln(dbVuln)
-
-				if dbVuln.FixedBy != versionfmt.MaxVersion {
-					vuln.FixedBy = dbVuln.FixedBy
-				}
-				feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
+				feature.Vulnerabilities = append(feature.Vulnerabilities, VulnerabilityFromDatabaseModel(dbVuln))
 			}
 			layer.Features = append(layer.Features, feature)
 		}
