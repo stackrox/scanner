@@ -17,7 +17,6 @@ package clair
 import (
 	"regexp"
 
-	"github.com/davecgh/go-spew/spew"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -109,7 +108,8 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 	}
 
 	// Analyze the content.
-	layer.Namespace, layer.Features, err = detectContent(imageFormat, name, path, headers, layer.Parent)
+	var languageComponents []*component.Component
+	layer.Namespace, layer.Features, languageComponents, err = detectContent(imageFormat, name, path, headers, layer.Parent)
 	if err != nil {
 		return err
 	}
@@ -118,45 +118,28 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 		return err
 	}
 
-	// Get Package specifics
-	languagePackages := getPkgs()
-
-	return datastore.InsertLayerComponents(layer, languagePackages)
-}
-
-func getPkgs() []*component.Component {
-	return []*component.Component{
-		{
-			JavaPkgMetadata: &component.JavaPkgMetadata{
-				ImplementationVersion: "2.3.12",
-				Location:              "",
-				MavenVersion:          "2.3.12",
-				Name:                  "struts",
-				Origin:                "org.apache.struts",
-				SpecificationVersion:  "2.3.12",
-			},
-		},
-	}
+	return datastore.InsertLayerComponents(layer, languageComponents)
 }
 
 // detectContent downloads a layer's archive and extracts its Namespace and
 // Features.
-func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, err error) {
+func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
 	files, err := imagefmt.Extract(imageFormat, path, headers, requiredfilenames.SingletonMatcher())
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{logLayerName: name, "path": cleanURL(path)}).Error("failed to extract data from path")
-		return
+		return nil, nil, nil, err
+
 	}
 
 	namespace, err = detectNamespace(name, files, parent)
 	if err != nil {
-		return
+		return nil, nil, nil, err
 	}
 
 	// Detect features.
 	featureVersions, err = detectFeatureVersions(name, files, namespace, parent)
 	if err != nil {
-		return
+		return nil, nil, nil, err
 	}
 	if len(featureVersions) > 0 {
 		log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
@@ -165,17 +148,9 @@ func detectContent(imageFormat, name, path string, headers map[string]string, pa
 	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())
 	if err != nil {
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
-	} else {
-		log.Infof("Found %d components with Rox analyzers", len(allComponents))
-		if len(allComponents) > 0 {
-			if len(allComponents) > 5 {
-				allComponents = allComponents[:5]
-			}
-			log.Infof("First %d components were %s", len(allComponents), spew.Sdump(allComponents))
-		}
 	}
 
-	return
+	return namespace, featureVersions, allComponents, err
 }
 
 func detectNamespace(name string, files tarutil.FilesMap, parent *database.Layer) (namespace *database.Namespace, err error) {

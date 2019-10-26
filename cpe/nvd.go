@@ -355,7 +355,7 @@ func recurseNode(node *Node) []*intermediatePair {
 			var constraints []string
 			var fixedVersion string
 			if allEmpty(match.VersionStartIncluding, match.VersionEndExcluding, match.VersionEndIncluding) {
-				pairs = append(pairs, &intermediatePair{vendor: spl[3], name: spl[4], constraint: exactMatch(spl[3])})
+				pairs = append(pairs, &intermediatePair{vendor: spl[3], name: spl[4], constraint: exactMatch(spl[5])})
 				continue
 			}
 			if match.VersionStartIncluding != "" {

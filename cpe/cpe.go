@@ -1,6 +1,7 @@
 package cpe
 
 import (
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -9,14 +10,14 @@ type cpeKey struct {
 	vendor, pkg, version string
 }
 
-func getVulnsForComponent(layer string, c *component.Component) []database.FeatureVersion {
-	potentialKeys := getVersionsForJava(c)
-
+func getVulnsForComponent(layer string, potentialKeys []cpeKey) []database.FeatureVersion {
 	featureMap := make(map[cpeKey][]database.Vulnerability)
 	for _, key := range potentialKeys {
 		matchers := cpeMatcher[key.vendor][key.pkg]
 		for _, matcher := range matchers {
+			log.Infof("Analyzing: %v", matcher.item.CVE.CVEDataMeta.ID)
 			if vuln := matcher.Matches(key.version); vuln != nil {
+				log.Infof("\tMatches: %v", matcher.item.CVE.CVEDataMeta.ID)
 				featureMap[key] = append(featureMap[key], *vuln)
 			}
 		}
@@ -39,9 +40,17 @@ func getVulnsForComponent(layer string, c *component.Component) []database.Featu
 }
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
-	var features []database.FeatureVersion
+	possibleCPEsMap := make(map[cpeKey]struct{})
+	var possibleCPEs []cpeKey
 	for _, c := range components {
-		features = append(features, getVulnsForComponent(layer, c)...)
+		keys := getVersionsForJava(c)
+		for _, k := range keys {
+			if _, ok := possibleCPEsMap[k]; ok {
+				continue
+			}
+			possibleCPEsMap[k] = struct{}{}
+			possibleCPEs = append(possibleCPEs, k)
+		}
 	}
-	return features
+	return getVulnsForComponent(layer, possibleCPEs)
 }
