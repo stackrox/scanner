@@ -1,7 +1,6 @@
 package cpe
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -44,11 +43,9 @@ func getVersionsForJava(component *component.Component) []cpeKey {
 	}
 
 	var vendor string
-	// Todo(cgorman) remove this line once integrated so we can parse the origin more appropriately, but need examples
-	fmt.Printf("Java Origin: %v\n", java.Origin)
 	originSpl := strings.Split(java.Origin, ".")
-	// This is probably pretty fragile
-	if len(originSpl) == 3 {
+	// Typically this is org.vendor.product
+	if len(originSpl) >= 2 {
 		vendor = originSpl[1]
 	}
 

@@ -375,6 +375,5 @@ func recurseNode(node *Node) []*intermediatePair {
 	for _, c := range node.Children {
 		pairs = append(pairs, recurseNode(c)...)
 	}
-	// Cancel out all children because they are no longer needed
 	return pairs
 }

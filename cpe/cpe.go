@@ -1,7 +1,6 @@
 package cpe
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -15,9 +14,7 @@ func getVulnsForComponent(layer string, potentialKeys []cpeKey) []database.Featu
 	for _, key := range potentialKeys {
 		matchers := cpeMatcher[key.vendor][key.pkg]
 		for _, matcher := range matchers {
-			log.Infof("Analyzing: %v", matcher.item.CVE.CVEDataMeta.ID)
 			if vuln := matcher.Matches(key.version); vuln != nil {
-				log.Infof("\tMatches: %v", matcher.item.CVE.CVEDataMeta.ID)
 				featureMap[key] = append(featureMap[key], *vuln)
 			}
 		}
