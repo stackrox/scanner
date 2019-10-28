@@ -14,32 +14,38 @@
 
 package database
 
-import "time"
+import (
+	"time"
+
+	"github.com/stackrox/scanner/pkg/component"
+)
 
 // MockDatastore implements Datastore and enables overriding each available method.
 // The default behavior of each method is to simply panic.
 type MockDatastore struct {
-	FctListNamespaces           func() ([]Namespace, error)
-	FctInsertLayer              func(Layer) error
-	FctFindLayer                func(name string, withFeatures, withVulnerabilities bool) (Layer, error)
-	FctDeleteLayer              func(name string) error
-	FctListVulnerabilities      func(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
-	FctInsertVulnerabilities    func(vulnerabilities []Vulnerability) error
-	FctFindVulnerability        func(namespaceName, name string) (Vulnerability, error)
-	FctDeleteVulnerability      func(namespaceName, name string) error
-	FctInsertVulnerabilityFixes func(vulnerabilityNamespace, vulnerabilityName string, fixes []FeatureVersion) error
-	FctDeleteVulnerabilityFix   func(vulnerabilityNamespace, vulnerabilityName, featureName string) error
-	FctGetAvailableNotification func(renotifyInterval time.Duration) (VulnerabilityNotification, error)
-	FctGetNotification          func(name string, limit int, page VulnerabilityNotificationPageNumber) (VulnerabilityNotification, VulnerabilityNotificationPageNumber, error)
-	FctSetNotificationNotified  func(name string) error
-	FctDeleteNotification       func(name string) error
-	FctInsertKeyValue           func(key, value string) error
-	FctGetKeyValue              func(key string) (string, error)
-	FctLock                     func(name string, owner string, duration time.Duration, renew bool) (bool, time.Time)
-	FctUnlock                   func(name, owner string)
-	FctFindLock                 func(name string) (string, time.Time, error)
-	FctPing                     func() bool
-	FctClose                    func()
+	FctListNamespaces             func() ([]Namespace, error)
+	FctInsertLayer                func(Layer) error
+	FctFindLayer                  func(name string, withFeatures, withVulnerabilities bool) (Layer, error)
+	FctDeleteLayer                func(name string) error
+	FctListVulnerabilities        func(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
+	FctInsertVulnerabilities      func(vulnerabilities []Vulnerability) error
+	FctFindVulnerability          func(namespaceName, name string) (Vulnerability, error)
+	FctDeleteVulnerability        func(namespaceName, name string) error
+	FctInsertVulnerabilityFixes   func(vulnerabilityNamespace, vulnerabilityName string, fixes []FeatureVersion) error
+	FctDeleteVulnerabilityFix     func(vulnerabilityNamespace, vulnerabilityName, featureName string) error
+	FctGetAvailableNotification   func(renotifyInterval time.Duration) (VulnerabilityNotification, error)
+	FctGetNotification            func(name string, limit int, page VulnerabilityNotificationPageNumber) (VulnerabilityNotification, VulnerabilityNotificationPageNumber, error)
+	FctSetNotificationNotified    func(name string) error
+	FctDeleteNotification         func(name string) error
+	FctInsertKeyValue             func(key, value string) error
+	FctGetKeyValue                func(key string) (string, error)
+	FctLock                       func(name string, owner string, duration time.Duration, renew bool) (bool, time.Time)
+	FctUnlock                     func(name, owner string)
+	FctFindLock                   func(name string) (string, time.Time, error)
+	FctPing                       func() bool
+	FctClose                      func()
+	FctInsertLayerComponents      func(l Layer, c []*component.Component) error
+	FctGetLayerLanguageComponents func(layer string) ([]*component.Component, error)
 }
 
 func (mds *MockDatastore) InsertLayer(layer Layer) error {
@@ -165,5 +171,13 @@ func (mds *MockDatastore) GetLayerByName(name string) (string, bool, error) {
 }
 
 func (mds *MockDatastore) AddImage(layer string, digest, name string) error {
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) InsertLayerComponents(l Layer, c []*component.Component) error {
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) GetLayerLanguageComponents(layer string) ([]*component.Component, error) {
 	panic("required mock function not implemented")
 }

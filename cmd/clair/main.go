@@ -85,6 +85,8 @@ func Boot(config *Config) {
 
 	go api.RunClairify(config.API, db)
 
+	go api.RunDebug()
+
 	// Start updater
 	st.Begin()
 	go clair.RunUpdater(config.Updater, db, st)

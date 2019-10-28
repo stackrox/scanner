@@ -16,6 +16,8 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/pprof"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -26,7 +28,7 @@ import (
 
 // Config is the configuration for the API service.
 type Config struct {
-	HealthPort                int
+	DebugPort                 int
 	ClairifyPort              int
 	MTLS                      bool
 	Timeout                   time.Duration
@@ -39,4 +41,32 @@ func RunClairify(cfg *Config, store database.Datastore) {
 	if err := serv.Start(cfg.MTLS); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func RunDebug() {
+	mux := http.NewServeMux()
+	for route, handler := range debugRoutes {
+		mux.Handle(route, handler)
+	}
+
+	srv := &http.Server{
+		Handler:      mux,
+		Addr:         "127.0.0.1:6060",
+		WriteTimeout: 5 * time.Minute,
+		ReadTimeout:  5 * time.Minute,
+	}
+	panic(srv.ListenAndServe())
+}
+
+var debugRoutes = map[string]http.Handler{
+	"/debug/pprof":         http.HandlerFunc(pprof.Index),
+	"/debug/pprof/cmdline": http.HandlerFunc(pprof.Cmdline),
+	"/debug/pprof/profile": http.HandlerFunc(pprof.Profile),
+	"/debug/pprof/symbol":  http.HandlerFunc(pprof.Symbol),
+	"/debug/pprof/trace":   http.HandlerFunc(pprof.Trace),
+	"/debug/block":         pprof.Handler(`block`),
+	"/debug/goroutine":     pprof.Handler(`goroutine`),
+	"/debug/heap":          pprof.Handler(`heap`),
+	"/debug/mutex":         pprof.Handler(`mutex`),
+	"/debug/threadcreate":  pprof.Handler(`threadcreate`),
 }

@@ -8,12 +8,12 @@ import (
 
 // An Analyzer analyzes images and extracts the components present in them.
 type Analyzer interface {
-	Analyze(tarutil.FilesMap) ([]component.Component, error)
+	Analyze(tarutil.FilesMap) ([]*component.Component, error)
 	matcher.Matcher
 }
 
-func Analyze(filesMap tarutil.FilesMap, analyzers []Analyzer) ([]component.Component, error) {
-	var allComponents []component.Component
+func Analyze(filesMap tarutil.FilesMap, analyzers []Analyzer) ([]*component.Component, error) {
+	var allComponents []*component.Component
 	for _, a := range analyzers {
 		components, err := a.Analyze(filesMap)
 		if err != nil {

@@ -16,4 +16,8 @@ RUN apk update && \
 
 COPY ./bin/scanner /
 
+ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
+RUN mkdir -p "${NVD_DEFINITIONS_DIR}"
+ADD ./dump/cves* "${NVD_DEFINITIONS_DIR}/"
+
 ENTRYPOINT ["/scanner"]

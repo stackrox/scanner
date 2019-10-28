@@ -11,6 +11,10 @@ func init() {
 		name varchar,
 		sha  varchar,
 		PRIMARY KEY( sha, name ));`,
+
+			`CREATE TABLE IF NOT EXISTS LanguageLayer (
+        layer_name VARCHAR(128) NOT NULL UNIQUE,
+	    component_data BYTEA NOT NULL);`,
 		}),
 	})
 }

@@ -78,7 +78,7 @@ type Queryer interface {
 
 type pgSQL struct {
 	*sql.DB
-	cache  *lru.ARCCache
+	cache  *lru.Cache
 	config Config
 }
 
@@ -184,7 +184,7 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 	// Initialize cache.
 	// TODO(Quentin-M): Benchmark with a simple LRU Cache.
 	if pg.config.CacheSize > 0 {
-		pg.cache, _ = lru.NewARC(pg.config.CacheSize)
+		pg.cache, _ = lru.New(pg.config.CacheSize)
 	}
 
 	return &pg, nil

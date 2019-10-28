@@ -15,6 +15,7 @@
 package v1
 
 import (
+	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 )
@@ -34,7 +35,45 @@ type Layer struct {
 	Features         []Feature         `json:"Features,omitempty"`
 }
 
-func LayerFromDatabaseModel(dbLayer database.Layer, withFeatures, withVulnerabilities bool) Layer {
+func getLanguageData(db database.Datastore, layerName string) ([]database.FeatureVersion, error) {
+	components, err := db.GetLayerLanguageComponents(layerName)
+	if err != nil {
+		return nil, err
+	}
+
+	features := cpe.CheckForVulnerabilities(layerName, components)
+	return features, nil
+}
+
+func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability {
+	vuln := Vulnerability{
+		Name:          dbVuln.Name,
+		NamespaceName: dbVuln.Namespace.Name,
+		Description:   dbVuln.Description,
+		Link:          dbVuln.Link,
+		Severity:      string(dbVuln.Severity),
+		Metadata:      dbVuln.Metadata,
+	}
+
+	return vuln
+}
+
+func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) Feature {
+	version := dbFeatureVersion.Version
+	if version == versionfmt.MaxVersion {
+		version = "None"
+	}
+
+	return Feature{
+		Name:          dbFeatureVersion.Feature.Name,
+		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
+		VersionFormat: dbFeatureVersion.Feature.Namespace.VersionFormat,
+		Version:       version,
+		AddedBy:       dbFeatureVersion.AddedBy.Name,
+	}
+}
+
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, error) {
 	layer := Layer{
 		Name:             dbLayer.Name,
 		IndexedByVersion: dbLayer.EngineVersion,
@@ -50,23 +89,10 @@ func LayerFromDatabaseModel(dbLayer database.Layer, withFeatures, withVulnerabil
 
 	if withFeatures || withVulnerabilities && dbLayer.Features != nil {
 		for _, dbFeatureVersion := range dbLayer.Features {
-			feature := Feature{
-				Name:          dbFeatureVersion.Feature.Name,
-				NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
-				VersionFormat: dbFeatureVersion.Feature.Namespace.VersionFormat,
-				Version:       dbFeatureVersion.Version,
-				AddedBy:       dbFeatureVersion.AddedBy.Name,
-			}
+			feature := featureFromDatabaseModel(dbFeatureVersion)
 
 			for _, dbVuln := range dbFeatureVersion.AffectedBy {
-				vuln := Vulnerability{
-					Name:          dbVuln.Name,
-					NamespaceName: dbVuln.Namespace.Name,
-					Description:   dbVuln.Description,
-					Link:          dbVuln.Link,
-					Severity:      string(dbVuln.Severity),
-					Metadata:      dbVuln.Metadata,
-				}
+				vuln := VulnerabilityFromDatabaseModel(dbVuln)
 
 				if dbVuln.FixedBy != versionfmt.MaxVersion {
 					vuln.FixedBy = dbVuln.FixedBy
@@ -75,9 +101,23 @@ func LayerFromDatabaseModel(dbLayer database.Layer, withFeatures, withVulnerabil
 			}
 			layer.Features = append(layer.Features, feature)
 		}
+
+		// Add Language Features
+		languageFeatures, err := getLanguageData(db, layer.Name)
+		if err != nil {
+			return layer, err
+		}
+		for _, dbFeatureVersion := range languageFeatures {
+			feature := featureFromDatabaseModel(dbFeatureVersion)
+
+			for _, dbVuln := range dbFeatureVersion.AffectedBy {
+				feature.Vulnerabilities = append(feature.Vulnerabilities, VulnerabilityFromDatabaseModel(dbVuln))
+			}
+			layer.Features = append(layer.Features, feature)
+		}
 	}
 
-	return layer
+	return layer, nil
 }
 
 type Namespace struct {
