@@ -46,7 +46,6 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
-	_ "github.com/stackrox/scanner/ext/notification/webhook"
 	_ "github.com/stackrox/scanner/ext/vulnmdsrc/nvd"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/alpine"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/amzn"
