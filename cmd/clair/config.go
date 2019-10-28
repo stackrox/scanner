@@ -24,7 +24,6 @@ import (
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/ext/notification"
 	"gopkg.in/yaml.v2"
 )
 
@@ -38,7 +37,6 @@ type File struct {
 type Config struct {
 	Database database.RegistrableComponentConfig
 	Updater  *clair.UpdaterConfig
-	Notifier *notification.Config
 	API      *api.Config
 }
 
@@ -56,10 +54,6 @@ func DefaultConfig() Config {
 			ClairifyPort: 8080,
 			MTLS:         false,
 			Timeout:      900 * time.Second,
-		},
-		Notifier: &notification.Config{
-			Attempts:         5,
-			RenotifyInterval: 2 * time.Hour,
 		},
 	}
 }
