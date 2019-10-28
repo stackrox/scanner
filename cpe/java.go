@@ -4,7 +4,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
@@ -16,29 +15,29 @@ var (
 func getVersionsForJava(component *component.Component) []cpeKey {
 	java := component.JavaPkgMetadata
 
-	versionSet := set.NewStringSet()
+	versionSet := make(map[string]struct{})
 	if java.ImplementationVersion != "" {
-		versionSet.Add(java.ImplementationVersion)
+		versionSet[java.ImplementationVersion] = struct{}{}
 	}
 	if java.MavenVersion != "" {
-		versionSet.Add(java.MavenVersion)
+		versionSet[java.MavenVersion] = struct{}{}
 	}
 	if java.SpecificationVersion != "" {
-		versionSet.Add(java.MavenVersion)
+		versionSet[java.MavenVersion] = struct{}{}
 	}
-	for _, k := range versionSet.AsSlice() {
-		versionSet.Add(extensionRegex.ReplaceAllString(k, ""))
+	for k := range versionSet {
+		versionSet[extensionRegex.ReplaceAllString(k, "")] = struct{}{}
 	}
 
-	nameSet := set.NewStringSet()
-	nameSet.Add(java.Name)
-	nameSet.Add(strings.ReplaceAll(java.Name, "_", "-"))
-	nameSet.Add(strings.ReplaceAll(java.Name, "-", "_"))
-	nameSet.Add(numRegex.ReplaceAllString(java.Name, ""))
+	nameSet := make(map[string]struct{})
+	nameSet[java.Name] = struct{}{}
+	nameSet[strings.ReplaceAll(java.Name, "_", "-")] = struct{}{}
+	nameSet[strings.ReplaceAll(java.Name, "-", "_")] = struct{}{}
+	nameSet[numRegex.ReplaceAllString(java.Name, "")] = struct{}{}
 
-	for _, name := range nameSet.AsSlice() {
+	for name := range nameSet {
 		if idx := strings.Index(name, "-"); idx != -1 {
-			nameSet.Add(name[:idx])
+			nameSet[name[:idx]] = struct{}{}
 		}
 	}
 
@@ -50,8 +49,8 @@ func getVersionsForJava(component *component.Component) []cpeKey {
 	}
 
 	var cpeKeys []cpeKey
-	for _, name := range nameSet.AsSlice() {
-		for _, version := range versionSet.AsSlice() {
+	for name := range nameSet {
+		for version := range versionSet {
 			cpeKeys = append(cpeKeys, cpeKey{vendor: vendor, pkg: name, version: version})
 		}
 	}
