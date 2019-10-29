@@ -13,6 +13,7 @@ func init() {
 		PRIMARY KEY( sha, name ));`,
 
 			`CREATE TABLE IF NOT EXISTS LanguageLayer (
+		layer_id int NOT NULL,
         layer_name VARCHAR(128) NOT NULL UNIQUE,
 	    component_data BYTEA NOT NULL);`,
 		}),
