@@ -30,11 +30,12 @@ func getVersionsForJava(component *component.Component) []cpeKey {
 		versionSet.Add(extensionRegex.ReplaceAllString(k, ""))
 	}
 
-	nameSet := set.NewStringSet()
-	nameSet.Add(java.Name)
-	nameSet.Add(strings.ReplaceAll(java.Name, "_", "-"))
-	nameSet.Add(strings.ReplaceAll(java.Name, "-", "_"))
-	nameSet.Add(numRegex.ReplaceAllString(java.Name, ""))
+	nameSet := set.NewStringSet(
+		java.Name,
+		strings.ReplaceAll(java.Name, "_", "-"),
+		strings.ReplaceAll(java.Name, "-", "_"),
+		numRegex.ReplaceAllString(java.Name, ""),
+	)
 
 	for name := range nameSet {
 		if idx := strings.Index(name, "-"); idx != -1 {
