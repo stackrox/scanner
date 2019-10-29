@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
@@ -15,18 +16,18 @@ var (
 func getVersionsForJava(component *component.Component) []cpeKey {
 	java := component.JavaPkgMetadata
 
-	versionSet := make(map[string]struct{})
+	versionSet := set.NewStringSet()
 	if java.ImplementationVersion != "" {
-		versionSet[java.ImplementationVersion] = struct{}{}
+		versionSet.Add(java.ImplementationVersion)
 	}
 	if java.MavenVersion != "" {
-		versionSet[java.MavenVersion] = struct{}{}
+		versionSet.Add(java.MavenVersion)
 	}
 	if java.SpecificationVersion != "" {
-		versionSet[java.MavenVersion] = struct{}{}
+		versionSet.Add(java.MavenVersion)
 	}
-	for k := range versionSet {
-		versionSet[extensionRegex.ReplaceAllString(k, "")] = struct{}{}
+	for _, k := range versionSet.AsSlice() {
+		versionSet.Add(extensionRegex.ReplaceAllString(k, ""))
 	}
 
 	nameSet := make(map[string]struct{})
@@ -50,7 +51,7 @@ func getVersionsForJava(component *component.Component) []cpeKey {
 
 	var cpeKeys []cpeKey
 	for name := range nameSet {
-		for version := range versionSet {
+		for _, version := range versionSet.AsSlice() {
 			cpeKeys = append(cpeKeys, cpeKey{vendor: vendor, pkg: name, version: version})
 		}
 	}
