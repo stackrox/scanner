@@ -26,19 +26,19 @@ func getVersionsForJava(component *component.Component) []cpeKey {
 	if java.SpecificationVersion != "" {
 		versionSet.Add(java.MavenVersion)
 	}
-	for _, k := range versionSet.AsSlice() {
+	for k := range versionSet {
 		versionSet.Add(extensionRegex.ReplaceAllString(k, ""))
 	}
 
-	nameSet := make(map[string]struct{})
-	nameSet[java.Name] = struct{}{}
-	nameSet[strings.ReplaceAll(java.Name, "_", "-")] = struct{}{}
-	nameSet[strings.ReplaceAll(java.Name, "-", "_")] = struct{}{}
-	nameSet[numRegex.ReplaceAllString(java.Name, "")] = struct{}{}
+	nameSet := set.NewStringSet()
+	nameSet.Add(java.Name)
+	nameSet.Add(strings.ReplaceAll(java.Name, "_", "-"))
+	nameSet.Add(strings.ReplaceAll(java.Name, "-", "_"))
+	nameSet.Add(numRegex.ReplaceAllString(java.Name, ""))
 
 	for name := range nameSet {
 		if idx := strings.Index(name, "-"); idx != -1 {
-			nameSet[name[:idx]] = struct{}{}
+			nameSet.Add(name[:idx])
 		}
 	}
 
@@ -51,7 +51,7 @@ func getVersionsForJava(component *component.Component) []cpeKey {
 
 	var cpeKeys []cpeKey
 	for name := range nameSet {
-		for _, version := range versionSet.AsSlice() {
+		for version := range versionSet {
 			cpeKeys = append(cpeKeys, cpeKey{vendor: vendor, pkg: name, version: version})
 		}
 	}

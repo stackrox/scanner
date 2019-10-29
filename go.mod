@@ -18,7 +18,7 @@ require (
 	github.com/prometheus/client_golang v0.9.1
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.4.2
-	github.com/stackrox/rox v0.0.0-20191029171614-de0063fd0431
+	github.com/stackrox/rox v0.0.0-20191029215756-4d799dd775e4
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de
 	golang.org/x/tools v0.0.0-20191018203202-04252eccb9d5
