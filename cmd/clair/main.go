@@ -26,6 +26,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/httputil/proxy"
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/database"
@@ -104,6 +105,8 @@ func main() {
 	flagLogLevel := flag.String("log-level", "info", "Define the logging level.")
 	flagInsecureTLS := flag.Bool("insecure-tls", false, "Disable TLS server's certificate chain and hostname verification when pulling layers.")
 	flag.Parse()
+
+	proxy.EnableProxyEnvironmentSetting(true)
 
 	// Check for dependencies.
 	for _, bin := range []string{"git", "rpm", "xz"} {
