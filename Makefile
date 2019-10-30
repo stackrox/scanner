@@ -132,10 +132,14 @@ install-dev-tools:
 .PHONY: image
 image: scanner-image db-image
 
-.PHONY: scanner-image
-scanner-image: deps
+.PHONY: build
+build: deps proto-generated-srcs
 	@echo "+ $@"
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o image/bin/scanner ./cmd/clair
+
+.PHONY: scanner-image
+scanner-image: build
+	@echo "+ $@"
 	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/Dockerfile.scanner image/
 
 .PHONY: db-image
