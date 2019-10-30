@@ -89,7 +89,7 @@ endif
 dev: install-dev-tools
 	@echo "+ $@"
 
-deps: go.mod
+deps: proto-generated-srcs go.mod
 	@echo "+ $@"
 	@go mod tidy
 	@$(MAKE) download-deps
@@ -133,7 +133,7 @@ install-dev-tools:
 image: scanner-image db-image
 
 .PHONY: build
-build: deps proto-generated-srcs
+build: deps
 	@echo "+ $@"
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o image/bin/scanner ./cmd/clair
 
