@@ -76,7 +76,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		// Get element filename
 		filename := strings.TrimPrefix(hdr.Name, "./")
 
-		if !filenameMatcher.Match(filename) {
+		if !filenameMatcher.Match(filename, hdr.FileInfo()) {
 			continue
 		}
 

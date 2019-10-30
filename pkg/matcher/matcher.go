@@ -1,20 +1,21 @@
 package matcher
 
 import (
+	"os"
 	"strings"
 )
 
 type Matcher interface {
-	Match(fileName string) bool
+	Match(fullPath string, fileInfo os.FileInfo) bool
 }
 
 type whitelistMatcher struct {
 	whitelist []string
 }
 
-func (w *whitelistMatcher) Match(fileName string) bool {
+func (w *whitelistMatcher) Match(fullPath string, _ os.FileInfo) bool {
 	for _, s := range w.whitelist {
-		if strings.HasPrefix(fileName, s) {
+		if strings.HasPrefix(fullPath, s) {
 			return true
 		}
 	}
@@ -31,9 +32,9 @@ type orMatcher struct {
 	matchers []Matcher
 }
 
-func (o *orMatcher) Match(fileName string) bool {
+func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo) bool {
 	for _, subMatcher := range o.matchers {
-		if subMatcher.Match(fileName) {
+		if subMatcher.Match(fullPath, fileInfo) {
 			return true
 		}
 	}

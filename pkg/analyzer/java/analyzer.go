@@ -1,7 +1,7 @@
 package java
 
 import (
-	"path/filepath"
+	"os"
 
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/component"
@@ -10,14 +10,18 @@ import (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(filePath string) bool {
-	return javaRegexp.MatchString(filepath.Base(filePath))
+func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) bool {
+	return match(fullPath)
+}
+
+func match(fullPath string) bool {
+	return javaRegexp.MatchString(fullPath)
 }
 
 func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
 	var allComponents []*component.Component
 	for filePath, contents := range fileMap {
-		if !a.Match(filePath) {
+		if !match(filePath) {
 			continue
 		}
 		packages, err := parseContents(filePath, contents)
