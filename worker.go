@@ -118,7 +118,7 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 		return err
 	}
 
-	return datastore.InsertLayerComponents(layer, languageComponents)
+	return datastore.InsertLayerComponents(layer.Name, languageComponents)
 }
 
 // detectContent downloads a layer's archive and extracts its Namespace and

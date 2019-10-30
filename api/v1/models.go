@@ -36,12 +36,15 @@ type Layer struct {
 }
 
 func getLanguageData(db database.Datastore, layerName string) ([]database.FeatureVersion, error) {
-	components, err := db.GetLayerLanguageComponents(layerName)
+	componentMap, err := db.GetLayerLanguageComponents(layerName)
 	if err != nil {
 		return nil, err
 	}
 
-	features := cpe.CheckForVulnerabilities(layerName, components)
+	var features []database.FeatureVersion
+	for layer, components := range componentMap {
+		features = append(features, cpe.CheckForVulnerabilities(layer, components)...)
+	}
 	return features, nil
 }
 

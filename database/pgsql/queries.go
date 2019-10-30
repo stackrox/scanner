@@ -101,6 +101,22 @@ const (
 		WHERE ldf.featureversion_id = fv.id AND fv.feature_id = f.id AND f.namespace_id = fn.id
 		ORDER BY ltree.ordering`
 
+	searchLanguageComponentsInImage = `
+		WITH RECURSIVE layer_tree(id, name, parent_id, depth, path, cycle) AS(
+			SELECT l.id, l.name, l.parent_id, 1, ARRAY[l.id], false
+			FROM Layer l
+			WHERE l.name = $1
+		UNION ALL
+			SELECT l.id, l.name, l.parent_id, lt.depth + 1, path || l.id, l.id = ANY(path)
+			FROM Layer l, layer_tree lt
+			WHERE l.id = lt.parent_id
+		)
+		SELECT ll.layer_name, ll.component_data
+		FROM LanguageLayer ll
+		JOIN (
+			SELECT row_number() over (ORDER BY depth DESC), id, name FROM layer_tree
+		) AS ltree (ordering, id, name) ON ll.layer_id = ltree.id ORDER BY ltree.ordering`
+
 	searchFeatureVersionVulnerability = `
 			SELECT vafv.featureversion_id, v.id, v.name, v.description, v.link, v.severity, v.metadata,
 				vn.name, vn.version_format, vfif.version
