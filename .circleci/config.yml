@@ -145,7 +145,7 @@ jobs:
             POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner")].metadata.name}')"
             [[ -n "${POD}" ]]
             echo "${POD}"
-            kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=1m
+            kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=3m
             kubectl -n stackrox get pod
             nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" &
             # It looks like we need this sleep, otherwise the port forward never starts.

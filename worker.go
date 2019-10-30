@@ -15,6 +15,7 @@
 package clair
 
 import (
+	"io"
 	"regexp"
 
 	log "github.com/sirupsen/logrus"
@@ -54,31 +55,20 @@ func cleanURL(str string) string {
 	return urlParametersRegexp.ReplaceAllString(str, "")
 }
 
-// ProcessLayer detects the Namespace of a layer, the features it adds/removes,
-// and then stores everything in the database.
-//
-// TODO(Quentin-M): We could have a goroutine that looks for layers that have
-// been analyzed with an older engine version and that processes them.
-func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, path string, headers map[string]string) error {
+func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName string) (database.Layer, error) {
 	// Verify parameters.
 	if name == "" {
-		return commonerr.NewBadRequestError("could not process a layer which does not have a name")
-	}
-
-	if path == "" {
-		return commonerr.NewBadRequestError("could not process a layer which does not have a path")
+		return database.Layer{}, commonerr.NewBadRequestError("could not process a layer which does not have a name")
 	}
 
 	if imageFormat == "" {
-		return commonerr.NewBadRequestError("could not process a layer which does not have a format")
+		return database.Layer{}, commonerr.NewBadRequestError("could not process a layer which does not have a format")
 	}
-
-	log.WithFields(log.Fields{logLayerName: name, "path": cleanURL(path), "engine version": Version, "parent layer": parentName, "format": imageFormat}).Debug("processing layer")
 
 	// Check to see if the layer is already in the database.
 	layer, err := datastore.FindLayer(name, false, false)
 	if err != nil && err != commonerr.ErrNotFound {
-		return err
+		return layer, err
 	}
 
 	if err == commonerr.ErrNotFound {
@@ -90,11 +80,11 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 		if parentName != "" {
 			parent, err := datastore.FindLayer(parentName, true, false)
 			if err != nil && err != commonerr.ErrNotFound {
-				return err
+				return layer, err
 			}
 			if err == commonerr.ErrNotFound {
 				log.WithFields(log.Fields{logLayerName: name, "parent layer": parentName}).Warning("the parent layer is unknown. it must be processed first")
-				return ErrParentUnknown
+				return layer, ErrParentUnknown
 			}
 			layer.Parent = &parent
 		}
@@ -102,9 +92,47 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 		// The layer is already in the database, check if we need to update it.
 		if layer.EngineVersion >= Version {
 			log.WithFields(log.Fields{logLayerName: name, "past engine version": layer.EngineVersion, "current engine version": Version}).Debug("layer content has already been processed in the past with older engine. skipping analysis")
-			return nil
+			return layer, nil
 		}
 		log.WithFields(log.Fields{logLayerName: name, "past engine version": layer.EngineVersion, "current engine version": Version}).Debug("layer content has already been processed in the past with older engine. analyzing again")
+	}
+	return layer, nil
+}
+
+// ProcessLayerFromReader detects the Namespace of a layer, the features it adds/removes,
+// and then stores everything in the database.
+//
+// TODO(Quentin-M): We could have a goroutine that looks for layers that have
+// been analyzed with an older engine version and that processes them.
+func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, parentName string, reader io.ReadCloser) error {
+	layer, err := preProcessLayer(datastore, imageFormat, name, parentName)
+	if err != nil {
+		return err
+	}
+
+	// Analyze the content.
+	var languageComponents []*component.Component
+	layer.Namespace, layer.Features, languageComponents, err = detectContentFromReader(reader, imageFormat, name, layer.Parent)
+	if err != nil {
+		return err
+	}
+
+	if err := datastore.InsertLayer(layer); err != nil {
+		return err
+	}
+
+	return datastore.InsertLayerComponents(layer.Name, languageComponents)
+}
+
+// ProcessLayer detects the Namespace of a layer, the features it adds/removes,
+// and then stores everything in the database.
+//
+// TODO(Quentin-M): We could have a goroutine that looks for layers that have
+// been analyzed with an older engine version and that processes them.
+func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, path string, headers map[string]string) error {
+	layer, err := preProcessLayer(datastore, imageFormat, name, parentName)
+	if err != nil {
+		return err
 	}
 
 	// Analyze the content.
@@ -121,16 +149,7 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 	return datastore.InsertLayerComponents(layer.Name, languageComponents)
 }
 
-// detectContent downloads a layer's archive and extracts its Namespace and
-// Features.
-func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
-	files, err := imagefmt.Extract(imageFormat, path, headers, requiredfilenames.SingletonMatcher())
-	if err != nil {
-		log.WithError(err).WithFields(log.Fields{logLayerName: name, "path": cleanURL(path)}).Error("failed to extract data from path")
-		return nil, nil, nil, err
-
-	}
-
+func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
 	namespace, err = detectNamespace(name, files, parent)
 	if err != nil {
 		return nil, nil, nil, err
@@ -151,6 +170,27 @@ func detectContent(imageFormat, name, path string, headers map[string]string, pa
 	}
 
 	return namespace, featureVersions, allComponents, err
+}
+
+func detectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
+	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.SingletonMatcher())
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return detectFromFiles(files, name, parent)
+}
+
+// detectContent downloads a layer's archive and extracts its Namespace and
+// Features.
+func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
+	files, err := imagefmt.Extract(imageFormat, path, headers, requiredfilenames.SingletonMatcher())
+	if err != nil {
+		log.WithError(err).WithFields(log.Fields{logLayerName: name, "path": cleanURL(path)}).Error("failed to extract data from path")
+		return nil, nil, nil, err
+	}
+
+	return detectFromFiles(files, name, parent)
 }
 
 func detectNamespace(name string, files tarutil.FilesMap, parent *database.Layer) (namespace *database.Namespace, err error) {

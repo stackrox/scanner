@@ -1,3 +1,10 @@
+# IDE
 .idea
-deps
+
+# Mac OS hidden file
 .DS_Store
+
+# Makefile cruft
+deps
+proto-generated-srcs
+protoc-*

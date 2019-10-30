@@ -9,7 +9,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
-	"fmt"
 	"io/ioutil"
 	"sync"
 
@@ -53,6 +52,7 @@ func TLSConfig() (*tls.Config, error) {
 		return nil, err
 	}
 	conf.ClientAuth = tls.VerifyClientCertIfGiven
+	conf.NextProtos = []string{"h2"}
 	return conf, nil
 }
 
@@ -82,7 +82,7 @@ func loadCACertDER() ([]byte, error) {
 	}
 	decoded, _ := pem.Decode(b)
 	if decoded == nil {
-		return nil, fmt.Errorf("invalid PEM")
+		return nil, errors.New("invalid PEM")
 	}
 	return decoded.Bytes, nil
 }

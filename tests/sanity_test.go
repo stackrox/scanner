@@ -79,7 +79,6 @@ func testImage(client *client.Clairify, imageRequest *types.ImageRequest, expect
 func TestImageSanity(t *testing.T) {
 	endpoint := os.Getenv("SCANNER_ENDPOINT")
 	require.NotEmpty(t, endpoint, "no scanner endpoint specified")
-
 	cli := client.New(endpoint, true)
 
 	for _, testCase := range []struct {

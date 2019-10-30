@@ -89,7 +89,7 @@ endif
 dev: install-dev-tools
 	@echo "+ $@"
 
-deps: go.mod
+deps: proto-generated-srcs go.mod
 	@echo "+ $@"
 	@go mod tidy
 	@$(MAKE) download-deps
@@ -132,10 +132,14 @@ install-dev-tools:
 .PHONY: image
 image: scanner-image db-image
 
-.PHONY: scanner-image
-scanner-image: deps
+.PHONY: build
+build: deps
 	@echo "+ $@"
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o image/bin/scanner ./cmd/clair
+
+.PHONY: scanner-image
+scanner-image: build
+	@echo "+ $@"
 	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/Dockerfile.scanner image/
 
 .PHONY: db-image
@@ -148,6 +152,7 @@ db-image:
 deploy: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
+	kubectl apply -R -f mock-tls
 	helm template chart/ --name scanner --set tag=$(TAG) --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
@@ -159,6 +164,27 @@ deploy: clean-helm-rendered
 e2e-tests:
 	@echo "+ $@"
 	go test -count=1 ./tests/...
+
+####################
+## Generated Srcs ##
+####################
+
+PROTO_GENERATED_SRCS = $(GENERATED_PB_SRCS) $(GENERATED_API_GW_SRCS)
+
+include make/protogen.mk
+
+.PHONY: go-generated-srcs
+go-generated-srcs: deps go-easyjson-srcs $(MOCKGEN_BIN) $(STRINGER_BIN) $(GENNY_BIN)
+	@echo "+ $@"
+	PATH=$(PATH):$(BASE_DIR)/tools/generate-helpers go generate ./...
+
+proto-generated-srcs: $(PROTO_GENERATED_SRCS)
+	@echo "+ $@"
+	@touch proto-generated-srcs
+
+clean-proto-generated-srcs:
+	@echo "+ $@"
+	git clean -xdf generated
 
 ###########
 ## Clean ##
