@@ -1,18 +1,18 @@
-package client
+package tests
 
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/generated/api/v1"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
-func TestScanImage(t *testing.T) {
+func TestGRPCScanImage(t *testing.T) {
 	clientTLSConfig := &tls.Config{
 		InsecureSkipVerify: true,
 	}
@@ -33,5 +33,6 @@ func TestScanImage(t *testing.T) {
 	getScanResp, err := client.GetScan(context.Background(), &v1.GetScanRequest{
 		Image: scanImageResp.Image.GetImage(),
 	})
-	fmt.Printf("%+v %+v\n", getScanResp, err)
+	require.NoError(t, err)
+	assert.NotZero(t, len(getScanResp.GetImage().GetFeatures()))
 }

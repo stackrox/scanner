@@ -72,11 +72,11 @@ func TestParse(t *testing.T) {
 		v, err := newVersion(c.str)
 
 		if c.err {
-			assert.Error(t, err, "When parsing '%s'", c.str)
+			assert.Error(t, err, "When parsing %q", c.str)
 		} else {
-			assert.Nil(t, err, "When parsing '%s'", c.str)
+			assert.Nil(t, err, "When parsing %q", c.str)
 		}
-		assert.Equal(t, c.ver, v, "When parsing '%s'", c.str)
+		assert.Equal(t, c.ver, v, "When parsing %q", c.str)
 	}
 }
 

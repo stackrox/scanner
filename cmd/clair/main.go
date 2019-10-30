@@ -61,6 +61,19 @@ import (
 	_ "github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
 )
 
+var debugRoutes = map[string]http.Handler{
+	"/debug/pprof":         http.HandlerFunc(pprof.Index),
+	"/debug/pprof/cmdline": http.HandlerFunc(pprof.Cmdline),
+	"/debug/pprof/profile": http.HandlerFunc(pprof.Profile),
+	"/debug/pprof/symbol":  http.HandlerFunc(pprof.Symbol),
+	"/debug/pprof/trace":   http.HandlerFunc(pprof.Trace),
+	"/debug/block":         pprof.Handler(`block`),
+	"/debug/goroutine":     pprof.Handler(`goroutine`),
+	"/debug/heap":          pprof.Handler(`heap`),
+	"/debug/mutex":         pprof.Handler(`mutex`),
+	"/debug/threadcreate":  pprof.Handler(`threadcreate`),
+}
+
 func waitForSignals(signals ...os.Signal) {
 	interrupts := make(chan os.Signal, 1)
 	signal.Notify(interrupts, signals...)
@@ -97,8 +110,8 @@ func Boot(config *Config) {
 	})
 
 	grpcAPI.Register(
-		ping.NewPingService(),
-		scan.NewScanService(db),
+		ping.NewService(),
+		scan.NewService(db),
 	)
 
 	go grpcAPI.Start()
@@ -155,17 +168,4 @@ func main() {
 	}
 
 	Boot(config)
-}
-
-var debugRoutes = map[string]http.Handler{
-	"/debug/pprof":         http.HandlerFunc(pprof.Index),
-	"/debug/pprof/cmdline": http.HandlerFunc(pprof.Cmdline),
-	"/debug/pprof/profile": http.HandlerFunc(pprof.Profile),
-	"/debug/pprof/symbol":  http.HandlerFunc(pprof.Symbol),
-	"/debug/pprof/trace":   http.HandlerFunc(pprof.Trace),
-	"/debug/block":         pprof.Handler(`block`),
-	"/debug/goroutine":     pprof.Handler(`goroutine`),
-	"/debug/heap":          pprof.Handler(`heap`),
-	"/debug/mutex":         pprof.Handler(`mutex`),
-	"/debug/threadcreate":  pprof.Handler(`threadcreate`),
 }

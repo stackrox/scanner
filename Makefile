@@ -173,11 +173,6 @@ PROTO_GENERATED_SRCS = $(GENERATED_PB_SRCS) $(GENERATED_API_GW_SRCS)
 
 include make/protogen.mk
 
-.PHONY: go-generated-srcs
-go-generated-srcs: deps go-easyjson-srcs $(MOCKGEN_BIN) $(STRINGER_BIN) $(GENNY_BIN)
-	@echo "+ $@"
-	PATH=$(PATH):$(BASE_DIR)/tools/generate-helpers go generate ./...
-
 proto-generated-srcs: $(PROTO_GENERATED_SRCS)
 	@echo "+ $@"
 	@touch proto-generated-srcs

@@ -24,8 +24,8 @@ type Service interface {
 	v1.ScanServiceServer
 }
 
-// NewScanService returns the service for scanning
-func NewScanService(db database.Datastore) Service {
+// NewService returns the service for scanning
+func NewService(db database.Datastore) Service {
 	return &serviceImpl{
 		db: db,
 	}

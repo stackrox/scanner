@@ -15,7 +15,7 @@ type Service interface {
 	v1.PingServiceServer
 }
 
-func NewPingService() Service {
+func NewService() Service {
 	return &serviceImpl{}
 }
 

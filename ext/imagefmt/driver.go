@@ -112,7 +112,7 @@ func ExtractFromReader(reader io.ReadCloser, format string, filenameMatcher matc
 		return files, nil
 	}
 
-	return nil, commonerr.NewBadRequestError(fmt.Sprintf("unsupported image format '%s'", format))
+	return nil, commonerr.NewBadRequestError(fmt.Sprintf("unsupported image format %q", format))
 }
 
 // Extract streams an image layer from disk or over HTTP, determines the

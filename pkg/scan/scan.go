@@ -1,14 +1,13 @@
 package server
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/heroku/docker-registry-client/registry"
 	"github.com/opencontainers/go-digest"
-	errors2 "github.com/pkg/errors"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/database"
@@ -24,7 +23,7 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	for _, layer := range layers {
 		readCloser, err := registry.DownloadLayer(image.Remote, digest.Digest(layer))
 		if err != nil {
-			return errors2.Wrapf(err, "error downloading layer %q", layer)
+			return errors.Wrapf(err, "error downloading layer %q", layer)
 		}
 		err = clair.ProcessLayerFromReader(storage, "Docker", layer, prevLayer, readCloser)
 		if err != nil {

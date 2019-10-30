@@ -49,6 +49,8 @@ message ScanImageResponse {
 }
 
 message GetScanRequest {
+    // Only one of these needs to be set for the request to be properly formed
+    // If both are set, then digest is used
     string image  = 1;
     string digest = 2;
 }
