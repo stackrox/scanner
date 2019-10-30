@@ -152,7 +152,6 @@ db-image:
 deploy: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
-	kubectl apply -R -f mock-tls
 	helm template chart/ --name scanner --set tag=$(TAG) --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
