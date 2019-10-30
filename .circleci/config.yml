@@ -147,7 +147,8 @@ jobs:
             echo "${POD}"
             kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=3m
             kubectl -n stackrox get pod
-            nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" &
+            nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" & # Legacy clairify endpoint
+            nohup kubectl port-forward -n stackrox "${POD}" "8081:8081" & # gRPC endpoint
             # It looks like we need this sleep, otherwise the port forward never starts.
             sleep 5
 

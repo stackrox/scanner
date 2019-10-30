@@ -160,7 +160,7 @@ deploy: clean-helm-rendered
 ###########
 
 .PHONY: e2e-tests
-e2e-tests:
+e2e-tests: proto-generated-srcs
 	@echo "+ $@"
 	go test -count=1 ./tests/...
 
