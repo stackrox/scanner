@@ -53,6 +53,7 @@ func TLSConfig() (*tls.Config, error) {
 		return nil, err
 	}
 	conf.ClientAuth = tls.VerifyClientCertIfGiven
+	conf.NextProtos = []string{"h2"}
 	return conf, nil
 }
 

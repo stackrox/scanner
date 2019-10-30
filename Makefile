@@ -150,6 +150,7 @@ deploy: clean-helm-rendered
 	kubectl create namespace stackrox || true
 	helm template chart/ --name scanner --set tag=$(TAG) --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
+	kubectl apply -R -f mock-tls
 
 ###########
 ## Tests ##
@@ -159,6 +160,27 @@ deploy: clean-helm-rendered
 e2e-tests:
 	@echo "+ $@"
 	go test -count=1 ./tests/...
+
+####################
+## Generated Srcs ##
+####################
+
+PROTO_GENERATED_SRCS = $(GENERATED_PB_SRCS) $(GENERATED_API_GW_SRCS)
+
+include make/protogen.mk
+
+.PHONY: go-generated-srcs
+go-generated-srcs: deps go-easyjson-srcs $(MOCKGEN_BIN) $(STRINGER_BIN) $(GENNY_BIN)
+	@echo "+ $@"
+	PATH=$(PATH):$(BASE_DIR)/tools/generate-helpers go generate ./...
+
+proto-generated-srcs: $(PROTO_GENERATED_SRCS)
+	@echo "+ $@"
+	@touch proto-generated-srcs
+
+clean-proto-generated-srcs:
+	@echo "+ $@"
+	git clean -xdf generated
 
 ###########
 ## Clean ##

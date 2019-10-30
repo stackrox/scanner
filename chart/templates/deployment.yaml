@@ -41,6 +41,9 @@ spec:
             - name: config
               mountPath: /etc/clair
               readOnly: true
+            - name: scanner-tls-volume
+              mountPath: /run/secrets/stackrox.io/certs/
+              readOnly: true
         - name: db
           image: {{.Values.scannerDBImage}}:{{.Values.tag}}
           resources:
@@ -59,3 +62,6 @@ spec:
             name: {{ .Values.appName }}-config
         - name: db-data
           emptyDir: {}
+        - name: scanner-tls-volume
+          secret:
+            secretName: scanner-tls

@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+option go_package = "v1";
+
+option java_package = "io.stackrox.proto.api.v1";
+
+import weak "google/api/annotations.proto";
+
+package v1;
+
+message Image {
+    repeated Feature features = 1;
+}
+
+message Feature {
+    string                 name            = 1;
+    string                 version         = 2;
+    repeated Vulnerability vulnerabilities = 3;
+    string                 feature_type    = 4;
+    string                 added_by_layer  = 5;
+}
+
+message Vulnerability {
+    string name        = 1;
+    string description = 2;
+    string link        = 3;
+    bytes metadata     = 4;
+    string fixed_by    = 5;
+}
+
+message ScanImageRequest {
+    string image = 1;
+    message RegistryData {
+        string url      = 1;
+        string username = 2;
+        string password = 3;
+        bool   insecure = 4;
+    }
+    RegistryData registry = 2;
+}
+
+message ScanImageResponse {
+    ScanStatus status = 1;
+    message Image {
+        string digest = 1;
+        string image  = 2;
+    }
+    Image image       = 2;
+}
+
+message GetScanRequest {
+    string image  = 1;
+    string digest = 2;
+}
+
+enum ScanStatus {
+    UNSET     = 0;
+    ANALYZING = 1;
+    FAILED    = 2;
+    SUCCEEDED = 3;
+}
+
+message GetScanResponse {
+    ScanStatus status = 1;
+    Image image       = 2;
+}
+
+// ScanService APIs can be used to scan images.
+service ScanService {
+    rpc ScanImage (ScanImageRequest) returns (ScanImageResponse) {
+        option (google.api.http) = {
+            post: "/v1/images/scan"
+            body: "*"
+        };
+    }
+
+    rpc GetScan(GetScanRequest) returns (GetScanResponse) {
+        option (google.api.http) = {
+            get: "/v1/images/scan"
+        };
+    }
+}

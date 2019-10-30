@@ -15,12 +15,10 @@
 package main
 
 import (
-	"errors"
 	"io/ioutil"
 	"os"
 	"time"
 
-	"github.com/fernet/fernet-go"
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/database"
@@ -51,8 +49,7 @@ func DefaultConfig() Config {
 		},
 		API: &api.Config{
 			ClairifyPort: 8080,
-			MTLS:         false,
-			Timeout:      900 * time.Second,
+			GRPCPort:     8081,
 		},
 	}
 }
@@ -83,21 +80,6 @@ func LoadConfig(path string) (config *Config, err error) {
 		return
 	}
 	config = &cfgFile.Clair
-
-	// Generate a pagination key if none is provided.
-	if config.API.PaginationKey == "" {
-		var key fernet.Key
-		if err = key.Generate(); err != nil {
-			return
-		}
-		config.API.PaginationKey = key.Encode()
-	} else {
-		_, err = fernet.DecodeKey(config.API.PaginationKey)
-		if err != nil {
-			err = errors.New("Invalid Pagination key; must be 32-bit URL-safe base64")
-			return
-		}
-	}
 
 	return
 }
