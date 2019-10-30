@@ -154,13 +154,13 @@ jobs:
       - run:
           name: Wait for API to be available
           command: |
-            curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -f 'http://localhost:8080/clairify/ping'
+            curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8080/clairify/ping'
             cat nohup.out || true
 
       - run:
           name: Run sanity tests
           command: |
-            export SCANNER_ENDPOINT=http://localhost:8080
+            export SCANNER_ENDPOINT=https://localhost:8080
             make e2e-tests
 
       - run:
