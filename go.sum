@@ -311,8 +311,8 @@ github.com/stackrox/docker-registry-client v0.0.0-20181115184320-3d98b2b79d1b/go
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191017214444-0f09bd56ec39 h1:LKLe/o0D257yjGXRb0558xczJPcwy9VMZzpT8FVR2Z4=
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191017214444-0f09bd56ec39/go.mod h1:13vPFaMtP66fobTXqiv3SB32ZCZfa9btx3O6uOlTCDY=
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191017214444-0f09bd56ec39/go.mod h1:13vPFaMtP66fobTXqiv3SB32ZCZfa9btx3O6uOlTCDY=
-github.com/stackrox/rox v0.0.0-20191031013825-613e9c2aa73d h1:LMwySYqnRL7eotnw45FmK7YR6rdRS6a930Me6vQsB9U=
-github.com/stackrox/rox v0.0.0-20191031013825-613e9c2aa73d/go.mod h1:y8ef9LW5r9Ngre/3zIZX9Z7/yVm/46wRb/QYXfKUAao=
+github.com/stackrox/rox v0.0.0-20191031210135-c25b3f3a6f24 h1:rWOFH2N4SqmuX+hgw4yykYghJ9i/QNaZo/R2GhPhXQI=
+github.com/stackrox/rox v0.0.0-20191031210135-c25b3f3a6f24/go.mod h1:y8ef9LW5r9Ngre/3zIZX9Z7/yVm/46wRb/QYXfKUAao=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2/go.mod h1:mjqs7N0Q6m5HpR7QfXVBZXZWSqTjQLeTujjA/xUp2uw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
