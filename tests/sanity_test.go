@@ -42,9 +42,11 @@ func testImage(client *client.Clairify, imageRequest *types.ImageRequest, expect
 	for _, feature := range expectedFeatures {
 		t.Run(fmt.Sprintf("%s/%s", feature.Name, feature.Version), func(t *testing.T) {
 			matching := getMatchingFeature(env.Layer.Features, feature, t)
-			sort.Slice(matching.Vulnerabilities, func(i, j int) bool {
-				return matching.Vulnerabilities[i].Name < matching.Vulnerabilities[j].Name
-			})
+			if matching.Vulnerabilities != nil {
+				sort.Slice(matching.Vulnerabilities, func(i, j int) bool {
+					return matching.Vulnerabilities[i].Name < matching.Vulnerabilities[j].Name
+				})
+			}
 			require.Equal(t, len(matching.Vulnerabilities), len(feature.Vulnerabilities))
 			for i, matchingVuln := range matching.Vulnerabilities {
 				expectedVuln := feature.Vulnerabilities[i]
@@ -202,6 +204,19 @@ func TestImageSanity(t *testing.T) {
 						},
 					},
 					AddedBy: "sha256:9f0706ba7422412cd468804fee456786f88bed94bf9aea6dde2a47f770d19d27",
+				},
+			},
+		},
+		{
+			image:    "docker.io/anchore/anchore-engine:v0.5.0",
+			registry: "https://registry-1.docker.io",
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "procps-ng",
+					NamespaceName: "centos:7",
+					VersionFormat: "rpm",
+					Version:       "3.3.10-26.el7",
+					AddedBy:       "sha256:c8d67acdb2ffaebd638cf55a8fccc63693211060670aa7f0ea1d65b5d2c674dd",
 				},
 			},
 		},

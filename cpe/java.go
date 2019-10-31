@@ -15,6 +15,9 @@ var (
 
 func getVersionsForJava(component *component.Component) []cpeKey {
 	java := component.JavaPkgMetadata
+	if java == nil {
+		return nil
+	}
 
 	versionSet := set.NewStringSet()
 	if java.ImplementationVersion != "" {

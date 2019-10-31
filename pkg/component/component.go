@@ -5,6 +5,8 @@ type Component struct {
 	Name    string
 	Version string
 
+	SourceType SourceType
+
 	// Location specifies a path to a file that the component's existence was derived from.
 	Location string
 

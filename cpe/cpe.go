@@ -36,11 +36,20 @@ func getVulnsForComponent(layer string, potentialKeys []cpeKey) []database.Featu
 	return features
 }
 
+func getKeys(c *component.Component) []cpeKey {
+	// TODO: Add any common logic up here.
+	switch c.SourceType {
+	case component.JavaSourceType:
+		return getVersionsForJava(c)
+	}
+	return nil
+}
+
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
 	possibleCPEsMap := make(map[cpeKey]struct{})
 	var possibleCPEs []cpeKey
 	for _, c := range components {
-		keys := getVersionsForJava(c)
+		keys := getKeys(c)
 		for _, k := range keys {
 			if _, ok := possibleCPEsMap[k]; ok {
 				continue
