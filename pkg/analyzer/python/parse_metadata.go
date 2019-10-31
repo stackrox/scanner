@@ -3,9 +3,9 @@ package python
 import (
 	"bufio"
 	"bytes"
-	"log"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -17,7 +17,7 @@ import (
 func parseMetadataFile(filePath string, contents []byte) *component.Component {
 	var c *component.Component
 
-	maybeInitializeC := func() {
+	ensureCInitialized := func() {
 		if c == nil {
 			c = &component.Component{
 				Location:   filePath,
@@ -37,10 +37,10 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 		}
 		switch key {
 		case "Name":
-			maybeInitializeC()
+			ensureCInitialized()
 			c.Name = value
 		case "Version":
-			maybeInitializeC()
+			ensureCInitialized()
 			c.Version = value
 		}
 
@@ -51,7 +51,7 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Printf("Error scanning file %q: %v", filePath, err)
+		log.Errorf("Error scanning file %q: %v", filePath, err)
 		return nil
 	}
 
