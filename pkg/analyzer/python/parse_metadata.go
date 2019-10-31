@@ -43,6 +43,11 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 			maybeInitializeC()
 			c.Version = value
 		}
+
+		// If we have got all the information we want, no point in scanning the rest of the file.
+		if c != nil && c.Name != "" && c.Version != "" {
+			break
+		}
 	}
 
 	if err := scanner.Err(); err != nil {
