@@ -100,6 +100,21 @@ func UnregisterExtractor(name string) {
 	delete(extractors, name)
 }
 
+// ExtractFromReader extracts the files from a reader which is in the format of a .tar.gz
+func ExtractFromReader(reader io.ReadCloser, format string, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error) {
+	defer reader.Close()
+
+	if extractor, exists := Extractors()[strings.ToLower(format)]; exists {
+		files, err := extractor.ExtractFiles(reader, filenameMatcher)
+		if err != nil {
+			return nil, err
+		}
+		return files, nil
+	}
+
+	return nil, commonerr.NewBadRequestError(fmt.Sprintf("unsupported image format %q", format))
+}
+
 // Extract streams an image layer from disk or over HTTP, determines the
 // image format, then extracts the files specified.
 func Extract(format, path string, headers map[string]string, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error) {
@@ -142,17 +157,7 @@ func Extract(format, path string, headers map[string]string, filenameMatcher mat
 			return nil, ErrCouldNotFindLayer
 		}
 	}
-	defer layerReader.Close()
-
-	if extractor, exists := Extractors()[strings.ToLower(format)]; exists {
-		files, err := extractor.ExtractFiles(layerReader, filenameMatcher)
-		if err != nil {
-			return nil, err
-		}
-		return files, nil
-	}
-
-	return nil, commonerr.NewBadRequestError(fmt.Sprintf("unsupported image format '%s'", format))
+	return ExtractFromReader(layerReader, format, filenameMatcher)
 }
 
 // SetInsecureTLS sets the insecureTLS to control whether TLS server's certificate chain

@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 
 	manifestV1 "github.com/docker/distribution/manifest/schema1"
@@ -9,6 +10,7 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/heroku/docker-registry-client/registry"
 	"github.com/opencontainers/go-digest"
+	"github.com/pkg/errors"
 	v1 "github.com/stackrox/scanner/api/v1"
 )
 
@@ -26,6 +28,7 @@ type Registry interface {
 	ManifestList(repository, reference string) (*registry.ManifestList, error)
 
 	ManifestDigest(repository, reference string) (digest.Digest, string, error)
+	DownloadLayer(repository string, digest digest.Digest) (io.ReadCloser, error)
 
 	GetURL() string
 	GetToken() string
@@ -133,7 +136,7 @@ func GenerateImageFromString(imageStr string) (*Image, error) {
 
 	ref, err := reference.ParseAnyReference(imageStr)
 	if err != nil {
-		return image, fmt.Errorf("error parsing image name '%s': %s", imageStr, err)
+		return image, errors.Wrapf(err, "error parsing image name %q", imageStr)
 	}
 
 	digest, ok := ref.(reference.Digested)

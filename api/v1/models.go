@@ -40,7 +40,6 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 	if err != nil {
 		return nil, err
 	}
-
 	var features []database.FeatureVersion
 	for layer, components := range componentMap {
 		features = append(features, cpe.CheckForVulnerabilities(layer, components)...)

@@ -19,6 +19,7 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/server/mtls"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	server "github.com/stackrox/scanner/pkg/scan"
 )
 
 // Server is the HTTP server for Clairify.
@@ -184,37 +185,21 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	image, err := types.GenerateImageFromString(imageRequest.Image)
-	if err != nil {
-		clairErrorString(w, http.StatusBadRequest, "could not parse image %q: %s", imageRequest.Image, err)
-		return
-	}
-
 	username, password, err := getAuth(r.Header.Get("Authorization"))
 	if err != nil {
 		clairError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	var reg types.Registry
-	if imageRequest.Insecure {
-		reg, err = s.insecureRegistryCreator(imageRequest.Registry, username, password)
-	} else {
-		reg, err = s.registryCreator(imageRequest.Registry, username, password)
-	}
-
+	image, err := types.GenerateImageFromString(imageRequest.Image)
 	if err != nil {
 		clairError(w, http.StatusBadRequest, err)
 		return
 	}
-	sha, layer, err := s.process(image, reg)
+
+	_, err = server.ProcessImage(s.storage, image, imageRequest.Registry, username, password, imageRequest.Insecure)
 	if err != nil {
-		clairError(w, http.StatusInternalServerError, err)
-		return
-	}
-	image.SHA = sha
-	if err := s.storage.AddImage(layer, image.SHA, image.TaggedName()); err != nil {
-		clairError(w, http.StatusInternalServerError, err)
+		clairErrorString(w, http.StatusInternalServerError, "error processing image %q: %v", imageRequest.Image, err)
 		return
 	}
 	imageEnvelope := types.ImageEnvelope{
@@ -234,7 +219,7 @@ func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
 }
 
 // Start starts the server listening.
-func (s *Server) Start(mtlsEnabled bool) error {
+func (s *Server) Start() error {
 	r := mux.NewRouter()
 	r.HandleFunc("/clairify/ping", s.Ping).Methods("GET")
 	r.HandleFunc("/clairify/image", s.ScanImage).Methods("POST")
@@ -245,22 +230,18 @@ func (s *Server) Start(mtlsEnabled bool) error {
 
 	var tlsConfig *tls.Config
 	var listener net.Listener
-	var addr string
-	if mtlsEnabled {
-		var err error
-		tlsConfig, err = mtls.TLSConfig()
-		if err != nil {
-			return err
-		}
+	var err error
 
-		listener, err = tls.Listen("tcp", s.endpoint, tlsConfig)
-		if err != nil {
-			return err
-		}
-		addr = listener.Addr().String()
-	} else {
-		addr = s.endpoint
+	tlsConfig, err = mtls.TLSConfig()
+	if err != nil {
+		return err
 	}
+
+	listener, err = tls.Listen("tcp", s.endpoint, tlsConfig)
+	if err != nil {
+		return err
+	}
+	addr := listener.Addr().String()
 
 	srv := &http.Server{
 		Handler:      r,

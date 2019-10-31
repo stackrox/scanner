@@ -63,7 +63,7 @@ func TestDoVulnerabilitiesNamespacing(t *testing.T) {
 			assert.Contains(t, vulnerability.FixedIn, fv2)
 			assert.Contains(t, vulnerability.FixedIn, fv3)
 		default:
-			t.Errorf("Should not have a Vulnerability with '%s' as its Namespace.", vulnerability.Namespace.Name)
+			t.Errorf("Should not have a Vulnerability with %q as its Namespace.", vulnerability.Namespace.Name)
 			fmt.Printf("%#v\n", vulnerability)
 		}
 	}

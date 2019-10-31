@@ -79,25 +79,25 @@ func TestParse(t *testing.T) {
 		v, err := newVersion(c.str)
 
 		if c.err {
-			assert.Error(t, err, "When parsing '%s'", c.str)
+			assert.Error(t, err, "When parsing %q", c.str)
 		} else {
-			assert.Nil(t, err, "When parsing '%s'", c.str)
+			assert.Nil(t, err, "When parsing %q", c.str)
 		}
-		assert.Equal(t, c.ver, v, "When parsing '%s'", c.str)
+		assert.Equal(t, c.ver, v, "When parsing %q", c.str)
 	}
 
 	// Test invalid characters in version
 	versym := []rune{'!', '#', '@', '$', '%', '&', '/', '|', '\\', '<', '>', '(', ')', '[', ']', '{', '}', ';', ',', '=', '*', '^', '\''}
 	for _, r := range versym {
 		_, err := newVersion(strings.Join([]string{"0:0", string(r), "-0"}, ""))
-		assert.Error(t, err, "Parsing with invalid character '%s' in version should have failed", string(r))
+		assert.Error(t, err, "Parsing with invalid character %q in version should have failed", string(r))
 	}
 
 	// Test invalid characters in revision
 	versym = []rune{'!', '#', '@', '$', '%', '&', '/', '|', '\\', '<', '>', '(', ')', '[', ']', '{', '}', ':', ';', ',', '=', '*', '^', '\''}
 	for _, r := range versym {
 		_, err := newVersion(strings.Join([]string{"0:0-", string(r)}, ""))
-		assert.Error(t, err, "Parsing with invalid character '%s' in revision should have failed", string(r))
+		assert.Error(t, err, "Parsing with invalid character %q in revision should have failed", string(r))
 	}
 }
 

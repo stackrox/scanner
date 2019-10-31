@@ -18,6 +18,8 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"net/http"
+	"net/http/pprof"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -29,6 +31,9 @@ import (
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/api"
+	"github.com/stackrox/scanner/api/grpc"
+	"github.com/stackrox/scanner/api/v1/ping"
+	"github.com/stackrox/scanner/api/v1/scan"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
 	"github.com/stackrox/scanner/pkg/formatter"
@@ -55,6 +60,19 @@ import (
 	_ "github.com/stackrox/scanner/ext/vulnsrc/rhel"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
 )
+
+var debugRoutes = map[string]http.Handler{
+	"/debug/pprof":         http.HandlerFunc(pprof.Index),
+	"/debug/pprof/cmdline": http.HandlerFunc(pprof.Cmdline),
+	"/debug/pprof/profile": http.HandlerFunc(pprof.Profile),
+	"/debug/pprof/symbol":  http.HandlerFunc(pprof.Symbol),
+	"/debug/pprof/trace":   http.HandlerFunc(pprof.Trace),
+	"/debug/block":         pprof.Handler(`block`),
+	"/debug/goroutine":     pprof.Handler(`goroutine`),
+	"/debug/heap":          pprof.Handler(`heap`),
+	"/debug/mutex":         pprof.Handler(`mutex`),
+	"/debug/threadcreate":  pprof.Handler(`threadcreate`),
+}
 
 func waitForSignals(signals ...os.Signal) {
 	interrupts := make(chan os.Signal, 1)
@@ -86,7 +104,17 @@ func Boot(config *Config) {
 
 	go api.RunClairify(config.API, db)
 
-	go api.RunDebug()
+	grpcAPI := grpc.NewAPI(grpc.Config{
+		Port:         config.API.GRPCPort,
+		CustomRoutes: debugRoutes,
+	})
+
+	grpcAPI.Register(
+		ping.NewService(),
+		scan.NewService(db),
+	)
+
+	go grpcAPI.Start()
 
 	// Start updater
 	st.Begin()
