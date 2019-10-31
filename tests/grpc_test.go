@@ -31,7 +31,7 @@ func TestGRPCScanImage(t *testing.T) {
 	require.NoError(t, err)
 
 	getScanResp, err := client.GetScan(context.Background(), &v1.GetScanRequest{
-		Image: scanImageResp.Image.GetImage(),
+		ImageSpec: &v1.ImageSpec{Image: scanImageResp.Image.GetImage()},
 	})
 	require.NoError(t, err)
 	assert.NotZero(t, len(getScanResp.GetImage().GetFeatures()))
