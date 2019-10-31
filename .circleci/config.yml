@@ -158,6 +158,9 @@ jobs:
             curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8080/clairify/ping'
             cat nohup.out || true
 
+            curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8081/v1/ping'
+            cat nohup.out || true
+
       - run:
           name: Run sanity tests
           command: |
