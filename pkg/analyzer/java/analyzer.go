@@ -24,15 +24,11 @@ func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component,
 		if !match(filePath) {
 			continue
 		}
-		packages, err := parseContents(filePath, contents)
+		components, err := parseContents(filePath, contents)
 		if err != nil {
 			return nil, err
 		}
-		for _, p := range packages {
-			allComponents = append(allComponents, &component.Component{
-				JavaPkgMetadata: p,
-			})
-		}
+		allComponents = append(allComponents, components...)
 	}
 	return allComponents, nil
 }

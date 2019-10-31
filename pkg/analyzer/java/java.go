@@ -24,7 +24,7 @@ func getOrigin(mf parsedManifestMF) string {
 	return mf.implementationVendor
 }
 
-func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*component.JavaPkgMetadata, error) {
+func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*component.Component, error) {
 	var manifestFile *zip.File
 	var subArchives []*zip.File
 	var pomProperties []*zip.File
@@ -51,38 +51,42 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*componen
 	fileNameWithExtension := locationSoFar[strings.LastIndex(locationSoFar, "/")+1:]
 	fileName := strings.TrimSuffix(fileNameWithExtension, filepath.Ext(fileNameWithExtension))
 
-	topLevelJavaPackage := component.JavaPkgMetadata{
-		ImplementationVersion: manifest.implementationVersion,
-		SpecificationVersion:  manifest.specificationVersion,
-		Location:              locationSoFar,
-		Name:                  fileName,
-		Origin:                getOrigin(manifest),
+	topLevelComponent := component.Component{
+		Location: locationSoFar,
+		JavaPkgMetadata: &component.JavaPkgMetadata{
+			ImplementationVersion: manifest.implementationVersion,
+			SpecificationVersion:  manifest.specificationVersion,
+			Name:                  fileName,
+			Origin:                getOrigin(manifest),
+		},
 	}
 
-	allPackages := []*component.JavaPkgMetadata{&topLevelJavaPackage}
+	allComponents := []*component.Component{&topLevelComponent}
 
 	for _, pomPropsF := range pomProperties {
 		parsedPomProps, err := parseMavenPomProperties(pomPropsF)
 		if err != nil {
 			return nil, err
 		}
-		var currentJavaPackage *component.JavaPkgMetadata
+		var currentComponent *component.Component
 		// The maven properties is for the same package as the manifest was.
 		if strings.HasPrefix(fileName, parsedPomProps.artifactID) {
-			currentJavaPackage = &topLevelJavaPackage
+			currentComponent = &topLevelComponent
 		} else {
-			currentJavaPackage = new(component.JavaPkgMetadata)
-			currentJavaPackage.Location = fmt.Sprintf("%s:%s", topLevelJavaPackage.Location, parsedPomProps.artifactID)
+			currentComponent = &component.Component{
+				Location:        fmt.Sprintf("%s:%s", topLevelComponent.Location, parsedPomProps.artifactID),
+				JavaPkgMetadata: &component.JavaPkgMetadata{},
+			}
 		}
 		if parsedPomProps.groupID != "" {
-			currentJavaPackage.Origin = parsedPomProps.groupID
+			currentComponent.JavaPkgMetadata.Origin = parsedPomProps.groupID
 		}
 		if parsedPomProps.artifactID != "" {
-			currentJavaPackage.Name = parsedPomProps.artifactID
+			currentComponent.JavaPkgMetadata.Name = parsedPomProps.artifactID
 		}
-		currentJavaPackage.MavenVersion = parsedPomProps.version
-		if currentJavaPackage != &topLevelJavaPackage {
-			allPackages = append(allPackages, currentJavaPackage)
+		currentComponent.JavaPkgMetadata.MavenVersion = parsedPomProps.version
+		if currentComponent != &topLevelComponent {
+			allComponents = append(allComponents, currentComponent)
 		}
 	}
 
@@ -100,13 +104,13 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*componen
 		if err != nil {
 			return nil, err
 		}
-		allPackages = append(allPackages, subPackages...)
+		allComponents = append(allComponents, subPackages...)
 	}
 
-	return allPackages, nil
+	return allComponents, nil
 }
 
-func parseContents(locationSoFar string, contents []byte) ([]*component.JavaPkgMetadata, error) {
+func parseContents(locationSoFar string, contents []byte) ([]*component.Component, error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(contents), int64(len(contents)))
 	if err != nil {
 		return nil, err
