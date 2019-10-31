@@ -20,15 +20,9 @@ func getVersionsForJava(component *component.Component) []cpeKey {
 	}
 
 	versionSet := set.NewStringSet()
-	if java.ImplementationVersion != "" {
-		versionSet.Add(java.ImplementationVersion)
-	}
-	if java.MavenVersion != "" {
-		versionSet.Add(java.MavenVersion)
-	}
-	if java.SpecificationVersion != "" {
-		versionSet.Add(java.MavenVersion)
-	}
+	versionSet.AddMatching(func(s string) bool {
+		return s != ""
+	}, java.ImplementationVersion, java.MavenVersion, java.SpecificationVersion)
 	for k := range versionSet {
 		versionSet.Add(extensionRegex.ReplaceAllString(k, ""))
 	}
