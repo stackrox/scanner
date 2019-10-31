@@ -58,7 +58,7 @@ func NewWithClient(endpoint string, insecure bool, client *http.Client) *Clairif
 }
 
 func (c *Clairify) sendRequest(request *http.Request, timeout time.Duration) ([]byte, error) {
-	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Content-SourceType", "application/json")
 	ctx, cancel := context.WithTimeout(request.Context(), timeout)
 	defer cancel()
 

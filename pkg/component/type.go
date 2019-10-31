@@ -1,12 +1,12 @@
 package component
 
-// Type represents the specific type of a language-level component.
-//go:generate stringer -type=Type
-type Type int
+// SourceType represents the specific type of a language-level component.
+//go:generate stringer -type=SourceType
+type SourceType int
 
 // This block enumerates valid types.
 const (
-	UnsetType Type = iota
-	JavaType
-	PythonType
+	UnsetSourceType SourceType = iota
+	JavaSourceType
+	PythonSourceType
 )

@@ -20,8 +20,8 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 	maybeInitializeC := func() {
 		if c == nil {
 			c = &component.Component{
-				Location: filePath,
-				Type:     component.PythonType,
+				Location:   filePath,
+				SourceType: component.PythonSourceType,
 			}
 		}
 	}

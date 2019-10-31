@@ -26,7 +26,7 @@ func getOrigin(mf parsedManifestMF) string {
 
 func newJavaComponent(location string) component.Component {
 	return component.Component{
-		Type:            component.JavaType,
+		SourceType:      component.JavaSourceType,
 		Location:        location,
 		JavaPkgMetadata: &component.JavaPkgMetadata{},
 	}

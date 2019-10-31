@@ -38,8 +38,8 @@ func getVulnsForComponent(layer string, potentialKeys []cpeKey) []database.Featu
 
 func getKeys(c *component.Component) []cpeKey {
 	// TODO: Add any common logic up here.
-	switch c.Type {
-	case component.JavaType:
+	switch c.SourceType {
+	case component.JavaSourceType:
 		return getVersionsForJava(c)
 	}
 	return nil

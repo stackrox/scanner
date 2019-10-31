@@ -80,7 +80,7 @@ func (c *Client) analyzeLayer(path, layerName, parentLayerName string, h map[str
 }
 
 func (c *Client) sendRequest(req *http.Request) ([]byte, int, error) {
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-SourceType", "application/json")
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, -1, err
