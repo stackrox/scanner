@@ -24,6 +24,14 @@ func getOrigin(mf parsedManifestMF) string {
 	return mf.implementationVendor
 }
 
+func newJavaComponent(location string) component.Component {
+	return component.Component{
+		Type:            component.JavaType,
+		Location:        location,
+		JavaPkgMetadata: &component.JavaPkgMetadata{},
+	}
+}
+
 func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*component.Component, error) {
 	var manifestFile *zip.File
 	var subArchives []*zip.File
@@ -51,14 +59,12 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*componen
 	fileNameWithExtension := locationSoFar[strings.LastIndex(locationSoFar, "/")+1:]
 	fileName := strings.TrimSuffix(fileNameWithExtension, filepath.Ext(fileNameWithExtension))
 
-	topLevelComponent := component.Component{
-		Location: locationSoFar,
-		JavaPkgMetadata: &component.JavaPkgMetadata{
-			ImplementationVersion: manifest.implementationVersion,
-			SpecificationVersion:  manifest.specificationVersion,
-			Name:                  fileName,
-			Origin:                getOrigin(manifest),
-		},
+	topLevelComponent := newJavaComponent(locationSoFar)
+	topLevelComponent.JavaPkgMetadata = &component.JavaPkgMetadata{
+		ImplementationVersion: manifest.implementationVersion,
+		SpecificationVersion:  manifest.specificationVersion,
+		Name:                  fileName,
+		Origin:                getOrigin(manifest),
 	}
 
 	allComponents := []*component.Component{&topLevelComponent}
@@ -73,10 +79,8 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*componen
 		if strings.HasPrefix(fileName, parsedPomProps.artifactID) {
 			currentComponent = &topLevelComponent
 		} else {
-			currentComponent = &component.Component{
-				Location:        fmt.Sprintf("%s:%s", topLevelComponent.Location, parsedPomProps.artifactID),
-				JavaPkgMetadata: &component.JavaPkgMetadata{},
-			}
+			newComponent := newJavaComponent(fmt.Sprintf("%s:%s", topLevelComponent.Location, parsedPomProps.artifactID))
+			currentComponent = &newComponent
 		}
 		if parsedPomProps.groupID != "" {
 			currentComponent.JavaPkgMetadata.Origin = parsedPomProps.groupID

@@ -21,6 +21,7 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 		if c == nil {
 			c = &component.Component{
 				Location: filePath,
+				Type:     component.PythonType,
 			}
 		}
 	}
