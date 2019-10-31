@@ -205,6 +205,10 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			image:    "docker.io/anchore/anchore-engine:v0.5.0",
+			registry: "https://registry-1.docker.io",
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			testImage(cli, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
