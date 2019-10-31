@@ -4,6 +4,8 @@ import (
 	"archive/zip"
 	"bufio"
 	"strings"
+
+	"github.com/stackrox/rox/pkg/stringutils"
 )
 
 const (
@@ -16,15 +18,6 @@ type parsedManifestMF struct {
 
 	implementationVersion string
 	implementationVendor  string
-}
-
-func split2(s, sep string) (first, second string) {
-	splitString := strings.SplitN(s, sep, 2)
-	first = splitString[0]
-	if len(splitString) > 1 {
-		second = splitString[1]
-	}
-	return
 }
 
 func parseManifestMF(f *zip.File) (parsedManifestMF, error) {
@@ -56,7 +49,7 @@ func parseManifestMF(f *zip.File) (parsedManifestMF, error) {
 			*currentValueToSet = strings.TrimSpace(currentValue)
 			currentValueToSet = nil
 		}
-		keyFromLine, valueFromLine := split2(currentLine, ":")
+		keyFromLine, valueFromLine := stringutils.Split2(currentLine, ":")
 		// Should never happen, probably a malformed JAR file?
 		if valueFromLine == "" {
 			continue
@@ -111,7 +104,7 @@ func parseMavenPomProperties(f *zip.File) (parsedPomProps, error) {
 		if strings.HasPrefix(currentLine, "#") {
 			continue
 		}
-		key, value := split2(currentLine, "=")
+		key, value := stringutils.Split2(currentLine, "=")
 		// TODO(viswa): Maybe better logging. This should never happen.
 		if value == "" {
 			continue
