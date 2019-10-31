@@ -256,7 +256,7 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 	} else if err == nil {
 		if existingLayer.EngineVersion >= layer.EngineVersion {
 			// The layer exists and has an equal or higher engine version, do nothing.
-			return nil
+			return commonerr.ErrNoNeedToInsert
 		}
 
 		layer.ID = existingLayer.ID
