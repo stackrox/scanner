@@ -13,13 +13,15 @@ import (
 // The metadata file format is specified at https://packaging.python.org/specifications/core-metadata/.
 // Note that it's possible that the file is not a Python manifest but some other totally random file that
 // happens to have a matching name.
-// In this case, this function will simply return `nil`.
+// In this case, this function will gracefully return `nil`.
 func parseMetadataFile(filePath string, contents []byte) *component.Component {
 	var c *component.Component
 
-	ensureCNotNil := func() {
+	maybeInitializeC := func() {
 		if c == nil {
-			c = &component.Component{}
+			c = &component.Component{
+				Location: filePath,
+			}
 		}
 	}
 
@@ -34,10 +36,10 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 		}
 		switch key {
 		case "Name":
-			ensureCNotNil()
+			maybeInitializeC()
 			c.Name = value
 		case "Version":
-			ensureCNotNil()
+			maybeInitializeC()
 			c.Version = value
 		}
 	}
@@ -47,9 +49,5 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 		return nil
 	}
 
-	if c == nil {
-		return nil
-	}
-	c.Location = filePath
 	return c
 }
