@@ -5,13 +5,15 @@ type Component struct {
 	Name    string
 	Version string
 
+	// Location specifies a path to a file that the component's existence was derived from.
+	Location string
+
 	JavaPkgMetadata *JavaPkgMetadata
 }
 
 // JavaPkgMetadata contains additional metadata that Java-based components have.
 type JavaPkgMetadata struct {
 	ImplementationVersion string
-	Location              string
 	MavenVersion          string
 	Name                  string
 	Origin                string
