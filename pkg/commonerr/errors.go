@@ -30,6 +30,9 @@ var (
 
 	// ErrCouldNotParse is returned when a fetcher fails to parse the update data.
 	ErrCouldNotParse = errors.New("updater/fetchers: could not parse")
+
+	// ErrNoNeedToInsert is returned when there is no reason to insert the layers as they already exist
+	ErrNoNeedToInsert = errors.New("no need to insert")
 )
 
 // ErrBadRequest occurs when a method has been passed an inappropriate argument.

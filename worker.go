@@ -119,6 +119,9 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 	}
 
 	if err := datastore.InsertLayer(layer); err != nil {
+		if err == commonerr.ErrNoNeedToInsert {
+			return nil
+		}
 		return err
 	}
 
