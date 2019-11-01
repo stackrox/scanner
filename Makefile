@@ -152,7 +152,7 @@ db-image:
 deploy: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
-	helm template chart/ --name scanner --set tag=$(TAG) --output-dir rendered-chart
+	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
 ###########

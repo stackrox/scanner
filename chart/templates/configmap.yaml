@@ -7,8 +7,8 @@ metadata:
     app: {{ .Values.appName }}
 data:
   config.yaml: |-
-    # The values specified here are the default values that Clair uses if no configuration file is specified or if the keys are not defined.
-    clair:
+    # The values specified here are the default values that the Scanner uses if no configuration file is specified or if the keys are not defined.
+    scanner:
       database:
         # Database driver
         type: pgsql
@@ -25,26 +25,9 @@ data:
         clairifyPort: 8080
         grpcPort: 8081
 
-      worker:
-        namespace_detectors:
-          - os-release
-          - lsb-release
-          - apt-sources
-          - alpine-release
-          - redhat-release
-
-        feature_listers:
-          - apk
-          - dpkg
-          - rpm
-
       updater:
         # Frequency the database will be updated with vulnerabilities from the default data sources
         # The value 0 disables the updater entirely.
         interval: 2h
-        enabledupdaters:
-          - debian
-          - ubuntu
-          - rhel
-          - oracle
-          - alpine
+
+      logLevel: {{ .Values.logLevel }}
