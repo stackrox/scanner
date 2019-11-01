@@ -32,7 +32,7 @@ func newJavaComponent(location string) component.Component {
 	}
 }
 
-func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*component.Component, error) {
+func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) ([]*component.Component, error) {
 	var manifestFile *zip.File
 	var subArchives []*zip.File
 	var pomProperties []*zip.File
@@ -60,10 +60,10 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*componen
 	fileName := strings.TrimSuffix(fileNameWithExtension, filepath.Ext(fileNameWithExtension))
 
 	topLevelComponent := newJavaComponent(locationSoFar)
+	topLevelComponent.Name = fileName
 	topLevelComponent.JavaPkgMetadata = &component.JavaPkgMetadata{
 		ImplementationVersion: manifest.implementationVersion,
 		SpecificationVersion:  manifest.specificationVersion,
-		Name:                  fileName,
 		Origin:                getOrigin(manifest),
 	}
 
@@ -86,7 +86,7 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*componen
 			currentComponent.JavaPkgMetadata.Origin = parsedPomProps.groupID
 		}
 		if parsedPomProps.artifactID != "" {
-			currentComponent.JavaPkgMetadata.Name = parsedPomProps.artifactID
+			currentComponent.Name = parsedPomProps.artifactID
 		}
 		currentComponent.JavaPkgMetadata.MavenVersion = parsedPomProps.version
 		if currentComponent != &topLevelComponent {
@@ -104,11 +104,11 @@ func parseJavaPackages(locationSoFar string, zipReader *zip.Reader) ([]*componen
 			return nil, err
 		}
 
-		subPackages, err := parseContents(fmt.Sprintf("%s:%s", locationSoFar, subArchiveF.Name), contents)
+		subComponents, err := parseContents(fmt.Sprintf("%s:%s", locationSoFar, subArchiveF.Name), contents)
 		if err != nil {
 			return nil, err
 		}
-		allComponents = append(allComponents, subPackages...)
+		allComponents = append(allComponents, subComponents...)
 	}
 
 	return allComponents, nil
@@ -119,5 +119,5 @@ func parseContents(locationSoFar string, contents []byte) ([]*component.Componen
 	if err != nil {
 		return nil, err
 	}
-	return parseJavaPackages(locationSoFar, zipReader)
+	return parseComponentsFromZipReader(locationSoFar, zipReader)
 }
