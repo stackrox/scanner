@@ -9,7 +9,7 @@ type cpeKey struct {
 	vendor, pkg, version string
 }
 
-func getVulnsForComponent(layer string, potentialKeys []cpeKey) []database.FeatureVersion {
+func getVulnsForComponent(layer string, potentialKeys []cpeKey, cpeToComponentMap map[cpeKey]*component.Component) []database.FeatureVersion {
 	featureMap := make(map[cpeKey][]database.Vulnerability)
 	for _, key := range potentialKeys {
 		matchers := cpeMatcher[key.vendor][key.pkg]
@@ -22,11 +22,12 @@ func getVulnsForComponent(layer string, potentialKeys []cpeKey) []database.Featu
 
 	features := make([]database.FeatureVersion, 0, len(featureMap))
 	for key, vulns := range featureMap {
+		component := cpeToComponentMap[key]
 		features = append(features, database.FeatureVersion{
 			Feature: database.Feature{
-				Name: key.pkg,
+				Name: component.Name,
 			},
-			Version:    key.version,
+			Version:    component.Version,
 			AffectedBy: vulns,
 			AddedBy: database.Layer{
 				Name: layer,
@@ -47,6 +48,7 @@ func getKeys(c *component.Component) []cpeKey {
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
 	possibleCPEsMap := make(map[cpeKey]struct{})
+	cpesToComponents := make(map[cpeKey]*component.Component)
 	var possibleCPEs []cpeKey
 	for _, c := range components {
 		keys := getKeys(c)
@@ -55,8 +57,9 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 				continue
 			}
 			possibleCPEsMap[k] = struct{}{}
+			cpesToComponents[k] = c
 			possibleCPEs = append(possibleCPEs, k)
 		}
 	}
-	return getVulnsForComponent(layer, possibleCPEs)
+	return getVulnsForComponent(layer, possibleCPEs, cpesToComponents)
 }

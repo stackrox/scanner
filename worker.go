@@ -56,20 +56,20 @@ func cleanURL(str string) string {
 	return urlParametersRegexp.ReplaceAllString(str, "")
 }
 
-func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName string) (database.Layer, error) {
+func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName string) (database.Layer, bool, error) {
 	// Verify parameters.
 	if name == "" {
-		return database.Layer{}, commonerr.NewBadRequestError("could not process a layer which does not have a name")
+		return database.Layer{}, false, commonerr.NewBadRequestError("could not process a layer which does not have a name")
 	}
 
 	if imageFormat == "" {
-		return database.Layer{}, commonerr.NewBadRequestError("could not process a layer which does not have a format")
+		return database.Layer{}, false, commonerr.NewBadRequestError("could not process a layer which does not have a format")
 	}
 
 	// Check to see if the layer is already in the database.
 	layer, err := datastore.FindLayer(name, false, false)
 	if err != nil && err != commonerr.ErrNotFound {
-		return layer, err
+		return layer, false, err
 	}
 
 	if err == commonerr.ErrNotFound {
@@ -81,23 +81,23 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 		if parentName != "" {
 			parent, err := datastore.FindLayer(parentName, true, false)
 			if err != nil && err != commonerr.ErrNotFound {
-				return layer, err
+				return layer, false, err
 			}
 			if err == commonerr.ErrNotFound {
 				log.WithFields(log.Fields{logLayerName: name, "parent layer": parentName}).Warning("the parent layer is unknown. it must be processed first")
-				return layer, ErrParentUnknown
+				return layer, false, ErrParentUnknown
 			}
 			layer.Parent = &parent
 		}
-	} else {
-		// The layer is already in the database, check if we need to update it.
-		if layer.EngineVersion >= Version {
-			log.WithFields(log.Fields{logLayerName: name, "past engine version": layer.EngineVersion, "current engine version": Version}).Debug("layer content has already been processed in the past with older engine. skipping analysis")
-			return layer, nil
-		}
-		log.WithFields(log.Fields{logLayerName: name, "past engine version": layer.EngineVersion, "current engine version": Version}).Debug("layer content has already been processed in the past with older engine. analyzing again")
+		return layer, false, nil
 	}
-	return layer, nil
+	// The layer is already in the database, check if we need to update it.
+	if layer.EngineVersion >= Version {
+		log.WithFields(log.Fields{logLayerName: name, "past engine version": layer.EngineVersion, "current engine version": Version}).Debug("layer content has already been processed in the past with older engine. skipping analysis")
+		return layer, true, nil
+	}
+	log.WithFields(log.Fields{logLayerName: name, "past engine version": layer.EngineVersion, "current engine version": Version}).Debug("layer content has already been processed in the past with older engine. analyzing again")
+	return layer, false, nil
 }
 
 // ProcessLayerFromReader detects the Namespace of a layer, the features it adds/removes,
@@ -106,9 +106,12 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
 func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, parentName string, reader io.ReadCloser) error {
-	layer, err := preProcessLayer(datastore, imageFormat, name, parentName)
+	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName)
 	if err != nil {
 		return err
+	}
+	if exists {
+		return nil
 	}
 
 	// Analyze the content.
@@ -134,9 +137,12 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
 func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, path string, headers map[string]string) error {
-	layer, err := preProcessLayer(datastore, imageFormat, name, parentName)
+	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName)
 	if err != nil {
 		return err
+	}
+	if exists {
+		return nil
 	}
 
 	// Analyze the content.
@@ -174,7 +180,6 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	}
 	if len(allComponents) > 0 {
 		log.Infof("Found %d components", len(allComponents))
-
 		componentsToPrint := allComponents
 		if len(componentsToPrint) > 5 {
 			componentsToPrint = componentsToPrint[:5]
