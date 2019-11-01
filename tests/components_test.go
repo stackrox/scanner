@@ -26,8 +26,8 @@ func TestPythonComponents(t *testing.T) {
 	client := v1.NewScanServiceClient(conn)
 	scanResp := scanPublicDockerHubImage(client, "docker.io/anchore/anchore-engine:v0.5.0", t)
 	getComponentsResp, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
-		ImageSpec:            &v1.ImageSpec{
-			Digest:               scanResp.GetImage().GetDigest(),
+		ImageSpec: &v1.ImageSpec{
+			Digest: scanResp.GetImage().GetDigest(),
 		},
 	})
 	gotComponents := getComponentsResp.GetLayerToComponents()

@@ -27,11 +27,10 @@ func scanPublicDockerHubImage(client v1.ScanServiceClient, imageName string, t *
 	scanImageResp, err := client.ScanImage(context.Background(), &v1.ScanImageRequest{
 		Image: imageName,
 		Registry: &v1.ScanImageRequest_RegistryData{
-			Url:      "https://registry-1.docker.io",
+			Url: "https://registry-1.docker.io",
 		},
 	})
 	require.NoError(t, err)
 	require.Equal(t, scanImageResp.GetStatus(), v1.ScanStatus_SUCCEEDED)
 	return scanImageResp
 }
-
