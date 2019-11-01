@@ -130,7 +130,6 @@ func main() {
 	// Parse command-line arguments
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	flagConfigPath := flag.String("config", "/etc/clair/config.yaml", "Load configuration from the specified file.")
-	flagLogLevel := flag.String("log-level", "info", "Define the logging level.")
 	flagInsecureTLS := flag.Bool("insecure-tls", false, "Disable TLS server's certificate chain and hostname verification when pulling layers.")
 	flag.Parse()
 
@@ -152,7 +151,7 @@ func main() {
 
 	// Initialize logging system
 
-	logLevel, err := log.ParseLevel(strings.ToUpper(*flagLogLevel))
+	logLevel, err := log.ParseLevel(strings.ToUpper(config.LogLevel))
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Invalid log level: %v", err)
 		logLevel = log.InfoLevel

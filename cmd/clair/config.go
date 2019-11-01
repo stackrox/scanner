@@ -25,17 +25,18 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// File represents a YAML configuration file that namespaces all Clair
-// configuration under the top-level "clair" key.
+// File represents a YAML configuration file that namespaces all configuration
+// configuration under the top-level "scanner" key.
 type File struct {
-	Clair Config `yaml:"clair"`
+	Scanner Config `yaml:"scanner"`
 }
 
 // Config is the global configuration for an instance of Clair.
 type Config struct {
-	Database database.RegistrableComponentConfig
-	Updater  *clair.UpdaterConfig
-	API      *api.Config
+	Database database.RegistrableComponentConfig `yaml:"database"`
+	Updater  *clair.UpdaterConfig                `yaml:"updater"`
+	API      *api.Config                         `yaml:"api"`
+	LogLevel string                              `yaml:"logLevel"`
 }
 
 // DefaultConfig is a configuration that can be used as a fallback value.
@@ -51,6 +52,7 @@ func DefaultConfig() Config {
 			ClairifyPort: 8080,
 			GRPCPort:     8081,
 		},
+		LogLevel: "info",
 	}
 }
 
@@ -59,9 +61,9 @@ func DefaultConfig() Config {
 // It supports relative and absolute paths. Given "", it returns DefaultConfig.
 func LoadConfig(path string) (config *Config, err error) {
 	var cfgFile File
-	cfgFile.Clair = DefaultConfig()
+	cfgFile.Scanner = DefaultConfig()
 	if path == "" {
-		return &cfgFile.Clair, nil
+		return &cfgFile.Scanner, nil
 	}
 
 	f, err := os.Open(os.ExpandEnv(path))
@@ -79,7 +81,7 @@ func LoadConfig(path string) (config *Config, err error) {
 	if err != nil {
 		return
 	}
-	config = &cfgFile.Clair
+	config = &cfgFile.Scanner
 
 	return
 }

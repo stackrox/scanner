@@ -3,3 +3,5 @@ namespace: stackrox
 scannerImage: us.gcr.io/stackrox-ci/scanner
 scannerDBImage: us.gcr.io/stackrox-ci/scanner-db
 tag: latest
+
+logLevel: info
