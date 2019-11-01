@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/stackrox/rox/pkg/stringutils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
@@ -90,23 +89,10 @@ func convertComponentsSlice(components []*component.Component) *v1.LanguageLevel
 }
 
 func convertComponent(c *component.Component) *v1.LanguageLevelComponent {
-	converted := &v1.LanguageLevelComponent{
+	return &v1.LanguageLevelComponent{
 		SourceType: sourceTypeToProtoMap[c.SourceType],
 		Name:       c.Name,
 		Version:    c.Version,
 		Location:   c.Location,
 	}
-
-	// Try to fill in the top level fields on a best-effort basis.
-	if c.Name == "" {
-		if c.JavaPkgMetadata != nil {
-			c.Name = c.JavaPkgMetadata.Name
-		}
-	}
-	if c.Version == "" {
-		if c.JavaPkgMetadata != nil {
-			c.Version = stringutils.FirstNonEmpty(c.JavaPkgMetadata.MavenVersion, c.JavaPkgMetadata.ImplementationVersion, c.JavaPkgMetadata.SpecificationVersion)
-		}
-	}
-	return converted
 }
