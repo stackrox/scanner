@@ -89,14 +89,14 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 			}
 			layer.Parent = &parent
 		}
-	} else {
-		// The layer is already in the database, check if we need to update it.
-		if layer.EngineVersion >= Version {
-			log.WithFields(log.Fields{logLayerName: name, "past engine version": layer.EngineVersion, "current engine version": Version}).Debug("layer content has already been processed in the past with older engine. skipping analysis")
-			return layer, true, nil
-		}
-		log.WithFields(log.Fields{logLayerName: name, "past engine version": layer.EngineVersion, "current engine version": Version}).Debug("layer content has already been processed in the past with older engine. analyzing again")
+		return layer, false, nil
 	}
+	// The layer is already in the database, check if we need to update it.
+	if layer.EngineVersion >= Version {
+		log.WithFields(log.Fields{logLayerName: name, "past engine version": layer.EngineVersion, "current engine version": Version}).Debug("layer content has already been processed in the past with older engine. skipping analysis")
+		return layer, true, nil
+	}
+	log.WithFields(log.Fields{logLayerName: name, "past engine version": layer.EngineVersion, "current engine version": Version}).Debug("layer content has already been processed in the past with older engine. analyzing again")
 	return layer, false, nil
 }
 
@@ -180,11 +180,11 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	}
 	if len(allComponents) > 0 {
 		log.Infof("Found %d components", len(allComponents))
-		numComponentsToPrint := len(allComponents)
-		if numComponentsToPrint > 5 {
-			numComponentsToPrint = 5
+		componentsToPrint := allComponents
+		if len(componentsToPrint) > 5 {
+			componentsToPrint = componentsToPrint[:5]
 		}
-		log.Infof("First %d of the components are %s", numComponentsToPrint, spew.Sdump(allComponents[:numComponentsToPrint]))
+		log.Infof("First %d of the components are %s", len(componentsToPrint), spew.Sdump(componentsToPrint))
 	}
 
 	return namespace, featureVersions, allComponents, err
