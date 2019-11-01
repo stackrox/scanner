@@ -28,10 +28,10 @@ func getVersionsForJava(component *component.Component) []cpeKey {
 	}
 
 	nameSet := set.NewStringSet(
-		java.Name,
-		strings.ReplaceAll(java.Name, "_", "-"),
-		strings.ReplaceAll(java.Name, "-", "_"),
-		numRegex.ReplaceAllString(java.Name, ""),
+		component.Name,
+		strings.ReplaceAll(component.Name, "_", "-"),
+		strings.ReplaceAll(component.Name, "-", "_"),
+		numRegex.ReplaceAllString(component.Name, ""),
 	)
 
 	for name := range nameSet {
