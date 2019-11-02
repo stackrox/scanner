@@ -1,8 +1,16 @@
 package cpe
 
 import (
+	"regexp"
+	"strings"
+
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
+)
+
+var (
+	numRegex = regexp.MustCompile(`[0-9].*$`)
 )
 
 type cpeKey struct {
@@ -37,13 +45,50 @@ func getVulnsForComponent(layer string, potentialKeys []cpeKey, cpeToComponentMa
 	return features
 }
 
-func getKeys(c *component.Component) []cpeKey {
-	// TODO: Add any common logic up here.
-	switch c.SourceType {
-	case component.JavaSourceType:
-		return getVersionsForJava(c)
+func generateNameKeys(c *component.Component) set.StringSet {
+	nameSet := set.NewStringSet(
+		c.Name,
+		strings.ReplaceAll(c.Name, "_", "-"),
+		strings.ReplaceAll(c.Name, "-", "_"),
+		numRegex.ReplaceAllString(c.Name, ""),
+	)
+	for name := range nameSet {
+		if idx := strings.Index(name, "-"); idx != -1 {
+			nameSet.Add(name[:idx])
+		}
 	}
-	return nil
+	return nameSet
+}
+
+func generateVersionKeys(c *component.Component) set.StringSet {
+	return set.NewStringSet(c.Version)
+}
+
+func getKeys(c *component.Component) []cpeKey {
+	vendorSet := set.NewStringSet()
+	nameSet := generateNameKeys(c)
+	versionSet := generateVersionKeys(c)
+
+	if generator, ok := generators[c.SourceType]; ok {
+		languageVendorSet, languageNameSet, languageVersionSet := generator(c)
+		vendorSet = vendorSet.Union(languageVendorSet)
+		nameSet = nameSet.Union(languageNameSet)
+		versionSet = versionSet.Union(languageVersionSet)
+	}
+
+	cpeKeys := make([]cpeKey, 0, vendorSet.Cardinality()*nameSet.Cardinality()*versionSet.Cardinality())
+	for _, vendor := range vendorSet.AsSlice() {
+		for _, name := range nameSet.AsSlice() {
+			for _, version := range versionSet.AsSlice() {
+				cpeKeys = append(cpeKeys, cpeKey{
+					vendor:  vendor,
+					pkg:     name,
+					version: version,
+				})
+			}
+		}
+	}
+	return cpeKeys
 }
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
