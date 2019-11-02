@@ -41,18 +41,47 @@ message ScanImageRequest {
 
 message ScanImageResponse {
     ScanStatus status = 1;
-    message Image {
-        string digest = 1;
-        string image  = 2;
-    }
-    Image image       = 2;
+    ImageSpec image       = 2;
+}
+
+message ImageSpec {
+    string digest = 1;
+    string image  = 2;
 }
 
 message GetScanRequest {
-    // Only one of these needs to be set for the request to be properly formed
+    // Only one of the fields in ImageSpec needs to be set for the request to be properly formed
     // If both are set, then digest is used
-    string image  = 1;
-    string digest = 2;
+    ImageSpec image_spec = 1;
+}
+
+message GetLanguageLevelComponentsRequest {
+    // Only one of the fields in ImageSpec needs to be set for the request to be properly formed
+    // If both are set, then digest is used
+    ImageSpec image_spec = 1;
+}
+
+enum SourceType {
+    UNSET_SOURCE_TYPE  = 0;
+    JAVA               = 1;
+    PYTHON             = 2;
+}
+
+message LanguageLevelComponent {
+    SourceType source_type = 1;
+    string     name        = 2;
+    string     version     = 3;
+    string     location    = 4;
+
+    // TODO: consider adding more specific version information here (like all the stuff we have for Java).
+}
+
+message LanguageLevelComponents {
+    repeated LanguageLevelComponent components = 1;
+}
+
+message GetLanguageLevelComponentsResponse {
+    map <string, LanguageLevelComponents> layer_to_components = 1;
 }
 
 enum ScanStatus {
@@ -79,6 +108,12 @@ service ScanService {
     rpc GetScan(GetScanRequest) returns (GetScanResponse) {
         option (google.api.http) = {
             get: "/v1/images/scan"
+        };
+    }
+
+    rpc GetLanguageLevelComponents(GetLanguageLevelComponentsRequest) returns (GetLanguageLevelComponentsResponse) {
+        option (google.api.http) = {
+            get: "/v1/images/languagecomponents"
         };
     }
 }

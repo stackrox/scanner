@@ -35,6 +35,20 @@ type serviceImpl struct {
 	db database.Datastore
 }
 
+func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
+	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec())
+	if err != nil {
+		return nil, err
+	}
+	components, err := s.db.GetLayerLanguageComponents(layerName)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to retrieve components from DB: %v", err)
+	}
+	return &v1.GetLanguageLevelComponentsResponse{
+		LayerToComponents: convertComponents(components),
+	}, nil
+}
+
 func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (*v1.ScanImageResponse, error) {
 	image, err := types.GenerateImageFromString(req.GetImage())
 	if err != nil {
@@ -50,7 +64,7 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 
 	return &v1.ScanImageResponse{
 		Status: v1.ScanStatus_SUCCEEDED,
-		Image: &v1.ScanImageResponse_Image{
+		Image: &v1.ImageSpec{
 			Digest: digest,
 			Image:  image.TaggedName(),
 		},
@@ -83,30 +97,38 @@ func (s *serviceImpl) getLayer(layerName string) (*v1.GetScanResponse, error) {
 	}, nil
 }
 
-func (s *serviceImpl) GetScan(ctx context.Context, req *v1.GetScanRequest) (*v1.GetScanResponse, error) {
-	if stringutils.AllEmpty(req.GetImage(), req.GetDigest()) {
-		return nil, status.Error(codes.InvalidArgument, "either image or digest must be specified")
+func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec) (string, error) {
+	if stringutils.AllEmpty(imgSpec.GetImage(), imgSpec.GetDigest()) {
+		return "", status.Error(codes.InvalidArgument, "either image or digest must be specified")
 	}
 
 	var layerFetcher func(s string) (string, bool, error)
 	var argument string
-	if digest := req.GetDigest(); digest != "" {
+	if digest := imgSpec.GetDigest(); digest != "" {
 		logrus.Debugf("Getting layer SHA by digest %s", digest)
 		argument = digest
 		layerFetcher = s.db.GetLayerBySHA
 	} else {
-		logrus.Debugf("Getting layer SHA by image %s", req.GetImage())
-		argument = req.GetImage()
+		logrus.Debugf("Getting layer SHA by image %s", imgSpec.GetImage())
+		argument = imgSpec.GetImage()
 		layerFetcher = s.db.GetLayerByName
 	}
-	layer, exists, err := layerFetcher(argument)
+	layerName, exists, err := layerFetcher(argument)
+	if err != nil {
+		return "", err
+	}
+	if !exists {
+		return "", status.Errorf(codes.NotFound, "image with reference %q not found", argument)
+	}
+	return layerName, nil
+}
+
+func (s *serviceImpl) GetScan(ctx context.Context, req *v1.GetScanRequest) (*v1.GetScanResponse, error) {
+	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec())
 	if err != nil {
 		return nil, err
 	}
-	if !exists {
-		return nil, status.Errorf(codes.NotFound, "image with reference %q not found", argument)
-	}
-	return s.getLayer(layer)
+	return s.getLayer(layerName)
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.
