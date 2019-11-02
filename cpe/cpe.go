@@ -20,7 +20,7 @@ type cpeKey struct {
 func getVulnsForComponent(layer string, potentialKeys []cpeKey, cpeToComponentMap map[cpeKey]*component.Component) []database.FeatureVersion {
 	featureMap := make(map[cpeKey][]database.Vulnerability)
 	for _, key := range potentialKeys {
-		matchers := cpeMatcher[key.vendor][key.pkg]
+		matchers := cpeMatcher[vendorNamePair{vendor: key.vendor, name: key.pkg}]
 		for _, matcher := range matchers {
 			if vuln := matcher.Matches(key.version); vuln != nil {
 				featureMap[key] = append(featureMap[key], *vuln)
@@ -77,6 +77,10 @@ func getKeys(c *component.Component) []cpeKey {
 	}
 
 	cpeKeys := make([]cpeKey, 0, vendorSet.Cardinality()*nameSet.Cardinality()*versionSet.Cardinality())
+
+	if vendorSet.Cardinality() == 0 {
+		vendorSet.Add("")
+	}
 	for _, vendor := range vendorSet.AsSlice() {
 		for _, name := range nameSet.AsSlice() {
 			for _, version := range versionSet.AsSlice() {

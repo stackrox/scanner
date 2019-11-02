@@ -13,8 +13,12 @@ import (
 )
 
 var (
-	cpeMatcher = make(map[string]map[string][]*vulnMatcher)
+	cpeMatcher = make(map[vendorNamePair][]*vulnMatcher)
 )
+
+type vendorNamePair struct {
+	vendor, name string
+}
 
 type vulnMatcher struct {
 	item              *Item
@@ -50,16 +54,17 @@ func handleJSONFile(path string) {
 		for _, node := range item.Configuration.Nodes {
 			pairs := recurseNode(node)
 			for _, p := range pairs {
-				vendorMap := cpeMatcher[p.vendor]
-				if vendorMap == nil {
-					vendorMap = make(map[string][]*vulnMatcher)
-					cpeMatcher[p.vendor] = vendorMap
-				}
-				vendorMap[p.name] = append(vendorMap[p.name], &vulnMatcher{
+				vulnMatcher := &vulnMatcher{
 					item:              item,
 					constraintMatcher: p.constraint,
 					fixedVersion:      p.fixedVersion,
-				})
+				}
+
+				vendorPair := vendorNamePair{vendor: p.vendor, name: p.name}
+				cpeMatcher[vendorPair] = append(cpeMatcher[vendorPair], vulnMatcher)
+
+				vendorLessPair := vendorNamePair{name: p.name}
+				cpeMatcher[vendorLessPair] = append(cpeMatcher[vendorLessPair], vulnMatcher)
 			}
 		}
 		// Mark configuration as nil so it can be garbage collected
