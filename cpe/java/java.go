@@ -2,19 +2,18 @@ package java
 
 import (
 	"github.com/stackrox/rox/pkg/set"
-	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/cpe"
+	"github.com/stackrox/scanner/pkg/component"
 
 	"regexp"
 	"strings"
-
 )
 
 var (
 	extensionRegex = regexp.MustCompile(`\.(RELEASE|GA|SEC.*)$`)
 )
 
-func init () {
+func init() {
 	cpe.Register(component.JavaSourceType, getVersionsForJava)
 }
 
