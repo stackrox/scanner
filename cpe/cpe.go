@@ -2,25 +2,30 @@ package cpe
 
 import (
 	"fmt"
-
 	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
+	"time"
 )
 
 func getVulnsForComponent(layer string, potentialKeys []*wfn.Attributes, attributesToComponents map[wfn.Attributes]*component.Component) []database.FeatureVersion {
 	featureMap := make(map[wfn.Attributes][]database.Vulnerability)
+
+	t := time.Now()
 	for _, vuln := range vulns {
 		matches := vuln.Match(potentialKeys, false)
 		for _, m := range matches {
-			featureMap[*m] = append(featureMap[*m], database.Vulnerability{
-				Name: vuln.ID(),
-				Link: fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", vuln.ID()),
-			})
+			component := attributesToComponents[*m]
+			generalizedAttr := wfn.Attributes{
+				Product: component.Name,
+				Version: component.Version,
+			}
+			attributesToComponents[generalizedAttr] = component
+			featureMap[generalizedAttr] = append(featureMap[generalizedAttr], *vuln.Vulnerability())
+			break
 		}
 	}
-	// Missing metadata and description
-
+	fmt.Printf("Evaluation time: %0.4f\n", time.Since(t).Seconds())
 	features := make([]database.FeatureVersion, 0, len(featureMap))
 	for key, vulns := range featureMap {
 		component := attributesToComponents[key]
