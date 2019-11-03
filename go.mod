@@ -6,6 +6,8 @@ require (
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
+	github.com/facebookincubator/flog v0.0.0-20190930132826-d2511d0ce33c // indirect
+	github.com/facebookincubator/nvdtools v0.1.4-0.20191024132624-1cb041402875
 	github.com/golang/protobuf v1.3.2
 	github.com/gorilla/mux v1.7.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
@@ -22,6 +24,7 @@ require (
 	github.com/prometheus/client_golang v0.9.1
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.4.2
+	github.com/stackrox/clairify v0.0.0-20190226172255-52856608eab5
 	github.com/stackrox/rox v0.0.0-20191031210135-c25b3f3a6f24
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de

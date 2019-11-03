@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -13,7 +14,7 @@ var (
 	numRegex       = regexp.MustCompile(`[0-9].*$`)
 )
 
-func getVersionsForJava(component *component.Component) []cpeKey {
+func getVersionsForJava(component *component.Component) []*wfn.Attributes {
 	java := component.JavaPkgMetadata
 	if java == nil {
 		return nil
@@ -47,11 +48,15 @@ func getVersionsForJava(component *component.Component) []cpeKey {
 		vendor = originSpl[1]
 	}
 
-	var cpeKeys []cpeKey
+	var attributes []*wfn.Attributes
 	for name := range nameSet {
 		for version := range versionSet {
-			cpeKeys = append(cpeKeys, cpeKey{vendor: vendor, pkg: name, version: version})
+			attributes = append(attributes, &wfn.Attributes{
+				Vendor:  vendor,
+				Product: name,
+				Version: version,
+			})
 		}
 	}
-	return cpeKeys
+	return attributes
 }

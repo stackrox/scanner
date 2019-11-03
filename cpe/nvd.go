@@ -8,8 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/hashicorp/go-version"
 	"github.com/stackrox/scanner/database"
+)
+
+var (
+	vulns []cvefeed.Vuln
 )
 
 var (
@@ -33,6 +38,28 @@ func (m *vulnMatcher) Matches(s string) *database.Vulnerability {
 
 type Matcher interface {
 	Matches(s string) *database.Vulnerability
+}
+
+func nvdtools(path string) {
+	f, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	fileVulns, err := cvefeed.ParseJSON(f)
+	if err != nil {
+		panic(err)
+	}
+	filteredVulns := fileVulns[:0]
+	for _, f := range fileVulns {
+		var app bool
+		for _, attr := range f.Config() {
+			app = attr.Part == "a" || app
+		}
+		if app {
+			filteredVulns = append(filteredVulns, f)
+		}
+	}
+	vulns = append(vulns, filteredVulns...)
 }
 
 func handleJSONFile(path string) {
@@ -84,7 +111,9 @@ func init() {
 		if !strings.HasSuffix(f.Name(), ".json") {
 			continue
 		}
+		jsonFile := filepath.Join(extractedPath, f.Name())
 		handleJSONFile(filepath.Join(extractedPath, f.Name()))
+		nvdtools(jsonFile)
 	}
 }
 
@@ -315,7 +344,9 @@ func exactMatch(s string) constraintMatcher {
 func constraintWrapper(s string) constraintMatcher {
 	cts, err := version.NewConstraint(s)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
+		if s == "<=-" {
+			fmt.Printf("Error: %s\n", err.Error())
+		}
 		return func(_ string) bool {
 			return false
 		}
