@@ -88,11 +88,10 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 		versionSet = versionSet.Union(languageVersionSet)
 	}
 
-	attributes := make([]*wfn.Attributes, 0, vendorSet.Cardinality()*nameSet.Cardinality()*versionSet.Cardinality())
-
 	if vendorSet.Cardinality() == 0 {
 		vendorSet.Add("")
 	}
+	attributes := make([]*wfn.Attributes, 0, vendorSet.Cardinality()*nameSet.Cardinality()*versionSet.Cardinality())
 	for _, vendor := range vendorSet.AsSlice() {
 		for _, name := range nameSet.AsSlice() {
 			for _, version := range versionSet.AsSlice() {

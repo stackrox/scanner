@@ -171,8 +171,6 @@ github.com/grpc-ecosystem/grpc-gateway v1.11.4-0.20191004150533-c677e419aa5c/go.
 github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible h1:pEaL0WKSw4FKzIY9ZNcLKPss7JVppKDr8Z+qBMv0098=
 github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible/go.mod h1:ePGpQaN9cw0tj45IR5E5ehMvsFlLlQZAkkOXZurJ3NM=
 github.com/hako/durafmt v0.0.0-20180520121703-7b7ae1e72ead/go.mod h1:5Scbynm8dF1XAPwIwkGPqzkM/shndPm79Jd1003hTjE=
-github.com/hashicorp/go-version v1.2.0 h1:3vNe/fWF5CBgRIguda1meWhsZHy3m8gCJ5wx+dIzX/E=
-github.com/hashicorp/go-version v1.2.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hashicorp/golang-lru v0.5.3 h1:YPkqC67at8FYaadspW/6uE0COsBxS2656RLEr8Bppgk=
