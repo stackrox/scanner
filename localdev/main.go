@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
 
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/cpe"
@@ -50,8 +51,8 @@ type Config struct {
 func main() {
 	// Need to export NVD_DEFINITIONS_DIR in order to get vulnerabilities
 
-	// Get local .tar.gz
-	f, err := os.Open("/Users/connorgorman/repos/src/github.com/stackrox/scanner/vulns/python/struts.tar.gz")
+	// Get local .tar.gz path
+	f, err := os.Open("")
 	if err != nil {
 		panic(err)
 	}
@@ -92,6 +93,7 @@ func main() {
 			break
 		}
 	}
+	var total time.Duration
 	for _, l := range config.Layers {
 		layerTarReader := ioutil.NopCloser(bytes.NewBuffer(filemap[l]))
 		_, _, languageComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace})
@@ -99,13 +101,16 @@ func main() {
 			panic(err)
 		}
 
+		t := time.Now()
 		features := cpe.CheckForVulnerabilities(l, languageComponents)
+		total += time.Since(t)
 		fmt.Println(l)
 		for _, f := range features {
-			fmt.Println("\t", f.Feature.Name, f.Version)
+			fmt.Println("\t", f.Feature.Name, f.Version, fmt.Sprintf("(%d vulns)", len(f.AffectedBy)))
 			for _, v := range f.AffectedBy {
 				fmt.Println("\t\t", v.Name)
 			}
 		}
 	}
+	fmt.Printf("\n%0.4f seconds took Checking for vulns", total.Seconds())
 }

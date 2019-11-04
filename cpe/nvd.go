@@ -17,12 +17,9 @@ import (
 )
 
 var (
-	vulns = make(map[productVersionPair][]*Vuln)
+	cache  *cvefeed.Cache
+	cveMap = make(map[string]*Vuln)
 )
-
-type productVersionPair struct {
-	product, version string
-}
 
 type Vuln struct {
 	cvefeed.Vuln
@@ -54,7 +51,7 @@ type Matcher interface {
 	Matches(s string) *database.Vulnerability
 }
 
-func handleJSONFile(path string) {
+func handleJSONFile(path string) []*Vuln {
 	f, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -70,16 +67,10 @@ func handleJSONFile(path string) {
 			app = attr.Part == "a" || app
 		}
 		if app {
-			for _, attr := vulns[f.]
-
-
 			filteredVulns = append(filteredVulns, f)
 		}
 	}
-
-
-
-	vulns = append(vulns, filteredVulns...)
+	return filteredVulns
 }
 
 func init() {
@@ -95,12 +86,21 @@ func init() {
 		return
 	}
 
+	var vulns []*Vuln
 	for _, f := range files {
 		if !strings.HasSuffix(f.Name(), ".json") {
 			continue
 		}
-		handleJSONFile(filepath.Join(extractedPath, f.Name()))
+		vulns = append(vulns, handleJSONFile(filepath.Join(extractedPath, f.Name()))...)
 	}
+
+	dict := make(cvefeed.Dictionary)
+	for _, v := range vulns {
+		dict[v.ID()] = *v
+		cveMap[v.ID()] = v
+	}
+	cache = cvefeed.NewCache(dict).SetMaxSize(0).SetRequireVersion(false)
+	cache.Idx = cvefeed.NewIndex(dict)
 }
 
 func (v *Vuln) Summary() string {

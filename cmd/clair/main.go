@@ -59,6 +59,9 @@ import (
 	_ "github.com/stackrox/scanner/ext/vulnsrc/oracle"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/rhel"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
+
+	// Register generators
+	_ "github.com/stackrox/scanner/cpe/java"
 )
 
 var debugRoutes = map[string]http.Handler{
