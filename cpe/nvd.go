@@ -3,7 +3,6 @@ package cpe
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -22,55 +21,48 @@ var (
 )
 
 type Vuln struct {
-	cvefeed.Vuln
 	Item *schema.NVDCVEFeedJSON10DefCVEItem
 }
 
-// ParseJSON parses JSON dictionary from NVD vulnerability feed
-func parseJSON(reader io.ReadCloser) ([]*Vuln, error) {
-	defer reader.Close()
-
-	var feed schema.NVDCVEFeedJSON10
-	if err := json.NewDecoder(reader).Decode(&feed); err != nil {
-		return nil, err
+func (v *Vuln) ID() string {
+	if v.Item.CVE != nil && v.Item.CVE.CVEDataMeta != nil {
+		return v.Item.CVE.CVEDataMeta.ID
 	}
-
-	vulns := make([]*Vuln, 0, len(feed.CVEItems))
-	for _, cve := range feed.CVEItems {
-		if cve != nil && cve.Configurations != nil {
-			vulns = append(vulns, &Vuln{
-				Vuln: nvd.ToVuln(cve),
-				Item: cve,
-			})
-		}
-	}
-	return vulns, nil
+	return ""
 }
 
 type Matcher interface {
 	Matches(s string) *database.Vulnerability
 }
 
-func handleJSONFile(path string) []*Vuln {
+func handleJSONFile(dict cvefeed.Dictionary, path string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		panic(err)
 	}
-	fileVulns, err := parseJSON(f)
-	if err != nil {
-		panic(err)
+	defer f.Close()
+
+	var feed schema.NVDCVEFeedJSON10
+	if err := json.NewDecoder(f).Decode(&feed); err != nil {
+		return err
 	}
-	filteredVulns := fileVulns[:0]
-	for _, f := range fileVulns {
-		var app bool
-		for _, attr := range f.Config() {
-			app = attr.Part == "a" || app
-		}
-		if app {
-			filteredVulns = append(filteredVulns, f)
+
+	for _, cve := range feed.CVEItems {
+		if cve != nil && cve.Configurations != nil {
+			vuln := nvd.ToVuln(cve)
+			var isAppCPE bool
+			for _, a := range vuln.Config() {
+				isAppCPE = a.Part == "a" || isAppCPE
+			}
+			if isAppCPE {
+				cveMap[vuln.ID()] = &Vuln{
+					Item: cve,
+				}
+				dict[vuln.ID()] = vuln
+			}
 		}
 	}
-	return filteredVulns
+	return nil
 }
 
 func init() {
@@ -86,21 +78,24 @@ func init() {
 		return
 	}
 
-	var vulns []*Vuln
+	dict := make(cvefeed.Dictionary)
 	for _, f := range files {
 		if !strings.HasSuffix(f.Name(), ".json") {
 			continue
 		}
-		vulns = append(vulns, handleJSONFile(filepath.Join(extractedPath, f.Name()))...)
+		if err := handleJSONFile(dict, filepath.Join(extractedPath, f.Name())); err != nil {
+			panic(err)
+		}
 	}
+	log.Infof("Total vulns: %d", len(cveMap))
 
-	dict := make(cvefeed.Dictionary)
-	for _, v := range vulns {
-		dict[v.ID()] = *v
-		cveMap[v.ID()] = v
-	}
-	cache = cvefeed.NewCache(dict).SetMaxSize(0).SetRequireVersion(false)
+	cache = cvefeed.NewCache(dict).SetMaxSize(-1).SetRequireVersion(false)
 	cache.Idx = cvefeed.NewIndex(dict)
+
+	// After this is built, nil out the configurations of the nodes as they are not relevant and can be GC'd
+	for _, v := range cveMap {
+		v.Item.Configurations = nil
+	}
 }
 
 func (v *Vuln) Summary() string {
