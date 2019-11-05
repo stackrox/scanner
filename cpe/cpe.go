@@ -82,19 +82,16 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 	versionSet := generateVersionKeys(c)
 
 	if generator, ok := generators[c.SourceType]; ok {
-		languageVendorSet, languageNameSet, languageVersionSet := generator(c)
-		vendorSet = vendorSet.Union(languageVendorSet)
-		nameSet = nameSet.Union(languageNameSet)
-		versionSet = versionSet.Union(languageVersionSet)
+		generator(c, vendorSet, nameSet, versionSet)
 	}
 
 	if vendorSet.Cardinality() == 0 {
 		vendorSet.Add("")
 	}
 	attributes := make([]*wfn.Attributes, 0, vendorSet.Cardinality()*nameSet.Cardinality()*versionSet.Cardinality())
-	for _, vendor := range vendorSet.AsSlice() {
-		for _, name := range nameSet.AsSlice() {
-			for _, version := range versionSet.AsSlice() {
+	for vendor := range vendorSet {
+		for name := range nameSet {
+			for version := range versionSet {
 				attributes = append(attributes, &wfn.Attributes{
 					Vendor:  vendor,
 					Product: name,
@@ -117,6 +114,12 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 			allAttributes = append(allAttributes, a)
 			uniqueAttributes[*a] = struct{}{}
 		}
+	}
+
+	log.Infof("%s", layer)
+	for _, a := range allAttributes {
+		a.Product = strings.ToLower(a.Product)
+		log.Infof("\t%+v", a)
 	}
 
 	return getVulnsForComponent(layer, allAttributes)

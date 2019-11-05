@@ -11,7 +11,7 @@ var (
 	generators = make(map[component.SourceType]Generator)
 )
 
-type Generator func(c *component.Component) (vendors, packages, versions set.StringSet)
+type Generator func(c *component.Component, vendors, packages, versions set.StringSet)
 
 func Register(name component.SourceType, generator Generator) {
 	if _, ok := generators[name]; ok {

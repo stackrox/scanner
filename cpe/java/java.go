@@ -17,13 +17,12 @@ func init() {
 	cpe.Register(component.JavaSourceType, getVersionsForJava)
 }
 
-func getVersionsForJava(component *component.Component) (vendors, pkgs, versions set.StringSet) {
+func getVersionsForJava(component *component.Component, vendorSet, _, versionSet set.StringSet) {
 	java := component.JavaPkgMetadata
 	if java == nil {
-		return nil, nil, nil
+		return
 	}
 
-	versionSet := set.NewStringSet()
 	versionSet.AddMatching(func(s string) bool {
 		return s != ""
 	}, java.ImplementationVersion, java.MavenVersion, java.SpecificationVersion)
@@ -31,11 +30,9 @@ func getVersionsForJava(component *component.Component) (vendors, pkgs, versions
 		versionSet.Add(extensionRegex.ReplaceAllString(k, ""))
 	}
 
-	vendor := set.NewStringSet()
 	originSpl := strings.Split(java.Origin, ".")
 	// Typically this is org.vendor.product
 	if len(originSpl) >= 2 {
-		vendor.Add(originSpl[1])
+		vendorSet.Add(originSpl[1])
 	}
-	return vendor, set.NewStringSet(), versionSet
 }
