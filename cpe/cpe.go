@@ -93,9 +93,9 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 		for name := range nameSet {
 			for version := range versionSet {
 				attributes = append(attributes, &wfn.Attributes{
-					Vendor:  vendor,
-					Product: name,
-					Version: version,
+					Vendor:  strings.ToLower(vendor),
+					Product: strings.ToLower(name),
+					Version: strings.ToLower(version),
 				})
 			}
 		}
