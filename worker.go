@@ -18,7 +18,6 @@ import (
 	"io"
 	"regexp"
 
-	"github.com/davecgh/go-spew/spew"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -116,7 +115,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 
 	// Analyze the content.
 	var languageComponents []*component.Component
-	layer.Namespace, layer.Features, languageComponents, err = detectContentFromReader(reader, imageFormat, name, layer.Parent)
+	layer.Namespace, layer.Features, languageComponents, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
 	if err != nil {
 		return err
 	}
@@ -160,7 +159,7 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 }
 
 func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
-	namespace, err = detectNamespace(name, files, parent)
+	namespace, err = DetectNamespace(name, files, parent)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -178,19 +177,10 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	if err != nil {
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
 	}
-	if len(allComponents) > 0 {
-		log.Infof("Found %d components", len(allComponents))
-		componentsToPrint := allComponents
-		if len(componentsToPrint) > 5 {
-			componentsToPrint = componentsToPrint[:5]
-		}
-		log.Infof("First %d of the components are %s", len(componentsToPrint), spew.Sdump(componentsToPrint))
-	}
-
 	return namespace, featureVersions, allComponents, err
 }
 
-func detectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
+func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
 	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.SingletonMatcher())
 	if err != nil {
 		return nil, nil, nil, err
@@ -211,7 +201,7 @@ func detectContent(imageFormat, name, path string, headers map[string]string, pa
 	return detectFromFiles(files, name, parent)
 }
 
-func detectNamespace(name string, files tarutil.FilesMap, parent *database.Layer) (namespace *database.Namespace, err error) {
+func DetectNamespace(name string, files tarutil.FilesMap, parent *database.Layer) (namespace *database.Namespace, err error) {
 	namespace, err = featurens.Detect(files)
 	if err != nil {
 		return

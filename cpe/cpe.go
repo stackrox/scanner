@@ -1,33 +1,72 @@
 package cpe
 
 import (
+	"regexp"
+	"strings"
+
+	"github.com/facebookincubator/nvdtools/wfn"
+	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
-type cpeKey struct {
-	vendor, pkg, version string
-}
+var (
+	numRegex = regexp.MustCompile(`[0-9].*$`)
+)
 
-func getVulnsForComponent(layer string, potentialKeys []cpeKey, cpeToComponentMap map[cpeKey]*component.Component) []database.FeatureVersion {
-	featureMap := make(map[cpeKey][]database.Vulnerability)
-	for _, key := range potentialKeys {
-		matchers := cpeMatcher[key.vendor][key.pkg]
-		for _, matcher := range matchers {
-			if vuln := matcher.Matches(key.version); vuln != nil {
-				featureMap[key] = append(featureMap[key], *vuln)
-			}
+func generateNameKeys(c *component.Component) set.StringSet {
+	nameSet := set.NewStringSet(
+		c.Name,
+		strings.ReplaceAll(c.Name, "_", "-"),
+		strings.ReplaceAll(c.Name, "-", "_"),
+		numRegex.ReplaceAllString(c.Name, ""),
+	)
+	for name := range nameSet {
+		if idx := strings.Index(name, "-"); idx != -1 {
+			nameSet.Add(name[:idx])
 		}
 	}
+	return nameSet
+}
 
-	features := make([]database.FeatureVersion, 0, len(featureMap))
-	for key, vulns := range featureMap {
-		component := cpeToComponentMap[key]
+func generateVersionKeys(c *component.Component) set.StringSet {
+	return set.NewStringSet(c.Version)
+}
+
+type nameVersion struct {
+	name, version string
+}
+
+func getVulnsForComponent(layer string, attributes []*wfn.Attributes) []database.FeatureVersion {
+	matchResults := cache.Get(attributes)
+	if len(matchResults) == 0 {
+		return nil
+	}
+
+	vulnSet := set.NewStringSet()
+	featuresMap := make(map[nameVersion][]database.Vulnerability)
+	for _, m := range matchResults {
+		if !vulnSet.Add(m.CVE.ID()) {
+			continue
+		}
+		cpe := m.CPEs[0]
+		cve, ok := cveMap[m.CVE.ID()]
+		if !ok {
+			log.Errorf("CVE %q not found in CVE map", m.CVE.ID())
+			continue
+		}
+		nameVersionPair := nameVersion{name: cpe.Product, version: cpe.Version}
+		featuresMap[nameVersionPair] = append(featuresMap[nameVersionPair], *cve.Vulnerability())
+	}
+
+	features := make([]database.FeatureVersion, 0, len(featuresMap))
+	for pair, vulns := range featuresMap {
 		features = append(features, database.FeatureVersion{
 			Feature: database.Feature{
-				Name: component.Name,
+				Name: pair.name,
 			},
-			Version:    component.Version,
+			Version:    pair.version,
 			AffectedBy: vulns,
 			AddedBy: database.Layer{
 				Name: layer,
@@ -37,29 +76,45 @@ func getVulnsForComponent(layer string, potentialKeys []cpeKey, cpeToComponentMa
 	return features
 }
 
-func getKeys(c *component.Component) []cpeKey {
-	// TODO: Add any common logic up here.
-	switch c.SourceType {
-	case component.JavaSourceType:
-		return getVersionsForJava(c)
+func getAttributes(c *component.Component) []*wfn.Attributes {
+	vendorSet := set.NewStringSet()
+	nameSet := generateNameKeys(c)
+	versionSet := generateVersionKeys(c)
+
+	if generator, ok := generators[c.SourceType]; ok {
+		generator(c, vendorSet, nameSet, versionSet)
 	}
-	return nil
+
+	if vendorSet.Cardinality() == 0 {
+		vendorSet.Add("")
+	}
+	attributes := make([]*wfn.Attributes, 0, vendorSet.Cardinality()*nameSet.Cardinality()*versionSet.Cardinality())
+	for vendor := range vendorSet {
+		for name := range nameSet {
+			for version := range versionSet {
+				attributes = append(attributes, &wfn.Attributes{
+					Vendor:  vendor,
+					Product: name,
+					Version: version,
+				})
+			}
+		}
+	}
+	return attributes
 }
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
-	possibleCPEsMap := make(map[cpeKey]struct{})
-	cpesToComponents := make(map[cpeKey]*component.Component)
-	var possibleCPEs []cpeKey
+	uniqueAttributes := make(map[wfn.Attributes]struct{})
+	var allAttributes []*wfn.Attributes
 	for _, c := range components {
-		keys := getKeys(c)
-		for _, k := range keys {
-			if _, ok := possibleCPEsMap[k]; ok {
+		for _, a := range getAttributes(c) {
+			if _, ok := uniqueAttributes[*a]; ok {
 				continue
 			}
-			possibleCPEsMap[k] = struct{}{}
-			cpesToComponents[k] = c
-			possibleCPEs = append(possibleCPEs, k)
+			allAttributes = append(allAttributes, a)
+			uniqueAttributes[*a] = struct{}{}
 		}
 	}
-	return getVulnsForComponent(layer, possibleCPEs, cpesToComponents)
+
+	return getVulnsForComponent(layer, allAttributes)
 }

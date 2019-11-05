@@ -6,13 +6,14 @@ require (
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
+	github.com/facebookincubator/flog v0.0.0-20190930132826-d2511d0ce33c // indirect
+	github.com/facebookincubator/nvdtools v0.1.4-0.20191024132624-1cb041402875
 	github.com/golang/protobuf v1.3.2
 	github.com/gorilla/mux v1.7.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.11.4-0.20191004150533-c677e419aa5c
 	github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible
-	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/lib/pq v1.2.0
