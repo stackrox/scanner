@@ -9,6 +9,7 @@ const (
 	UnsetSourceType SourceType = iota
 	JavaSourceType
 	PythonSourceType
+	NPMSourceType
 
 	SentinelEndSourceType
 )
