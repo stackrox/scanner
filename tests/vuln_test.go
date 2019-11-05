@@ -29,6 +29,7 @@ func TestVulns(t *testing.T) {
 	for _, feat := range scan.GetImage().GetFeatures() {
 		fmt.Println(feat.GetName(), feat.GetVersion())
 	}
+	fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
 
 	componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
 		ImageSpec: scanResp.GetImage(),
