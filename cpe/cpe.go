@@ -116,11 +116,5 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 		}
 	}
 
-	log.Infof("%s", layer)
-	for _, a := range allAttributes {
-		a.Product = strings.ToLower(a.Product)
-		log.Infof("\t%+v", a)
-	}
-
 	return getVulnsForComponent(layer, allAttributes)
 }
