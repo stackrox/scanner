@@ -26,6 +26,10 @@ func TestVulns(t *testing.T) {
 		{"Django", "2.1", []string{"CVE-2019-14235"}},
 	}
 
+	for _, feat := range scan.GetImage().GetFeatures() {
+		fmt.Println(feat.GetName(), feat.GetVersion())
+	}
+
 	for _, expectedFeat := range expectedFeatures {
 		t.Run(fmt.Sprintf("%s/%s", expectedFeat.name, expectedFeat.version), func(t *testing.T) {
 			var matching *v1.Feature
