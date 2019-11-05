@@ -1,11 +1,19 @@
 package tests
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
+	"encoding/json"
+	"fmt"
 	"os"
+	"runtime"
+	"strings"
 	"testing"
+	"time"
 
+	dockerCredentialHelpers "github.com/docker/docker-credential-helpers/credentials"
+	"github.com/docker/docker-credential-helpers/osxkeychain"
 	"github.com/stackrox/rox/pkg/stringutils"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stretchr/testify/require"
@@ -13,8 +21,47 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+const (
+	scannerGRPCEndpointEnv = "SCANNER_GRPC_ENDPOINTT"
+	dockerIOUsernameEnv    = "DOCKER_IO_PULL_USERNAME"
+	dockerIOPasswordEnv    = "DOCKER_IO_PULL_PASSWORD"
+)
+
+func maybeGetFromKeyChain() (string, string) {
+	if runtime.GOOS != "darwin" {
+		return "", ""
+	}
+	var buffer bytes.Buffer
+	err := dockerCredentialHelpers.Get(osxkeychain.Osxkeychain{}, strings.NewReader("docker.io"), &buffer)
+	if err != nil {
+		fmt.Printf("Error getting credentials: %v\n", err)
+		return "", ""
+	}
+	var creds dockerCredentialHelpers.Credentials
+	err = json.Unmarshal(buffer.Bytes(), &creds)
+	if err != nil {
+		fmt.Printf("Error unmarshaling docker credentials JSON: %v\n", err)
+		return "", ""
+	}
+	return creds.Username, creds.Secret
+}
+
+func mustGetDockerCredentials(t *testing.T) (string, string) {
+	user, pass := maybeGetFromKeyChain()
+	if stringutils.AllNotEmpty(user, pass) {
+		return user, pass
+	}
+	return mustGetEnv(dockerIOUsernameEnv, t), mustGetEnv(dockerIOPasswordEnv, t)
+}
+
+func mustGetEnv(key string, t *testing.T) string {
+	val := os.Getenv(key)
+	require.NotEmpty(t, val, "No %s env found", key)
+	return val
+}
+
 func connectToScanner(t *testing.T) *grpc.ClientConn {
-	gRPCEndpoint := stringutils.OrDefault(os.Getenv("SCANNER_GRPC_ENDPOINT"), "localhost:8081")
+	gRPCEndpoint := stringutils.OrDefault(os.Getenv(scannerGRPCEndpointEnv), "localhost:8081")
 	clientTLSConfig := &tls.Config{
 		InsecureSkipVerify: true,
 	}
@@ -23,14 +70,32 @@ func connectToScanner(t *testing.T) *grpc.ClientConn {
 	return conn
 }
 
+func scanImage(client v1.ScanServiceClient, req *v1.ScanImageRequest, t *testing.T) *v1.ScanImageResponse {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	scanImageResp, err := client.ScanImage(ctx, req)
+	require.NoError(t, err)
+	require.Equal(t, scanImageResp.GetStatus(), v1.ScanStatus_SUCCEEDED)
+	return scanImageResp
+}
+
 func scanPublicDockerHubImage(client v1.ScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
-	scanImageResp, err := client.ScanImage(context.Background(), &v1.ScanImageRequest{
+	return scanImage(client, &v1.ScanImageRequest{
 		Image: imageName,
 		Registry: &v1.ScanImageRequest_RegistryData{
 			Url: "https://registry-1.docker.io",
 		},
-	})
-	require.NoError(t, err)
-	require.Equal(t, scanImageResp.GetStatus(), v1.ScanStatus_SUCCEEDED)
-	return scanImageResp
+	}, t)
+}
+
+func scanDockerIOStackRoxImage(client v1.ScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
+	user, pass := mustGetDockerCredentials(t)
+	return scanImage(client, &v1.ScanImageRequest{
+		Image: imageName,
+		Registry: &v1.ScanImageRequest_RegistryData{
+			Url:      "https://registry-1.docker.io",
+			Username: user,
+			Password: pass,
+		},
+	}, t)
 }
