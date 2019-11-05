@@ -20,6 +20,10 @@ const (
 	dockerIOPasswordEnv    = "DOCKER_IO_PULL_PASSWORD"
 )
 
+var (
+	maybeGetFromKeyChain func() (string, string)
+)
+
 func mustGetDockerCredentials(t *testing.T) (string, string) {
 	user, pass := maybeGetFromKeyChain()
 	if stringutils.AllNotEmpty(user, pass) {
