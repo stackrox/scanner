@@ -25,9 +25,11 @@ var (
 )
 
 func mustGetDockerCredentials(t *testing.T) (string, string) {
-	user, pass := maybeGetFromKeyChain()
-	if stringutils.AllNotEmpty(user, pass) {
-		return user, pass
+	if maybeGetFromKeyChain != nil {
+		user, pass := maybeGetFromKeyChain()
+		if stringutils.AllNotEmpty(user, pass) {
+			return user, pass
+		}
 	}
 	return mustGetEnv(dockerIOUsernameEnv, t), mustGetEnv(dockerIOPasswordEnv, t)
 }
