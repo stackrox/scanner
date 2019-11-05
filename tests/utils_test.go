@@ -1,19 +1,12 @@
 package tests
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
-	"encoding/json"
-	"fmt"
 	"os"
-	"runtime"
-	"strings"
 	"testing"
 	"time"
 
-	dockerCredentialHelpers "github.com/docker/docker-credential-helpers/credentials"
-	"github.com/docker/docker-credential-helpers/osxkeychain"
 	"github.com/stackrox/rox/pkg/stringutils"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stretchr/testify/require"
@@ -26,25 +19,6 @@ const (
 	dockerIOUsernameEnv    = "DOCKER_IO_PULL_USERNAME"
 	dockerIOPasswordEnv    = "DOCKER_IO_PULL_PASSWORD"
 )
-
-func maybeGetFromKeyChain() (string, string) {
-	if runtime.GOOS != "darwin" {
-		return "", ""
-	}
-	var buffer bytes.Buffer
-	err := dockerCredentialHelpers.Get(osxkeychain.Osxkeychain{}, strings.NewReader("docker.io"), &buffer)
-	if err != nil {
-		fmt.Printf("Error getting credentials: %v\n", err)
-		return "", ""
-	}
-	var creds dockerCredentialHelpers.Credentials
-	err = json.Unmarshal(buffer.Bytes(), &creds)
-	if err != nil {
-		fmt.Printf("Error unmarshaling docker credentials JSON: %v\n", err)
-		return "", ""
-	}
-	return creds.Username, creds.Secret
-}
 
 func mustGetDockerCredentials(t *testing.T) (string, string) {
 	user, pass := maybeGetFromKeyChain()
