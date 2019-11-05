@@ -25,6 +25,8 @@ var (
 )
 
 func mustGetDockerCredentials(t *testing.T) (string, string) {
+	// This is only injected on Darwin, to simplify running tests locally without exporting the
+	// env variables.
 	if maybeGetFromKeyChain != nil {
 		user, pass := maybeGetFromKeyChain()
 		if stringutils.AllNotEmpty(user, pass) {

@@ -30,6 +30,17 @@ func TestVulns(t *testing.T) {
 		fmt.Println(feat.GetName(), feat.GetVersion())
 	}
 
+	componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
+		ImageSpec: scanResp.GetImage(),
+	})
+	require.NoError(t, err)
+	for _, components := range componentsMap.GetLayerToComponents() {
+		for _, component := range components.GetComponents() {
+			fmt.Println(component.GetName(), component.GetVersion())
+		}
+	}
+	fmt.Println("DONE PRINTING COMPONENTS")
+
 	for _, expectedFeat := range expectedFeatures {
 		t.Run(fmt.Sprintf("%s/%s", expectedFeat.name, expectedFeat.version), func(t *testing.T) {
 			var matching *v1.Feature
