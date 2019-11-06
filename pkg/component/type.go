@@ -7,9 +7,10 @@ type SourceType int
 // This block enumerates valid types.
 const (
 	UnsetSourceType SourceType = iota
+	GemSourceType
 	JavaSourceType
-	PythonSourceType
 	NPMSourceType
+	PythonSourceType
 
 	SentinelEndSourceType
 )

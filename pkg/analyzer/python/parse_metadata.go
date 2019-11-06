@@ -7,6 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/scanner/pkg/analyzer/internal/common"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
@@ -45,7 +46,7 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 		}
 
 		// If we have got all the information we want, no point in scanning the rest of the file.
-		if c != nil && c.Name != "" && c.Version != "" {
+		if common.HasNameAndVersion(c) {
 			break
 		}
 	}
