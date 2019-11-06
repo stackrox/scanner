@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	scannerGRPCEndpointEnv = "SCANNER_GRPC_ENDPOINTT"
+	scannerGRPCEndpointEnv = "SCANNER_GRPC_ENDPOINT"
 	dockerIOUsernameEnv    = "DOCKER_IO_PULL_USERNAME"
 	dockerIOPasswordEnv    = "DOCKER_IO_PULL_PASSWORD"
 )
