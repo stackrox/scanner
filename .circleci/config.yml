@@ -161,7 +161,7 @@ jobs:
               cat nohup.out || true
               rm nohup.out || true
               rm FAIL || true
-              killall kubectl
+              pkill kubectl
               sleep 5
             done
 
