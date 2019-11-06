@@ -87,6 +87,12 @@ func TestStackroxVulnImages(t *testing.T) {
 				{"lodash", "4.17.10", []string{"CVE-2019-1010266"}},
 			},
 		},
+		{
+			imageTag: "rails-cve-2016-2098",
+			expectedFeatures: []expectedFeature{
+				{"rails", "4.2.5.1", []string{"CVE-2016-2098"}},
+			},
+		},
 	} {
 		t.Run(testCase.imageTag, func(t *testing.T) {
 			testSingleVulnImage(testCase, t)
