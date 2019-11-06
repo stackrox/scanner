@@ -85,7 +85,7 @@ func TestStackroxVulnImages(t *testing.T) {
 			},
 		},
 		{
-			imageTag: "cve-2019-1010266",
+			imageTag: "lodash-cve-2019-1010266",
 			expectedFeatures: []expectedFeature{
 				{"lodash", "4.17.10", []string{"CVE-2019-1010266"}},
 			},
