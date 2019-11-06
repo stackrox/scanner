@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stackrox/rox/pkg/sliceutils"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,23 +50,17 @@ func TestVulns(t *testing.T) {
 
 	for _, expectedFeat := range expectedFeatures {
 		t.Run(fmt.Sprintf("%s/%s", expectedFeat.name, expectedFeat.version), func(t *testing.T) {
-			var matching *v1.Feature
-			for _, actualFeature := range scan.GetImage().GetFeatures() {
-				if actualFeature.GetName() == expectedFeat.name && actualFeature.GetVersion() == expectedFeat.version {
-					matching = actualFeature
-					break
-				}
-			}
-			assert.NotNil(t, matching)
+			matchingIdx := sliceutils.FindMatching(scan.GetImage().GetFeatures(), func(feature *v1.Feature) bool {
+				return feature.GetName() == expectedFeat.name && feature.GetVersion() == expectedFeat.version
+			})
+			require.NotEqual(t, -1, matchingIdx)
+			matchingFeature := scan.GetImage().GetFeatures()[matchingIdx]
+
 			for _, expectedVuln := range expectedFeat.expectedVulns {
-				var found bool
-				for _, actualVuln := range matching.GetVulnerabilities() {
-					if actualVuln.GetName() == expectedVuln {
-						found = true
-						break
-					}
-				}
-				assert.True(t, found, "Vuln %s not found", expectedVuln)
+				matchingIdx := sliceutils.FindMatching(matchingFeature.GetVulnerabilities(), func(v *v1.Vulnerability) bool {
+					return v.GetName() == expectedVuln
+				})
+				assert.NotEqual(t, -1, matchingIdx, "Vuln %s not found", expectedVuln)
 			}
 		})
 	}
