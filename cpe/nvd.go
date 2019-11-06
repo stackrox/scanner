@@ -25,7 +25,7 @@ type Vuln struct {
 }
 
 func (v *Vuln) ID() string {
-	if v.Item.CVE != nil && v.Item.CVE.CVEDataMeta != nil {
+	if v.Item != nil && v.Item.CVE != nil && v.Item.CVE.CVEDataMeta != nil {
 		return v.Item.CVE.CVEDataMeta.ID
 	}
 	return ""
@@ -99,6 +99,9 @@ func init() {
 }
 
 func (v *Vuln) Summary() string {
+	if v.Item == nil || v.Item.CVE == nil || v.Item.CVE.Description == nil {
+		return ""
+	}
 	for _, desc := range v.Item.CVE.Description.DescriptionData {
 		if desc.Lang == "en" {
 			return desc.Value
@@ -129,6 +132,9 @@ type MetadataCVSSv3 struct {
 }
 
 func (v *Vuln) Metadata() *Metadata {
+	if v.Item == nil {
+		return nil
+	}
 	metadata := &Metadata{
 		PublishedDateTime:    v.Item.PublishedDate,
 		LastModifiedDateTime: v.Item.LastModifiedDate,

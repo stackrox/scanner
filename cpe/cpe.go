@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/facebookincubator/nvdtools/wfn"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -15,12 +16,15 @@ var (
 	numRegex = regexp.MustCompile(`[0-9].*$`)
 )
 
-func generateNameKeys(c *component.Component) set.StringSet {
+func generateNameKeys(componentName string) set.StringSet {
+	if componentName == "" {
+		return set.NewStringSet()
+	}
 	nameSet := set.NewStringSet(
-		c.Name,
-		strings.ReplaceAll(c.Name, "_", "-"),
-		strings.ReplaceAll(c.Name, "-", "_"),
-		numRegex.ReplaceAllString(c.Name, ""),
+		componentName,
+		strings.ReplaceAll(componentName, "_", "-"),
+		strings.ReplaceAll(componentName, "-", "_"),
+		numRegex.ReplaceAllString(componentName, ""),
 	)
 	for name := range nameSet {
 		if idx := strings.Index(name, "-"); idx != -1 {
@@ -38,47 +42,63 @@ type nameVersion struct {
 	name, version string
 }
 
-func getVulnsForComponent(layer string, attributes []*wfn.Attributes) []database.FeatureVersion {
-	matchResults := cache.Get(attributes)
+func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResult, cveToVulns map[string]*Vuln) []database.FeatureVersion {
 	if len(matchResults) == 0 {
 		return nil
 	}
 
 	vulnSet := set.NewStringSet()
-	featuresMap := make(map[nameVersion][]database.Vulnerability)
+	featuresMap := make(map[nameVersion]*database.FeatureVersion)
 	for _, m := range matchResults {
 		if !vulnSet.Add(m.CVE.ID()) {
 			continue
 		}
-		cpe := m.CPEs[0]
-		cve, ok := cveMap[m.CVE.ID()]
+		cve, ok := cveToVulns[m.CVE.ID()]
 		if !ok {
 			log.Errorf("CVE %q not found in CVE map", m.CVE.ID())
 			continue
 		}
-		nameVersionPair := nameVersion{name: cpe.Product, version: cpe.Version}
-		featuresMap[nameVersionPair] = append(featuresMap[nameVersionPair], *cve.Vulnerability())
-	}
+		if len(m.CPEs) == 0 {
+			log.Errorf("Found 0 CPEs in match with CVE %q", m.CVE.ID())
+			continue
+		}
+		cpe := m.CPEs[0]
 
+		nameVersion := nameVersion{
+			name:    cpe.Product,
+			version: cpe.Version,
+		}
+		feature, ok := featuresMap[nameVersion]
+		if !ok {
+			feature = &database.FeatureVersion{
+				Feature: database.Feature{
+					Name: cpe.Product,
+				},
+				Version: cpe.Version,
+				AddedBy: database.Layer{
+					Name: layer,
+				},
+			}
+			featuresMap[nameVersion] = feature
+		}
+		feature.AffectedBy = append(feature.AffectedBy, *cve.Vulnerability())
+	}
 	features := make([]database.FeatureVersion, 0, len(featuresMap))
-	for pair, vulns := range featuresMap {
-		features = append(features, database.FeatureVersion{
-			Feature: database.Feature{
-				Name: pair.name,
-			},
-			Version:    pair.version,
-			AffectedBy: vulns,
-			AddedBy: database.Layer{
-				Name: layer,
-			},
-		})
+	for _, feature := range featuresMap {
+		features = append(features, *feature)
 	}
 	return features
 }
 
+func getVulnsForComponent(layer string, attributes []*wfn.Attributes) []database.FeatureVersion {
+	matchResults := cache.Get(attributes)
+
+	return getFeaturesFromMatchResults(layer, matchResults, cveMap)
+}
+
 func getAttributes(c *component.Component) []*wfn.Attributes {
 	vendorSet := set.NewStringSet()
-	nameSet := generateNameKeys(c)
+	nameSet := generateNameKeys(c.Name)
 	versionSet := generateVersionKeys(c)
 
 	if generator, ok := generators[c.SourceType]; ok {
