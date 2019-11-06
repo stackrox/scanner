@@ -84,6 +84,12 @@ func TestStackroxVulnImages(t *testing.T) {
 				{"django", "2.1", []string{"CVE-2019-14235"}},
 			},
 		},
+		{
+			imageTag: "cve-2019-1010266",
+			expectedFeatures: []expectedFeature{
+				{"lodash", "4.17.10", []string{"CVE-2019-1010266"}},
+			},
+		},
 	} {
 		t.Run(testCase.imageTag, func(t *testing.T) {
 			testSingleVulnImage(testCase, t)
