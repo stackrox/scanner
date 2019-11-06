@@ -25,9 +25,8 @@ func getMatchingFeature(featureList []v1.Feature, featureToFind v1.Feature, t *t
 	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list", featureToFind)
 	return featureList[candidateIdx]
 }
-
-func testImage(client *client.Clairify, imageRequest *types.ImageRequest, expectedFeatures []v1.Feature, t *testing.T) {
-	img, err := client.AddImage("", "", imageRequest)
+func verifyImageHasExpectedFeatures(client *client.Clairify, username, password string, imageRequest *types.ImageRequest, expectedFeatures []v1.Feature, t *testing.T) {
+	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
 	env, err := client.RetrieveImageDataBySHA(img.SHA, true, true)
@@ -222,7 +221,7 @@ func TestImageSanity(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			testImage(cli, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
+			verifyImageHasExpectedFeatures(cli, "", "", &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
 		})
 	}
 
