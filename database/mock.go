@@ -175,6 +175,9 @@ func (mds *MockDatastore) AddImage(layer string, digest, name string) error {
 }
 
 func (mds *MockDatastore) InsertLayerComponents(l string, c []*component.Component) error {
+	if mds.FctInsertLayerComponents != nil {
+		return mds.FctInsertLayerComponents(l, c)
+	}
 	panic("required mock function not implemented")
 }
 

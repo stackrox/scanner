@@ -196,14 +196,6 @@ const (
           AND name = $2
           AND deleted_at IS NULL
     RETURNING id`
-
-	// complex_test.go
-	searchComplexTestFeatureVersionAffects = `
-		SELECT v.name
-    FROM FeatureVersion fv
-      LEFT JOIN Vulnerability_Affects_FeatureVersion vaf ON fv.id = vaf.featureversion_id
-      JOIN Vulnerability v ON vaf.vulnerability_id = v.id
-    WHERE featureversion_id = $1`
 )
 
 // buildInputArray constructs a PostgreSQL input array from the specified integers.

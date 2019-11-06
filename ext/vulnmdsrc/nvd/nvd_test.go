@@ -50,7 +50,7 @@ func TestNVDParser(t *testing.T) {
 	// Item with only CVSSv2.
 	gotMetadata, ok := a.metadata["CVE-2012-0001"]
 	assert.True(t, ok)
-	wantMetadata := Metadata{
+	wantMetadata := &Metadata{
 		CVSSv2: NVDmetadataCVSSv2{
 			Vectors:             "AV:N/AC:L/Au:S/C:P/I:N/A:N",
 			Score:               4.0,
@@ -58,12 +58,12 @@ func TestNVDParser(t *testing.T) {
 			ImpactScore:         2.9,
 		},
 	}
-	assert.Equal(t, wantMetadata, gotMetadata)
+	assert.Equal(t, wantMetadata, gotMetadata.Metadata())
 
 	// Item with both CVSSv2 and CVSSv3 has CVSSv2 information returned.
 	gotMetadata, ok = a.metadata["CVE-2018-0001"]
 	assert.True(t, ok)
-	wantMetadata = Metadata{
+	wantMetadata = &Metadata{
 		CVSSv2: NVDmetadataCVSSv2{
 			Vectors:             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 			Score:               7.5,
@@ -77,7 +77,7 @@ func TestNVDParser(t *testing.T) {
 			ImpactScore:         5.9,
 		},
 	}
-	assert.Equal(t, wantMetadata, gotMetadata)
+	assert.Equal(t, wantMetadata, gotMetadata.Metadata())
 }
 
 func TestNVDParserErrors(t *testing.T) {

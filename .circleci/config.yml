@@ -25,6 +25,19 @@ commands:
             gcloud config set core/disable_prompts True
 
 jobs:
+  unit-tests:
+    <<: *defaults
+    steps:
+      - checkout
+
+      - run:
+          name: Install dependencies
+          command: make deps
+
+      - run:
+          name: Run unit tests
+          command: make unit-tests
+
   style-checks:
     <<: *defaults
     steps:
@@ -205,6 +218,11 @@ workflows:
 
   build:
     jobs:
+    - unit-tests:
+        context: docker-io-pull
+        filters:
+          tags:
+            only: /.*/
     - style-checks:
         context: docker-io-pull
         filters:

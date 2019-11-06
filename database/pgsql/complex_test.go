@@ -1,3 +1,5 @@
+// +build db-integration
+
 // Copyright 2017 clair authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +34,13 @@ import (
 const (
 	numVulnerabilities = 100
 	numFeatureVersions = 100
+
+	searchComplexTestFeatureVersionAffects = `
+		SELECT v.name
+    FROM FeatureVersion fv
+      LEFT JOIN Vulnerability_Affects_FeatureVersion vaf ON fv.id = vaf.featureversion_id
+      JOIN Vulnerability v ON vaf.vulnerability_id = v.id
+    WHERE featureversion_id = $1`
 )
 
 func TestRaceAffects(t *testing.T) {
