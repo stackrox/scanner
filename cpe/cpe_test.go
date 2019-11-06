@@ -2,26 +2,27 @@ package cpe
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestGenerateNameKeys(t *testing.T) {
 	cases := []struct {
 		name string
 		keys []string
-	} {
+	}{
 		{
 			name: "",
 		},
 		{
 			name: "name",
-			keys: []string {
+			keys: []string{
 				"name",
 			},
 		},
@@ -43,7 +44,7 @@ func TestGenerateNameKeys(t *testing.T) {
 			},
 		},
 	}
-	for _,c := range cases {
+	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			assert.ElementsMatch(t, c.keys, generateNameKeys(c.name).AsSlice())
 		})
@@ -52,15 +53,15 @@ func TestGenerateNameKeys(t *testing.T) {
 
 func TestGetAttributes(t *testing.T) {
 	cases := []struct {
-		comp *component.Component
+		comp               *component.Component
 		expectedAttributes []*wfn.Attributes
-	} {
+	}{
 		{
 			comp: &component.Component{
-				Name:            "struts2-showcase",
-				Version:         "1.3.12",
+				Name:    "struts2-showcase",
+				Version: "1.3.12",
 			},
-			expectedAttributes: []*wfn.Attributes {
+			expectedAttributes: []*wfn.Attributes{
 				{
 					Product: "struts",
 					Version: "1.3.12",
@@ -81,7 +82,7 @@ func TestGetAttributes(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		t.Run(fmt.Sprintf("%s-%s",c.comp.Name, c.comp.Version), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%s-%s", c.comp.Name, c.comp.Version), func(t *testing.T) {
 			assert.ElementsMatch(t, c.expectedAttributes, getAttributes(c.comp))
 		})
 	}
@@ -89,8 +90,8 @@ func TestGetAttributes(t *testing.T) {
 
 func newScannerVuln(id string) *Vuln {
 	return &Vuln{
-		Item: &schema.NVDCVEFeedJSON10DefCVEItem {
-			CVE: &schema.CVEJSON40 {
+		Item: &schema.NVDCVEFeedJSON10DefCVEItem{
+			CVE: &schema.CVEJSON40{
 				CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
 					ID: id,
 				},
@@ -105,10 +106,10 @@ func newMockCVEFeedVuln(id string) cvefeed.Vuln {
 
 func newDatabaseVuln(id string) database.Vulnerability {
 	return database.Vulnerability{
-		Name:                           id,
-		Link:                           fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", id),
-		Severity:                       "",
-		Metadata:                       map[string]interface{}{
+		Name:     id,
+		Link:     fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", id),
+		Severity: "",
+		Metadata: map[string]interface{}{
 			"NVD": &Metadata{},
 		},
 	}
@@ -117,19 +118,19 @@ func newDatabaseVuln(id string) database.Vulnerability {
 func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 
 	cases := []struct {
-		name string
-		matches []cvefeed.MatchResult
+		name        string
+		matches     []cvefeed.MatchResult
 		cvesToVulns map[string]*Vuln
-		features []database.FeatureVersion
-	} {
+		features    []database.FeatureVersion
+	}{
 		{
-			name: "no matches",
-			matches: []cvefeed.MatchResult {},
+			name:        "no matches",
+			matches:     []cvefeed.MatchResult{},
 			cvesToVulns: map[string]*Vuln{},
 		},
 		{
 			name: "one match but not attributes (shouldn't happen)",
-			matches: []cvefeed.MatchResult {
+			matches: []cvefeed.MatchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
 				},
@@ -140,10 +141,10 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		},
 		{
 			name: "one match",
-			matches: []cvefeed.MatchResult {
+			matches: []cvefeed.MatchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []*wfn.Attributes {
+					CPEs: []*wfn.Attributes{
 						{
 							Product: "product",
 							Version: "version",
@@ -154,13 +155,13 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			cvesToVulns: map[string]*Vuln{
 				"cve1": newScannerVuln("cve1"),
 			},
-			features: []database.FeatureVersion {
+			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
-						Name:      "product",
+						Name: "product",
 					},
 					Version: "version",
-					AffectedBy: []database.Vulnerability {
+					AffectedBy: []database.Vulnerability{
 						newDatabaseVuln("cve1"),
 					},
 				},
@@ -168,10 +169,10 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		},
 		{
 			name: "one match with two CPEs",
-			matches: []cvefeed.MatchResult {
+			matches: []cvefeed.MatchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []*wfn.Attributes {
+					CPEs: []*wfn.Attributes{
 						{
 							Product: "product",
 							Version: "version",
@@ -186,13 +187,13 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			cvesToVulns: map[string]*Vuln{
 				"cve1": newScannerVuln("cve1"),
 			},
-			features: []database.FeatureVersion {
+			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
-						Name:      "product",
+						Name: "product",
 					},
 					Version: "version",
-					AffectedBy: []database.Vulnerability {
+					AffectedBy: []database.Vulnerability{
 						newDatabaseVuln("cve1"),
 					},
 				},
@@ -200,10 +201,10 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		},
 		{
 			name: "two matches with same CPE",
-			matches: []cvefeed.MatchResult {
+			matches: []cvefeed.MatchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []*wfn.Attributes {
+					CPEs: []*wfn.Attributes{
 						{
 							Product: "product",
 							Version: "version",
@@ -212,7 +213,7 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 				},
 				{
 					CVE: newMockCVEFeedVuln("cve2"),
-					CPEs: []*wfn.Attributes {
+					CPEs: []*wfn.Attributes{
 						{
 							Product: "product",
 							Version: "version",
@@ -223,15 +224,14 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			cvesToVulns: map[string]*Vuln{
 				"cve1": newScannerVuln("cve1"),
 				"cve2": newScannerVuln("cve2"),
-
 			},
-			features: []database.FeatureVersion {
+			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
-						Name:      "product",
+						Name: "product",
 					},
 					Version: "version",
-					AffectedBy: []database.Vulnerability {
+					AffectedBy: []database.Vulnerability{
 						newDatabaseVuln("cve1"),
 						newDatabaseVuln("cve2"),
 					},
@@ -240,10 +240,10 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		},
 		{
 			name: "two matches with different CPE",
-			matches: []cvefeed.MatchResult {
+			matches: []cvefeed.MatchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []*wfn.Attributes {
+					CPEs: []*wfn.Attributes{
 						{
 							Product: "product",
 							Version: "version",
@@ -252,7 +252,7 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 				},
 				{
 					CVE: newMockCVEFeedVuln("cve2"),
-					CPEs: []*wfn.Attributes {
+					CPEs: []*wfn.Attributes{
 						{
 							Product: "product2",
 							Version: "version2",
@@ -264,22 +264,22 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 				"cve1": newScannerVuln("cve1"),
 				"cve2": newScannerVuln("cve2"),
 			},
-			features: []database.FeatureVersion {
+			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
-						Name:      "product",
+						Name: "product",
 					},
 					Version: "version",
-					AffectedBy: []database.Vulnerability {
+					AffectedBy: []database.Vulnerability{
 						newDatabaseVuln("cve1"),
 					},
 				},
 				{
 					Feature: database.Feature{
-						Name:      "product2",
+						Name: "product2",
 					},
 					Version: "version2",
-					AffectedBy: []database.Vulnerability {
+					AffectedBy: []database.Vulnerability{
 						newDatabaseVuln("cve2"),
 					},
 				},
