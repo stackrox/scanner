@@ -22,6 +22,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stretchr/testify/assert"
 
 	// Register the required detectors.
@@ -57,6 +58,10 @@ func TestProcessWithDistUpgrade(t *testing.T) {
 			return layer, nil
 		}
 		return database.Layer{}, commonerr.ErrNotFound
+	}
+
+	datastore.FctInsertLayerComponents = func(l string, c []*component.Component) error {
+		return nil
 	}
 
 	// Create the list of FeatureVersions that should not been upgraded from one layer to another.

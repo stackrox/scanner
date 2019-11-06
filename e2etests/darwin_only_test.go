@@ -1,6 +1,7 @@
-//+build darwin
+// +build darwin
+// +build e2e
 
-package tests
+package e2etests
 
 import (
 	"bytes"

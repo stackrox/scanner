@@ -159,10 +159,15 @@ deploy: clean-helm-rendered
 ## Tests ##
 ###########
 
+.PHONY: unit-tests
+unit-tests: deps
+	@echo "+ $@"
+	go test -race ./...
+
 .PHONY: e2e-tests
 e2e-tests: deps
 	@echo "+ $@"
-	go test -count=1 ./tests/...
+	go test -tags e2e -count=1 ./e2etests/...
 
 ####################
 ## Generated Srcs ##
