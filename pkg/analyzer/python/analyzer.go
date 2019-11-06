@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/stackrox/scanner/pkg/analyzer"
+	"github.com/stackrox/scanner/pkg/analyzer/internal/common"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -47,16 +48,7 @@ func matchSuffix(fullPath string) bool {
 }
 
 func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
-	var allComponents []*component.Component
-	for filePath, contents := range fileMap {
-		if !matchSuffix(filePath) {
-			continue
-		}
-		if c := parseMetadataFile(filePath, contents); c != nil {
-			allComponents = append(allComponents, c)
-		}
-	}
-	return allComponents, nil
+	return common.ExtractComponents(fileMap, matchSuffix, parseMetadataFile), nil
 }
 
 func Analyzer() analyzer.Analyzer {

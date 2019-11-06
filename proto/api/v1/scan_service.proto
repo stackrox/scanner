@@ -65,6 +65,7 @@ enum SourceType {
     UNSET_SOURCE_TYPE  = 0;
     JAVA               = 1;
     PYTHON             = 2;
+    NPM                = 3;
 }
 
 message LanguageLevelComponent {
