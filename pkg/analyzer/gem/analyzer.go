@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	gemspecRegexp = regexp.MustCompile(`.*specifications/.*\.gemspec`)
+	gemSpecRegexp = regexp.MustCompile(`.*specifications/.*\.gemspec`)
 )
 
 type analyzerImpl struct{}
@@ -21,7 +21,7 @@ func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) bool {
 }
 
 func match(fullPath string) bool {
-	return gemspecRegexp.MatchString(fullPath)
+	return gemSpecRegexp.MatchString(fullPath)
 }
 
 func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
