@@ -116,7 +116,6 @@ func newDatabaseVuln(id string) database.Vulnerability {
 }
 
 func TestGetFeaturesMapFromMatchResults(t *testing.T) {
-
 	cases := []struct {
 		name        string
 		matches     []cvefeed.MatchResult
@@ -290,10 +289,6 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			features := getFeaturesFromMatchResults("", c.matches, c.cvesToVulns)
-
-			if len(features) > 0 {
-				assert.Equal(t, c.features[0], features[0])
-			}
 			assert.ElementsMatch(t, c.features, features)
 		})
 	}
