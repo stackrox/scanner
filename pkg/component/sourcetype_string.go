@@ -9,15 +9,16 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[UnsetSourceType-0]
-	_ = x[JavaSourceType-1]
-	_ = x[PythonSourceType-2]
+	_ = x[GemSourceType-1]
+	_ = x[JavaSourceType-2]
 	_ = x[NPMSourceType-3]
-	_ = x[SentinelEndSourceType-4]
+	_ = x[PythonSourceType-4]
+	_ = x[SentinelEndSourceType-5]
 }
 
-const _SourceType_name = "UnsetSourceTypeJavaSourceTypePythonSourceTypeNPMSourceTypeSentinelEndSourceType"
+const _SourceType_name = "UnsetSourceTypeGemSourceTypeJavaSourceTypeNPMSourceTypePythonSourceTypeSentinelEndSourceType"
 
-var _SourceType_index = [...]uint8{0, 15, 29, 45, 58, 79}
+var _SourceType_index = [...]uint8{0, 15, 28, 42, 55, 71, 92}
 
 func (i SourceType) String() string {
 	if i < 0 || i >= SourceType(len(_SourceType_index)-1) {

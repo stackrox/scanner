@@ -66,6 +66,7 @@ enum SourceType {
     JAVA               = 1;
     PYTHON             = 2;
     NPM                = 3;
+    GEM                = 4;
 }
 
 message LanguageLevelComponent {

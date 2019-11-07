@@ -47,7 +47,7 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 			require.NoError(t, err)
 			for _, components := range componentsMap.GetLayerToComponents() {
 				for _, component := range components.GetComponents() {
-					fmt.Println(component.GetName(), component.GetVersion())
+					fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
 				}
 			}
 			fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
@@ -85,6 +85,22 @@ func TestStackroxVulnImages(t *testing.T) {
 			imageTag: "lodash-cve-2019-1010266",
 			expectedFeatures: []expectedFeature{
 				{"lodash", "4.17.10", []string{"CVE-2019-1010266"}},
+			},
+		},
+		{
+			imageTag: "rails-cve-2016-2098",
+			expectedFeatures: []expectedFeature{
+				{"rails", "4.2.5.1", []string{
+					// TODO: Uncomment these after fixing the matching.
+					// "CVE-2016-2098",
+					// "CVE-2016-6316",
+					// "CVE-2016-6317",
+					"CVE-2018-16476",
+					// "CVE-2019-5418",
+					// "CVE-2019-5419",
+					// "CVE-2019-5420",
+				},
+				},
 			},
 		},
 	} {
