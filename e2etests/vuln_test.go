@@ -76,15 +76,29 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 func TestStackroxVulnImages(t *testing.T) {
 	for _, testCase := range []singleTestCase{
 		{
-			imageTag: "django-cve-2019-14235",
 			expectedFeatures: []expectedFeature{
-				{"django", "2.1", []string{"CVE-2019-14235"}},
+				{"django", "2.1", []string{
+					"CVE-2018-16984",
+					"CVE-2019-12308",
+					"CVE-2019-12781",
+					"CVE-2019-3498",
+					"CVE-2019-14232",
+					"CVE-2019-14233",
+					"CVE-2019-14234",
+					"CVE-2019-14235",
+				},
+				},
 			},
 		},
 		{
 			imageTag: "lodash-cve-2019-1010266",
 			expectedFeatures: []expectedFeature{
-				{"lodash", "4.17.10", []string{"CVE-2019-1010266"}},
+				{"lodash", "4.17.10", []string{
+					"CVE-2019-10744",
+					"CVE-2018-16487",
+					"CVE-2019-1010266",
+				},
+				},
 			},
 		},
 		{
