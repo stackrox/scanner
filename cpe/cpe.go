@@ -35,7 +35,11 @@ func generateNameKeys(componentName string) set.StringSet {
 }
 
 func generateVersionKeys(c *component.Component) set.StringSet {
-	return set.NewStringSet(c.Version)
+	return set.NewStringSet(c.Version, strings.ReplaceAll(c.Version, ".", "\\."))
+}
+
+func normalVersionKeys(v string) string {
+	return strings.ReplaceAll(v, "\\", "")
 }
 
 type nameVersion struct {
@@ -47,12 +51,9 @@ func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResul
 		return nil
 	}
 
-	vulnSet := set.NewStringSet()
 	featuresMap := make(map[nameVersion]*database.FeatureVersion)
+	featuresToVulns := make(map[nameVersion]set.StringSet)
 	for _, m := range matchResults {
-		if !vulnSet.Add(m.CVE.ID()) {
-			continue
-		}
 		cve, ok := cveToVulns[m.CVE.ID()]
 		if !ok {
 			log.Errorf("CVE %q not found in CVE map", m.CVE.ID())
@@ -62,26 +63,39 @@ func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResul
 			log.Errorf("Found 0 CPEs in match with CVE %q", m.CVE.ID())
 			continue
 		}
-		cpe := m.CPEs[0]
-
-		nameVersion := nameVersion{
-			name:    cpe.Product,
-			version: cpe.Version,
-		}
-		feature, ok := featuresMap[nameVersion]
-		if !ok {
-			feature = &database.FeatureVersion{
-				Feature: database.Feature{
-					Name: cpe.Product,
-				},
-				Version: cpe.Version,
-				AddedBy: database.Layer{
-					Name: layer,
-				},
+		for _, cpe := range m.CPEs {
+			name, version := cpe.Product, normalVersionKeys(cpe.Version)
+			nameVersion := nameVersion{
+				name:    name,
+				version: version,
 			}
-			featuresMap[nameVersion] = feature
+
+			vulnSet, ok := featuresToVulns[nameVersion]
+			if !ok {
+				vulnSet = set.NewStringSet()
+				featuresToVulns[nameVersion] = vulnSet
+			}
+			if !vulnSet.Add(m.CVE.ID()) {
+				continue
+			}
+
+			feature, ok := featuresMap[nameVersion]
+			if !ok {
+				feature = &database.FeatureVersion{
+					Feature: database.Feature{
+						Name: name,
+					},
+					Version: version,
+					AddedBy: database.Layer{
+						Name: layer,
+					},
+				}
+				featuresMap[nameVersion] = feature
+
+				featuresToVulns[nameVersion] = set.NewStringSet()
+			}
+			feature.AffectedBy = append(feature.AffectedBy, *cve.Vulnerability())
 		}
-		feature.AffectedBy = append(feature.AffectedBy, *cve.Vulnerability())
 	}
 	features := make([]database.FeatureVersion, 0, len(featuresMap))
 	for _, feature := range featuresMap {
