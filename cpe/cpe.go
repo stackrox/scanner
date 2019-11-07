@@ -35,11 +35,11 @@ func generateNameKeys(componentName string) set.StringSet {
 }
 
 func generateVersionKeys(c *component.Component) set.StringSet {
-	return set.NewStringSet(c.Version, strings.ReplaceAll(c.Version, ".", "\\."))
+	return set.NewStringSet(c.Version, strings.ReplaceAll(c.Version, ".", `\.`))
 }
 
 func normalVersionKeys(v string) string {
-	return strings.ReplaceAll(v, "\\", "")
+	return strings.ReplaceAll(v, `\`, "")
 }
 
 type nameVersion struct {
@@ -91,8 +91,6 @@ func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResul
 					},
 				}
 				featuresMap[nameVersion] = feature
-
-				featuresToVulns[nameVersion] = set.NewStringSet()
 			}
 			feature.AffectedBy = append(feature.AffectedBy, *cve.Vulnerability())
 		}
