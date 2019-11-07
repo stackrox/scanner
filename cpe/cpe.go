@@ -39,7 +39,7 @@ func generateVersionKeys(c *component.Component) set.StringSet {
 }
 
 func normalVersionKeys(v string) string {
-	return strings.ReplaceAll(v, `\`, "")
+	return strings.ReplaceAll(v, `\.`, ".")
 }
 
 type nameVersion struct {
