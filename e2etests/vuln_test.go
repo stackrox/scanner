@@ -47,7 +47,7 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 			require.NoError(t, err)
 			for _, components := range componentsMap.GetLayerToComponents() {
 				for _, component := range components.GetComponents() {
-					fmt.Println(component.GetName(), component.GetVersion())
+					fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
 				}
 			}
 			fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
