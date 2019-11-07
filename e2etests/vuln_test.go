@@ -91,14 +91,13 @@ func TestStackroxVulnImages(t *testing.T) {
 			imageTag: "rails-cve-2016-2098",
 			expectedFeatures: []expectedFeature{
 				{"rails", "4.2.5.1", []string{
-					// TODO: Uncomment these after fixing the matching.
-					// "CVE-2016-2098",
-					// "CVE-2016-6316",
-					// "CVE-2016-6317",
+					"CVE-2016-2098",
+					"CVE-2016-6316",
+					"CVE-2016-6317",
 					"CVE-2018-16476",
-					// "CVE-2019-5418",
-					// "CVE-2019-5419",
-					// "CVE-2019-5420",
+					"CVE-2019-5418",
+					"CVE-2019-5419",
+					"CVE-2019-5420",
 				},
 				},
 			},

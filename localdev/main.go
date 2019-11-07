@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -59,6 +60,7 @@ func main() {
 
 	// Extract
 	var matcher manifestMatcher
+	tarutil.MaxExtractableFileSize = 1024 * 1024 * 1024
 	filemap, err := tarutil.ExtractFiles(f, &matcher)
 	if err != nil {
 		panic(err)
@@ -103,10 +105,18 @@ func main() {
 
 		t := time.Now()
 		features := cpe.CheckForVulnerabilities(l, languageComponents)
+
+		sort.Slice(features, func(i, j int) bool {
+			return features[i].Feature.Name < features[j].Feature.Name
+		})
+
 		total += time.Since(t)
 		fmt.Println(l)
 		for _, f := range features {
 			fmt.Println("\t", f.Feature.Name, f.Version, fmt.Sprintf("(%d vulns)", len(f.AffectedBy)))
+			sort.Slice(f.AffectedBy, func(i, j int) bool {
+				return f.AffectedBy[i].Name < f.AffectedBy[j].Name
+			})
 			for _, v := range f.AffectedBy {
 				fmt.Println("\t\t", v.Name)
 			}

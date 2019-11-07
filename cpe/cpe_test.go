@@ -67,16 +67,32 @@ func TestGetAttributes(t *testing.T) {
 					Version: "1.3.12",
 				},
 				{
+					Product: "struts",
+					Version: "1\\.3\\.12",
+				},
+				{
 					Product: "struts2",
 					Version: "1.3.12",
+				},
+				{
+					Product: "struts2",
+					Version: "1\\.3\\.12",
 				},
 				{
 					Product: "struts2-showcase",
 					Version: "1.3.12",
 				},
 				{
+					Product: "struts2-showcase",
+					Version: "1\\.3\\.12",
+				},
+				{
 					Product: "struts2_showcase",
 					Version: "1.3.12",
+				},
+				{
+					Product: "struts2_showcase",
+					Version: "1\\.3\\.12",
 				},
 			},
 		},
@@ -192,6 +208,15 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 						Name: "product",
 					},
 					Version: "version",
+					AffectedBy: []database.Vulnerability{
+						newDatabaseVuln("cve1"),
+					},
+				},
+				{
+					Feature: database.Feature{
+						Name: "product2",
+					},
+					Version: "version2",
 					AffectedBy: []database.Vulnerability{
 						newDatabaseVuln("cve1"),
 					},
