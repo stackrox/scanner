@@ -33,10 +33,6 @@ type MockDatastore struct {
 	FctDeleteVulnerability        func(namespaceName, name string) error
 	FctInsertVulnerabilityFixes   func(vulnerabilityNamespace, vulnerabilityName string, fixes []FeatureVersion) error
 	FctDeleteVulnerabilityFix     func(vulnerabilityNamespace, vulnerabilityName, featureName string) error
-	FctGetAvailableNotification   func(renotifyInterval time.Duration) (VulnerabilityNotification, error)
-	FctGetNotification            func(name string, limit int, page VulnerabilityNotificationPageNumber) (VulnerabilityNotification, VulnerabilityNotificationPageNumber, error)
-	FctSetNotificationNotified    func(name string) error
-	FctDeleteNotification         func(name string) error
 	FctInsertKeyValue             func(key, value string) error
 	FctGetKeyValue                func(key string) (string, error)
 	FctLock                       func(name string, owner string, duration time.Duration, renew bool) (bool, time.Time)
