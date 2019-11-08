@@ -80,7 +80,7 @@ func init() {
 	vulnsrc.RegisterUpdater("ubuntu", &updater{})
 }
 
-func (u *updater) Update(datastore database.Datastore) (resp vulnsrc.UpdateResponse, err error) {
+func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
 	log.WithField("package", "Ubuntu").Info("Start fetching vulnerabilities")
 
 	// Pull the master branch.

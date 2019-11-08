@@ -42,11 +42,15 @@ type UpdateResponse struct {
 	Vulnerabilities []database.Vulnerability
 }
 
+type DataStore interface {
+	GetKeyValue(key string) (string, error)
+}
+
 // Updater represents anything that can fetch vulnerabilities and insert them
 // into a Clair datastore.
 type Updater interface {
 	// Update gets vulnerability updates.
-	Update(database.Datastore) (UpdateResponse, error)
+	Update(DataStore) (UpdateResponse, error)
 
 	// Clean deletes any allocated resources.
 	// It is invoked when Clair stops.

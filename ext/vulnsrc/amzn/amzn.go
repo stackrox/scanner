@@ -79,7 +79,7 @@ func init() {
 	vulnsrc.RegisterUpdater("amzn2", &amazonLinux2Updater)
 }
 
-func (u *updater) Update(datastore database.Datastore) (vulnsrc.UpdateResponse, error) {
+func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
 	log.WithField("package", u.Name).Info("Start fetching vulnerabilities")
 
 	// Get the most recent updated date of the previous update.

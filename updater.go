@@ -104,7 +104,7 @@ func RunUpdater(config *UpdaterConfig, datastore database.Datastore, st *stopper
 				// Launch update in a new go routine.
 				doneC := make(chan bool, 1)
 				go func() {
-					updateSuccessful = update(datastore, firstUpdate)
+					updateSuccessful = update(datastore)
 					doneC <- true
 				}()
 
@@ -185,7 +185,7 @@ func sleepUpdater(approxWakeup time.Time, st *stopper.Stopper) (stopped bool) {
 
 // update fetches all the vulnerabilities from the registered fetchers, upserts
 // them into the database and then sends notifications.
-func update(datastore database.Datastore, firstUpdate bool) (updateSuccessful bool) {
+func update(datastore database.Datastore) (updateSuccessful bool) {
 	defer setUpdaterDuration(time.Now())
 
 	log.Info("updating vulnerabilities")

@@ -47,7 +47,7 @@ type updater struct {
 	repositoryLocalPath string
 }
 
-func (u *updater) Update(db database.Datastore) (resp vulnsrc.UpdateResponse, err error) {
+func (u *updater) Update(db vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
 	log.WithField("package", "Alpine").Info("Start fetching vulnerabilities")
 
 	// Pull the master branch.
@@ -84,13 +84,9 @@ func (u *updater) Update(db database.Datastore) (resp vulnsrc.UpdateResponse, er
 	// Append any changed vulnerabilities to the response.
 	for _, namespace := range namespaces {
 		var vulns []database.Vulnerability
-		var note string
-		vulns, note, err = parseVulnsFromNamespace(u.repositoryLocalPath, namespace)
+		vulns, err = parseVulnsFromNamespace(u.repositoryLocalPath, namespace)
 		if err != nil {
 			return
-		}
-		if note != "" {
-			resp.Notes = append(resp.Notes, note)
 		}
 		resp.Vulnerabilities = append(resp.Vulnerabilities, vulns...)
 	}
@@ -143,7 +139,7 @@ func ls(path string, filter lsFilter) ([]string, error) {
 	return files, nil
 }
 
-func parseVulnsFromNamespace(repositoryPath, namespace string) (vulns []database.Vulnerability, note string, err error) {
+func parseVulnsFromNamespace(repositoryPath, namespace string) (vulns []database.Vulnerability, err error) {
 	nsDir := filepath.Join(repositoryPath, namespace)
 	var dbFilenames []string
 	dbFilenames, err = ls(nsDir, filesOnly)
