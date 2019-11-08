@@ -70,6 +70,7 @@ func init() {
 	if definitionsDir == "" {
 		return
 	}
+	log.Info("Initializing NVD CPE Definitions")
 
 	extractedPath := filepath.Join(definitionsDir, "cve")
 	files, err := ioutil.ReadDir(extractedPath)
