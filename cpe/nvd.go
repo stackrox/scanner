@@ -97,6 +97,7 @@ func init() {
 	for _, v := range cveMap {
 		v.Item.Configurations = nil
 	}
+	log.Info("Finished initializing NVD CPE Definitions")
 }
 
 func (v *Vuln) Summary() string {
