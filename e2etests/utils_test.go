@@ -45,7 +45,7 @@ func mustGetEnv(key string, t *testing.T) string {
 }
 
 func connectToScanner(t *testing.T) *grpc.ClientConn {
-	gRPCEndpoint := stringutils.OrDefault(os.Getenv(scannerGRPCEndpointEnv), "localhost:8081")
+	gRPCEndpoint := stringutils.OrDefault(os.Getenv(scannerGRPCEndpointEnv), "localhost:8443")
 	clientTLSConfig := &tls.Config{
 		InsecureSkipVerify: true,
 	}

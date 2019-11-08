@@ -22,8 +22,8 @@ data:
           cachesize: 16384
 
       api:
-        clairifyPort: 8080
-        grpcPort: 8081
+        httpsPort: 8080
+        grpcPort: 8443
 
       updater:
         # Frequency the database will be updated with vulnerabilities from the default data sources
