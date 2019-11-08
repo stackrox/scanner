@@ -80,6 +80,7 @@ jobs:
           docker push "us.gcr.io/stackrox-ci/scanner:${TAG}"
           docker push "us.gcr.io/stackrox-ci/scanner-db:${TAG}"
 
+          docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
           docker tag "us.gcr.io/stackrox-ci/scanner:${TAG}" "stackrox/scanner:${TAG}"
           docker push "stackrox/scanner:${TAG}"
 
