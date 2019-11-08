@@ -17,7 +17,6 @@ package database
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"time"
 )
 
 type Model struct {
@@ -101,25 +100,3 @@ func (mm *MetadataMap) Value() (driver.Value, error) {
 	json, err := json.Marshal(*mm)
 	return string(json), err
 }
-
-type VulnerabilityNotification struct {
-	Model
-
-	Name string
-
-	Created  time.Time
-	Notified time.Time
-	Deleted  time.Time
-
-	OldVulnerability *Vulnerability
-	NewVulnerability *Vulnerability
-}
-
-type VulnerabilityNotificationPageNumber struct {
-	// -1 means that we reached the end already.
-	OldVulnerability int
-	NewVulnerability int
-}
-
-var VulnerabilityNotificationFirstPage = VulnerabilityNotificationPageNumber{0, 0}
-var NoVulnerabilityNotificationPage = VulnerabilityNotificationPageNumber{-1, -1}
