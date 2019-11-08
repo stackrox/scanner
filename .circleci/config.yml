@@ -169,9 +169,9 @@ jobs:
             success=0
             for i in $(seq 1 10); do
               nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" & # Legacy clairify endpoint
-              nohup kubectl port-forward -n stackrox "${POD}" "8081:8081" & # gRPC endpoint
+              nohup kubectl port-forward -n stackrox "${POD}" "8443:8443" & # gRPC endpoint
               curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8080/clairify/ping' || touch FAIL
-              curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8081/v1/ping' || touch FAIL
+              curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8443/v1/ping' || touch FAIL
               if [[ ! -f FAIL ]]; then
                 success=1
                 break

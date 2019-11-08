@@ -221,12 +221,17 @@ func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
 // Start starts the server listening.
 func (s *Server) Start() error {
 	r := mux.NewRouter()
-	r.HandleFunc("/clairify/ping", s.Ping).Methods("GET")
-	r.HandleFunc("/clairify/image", s.ScanImage).Methods("POST")
 
-	r.HandleFunc("/clairify/sha/{sha}", s.GetResultsBySHA).Methods("GET")
-	r.HandleFunc("/clairify/image/{registry}/{remote}/{tag}", s.GetResultsByImage).Methods("GET")
-	r.HandleFunc("/clairify/image/{registry}/{namespace}/{repo}/{tag}", s.GetResultsByImage).Methods("GET")
+	apiRoots := []string{"clairify", "scanner"}
+
+	for _, root := range apiRoots {
+		r.HandleFunc(fmt.Sprintf("/%s/ping", root), s.Ping).Methods("GET")
+		r.HandleFunc(fmt.Sprintf("/%s/image", root), s.ScanImage).Methods("POST")
+
+		r.HandleFunc(fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA).Methods("GET")
+		r.HandleFunc(fmt.Sprintf("/%s/image/{registry}/{remote}/{tag}", root), s.GetResultsByImage).Methods("GET")
+		r.HandleFunc(fmt.Sprintf("/%s/image/{registry}/{namespace}/{repo}/{tag}", root), s.GetResultsByImage).Methods("GET")
+	}
 
 	var tlsConfig *tls.Config
 	var listener net.Listener

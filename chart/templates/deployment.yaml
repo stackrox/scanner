@@ -40,7 +40,7 @@ spec:
             successThreshold: 1
           volumeMounts:
             - name: config
-              mountPath: /etc/clair
+              mountPath: /etc/scanner
               readOnly: true
             - name: scanner-tls-volume
               mountPath: /run/secrets/stackrox.io/certs/

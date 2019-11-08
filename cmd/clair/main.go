@@ -132,8 +132,8 @@ func Boot(config *Config) {
 func main() {
 	// Parse command-line arguments
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	flagConfigPath := flag.String("config", "/etc/clair/config.yaml", "Load configuration from the specified file.")
-	flagInsecureTLS := flag.Bool("insecure-tls", false, "Disable TLS server's certificate chain and hostname verification when pulling layers.")
+	flagConfigPath := flag.String("config", "/etc/scanner/config.yaml", "Load configuration from the specified file.")
+	flagInsecureTLS := flag.Bool("insecure-tls", true, "Disable TLS server's certificate chain and hostname verification when pulling layers.")
 	flag.Parse()
 
 	proxy.EnableProxyEnvironmentSetting(true)
