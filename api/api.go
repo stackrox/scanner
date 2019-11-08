@@ -25,12 +25,12 @@ import (
 
 // Config is the configuration for the API service.
 type Config struct {
-	ClairifyPort int
-	GRPCPort     int
+	HTTPSPort int
+	GRPCPort  int
 }
 
 func RunClairify(cfg *Config, store database.Datastore) {
-	serv := server.New(fmt.Sprintf(":%d", cfg.ClairifyPort), store, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
+	serv := server.New(fmt.Sprintf(":%d", cfg.HTTPSPort), store, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
 	if err := serv.Start(); err != nil {
 		log.Fatal(err)
 	}

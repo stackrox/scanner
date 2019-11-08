@@ -49,8 +49,8 @@ func DefaultConfig() Config {
 			Interval: 1 * time.Hour,
 		},
 		API: &api.Config{
-			ClairifyPort: 8080,
-			GRPCPort:     8081,
+			HTTPSPort: 8080,
+			GRPCPort:  8443,
 		},
 		LogLevel: "info",
 	}

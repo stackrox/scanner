@@ -24,23 +24,23 @@ type ClientTestSuite struct {
 
 func (suite *ClientTestSuite) SetupSuite() {
 	masterRouter := http.NewServeMux()
-	masterRouter.HandleFunc("/clairify/ping", func(w http.ResponseWriter, r *http.Request) {
+	masterRouter.HandleFunc("/scanner/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("{}"))
 	})
-	masterRouter.HandleFunc("/clairify/image/docker.io/library/nginx/1.10", func(w http.ResponseWriter, r *http.Request) {
+	masterRouter.HandleFunc("/scanner/image/docker.io/library/nginx/1.10", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fixtures.GetLayerResponse))
 	})
-	masterRouter.HandleFunc("/clairify/image/docker.io/library/nginx/badtag", func(w http.ResponseWriter, r *http.Request) {
+	masterRouter.HandleFunc("/scanner/image/docker.io/library/nginx/badtag", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fixtures.ErrorResponse))
 	})
-	masterRouter.HandleFunc("/clairify/sha/goodsha", func(w http.ResponseWriter, r *http.Request) {
+	masterRouter.HandleFunc("/scanner/sha/goodsha", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fixtures.GetLayerResponse))
 	})
-	masterRouter.HandleFunc("/clairify/sha/badsha", func(w http.ResponseWriter, r *http.Request) {
+	masterRouter.HandleFunc("/scanner/sha/badsha", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(fixtures.ErrorResponse))
 	})
-	masterRouter.HandleFunc("/clairify/image", func(w http.ResponseWriter, r *http.Request) {
+	masterRouter.HandleFunc("/scanner/image", func(w http.ResponseWriter, r *http.Request) {
 		if !strings.HasPrefix(r.Header.Get("Authorization"), "Basic") {
 			w.WriteHeader(http.StatusUnauthorized)
 			return

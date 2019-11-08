@@ -98,7 +98,7 @@ func encodeValues(features, vulnerabilities bool) url.Values {
 
 // Ping verifies that Clairify is accessible.
 func (c *Clairify) Ping() error {
-	request, err := http.NewRequest("GET", c.endpoint+"/clairify/ping", nil)
+	request, err := http.NewRequest("GET", c.endpoint+"/scanner/ping", nil)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (c *Clairify) AddImage(username, password string, req *types.ImageRequest) 
 	if err != nil {
 		return nil, err
 	}
-	request, err := http.NewRequest("POST", c.endpoint+"/clairify/image", bytes.NewBuffer(data))
+	request, err := http.NewRequest("POST", c.endpoint+"/scanner/image", bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (c *Clairify) AddImage(username, password string, req *types.ImageRequest) 
 // RetrieveImageDataBySHA contacts Clairify to fetch vulnerability data by the image SHA.
 func (c *Clairify) RetrieveImageDataBySHA(sha string, features, vulnerabilities bool) (*v1.LayerEnvelope, error) {
 	values := encodeValues(features, vulnerabilities)
-	request, err := http.NewRequest("GET", c.endpoint+"/clairify/sha/"+sha, nil)
+	request, err := http.NewRequest("GET", c.endpoint+"/scanner/sha/"+sha, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +157,7 @@ func (c *Clairify) RetrieveImageDataBySHA(sha string, features, vulnerabilities 
 // RetrieveImageDataByName contacts Clairify to fetch vulnerability data by the image name.
 func (c *Clairify) RetrieveImageDataByName(image *types.Image, features, vulnerabilities bool) (*v1.LayerEnvelope, error) {
 	values := encodeValues(features, vulnerabilities)
-	url := fmt.Sprintf("%s/clairify/image/%s/%s/%s", c.endpoint, image.Registry, image.Remote, image.Tag)
+	url := fmt.Sprintf("%s/scanner/image/%s/%s/%s", c.endpoint, image.Registry, image.Remote, image.Tag)
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
