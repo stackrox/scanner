@@ -78,7 +78,16 @@ type NVDmetadataCVSSv3 struct {
 	ImpactScore         float64
 }
 
+<<<<<<< HEAD
 func (a *appender) BuildCache(nvdDumpDir string) error {
+=======
+func init() {
+	vulnmdsrc.RegisterAppender(appenderName, &appender{})
+}
+
+func (a *appender) BuildCache() error {
+	var err error
+>>>>>>> 6bf1e3e... Start doing updater stuff
 	a.metadata = make(map[string]*metadataEnricher)
 
 	fileInfos, err := ioutil.ReadDir(nvdDumpDir)
@@ -101,6 +110,7 @@ func (a *appender) BuildCache(nvdDumpDir string) error {
 		}
 		_ = f.Close()
 	}
+	log.Infof("Obtained metadata for %d vulns", len(a.metadata))
 
 	return nil
 }

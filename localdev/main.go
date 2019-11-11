@@ -30,13 +30,8 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
-	_ "github.com/stackrox/scanner/ext/vulnmdsrc/nvd"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/alpine"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/amzn"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/debian"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/oracle"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/rhel"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
+	_ "github.com/stackrox/scanner/ext/vulnmdsrc/all"
+	_ "github.com/stackrox/scanner/ext/vulnsrc/all"
 )
 
 type manifestMatcher struct{}

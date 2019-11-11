@@ -113,7 +113,6 @@ func httpGet(url string) (*http.Response, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.WithError(err).Error("could not download RHEL's update list")
 		return nil, err
 	}
 
@@ -132,7 +131,7 @@ func getWithRetriesAndBackoff(url string) (*http.Response, error) {
 		if err == nil {
 			return resp, nil
 		}
-		log.WithField("FailedAttempts", i+1).WithField("url", url).Info("Failed to make request to RHEL. Retrying...")
+		log.WithField("FailedAttempts", i+1).WithField("url", url).WithError(err).Info("Failed to make request to RHEL. Retrying...")
 		currentBackoffDuration *= backoffMultiplier
 		if currentBackoffDuration > maxBackoffDuration {
 			currentBackoffDuration = maxBackoffDuration

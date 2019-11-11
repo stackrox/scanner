@@ -280,9 +280,34 @@ func addMetadata(vulnerabilities []database.Vulnerability) []database.Vulnerabil
 		_ = os.RemoveAll(dumpDir)
 	}()
 
+<<<<<<< HEAD
 	if err := nvdloader.DownloadFeedsToPath(dumpDir); err != nil {
 		log.WithError(err).Error("Failed to download NVD feeds")
 		return vulnerabilities
+=======
+	var wg sync.WaitGroup
+	wg.Add(len(vulnmdsrc.Appenders()))
+
+	for n, a := range vulnmdsrc.Appenders() {
+		go func(name string, appender vulnmdsrc.Appender) {
+			defer wg.Done()
+
+			// Build up a metadata cache.
+			if err := appender.BuildCache(); err != nil {
+				promUpdaterErrorsTotal.Inc()
+				log.WithError(err).WithField("appender name", name).Error("an error occured when loading metadata fetcher")
+				return
+			}
+
+			// Append vulnerability metadata  to each vulnerability.
+			for _, vulnerability := range lockableVulnerabilities {
+				appender.Append(vulnerability.Name, vulnerability.SubCVEs, vulnerability.appendFunc)
+			}
+
+			// Purge the metadata cache.
+			appender.PurgeCache()
+		}(n, a)
+>>>>>>> 6bf1e3e... Start doing updater stuff
 	}
 
 	nvdAppender := nvd.SingletonAppender()

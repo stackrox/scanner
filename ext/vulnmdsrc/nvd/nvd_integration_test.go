@@ -10,6 +10,6 @@ import (
 
 func TestPull(t *testing.T) {
 	a := appender{}
-	err := a.BuildCache(nil)
+	err := a.BuildCache()
 	require.NoError(t, err)
 }
