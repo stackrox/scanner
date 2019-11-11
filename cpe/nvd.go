@@ -49,7 +49,7 @@ func isNodeValid(node *schema.NVDCVEFeedJSON10DefNode) bool {
 		node.CPEMatch = filteredCPEs
 		return len(filteredCPEs) != 0
 	}
-	// Otherwise look at the children and make sure if the Operator is an AND they are all valid, if not, then make sure at least is valid
+	// Otherwise look at the children and make sure if the Operator is an AND they are all valid
 	if strings.EqualFold(node.Operator, "and") {
 		for _, c := range node.Children {
 			if !isNodeValid(c) {
@@ -58,7 +58,7 @@ func isNodeValid(node *schema.NVDCVEFeedJSON10DefNode) bool {
 		}
 		return true
 	}
-	// Operator is an OR
+	// Operator is an OR so ensure at least one is valid
 	filteredNodes := node.Children[:0]
 	for _, c := range node.Children {
 		if isNodeValid(c) {

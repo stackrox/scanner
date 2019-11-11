@@ -149,6 +149,9 @@ func filterMatchResultsByTargetSoftware(matchResults []cvefeed.MatchResult) []cv
 				break
 			}
 		}
+		if tgt == "" {
+			return matchResults
+		}
 		for _, cveCPE := range f.CVE.Config() {
 			if cveCPE.TargetSW == tgt {
 				filteredResults = append(filteredResults, f)
