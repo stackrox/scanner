@@ -81,22 +81,6 @@ func TestGetAttributes(t *testing.T) {
 			},
 			expectedAttributes: []*wfn.Attributes{
 				{
-					Product: "struts",
-					Version: "1.3.12",
-				},
-				{
-					Product: "struts",
-					Version: "1\\.3\\.12",
-				},
-				{
-					Product: "struts2",
-					Version: "1.3.12",
-				},
-				{
-					Product: "struts2",
-					Version: "1\\.3\\.12",
-				},
-				{
 					Product: "struts2-showcase",
 					Version: "1.3.12",
 				},
