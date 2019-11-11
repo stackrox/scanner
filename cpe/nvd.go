@@ -21,18 +21,78 @@ var (
 )
 
 type Vuln struct {
-	Item *schema.NVDCVEFeedJSON10DefCVEItem
-}
-
-func (v *Vuln) ID() string {
-	if v.Item != nil && v.Item.CVE != nil && v.Item.CVE.CVEDataMeta != nil {
-		return v.Item.CVE.CVEDataMeta.ID
-	}
-	return ""
+	ID       string
+	Metadata *Metadata
+	Summary  string
 }
 
 type Matcher interface {
 	Matches(s string) *database.Vulnerability
+}
+
+func cpeIsApplication(cpe string) bool {
+	spl := strings.SplitN(cpe, ":", 4)
+	if len(spl) < 4 {
+		return false
+	}
+	return spl[2] == "a"
+}
+
+func isNodeValid(node *schema.NVDCVEFeedJSON10DefNode) bool {
+	if len(node.CPEMatch) != 0 {
+		filteredCPEs := node.CPEMatch[:0]
+		for _, cpe := range node.CPEMatch {
+			if cpeIsApplication(cpe.Cpe23Uri) {
+				filteredCPEs = append(filteredCPEs, cpe)
+			}
+		}
+		node.CPEMatch = filteredCPEs
+		return len(filteredCPEs) != 0
+	}
+	// Otherwise look at the children and make sure if the Operator is an AND they are all valid, if not, then make sure at least is valid
+	if strings.EqualFold(node.Operator, "and") {
+		for _, c := range node.Children {
+			if !isNodeValid(c) {
+				return false
+			}
+		}
+		return true
+	}
+	// Operator is an OR
+	filteredNodes := node.Children[:0]
+	for _, c := range node.Children {
+		if isNodeValid(c) {
+			filteredNodes = append(filteredNodes, c)
+		}
+	}
+	node.Children = filteredNodes
+	return len(filteredNodes) != 0
+}
+
+func isValidCVE(cve *schema.NVDCVEFeedJSON10DefCVEItem) bool {
+	if cve.Configurations == nil {
+		return false
+	}
+	filteredNodes := cve.Configurations.Nodes[:0]
+	for _, n := range cve.Configurations.Nodes {
+		if isNodeValid(n) {
+			filteredNodes = append(filteredNodes, n)
+		}
+	}
+	cve.Configurations.Nodes = filteredNodes
+	return len(filteredNodes) != 0
+}
+
+func trimCVE(cve *schema.NVDCVEFeedJSON10DefCVEItem) {
+	cve.CVE = &schema.CVEJSON40{
+		CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+			ID: cve.CVE.CVEDataMeta.ID,
+		},
+	}
+	cve.Configurations = nil
+	cve.Impact = nil
+	cve.PublishedDate = ""
+	cve.LastModifiedDate = ""
 }
 
 func handleJSONFile(dict cvefeed.Dictionary, path string) error {
@@ -49,17 +109,17 @@ func handleJSONFile(dict cvefeed.Dictionary, path string) error {
 
 	for _, cve := range feed.CVEItems {
 		if cve != nil && cve.Configurations != nil {
+			if !isValidCVE(cve) {
+				continue
+			}
 			vuln := nvd.ToVuln(cve)
-			var isAppCPE bool
-			for _, a := range vuln.Config() {
-				isAppCPE = a.Part == "a" || isAppCPE
+			cveMap[vuln.ID()] = &Vuln{
+				ID:       vuln.ID(),
+				Metadata: convertMetadata(cve),
+				Summary:  convertSummary(cve),
 			}
-			if isAppCPE {
-				cveMap[vuln.ID()] = &Vuln{
-					Item: cve,
-				}
-				dict[vuln.ID()] = vuln
-			}
+			dict[vuln.ID()] = vuln
+			trimCVE(cve)
 		}
 	}
 	return nil
@@ -92,19 +152,14 @@ func init() {
 
 	cache = cvefeed.NewCache(dict).SetMaxSize(-1).SetRequireVersion(false)
 	cache.Idx = cvefeed.NewIndex(dict)
-
-	// After this is built, nil out the configurations of the nodes as they are not relevant and can be GC'd
-	for _, v := range cveMap {
-		v.Item.Configurations = nil
-	}
 	log.Info("Finished initializing NVD CPE Definitions")
 }
 
-func (v *Vuln) Summary() string {
-	if v.Item == nil || v.Item.CVE == nil || v.Item.CVE.Description == nil {
+func convertSummary(item *schema.NVDCVEFeedJSON10DefCVEItem) string {
+	if item == nil || item.CVE == nil || item.CVE.Description == nil {
 		return ""
 	}
-	for _, desc := range v.Item.CVE.Description.DescriptionData {
+	for _, desc := range item.CVE.Description.DescriptionData {
 		if desc.Lang == "en" {
 			return desc.Value
 		}
@@ -133,29 +188,29 @@ type MetadataCVSSv3 struct {
 	ImpactScore         float64
 }
 
-func (v *Vuln) Metadata() *Metadata {
-	if v.Item == nil {
+func convertMetadata(item *schema.NVDCVEFeedJSON10DefCVEItem) *Metadata {
+	if item == nil {
 		return nil
 	}
 	metadata := &Metadata{
-		PublishedDateTime:    v.Item.PublishedDate,
-		LastModifiedDateTime: v.Item.LastModifiedDate,
+		PublishedDateTime:    item.PublishedDate,
+		LastModifiedDateTime: item.LastModifiedDate,
 	}
-	if impact := v.Item.Impact; impact != nil {
+	if impact := item.Impact; impact != nil {
 		if impact.BaseMetricV2 != nil && impact.BaseMetricV2.CVSSV2 != nil {
 			metadata.CVSSv2 = MetadataCVSSv2{
-				Vectors:             v.Item.Impact.BaseMetricV2.CVSSV2.VectorString,
-				Score:               v.Item.Impact.BaseMetricV2.CVSSV2.BaseScore,
-				ExploitabilityScore: v.Item.Impact.BaseMetricV2.ExploitabilityScore,
-				ImpactScore:         v.Item.Impact.BaseMetricV2.ImpactScore,
+				Vectors:             item.Impact.BaseMetricV2.CVSSV2.VectorString,
+				Score:               item.Impact.BaseMetricV2.CVSSV2.BaseScore,
+				ExploitabilityScore: item.Impact.BaseMetricV2.ExploitabilityScore,
+				ImpactScore:         item.Impact.BaseMetricV2.ImpactScore,
 			}
 		}
 		if impact.BaseMetricV3 != nil && impact.BaseMetricV3.CVSSV3 != nil {
 			metadata.CVSSv3 = MetadataCVSSv3{
-				Vectors:             v.Item.Impact.BaseMetricV3.CVSSV3.VectorString,
-				Score:               v.Item.Impact.BaseMetricV3.CVSSV3.BaseScore,
-				ExploitabilityScore: v.Item.Impact.BaseMetricV3.ExploitabilityScore,
-				ImpactScore:         v.Item.Impact.BaseMetricV3.ImpactScore,
+				Vectors:             item.Impact.BaseMetricV3.CVSSV3.VectorString,
+				Score:               item.Impact.BaseMetricV3.CVSSV3.BaseScore,
+				ExploitabilityScore: item.Impact.BaseMetricV3.ExploitabilityScore,
+				ImpactScore:         item.Impact.BaseMetricV3.ImpactScore,
 			}
 		}
 	}
@@ -164,11 +219,11 @@ func (v *Vuln) Metadata() *Metadata {
 
 func (v *Vuln) Vulnerability() *database.Vulnerability {
 	return &database.Vulnerability{
-		Name:        v.ID(),
-		Description: v.Summary(),
-		Link:        fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", v.ID()),
+		Name:        v.ID,
+		Description: v.Summary,
+		Link:        fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", v.ID),
 		Metadata: map[string]interface{}{
-			"NVD": v.Metadata(),
+			"NVD": v.Metadata,
 		},
 	}
 }
