@@ -123,9 +123,11 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 }
 
 func parseContents(locationSoFar string, contents []byte) ([]*component.Component, error) {
+	// Typically, this is when a jar has a prefix of ._
 	zipReader, err := zip.NewReader(bytes.NewReader(contents), int64(len(contents)))
 	if err != nil {
-		return nil, err
+		log.Debugf("error parsing %q: %v", locationSoFar, err)
+		return nil, nil
 	}
 	return parseComponentsFromZipReader(locationSoFar, zipReader)
 }
