@@ -92,7 +92,7 @@ func (a *appender) BuildCache(nvdDumpDir string) error {
 		if filepath.Ext(fileName) != ".json" {
 			continue
 		}
-		f, err := os.Open(fileName)
+		f, err := os.Open(filepath.Join(nvdDumpDir, fileName))
 		if err != nil {
 			return errors.Wrapf(err, "could not open NVD data file %s", fileName)
 		}

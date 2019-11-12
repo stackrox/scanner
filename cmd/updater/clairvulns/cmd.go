@@ -1,11 +1,15 @@
 package clairvulns
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -41,22 +45,61 @@ func Command() *cobra.Command {
 	c := &cobra.Command{
 		Use: "fetch clair vulnerabilities",
 	}
-	outFile := c.Flags().String("out-file", "", "path to write updated vulnerabilities to")
-	utils.Must(c.MarkFlagRequired("out-file"))
+	outFile := c.Flags().String("out-file", "./dump.tar.gz", "file to write the dump to")
 
 	c.RunE = func(_ *cobra.Command, _ []string) error {
+		if !strings.HasSuffix(*outFile, ".tar.gz") {
+			return errors.Errorf("invalid outfile %q; must end in .tar.gz", *outFile)
+		}
 		startTime := time.Now()
-		fetchedVulns, err := fetchVulns(emptyDataStore{})
+
+		dumpDir, err := ioutil.TempDir("", "vuln-updater")
 		if err != nil {
-			return err
+			return errors.Wrap(err, "failed to create temp dir")
+		}
+		log.Infof("Writing to dump dir %q", dumpDir)
+		defer func() {
+			_ = os.RemoveAll(dumpDir)
+		}()
+		nvdSubDir := filepath.Join(dumpDir, vulndump.NVDSubDirName)
+		if err := os.MkdirAll(nvdSubDir, 0755); err != nil {
+			return errors.Wrap(err, "creating subdir for NVD")
+		}
+
+		log.Info("Downloading NVD...")
+		if err := nvdloader.DownloadFeedsToPath(nvdSubDir); err != nil {
+			return errors.Wrap(err, "downloading NVD")
+		}
+		log.Info("Fetching vulns...")
+		fetchedVulns, err := fetchVulns(emptyDataStore{}, nvdSubDir)
+		if err != nil {
+			return errors.Wrap(err, "fetching vulns")
 		}
 		log.Infof("Finished fetching vulns (total: %d)", len(fetchedVulns))
-		f, err := os.Create(*outFile)
+		log.Info("Writing JSON file for updated vulns...")
+		f, err := os.Create(filepath.Join(dumpDir, vulndump.FeedVulnsFileName))
 		if err != nil {
-			return err
+			return errors.Wrap(err, "creating JSON file for updated vulns")
 		}
 		if err := json.NewEncoder(f).Encode(wrapVulns(startTime, fetchedVulns)); err != nil {
-			return err
+			return errors.Wrap(err, "writing JSON for vulns to file")
+		}
+		log.Info("Writing TIMESTAMP file...")
+		marshaledStartTime, err := startTime.MarshalText()
+		utils.Must(err) // Never happens.
+		if err := ioutil.WriteFile(filepath.Join(dumpDir, vulndump.TimestampFileName), marshaledStartTime, 0644); err != nil {
+			return errors.Wrap(err, "writing timestamp file")
+		}
+
+		log.Info("Creating a tar archive...")
+		tarArchiver := archiver.NewTarGz()
+		tarArchiver.CompressionLevel = gzip.BestCompression
+		if err := tarArchiver.Archive([]string{
+			filepath.Join(dumpDir, vulndump.TimestampFileName),
+			filepath.Join(dumpDir, vulndump.NVDSubDirName),
+			filepath.Join(dumpDir, vulndump.FeedVulnsFileName),
+		}, *outFile); err != nil {
+			return errors.Wrap(err, "writing out tar")
 		}
 		return nil
 	}
@@ -65,7 +108,7 @@ func Command() *cobra.Command {
 }
 
 // fetch get data from the registered fetchers, in parallel.
-func fetchVulns(datastore vulnsrc.DataStore) (vulns []database.Vulnerability, err error) {
+func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []database.Vulnerability, err error) {
 	errSig := concurrency.NewErrorSignal()
 
 	// Fetch updates in parallel.
@@ -99,7 +142,7 @@ func fetchVulns(datastore vulnsrc.DataStore) (vulns []database.Vulnerability, er
 	}
 
 	close(responseC)
-	vulnsWithMetadata, err := addMetadata(vulns)
+	vulnsWithMetadata, err := addMetadata(vulns, nvdDumpDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "adding metadata to vulns")
 	}
@@ -107,23 +150,11 @@ func fetchVulns(datastore vulnsrc.DataStore) (vulns []database.Vulnerability, er
 }
 
 // Add metadata to the specified vulnerabilities using the NVD metadata fetcher.
-func addMetadata(vulnerabilities []database.Vulnerability) ([]database.Vulnerability, error) {
+func addMetadata(vulnerabilities []database.Vulnerability, nvdDumpDir string) ([]database.Vulnerability, error) {
 	log.Info("adding metadata to vulnerabilities")
 
-	dumpDir, err := ioutil.TempDir("", "nvd-dump")
-	if err != nil {
-		return nil, errors.Wrap(err, "creating temp dir")
-	}
-	defer func() {
-		_ = os.RemoveAll(dumpDir)
-	}()
-
-	if err := nvdloader.DownloadFeedsToPath(dumpDir); err != nil {
-		return nil, errors.Wrap(err, "downloading NVD feeds")
-	}
-
 	nvdAppender := nvd.SingletonAppender()
-	if err := nvdAppender.BuildCache(dumpDir); err != nil {
+	if err := nvdAppender.BuildCache(nvdDumpDir); err != nil {
 		return nil, errors.Wrap(err, "failed to build cache from the NVD feed dump")
 	}
 	defer nvdAppender.PurgeCache()

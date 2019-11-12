@@ -69,7 +69,7 @@ func UpdateFromVulnDump(tarGZPath string, db database.Datastore, inMemUpdater In
 		return errors.Wrap(err, "failed to unarchive tar gz file")
 	}
 
-	dumpTSBytes, err := ioutil.ReadFile(filepath.Join(destination, "TIMESTAMP"))
+	dumpTSBytes, err := ioutil.ReadFile(filepath.Join(destination, TimestampFileName))
 	if err != nil {
 		return errors.Wrap(err, "couldn't read the timestamp")
 	}
@@ -95,10 +95,10 @@ func UpdateFromVulnDump(tarGZPath string, db database.Datastore, inMemUpdater In
 			return nil
 		}
 	}
-	if err := inMemUpdater(filepath.Join(destination, "nvd")); err != nil {
+	if err := inMemUpdater(filepath.Join(destination, NVDSubDirName)); err != nil {
 		return errors.Wrap(err, "couldn't update in mem NVD copy")
 	}
-	filteredVulns, err := filterVulns(dbTime, filepath.Join(destination, "vulns_from_feeds.json"))
+	filteredVulns, err := filterVulns(dbTime, filepath.Join(destination, FeedVulnsFileName))
 	if err != nil {
 		return errors.Wrap(err, "filtering vulns")
 	}
