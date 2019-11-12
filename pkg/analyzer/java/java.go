@@ -47,8 +47,6 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 
 	if manifestFile == nil {
 		return nil, nil
-		//TODO(viswa): Make this more forgiving.
-		//return nil, errors.New("no manifest file found")
 	}
 
 	manifest, err := parseManifestMF(manifestFile)
