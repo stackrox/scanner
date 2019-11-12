@@ -15,6 +15,7 @@ import (
 	"github.com/stackrox/scanner/ext/vulnmdsrc/nvd"
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"github.com/stackrox/scanner/pkg/nvdloader"
+	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
 // An empty datastore makes all the updaters assume they're starting from scratch.
@@ -25,15 +26,10 @@ func (e emptyDataStore) GetKeyValue(key string) (string, error) {
 	return "", nil
 }
 
-type wrappedVuln struct {
-	LastUpdatedTime time.Time              `json:"lastUpdatedTime"`
-	Vulnerability   database.Vulnerability `json:"vulnerability"`
-}
-
-func wrapVulns(startTime time.Time, fetchedVulns []database.Vulnerability) []wrappedVuln {
-	wrappedVulns := make([]wrappedVuln, 0, len(fetchedVulns))
+func wrapVulns(startTime time.Time, fetchedVulns []database.Vulnerability) []vulndump.WrappedVulnerability {
+	wrappedVulns := make([]vulndump.WrappedVulnerability, 0, len(fetchedVulns))
 	for _, v := range fetchedVulns {
-		wrappedVulns = append(wrappedVulns, wrappedVuln{
+		wrappedVulns = append(wrappedVulns, vulndump.WrappedVulnerability{
 			LastUpdatedTime: startTime,
 			Vulnerability:   v,
 		})
