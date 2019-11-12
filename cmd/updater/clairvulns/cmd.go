@@ -2,8 +2,8 @@ package clairvulns
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -12,8 +12,9 @@ import (
 	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/ext/vulnmdsrc/nvd"
 	"github.com/stackrox/scanner/ext/vulnsrc"
+	"github.com/stackrox/scanner/pkg/nvdloader"
 )
 
 // An empty datastore makes all the updaters assume they're starting from scratch.
@@ -109,82 +110,54 @@ func fetchVulns(datastore vulnsrc.DataStore) (vulns []database.Vulnerability, er
 	return vulnsWithMetadata, nil
 }
 
-// Add metadata to the specified vulnerabilities using the registered MetadataFetchers, in parallel.
+// Add metadata to the specified vulnerabilities using the NVD metadata fetcher.
 func addMetadata(vulnerabilities []database.Vulnerability) ([]database.Vulnerability, error) {
-	if len(vulnmdsrc.Appenders()) == 0 {
-		return vulnerabilities, nil
+	log.Info("adding metadata to vulnerabilities")
+
+	dumpDir, err := ioutil.TempDir("", "nvd-dump")
+	if err != nil {
+		return nil, errors.Wrap(err, "creating temp dir")
+	}
+	defer func() {
+		_ = os.RemoveAll(dumpDir)
+	}()
+
+	if err := nvdloader.DownloadFeedsToPath(dumpDir); err != nil {
+		return nil, errors.Wrap(err, "downloading NVD feeds")
 	}
 
-	log.Infof("adding metadata to %d vulnerabilities", len(vulnerabilities))
-
-	// Add a mutex to each vulnerability to ensure that only one appender at a
-	// time can modify the vulnerability's Metadata map.
-	lockableVulnerabilities := make([]*lockableVulnerability, 0, len(vulnerabilities))
-	for i := 0; i < len(vulnerabilities); i++ {
-		lockableVulnerabilities = append(lockableVulnerabilities, &lockableVulnerability{
-			Vulnerability: &vulnerabilities[i],
-		})
+	nvdAppender := nvd.SingletonAppender()
+	if err := nvdAppender.BuildCache(dumpDir); err != nil {
+		return nil, errors.Wrap(err, "failed to build cache from the NVD feed dump")
 	}
-
-	errSig := concurrency.NewErrorSignal()
-	var wg sync.WaitGroup
-	wg.Add(len(vulnmdsrc.Appenders()))
-
-	for n, a := range vulnmdsrc.Appenders() {
-		go func(name string, appender vulnmdsrc.Appender) {
-			defer wg.Done()
-
-			// Build up a metadata cache.
-			if err := appender.BuildCache(); err != nil {
-				log.WithError(err).WithField("appender name", name).Error("an error occurred when loading metadata fetcher")
-				errSig.SignalWithError(err)
-				return
-			}
-
-			// Append vulnerability metadata  to each vulnerability.
-			for _, vulnerability := range lockableVulnerabilities {
-				if err := appender.Append(vulnerability.Name, vulnerability.SubCVEs, vulnerability.appendFunc); err != nil {
-					errSig.SignalWithError(err)
-					return
-				}
-			}
-
-			// Purge the metadata cache.
-			appender.PurgeCache()
-		}(n, a)
-	}
-
-	wg.Wait()
-	if err := errSig.Err(); err != nil {
-		return nil, err
+	defer nvdAppender.PurgeCache()
+	for i := range vulnerabilities {
+		vuln := &vulnerabilities[i]
+		if err := nvdAppender.Append(vuln.Name, vuln.SubCVEs, appendFuncForVuln(vuln)); err != nil {
+			return nil, errors.Wrapf(err, "Failed to append metadata for vuln %s", vuln.Name)
+		}
 	}
 
 	return vulnerabilities, nil
 }
 
-type lockableVulnerability struct {
-	*database.Vulnerability
-	sync.Mutex
-}
+func appendFuncForVuln(v *database.Vulnerability) nvd.AppendFunc {
+	return func(metadataKey string, enricher nvd.MetadataEnricher, severity database.Severity) {
+		// If necessary, initialize the metadata map for the vulnerability.
+		if v.Metadata == nil {
+			v.Metadata = make(map[string]interface{})
+		}
 
-func (lv *lockableVulnerability) appendFunc(metadataKey string, enricher vulnmdsrc.MetadataEnricher, severity database.Severity) {
-	lv.Lock()
-	defer lv.Unlock()
+		// Append the metadata.
+		v.Metadata[metadataKey] = enricher.Metadata()
+		if v.Description == "" {
+			v.Description = enricher.Summary()
+		}
 
-	// If necessary, initialize the metadata map for the vulnerability.
-	if lv.Metadata == nil {
-		lv.Metadata = make(map[string]interface{})
-	}
-
-	// Append the metadata.
-	lv.Metadata[metadataKey] = enricher.Metadata()
-	if lv.Description == "" {
-		lv.Description = enricher.Summary()
-	}
-
-	// If necessary, provide a severity for the vulnerability.
-	if lv.Severity == database.UnknownSeverity {
-		lv.Severity = severity
+		// If necessary, provide a severity for the vulnerability.
+		if v.Severity == database.UnknownSeverity {
+			v.Severity = severity
+		}
 	}
 }
 

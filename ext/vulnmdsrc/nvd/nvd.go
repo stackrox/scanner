@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/apex/log"
 	"github.com/pkg/errors"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/commonerr"
@@ -78,16 +79,7 @@ type NVDmetadataCVSSv3 struct {
 	ImpactScore         float64
 }
 
-<<<<<<< HEAD
 func (a *appender) BuildCache(nvdDumpDir string) error {
-=======
-func init() {
-	vulnmdsrc.RegisterAppender(appenderName, &appender{})
-}
-
-func (a *appender) BuildCache() error {
-	var err error
->>>>>>> 6bf1e3e... Start doing updater stuff
 	a.metadata = make(map[string]*metadataEnricher)
 
 	fileInfos, err := ioutil.ReadDir(nvdDumpDir)
