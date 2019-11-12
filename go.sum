@@ -95,8 +95,6 @@ github.com/facebookgo/stack v0.0.0-20160209184415-751773369052/go.mod h1:UbMTZqL
 github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870/go.mod h1:5tD+neXqOorC30/tWg0LCSkrqj/AR6gu8yY8/fpw1q0=
 github.com/facebookincubator/flog v0.0.0-20190930132826-d2511d0ce33c h1:KqlxcP2nuOcMjudCvK0qME2K/aFBDH+xcvYv7HYQaYc=
 github.com/facebookincubator/flog v0.0.0-20190930132826-d2511d0ce33c/go.mod h1:QGzNH9ujQ2ZUr/CjDGZGWeDAVStrWNjHeEcjJL96Nuk=
-github.com/facebookincubator/nvdtools v0.1.4-0.20191024132624-1cb041402875 h1:jX2AZJ2zO/67+p301bRIrpT2ab7izvJ46hHsahTdG88=
-github.com/facebookincubator/nvdtools v0.1.4-0.20191024132624-1cb041402875/go.mod h1:0/FIVnSEl9YHXLq3tKBPpKaI0iUceDhdSHPlIwIX44Y=
 github.com/fatih/structs v1.0.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
 github.com/fatih/structs v1.1.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
 github.com/fernet/fernet-go v0.0.0-20180830025343-9eac43b88a5e h1:P10tZmVD2XclAaT9l7OduMH1OLFzTa1wUuUqHZnEdI0=
@@ -318,6 +316,8 @@ github.com/stackrox/docker-registry-client v0.0.0-20181115184320-3d98b2b79d1b/go
 github.com/stackrox/docker-registry-client v0.0.0-20181115184320-3d98b2b79d1b/go.mod h1:ftVRYPg9kyRYpu5y5rE+8c8P6KtAitUy57PlHhMraL8=
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191029220117-2a73008e51a9 h1:IXESjfBZNfZjU+VuVdxLZvkeiMPlodw94++hjOLORis=
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191029220117-2a73008e51a9/go.mod h1:13vPFaMtP66fobTXqiv3SB32ZCZfa9btx3O6uOlTCDY=
+github.com/stackrox/nvdtools v0.0.0-20191111160913-43bbb910fd39 h1:/k16pmT3mfhoJW8LxEgC1+nup5oWAI0vmRMTiw2AQtg=
+github.com/stackrox/nvdtools v0.0.0-20191111160913-43bbb910fd39/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
 github.com/stackrox/rox v0.0.0-20191106003112-a2ce10392777 h1:Vnhoa5g+X4zyxPADCQnPkgVQsSEg7kV6uTZXjt+r4Qk=
 github.com/stackrox/rox v0.0.0-20191106003112-a2ce10392777/go.mod h1:IqJz4g4l9F1W7D+nbovStYRUURq5ulaXyl8vYLPow10=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2/go.mod h1:mjqs7N0Q6m5HpR7QfXVBZXZWSqTjQLeTujjA/xUp2uw=

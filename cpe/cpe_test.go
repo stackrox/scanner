@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/facebookincubator/nvdtools/cvefeed"
-	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
@@ -14,8 +13,9 @@ import (
 
 func TestGenerateNameKeys(t *testing.T) {
 	cases := []struct {
-		name string
-		keys []string
+		name      string
+		keys      []string
+		hasVendor bool
 	}{
 		{
 			name: "",
@@ -33,6 +33,7 @@ func TestGenerateNameKeys(t *testing.T) {
 				"struts-showcase",
 				"struts_showcase",
 			},
+			hasVendor: true,
 		},
 		{
 			name: "struts2-showcase",
@@ -42,11 +43,28 @@ func TestGenerateNameKeys(t *testing.T) {
 				"struts2-showcase",
 				"struts2_showcase",
 			},
+			hasVendor: true,
+		},
+		{
+			name: "struts-showcase",
+			keys: []string{
+				"struts-showcase",
+				"struts_showcase",
+			},
+			hasVendor: false,
+		},
+		{
+			name: "struts2-showcase",
+			keys: []string{
+				"struts2-showcase",
+				"struts2_showcase",
+			},
+			hasVendor: false,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			assert.ElementsMatch(t, c.keys, generateNameKeys(c.name).AsSlice())
+			assert.ElementsMatch(t, c.keys, generateNameKeys(c.name, c.hasVendor).AsSlice())
 		})
 	}
 }
@@ -62,22 +80,6 @@ func TestGetAttributes(t *testing.T) {
 				Version: "1.3.12",
 			},
 			expectedAttributes: []*wfn.Attributes{
-				{
-					Product: "struts",
-					Version: "1.3.12",
-				},
-				{
-					Product: "struts",
-					Version: "1\\.3\\.12",
-				},
-				{
-					Product: "struts2",
-					Version: "1.3.12",
-				},
-				{
-					Product: "struts2",
-					Version: "1\\.3\\.12",
-				},
 				{
 					Product: "struts2-showcase",
 					Version: "1.3.12",
@@ -106,13 +108,7 @@ func TestGetAttributes(t *testing.T) {
 
 func newScannerVuln(id string) *Vuln {
 	return &Vuln{
-		Item: &schema.NVDCVEFeedJSON10DefCVEItem{
-			CVE: &schema.CVEJSON40{
-				CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
-					ID: id,
-				},
-			},
-		},
+		ID: id,
 	}
 }
 
@@ -126,7 +122,7 @@ func newDatabaseVuln(id string) database.Vulnerability {
 		Link:     fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", id),
 		Severity: "",
 		Metadata: map[string]interface{}{
-			"NVD": &Metadata{},
+			"NVD": (*Metadata)(nil),
 		},
 	}
 }

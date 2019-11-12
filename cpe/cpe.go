@@ -16,7 +16,7 @@ var (
 	numRegex = regexp.MustCompile(`[0-9].*$`)
 )
 
-func generateNameKeys(componentName string) set.StringSet {
+func generateNameKeys(componentName string, hasVendor bool) set.StringSet {
 	if componentName == "" {
 		return set.NewStringSet()
 	}
@@ -24,13 +24,17 @@ func generateNameKeys(componentName string) set.StringSet {
 		componentName,
 		strings.ReplaceAll(componentName, "_", "-"),
 		strings.ReplaceAll(componentName, "-", "_"),
-		numRegex.ReplaceAllString(componentName, ""),
 	)
-	for name := range nameSet {
-		if idx := strings.Index(name, "-"); idx != -1 {
-			nameSet.Add(name[:idx])
+
+	if hasVendor {
+		nameSet.Add(numRegex.ReplaceAllString(componentName, ""))
+		for name := range nameSet {
+			if idx := strings.Index(name, "-"); idx != -1 {
+				nameSet.Add(name[:idx])
+			}
 		}
 	}
+
 	return nameSet
 }
 
@@ -102,21 +106,16 @@ func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResul
 	return features
 }
 
-func getVulnsForComponent(layer string, attributes []*wfn.Attributes) []database.FeatureVersion {
-	matchResults := cache.Get(attributes)
-
-	return getFeaturesFromMatchResults(layer, matchResults, cveMap)
-}
-
 func getAttributes(c *component.Component) []*wfn.Attributes {
 	vendorSet := set.NewStringSet()
-	nameSet := generateNameKeys(c.Name)
+	nameSet := set.NewStringSet()
 	versionSet := generateVersionKeys(c)
 
 	if generator, ok := generators[c.SourceType]; ok {
 		generator(c, vendorSet, nameSet, versionSet)
 	}
 
+	nameSet = nameSet.Union(generateNameKeys(c.Name, vendorSet.Cardinality() != 0))
 	if vendorSet.Cardinality() == 0 {
 		vendorSet.Add("")
 	}
@@ -124,10 +123,15 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 	for vendor := range vendorSet {
 		for name := range nameSet {
 			for version := range versionSet {
+				var tgtSW string
+				if c.SourceType == component.NPMSourceType {
+					tgtSW = `node\.js`
+				}
 				attributes = append(attributes, &wfn.Attributes{
-					Vendor:  strings.ToLower(vendor),
-					Product: strings.ToLower(name),
-					Version: strings.ToLower(version),
+					Vendor:   strings.ToLower(vendor),
+					Product:  strings.ToLower(name),
+					Version:  strings.ToLower(version),
+					TargetSW: tgtSW,
 				})
 			}
 		}
@@ -135,18 +139,35 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 	return attributes
 }
 
-func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
-	uniqueAttributes := make(map[wfn.Attributes]struct{})
-	var allAttributes []*wfn.Attributes
-	for _, c := range components {
-		for _, a := range getAttributes(c) {
-			if _, ok := uniqueAttributes[*a]; ok {
-				continue
+func filterMatchResultsByTargetSoftware(matchResults []cvefeed.MatchResult) []cvefeed.MatchResult {
+	filteredResults := make([]cvefeed.MatchResult, 0, len(matchResults))
+	for _, f := range matchResults {
+		// If the CPE has a language specified, then ensure that the language is ensured in the result CPE
+		var tgt string
+		for _, matchedAttribute := range f.CPEs {
+			if tgt = matchedAttribute.TargetSW; tgt != "" {
+				break
 			}
-			allAttributes = append(allAttributes, a)
-			uniqueAttributes[*a] = struct{}{}
+		}
+		if tgt == "" {
+			return matchResults
+		}
+		for _, cveCPE := range f.CVE.Config() {
+			if cveCPE.TargetSW == tgt {
+				filteredResults = append(filteredResults, f)
+			}
 		}
 	}
+	return filteredResults
+}
 
-	return getVulnsForComponent(layer, allAttributes)
+func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
+	var matchResults []cvefeed.MatchResult
+	for _, c := range components {
+		attributes := getAttributes(c)
+		matchResults = append(matchResults, cache.Get(attributes)...)
+	}
+	matchResults = filterMatchResultsByTargetSoftware(matchResults)
+
+	return getFeaturesFromMatchResults(layer, matchResults, cveMap)
 }
