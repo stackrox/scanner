@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
@@ -51,7 +52,8 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 
 	manifest, err := parseManifestMF(manifestFile)
 	if err != nil {
-		return nil, err
+		log.Debugf("error parsing java manifest file: %v", err)
+		return nil, nil
 	}
 
 	fileNameWithExtension := locationSoFar[strings.LastIndex(locationSoFar, "/")+1:]
@@ -70,7 +72,8 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 	for _, pomPropsF := range pomProperties {
 		parsedPomProps, err := parseMavenPomProperties(pomPropsF)
 		if err != nil {
-			return nil, err
+			log.Debugf("error parsing maven pom properties of java sub archive: %v", err)
+			continue
 		}
 		var currentComponent *component.Component
 		// The maven properties is for the same package as the manifest was.
@@ -93,18 +96,25 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 	}
 
 	for _, subArchiveF := range subArchives {
+		if subArchiveF.CompressedSize64 == 0 {
+			continue
+		}
+
 		reader, err := subArchiveF.Open()
 		if err != nil {
-			return nil, err
+			log.Debugf("error opening java sub archive: %v", err)
+			continue
 		}
 		contents, err := ioutil.ReadAll(reader)
 		if err != nil {
-			return nil, err
+			log.Debugf("error reading java sub archive: %v", err)
+			continue
 		}
 
 		subComponents, err := parseContents(fmt.Sprintf("%s:%s", locationSoFar, subArchiveF.Name), contents)
 		if err != nil {
-			return nil, err
+			log.Debugf("error parsing contents of java sub archive: %v", err)
+			continue
 		}
 		allComponents = append(allComponents, subComponents...)
 	}
@@ -113,9 +123,6 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 }
 
 func parseContents(locationSoFar string, contents []byte) ([]*component.Component, error) {
-	if len(contents) == 0 {
-		return nil, nil
-	}
 	zipReader, err := zip.NewReader(bytes.NewReader(contents), int64(len(contents)))
 	if err != nil {
 		return nil, err
