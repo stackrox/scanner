@@ -5,7 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/stackrox/scanner/cmd/updater/clairvulns"
+	"github.com/stackrox/scanner/cmd/updater/generatedump"
 
 	// Register updaters.
 	_ "github.com/stackrox/scanner/ext/vulnsrc/all"
@@ -17,7 +17,7 @@ func main() {
 	}
 
 	c.AddCommand(
-		clairvulns.Command(),
+		generatedump.Command(),
 	)
 
 	if err := c.Execute(); err != nil {

@@ -1,4 +1,4 @@
-package clairvulns
+package generatedump
 
 import (
 	"compress/gzip"
@@ -43,7 +43,7 @@ func wrapVulns(startTime time.Time, fetchedVulns []database.Vulnerability) []vul
 
 func Command() *cobra.Command {
 	c := &cobra.Command{
-		Use: "fetch clair vulnerabilities",
+		Use: "generated the vuln dump",
 	}
 	outFile := c.Flags().String("out-file", "./dump.tar.gz", "file to write the dump to")
 
