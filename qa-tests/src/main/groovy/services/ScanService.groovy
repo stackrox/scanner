@@ -10,15 +10,12 @@ class ScanService extends BaseService {
         return ScanServiceGrpc.newBlockingStub(getChannel())
     }
 
-    static scanImage(String image, RegistryData registryData = null) {
-        ScanServiceOuterClass.ScanImageRequestOrBuilder request = ScanServiceOuterClass.ScanImageRequest.newBuilder()
-                .setImage(image)
-        if (registryData != null) {
-            request.setRegistry(registryData)
-        }
-
+    static scanImage(String image, RegistryData registryData) {
         try {
-            return getScanClient().scanImage(request.build())
+            return getScanClient().scanImage(ScanServiceOuterClass.ScanImageRequest.newBuilder()
+                    .setImage(image)
+                    .setRegistry(registryData)
+                    .build())
         } catch (Exception e) {
             println "Error trying to submit image for scan: ${e.toString()}"
         }
