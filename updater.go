@@ -339,6 +339,7 @@ func appendFuncForVuln(v *database.Vulnerability) nvd.AppendFunc {
 	}
 }
 
+// doVulnerabilitiesNamespacing takes Vulnerabilities that don't have a
 // Namespace and split them into multiple vulnerabilities that have a Namespace
 // and only contains the FixedIn FeatureVersions corresponding to their
 // Namespace.
