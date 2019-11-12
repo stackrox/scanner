@@ -29,7 +29,7 @@ func addVersion(c *component.Component) {
 func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
 	var allComponents []*component.Component
 	for filePath, contents := range fileMap {
-		if !match(filePath) {
+		if !match(filePath) || len(contents) == 0 {
 			continue
 		}
 		components, err := parseContents(filePath, contents)
