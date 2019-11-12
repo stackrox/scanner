@@ -18,6 +18,7 @@ style:
 proto-generated-srcs:
 	@echo "+ $@"
 	-rm -r src/main/proto
+	@scripts/migrate_protos.sh
 	gradle generateProto generateTestProto
 
 .PHONY: clean-generated-srcs
