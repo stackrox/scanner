@@ -3,7 +3,6 @@ package java
 import (
 	"archive/zip"
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -47,8 +46,9 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 	}
 
 	if manifestFile == nil {
-		// TODO(viswa): Make this more forgiving.
-		return nil, errors.New("no manifest file found")
+		return nil, nil
+		//TODO(viswa): Make this more forgiving.
+		//return nil, errors.New("no manifest file found")
 	}
 
 	manifest, err := parseManifestMF(manifestFile)
@@ -115,6 +115,9 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 }
 
 func parseContents(locationSoFar string, contents []byte) ([]*component.Component, error) {
+	if len(contents) == 0 {
+		return nil, nil
+	}
 	zipReader, err := zip.NewReader(bytes.NewReader(contents), int64(len(contents)))
 	if err != nil {
 		return nil, err
