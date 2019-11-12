@@ -52,7 +52,6 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
-	_ "github.com/stackrox/scanner/ext/vulnmdsrc/all"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/all"
 
 	// Register generators

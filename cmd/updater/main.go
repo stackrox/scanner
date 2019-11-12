@@ -8,7 +8,6 @@ import (
 	"github.com/stackrox/scanner/cmd/updater/clairvulns"
 
 	// Register updaters.
-	_ "github.com/stackrox/scanner/ext/vulnmdsrc/all"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/all"
 )
 
