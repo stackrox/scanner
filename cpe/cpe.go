@@ -8,6 +8,7 @@ import (
 	"github.com/facebookincubator/nvdtools/wfn"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -50,7 +51,7 @@ type nameVersion struct {
 	name, version string
 }
 
-func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResult, cveToVulns map[string]*Vuln) []database.FeatureVersion {
+func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResult, cveToVulns map[string]*nvdtoolscache.Vuln) []database.FeatureVersion {
 	if len(matchResults) == 0 {
 		return nil
 	}
@@ -162,6 +163,7 @@ func filterMatchResultsByTargetSoftware(matchResults []cvefeed.MatchResult) []cv
 }
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
+	cache, cveMap := nvdtoolscache.Get()
 	var matchResults []cvefeed.MatchResult
 	for _, c := range components {
 		attributes := getAttributes(c)
