@@ -1,12 +1,17 @@
 version: 2.1
 
+defaultImage: &defaultImage
+  image: docker.io/stackrox/apollo-ci:0.2.6
+    auth:
+      username: $DOCKER_IO_PULL_USERNAME
+      password: $DOCKER_IO_PULL_PASSWORD
+
+defaultWorkingDirectory: &defaultWorkingDirectory '/go/src/github.com/stackrox/scanner'
+
 defaults: &defaults
   docker:
-    - image: docker.io/stackrox/apollo-ci:0.2.6
-      auth:
-        username: $DOCKER_IO_PULL_USERNAME
-        password: $DOCKER_IO_PULL_PASSWORD
-  working_directory: /go/src/github.com/stackrox/scanner
+    - *defaultImage
+  working_directory: *defaultWorkingDirectory
 
 commands:
   setup-gcp:
@@ -56,7 +61,10 @@ jobs:
           command: make -C qa-tests style
 
   produce-vuln-definitions-dump:
-    <<: *defaults
+    docker:
+      - *defaultImage
+      - image: postgres:12.0-alpine
+
     steps:
     - checkout
     - setup_remote_docker
@@ -79,22 +87,14 @@ jobs:
           [[ -f "${VULN_DUMP_DIR}/dump.tar.gz" ]]
 
     - run:
-        name: Run postgres in Docker
-        command: |
-          docker run --name postgres-dump -d --publish 5432:5432 postgres:12.0-alpine
-          docker ps
-          sleep 5
-          docker ps
-
-    - run:
         name: Upload dump to postgres
         command: |
-          ./bin/updater load-dump --dump-file "${VULN_DUMP_DIR}/dump.tar.gz"
+          ./bin/updater load-dump --postgres-host localhost --postgres-port 5432 --dump-file "${VULN_DUMP_DIR}/dump.tar.gz"
 
     - run:
         name: Save dump
         command: |
-          docker exec postgres-dump pg_dump -U postgres > "${VULN_DUMP_DIR}/definitions.sql"
+          pg_dump -U postgres postgres://127.0.0.1:5432 > "${VULN_DUMP_DIR}/definitions.sql"
           gzip --best "${VULN_DUMP_DIR}/definitions.sql"
           [[ -f "${VULN_DUMP_DIR}/definitions.sql.gz" ]]
 
