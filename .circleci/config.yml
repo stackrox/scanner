@@ -115,8 +115,10 @@ jobs:
         at: /tmp/vuln-dump
 
     - run:
-        name: Move vuln dump to expected directory
-        command: mv /tmp/vuln-dump/definitions.sql.gz image/dump
+        name: Move vuln dump and NVD download to the image dump directory
+        command: |
+          mv /tmp/vuln-dump/definitions.sql.gz image/dump
+          tar -xvzf /tmp/vuln-dump/dump.tar.gz -C image/dump nvd
 
     - run:
         name: Build images

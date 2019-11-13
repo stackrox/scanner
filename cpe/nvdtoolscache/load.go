@@ -18,7 +18,7 @@ import (
 func LoadFromDirectory(definitionsDir string) error {
 	log.Info("Initializing NVD CPE Definitions")
 
-	extractedPath := filepath.Join(definitionsDir, "cve")
+	extractedPath := filepath.Join(definitionsDir)
 	files, err := ioutil.ReadDir(extractedPath)
 	if err != nil {
 		return err
