@@ -55,6 +55,50 @@ jobs:
           name: Run style checks on test code
           command: make -C qa-tests style
 
+  produce-vuln-definitions-dump:
+    <<: *defaults
+    steps:
+    - checkout
+    - setup_remote_docker
+
+    - run:
+        name: Build updater
+        command: |
+          make build-updater
+
+    - run:
+        name: Generate dump
+        command: |
+          ./bin/updater generate-dump --out-file ./dump.tar.gz
+          [[ -f ./dump.tar.gz ]]
+
+
+    - run: Run postgres in Docker
+      command: |
+        docker run --name postgres-dump -d --publish 5432:5432 postgres:12.0-alpine
+        docker ps
+        sleep 5
+        docker ps
+
+    - run: Upload dump to postgres
+      command: |
+        ./bin/updater load-dump --dump-file dump.tar.gz
+
+    - run: Save dump
+      command: |
+        docker exec postgres-dump pg_dump -U postgres > /tmp/definitions.sql
+        gzip --best /tmp/definitions.sql
+        [[ -f /tmp/definitions.sql.gz ]]
+
+    - persist_to_workspace:
+        root: /tmp
+        paths:
+          - definitions.sql.gz
+
+    - run: Remove postgres container
+      command: docker stop postgres-dump && docker rm postgres-dump
+
+
   build:
     <<: *defaults
     steps:

@@ -24,6 +24,14 @@ $(GOLINT_BIN): deps
 	@echo "+ $@"
 	go install golang.org/x/lint/golint
 
+#############
+##  Build  ##
+#############
+.PHONY: build-updater
+build-updater: deps
+	@echo "+ $@"
+	go build -o ./bin/updater ./cmd/updater
+
 ###########
 ## Style ##
 ###########

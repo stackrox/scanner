@@ -6,8 +6,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/scanner/cmd/updater/generatedump"
+	"github.com/stackrox/scanner/cmd/updater/loaddump"
 
-	// Register updaters.
+	// Registrations.
+	_ "github.com/stackrox/scanner/database/pgsql"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/all"
 )
 
@@ -18,6 +20,7 @@ func main() {
 
 	c.AddCommand(
 		generatedump.Command(),
+		loaddump.Command(),
 	)
 
 	if err := c.Execute(); err != nil {

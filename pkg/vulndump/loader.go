@@ -103,7 +103,7 @@ func UpdateFromVulnDump(tarGZPath string, db database.Datastore, inMemUpdater In
 		return errors.Wrap(err, "filtering vulns")
 	}
 	logrus.Infof("Inserting %d vulns into the DB", len(filteredVulns))
-	if err := db.InsertVulnerabilities(filteredVulns); err != nil {
+	if err := db.InsertVulnerabilities(filteredVulns[:1000]); err != nil {
 		return errors.Wrap(err, "inserting vulns into the DB")
 	}
 	logrus.Info("Done inserting vulns into the DB")
