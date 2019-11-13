@@ -18,7 +18,7 @@ func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) bool {
 
 func match(fullPath string) bool {
 	// Check for node modules to ensure it is actually a NodeJS module
-	return strings.Contains(fullPath, "node_modules") && strings.HasSuffix(fullPath, "/package.json")
+	return (strings.Contains(fullPath, "node_modules") || strings.Contains(fullPath, "nodejs")) && strings.HasSuffix(fullPath, "/package.json")
 }
 
 func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
