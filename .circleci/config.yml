@@ -69,7 +69,7 @@ jobs:
     - run:
         name: Make temp directory for vuln dump
         command: |
-          cci-export VULN_DUMP_DIR=/tmp/vuln-dump
+          cci-export VULN_DUMP_DIR /tmp/vuln-dump
           mkdir -p "${VULN_DUMP_DIR}"
 
     - run:
