@@ -105,6 +105,11 @@ jobs:
         - dump.tar.gz
 
     - run:
+        name: Print postgres logs
+        command: docker logs postgres-dump
+        when: always
+
+    - run:
         name: Remove postgres container
         command: docker stop postgres-dump && docker rm postgres-dump
 
