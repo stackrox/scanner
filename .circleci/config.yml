@@ -69,11 +69,7 @@ jobs:
     steps:
     - checkout
     - setup_remote_docker
-
-    - run:
-        name: Build updater
-        command: |
-          make build-updater
+    - setup-gcp
 
     - run:
         name: Make temp directory for vuln dump
@@ -82,21 +78,25 @@ jobs:
           mkdir -p "${VULN_DUMP_DIR}"
 
     - run:
-        name: Generate dump
+       name: Fetch vuln dumps from upstream or GS bucket
+       command: |
+         if [[ "${CIRCLE_BRANCH}" == "master" || -n "${CIRCLE_TAG}" ]] || .circleci/pr_has_label.sh ci-fetch-dumps; then
+           echo "Fetching the updates from upstream"
+           make build-updater
+           ./bin/updater generate-dump --out-file "${VULN_DUMP_DIR}/dump.tar.gz"
+           ./bin/updater load-dump --postgres-host localhost --postgres-port 5432 --dump-file "${VULN_DUMP_DIR}/dump.tar.gz"
+           pg_dump -U postgres postgres://127.0.0.1:5432 > "${VULN_DUMP_DIR}/definitions.sql"
+           gzip --best "${VULN_DUMP_DIR}/definitions.sql"
+           gsutil cp "${VULN_DUMP_DIR}/definitions.sql.gz" "${VULN_DUMP_DIR}/dump.tar.gz" gs://stackrox-scanner-ci-vuln-dump
+         else
+           echo "On a PR branch, just fetching the updates from the GS bucket"
+           gsutil cp gs://stackrox-scanner-ci-vuln-dump/definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump/dump.tar.gz "${VULN_DUMP_DIR}"
+         fi
+
+    - run:
+        name: Ensure files are present
         command: |
-          ./bin/updater generate-dump --out-file "${VULN_DUMP_DIR}/dump.tar.gz"
           [[ -f "${VULN_DUMP_DIR}/dump.tar.gz" ]]
-
-    - run:
-        name: Upload dump to postgres
-        command: |
-          ./bin/updater load-dump --postgres-host localhost --postgres-port 5432 --dump-file "${VULN_DUMP_DIR}/dump.tar.gz"
-
-    - run:
-        name: Save dump
-        command: |
-          pg_dump -U postgres postgres://127.0.0.1:5432 > "${VULN_DUMP_DIR}/definitions.sql"
-          gzip --best "${VULN_DUMP_DIR}/definitions.sql"
           [[ -f "${VULN_DUMP_DIR}/definitions.sql.gz" ]]
 
     - persist_to_workspace:
