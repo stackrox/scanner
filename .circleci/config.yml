@@ -78,28 +78,31 @@ jobs:
           ./bin/updater generate-dump --out-file "${VULN_DUMP_DIR}/dump.tar.gz"
           [[ -f "${VULN_DUMP_DIR}/dump.tar.gz" ]]
 
-    - run: Run postgres in Docker
-      command: |
-        docker run --name postgres-dump -d --publish 5432:5432 postgres:12.0-alpine
-        docker ps
-        sleep 5
-        docker ps
+    - run:
+        name: Run postgres in Docker
+        command: |
+          docker run --name postgres-dump -d --publish 5432:5432 postgres:12.0-alpine
+          docker ps
+          sleep 5
+          docker ps
 
-    - run: Upload dump to postgres
-      command: |
-        ./bin/updater load-dump --dump-file "${VULN_DUMP_DIR}/dump.tar.gz"
+    - run:
+        name: Upload dump to postgres
+        command: |
+          ./bin/updater load-dump --dump-file "${VULN_DUMP_DIR}/dump.tar.gz"
 
-    - run: Save dump
-      command: |
-        docker exec postgres-dump pg_dump -U postgres > "${VULN_DUMP_DIR}/definitions.sql"
-        gzip --best "${VULN_DUMP_DIR}/definitions.sql"
-        [[ -f "${VULN_DUMP_DIR}/definitions.sql.gz" ]]
+    - run:
+        name: Save dump
+        command: |
+          docker exec postgres-dump pg_dump -U postgres > "${VULN_DUMP_DIR}/definitions.sql"
+          gzip --best "${VULN_DUMP_DIR}/definitions.sql"
+          [[ -f "${VULN_DUMP_DIR}/definitions.sql.gz" ]]
 
     - persist_to_workspace:
         root: /tmp/vuln-dump
         paths:
-          - definitions.sql.gz
-          - dump.tar.gz
+        - definitions.sql.gz
+        - dump.tar.gz
 
     - run: Remove postgres container
       command: docker stop postgres-dump && docker rm postgres-dump
