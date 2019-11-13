@@ -4,31 +4,27 @@ import (
 	"os"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
 )
 
 var (
-	lock       sync.RWMutex
-	dbInstance DB
+	once     sync.Once
+	instance Cache
 )
 
-func Get() DB {
-	lock.RLock()
-	defer lock.RUnlock()
-	return dbInstance
-}
+// Singleton returns the cache instance to use.
+func Singleton() Cache {
+	once.Do(func() {
+		var err error
+		instance, err = New()
+		utils.Must(err)
 
-func setInstances(db DB) {
-	lock.Lock()
-	defer lock.Unlock()
-	dbInstance = db
-}
-
-func init() {
-	definitionsDir := os.Getenv("NVD_DEFINITIONS_DIR")
-	if definitionsDir == "" {
-		return
-	}
-	utils.Must(LoadFromDirectory(definitionsDir))
-
+		if definitionsDir := os.Getenv("NVD_DEFINITIONS_DIR"); definitionsDir != "" {
+			log.Info("Loading NVD definitions into cache")
+			utils.Must(instance.LoadFromDirectory(definitionsDir))
+			log.Info("Done loading NVD definitions into cache")
+		}
+	})
+	return instance
 }

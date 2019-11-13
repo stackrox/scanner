@@ -12,13 +12,7 @@ import (
 	"github.com/stackrox/rox/pkg/set"
 )
 
-type DB interface {
-	GetVulnsForAttributes(attributes []*wfn.Attributes) ([]cvefeed.Vuln, error)
-	AddProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSON10DefCVEItem) error
-	Sync() error
-}
-
-func NewDB() (DB, error) {
+func New() (Cache, error) {
 	opts := bbolt.Options{
 		NoFreelistSync: true,
 		FreelistType:   bbolt.FreelistMapType,
@@ -28,21 +22,21 @@ func NewDB() (DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &dbImpl{
+	return &cacheImpl{
 		DB: db,
 	}, nil
 }
 
-type dbImpl struct {
+type cacheImpl struct {
 	*bbolt.DB
 }
 
-func (d *dbImpl) AddProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSON10DefCVEItem) error {
+func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSON10DefCVEItem) error {
 	bytes, err := easyjson.Marshal(itemWrapper(*cve))
 	if err != nil {
 		return err
 	}
-	return d.Update(func(tx *bbolt.Tx) error {
+	return c.Update(func(tx *bbolt.Tx) error {
 		for _, a := range vuln.Config() {
 			product := []byte(a.Product)
 			bucket, err := tx.CreateBucketIfNotExists(product)
@@ -60,7 +54,7 @@ func (d *dbImpl) AddProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSON10
 	})
 }
 
-func (d *dbImpl) GetVulnsForAttributes(attributes []*wfn.Attributes) ([]cvefeed.Vuln, error) {
+func (c *cacheImpl) GetVulnsForAttributes(attributes []*wfn.Attributes) ([]cvefeed.Vuln, error) {
 	products := set.NewStringSet()
 	for _, a := range attributes {
 		if a.Product != "" {
@@ -70,7 +64,7 @@ func (d *dbImpl) GetVulnsForAttributes(attributes []*wfn.Attributes) ([]cvefeed.
 
 	vulnSet := set.NewStringSet()
 	var vulns []cvefeed.Vuln
-	err := d.View(func(tx *bbolt.Tx) error {
+	err := c.View(func(tx *bbolt.Tx) error {
 		for product := range products {
 			bucket := tx.Bucket([]byte(product))
 			if bucket == nil {
@@ -95,6 +89,6 @@ func (d *dbImpl) GetVulnsForAttributes(attributes []*wfn.Attributes) ([]cvefeed.
 	return vulns, err
 }
 
-func (d *dbImpl) Sync() error {
-	return d.DB.Sync()
+func (c *cacheImpl) sync() error {
+	return c.DB.Sync()
 }

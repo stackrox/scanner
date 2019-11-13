@@ -15,16 +15,11 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 )
 
-func LoadFromDirectory(definitionsDir string) error {
-	log.Info("Initializing NVD CPE Definitions")
+func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
+	log.WithField("dir", definitionsDir).Info("Loading definitions directory")
 
 	extractedPath := filepath.Join(definitionsDir, "cve")
 	files, err := ioutil.ReadDir(extractedPath)
-	if err != nil {
-		return err
-	}
-
-	db, err := NewDB()
 	if err != nil {
 		return err
 	}
@@ -34,7 +29,7 @@ func LoadFromDirectory(definitionsDir string) error {
 		if !strings.HasSuffix(f.Name(), ".json") {
 			continue
 		}
-		numVulns, err := handleJSONFile(db, filepath.Join(extractedPath, f.Name()))
+		numVulns, err := c.handleJSONFile(filepath.Join(extractedPath, f.Name()))
 		if err != nil {
 			return errors.Wrapf(err, "handling file %s", f.Name())
 		}
@@ -42,11 +37,7 @@ func LoadFromDirectory(definitionsDir string) error {
 	}
 	log.Infof("Total vulns: %d", totalVulns)
 
-	if err := db.Sync(); err != nil {
-		panic(err)
-	}
-
-	setInstances(db)
+	utils.Must(c.sync())
 	return nil
 }
 
@@ -113,7 +104,7 @@ func trimCVE(cve *schema.NVDCVEFeedJSON10DefCVEItem) {
 	cve.Configurations.CVEDataVersion = ""
 }
 
-func handleJSONFile(db DB, path string) (int, error) {
+func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -136,7 +127,7 @@ func handleJSONFile(db DB, path string) (int, error) {
 			trimCVE(cve)
 
 			t := time.Now()
-			if err := db.AddProductToCVE(vuln, cve); err != nil {
+			if err := c.addProductToCVE(vuln, cve); err != nil {
 				log.Error(err)
 				continue
 			}

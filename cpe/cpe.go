@@ -159,12 +159,12 @@ func filterMatchResultsByTargetSoftware(matchResults []cvefeed.MatchResult) []cv
 }
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
-	db := nvdtoolscache.Get()
+	cache := nvdtoolscache.Singleton()
 	var matchResults []cvefeed.MatchResult
 	for _, c := range components {
 		attributes := getAttributes(c)
 
-		vulns, err := db.GetVulnsForAttributes(attributes)
+		vulns, err := cache.GetVulnsForAttributes(attributes)
 		if err != nil {
 			log.Error(err)
 			continue
