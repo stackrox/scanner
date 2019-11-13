@@ -88,6 +88,7 @@ github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25Kn
 github.com/edsrzf/mmap-go v1.0.0/go.mod h1:YO35OhQPt3KJa3ryjFM5Bs14WD66h8eGKpfaBNrHW5M=
 github.com/emicklei/go-restful v0.0.0-20170410110728-ff4f55a20633/go.mod h1:otzb+WCGbkyDHkqmQmT5YD2WR4BBwUdeQoFo8l/7tVs=
 github.com/emicklei/proto v1.6.7/go.mod h1:Dqn751twH9SasYqvA59Lb9Hz+itoJgmMoivX6k7OPZc=
+github.com/etcd-io/bbolt v1.3.3 h1:gSJmxrs37LgTqR/oyJBWok6k6SvXEUerFTbltIhXkBM=
 github.com/etcd-io/bbolt v1.3.3/go.mod h1:ZF2nL25h33cCyBtcyWeZ2/I3HQOfTP+0PIEvHjkjCrw=
 github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d/go.mod h1:ZZMPRZwes7CROmyNKgQzC3XPs6L/G2EJLHddWejkmf4=
 github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51/go.mod h1:Yg+htXGokKKdzcwhuNDwVvN+uBxDGXJ7G/VN1d8fa64=
@@ -213,6 +214,7 @@ github.com/lib/pq v1.2.0 h1:LXpIM/LZ5xGFhOpXAQUIMM1HdyqzVYM13zNdjCEEcA0=
 github.com/lib/pq v1.2.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/mailru/easyjson v0.0.0-20160728113105-d5b7844b561a/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
+github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329 h1:2gxZ0XQIU/5z3Z3bUBu+FXuk2pFbkN6tcwi/pjyaDic=
 github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/mattn/go-shellwords v1.0.5/go.mod h1:3xCvwCdWdlDJUrvuMn7Wuy9eWs4pE8vqg+NOMyg4B2o=
 github.com/mattn/go-sqlite3 v1.9.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
@@ -316,8 +318,8 @@ github.com/stackrox/docker-registry-client v0.0.0-20181115184320-3d98b2b79d1b/go
 github.com/stackrox/docker-registry-client v0.0.0-20181115184320-3d98b2b79d1b/go.mod h1:ftVRYPg9kyRYpu5y5rE+8c8P6KtAitUy57PlHhMraL8=
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191029220117-2a73008e51a9 h1:IXESjfBZNfZjU+VuVdxLZvkeiMPlodw94++hjOLORis=
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191029220117-2a73008e51a9/go.mod h1:13vPFaMtP66fobTXqiv3SB32ZCZfa9btx3O6uOlTCDY=
-github.com/stackrox/nvdtools v0.0.0-20191111160913-43bbb910fd39 h1:/k16pmT3mfhoJW8LxEgC1+nup5oWAI0vmRMTiw2AQtg=
-github.com/stackrox/nvdtools v0.0.0-20191111160913-43bbb910fd39/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
+github.com/stackrox/nvdtools v0.0.0-20191113120155-9d91e1a7e8e3 h1:4nOZCCi6whlNXE1E+lZhFzjdOBVSkt8SM8TvbDpQAR4=
+github.com/stackrox/nvdtools v0.0.0-20191113120155-9d91e1a7e8e3/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
 github.com/stackrox/rox v0.0.0-20191106003112-a2ce10392777 h1:Vnhoa5g+X4zyxPADCQnPkgVQsSEg7kV6uTZXjt+r4Qk=
 github.com/stackrox/rox v0.0.0-20191106003112-a2ce10392777/go.mod h1:IqJz4g4l9F1W7D+nbovStYRUURq5ulaXyl8vYLPow10=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2/go.mod h1:mjqs7N0Q6m5HpR7QfXVBZXZWSqTjQLeTujjA/xUp2uw=
@@ -342,6 +344,7 @@ github.com/viswajithiii/goveralls v0.0.3-0.20190917224517-4dd02c532775/go.mod h1
 github.com/viswajithiii/protolock v0.10.1-0.20190117180626-43bb8a9ba4e8/go.mod h1:1ESfEiCwz0YKPcxyTP7r+gffwi/TEZE41/Zu3LiVmV8=
 github.com/willf/bitset v1.1.10/go.mod h1:RjeCKbqT1RxIR/KWY6phxZiaY1IyutSBfGjNPySAYV4=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
+go.etcd.io/bbolt v1.3.3 h1:MUGmc65QhB3pIlaQ5bB4LwqSj6GIonVJXpZiaKNyaKk=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=

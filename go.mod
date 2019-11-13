@@ -7,6 +7,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker-credential-helpers v0.6.3
+	github.com/etcd-io/bbolt v1.3.3
 	github.com/facebookincubator/flog v0.0.0-20190930132826-d2511d0ce33c // indirect
 	github.com/facebookincubator/nvdtools v0.1.4-0.20191024132624-1cb041402875
 	github.com/golang/protobuf v1.3.2
@@ -18,6 +19,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/lib/pq v1.2.0
+	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
 	github.com/opencontainers/go-digest v1.0.0-rc1
 	github.com/pborman/uuid v0.0.0-20180906182336-adf5a7427709
 	github.com/pkg/errors v0.8.1
@@ -37,7 +39,7 @@ require (
 replace (
 	github.com/blevesearch/bleve => github.com/stackrox/bleve v0.0.0-20190918030150-5ebdc2278ffe
 	github.com/dgraph-io/badger => github.com/stackrox/badger v1.6.1-0.20191025195058-f2b50b9f079c
-	github.com/facebookincubator/nvdtools => github.com/stackrox/nvdtools v0.0.0-20191111160913-43bbb910fd39
+	github.com/facebookincubator/nvdtools => github.com/stackrox/nvdtools v0.0.0-20191113120155-9d91e1a7e8e3
 	github.com/fullsailor/pkcs7 => github.com/misberner/pkcs7 v0.0.0-20190417093538-a48bf0f78dea
 	github.com/go-resty/resty => gopkg.in/resty.v1 v1.11.0
 	github.com/gogo/protobuf => github.com/connorgorman/protobuf v1.2.2-0.20190220010025-a81e5c3a5053
