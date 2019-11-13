@@ -2,9 +2,9 @@ version: 2.1
 
 defaultImage: &defaultImage
   image: docker.io/stackrox/apollo-ci:0.2.6
-    auth:
-      username: $DOCKER_IO_PULL_USERNAME
-      password: $DOCKER_IO_PULL_PASSWORD
+  auth:
+    username: $DOCKER_IO_PULL_USERNAME
+    password: $DOCKER_IO_PULL_PASSWORD
 
 defaultWorkingDirectory: &defaultWorkingDirectory '/go/src/github.com/stackrox/scanner'
 
@@ -64,6 +64,7 @@ jobs:
     docker:
       - *defaultImage
       - image: postgres:12.0-alpine
+    working_directory: *defaultWorkingDirectory
 
     steps:
     - checkout
