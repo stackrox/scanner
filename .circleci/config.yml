@@ -116,7 +116,7 @@ jobs:
     - setup_remote_docker
 
     - attach_workspace:
-      at: /tmp/vuln-dump
+        at: /tmp/vuln-dump
 
     - run:
         name: Move vuln dump to expected directory
