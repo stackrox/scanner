@@ -105,6 +105,10 @@ jobs:
         - definitions.sql.gz
         - dump.tar.gz
 
+    - store_artifacts:
+        path: /tmp/vuln-dump
+        destination: vuln-dump
+
   build:
     <<: *defaults
     steps:
