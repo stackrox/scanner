@@ -18,7 +18,7 @@ func New() (Cache, error) {
 		FreelistType:   bbolt.FreelistMapType,
 		NoSync:         true,
 	}
-	db, err := bbolt.Open("/tmp/temp.db", 0777, &opts)
+	db, err := bbolt.Open("/tmp/temp.db", 0600, &opts)
 	if err != nil {
 		return nil, err
 	}

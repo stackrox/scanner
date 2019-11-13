@@ -126,12 +126,12 @@ func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 			vuln := nvd.ToVuln(cve)
 			trimCVE(cve)
 
-			t := time.Now()
-			if err := c.addProductToCVE(vuln, cve); err != nil {
-				log.Error(err)
-				continue
+			start := time.Now()
+			err := c.addProductToCVE(vuln, cve)
+			writing += time.Since(start)
+			if err != nil {
+				return 0, errors.Wrapf(err, "adding vuln %q", vuln.ID())
 			}
-			writing += time.Since(t)
 			vulns++
 		}
 	}
