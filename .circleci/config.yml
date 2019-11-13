@@ -104,8 +104,9 @@ jobs:
         - definitions.sql.gz
         - dump.tar.gz
 
-    - run: Remove postgres container
-      command: docker stop postgres-dump && docker rm postgres-dump
+    - run:
+        name: Remove postgres container
+        command: docker stop postgres-dump && docker rm postgres-dump
 
 
   build:
