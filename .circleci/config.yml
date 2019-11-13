@@ -67,11 +67,16 @@ jobs:
           make build-updater
 
     - run:
+        name: Make temp directory for vuln dump
+        command: |
+          cci-export VULN_DUMP_DIR=/tmp/vuln-dump
+          mkdir -p "${VULN_DUMP_DIR}"
+
+    - run:
         name: Generate dump
         command: |
-          ./bin/updater generate-dump --out-file ./dump.tar.gz
-          [[ -f ./dump.tar.gz ]]
-
+          ./bin/updater generate-dump --out-file "${VULN_DUMP_DIR}/dump.tar.gz"
+          [[ -f "${VULN_DUMP_DIR}/dump.tar.gz" ]]
 
     - run: Run postgres in Docker
       command: |
@@ -82,18 +87,19 @@ jobs:
 
     - run: Upload dump to postgres
       command: |
-        ./bin/updater load-dump --dump-file dump.tar.gz
+        ./bin/updater load-dump --dump-file "${VULN_DUMP_DIR}/dump.tar.gz"
 
     - run: Save dump
       command: |
-        docker exec postgres-dump pg_dump -U postgres > /tmp/definitions.sql
-        gzip --best /tmp/definitions.sql
-        [[ -f /tmp/definitions.sql.gz ]]
+        docker exec postgres-dump pg_dump -U postgres > "${VULN_DUMP_DIR}/definitions.sql"
+        gzip --best "${VULN_DUMP_DIR}/definitions.sql"
+        [[ -f "${VULN_DUMP_DIR}/definitions.sql.gz" ]]
 
     - persist_to_workspace:
-        root: /tmp
+        root: /tmp/vuln-dump
         paths:
           - definitions.sql.gz
+          - dump.tar.gz
 
     - run: Remove postgres container
       command: docker stop postgres-dump && docker rm postgres-dump
@@ -105,11 +111,12 @@ jobs:
     - checkout
     - setup_remote_docker
 
+    - attach_workspace:
+      at: /tmp/vuln-dump
+
     - run:
-        name: Pull definitions dump
-        command: |
-          status_code="$(curl -w '%{http_code}' -u "${STACKROX_IO_PUSH_USERNAME}:${STACKROX_IO_PUSH_PASSWORD}" -L https://install.stackrox.io/scanner/definitions.sql.gz --output image/dump/definitions.sql.gz)"
-          [[ "${status_code}" -eq 200 ]] || { echo "Failed to pull the definitions dump. Status code ${status_code}. File contents: $(head image/dump/definitions.sql.gz)"; exit 1; }
+        name: Move vuln dump to expected directory
+        command: mv /tmp/vuln-dump/definitions.sql.gz image/dump
 
     - run:
         name: Build images
@@ -278,8 +285,15 @@ workflows:
         filters:
           tags:
             only: /.*/
+    - produce-vuln-definitions-dump:
+        context: docker-io-pull
+        filters:
+          tags:
+            only: /.*/
     - build:
         context: docker-io-and-stackrox-io-push
+        requires:
+          - produce-vuln-definitions-dump
         filters:
           tags:
             only: /.*/
