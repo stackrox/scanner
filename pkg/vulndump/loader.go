@@ -12,6 +12,7 @@ import (
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/wellknownkeys"
 )
@@ -38,7 +39,7 @@ func filterVulns(dbUpdatedTime time.Time, wrappedVulnsPath string) ([]database.V
 	}
 	var filteredVulns []database.Vulnerability
 	for _, wrappedVuln := range wrappedVulns {
-		if !dbUpdatedTime.IsZero() && (wrappedVuln.LastUpdatedTime.Before(dbUpdatedTime) || wrappedVuln.LastUpdatedTime.Equal(dbUpdatedTime)) {
+		if !dbUpdatedTime.IsZero() && (!wrappedVuln.LastUpdatedTime.After(dbUpdatedTime)) {
 			continue
 		}
 		filteredVulns = append(filteredVulns, wrappedVuln.Vulnerability)
@@ -59,14 +60,14 @@ func UpdateFromVulnDump(tarGZPath string, db database.Datastore, inMemUpdater In
 	if err != nil {
 		return errors.Wrap(err, "failed to create temp dir for extracted vuln dump")
 	}
-	logrus.WithField("dir", destination).Info("Extracting vuln definitions into temp dir")
-	if err := archiver.DefaultTarGz.Unarchive(tarGZPath, destination); err != nil {
-		return errors.Wrap(err, "failed to unarchive tar gz file")
-	}
-
 	defer func() {
 		_ = os.RemoveAll(destination)
 	}()
+
+	log.WithField("dir", destination).Info("Extracting vuln definitions into temp dir")
+	if err := archiver.DefaultTarGz.Unarchive(tarGZPath, destination); err != nil {
+		return errors.Wrap(err, "failed to unarchive tar gz file")
+	}
 
 	dumpTSBytes, err := ioutil.ReadFile(filepath.Join(destination, "TIMESTAMP"))
 	if err != nil {
