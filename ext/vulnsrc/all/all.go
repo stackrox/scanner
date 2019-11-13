@@ -5,7 +5,7 @@ import (
 	_ "github.com/stackrox/scanner/ext/vulnsrc/alpine"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/amzn"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/debian"
-	// _ "github.com/stackrox/scanner/ext/vulnsrc/oracle"
-	// _ "github.com/stackrox/scanner/ext/vulnsrc/rhel"
-	// _ "github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
+	_ "github.com/stackrox/scanner/ext/vulnsrc/oracle"
+	_ "github.com/stackrox/scanner/ext/vulnsrc/rhel"
+	_ "github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
 )
