@@ -1,0 +1,25 @@
+FROM registry.access.redhat.com/ubi7/ubi
+
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
+# Scanner requires the following binaries.
+RUN yum update -y --disableplugin=subscription-manager && \
+    yum -y install ca-certificates git openssl xz
+
+COPY ./bin/scanner /
+
+ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
+RUN mkdir -p "${NVD_DEFINITIONS_DIR}"
+ADD ./dump/cves* "${NVD_DEFINITIONS_DIR}/"
+
+ENTRYPOINT ["/scanner"]
+
+# Make image STIG compliant: https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/
+ARG DSOP_URL=https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/raw/18d21ee5ed843e7b319e2670f47687f057db98a6/7.7
+RUN ( for i in dsop-fix-{1,2,3}.sh ; do curl -O "$DSOP_URL/$i" ; done; )
+RUN ( chmod +x /dsop-fix-{1,2}.sh && for i in /dsop-fix-{1,2}.sh; do sh "$i"; done; )
+RUN ( yum update -y --disableplugin=subscription-manager && rm -rf /var/cache/yum/ /var/tmp/* /tmp/* /var/tmp/.???* /tmp/.???*; )
+RUN ( chmod +x /dsop-fix-3.sh && /dsop-fix-3.sh && rm -rf /dsop-fix*.sh ; )
+
+# Remove package manager
+RUN rpm -e subscription-manager yum yum-utils yum-plugin-ovl

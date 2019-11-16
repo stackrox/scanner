@@ -1,0 +1,58 @@
+# Modified for RHEL from https://github.com/docker-library/postgres/tree/master/12
+
+FROM registry.access.redhat.com/ubi7/ubi
+
+ENV PG_MAJOR 12
+ENV GOSU_VERSION 1.11
+ENV ARCH amd64
+ENV LANG en_US.utf8
+ENV PATH $PATH:/usr/pgsql-$PG_MAJOR/bin/
+ENV PGDATA /var/lib/postgresql/data
+
+# Install postgres packages from https://yum.postgresql.org/
+RUN yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm && \
+    yum update -y --disableplugin=subscription-manager && \
+    yum install -y \
+      ca-certificates \
+      nss_wrapper \
+      "postgresql${PG_MAJOR}" \
+      "postgresql${PG_MAJOR}-server"
+
+# this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)                 
+RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PGDATA"                 
+
+RUN localedef -f UTF-8 -i en_US en_US.UTF-8
+
+# gosu download
+ADD "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$ARCH" /usr/local/bin/gosu
+ADD "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$ARCH.asc" /usr/local/bin/gosu.asc
+
+# gosu verification and permissions
+RUN set -x \
+	&& export GNUPGHOME="$(mktemp -d)" \
+	&& gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+	&& { command -v gpgconf > /dev/null && gpgconf --kill all || :; } \
+	&& rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
+	&& chmod +x /usr/local/bin/gosu \
+	&& gosu nobody true
+
+RUN mkdir /docker-entrypoint-initdb.d
+
+COPY ./db.rhel/docker-entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+EXPOSE 5432
+CMD ["postgres"]
+
+COPY ./dump/definitions.sql.gz /docker-entrypoint-initdb.d/
+
+# Make image STIG compliant: https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/
+ARG DSOP_URL=https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/raw/18d21ee5ed843e7b319e2670f47687f057db98a6/7.7
+RUN ( for i in dsop-fix-{1,2,3}.sh ; do curl -O "$DSOP_URL/$i" ; done; )
+RUN ( chmod +x /dsop-fix-{1,2}.sh && for i in /dsop-fix-{1,2}.sh; do sh "$i"; done; )
+RUN ( yum update -y --disableplugin=subscription-manager && rm -rf /var/cache/yum/ /var/tmp/* /tmp/* /var/tmp/.???* /tmp/.???*; )
+RUN ( chmod +x /dsop-fix-3.sh && /dsop-fix-3.sh && rm -rf /dsop-fix*.sh ; )
+
+# Remove package manager
+RUN rpm -e --nodeps curl rpm rpm-libs rpm-build-libs rpm-python subscription-manager subscription-manager-rhsm yum yum-utils yum-plugin-ovl

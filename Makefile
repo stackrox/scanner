@@ -143,7 +143,7 @@ install-dev-tools:
 ############
 
 .PHONY: image
-image: scanner-image db-image
+image: scanner-image scanner-image-rhel db-image db-image-rhel
 
 .PHONY: build
 build: deps
@@ -155,17 +155,36 @@ scanner-image: build
 	@echo "+ $@"
 	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/Dockerfile.scanner image/
 
+.PHONY: scanner-image-rhel
+scanner-image-rhel: build
+	@echo "+ $@"
+	@docker build -t us.gcr.io/stackrox-ci/scanner-rhel:$(TAG) -f image/Dockerfile.scanner.rhel image/
+
 .PHONY: db-image
 db-image:
 	@echo "+ $@"
 	@test -f image/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
 	@docker build -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/Dockerfile.db image/
 
+.PHONY: db-image-rhel
+db-image-rhel:
+	@echo "+ $@"
+	@test -f image/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
+	@docker build -t us.gcr.io/stackrox-ci/scanner-db-rhel:$(TAG) -f image/Dockerfile.db.rhel image/
+
+
 .PHONY: deploy
 deploy: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
 	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG --output-dir rendered-chart
+	kubectl apply -R -f rendered-chart
+
+.PHONY: deploy-rhel
+deploy-rhel: clean-helm-rendered
+	@echo "+ $@"
+	kubectl create namespace stackrox || true
+	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG,scannerImage="us.gcr.io/stackrox-ci/scanner-rhel",scannerDBImage="us.gcr.io/stackrox-ci/scanner-db-rhel" --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
 ###########
