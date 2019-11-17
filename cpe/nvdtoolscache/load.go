@@ -1,15 +1,14 @@
 package nvdtoolscache
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
@@ -112,29 +111,26 @@ func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 	defer utils.IgnoreError(f.Close)
 
 	var feed feedWrapper
-	if err := json.NewDecoder(f).Decode(&feed); err != nil {
+	if err := easyjson.UnmarshalFromReader(f, &feed); err != nil {
 		return 0, err
 	}
 
 	var vulns int
-	var writing time.Duration
 	for _, cve := range feed.CVEItems {
-		if cve != nil && cve.Configurations != nil {
-			if !isValidCVE(cve) {
-				continue
-			}
-			vuln := nvd.ToVuln(cve)
-			trimCVE(cve)
-
-			start := time.Now()
-			err := c.addProductToCVE(vuln, cve)
-			writing += time.Since(start)
-			if err != nil {
-				return 0, errors.Wrapf(err, "adding vuln %q", vuln.ID())
-			}
-			vulns++
+		if cve == nil || cve.Configurations == nil {
+			continue
 		}
+		if !isValidCVE(cve) {
+			continue
+		}
+		vuln := nvd.ToVuln(cve)
+		trimCVE(cve)
+
+		err := c.addProductToCVE(vuln, cve)
+		if err != nil {
+			return 0, errors.Wrapf(err, "adding vuln %q", vuln.ID())
+		}
+		vulns++
 	}
-	log.Infof("%s - %0.4f", path, writing.Seconds())
 	return vulns, nil
 }

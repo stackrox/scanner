@@ -1,8 +1,6 @@
 package nvdtoolscache
 
 import (
-	"encoding/json"
-
 	"github.com/etcd-io/bbolt"
 	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
@@ -32,7 +30,7 @@ type cacheImpl struct {
 }
 
 func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSON10DefCVEItem) error {
-	bytes, err := easyjson.Marshal(itemWrapper(*cve))
+	bytes, err := easyjson.Marshal((*itemWrapper)(cve))
 	if err != nil {
 		return err
 	}
@@ -70,12 +68,12 @@ func (c *cacheImpl) GetVulnsForAttributes(attributes []*wfn.Attributes) ([]cvefe
 			if bucket == nil {
 				continue
 			}
-			return bucket.ForEach(func(k, v []byte) error {
+			err := bucket.ForEach(func(k, v []byte) error {
 				if !vulnSet.Add(string(k)) {
 					return nil
 				}
 				var itemW itemWrapper
-				if err := json.Unmarshal(v, &itemW); err != nil {
+				if err := easyjson.Unmarshal(v, &itemW); err != nil {
 					return err
 				}
 				item := schema.NVDCVEFeedJSON10DefCVEItem(itemW)
@@ -83,6 +81,9 @@ func (c *cacheImpl) GetVulnsForAttributes(attributes []*wfn.Attributes) ([]cvefe
 				vulns = append(vulns, nvd.ToVuln(&item))
 				return nil
 			})
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})

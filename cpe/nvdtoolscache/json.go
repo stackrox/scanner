@@ -7,4 +7,5 @@ import (
 // easyjson:json
 type itemWrapper schema.NVDCVEFeedJSON10DefCVEItem
 
+// easyjson:json
 type feedWrapper schema.NVDCVEFeedJSON10

@@ -2959,3 +2959,301 @@ func easyjson42239ddeEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(
 	}
 	out.RawByte('}')
 }
+func easyjson42239ddeDecodeGithubComStackroxScannerCpeNvdtoolscache1(in *jlexer.Lexer, out *feedWrapper) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "CVE_data_format":
+			out.CVEDataFormat = string(in.String())
+		case "CVE_data_numberOfCVEs":
+			out.CVEDataNumberOfCVEs = string(in.String())
+		case "CVE_data_timestamp":
+			out.CVEDataTimestamp = string(in.String())
+		case "CVE_data_type":
+			out.CVEDataType = string(in.String())
+		case "CVE_data_version":
+			out.CVEDataVersion = string(in.String())
+		case "CVE_Items":
+			if in.IsNull() {
+				in.Skip()
+				out.CVEItems = nil
+			} else {
+				in.Delim('[')
+				if out.CVEItems == nil {
+					if !in.IsDelim(']') {
+						out.CVEItems = make([]*schema.NVDCVEFeedJSON10DefCVEItem, 0, 8)
+					} else {
+						out.CVEItems = []*schema.NVDCVEFeedJSON10DefCVEItem{}
+					}
+				} else {
+					out.CVEItems = (out.CVEItems)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v37 *schema.NVDCVEFeedJSON10DefCVEItem
+					if in.IsNull() {
+						in.Skip()
+						v37 = nil
+					} else {
+						if v37 == nil {
+							v37 = new(schema.NVDCVEFeedJSON10DefCVEItem)
+						}
+						easyjson42239ddeDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(in, &*v37)
+					}
+					out.CVEItems = append(out.CVEItems, v37)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson42239ddeEncodeGithubComStackroxScannerCpeNvdtoolscache1(out *jwriter.Writer, in feedWrapper) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"CVE_data_format\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.CVEDataFormat))
+	}
+	if in.CVEDataNumberOfCVEs != "" {
+		const prefix string = ",\"CVE_data_numberOfCVEs\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.CVEDataNumberOfCVEs))
+	}
+	if in.CVEDataTimestamp != "" {
+		const prefix string = ",\"CVE_data_timestamp\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.CVEDataTimestamp))
+	}
+	{
+		const prefix string = ",\"CVE_data_type\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.CVEDataType))
+	}
+	{
+		const prefix string = ",\"CVE_data_version\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.CVEDataVersion))
+	}
+	{
+		const prefix string = ",\"CVE_Items\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.CVEItems == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v38, v39 := range in.CVEItems {
+				if v38 > 0 {
+					out.RawByte(',')
+				}
+				if v39 == nil {
+					out.RawString("null")
+				} else {
+					easyjson42239ddeEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(out, *v39)
+				}
+			}
+			out.RawByte(']')
+		}
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v feedWrapper) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson42239ddeEncodeGithubComStackroxScannerCpeNvdtoolscache1(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v feedWrapper) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson42239ddeEncodeGithubComStackroxScannerCpeNvdtoolscache1(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *feedWrapper) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson42239ddeDecodeGithubComStackroxScannerCpeNvdtoolscache1(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *feedWrapper) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson42239ddeDecodeGithubComStackroxScannerCpeNvdtoolscache1(l, v)
+}
+func easyjson42239ddeDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(in *jlexer.Lexer, out *schema.NVDCVEFeedJSON10DefCVEItem) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "cve":
+			if in.IsNull() {
+				in.Skip()
+				out.CVE = nil
+			} else {
+				if out.CVE == nil {
+					out.CVE = new(schema.CVEJSON40)
+				}
+				easyjson42239ddeDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in, &*out.CVE)
+			}
+		case "configurations":
+			if in.IsNull() {
+				in.Skip()
+				out.Configurations = nil
+			} else {
+				if out.Configurations == nil {
+					out.Configurations = new(schema.NVDCVEFeedJSON10DefConfigurations)
+				}
+				easyjson42239ddeDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(in, &*out.Configurations)
+			}
+		case "impact":
+			if in.IsNull() {
+				in.Skip()
+				out.Impact = nil
+			} else {
+				if out.Impact == nil {
+					out.Impact = new(schema.NVDCVEFeedJSON10DefImpact)
+				}
+				easyjson42239ddeDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(in, &*out.Impact)
+			}
+		case "lastModifiedDate":
+			out.LastModifiedDate = string(in.String())
+		case "publishedDate":
+			out.PublishedDate = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson42239ddeEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(out *jwriter.Writer, in schema.NVDCVEFeedJSON10DefCVEItem) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"cve\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.CVE == nil {
+			out.RawString("null")
+		} else {
+			easyjson42239ddeEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(out, *in.CVE)
+		}
+	}
+	if in.Configurations != nil {
+		const prefix string = ",\"configurations\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		easyjson42239ddeEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(out, *in.Configurations)
+	}
+	if in.Impact != nil {
+		const prefix string = ",\"impact\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		easyjson42239ddeEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(out, *in.Impact)
+	}
+	if in.LastModifiedDate != "" {
+		const prefix string = ",\"lastModifiedDate\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.LastModifiedDate))
+	}
+	if in.PublishedDate != "" {
+		const prefix string = ",\"publishedDate\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.PublishedDate))
+	}
+	out.RawByte('}')
+}
