@@ -337,10 +337,10 @@ github.com/stackrox/docker-registry-client v0.0.0-20181115184320-3d98b2b79d1b/go
 github.com/stackrox/docker-registry-client v0.0.0-20181115184320-3d98b2b79d1b/go.mod h1:ftVRYPg9kyRYpu5y5rE+8c8P6KtAitUy57PlHhMraL8=
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191029220117-2a73008e51a9 h1:IXESjfBZNfZjU+VuVdxLZvkeiMPlodw94++hjOLORis=
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191029220117-2a73008e51a9/go.mod h1:13vPFaMtP66fobTXqiv3SB32ZCZfa9btx3O6uOlTCDY=
-github.com/stackrox/nvdtools v0.0.0-20191113120155-9d91e1a7e8e3 h1:4nOZCCi6whlNXE1E+lZhFzjdOBVSkt8SM8TvbDpQAR4=
-github.com/stackrox/nvdtools v0.0.0-20191113120155-9d91e1a7e8e3/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
-github.com/stackrox/rox v0.0.0-20191119234625-95d517eb35ff h1:PUnJBYu96D6n3WkGO30RkgOpZfBoHurvxK+xgbY1U/E=
-github.com/stackrox/rox v0.0.0-20191119234625-95d517eb35ff/go.mod h1:Qshd7p6Hw8xBvPlJM3pKWh81R2s3qhbAdYIvA6pPStw=
+github.com/stackrox/nvdtools v0.0.0-20191120225537-fe4e9a7e467f h1:lENqZ9C0tnHzRYFazm05INfuWFf8HfnLPxDWOme2JsY=
+github.com/stackrox/nvdtools v0.0.0-20191120225537-fe4e9a7e467f/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
+github.com/stackrox/rox v0.0.0-20191120221544-4d8f94f28193 h1:N5Oqddk9d8pgXxTBAtZ02B+m9WfEWkhmIPJ7OdgtQD4=
+github.com/stackrox/rox v0.0.0-20191120221544-4d8f94f28193/go.mod h1:Qshd7p6Hw8xBvPlJM3pKWh81R2s3qhbAdYIvA6pPStw=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2/go.mod h1:mjqs7N0Q6m5HpR7QfXVBZXZWSqTjQLeTujjA/xUp2uw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
