@@ -5,10 +5,13 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
-	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/mailru/easyjson"
 	"github.com/stackrox/rox/pkg/set"
 )
+
+// This is a temporary path for the boltDB and is expected to be backed by
+// an empty dir
+const boltPath = "/var/lib/stackrox/temp.db"
 
 func New() (Cache, error) {
 	opts := bbolt.Options{
@@ -16,7 +19,7 @@ func New() (Cache, error) {
 		FreelistType:   bbolt.FreelistMapType,
 		NoSync:         true,
 	}
-	db, err := bbolt.Open("/tmp/temp.db", 0600, &opts)
+	db, err := bbolt.Open(boltPath, 0600, &opts)
 	if err != nil {
 		return nil, err
 	}
@@ -52,18 +55,11 @@ func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSO
 	})
 }
 
-func (c *cacheImpl) GetVulnsForAttributes(attributes []*wfn.Attributes) ([]cvefeed.Vuln, error) {
-	products := set.NewStringSet()
-	for _, a := range attributes {
-		if a.Product != "" {
-			products.Add(a.Product)
-		}
-	}
-
+func (c *cacheImpl) GetVulnsForProducts(products []string) ([]cvefeed.Vuln, error) {
 	vulnSet := set.NewStringSet()
 	var vulns []cvefeed.Vuln
 	err := c.View(func(tx *bbolt.Tx) error {
-		for product := range products {
+		for _, product := range products {
 			bucket := tx.Bucket([]byte(product))
 			if bucket == nil {
 				continue

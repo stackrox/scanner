@@ -164,9 +164,16 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 	for _, c := range components {
 		attributes := getAttributes(c)
 
-		vulns, err := cache.GetVulnsForAttributes(attributes)
+		products := set.NewStringSet()
+		for _, a := range attributes {
+			if a.Product != "" {
+				products.Add(a.Product)
+			}
+		}
+
+		vulns, err := cache.GetVulnsForProducts(products.AsSlice())
 		if err != nil {
-			log.Error(err)
+			log.Errorf("error getting vulns for products: %v", err)
 			continue
 		}
 		for _, v := range vulns {

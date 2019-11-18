@@ -115,7 +115,7 @@ func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 		return 0, err
 	}
 
-	var vulns int
+	var numVulns int
 	for _, cve := range feed.CVEItems {
 		if cve == nil || cve.Configurations == nil {
 			continue
@@ -130,7 +130,7 @@ func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 		if err != nil {
 			return 0, errors.Wrapf(err, "adding vuln %q", vuln.ID())
 		}
-		vulns++
+		numVulns++
 	}
-	return vulns, nil
+	return numVulns, nil
 }
