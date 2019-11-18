@@ -9,7 +9,7 @@ RUN yum update -y --disableplugin=subscription-manager && \
 COPY ./bin/scanner /
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
-RUN mkdir -p "${NVD_DEFINITIONS_DIR}"
+RUN mkdir -p "${NVD_DEFINITIONS_DIR}" && chown -R 4000:4000 "${NVD_DEFINITIONS_DIR}"
 ADD ./dump/cves* "${NVD_DEFINITIONS_DIR}/"
 
 ENTRYPOINT ["/scanner"]
@@ -23,3 +23,5 @@ RUN ( chmod +x /dsop-fix-3.sh && /dsop-fix-3.sh && rm -rf /dsop-fix*.sh ; )
 
 # Remove package manager
 RUN rpm -e subscription-manager yum yum-utils yum-plugin-ovl
+
+USER 4000:4000
