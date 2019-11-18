@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/facebookincubator/nvdtools/cvefeed"
+	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
+	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
@@ -107,14 +109,16 @@ func TestGetAttributes(t *testing.T) {
 	}
 }
 
-func newScannerVuln(id string) *nvdtoolscache.Vuln {
-	return &nvdtoolscache.Vuln{
-		ID: id,
-	}
-}
-
 func newMockCVEFeedVuln(id string) cvefeed.Vuln {
-	return &mockVuln{id: id}
+	return &nvd.Vuln{
+		CVEItem: &schema.NVDCVEFeedJSON10DefCVEItem{
+			CVE: &schema.CVEJSON40{
+				CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+					ID: id,
+				},
+			},
+		},
+	}
 }
 
 func newDatabaseVuln(id string) database.Vulnerability {
@@ -123,22 +127,20 @@ func newDatabaseVuln(id string) database.Vulnerability {
 		Link:     fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", id),
 		Severity: "",
 		Metadata: map[string]interface{}{
-			"NVD": (*nvdtoolscache.Metadata)(nil),
+			"NVD": &nvdtoolscache.Metadata{},
 		},
 	}
 }
 
 func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 	cases := []struct {
-		name        string
-		matches     []cvefeed.MatchResult
-		cvesToVulns map[string]*nvdtoolscache.Vuln
-		features    []database.FeatureVersion
+		name     string
+		matches  []cvefeed.MatchResult
+		features []database.FeatureVersion
 	}{
 		{
-			name:        "no matches",
-			matches:     []cvefeed.MatchResult{},
-			cvesToVulns: map[string]*nvdtoolscache.Vuln{},
+			name:    "no matches",
+			matches: []cvefeed.MatchResult{},
 		},
 		{
 			name: "one match but not attributes (shouldn't happen)",
@@ -146,9 +148,6 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
 				},
-			},
-			cvesToVulns: map[string]*nvdtoolscache.Vuln{
-				"cve1": newScannerVuln("cve1"),
 			},
 		},
 		{
@@ -163,9 +162,6 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 						},
 					},
 				},
-			},
-			cvesToVulns: map[string]*nvdtoolscache.Vuln{
-				"cve1": newScannerVuln("cve1"),
 			},
 			features: []database.FeatureVersion{
 				{
@@ -195,9 +191,6 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 						},
 					},
 				},
-			},
-			cvesToVulns: map[string]*nvdtoolscache.Vuln{
-				"cve1": newScannerVuln("cve1"),
 			},
 			features: []database.FeatureVersion{
 				{
@@ -242,10 +235,6 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 					},
 				},
 			},
-			cvesToVulns: map[string]*nvdtoolscache.Vuln{
-				"cve1": newScannerVuln("cve1"),
-				"cve2": newScannerVuln("cve2"),
-			},
 			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
@@ -281,10 +270,6 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 					},
 				},
 			},
-			cvesToVulns: map[string]*nvdtoolscache.Vuln{
-				"cve1": newScannerVuln("cve1"),
-				"cve2": newScannerVuln("cve2"),
-			},
 			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
@@ -310,7 +295,7 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			features := getFeaturesFromMatchResults("", c.matches, c.cvesToVulns)
+			features := getFeaturesFromMatchResults("", c.matches)
 			assert.ElementsMatch(t, c.features, features)
 		})
 	}

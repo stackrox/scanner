@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/nvdtools/cvefeed"
+	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/wfn"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -51,7 +52,7 @@ type nameVersion struct {
 	name, version string
 }
 
-func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResult, cveToVulns map[string]*nvdtoolscache.Vuln) []database.FeatureVersion {
+func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResult) []database.FeatureVersion {
 	if len(matchResults) == 0 {
 		return nil
 	}
@@ -59,11 +60,6 @@ func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResul
 	featuresMap := make(map[nameVersion]*database.FeatureVersion)
 	featuresToVulns := make(map[nameVersion]set.StringSet)
 	for _, m := range matchResults {
-		cve, ok := cveToVulns[m.CVE.ID()]
-		if !ok {
-			log.Errorf("CVE %q not found in CVE map", m.CVE.ID())
-			continue
-		}
 		if len(m.CPEs) == 0 {
 			log.Errorf("Found 0 CPEs in match with CVE %q", m.CVE.ID())
 			continue
@@ -97,7 +93,7 @@ func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResul
 				}
 				featuresMap[nameVersion] = feature
 			}
-			feature.AffectedBy = append(feature.AffectedBy, *cve.Vulnerability())
+			feature.AffectedBy = append(feature.AffectedBy, *nvdtoolscache.NewVulnerability(m.CVE.(*nvd.Vuln).CVEItem))
 		}
 	}
 	features := make([]database.FeatureVersion, 0, len(featuresMap))
@@ -163,13 +159,30 @@ func filterMatchResultsByTargetSoftware(matchResults []cvefeed.MatchResult) []cv
 }
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
-	cache, cveMap := nvdtoolscache.Get()
+	cache := nvdtoolscache.Singleton()
 	var matchResults []cvefeed.MatchResult
 	for _, c := range components {
 		attributes := getAttributes(c)
-		matchResults = append(matchResults, cache.Get(attributes)...)
+
+		products := set.NewStringSet()
+		for _, a := range attributes {
+			if a.Product != "" {
+				products.Add(a.Product)
+			}
+		}
+
+		vulns, err := cache.GetVulnsForProducts(products.AsSlice())
+		if err != nil {
+			log.Errorf("error getting vulns for products: %v", err)
+			continue
+		}
+		for _, v := range vulns {
+			if matches := v.Match(attributes, false); len(matches) > 0 {
+				matchResults = append(matchResults, cvefeed.MatchResult{CVE: v, CPEs: matches})
+			}
+		}
 	}
 	matchResults = filterMatchResultsByTargetSoftware(matchResults)
 
-	return getFeaturesFromMatchResults(layer, matchResults, cveMap)
+	return getFeaturesFromMatchResults(layer, matchResults)
 }

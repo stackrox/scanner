@@ -45,6 +45,8 @@ spec:
             - name: scanner-tls-volume
               mountPath: /run/secrets/stackrox.io/certs/
               readOnly: true
+            - name: vuln-temp-db
+              mountPath: /var/lib/stackrox
         - name: db
           image: {{.Values.scannerDBImage}}:{{.Values.tag}}
           resources:
@@ -62,6 +64,8 @@ spec:
           configMap:
             name: {{ .Values.appName }}-config
         - name: db-data
+          emptyDir: {}
+        - name: vuln-temp-db
           emptyDir: {}
         - name: scanner-tls-volume
           secret:

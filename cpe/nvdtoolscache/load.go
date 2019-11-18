@@ -1,22 +1,21 @@
 package nvdtoolscache
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
 )
 
-func LoadFromDirectory(definitionsDir string) error {
-	log.Info("Initializing NVD CPE Definitions")
+func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
+	log.WithField("dir", definitionsDir).Info("Loading definitions directory")
 
 	extractedPath := filepath.Join(definitionsDir, "cve")
 	files, err := ioutil.ReadDir(extractedPath)
@@ -24,22 +23,20 @@ func LoadFromDirectory(definitionsDir string) error {
 		return err
 	}
 
-	dict := make(cvefeed.Dictionary)
-	cveMap := make(map[string]*Vuln)
+	var totalVulns int
 	for _, f := range files {
 		if !strings.HasSuffix(f.Name(), ".json") {
 			continue
 		}
-		if err := handleJSONFile(cveMap, dict, filepath.Join(extractedPath, f.Name())); err != nil {
+		numVulns, err := c.handleJSONFile(filepath.Join(extractedPath, f.Name()))
+		if err != nil {
 			return errors.Wrapf(err, "handling file %s", f.Name())
 		}
+		totalVulns += numVulns
 	}
-	log.Infof("Total vulns: %d", len(cveMap))
+	log.Infof("Total vulns: %d", totalVulns)
 
-	cache := cvefeed.NewCache(dict).SetMaxSize(-1).SetRequireVersion(false)
-	cache.Idx = cvefeed.NewIndex(dict)
-
-	set(cache, cveMap)
+	utils.Must(c.sync())
 	return nil
 }
 
@@ -97,84 +94,43 @@ func isValidCVE(cve *schema.NVDCVEFeedJSON10DefCVEItem) bool {
 }
 
 func trimCVE(cve *schema.NVDCVEFeedJSON10DefCVEItem) {
-	cve.CVE = &schema.CVEJSON40{
-		CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
-			ID: cve.CVE.CVEDataMeta.ID,
-		},
-	}
-	cve.Configurations = nil
-	cve.Impact = nil
-	cve.PublishedDate = ""
-	cve.LastModifiedDate = ""
+	cve.CVE.References = nil
+	cve.CVE.Affects = nil
+	cve.CVE.DataType = ""
+	cve.CVE.Problemtype = nil
+	cve.CVE.DataVersion = ""
+	cve.CVE.DataFormat = ""
+	cve.Configurations.CVEDataVersion = ""
 }
 
-func handleJSONFile(cveMap map[string]*Vuln, dict cvefeed.Dictionary, path string) error {
+func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		panic(err)
 	}
 	defer utils.IgnoreError(f.Close)
 
-	var feed schema.NVDCVEFeedJSON10
-	if err := json.NewDecoder(f).Decode(&feed); err != nil {
-		return err
+	var feed feedWrapper
+	if err := easyjson.UnmarshalFromReader(f, &feed); err != nil {
+		return 0, err
 	}
 
+	var numVulns int
 	for _, cve := range feed.CVEItems {
-		if cve != nil && cve.Configurations != nil {
-			if !isValidCVE(cve) {
-				continue
-			}
-			vuln := nvd.ToVuln(cve)
-			cveMap[vuln.ID()] = &Vuln{
-				ID:       vuln.ID(),
-				Metadata: convertMetadata(cve),
-				Summary:  convertSummary(cve),
-			}
-			dict[vuln.ID()] = vuln
-			trimCVE(cve)
+		if cve == nil || cve.Configurations == nil {
+			continue
 		}
-	}
-	return nil
-}
+		if !isValidCVE(cve) {
+			continue
+		}
+		vuln := nvd.ToVuln(cve)
+		trimCVE(cve)
 
-func convertSummary(item *schema.NVDCVEFeedJSON10DefCVEItem) string {
-	if item == nil || item.CVE == nil || item.CVE.Description == nil {
-		return ""
-	}
-	for _, desc := range item.CVE.Description.DescriptionData {
-		if desc.Lang == "en" {
-			return desc.Value
+		err := c.addProductToCVE(vuln, cve)
+		if err != nil {
+			return 0, errors.Wrapf(err, "adding vuln %q", vuln.ID())
 		}
+		numVulns++
 	}
-	return ""
-}
-
-func convertMetadata(item *schema.NVDCVEFeedJSON10DefCVEItem) *Metadata {
-	if item == nil {
-		return nil
-	}
-	metadata := &Metadata{
-		PublishedDateTime:    item.PublishedDate,
-		LastModifiedDateTime: item.LastModifiedDate,
-	}
-	if impact := item.Impact; impact != nil {
-		if impact.BaseMetricV2 != nil && impact.BaseMetricV2.CVSSV2 != nil {
-			metadata.CVSSv2 = MetadataCVSSv2{
-				Vectors:             item.Impact.BaseMetricV2.CVSSV2.VectorString,
-				Score:               item.Impact.BaseMetricV2.CVSSV2.BaseScore,
-				ExploitabilityScore: item.Impact.BaseMetricV2.ExploitabilityScore,
-				ImpactScore:         item.Impact.BaseMetricV2.ImpactScore,
-			}
-		}
-		if impact.BaseMetricV3 != nil && impact.BaseMetricV3.CVSSV3 != nil {
-			metadata.CVSSv3 = MetadataCVSSv3{
-				Vectors:             item.Impact.BaseMetricV3.CVSSV3.VectorString,
-				Score:               item.Impact.BaseMetricV3.CVSSV3.BaseScore,
-				ExploitabilityScore: item.Impact.BaseMetricV3.ExploitabilityScore,
-				ImpactScore:         item.Impact.BaseMetricV3.ImpactScore,
-			}
-		}
-	}
-	return metadata
+	return numVulns, nil
 }

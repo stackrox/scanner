@@ -4,34 +4,27 @@ import (
 	"os"
 	"sync"
 
-	"github.com/facebookincubator/nvdtools/cvefeed"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
 )
 
 var (
-	lock           sync.RWMutex
-	cacheInstance  *cvefeed.Cache
-	cveMapInstance *map[string]*Vuln
+	once     sync.Once
+	instance Cache
 )
 
-func Get() (*cvefeed.Cache, map[string]*Vuln) {
-	lock.RLock()
-	defer lock.RUnlock()
-	return cacheInstance, *cveMapInstance
-}
+// Singleton returns the cache instance to use.
+func Singleton() Cache {
+	once.Do(func() {
+		var err error
+		instance, err = New()
+		utils.Must(err)
 
-func set(cache *cvefeed.Cache, cveMap map[string]*Vuln) {
-	lock.Lock()
-	defer lock.Unlock()
-	cacheInstance = cache
-	cveMapInstance = &cveMap
-}
-
-func init() {
-	definitionsDir := os.Getenv("NVD_DEFINITIONS_DIR")
-	if definitionsDir == "" {
-		return
-	}
-	utils.Must(LoadFromDirectory(definitionsDir))
-
+		if definitionsDir := os.Getenv("NVD_DEFINITIONS_DIR"); definitionsDir != "" {
+			log.Info("Loading NVD definitions into cache")
+			utils.Must(instance.LoadFromDirectory(definitionsDir))
+			log.Info("Done loading NVD definitions into cache")
+		}
+	})
+	return instance
 }
