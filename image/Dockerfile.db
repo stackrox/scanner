@@ -1,5 +1,5 @@
 FROM postgres:12.0-alpine
 
-RUN apk update && apk upgrade
+RUN apk upgrade --no-cache libxslt && apk del apk-tools
 
 COPY ./dump/definitions.sql.gz /docker-entrypoint-initdb.d/
