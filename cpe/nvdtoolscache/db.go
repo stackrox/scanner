@@ -76,9 +76,7 @@ func (c *cacheImpl) GetVulnsForAttributes(attributes []*wfn.Attributes) ([]cvefe
 				if err := easyjson.Unmarshal(v, &itemW); err != nil {
 					return err
 				}
-				item := schema.NVDCVEFeedJSON10DefCVEItem(itemW)
-
-				vulns = append(vulns, nvd.ToVuln(&item))
+				vulns = append(vulns, nvd.ToVuln((*schema.NVDCVEFeedJSON10DefCVEItem)(&itemW)))
 				return nil
 			})
 			if err != nil {
