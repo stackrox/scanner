@@ -9,6 +9,9 @@ ENV LANG en_US.utf8
 ENV PATH $PATH:/usr/pgsql-$PG_MAJOR/bin/
 ENV PGDATA /var/lib/postgresql/data
 
+RUN groupadd -g 70 postgres
+RUN adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh
+
 # Install postgres packages from https://yum.postgresql.org/
 RUN yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm && \
     yum update -y --disableplugin=subscription-manager && \
@@ -40,6 +43,7 @@ RUN set -x \
 RUN mkdir /docker-entrypoint-initdb.d
 
 COPY ./db.rhel/docker-entrypoint.sh /usr/local/bin/
+RUN chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
