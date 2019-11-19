@@ -146,8 +146,12 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 				return
 			}
 
-			responseC <- &response
-			log.WithField("updater name", name).Info("finished fetching")
+			select {
+			case responseC <- &response:
+				log.WithField("updater name", name).Info("finished fetching")
+			case <-errSig.Done():
+				log.WithField("updater name", name).Warn("Exiting with error since another updater failed")
+			}
 		}(n, u)
 	}
 
@@ -164,7 +168,6 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 		}
 	}
 
-	close(responseC)
 	vulnsWithMetadata, err := addMetadata(vulns, nvdDumpDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "adding metadata to vulns")
@@ -242,7 +245,7 @@ func doVulnerabilitiesNamespacing(vulnerabilities []database.Vulnerability) []da
 	}
 
 	// Convert map into a slice.
-	var response []database.Vulnerability
+	response := make([]database.Vulnerability, 0, len(vulnerabilitiesMap))
 	for _, vulnerability := range vulnerabilitiesMap {
 		response = append(response, *vulnerability)
 	}
