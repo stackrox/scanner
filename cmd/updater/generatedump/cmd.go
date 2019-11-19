@@ -102,7 +102,7 @@ func generateDumpWithAllVulns(outFile string) error {
 	if err != nil {
 		return errors.Wrap(err, "writing manifest file")
 	}
-	log.Info("Zipping up the file...")
+	log.Info("Zipping up the files...")
 	zipArchive := archiver.NewZip()
 	zipArchive.CompressionLevel = flate.BestCompression
 	err = zipArchive.Archive([]string{
@@ -111,9 +111,9 @@ func generateDumpWithAllVulns(outFile string) error {
 		osVulnsFilePath,
 	}, outFile)
 	if err != nil {
-		return errors.Wrap(err, "creating ZIP")
+		return errors.Wrap(err, "creating ZIP of the vuln dump")
 	}
-	log.Info("Done writing the zip!")
+	log.Info("Done writing the zip with the entire vuln dump!")
 	return nil
 }
 
@@ -222,31 +222,30 @@ func appendFuncForVuln(v *database.Vulnerability) nvd.AppendFunc {
 // It helps simplifying the fetchers that share the same metadata about a
 // Vulnerability regardless of their actual namespace (ie. same vulnerability
 // information for every version of a distro).
-func doVulnerabilitiesNamespacing(vulnerabilities []database.Vulnerability) []database.Vulnerability {
-	vulnerabilitiesMap := make(map[string]*database.Vulnerability)
+func doVulnerabilitiesNamespacing(nonNamespacedVulns []database.Vulnerability) []database.Vulnerability {
+	namespacedVulnsMap := make(map[string]*database.Vulnerability)
 
-	for _, v := range vulnerabilities {
-		featureVersions := v.FixedIn
-		v.FixedIn = []database.FeatureVersion{}
+	for _, nonNamespacedVuln := range nonNamespacedVulns {
+		featureVersions := nonNamespacedVuln.FixedIn
+		nonNamespacedVuln.FixedIn = []database.FeatureVersion{}
 
 		for _, fv := range featureVersions {
-			index := fv.Feature.Namespace.Name + ":" + v.Name
+			index := fv.Feature.Namespace.Name + ":" + nonNamespacedVuln.Name
 
-			if vulnerability, ok := vulnerabilitiesMap[index]; !ok {
-				newVulnerability := v
-				newVulnerability.Namespace = fv.Feature.Namespace
-				newVulnerability.FixedIn = []database.FeatureVersion{fv}
-
-				vulnerabilitiesMap[index] = &newVulnerability
-			} else {
-				vulnerability.FixedIn = append(vulnerability.FixedIn, fv)
+			namespacedVuln := namespacedVulnsMap[index]
+			if namespacedVuln == nil {
+				newVuln := nonNamespacedVuln
+				newVuln.Namespace = fv.Feature.Namespace
+				namespacedVuln = &newVuln
+				namespacedVulnsMap[index] = namespacedVuln
 			}
+			namespacedVuln.FixedIn = append(namespacedVuln.FixedIn, fv)
 		}
 	}
 
 	// Convert map into a slice.
-	response := make([]database.Vulnerability, 0, len(vulnerabilitiesMap))
-	for _, vulnerability := range vulnerabilitiesMap {
+	response := make([]database.Vulnerability, 0, len(namespacedVulnsMap))
+	for _, vulnerability := range namespacedVulnsMap {
 		response = append(response, *vulnerability)
 	}
 
