@@ -34,7 +34,6 @@ import (
 	"github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/ping"
 	"github.com/stackrox/scanner/api/v1/scan"
-	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
 	"github.com/stackrox/scanner/pkg/formatter"
@@ -105,9 +104,6 @@ func Boot(config *Config) {
 		log.WithError(err).Fatal("Failed to open database despite multiple retries...")
 	}
 	defer db.Close()
-
-	// Initialize the vulnerability cache prior to making the API available
-	_ = nvdtoolscache.Singleton()
 
 	go api.RunClairify(config.API, db)
 

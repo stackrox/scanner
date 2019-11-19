@@ -24,10 +24,13 @@ $(GOLINT_BIN): deps
 	@echo "+ $@"
 	go install golang.org/x/lint/golint
 
-EASYJSON_BIN := $(GOPATH)/bin/easyjson
-$(EASYJSON_BIN): deps
+#############
+##  Build  ##
+#############
+.PHONY: build-updater
+build-updater: deps
 	@echo "+ $@"
-	go install github.com/mailru/easyjson/easyjson
+	go build -o ./bin/updater ./cmd/updater
 
 ###########
 ## Style ##
@@ -185,11 +188,6 @@ include make/protogen.mk
 proto-generated-srcs: $(PROTO_GENERATED_SRCS)
 	@echo "+ $@"
 	@touch proto-generated-srcs
-
-.PHONY: go-easyjson-srcs
-go-easyjson-srcs: $(EASYJSON_BIN)
-	@echo "+ $@"
-	@easyjson -pkg cpe/nvdtoolscache/json.go
 
 clean-proto-generated-srcs:
 	@echo "+ $@"

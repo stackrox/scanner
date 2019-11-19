@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/apex/log"
 	"github.com/pkg/errors"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/commonerr"
@@ -91,7 +92,7 @@ func (a *appender) BuildCache(nvdDumpDir string) error {
 		if filepath.Ext(fileName) != ".json" {
 			continue
 		}
-		f, err := os.Open(fileName)
+		f, err := os.Open(filepath.Join(nvdDumpDir, fileName))
 		if err != nil {
 			return errors.Wrapf(err, "could not open NVD data file %s", fileName)
 		}
@@ -101,6 +102,7 @@ func (a *appender) BuildCache(nvdDumpDir string) error {
 		}
 		_ = f.Close()
 	}
+	log.Infof("Obtained metadata for %d vulns", len(a.metadata))
 
 	return nil
 }
