@@ -34,6 +34,7 @@ import (
 	"github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/ping"
 	"github.com/stackrox/scanner/api/v1/scan"
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
 	"github.com/stackrox/scanner/pkg/formatter"
@@ -52,13 +53,7 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
-	_ "github.com/stackrox/scanner/ext/vulnmdsrc/nvd"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/alpine"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/amzn"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/debian"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/oracle"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/rhel"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
+	_ "github.com/stackrox/scanner/ext/vulnsrc/all"
 
 	// Register generators
 	_ "github.com/stackrox/scanner/cpe/java"
@@ -89,21 +84,15 @@ func Boot(config *Config) {
 	st := stopper.NewStopper()
 
 	// Open database
-	var db database.Datastore
-	var err error
-	for try := 1; ; try++ {
-		db, err = database.Open(config.Database)
-		if err == nil || try == 5 {
-			break
-		}
-		log.WithError(err).WithField("Attempts", try).Error("Failed to open database. Retrying...")
-		time.Sleep(10 * time.Second)
-	}
+	db, err := database.OpenWithRetries(config.Database, 5, 10*time.Second)
 
 	if err != nil {
 		log.WithError(err).Fatal("Failed to open database despite multiple retries...")
 	}
 	defer db.Close()
+
+	// Initialize the vulnerability cache prior to making the API available
+	_ = nvdtoolscache.Singleton()
 
 	go api.RunClairify(config.API, db)
 
