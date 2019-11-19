@@ -29,6 +29,14 @@ $(EASYJSON_BIN): deps
 	@echo "+ $@"
 	go install github.com/mailru/easyjson/easyjson
 
+#############
+##  Build  ##
+#############
+.PHONY: build-updater
+build-updater: deps
+	@echo "+ $@"
+	go build -o ./bin/updater ./cmd/updater
+
 ###########
 ## Style ##
 ###########
