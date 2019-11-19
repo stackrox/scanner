@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
@@ -64,28 +63,13 @@ func Register(name string, driver Driver) {
 	drivers[name] = driver
 }
 
-// OpenWithRetries opens the database with the given number of retries.
-func OpenWithRetries(cfg RegistrableComponentConfig, maxTries int, sleepBetweenTries time.Duration) (Datastore, error) {
+// Open opens a Datastore specified by a configuration.
+func Open(cfg RegistrableComponentConfig) (Datastore, error) {
 	driver, ok := drivers[cfg.Type]
 	if !ok {
 		return nil, fmt.Errorf("database: unknown Driver %q (forgotten configuration or import?)", cfg.Type)
 	}
-	for try := 1; ; try++ {
-		db, err := driver(cfg)
-		if err == nil {
-			return db, nil
-		}
-		if try == maxTries {
-			return nil, err
-		}
-		log.WithError(err).WithField("Attempts", try).Error("Failed to open database. Retrying...")
-		time.Sleep(sleepBetweenTries)
-	}
-}
-
-// Open opens a Datastore specified by a configuration.
-func Open(cfg RegistrableComponentConfig) (Datastore, error) {
-	return OpenWithRetries(cfg, 1, 0)
+	return driver(cfg)
 }
 
 // Datastore represents the required operations on a persistent data store for
