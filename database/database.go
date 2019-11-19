@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/apex/log"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
@@ -85,7 +85,7 @@ func OpenWithRetries(cfg RegistrableComponentConfig, maxTries int, sleepBetweenT
 
 // Open opens a Datastore specified by a configuration.
 func Open(cfg RegistrableComponentConfig) (Datastore, error) {
-	return OpenWithRetries(cfg, 1, time.Duration(0))
+	return OpenWithRetries(cfg, 1, 0)
 }
 
 // Datastore represents the required operations on a persistent data store for
