@@ -15,13 +15,21 @@
 package v1
 
 import (
+	"fmt"
 	"strings"
 
+	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/component"
 )
+
+// These are possible package prefixes or suffixes. Package managers sometimes annotate
+// the packages with these e.g. urllib-python
+var possiblePythonPrefixesOrSuffixes = []string{
+	"python", "python2", "python3",
+}
 
 type Error struct {
 	Message string `json:"Message,omitempty"`
@@ -69,15 +77,10 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) Feature 
 		version = "None"
 	}
 
-	versionFormat := dbFeatureVersion.Feature.Namespace.VersionFormat
-	if dbFeatureVersion.Feature.SourceType != "" {
-		versionFormat = dbFeatureVersion.Feature.SourceType
-	}
-
 	return Feature{
 		Name:          dbFeatureVersion.Feature.Name,
 		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
-		VersionFormat: versionFormat,
+		VersionFormat: stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
 		Version:       version,
 		AddedBy:       dbFeatureVersion.AddedBy.Name,
 	}
@@ -96,12 +99,11 @@ func dedupeFeatureNameMatcher(feature Feature, osFeature Feature) bool {
 	}
 
 	if feature.VersionFormat == component.PythonSourceType.String() {
-		operators := []string{"python", "python2", "python3"}
-		for _, operator := range operators {
-			if feature.Name == strings.TrimPrefix(osFeature.Name, operator+"-") {
+		for _, ext := range possiblePythonPrefixesOrSuffixes {
+			if feature.Name == strings.TrimPrefix(osFeature.Name, fmt.Sprintf("%s-", ext)) {
 				return true
 			}
-			if feature.Name == strings.TrimSuffix(osFeature.Name, "-"+operator) {
+			if feature.Name == strings.TrimSuffix(osFeature.Name, fmt.Sprintf("-%s", ext)) {
 				return true
 			}
 		}

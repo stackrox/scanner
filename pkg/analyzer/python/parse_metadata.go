@@ -12,6 +12,8 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 )
 
+// Package managers find these libraries and are a more complete source of vulnerabilities
+// as opposed to CPEs
 var disallowedPkgs = set.NewFrozenStringSet("python")
 
 // The metadata file format is specified at https://packaging.python.org/specifications/core-metadata/.
