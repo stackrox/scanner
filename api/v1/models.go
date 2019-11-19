@@ -15,9 +15,12 @@
 package v1
 
 import (
+	"strings"
+
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
+	"github.com/stackrox/scanner/pkg/component"
 )
 
 type Error struct {
@@ -66,13 +69,54 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) Feature 
 		version = "None"
 	}
 
+	versionFormat := dbFeatureVersion.Feature.Namespace.VersionFormat
+	if dbFeatureVersion.Feature.SourceType != "" {
+		versionFormat = dbFeatureVersion.Feature.SourceType
+	}
+
 	return Feature{
 		Name:          dbFeatureVersion.Feature.Name,
 		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
-		VersionFormat: dbFeatureVersion.Feature.Namespace.VersionFormat,
+		VersionFormat: versionFormat,
 		Version:       version,
 		AddedBy:       dbFeatureVersion.AddedBy.Name,
 	}
+}
+
+func dedupeVersionMatcher(v1, v2 string) bool {
+	if v1 == v2 {
+		return true
+	}
+	return strings.HasPrefix(v2, v1)
+}
+
+func dedupeFeatureNameMatcher(feature Feature, osFeature Feature) bool {
+	if feature.Name == osFeature.Name {
+		return true
+	}
+
+	if feature.VersionFormat == component.PythonSourceType.String() {
+		operators := []string{"python", "python2", "python3"}
+		for _, operator := range operators {
+			if feature.Name == strings.TrimPrefix(osFeature.Name, operator+"-") {
+				return true
+			}
+			if feature.Name == strings.TrimSuffix(osFeature.Name, "-"+operator) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
+	// Can probably sort this and it'll be faster
+	for _, osFeature := range osFeatures {
+		if dedupeFeatureNameMatcher(feature, osFeature) && dedupeVersionMatcher(feature.Version, osFeature.Version) {
+			return true
+		}
+	}
+	return false
 }
 
 func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, error) {
@@ -105,18 +149,23 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		}
 
 		// Add Language Features
-		languageFeatures, err := getLanguageData(db, layer.Name)
+		languageFeatureVersions, err := getLanguageData(db, layer.Name)
 		if err != nil {
 			return layer, err
 		}
-		for _, dbFeatureVersion := range languageFeatures {
+
+		var languageFeatures []Feature
+		for _, dbFeatureVersion := range languageFeatureVersions {
 			feature := featureFromDatabaseModel(dbFeatureVersion)
 
 			for _, dbVuln := range dbFeatureVersion.AffectedBy {
 				feature.Vulnerabilities = append(feature.Vulnerabilities, VulnerabilityFromDatabaseModel(dbVuln))
 			}
-			layer.Features = append(layer.Features, feature)
+			if !shouldDedupeLanguageFeature(feature, layer.Features) {
+				languageFeatures = append(languageFeatures, feature)
+			}
 		}
+		layer.Features = append(layer.Features, languageFeatures...)
 	}
 
 	return layer, nil
