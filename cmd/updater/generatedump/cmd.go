@@ -121,7 +121,7 @@ func Command() *cobra.Command {
 	c := &cobra.Command{
 		Use: "generate-dump",
 	}
-	outFile := c.Flags().String("out-file", "./dump.tar.gz", "file to write the dump to")
+	outFile := c.Flags().String("out-file", "./dump.zip", "file to write the dump to")
 
 	c.RunE = func(_ *cobra.Command, _ []string) error {
 		return generateDumpWithAllVulns(*outFile)
