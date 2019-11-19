@@ -166,7 +166,8 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
-						Name: "product",
+						Name:       "product",
+						SourceType: "UnsetSourceType",
 					},
 					Version: "version",
 					AffectedBy: []database.Vulnerability{
@@ -195,7 +196,8 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
-						Name: "product",
+						Name:       "product",
+						SourceType: "UnsetSourceType",
 					},
 					Version: "version",
 					AffectedBy: []database.Vulnerability{
@@ -204,7 +206,8 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 				},
 				{
 					Feature: database.Feature{
-						Name: "product2",
+						Name:       "product2",
+						SourceType: "UnsetSourceType",
 					},
 					Version: "version2",
 					AffectedBy: []database.Vulnerability{
@@ -238,7 +241,8 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
-						Name: "product",
+						Name:       "product",
+						SourceType: "UnsetSourceType",
 					},
 					Version: "version",
 					AffectedBy: []database.Vulnerability{
@@ -273,7 +277,8 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
-						Name: "product",
+						Name:       "product",
+						SourceType: "UnsetSourceType",
 					},
 					Version: "version",
 					AffectedBy: []database.Vulnerability{
@@ -282,7 +287,8 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 				},
 				{
 					Feature: database.Feature{
-						Name: "product2",
+						Name:       "product2",
+						SourceType: "UnsetSourceType",
 					},
 					Version: "version2",
 					AffectedBy: []database.Vulnerability{
@@ -295,7 +301,14 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			features := getFeaturesFromMatchResults("", c.matches)
+			matchResults := make([]matchResultWrapper, 0, len(c.matches))
+			for _, m := range c.matches {
+				matchResults = append(matchResults, matchResultWrapper{
+					MatchResult: m,
+				})
+			}
+
+			features := getFeaturesFromMatchResults("", matchResults)
 			assert.ElementsMatch(t, c.features, features)
 		})
 	}

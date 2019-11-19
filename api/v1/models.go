@@ -15,10 +15,21 @@
 package v1
 
 import (
+	"fmt"
+	"strings"
+
+	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
+	"github.com/stackrox/scanner/pkg/component"
 )
+
+// These are possible package prefixes or suffixes. Package managers sometimes annotate
+// the packages with these e.g. urllib-python
+var possiblePythonPrefixesOrSuffixes = []string{
+	"python", "python2", "python3",
+}
 
 type Error struct {
 	Message string `json:"Message,omitempty"`
@@ -69,10 +80,45 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) Feature 
 	return Feature{
 		Name:          dbFeatureVersion.Feature.Name,
 		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
-		VersionFormat: dbFeatureVersion.Feature.Namespace.VersionFormat,
+		VersionFormat: stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
 		Version:       version,
 		AddedBy:       dbFeatureVersion.AddedBy.Name,
 	}
+}
+
+func dedupeVersionMatcher(v1, v2 string) bool {
+	if v1 == v2 {
+		return true
+	}
+	return strings.HasPrefix(v2, v1)
+}
+
+func dedupeFeatureNameMatcher(feature Feature, osFeature Feature) bool {
+	if feature.Name == osFeature.Name {
+		return true
+	}
+
+	if feature.VersionFormat == component.PythonSourceType.String() {
+		for _, ext := range possiblePythonPrefixesOrSuffixes {
+			if feature.Name == strings.TrimPrefix(osFeature.Name, fmt.Sprintf("%s-", ext)) {
+				return true
+			}
+			if feature.Name == strings.TrimSuffix(osFeature.Name, fmt.Sprintf("-%s", ext)) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
+	// Can probably sort this and it'll be faster
+	for _, osFeature := range osFeatures {
+		if dedupeFeatureNameMatcher(feature, osFeature) && dedupeVersionMatcher(feature.Version, osFeature.Version) {
+			return true
+		}
+	}
+	return false
 }
 
 func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, error) {
@@ -105,18 +151,23 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		}
 
 		// Add Language Features
-		languageFeatures, err := getLanguageData(db, layer.Name)
+		languageFeatureVersions, err := getLanguageData(db, layer.Name)
 		if err != nil {
 			return layer, err
 		}
-		for _, dbFeatureVersion := range languageFeatures {
+
+		var languageFeatures []Feature
+		for _, dbFeatureVersion := range languageFeatureVersions {
 			feature := featureFromDatabaseModel(dbFeatureVersion)
 
 			for _, dbVuln := range dbFeatureVersion.AffectedBy {
 				feature.Vulnerabilities = append(feature.Vulnerabilities, VulnerabilityFromDatabaseModel(dbVuln))
 			}
-			layer.Features = append(layer.Features, feature)
+			if !shouldDedupeLanguageFeature(feature, layer.Features) {
+				languageFeatures = append(languageFeatures, feature)
+			}
 		}
+		layer.Features = append(layer.Features, languageFeatures...)
 	}
 
 	return layer, nil

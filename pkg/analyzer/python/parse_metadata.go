@@ -6,10 +6,15 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/pkg/analyzer/internal/common"
 	"github.com/stackrox/scanner/pkg/component"
 )
+
+// Package managers find these libraries and are a more complete source of vulnerabilities
+// as opposed to CPEs
+var disallowedPkgs = set.NewFrozenStringSet("python")
 
 // The metadata file format is specified at https://packaging.python.org/specifications/core-metadata/.
 // Note that it's possible that the file is not a Python manifest but some other totally random file that
@@ -53,6 +58,10 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 
 	if err := scanner.Err(); err != nil {
 		log.Errorf("Error scanning file %q: %v", filePath, err)
+		return nil
+	}
+
+	if disallowedPkgs.Contains(strings.ToLower(c.Name)) {
 		return nil
 	}
 

@@ -52,7 +52,7 @@ type nameVersion struct {
 	name, version string
 }
 
-func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResult) []database.FeatureVersion {
+func getFeaturesFromMatchResults(layer string, matchResults []matchResultWrapper) []database.FeatureVersion {
 	if len(matchResults) == 0 {
 		return nil
 	}
@@ -84,7 +84,8 @@ func getFeaturesFromMatchResults(layer string, matchResults []cvefeed.MatchResul
 			if !ok {
 				feature = &database.FeatureVersion{
 					Feature: database.Feature{
-						Name: name,
+						Name:       name,
+						SourceType: m.source.String(),
 					},
 					Version: version,
 					AddedBy: database.Layer{
@@ -136,8 +137,8 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 	return attributes
 }
 
-func filterMatchResultsByTargetSoftware(matchResults []cvefeed.MatchResult) []cvefeed.MatchResult {
-	filteredResults := make([]cvefeed.MatchResult, 0, len(matchResults))
+func filterMatchResultsByTargetSoftware(matchResults []matchResultWrapper) []matchResultWrapper {
+	filteredResults := make([]matchResultWrapper, 0, len(matchResults))
 	for _, f := range matchResults {
 		// If the CPE has a language specified, then ensure that the language is ensured in the result CPE
 		var tgt string
@@ -158,9 +159,15 @@ func filterMatchResultsByTargetSoftware(matchResults []cvefeed.MatchResult) []cv
 	return filteredResults
 }
 
+type matchResultWrapper struct {
+	cvefeed.MatchResult
+	source component.SourceType
+}
+
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
 	cache := nvdtoolscache.Singleton()
-	var matchResults []cvefeed.MatchResult
+
+	var matchResults []matchResultWrapper
 	for _, c := range components {
 		attributes := getAttributes(c)
 
@@ -178,7 +185,10 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 		}
 		for _, v := range vulns {
 			if matches := v.Match(attributes, false); len(matches) > 0 {
-				matchResults = append(matchResults, cvefeed.MatchResult{CVE: v, CPEs: matches})
+				matchResults = append(matchResults, matchResultWrapper{
+					MatchResult: cvefeed.MatchResult{CVE: v, CPEs: matches},
+					source:      c.SourceType,
+				})
 			}
 		}
 	}
