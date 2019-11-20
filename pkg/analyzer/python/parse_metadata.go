@@ -61,7 +61,7 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 		return nil
 	}
 
-	if disallowedPkgs.Contains(strings.ToLower(c.Name)) {
+	if c != nil && disallowedPkgs.Contains(strings.ToLower(c.Name)) {
 		return nil
 	}
 
