@@ -169,7 +169,7 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 		return errors.Wrap(err, "filtering vulns")
 	}
 	log.Infof("Done filtering vulns. There are %d vulns to insert into the DB", len(filteredVulns))
-	if err := db.InsertVulnerabilities(filteredVulns[:4000]); err != nil {
+	if err := db.InsertVulnerabilities(filteredVulns); err != nil {
 		return errors.Wrap(err, "inserting vulns into the DB")
 	}
 	log.Info("Done inserting vulns into the DB")
