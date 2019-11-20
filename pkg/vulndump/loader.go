@@ -24,7 +24,7 @@ var (
 	// This lets us do some basic validation on the dumps, since no dumps were created before this date.
 	// Therefore, if a dump has a start time before this timestamp, its start timestamp MUST be the zero time,
 	// and its end timestamp MUST be after this time.
-	earliestDump = timeutil.MustParse(time.RFC3339, "2019-11-19T00:00:00Z00:00")
+	earliestDump = timeutil.MustParse(time.RFC3339, "2019-11-19T00:00:00Z")
 )
 
 // InMemNVDCacheUpdater is a callback that updates the inmem NVD cache from a directory of extracted nvd definitions.
@@ -139,6 +139,7 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 		}
 	}()
 
+	log.Info("Loading manifest")
 	manifestFile, err := openFileInZip(zipR, ManifestFileName)
 	if err != nil {
 		return errors.Wrap(err, "opening manifest file")
@@ -147,6 +148,7 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	if err != nil {
 		return errors.Wrap(err, "loading/validating manifest")
 	}
+	log.Info("Loaded manifest")
 	dbTime, shouldUpdate, err := determineWhetherToUpdate(db, manifest)
 	if err != nil {
 		return errors.Wrap(err, "determining whether to update")
@@ -155,7 +157,9 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 		log.Infof("DB already contains all the vulns in the dump at %q. Nothing to do here!", zipPath)
 		return nil
 	}
+	log.Infof("Running the update (last DB update time %s)", dbTime)
 
+	log.Info("Loading and filtering vulns")
 	osVulnsFile, err := openFileInZip(zipR, OSVulnsFileName)
 	if err != nil {
 		return errors.Wrap(err, "opening os vulns file")
@@ -164,8 +168,8 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	if err != nil {
 		return errors.Wrap(err, "filtering vulns")
 	}
-	log.Infof("Inserting %d vulns into the DB", len(filteredVulns))
-	if err := db.InsertVulnerabilities(filteredVulns); err != nil {
+	log.Infof("Done filtering vulns. There are %d vulns to insert into the DB", len(filteredVulns))
+	if err := db.InsertVulnerabilities(filteredVulns[:4000]); err != nil {
 		return errors.Wrap(err, "inserting vulns into the DB")
 	}
 	log.Info("Done inserting vulns into the DB")
