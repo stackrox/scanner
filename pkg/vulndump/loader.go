@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/mholt/archiver"
@@ -124,7 +123,7 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 		}
 	}()
 
-	if !strings.HasSuffix(zipPath, ".zip") {
+	if filepath.Ext(zipPath) != ".zip" {
 		return errors.Errorf("invalid path %q: only .zip files are supported", zipPath)
 	}
 
@@ -174,6 +173,8 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	}
 	log.Info("Done inserting vulns into the DB")
 
+	// Explicitly close the zip file because the
+	// archiver.Extract function below calls zip.Open again.
 	_ = zipR.Close()
 	zipFileClosed = true
 
