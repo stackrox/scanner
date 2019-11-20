@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
@@ -21,11 +22,13 @@ const (
 func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string) error {
 	var prevLayer string
 	for _, layer := range layers {
-		readCloser, err := registry.DownloadLayer(image.Remote, digest.Digest(layer))
-		if err != nil {
-			return errors.Wrapf(err, "error downloading layer %q", layer)
+		layerReadCloser := &layerDownloadReadCloser{
+			downloader: func() (io.ReadCloser, error) {
+				return registry.DownloadLayer(image.Remote, digest.Digest(layer))
+			},
 		}
-		err = clair.ProcessLayerFromReader(storage, "Docker", layer, prevLayer, readCloser)
+
+		err := clair.ProcessLayerFromReader(storage, "Docker", layer, prevLayer, layerReadCloser)
 		if err != nil {
 			logrus.Errorf("Error analyzing layer: %v", err)
 			return err
