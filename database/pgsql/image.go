@@ -33,14 +33,7 @@ func (pgSQL *pgSQL) GetLayerByName(name string) (string, bool, error) {
 // AddImage inserts an image and its latest layer into the database.
 // Duplicate entries are ignored.
 func (pgSQL *pgSQL) AddImage(layer string, digest, name string) error {
-	_, exists, err := pgSQL.GetLayerBySHA(digest)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return nil
-	}
-	_, err = pgSQL.Exec(`INSERT INTO ImageToLayer(layer, name, sha)
+	_, err := pgSQL.Exec(`INSERT INTO ImageToLayer(layer, name, sha)
 	VALUES ($1, $2, $3) ON CONFLICT DO NOTHING;`, layer, name, digest)
 	return err
 }
