@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/scanner/cmd/updater/generatedump"
+	"github.com/stackrox/scanner/cmd/updater/loaddump"
 
 	// Registrations.
 	_ "github.com/stackrox/scanner/database/pgsql"
@@ -14,11 +15,12 @@ import (
 
 func main() {
 	c := &cobra.Command{
-		Use: "Commands related to fetching updated vulnerability definitions",
+		Short: "Commands related to fetching updated vulnerability definitions",
 	}
 
 	c.AddCommand(
 		generatedump.Command(),
+		loaddump.Command(),
 	)
 
 	if err := c.Execute(); err != nil {

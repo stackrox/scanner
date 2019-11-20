@@ -339,8 +339,8 @@ github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191029220117-2a73008e51a9 h1:I
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191029220117-2a73008e51a9/go.mod h1:13vPFaMtP66fobTXqiv3SB32ZCZfa9btx3O6uOlTCDY=
 github.com/stackrox/nvdtools v0.0.0-20191113120155-9d91e1a7e8e3 h1:4nOZCCi6whlNXE1E+lZhFzjdOBVSkt8SM8TvbDpQAR4=
 github.com/stackrox/nvdtools v0.0.0-20191113120155-9d91e1a7e8e3/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
-github.com/stackrox/rox v0.0.0-20191106003112-a2ce10392777 h1:Vnhoa5g+X4zyxPADCQnPkgVQsSEg7kV6uTZXjt+r4Qk=
-github.com/stackrox/rox v0.0.0-20191106003112-a2ce10392777/go.mod h1:IqJz4g4l9F1W7D+nbovStYRUURq5ulaXyl8vYLPow10=
+github.com/stackrox/rox v0.0.0-20191119234625-95d517eb35ff h1:PUnJBYu96D6n3WkGO30RkgOpZfBoHurvxK+xgbY1U/E=
+github.com/stackrox/rox v0.0.0-20191119234625-95d517eb35ff/go.mod h1:Qshd7p6Hw8xBvPlJM3pKWh81R2s3qhbAdYIvA6pPStw=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2/go.mod h1:mjqs7N0Q6m5HpR7QfXVBZXZWSqTjQLeTujjA/xUp2uw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
