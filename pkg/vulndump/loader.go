@@ -75,9 +75,9 @@ func validateAndLoadManifest(f io.ReadCloser) (*Manifest, error) {
 		if m.Until.Before(earliestDump) {
 			return nil, errors.Errorf("invalid until time in manifest: %s; the dump is a genesis dump, but ends before our earliestDump time!", m.Until)
 		}
+	} else {
 		// Not a genesis dump. This path will be hit during regular updates.
 		// Make sure it starts after earliestDump->some time after that.
-	} else {
 		if !m.Since.After(earliestDump) {
 			return nil, errors.Errorf("unexpected dump: not a genesis dump, but starts before our earliest known dump (at %s)", m.Since)
 		}
