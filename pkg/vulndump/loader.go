@@ -39,7 +39,7 @@ func filterVulns(dbUpdatedTime time.Time, wrappedVulnsFile io.ReadCloser) ([]dat
 	}
 	var filteredVulns []database.Vulnerability
 	for _, wrappedVuln := range wrappedVulns {
-		if !dbUpdatedTime.IsZero() && (!wrappedVuln.LastUpdatedTime.After(dbUpdatedTime)) {
+		if !dbUpdatedTime.IsZero() && !wrappedVuln.LastUpdatedTime.After(dbUpdatedTime) {
 			continue
 		}
 		filteredVulns = append(filteredVulns, wrappedVuln.Vulnerability)
