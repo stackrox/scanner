@@ -18,17 +18,18 @@ func Command() *cobra.Command {
 		Use: "load-dump",
 	}
 
-	postgresHost := c.Flags().String("postgres-host", "127.0.0.1", "postgres host")
-	postgresPort := c.Flags().Int("postgres-port", 5432, "postgres port")
-	dumpFile := c.Flags().String("dump-file", "", "path to dump file")
-	utils.Must(c.MarkFlagRequired("dump-file"))
+	var (
+		postgresHost string
+		postgresPort int
+		dumpFile     string
+	)
 
 	c.RunE = func(_ *cobra.Command, _ []string) error {
-		log.Infof("Attempting to open DB at %s:%d", *postgresHost, *postgresPort)
+		log.Infof("Attempting to open DB at %s:%d", postgresHost, postgresPort)
 		db, err := database.OpenWithRetries(database.RegistrableComponentConfig{
 			Type: "pgsql",
 			Options: map[string]interface{}{
-				"source": fmt.Sprintf("host=%s port=%d user=postgres sslmode=disable statement_timeout=60000", *postgresHost, *postgresPort),
+				"source": fmt.Sprintf("host=%s port=%d user=postgres sslmode=disable statement_timeout=60000", postgresHost, postgresPort),
 			},
 		}, 5, 10*time.Second)
 		if err != nil {
@@ -43,7 +44,7 @@ func Command() *cobra.Command {
 			return errors.Wrap(err, "creating scratch dir")
 		}
 		log.Info("Updating DB with vuln dump")
-		err = vulndump.UpdateFromVulnDump(*dumpFile, scratchDir, db, nil)
+		err = vulndump.UpdateFromVulnDump(dumpFile, scratchDir, db, nil)
 		if err != nil {
 			return errors.Wrap(err, "updating DB from dump")
 		}
@@ -51,6 +52,11 @@ func Command() *cobra.Command {
 
 		return nil
 	}
+
+	c.Flags().StringVar(&postgresHost, "postgres-host", "127.0.0.1", "postgres host")
+	c.Flags().IntVar(&postgresPort, "postgres-port", 5432, "postgres port")
+	c.Flags().StringVar(&dumpFile, "dump-file", "", "path to dump file")
+	utils.Must(c.MarkFlagRequired("dump-file"))
 
 	return c
 }
