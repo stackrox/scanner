@@ -14,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/fileutils"
+	"github.com/stackrox/rox/pkg/timeutil"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/wellknownkeys"
@@ -23,11 +24,7 @@ var (
 	// This lets us do some basic validation on the dumps, since no dumps were created before this date.
 	// Therefore, if a dump has a start time before this timestamp, its start timestamp MUST be the zero time,
 	// and its end timestamp MUST be after this time.
-	earliestDump = func() time.Time {
-		t, err := time.Parse(time.RFC3339, "2019-11-19T00:00:00Z00:00")
-		utils.Must(err)
-		return t
-	}()
+	earliestDump = timeutil.MustParse(time.RFC3339, "2019-11-19T00:00:00Z00:00")
 )
 
 // InMemNVDCacheUpdater is a callback that updates the inmem NVD cache from a directory of extracted nvd definitions.
