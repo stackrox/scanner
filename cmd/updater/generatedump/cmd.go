@@ -29,17 +29,6 @@ func (e emptyDataStore) GetKeyValue(key string) (string, error) {
 	return "", nil
 }
 
-func wrapVulns(startTime time.Time, fetchedVulns []database.Vulnerability) []vulndump.WrappedVulnerability {
-	wrappedVulns := make([]vulndump.WrappedVulnerability, 0, len(fetchedVulns))
-	for _, v := range fetchedVulns {
-		wrappedVulns = append(wrappedVulns, vulndump.WrappedVulnerability{
-			LastUpdatedTime: startTime,
-			Vulnerability:   v,
-		})
-	}
-	return wrappedVulns
-}
-
 func writeJSONObjectToFile(filePath string, object interface{}) error {
 	log.Info("Writing JSON file for updated vulns...")
 	f, err := os.Create(filePath)
@@ -88,7 +77,7 @@ func generateDumpWithAllVulns(outFile string) error {
 
 	log.Info("Writing JSON file for updated vulns...")
 	osVulnsFilePath := filepath.Join(dumpDir, vulndump.OSVulnsFileName)
-	err = writeJSONObjectToFile(osVulnsFilePath, wrapVulns(startTime, fetchedVulns))
+	err = writeJSONObjectToFile(osVulnsFilePath, fetchedVulns)
 	if err != nil {
 		return errors.Wrap(err, "writing JSON file for OS vulns")
 	}

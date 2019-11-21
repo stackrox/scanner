@@ -29,21 +29,14 @@ var (
 // InMemNVDCacheUpdater is a callback that updates the inmem NVD cache from a directory of extracted nvd definitions.
 type InMemNVDCacheUpdater func(nvdDefinitionsDir string) error
 
-func filterVulns(dbUpdatedTime time.Time, wrappedVulnsFile io.ReadCloser) ([]database.Vulnerability, error) {
-	defer utils.IgnoreError(wrappedVulnsFile.Close)
+func loadVulns(osVulnsFile io.ReadCloser) ([]database.Vulnerability, error) {
+	defer utils.IgnoreError(osVulnsFile.Close)
 
-	var wrappedVulns []WrappedVulnerability
-	if err := json.NewDecoder(wrappedVulnsFile).Decode(&wrappedVulns); err != nil {
+	var vulns []database.Vulnerability
+	if err := json.NewDecoder(osVulnsFile).Decode(&vulns); err != nil {
 		return nil, errors.Wrap(err, "JSON decoding failed")
 	}
-	var filteredVulns []database.Vulnerability
-	for _, wrappedVuln := range wrappedVulns {
-		if !dbUpdatedTime.IsZero() && !wrappedVuln.LastUpdatedTime.After(dbUpdatedTime) {
-			continue
-		}
-		filteredVulns = append(filteredVulns, wrappedVuln.Vulnerability)
-	}
-	return filteredVulns, nil
+	return vulns, nil
 }
 
 func openFileInZip(zipR *zip.ReadCloser, name string) (io.ReadCloser, error) {
@@ -84,28 +77,28 @@ func validateAndLoadManifest(f io.ReadCloser) (*Manifest, error) {
 	return &m, nil
 }
 
-func determineWhetherToUpdate(db database.Datastore, manifest *Manifest) (time.Time, bool, error) {
+func determineWhetherToUpdate(db database.Datastore, manifest *Manifest) (bool, error) {
 	val, err := db.GetKeyValue(wellknownkeys.VulnUpdateTimestampKey)
 	if err != nil {
-		return time.Time{}, false, errors.Wrap(err, "getting last update timestamp from DB")
+		return false, errors.Wrap(err, "getting last update timestamp from DB")
 	}
 	// If the val is empty, that means this is a first update.
 	// That means that we MUST make sure that the dump is a genesis dump.
 	if val == "" {
 		if !manifest.Since.IsZero() {
-			return time.Time{}, false, errors.New("DB is empty, but this dump is NOT a genesis dump. We NEED to load a genesis dump first.")
+			return false, errors.New("DB is empty, but this dump is NOT a genesis dump. We NEED to load a genesis dump first.")
 		}
 		// Nothing in the DB, and this is a genesis dump. Let's update.
-		return time.Time{}, true, nil
+		return true, nil
 	}
 
 	// Not a first update. We update only if the manifest contains updates from after the most recent
 	// update in the DB.
 	var dbTime time.Time
 	if err := dbTime.UnmarshalText(bytes.TrimSpace([]byte(val))); err != nil {
-		return time.Time{}, false, errors.Wrapf(err, "invalid timestamp in DB: %q", val)
+		return false, errors.Wrapf(err, "invalid timestamp in DB: %q", val)
 	}
-	return dbTime, manifest.Until.After(dbTime), nil
+	return manifest.Until.After(dbTime), nil
 }
 
 // UpdateFromVulnDump updates the definitions (both in the DB and in the inMemUpdater) from the given zip file.
@@ -148,7 +141,7 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 		return errors.Wrap(err, "loading/validating manifest")
 	}
 	log.Info("Loaded manifest")
-	dbTime, shouldUpdate, err := determineWhetherToUpdate(db, manifest)
+	shouldUpdate, err := determineWhetherToUpdate(db, manifest)
 	if err != nil {
 		return errors.Wrap(err, "determining whether to update")
 	}
@@ -156,19 +149,19 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 		log.Infof("DB already contains all the vulns in the dump at %q. Nothing to do here!", zipPath)
 		return nil
 	}
-	log.Infof("Running the update (last DB update time %s)", dbTime)
+	log.Info("Running the update.")
 
-	log.Info("Loading and filtering vulns")
+	log.Info("Loading OS vulns...")
 	osVulnsFile, err := openFileInZip(zipR, OSVulnsFileName)
 	if err != nil {
 		return errors.Wrap(err, "opening os vulns file")
 	}
-	filteredVulns, err := filterVulns(dbTime, osVulnsFile)
+	osVulns, err := loadVulns(osVulnsFile)
 	if err != nil {
-		return errors.Wrap(err, "filtering vulns")
+		return errors.Wrap(err, "loading OS vulns")
 	}
-	log.Infof("Done filtering vulns. There are %d vulns to insert into the DB", len(filteredVulns))
-	if err := db.InsertVulnerabilities(filteredVulns); err != nil {
+	log.Infof("Done loading OS vulns. There are %d vulns to insert into the DB", len(osVulns))
+	if err := db.InsertVulnerabilities(osVulns); err != nil {
 		return errors.Wrap(err, "inserting vulns into the DB")
 	}
 	log.Info("Done inserting vulns into the DB")

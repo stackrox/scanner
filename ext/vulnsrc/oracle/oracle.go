@@ -153,7 +153,9 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		}
 	}
 
-	for _, elsa := range elsaList {
+	log.WithField("count", len(elsaList)).Info("Got list of Oracle updates to process")
+
+	for i, elsa := range elsaList {
 		// Download the ELSA's XML file.
 		r, err := httputil.GetWithUserAgent(ovalURI + elsaFilePrefix + strconv.Itoa(elsa) + ".xml")
 		if err != nil {
@@ -175,6 +177,9 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 
 		// Collect vulnerabilities.
 		resp.Vulnerabilities = append(resp.Vulnerabilities, vs...)
+		if (i+1)%100 == 0 {
+			log.Infof("Oracle updater: finished fetching %d/%d ELSAs", i+1, len(elsaList))
+		}
 	}
 
 	// Set the flag if we found anything.
