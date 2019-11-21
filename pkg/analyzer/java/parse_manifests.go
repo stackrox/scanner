@@ -3,6 +3,8 @@ package java
 import (
 	"archive/zip"
 	"bufio"
+	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/stackrox/rox/pkg/stringutils"
@@ -12,15 +14,36 @@ const (
 	manifestFileName = `META-INF/MANIFEST.MF`
 )
 
+var (
+	semverRegex = regexp.MustCompile(`^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$`)
+)
+
 type parsedManifestMF struct {
 	specificationVersion string
 	specificationVendor  string
 
-	implementationVersion string
-	implementationVendor  string
+	implementationVersion  string
+	implementationVendor   string
+	implementationVendorID string
+	bundleName             string
+	bundleSymbolicName     string
 }
 
-func parseManifestMF(f *zip.File) (parsedManifestMF, error) {
+func parseVersionOutOfName(jar string) string {
+	jarBase := filepath.Base(jar)
+	jarBase = strings.TrimSuffix(jarBase, ".jar")
+	jarBase = strings.TrimSuffix(jarBase, "-fatjar")
+
+	if idx := strings.LastIndex(jarBase, "-"); idx != -1 && idx != len(jarBase)-1 {
+		version := jarBase[idx+1:]
+		if semverRegex.MatchString(version) {
+			return version
+		}
+	}
+	return ""
+}
+
+func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error) {
 	reader, err := f.Open()
 	if err != nil {
 		return parsedManifestMF{}, err
@@ -32,6 +55,7 @@ func parseManifestMF(f *zip.File) (parsedManifestMF, error) {
 	var currentValueToSet *string
 	var currentValue string
 	var manifest parsedManifestMF
+	var isTemplatedManifestFile bool
 
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
@@ -51,7 +75,12 @@ func parseManifestMF(f *zip.File) (parsedManifestMF, error) {
 		}
 		keyFromLine, valueFromLine := stringutils.Split2(currentLine, ":")
 		// Should never happen, probably a malformed JAR file?
+		// Sometimes the Manifests are templated with ${revision} or ${version}
 		if valueFromLine == "" {
+			continue
+		}
+		if strings.Contains(valueFromLine, "$") {
+			isTemplatedManifestFile = true
 			continue
 		}
 
@@ -65,6 +94,12 @@ func parseManifestMF(f *zip.File) (parsedManifestMF, error) {
 			currentValueToSet = &manifest.implementationVersion
 		case "Implementation-Vendor":
 			currentValueToSet = &manifest.implementationVendor
+		case "Implementation-Vendor-Id":
+			currentValueToSet = &manifest.implementationVendorID
+		case "Bundle-Name":
+			currentValueToSet = &manifest.bundleName
+		case "Bundle-SymbolicName":
+			currentValueToSet = &manifest.bundleSymbolicName
 		}
 		if currentValueToSet != nil {
 			currentValue = valueFromLine
@@ -78,6 +113,12 @@ func parseManifestMF(f *zip.File) (parsedManifestMF, error) {
 		*currentValueToSet = strings.TrimSpace(currentValue)
 		currentValueToSet = nil
 	}
+
+	// Try to take the version from the jar name
+	if manifest.implementationVersion == "" && isTemplatedManifestFile {
+		manifest.implementationVersion = parseVersionOutOfName(locationSoFar)
+	}
+
 	return manifest, nil
 }
 

@@ -1,48 +1,26 @@
 package cpe
 
 import (
-	"regexp"
 	"sort"
 	"strings"
 
-	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/wfn"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/cpe/attributes/java"
+	"github.com/stackrox/scanner/cpe/attributes/node"
+	"github.com/stackrox/scanner/cpe/attributes/python"
+	"github.com/stackrox/scanner/cpe/attributes/ruby"
+	"github.com/stackrox/scanner/cpe/match"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
+	"github.com/stackrox/scanner/cpe/validation"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
-var (
-	numRegex = regexp.MustCompile(`[0-9].*$`)
-)
-
-func generateNameKeys(componentName string, hasVendor bool) set.StringSet {
-	if componentName == "" {
-		return set.NewStringSet()
-	}
-	nameSet := set.NewStringSet(
-		componentName,
-		strings.ReplaceAll(componentName, "_", "-"),
-		strings.ReplaceAll(componentName, "-", "_"),
-	)
-
-	if hasVendor {
-		nameSet.Add(numRegex.ReplaceAllString(componentName, ""))
-		for name := range nameSet {
-			if idx := strings.Index(name, "-"); idx != -1 {
-				nameSet.Add(name[:idx])
-			}
-		}
-	}
-
-	return nameSet
-}
-
-func generateVersionKeys(c *component.Component) set.StringSet {
-	return set.NewStringSet(c.Version, strings.ReplaceAll(c.Version, ".", `\.`))
+type nameVersion struct {
+	name, version string
 }
 
 func getNameVersionFromCPE(attr *wfn.Attributes) nameVersion {
@@ -52,11 +30,7 @@ func getNameVersionFromCPE(attr *wfn.Attributes) nameVersion {
 	}
 }
 
-type nameVersion struct {
-	name, version string
-}
-
-func getFeaturesFromMatchResults(layer string, matchResults []matchResult) []database.FeatureVersion {
+func getFeaturesFromMatchResults(layer string, matchResults []match.Result) []database.FeatureVersion {
 	if len(matchResults) == 0 {
 		return nil
 	}
@@ -93,9 +67,8 @@ func getFeaturesFromMatchResults(layer string, matchResults []matchResult) []dat
 			}
 			featuresMap[nameVersion] = feature
 		}
-		vuln := nvdtoolscache.NewVulnerability(m.CVE.(*nvd.Vuln).CVEItem)
-		vuln.FixedBy = cpe.FixedIn
-		feature.AffectedBy = append(feature.AffectedBy, *vuln)
+		m.Vuln.FixedBy = cpe.FixedIn
+		feature.AffectedBy = append(feature.AffectedBy, *m.Vuln)
 	}
 	features := make([]database.FeatureVersion, 0, len(featuresMap))
 	for _, feature := range featuresMap {
@@ -104,9 +77,37 @@ func getFeaturesFromMatchResults(layer string, matchResults []matchResult) []dat
 	return features
 }
 
+func escapeDash(s string) string {
+	return strings.ReplaceAll(s, "-", `\-`)
+}
+
+func getAttributes(c *component.Component) []*wfn.Attributes {
+	var attrs []*wfn.Attributes
+	switch c.SourceType {
+	case component.PythonSourceType:
+		attrs = python.GetPythonAttributes(c)
+	case component.GemSourceType:
+		attrs = ruby.GetRubyAttributes(c)
+	case component.NPMSourceType:
+		attrs = node.GetNodeAttributes(c)
+	case component.JavaSourceType:
+		attrs = java.GetJavaAttributes(c)
+	case component.UnsetSourceType:
+		log.Errorf("Attributes cannot be found for source type %q", c.SourceType.String())
+	}
+	for _, a := range attrs {
+		a.Product = escapeDash(a.Product)
+		a.Vendor = escapeDash(a.Vendor)
+	}
+	return attrs
+}
+
 func getMostSpecificCPE(cpes []wfn.AttributesWithFixedIn) wfn.AttributesWithFixedIn {
 	max := cpes[0]
 	for _, c := range cpes {
+		if max.Vendor != "" && c.Vendor == "" {
+			continue
+		}
 		if len(c.Version) > len(max.Version) {
 			max = c
 		}
@@ -114,69 +115,9 @@ func getMostSpecificCPE(cpes []wfn.AttributesWithFixedIn) wfn.AttributesWithFixe
 	return max
 }
 
-func escapeDash(s string) string {
-	return strings.ReplaceAll(s, "-", `\-`)
-}
-
-func getAttributes(c *component.Component) []*wfn.Attributes {
-	vendorSet := set.NewStringSet()
-	nameSet := set.NewStringSet()
-	versionSet := generateVersionKeys(c)
-
-	if generator, ok := generators[c.SourceType]; ok {
-		generator(c, vendorSet, nameSet, versionSet)
-	}
-
-	nameSet = nameSet.Union(generateNameKeys(c.Name, vendorSet.Cardinality() != 0))
-	if vendorSet.Cardinality() == 0 {
-		vendorSet.Add("")
-	}
-	attributes := make([]*wfn.Attributes, 0, vendorSet.Cardinality()*nameSet.Cardinality()*versionSet.Cardinality())
-	for vendor := range vendorSet {
-		for name := range nameSet {
-			for version := range versionSet {
-				var tgtSW string
-				if c.SourceType == component.NPMSourceType {
-					tgtSW = `node\.js`
-				}
-				attributes = append(attributes, &wfn.Attributes{
-					Vendor:   escapeDash(strings.ToLower(vendor)),
-					Product:  escapeDash(strings.ToLower(name)),
-					Version:  strings.ToLower(version),
-					TargetSW: tgtSW,
-				})
-			}
-		}
-	}
-	return attributes
-}
-
-func filterMatchResultsByTargetSoftware(matchResults []matchResult) []matchResult {
-	filteredResults := make([]matchResult, 0, len(matchResults))
-	for _, f := range matchResults {
-		// If the CPE has a language specified, then ensure that the language is ensured in the result CPE
-		tgt := f.CPE.TargetSW
-		if tgt == "" {
-			return matchResults
-		}
-		for _, cveCPE := range f.CVE.Config() {
-			if cveCPE.TargetSW == tgt {
-				filteredResults = append(filteredResults, f)
-			}
-		}
-	}
-	return filteredResults
-}
-
-type matchResult struct {
-	CVE       cvefeed.Vuln
-	CPE       wfn.AttributesWithFixedIn
-	Component *component.Component
-}
-
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
 	cache := nvdtoolscache.Singleton()
-	var matchResults []matchResult
+	var matchResults []match.Result
 
 	sort.Slice(components, func(i, j int) bool {
 		return components[i].Name < components[j].Name
@@ -197,15 +138,24 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 		}
 		for _, v := range vulns {
 			if matchesWithFixed := v.MatchWithFixedIn(attributes, false); len(matchesWithFixed) > 0 {
-				matchResults = append(matchResults, matchResult{
+				result := match.Result{
 					CVE:       v,
 					CPE:       getMostSpecificCPE(matchesWithFixed),
 					Component: c,
-				})
+					Vuln:      nvdtoolscache.NewVulnerability(v.(*nvd.Vuln).CVEItem),
+				}
+
+				validator, ok := validation.Validators[c.SourceType]
+				if !ok {
+					log.Errorf("could not find validator for source type: %q", c.SourceType)
+				}
+				if !validator.ValidateResult(result) {
+					continue
+				}
+				matchResults = append(matchResults, result)
 			}
 		}
 	}
-	matchResults = filterMatchResultsByTargetSoftware(matchResults)
 
 	return getFeaturesFromMatchResults(layer, matchResults)
 }

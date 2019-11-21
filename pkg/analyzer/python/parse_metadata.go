@@ -8,12 +8,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
-	"github.com/stackrox/scanner/pkg/analyzer/internal/common"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
 // Package managers find these libraries and are a more complete source of vulnerabilities
-// as opposed to CPEs
+// as opposed to CPE
 var disallowedPkgs = set.NewFrozenStringSet("python")
 
 // The metadata file format is specified at https://packaging.python.org/specifications/core-metadata/.
@@ -21,15 +20,10 @@ var disallowedPkgs = set.NewFrozenStringSet("python")
 // happens to have a matching name.
 // In this case, this function will gracefully return `nil`.
 func parseMetadataFile(filePath string, contents []byte) *component.Component {
-	var c *component.Component
-
-	ensureCInitialized := func() {
-		if c == nil {
-			c = &component.Component{
-				Location:   filePath,
-				SourceType: component.PythonSourceType,
-			}
-		}
+	c := &component.Component{
+		Location:          filePath,
+		SourceType:        component.PythonSourceType,
+		PythonPkgMetadata: &component.PythonPkgMetadata{},
 	}
 
 	scanner := bufio.NewScanner(bytes.NewReader(contents))
@@ -43,16 +37,19 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 		}
 		switch key {
 		case "Name":
-			ensureCInitialized()
 			c.Name = value
 		case "Version":
-			ensureCInitialized()
 			c.Version = value
-		}
-
-		// If we have got all the information we want, no point in scanning the rest of the file.
-		if common.HasNameAndVersion(c) {
-			break
+		case "Home-page":
+			c.PythonPkgMetadata.Homepage = value
+		case "Author-email":
+			c.PythonPkgMetadata.AuthorEmail = value
+		case "Summary":
+			c.PythonPkgMetadata.Summary = value
+		case "Description":
+			c.PythonPkgMetadata.Description = value
+		case "Download-URL":
+			c.PythonPkgMetadata.DownloadURL = value
 		}
 	}
 
@@ -61,9 +58,10 @@ func parseMetadataFile(filePath string, contents []byte) *component.Component {
 		return nil
 	}
 
-	if c == nil {
+	if !stringutils.AllNotEmpty(c.Name, c.Version) {
 		return nil
 	}
+
 	if disallowedPkgs.Contains(strings.ToLower(c.Name)) {
 		return nil
 	}

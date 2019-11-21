@@ -23,12 +23,12 @@ func parsePackageJSON(filePath string, contents []byte) *component.Component {
 	var pkgJSON packageJSON
 	err := json.Unmarshal(contents, &pkgJSON)
 	if err != nil {
-		logrus.Errorf("Couldn't unmarshal package.json file at %q: %v", filePath, err)
+		logrus.Debugf("Couldn't unmarshal package.json file at %q: %v", filePath, err)
 		return nil
 	}
 
 	if stringutils.AtLeastOneEmpty(pkgJSON.Name, pkgJSON.Version) {
-		logrus.Errorf("Incomplete package.json file at %q; got %s/%s", filePath, pkgJSON.Name, pkgJSON.Version)
+		logrus.Debugf("Incomplete package.json file at %q; got %s/%s", filePath, pkgJSON.Name, pkgJSON.Version)
 		return nil
 	}
 	return &component.Component{

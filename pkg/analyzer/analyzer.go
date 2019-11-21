@@ -21,5 +21,6 @@ func Analyze(filesMap tarutil.FilesMap, analyzers []Analyzer) ([]*component.Comp
 		}
 		allComponents = append(allComponents, components...)
 	}
+
 	return allComponents, nil
 }
