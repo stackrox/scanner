@@ -8,10 +8,10 @@ import (
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
-	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/nvdloader"
 )
 
 func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
@@ -110,9 +110,9 @@ func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 	}
 	defer utils.IgnoreError(f.Close)
 
-	var feed feedWrapper
-	if err := easyjson.UnmarshalFromReader(f, &feed); err != nil {
-		return 0, err
+	feed, err := nvdloader.LoadJSONFileFromReader(f)
+	if err != nil {
+		return 0, errors.Wrapf(err, "loading JSON file at path %q", path)
 	}
 
 	var numVulns int
