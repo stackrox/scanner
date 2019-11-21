@@ -1,5 +1,5 @@
 ext/featurefmt/rpm/testdata/Packages
 image/dump/cves_10222019.tar.gz
 go.sum
-cpe/nvdtoolscache/json_easyjson.go
+pkg/nvdloader/nvdloader_easyjson.go
 

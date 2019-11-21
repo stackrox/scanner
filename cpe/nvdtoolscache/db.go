@@ -5,8 +5,9 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
-	"github.com/mailru/easyjson"
+	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/pkg/nvdloader"
 )
 
 // This is a temporary path for the boltDB and is expected to be backed by
@@ -33,7 +34,7 @@ type cacheImpl struct {
 }
 
 func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSON10DefCVEItem) error {
-	bytes, err := easyjson.Marshal((*itemWrapper)(cve))
+	bytes, err := nvdloader.MarshalNVDFeedCVEItem(cve)
 	if err != nil {
 		return err
 	}
@@ -68,11 +69,11 @@ func (c *cacheImpl) GetVulnsForProducts(products []string) ([]cvefeed.Vuln, erro
 				if !vulnSet.Add(string(k)) {
 					return nil
 				}
-				var itemW itemWrapper
-				if err := easyjson.Unmarshal(v, &itemW); err != nil {
-					return err
+				vuln, err := nvdloader.UnmarshalNVDFeedCVEItem(v)
+				if err != nil {
+					return errors.Wrapf(err, "unmarshaling vuln %s", string(k))
 				}
-				vulns = append(vulns, nvd.ToVuln((*schema.NVDCVEFeedJSON10DefCVEItem)(&itemW)))
+				vulns = append(vulns, nvd.ToVuln(vuln))
 				return nil
 			})
 			if err != nil {
