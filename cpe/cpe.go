@@ -52,7 +52,7 @@ type nameVersion struct {
 	name, version string
 }
 
-func getFeaturesFromMatchResults(layer string, matchResults []matchResultWrapper) []database.FeatureVersion {
+func getFeaturesFromMatchResults(layer string, matchResults []matchResult) []database.FeatureVersion {
 	if len(matchResults) == 0 {
 		return nil
 	}
@@ -94,7 +94,9 @@ func getFeaturesFromMatchResults(layer string, matchResults []matchResultWrapper
 				}
 				featuresMap[nameVersion] = feature
 			}
-			feature.AffectedBy = append(feature.AffectedBy, *nvdtoolscache.NewVulnerability(m.CVE.(*nvd.Vuln).CVEItem))
+			vuln := nvdtoolscache.NewVulnerability(m.CVE.(*nvd.Vuln).CVEItem)
+			vuln.FixedBy = cpe.FixedIn
+			feature.AffectedBy = append(feature.AffectedBy, *vuln)
 		}
 	}
 	features := make([]database.FeatureVersion, 0, len(featuresMap))
@@ -137,8 +139,8 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 	return attributes
 }
 
-func filterMatchResultsByTargetSoftware(matchResults []matchResultWrapper) []matchResultWrapper {
-	filteredResults := make([]matchResultWrapper, 0, len(matchResults))
+func filterMatchResultsByTargetSoftware(matchResults []matchResult) []matchResult {
+	filteredResults := make([]matchResult, 0, len(matchResults))
 	for _, f := range matchResults {
 		// If the CPE has a language specified, then ensure that the language is ensured in the result CPE
 		var tgt string
@@ -159,15 +161,15 @@ func filterMatchResultsByTargetSoftware(matchResults []matchResultWrapper) []mat
 	return filteredResults
 }
 
-type matchResultWrapper struct {
-	cvefeed.MatchResult
+type matchResult struct {
+	CVE    cvefeed.Vuln
+	CPEs   []wfn.AttributesWithFixedIn
 	source component.SourceType
 }
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
 	cache := nvdtoolscache.Singleton()
-
-	var matchResults []matchResultWrapper
+	var matchResults []matchResult
 	for _, c := range components {
 		attributes := getAttributes(c)
 
@@ -184,11 +186,8 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 			continue
 		}
 		for _, v := range vulns {
-			if matches := v.Match(attributes, false); len(matches) > 0 {
-				matchResults = append(matchResults, matchResultWrapper{
-					MatchResult: cvefeed.MatchResult{CVE: v, CPEs: matches},
-					source:      c.SourceType,
-				})
+			if matchesWithFixed := v.MatchWithFixedIn(attributes, false); len(matchesWithFixed) > 0 {
+				matchResults = append(matchResults, matchResult{CVE: v, CPEs: matchesWithFixed, source: c.SourceType})
 			}
 		}
 	}

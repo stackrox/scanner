@@ -67,7 +67,9 @@ func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability
 		Severity:      string(dbVuln.Severity),
 		Metadata:      dbVuln.Metadata,
 	}
-
+	if dbVuln.FixedBy != versionfmt.MaxVersion {
+		vuln.FixedBy = dbVuln.FixedBy
+	}
 	return vuln
 }
 

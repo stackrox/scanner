@@ -135,16 +135,16 @@ func newDatabaseVuln(id string) database.Vulnerability {
 func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 	cases := []struct {
 		name     string
-		matches  []cvefeed.MatchResult
+		matches  []matchResult
 		features []database.FeatureVersion
 	}{
 		{
 			name:    "no matches",
-			matches: []cvefeed.MatchResult{},
+			matches: []matchResult{},
 		},
 		{
 			name: "one match but not attributes (shouldn't happen)",
-			matches: []cvefeed.MatchResult{
+			matches: []matchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
 				},
@@ -152,13 +152,15 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		},
 		{
 			name: "one match",
-			matches: []cvefeed.MatchResult{
+			matches: []matchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []*wfn.Attributes{
+					CPEs: []wfn.AttributesWithFixedIn{
 						{
-							Product: "product",
-							Version: "version",
+							Attributes: &wfn.Attributes{
+								Product: "product",
+								Version: "version",
+							},
 						},
 					},
 				},
@@ -178,17 +180,21 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		},
 		{
 			name: "one match with two CPEs",
-			matches: []cvefeed.MatchResult{
+			matches: []matchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []*wfn.Attributes{
+					CPEs: []wfn.AttributesWithFixedIn{
 						{
-							Product: "product",
-							Version: "version",
+							Attributes: &wfn.Attributes{
+								Product: "product",
+								Version: "version",
+							},
 						},
 						{
-							Product: "product2",
-							Version: "version2",
+							Attributes: &wfn.Attributes{
+								Product: "product2",
+								Version: "version2",
+							},
 						},
 					},
 				},
@@ -218,22 +224,26 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		},
 		{
 			name: "two matches with same CPE",
-			matches: []cvefeed.MatchResult{
+			matches: []matchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []*wfn.Attributes{
+					CPEs: []wfn.AttributesWithFixedIn{
 						{
-							Product: "product",
-							Version: "version",
+							Attributes: &wfn.Attributes{
+								Product: "product",
+								Version: "version",
+							},
 						},
 					},
 				},
 				{
 					CVE: newMockCVEFeedVuln("cve2"),
-					CPEs: []*wfn.Attributes{
+					CPEs: []wfn.AttributesWithFixedIn{
 						{
-							Product: "product",
-							Version: "version",
+							Attributes: &wfn.Attributes{
+								Product: "product",
+								Version: "version",
+							},
 						},
 					},
 				},
@@ -254,22 +264,26 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		},
 		{
 			name: "two matches with different CPE",
-			matches: []cvefeed.MatchResult{
+			matches: []matchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []*wfn.Attributes{
+					CPEs: []wfn.AttributesWithFixedIn{
 						{
-							Product: "product",
-							Version: "version",
+							Attributes: &wfn.Attributes{
+								Product: "product",
+								Version: "version",
+							},
 						},
 					},
 				},
 				{
 					CVE: newMockCVEFeedVuln("cve2"),
-					CPEs: []*wfn.Attributes{
+					CPEs: []wfn.AttributesWithFixedIn{
 						{
-							Product: "product2",
-							Version: "version2",
+							Attributes: &wfn.Attributes{
+								Product: "product2",
+								Version: "version2",
+							},
 						},
 					},
 				},
@@ -301,14 +315,7 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			matchResults := make([]matchResultWrapper, 0, len(c.matches))
-			for _, m := range c.matches {
-				matchResults = append(matchResults, matchResultWrapper{
-					MatchResult: m,
-				})
-			}
-
-			features := getFeaturesFromMatchResults("", matchResults)
+			features := getFeaturesFromMatchResults("", c.matches)
 			assert.ElementsMatch(t, c.features, features)
 		})
 	}

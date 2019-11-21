@@ -13,10 +13,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type expectedVuln struct {
+	name, fixedBy string
+}
+
 type expectedFeature struct {
 	name          string
 	version       string
-	expectedVulns []string
+	expectedVulns []expectedVuln
 }
 
 type singleTestCase struct {
@@ -63,7 +67,10 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 
 			for _, expectedVuln := range expectedFeat.expectedVulns {
 				matchingIdx := sliceutils.FindMatching(matchingFeature.GetVulnerabilities(), func(v *v1.Vulnerability) bool {
-					return v.GetName() == expectedVuln
+					if expectedVuln.fixedBy == "" {
+						return v.GetName() == expectedVuln.name
+					}
+					return v.GetName() == expectedVuln.name && v.GetFixedBy() == expectedVuln.fixedBy
 				})
 				assert.NotEqual(t, -1, matchingIdx, "Vuln %s not found", expectedVuln)
 			}
@@ -78,15 +85,15 @@ func TestStackroxVulnImages(t *testing.T) {
 		{
 			imageTag: "django-cve-2019-14235",
 			expectedFeatures: []expectedFeature{
-				{"django", "2.1", []string{
-					"CVE-2018-16984",
-					"CVE-2019-12308",
-					"CVE-2019-12781",
-					"CVE-2019-3498",
-					"CVE-2019-14232",
-					"CVE-2019-14233",
-					"CVE-2019-14234",
-					"CVE-2019-14235",
+				{"django", "2.1", []expectedVuln{
+					{name: "CVE-2018-16984", fixedBy: "2.1.2"},
+					{name: "CVE-2019-12308", fixedBy: "2.1.9"},
+					{name: "CVE-2019-12781", fixedBy: "2.1.10"},
+					{name: "CVE-2019-3498", fixedBy: "2.1.5"},
+					{name: "CVE-2019-14232", fixedBy: "2.1.11"},
+					{name: "CVE-2019-14233", fixedBy: "2.1.11"},
+					{name: "CVE-2019-14234", fixedBy: "2.1.11"},
+					{name: "CVE-2019-14235", fixedBy: "2.1.11"},
 				},
 				},
 			},
@@ -94,10 +101,10 @@ func TestStackroxVulnImages(t *testing.T) {
 		{
 			imageTag: "lodash-cve-2019-1010266",
 			expectedFeatures: []expectedFeature{
-				{"lodash", "4.17.10", []string{
-					"CVE-2019-10744",
-					"CVE-2018-16487",
-					"CVE-2019-1010266",
+				{"lodash", "4.17.10", []expectedVuln{
+					{name: "CVE-2019-10744", fixedBy: "4.17.12"},
+					{name: "CVE-2018-16487", fixedBy: "4.17.11"},
+					{name: "CVE-2019-1010266", fixedBy: "4.17.11"},
 				},
 				},
 			},
@@ -105,14 +112,14 @@ func TestStackroxVulnImages(t *testing.T) {
 		{
 			imageTag: "rails-cve-2016-2098",
 			expectedFeatures: []expectedFeature{
-				{"rails", "4.2.5.1", []string{
-					"CVE-2016-2098",
-					"CVE-2016-6316",
-					"CVE-2016-6317",
-					"CVE-2018-16476",
-					"CVE-2019-5418",
-					"CVE-2019-5419",
-					"CVE-2019-5420",
+				{"rails", "4.2.5.1", []expectedVuln{
+					{name: "CVE-2016-2098"},
+					{name: "CVE-2016-6316"},
+					{name: "CVE-2016-6317"},
+					{name: "CVE-2018-16476", fixedBy: "4.2.11"},
+					{name: "CVE-2019-5418", fixedBy: "4.2.11.1"},
+					{name: "CVE-2019-5419", fixedBy: "4.2.11.1"},
+					{name: "CVE-2019-5420", fixedBy: "5.2.2.1"},
 				},
 				},
 			},
