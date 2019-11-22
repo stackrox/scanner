@@ -206,7 +206,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 	log.WithField("count", len(elsaList)).Info("Got list of Oracle updates to process")
 
 	respChan := make(chan elsaResp)
-	urlChan := make(chan string)
+	urlChan := make(chan string, len(elsaList))
 	var wg concurrency.WaitGroup
 	errSig := concurrency.NewErrorSignal()
 	for i := 0; i < numELSAWorkers; i++ {
@@ -214,12 +214,10 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		go elsaFetchWorker(urlChan, respChan, &errSig, &wg)
 	}
 
-	go func() {
-		for _, elsa := range elsaList {
-			urlChan <- fmt.Sprintf("%s%s%s.xml", ovalURI, elsaFilePrefix, strconv.Itoa(elsa))
-		}
-		close(urlChan)
-	}()
+	for _, elsa := range elsaList {
+		urlChan <- fmt.Sprintf("%s%s%s.xml", ovalURI, elsaFilePrefix, strconv.Itoa(elsa))
+	}
+	close(urlChan)
 
 	var numProcessed int
 forloop:
