@@ -17,6 +17,6 @@ COPY ./bin/scanner /
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 RUN mkdir -p "${NVD_DEFINITIONS_DIR}"
-ADD ./dump/cves* "${NVD_DEFINITIONS_DIR}/"
+COPY ./dump/nvd/*.json "${NVD_DEFINITIONS_DIR}/"
 
 ENTRYPOINT ["/scanner"]
