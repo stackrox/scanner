@@ -190,9 +190,6 @@ deploy-rhel: clean-helm-rendered
 	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG,scannerImage="us.gcr.io/stackrox-ci/scanner-rhel",scannerDBImage="us.gcr.io/stackrox-ci/scanner-db-rhel" --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
-.PHONY: deploy-default
-deploy-default: deploy
-
 ###########
 ## Tests ##
 ###########

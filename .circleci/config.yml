@@ -135,7 +135,12 @@ commands:
 
       - run:
           name: Deploy into the cluster
-          command: make deploy-<< parameters.cluster-id >>
+          command: |
+            if [[ "<< parameters.cluster-id >>" == "rhel" ]]; then
+              make deploy-rhel
+            else
+              make deploy
+            fi
 
       - run:
           name: Wait for the pod to be running, and port-forward
@@ -274,13 +279,13 @@ jobs:
       - checkout
       - setup_remote_docker
       - provision-gke-cluster:
-          cluster-id: default
+          cluster-id: alpine
 
   e2e-tests:
     <<: *defaults
     steps:
       - run-e2e-tests:
-          cluster-id: default
+          cluster-id: alpine
 
   e2e-tests-rhel:
     <<: *defaults
