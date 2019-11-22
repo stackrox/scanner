@@ -24,7 +24,8 @@ RUN ( chmod +x /dsop-fix-3.sh && /dsop-fix-3.sh && rm -rf /dsop-fix*.sh ; )
 # Remove package manager
 RUN rpm -e subscription-manager yum yum-utils yum-plugin-ovl
 
+RUN chown -R 4000:4000 /tmp
+
 USER 4000:4000
 
-RUN chown -R 4000:4000 /tmp
 
