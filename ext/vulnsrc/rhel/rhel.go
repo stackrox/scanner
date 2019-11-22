@@ -18,6 +18,7 @@ package rhel
 
 import (
 	"bufio"
+	"compress/bzip2"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -27,7 +28,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
@@ -42,8 +46,7 @@ const (
 	firstConsideredRHEL = 5
 
 	ovalURI        = "https://www.redhat.com/security/data/oval/"
-	rhsaFilePrefix = "com.redhat.rhsa-"
-	updaterFlag    = "rhelUpdater"
+	allRHSAsXMLBZ2 = ovalURI + "com.redhat.rhsa-all.xml.bz2"
 )
 
 var (
@@ -54,7 +57,8 @@ var (
 		" ComputeNode is installed",
 	}
 
-	rhsaRegexp = regexp.MustCompile(`com.redhat.rhsa-(\d+).xml`)
+	rhsaIDRegexp   = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
+	rhsaFileRegexp = regexp.MustCompile(`com.redhat.rhsa-(\d+).xml`)
 )
 
 type oval struct {
@@ -62,6 +66,7 @@ type oval struct {
 }
 
 type definition struct {
+	ID          string      `xml:"id,attr"`
 	Title       string      `xml:"metadata>title"`
 	Description string      `xml:"metadata>description"`
 	References  []reference `xml:"metadata>reference"`
@@ -147,70 +152,68 @@ func init() {
 
 func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
 	log.WithField("package", "RHEL").Info("Start fetching vulnerabilities")
-	// Get the first RHSA we have to manage.
-	flagValue, err := datastore.GetKeyValue(updaterFlag)
-	if err != nil {
-		return resp, err
-	}
-	firstRHSA, err := strconv.Atoi(flagValue)
-	if firstRHSA == 0 || err != nil {
-		firstRHSA = firstRHEL5RHSA
-	}
 
-	// Fetch the update list.
-	r, err := getWithRetriesAndBackoff(ovalURI)
+	log.Info("RHEL: fetching giant update file")
+	// RedHat has one giant file with almost all the RHSAs, except some which they don't keep in this for some reason.
+	// We fetch this file first, since it's just one HTTP call.
+	// We then iterate over the list of other files, and fetch all the RHSAs that weren't included in this one.
+	allRHSAsResp, err := getWithRetriesAndBackoff(allRHSAsXMLBZ2)
 	if err != nil {
-		log.WithError(err).Error("could not download RHEL's update list")
+		log.WithError(err).Error("could not download RHEL's giant update file")
 		return resp, commonerr.ErrCouldNotDownload
 	}
-	defer r.Body.Close()
+	defer utils.IgnoreError(allRHSAsResp.Body.Close)
 
-	// Get the list of RHSAs that we have to process.
-	var rhsaList []int
-	scanner := bufio.NewScanner(r.Body)
+	decompressingReader := bzip2.NewReader(allRHSAsResp.Body)
+	vs, coveredIDs, err := parseRHSA(decompressingReader)
+	if err != nil {
+		return vulnsrc.UpdateResponse{}, errors.Wrap(err, "parsing RHSA bulk response")
+	}
+	resp.Vulnerabilities = append(resp.Vulnerabilities, vs...)
+	log.Infof("RHEL: done fetching giant update file. Got %d vulns (%d RHSAs)", len(vs), coveredIDs.Cardinality())
+
+	log.Info("RHEL: Fetching remaining IDs which weren't in the giant update file")
+	ovalDirectoryResp, err := getWithRetriesAndBackoff(ovalURI)
+	if err != nil {
+		log.WithError(err).Error("could not fetch RHEL's update list")
+		return resp, commonerr.ErrCouldNotDownload
+	}
+	defer utils.IgnoreError(ovalDirectoryResp.Body.Close)
+	var remainingRHSAURLs []string
+	scanner := bufio.NewScanner(ovalDirectoryResp.Body)
 	for scanner.Scan() {
 		line := scanner.Text()
-		r := rhsaRegexp.FindStringSubmatch(line)
-		if len(r) == 2 {
-			rhsaNo, _ := strconv.Atoi(r[1])
-			if rhsaNo > firstRHSA {
-				rhsaList = append(rhsaList, rhsaNo)
-			}
+		regexMatch := rhsaFileRegexp.FindStringSubmatch(line)
+		// Not an RHSA
+		if len(regexMatch) != 2 {
+			continue
+		}
+		rhsaNo, err := strconv.Atoi(regexMatch[1])
+		if err != nil {
+			return resp, errors.Wrapf(err, "invalid RHSA file name: %s. Bad regex?", regexMatch[0])
+		}
+		if rhsaNo > firstRHEL5RHSA && !coveredIDs.Contains(rhsaNo) {
+			remainingRHSAURLs = append(remainingRHSAURLs, regexMatch[0])
 		}
 	}
 
-	log.WithField("count", len(rhsaList)).Info("Obtained RHSA list")
-
 	const printEvery = 100
-
-	for i, rhsa := range rhsaList {
-		// Download the RHSA's XML file.
-		r, err := getWithRetriesAndBackoff(ovalURI + rhsaFilePrefix + strconv.Itoa(rhsa) + ".xml")
+	log.WithField("count", len(remainingRHSAURLs)).Info("RHEL: got remaining RHSAs to fetch")
+	for i, rhsaURL := range remainingRHSAURLs {
+		r, err := getWithRetriesAndBackoff(ovalURI + rhsaURL)
 		if err != nil {
 			log.WithError(err).Error("could not download RHEL's update list")
 			return resp, commonerr.ErrCouldNotDownload
 		}
-		defer r.Body.Close()
-
-		// Parse the XML.
-		vs, err := parseRHSA(r.Body)
+		currentVulns, _, err := parseRHSA(r.Body)
+		_ = r.Body.Close()
 		if err != nil {
 			return resp, err
 		}
-
-		// Collect vulnerabilities.
-		resp.Vulnerabilities = append(resp.Vulnerabilities, vs...)
-		if i%printEvery == 0 {
-			log.Infof("Finished collecting %d/%d RHSAs", i, len(rhsaList))
+		resp.Vulnerabilities = append(resp.Vulnerabilities, currentVulns...)
+		if (i+1)%printEvery == 0 {
+			log.Infof("Finished collecting %d/%d additional RHSAs", i+1, len(remainingRHSAURLs))
 		}
-	}
-
-	// Set the flag if we found anything.
-	if len(rhsaList) > 0 {
-		resp.FlagName = updaterFlag
-		resp.FlagValue = strconv.Itoa(rhsaList[len(rhsaList)-1])
-	} else {
-		log.WithField("package", "Red Hat").Info("no update")
 	}
 
 	return resp, nil
@@ -218,7 +221,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 
 func (u *updater) Clean() {}
 
-func parseRHSA(ovalReader io.Reader) (vulnerabilities []database.Vulnerability, err error) {
+func parseRHSA(ovalReader io.Reader) (vulnerabilities []database.Vulnerability, parsedRHSAIDs set.IntSet, err error) {
 	// Decode the XML.
 	var ov oval
 	err = xml.NewDecoder(ovalReader).Decode(&ov)
@@ -228,9 +231,28 @@ func parseRHSA(ovalReader io.Reader) (vulnerabilities []database.Vulnerability, 
 		return
 	}
 
+	parsedRHSAIDs = set.NewIntSet()
+
 	// Iterate over the definitions and collect any vulnerabilities that affect
 	// at least one package.
 	for _, definition := range ov.Definitions {
+		regexMatch := rhsaIDRegexp.FindStringSubmatch(definition.ID)
+		// Not an RHSA, some other kind of RHEL ID
+		if len(regexMatch) < 2 {
+			// Make sure we don't miss anything.
+			if !(strings.HasPrefix(definition.ID, "oval:com.redhat.rhba:def") || strings.HasPrefix(definition.ID, "oval:com.redhat.rhea:def")) {
+				return nil, nil, errors.Wrapf(err, "invalid ID: %s", definition.ID)
+			}
+			continue
+		}
+		rhsaNo, err := strconv.Atoi(regexMatch[1])
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "invalid RHSA id format: %s", definition.ID)
+		}
+		if rhsaNo < firstRHEL5RHSA {
+			continue
+		}
+		parsedRHSAIDs.Add(rhsaNo)
 		pkgs := toFeatureVersions(definition.Criteria)
 		if len(pkgs) > 0 {
 			rhsaVuln := database.Vulnerability{
