@@ -167,7 +167,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 	decompressingReader := bzip2.NewReader(allRHSAsResp.Body)
 	vs, coveredIDs, err := parseRHSA(decompressingReader)
 	if err != nil {
-		return vulnsrc.UpdateResponse{}, errors.Wrap(err, "parsing decompressing reader")
+		return vulnsrc.UpdateResponse{}, errors.Wrap(err, "parsing RHSA bulk response")
 	}
 	resp.Vulnerabilities = append(resp.Vulnerabilities, vs...)
 	log.Infof("RHEL: done fetching giant update file. Got %d vulns (%d RHSAs)", len(vs), coveredIDs.Cardinality())
