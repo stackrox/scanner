@@ -25,7 +25,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/concurrency"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
@@ -39,6 +42,7 @@ const (
 	ovalURI          = "https://linux.oracle.com/oval/"
 	elsaFilePrefix   = "com.oracle.elsa-"
 	updaterFlag      = "oracleUpdater"
+	numELSAWorkers   = 10
 )
 
 var (
@@ -113,6 +117,52 @@ func compareELSA(left, right int) int {
 	return len(lstr) - len(rstr)
 }
 
+func fetchVulnsFromELSAURL(url string) ([]database.Vulnerability, error) {
+	// Download the ELSA's XML file.
+	r, err := httputil.GetWithUserAgent(url)
+	if err != nil {
+		return nil, errors.Wrapf(err, "downloading from %s", url)
+	}
+	defer utils.IgnoreError(r.Body.Close)
+
+	if !httputil.Status2xx(r) {
+		log.WithField("StatusCode", r.StatusCode).Error("Failed to update Oracle")
+		return nil, errors.Errorf("got status code %d querying %s", r.StatusCode, url)
+	}
+
+	// Parse the XML.
+	vs, err := parseELSA(r.Body)
+	if err != nil {
+		return nil, errors.Wrapf(err, "parsing vulns from url %s", url)
+	}
+	return vs, nil
+}
+
+func elsaFetchWorker(urlChan <-chan string, respChan chan<- elsaResp, errSig *concurrency.ErrorSignal, wg *concurrency.WaitGroup) {
+	defer wg.Add(-1)
+	for {
+		select {
+		case url, ok := <-urlChan:
+			// Channel has been closed.
+			if !ok {
+				return
+			}
+			vulns, err := fetchVulnsFromELSAURL(url)
+			if err != nil {
+				errSig.SignalWithError(err)
+				return
+			}
+			respChan <- elsaResp{vulns: vulns}
+		case <-errSig.Done():
+			return
+		}
+	}
+}
+
+type elsaResp struct {
+	vulns []database.Vulnerability
+}
+
 func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
 	log.WithField("package", "Oracle Linux").Info("Start fetching vulnerabilities")
 	// Get the first ELSA we have to manage.
@@ -155,30 +205,34 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 
 	log.WithField("count", len(elsaList)).Info("Got list of Oracle updates to process")
 
-	for i, elsa := range elsaList {
-		// Download the ELSA's XML file.
-		r, err := httputil.GetWithUserAgent(ovalURI + elsaFilePrefix + strconv.Itoa(elsa) + ".xml")
-		if err != nil {
-			log.WithError(err).Error("could not download Oracle's update list")
-			return resp, commonerr.ErrCouldNotDownload
-		}
-		defer r.Body.Close()
+	respChan := make(chan elsaResp)
+	urlChan := make(chan string, len(elsaList))
+	var wg concurrency.WaitGroup
+	errSig := concurrency.NewErrorSignal()
+	for i := 0; i < numELSAWorkers; i++ {
+		wg.Add(1)
+		go elsaFetchWorker(urlChan, respChan, &errSig, &wg)
+	}
 
-		if !httputil.Status2xx(r) {
-			log.WithField("StatusCode", r.StatusCode).Error("Failed to update Oracle")
-			return resp, commonerr.ErrCouldNotDownload
-		}
+	for _, elsa := range elsaList {
+		urlChan <- fmt.Sprintf("%s%s%s.xml", ovalURI, elsaFilePrefix, strconv.Itoa(elsa))
+	}
+	close(urlChan)
 
-		// Parse the XML.
-		vs, err := parseELSA(r.Body)
-		if err != nil {
-			return resp, err
-		}
-
-		// Collect vulnerabilities.
-		resp.Vulnerabilities = append(resp.Vulnerabilities, vs...)
-		if (i+1)%100 == 0 {
-			log.Infof("Oracle updater: finished fetching %d/%d ELSAs", i+1, len(elsaList))
+	var numProcessed int
+forloop:
+	for {
+		select {
+		case elsaResp := <-respChan:
+			resp.Vulnerabilities = append(resp.Vulnerabilities, elsaResp.vulns...)
+			numProcessed++
+			if numProcessed%100 == 0 {
+				log.Infof("Oracle: Processed %d/%d ELSAs", numProcessed, len(elsaList))
+			}
+		case <-errSig.Done():
+			return resp, errSig.Err()
+		case <-wg.Done():
+			break forloop
 		}
 	}
 
