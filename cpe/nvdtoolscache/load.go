@@ -17,8 +17,7 @@ import (
 func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 	log.WithField("dir", definitionsDir).Info("Loading definitions directory")
 
-	extractedPath := filepath.Join(definitionsDir, "cve")
-	files, err := ioutil.ReadDir(extractedPath)
+	files, err := ioutil.ReadDir(definitionsDir)
 	if err != nil {
 		return err
 	}
@@ -28,7 +27,7 @@ func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 		if !strings.HasSuffix(f.Name(), ".json") {
 			continue
 		}
-		numVulns, err := c.handleJSONFile(filepath.Join(extractedPath, f.Name()))
+		numVulns, err := c.handleJSONFile(filepath.Join(definitionsDir, f.Name()))
 		if err != nil {
 			return errors.Wrapf(err, "handling file %s", f.Name())
 		}

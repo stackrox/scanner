@@ -237,18 +237,19 @@ jobs:
     steps:
     - checkout
     - setup_remote_docker
+    - setup-gcp
 
     - run:
-        name: Pull definitions dump
+        name: Pull definitions dumps
         command: |
-          status_code="$(curl -w '%{http_code}' -u "${STACKROX_IO_PUSH_USERNAME}:${STACKROX_IO_PUSH_PASSWORD}" -L https://install.stackrox.io/scanner/definitions.sql.gz --output image/dump/definitions.sql.gz)"
-          [[ "${status_code}" -eq 200 ]] || { echo "Failed to pull the definitions dump. Status code ${status_code}. File contents: $(head image/dump/definitions.sql.gz)"; exit 1; }
+          gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/dump/definitions.sql.gz
+          gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
+          unzip -d image/dump /tmp/nvd-definitions.zip
+          rm /tmp/nvd-definitions.zip
 
     - run:
         name: Build images
         command: make image image-rhel
-
-    - setup-gcp
 
     - run:
         name: Ensure image is not dirty
