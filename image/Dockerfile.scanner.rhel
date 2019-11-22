@@ -25,3 +25,6 @@ RUN ( chmod +x /dsop-fix-3.sh && /dsop-fix-3.sh && rm -rf /dsop-fix*.sh ; )
 RUN rpm -e subscription-manager yum yum-utils yum-plugin-ovl
 
 USER 4000:4000
+
+RUN chown -R 4000:4000 /tmp
+

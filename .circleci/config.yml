@@ -273,32 +273,20 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - setup-gcp
+      - provision-gke-cluster:
+          cluster-id: default
 
-      - run:
-          name: Create GKE Cluster
-          command: |
-            cci-export CLUSTER_NAME "stackrox-scanner-ci-${CIRCLE_BUILD_NUM}"
-            source .circleci/create-cluster.sh && create-cluster
+  e2e-tests:
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          cluster-id: default
 
-      - run:
-          name: Save cluster config
-          command: |
-            CONFIG_DIR=/tmp/saved_config
-            mkdir -p "${CONFIG_DIR}"
-            echo "${CLUSTER_NAME}" > "${CONFIG_DIR}/name"
-            gcloud config get-value compute/zone > "${CONFIG_DIR}/zone"
-
-      - run:
-          name: Tear down cluster upon failure
-          command: |
-            gcloud container clusters delete "$CLUSTER_NAME" --async
-          when: on_fail
-
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - saved_config
+  e2e-tests-rhel:
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          cluster-id: rhel
 
   provision-cluster-rhel:
     <<: *defaults
@@ -307,113 +295,6 @@ jobs:
       - setup_remote_docker
       - provision-gke-cluster:
           cluster-id: rhel
-
-  e2e-tests-rhel:
-    <<: *defaults
-
-    steps:
-      - run-e2e-tests:
-          cluster-id: rhel
-
-  e2e-tests:
-    <<: *defaults
-    steps:
-      - checkout
-      - setup_remote_docker
-      - setup-gcp
-
-      - attach_workspace:
-          at: /tmp
-
-      - run:
-          name: Restore cluster config
-          command: |
-            CONFIG_DIR=/tmp/saved_config
-            cci-export CLUSTER_NAME "$(cat "${CONFIG_DIR}/name")"
-            [[ -n "${CLUSTER_NAME}" ]]
-            cci-export ZONE "$(cat "${CONFIG_DIR}/zone")"
-            [[ -n "${ZONE}" ]]
-            gcloud config set compute/zone "${ZONE}"
-            cmd=(gcloud container clusters get-credentials --project stackrox-ci --zone "$ZONE" "$CLUSTER_NAME")
-            "${cmd[@]}"
-            echo "Restored config for cluster ${CLUSTER_NAME}"
-            echo
-            echo "Run the following command to attach to the cluster:"
-            echo
-            printf " %q" "${cmd[@]}"
-            echo
-
-      - run:
-          name: Wait for cluster to stabilize
-          command: |
-            source .circleci/create-cluster.sh && wait-for-cluster
-
-      - run:
-          name: Deploy into the cluster
-          command: make deploy
-
-      - run:
-          name: Wait for the pod to be running, and port-forward
-          command: |
-            sleep 5
-            kubectl -n stackrox get pod
-            POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner")].metadata.name}')"
-            [[ -n "${POD}" ]]
-            kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=3m
-            kubectl -n stackrox get pod
-
-            success=0
-            for i in $(seq 1 10); do
-              nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" & # Legacy clairify endpoint
-              nohup kubectl port-forward -n stackrox "${POD}" "8443:8443" & # gRPC endpoint
-              curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8080/clairify/ping' || touch FAIL
-              curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8443/v1/ping' || touch FAIL
-              if [[ ! -f FAIL ]]; then
-                success=1
-                break
-              fi
-              echo "Port-forwarding failed."
-              cat nohup.out || true
-              rm nohup.out || true
-              rm FAIL || true
-              pkill kubectl || true
-              sleep 5
-            done
-
-            [[ "${success}" -gt 0 ]]
-
-      - run:
-          name: Run sanity tests
-          command: |
-            export SCANNER_ENDPOINT=https://localhost:8080
-            make e2e-tests
-
-      - run:
-          name: Collect k8s logs
-          command: |
-            .circleci/collect-service-logs.sh stackrox
-            .circleci/collect-service-logs.sh kube-system
-          when: always
-
-      - store_artifacts:
-          path: /tmp/k8s-service-logs
-          destination: k8s-service-logs
-
-      - run:
-          name: Verify the scanner did not restart
-          command: |
-            if [[ "$(ls /tmp/k8s-service-logs/stackrox/*-previous.log | wc -l)" != 0 ]]; then
-                ls /tmp/k8s-service-logs/stackrox/*-previous.log
-                exit 1
-            fi
-            cat nohup.out || true
-          when: always
-
-      - run:
-          name: Tear down cluster
-          command: |
-            gcloud container clusters delete "$CLUSTER_NAME" --async
-          when: always
 
 workflows:
   version: 2

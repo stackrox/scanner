@@ -19,6 +19,4 @@ ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 RUN mkdir -p "${NVD_DEFINITIONS_DIR}"
 ADD ./dump/cves* "${NVD_DEFINITIONS_DIR}/"
 
-RUN chown -R 4000:4000 /tmp
-
 ENTRYPOINT ["/scanner"]
