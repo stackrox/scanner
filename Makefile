@@ -143,7 +143,10 @@ install-dev-tools:
 ############
 
 .PHONY: image
-image: scanner-image scanner-image-rhel db-image db-image-rhel
+image: scanner-image db-image
+
+.PHONY: image-rhel
+image-rhel: scanner-image-rhel db-image-rhel
 
 .PHONY: build
 build: deps
@@ -186,6 +189,9 @@ deploy-rhel: clean-helm-rendered
 	kubectl create namespace stackrox || true
 	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG,scannerImage="us.gcr.io/stackrox-ci/scanner-rhel",scannerDBImage="us.gcr.io/stackrox-ci/scanner-db-rhel" --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
+
+.PHONY: deploy-default
+deploy-default: deploy
 
 ###########
 ## Tests ##

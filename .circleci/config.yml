@@ -24,6 +24,178 @@ commands:
             gcloud config set project stackrox-ci
             gcloud config set core/disable_prompts True
 
+  create-gke:
+    parameters:
+      wait:
+        type: boolean
+        default: true
+
+    steps:
+      - run:
+          name: Create GKE cluster
+          command: |
+            source .circleci/create-cluster.sh && create-cluster
+            <<# parameters.wait >>
+            wait-for-cluster
+            <</ parameters.wait >>
+
+  teardown-gke:
+    steps:
+      - run:
+          name: Tear down GKE cluster
+          command: |
+            [[ -n "$CLUSTER_NAME" ]]
+            gcloud container clusters delete "$CLUSTER_NAME" --async
+
+          when: always
+
+  provision-gke-cluster:
+    parameters:
+      cluster-id:
+        type: string
+      num-nodes:
+        type: integer
+        default: 1
+
+    steps:
+      - setup-gcp
+      - run:
+          name: Assign environment variables
+          command: |
+            CLUSTER_NAME="stackrox-scanner-ci-<< parameters.cluster-id >>-${CIRCLE_BUILD_NUM}"
+            cci-export CLUSTER_NAME "$CLUSTER_NAME"
+            echo "Assigned cluster name is $CLUSTER_NAME"
+
+            NUM_NODES="<< parameters.num-nodes >>"
+            cci-export NUM_NODES "$NUM_NODES"
+            echo "Number of nodes for cluster is $NUM_NODES"
+
+      - create-gke:
+          wait: false
+
+      - run:
+          name: Save cluster config
+          command: |
+            CONFIG_DIR="/tmp/.ci-clusters/<< parameters.cluster-id >>"
+            mkdir -p "$CONFIG_DIR"
+            echo "$CLUSTER_NAME" >>"${CONFIG_DIR}/name"
+            gcloud config get-value compute/zone >>"${CONFIG_DIR}/zone"
+
+      - run:
+          name: Tear down cluster upon failure
+          command: |
+            gcloud container clusters delete "$CLUSTER_NAME" --async
+          when: on_fail
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - .ci-clusters/<< parameters.cluster-id >>
+
+  attach-gke-cluster:
+    parameters:
+      cluster-id:
+        type: string
+
+    steps:
+      - run:
+          name: Restore config for << parameters.cluster-id >> cluster
+          command: |
+            CONFIG_DIR="/tmp/.ci-clusters/<< parameters.cluster-id >>"
+            CLUSTER_NAME="$(cat "${CONFIG_DIR}/name")"
+            [[ -n "$CLUSTER_NAME" ]]
+            ZONE="$(cat "${CONFIG_DIR}/zone")"
+            [[ -n "$ZONE" ]]
+            gcloud config set compute/zone "$ZONE"
+            cmd=(gcloud container clusters get-credentials --project stackrox-ci --zone "$ZONE" "$CLUSTER_NAME")
+            "${cmd[@]}"
+            echo "Restored config for cluster ${CLUSTER_NAME}"
+            cci-export CLUSTER_NAME "$CLUSTER_NAME"
+            echo
+            echo "Run the following command to attach to the cluster:"
+            echo
+            printf " %q" "${cmd[@]}"
+            echo
+
+  run-e2e-tests:
+    parameters:
+      cluster-id:
+        type: string
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - setup-gcp
+
+      - attach_workspace:
+          at: /tmp
+
+      - attach-gke-cluster:
+          cluster-id: << parameters.cluster-id >>
+
+      - run:
+          name: Deploy into the cluster
+          command: make deploy-<< parameters.cluster-id >>
+
+      - run:
+          name: Wait for the pod to be running, and port-forward
+          command: |
+            sleep 5
+            kubectl -n stackrox get pod
+            POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner")].metadata.name}')"
+            [[ -n "${POD}" ]]
+            kubectl -n stackrox wait --for=condition=ready "pod/${POD}" --timeout=3m
+            kubectl -n stackrox get pod
+
+            success=0
+            for i in $(seq 1 10); do
+              nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" & # Legacy clairify endpoint
+              nohup kubectl port-forward -n stackrox "${POD}" "8443:8443" & # gRPC endpoint
+              curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8080/clairify/ping' || touch FAIL
+              curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8443/v1/ping' || touch FAIL
+              if [[ ! -f FAIL ]]; then
+                success=1
+                break
+              fi
+              echo "Port-forwarding failed."
+              cat nohup.out || true
+              rm nohup.out || true
+              rm FAIL || true
+              pkill kubectl || true
+              sleep 5
+            done
+
+            [[ "${success}" -gt 0 ]]
+
+      - run:
+          name: Run sanity tests
+          command: |
+            export SCANNER_ENDPOINT=https://localhost:8080
+            make e2e-tests
+
+      - run:
+          name: Collect k8s logs
+          command: |
+            .circleci/collect-service-logs.sh stackrox
+            .circleci/collect-service-logs.sh kube-system
+          when: always
+
+      - store_artifacts:
+          path: /tmp/k8s-service-logs
+          destination: k8s-service-logs-<< parameters.cluster-id >>
+
+      - run:
+          name: Verify the scanner did not restart
+          command: |
+            if [[ "$(ls /tmp/k8s-service-logs/stackrox/*-previous.log | wc -l)" != 0 ]]; then
+                ls /tmp/k8s-service-logs/stackrox/*-previous.log
+                exit 1
+            fi
+            cat nohup.out || true
+          when: always
+
+      - teardown-gke
+
 jobs:
   unit-tests:
     <<: *defaults
@@ -69,7 +241,7 @@ jobs:
 
     - run:
         name: Build images
-        command: make image
+        command: make image image-rhel
 
     - setup-gcp
 
@@ -80,9 +252,8 @@ jobs:
           docker push "us.gcr.io/stackrox-ci/scanner:${TAG}"
           docker push "us.gcr.io/stackrox-ci/scanner-db:${TAG}"
 
-          # uncomment after creating repos
-          # docker push "us.gcr.io/stackrox-ci/scanner-rhel:${TAG}"
-          # docker push "us.gcr.io/stackrox-ci/scanner-db-rhel:${TAG}"
+          docker push "us.gcr.io/stackrox-ci/scanner-rhel:${TAG}"
+          docker push "us.gcr.io/stackrox-ci/scanner-db-rhel:${TAG}"
 
           docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
           docker tag "us.gcr.io/stackrox-ci/scanner:${TAG}" "stackrox/scanner:${TAG}"
@@ -128,6 +299,21 @@ jobs:
           root: /tmp
           paths:
             - saved_config
+
+  provision-cluster-rhel:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker
+      - provision-gke-cluster:
+          cluster-id: rhel
+
+  e2e-tests-rhel:
+    <<: *defaults
+
+    steps:
+      - run-e2e-tests:
+          cluster-id: rhel
 
   e2e-tests:
     <<: *defaults
@@ -254,11 +440,24 @@ workflows:
         filters:
           tags:
             only: /.*/
+    - provision-cluster-rhel:
+        context: docker-io-pull
+        filters:
+          tags:
+            only: /.*/
     - e2e-tests:
         context: docker-io-pull
         requires:
           - build
           - provision-cluster
+        filters:
+          tags:
+            only: /.*/
+    - e2e-tests-rhel:
+        context: docker-io-pull
+        requires:
+          - build
+          - provision-cluster-rhel
         filters:
           tags:
             only: /.*/
