@@ -24,89 +24,62 @@ commands:
             gcloud config set project stackrox-ci
             gcloud config set core/disable_prompts True
 
-jobs:
-  unit-tests:
-    <<: *defaults
+  create-gke:
+    parameters:
+      wait:
+        type: boolean
+        default: true
+
     steps:
-      - checkout
-
       - run:
-          name: Install dependencies
-          command: make deps
-
-      - run:
-          name: Run unit tests
-          command: make unit-tests
-
-  style-checks:
-    <<: *defaults
-    steps:
-      - checkout
-
-      - run:
-          name: Install dependencies
-          command: make deps
-
-      - run:
-          name: Run style checks
-          command: make style
-
-      - run:
-          name: Run style checks on test code
-          command: make -C qa-tests style
-
-  build:
-    <<: *defaults
-    steps:
-    - checkout
-    - setup_remote_docker
-
-    - run:
-        name: Pull definitions dump
-        command: |
-          status_code="$(curl -w '%{http_code}' -u "${STACKROX_IO_PUSH_USERNAME}:${STACKROX_IO_PUSH_PASSWORD}" -L https://install.stackrox.io/scanner/definitions.sql.gz --output image/dump/definitions.sql.gz)"
-          [[ "${status_code}" -eq 200 ]] || { echo "Failed to pull the definitions dump. Status code ${status_code}. File contents: $(head image/dump/definitions.sql.gz)"; exit 1; }
-
-    - run:
-        name: Build images
-        command: make image
-
-    - setup-gcp
-
-    - run:
-        name: Push images
-        command: |
-          TAG="$(./get-tag)"
-          docker push "us.gcr.io/stackrox-ci/scanner:${TAG}"
-          docker push "us.gcr.io/stackrox-ci/scanner-db:${TAG}"
-
-          docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
-          docker tag "us.gcr.io/stackrox-ci/scanner:${TAG}" "stackrox/scanner:${TAG}"
-          docker push "stackrox/scanner:${TAG}"
-
-          docker tag "us.gcr.io/stackrox-ci/scanner-db:${TAG}" "stackrox/scanner-db:${TAG}"
-          docker push "stackrox/scanner-db:${TAG}"
-
-  provision-cluster:
-    <<: *defaults
-    steps:
-      - checkout
-      - setup_remote_docker
-      - setup-gcp
-
-      - run:
-          name: Create GKE Cluster
+          name: Create GKE cluster
           command: |
-            cci-export CLUSTER_NAME "stackrox-scanner-ci-${CIRCLE_BUILD_NUM}"
             source .circleci/create-cluster.sh && create-cluster
+            <<# parameters.wait >>
+            wait-for-cluster
+            <</ parameters.wait >>
+
+  teardown-gke:
+    steps:
+      - run:
+          name: Tear down GKE cluster
+          command: |
+            [[ -n "$CLUSTER_NAME" ]]
+            gcloud container clusters delete "$CLUSTER_NAME" --async
+
+          when: always
+
+  provision-gke-cluster:
+    parameters:
+      cluster-id:
+        type: string
+      num-nodes:
+        type: integer
+        default: 1
+
+    steps:
+      - setup-gcp
+      - run:
+          name: Assign environment variables
+          command: |
+            CLUSTER_NAME="stackrox-scanner-ci-<< parameters.cluster-id >>-${CIRCLE_BUILD_NUM}"
+            cci-export CLUSTER_NAME "$CLUSTER_NAME"
+            echo "Assigned cluster name is $CLUSTER_NAME"
+
+            NUM_NODES="<< parameters.num-nodes >>"
+            cci-export NUM_NODES "$NUM_NODES"
+            echo "Number of nodes for cluster is $NUM_NODES"
+
+      - create-gke:
+          wait: false
 
       - run:
           name: Save cluster config
           command: |
-            CONFIG_DIR=/tmp/saved_config
-            mkdir -p "${CONFIG_DIR}"
-            echo "${CLUSTER_NAME}" > "${CONFIG_DIR}/name"
-            gcloud config get-value compute/zone > "${CONFIG_DIR}/zone"
+            CONFIG_DIR="/tmp/.ci-clusters/<< parameters.cluster-id >>"
+            mkdir -p "$CONFIG_DIR"
+            echo "$CLUSTER_NAME" >>"${CONFIG_DIR}/name"
+            gcloud config get-value compute/zone >>"${CONFIG_DIR}/zone"
 
       - run:
           name: Tear down cluster upon failure
@@ -117,10 +90,38 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - saved_config
+            - .ci-clusters/<< parameters.cluster-id >>
 
-  e2e-tests:
-    <<: *defaults
+  attach-gke-cluster:
+    parameters:
+      cluster-id:
+        type: string
+
+    steps:
+      - run:
+          name: Restore config for << parameters.cluster-id >> cluster
+          command: |
+            CONFIG_DIR="/tmp/.ci-clusters/<< parameters.cluster-id >>"
+            CLUSTER_NAME="$(cat "${CONFIG_DIR}/name")"
+            [[ -n "$CLUSTER_NAME" ]]
+            ZONE="$(cat "${CONFIG_DIR}/zone")"
+            [[ -n "$ZONE" ]]
+            gcloud config set compute/zone "$ZONE"
+            cmd=(gcloud container clusters get-credentials --project stackrox-ci --zone "$ZONE" "$CLUSTER_NAME")
+            "${cmd[@]}"
+            echo "Restored config for cluster ${CLUSTER_NAME}"
+            cci-export CLUSTER_NAME "$CLUSTER_NAME"
+            echo
+            echo "Run the following command to attach to the cluster:"
+            echo
+            printf " %q" "${cmd[@]}"
+            echo
+
+  run-e2e-tests:
+    parameters:
+      cluster-id:
+        type: string
+
     steps:
       - checkout
       - setup_remote_docker
@@ -129,32 +130,17 @@ jobs:
       - attach_workspace:
           at: /tmp
 
-      - run:
-          name: Restore cluster config
-          command: |
-            CONFIG_DIR=/tmp/saved_config
-            cci-export CLUSTER_NAME "$(cat "${CONFIG_DIR}/name")"
-            [[ -n "${CLUSTER_NAME}" ]]
-            cci-export ZONE "$(cat "${CONFIG_DIR}/zone")"
-            [[ -n "${ZONE}" ]]
-            gcloud config set compute/zone "${ZONE}"
-            cmd=(gcloud container clusters get-credentials --project stackrox-ci --zone "$ZONE" "$CLUSTER_NAME")
-            "${cmd[@]}"
-            echo "Restored config for cluster ${CLUSTER_NAME}"
-            echo
-            echo "Run the following command to attach to the cluster:"
-            echo
-            printf " %q" "${cmd[@]}"
-            echo
-
-      - run:
-          name: Wait for cluster to stabilize
-          command: |
-            source .circleci/create-cluster.sh && wait-for-cluster
+      - attach-gke-cluster:
+          cluster-id: << parameters.cluster-id >>
 
       - run:
           name: Deploy into the cluster
-          command: make deploy
+          command: |
+            if [[ "<< parameters.cluster-id >>" == "rhel" ]]; then
+              make deploy-rhel
+            else
+              make deploy
+            fi
 
       - run:
           name: Wait for the pod to be running, and port-forward
@@ -201,7 +187,7 @@ jobs:
 
       - store_artifacts:
           path: /tmp/k8s-service-logs
-          destination: k8s-service-logs
+          destination: k8s-service-logs-<< parameters.cluster-id >>
 
       - run:
           name: Verify the scanner did not restart
@@ -213,11 +199,107 @@ jobs:
             cat nohup.out || true
           when: always
 
+      - teardown-gke
+
+jobs:
+  unit-tests:
+    <<: *defaults
+    steps:
+      - checkout
+
       - run:
-          name: Tear down cluster
-          command: |
-            gcloud container clusters delete "$CLUSTER_NAME" --async
-          when: always
+          name: Install dependencies
+          command: make deps
+
+      - run:
+          name: Run unit tests
+          command: make unit-tests
+
+  style-checks:
+    <<: *defaults
+    steps:
+      - checkout
+
+      - run:
+          name: Install dependencies
+          command: make deps
+
+      - run:
+          name: Run style checks
+          command: make style
+
+      - run:
+          name: Run style checks on test code
+          command: make -C qa-tests style
+
+  build:
+    <<: *defaults
+    steps:
+    - checkout
+    - setup_remote_docker
+
+    - run:
+        name: Pull definitions dump
+        command: |
+          status_code="$(curl -w '%{http_code}' -u "${STACKROX_IO_PUSH_USERNAME}:${STACKROX_IO_PUSH_PASSWORD}" -L https://install.stackrox.io/scanner/definitions.sql.gz --output image/dump/definitions.sql.gz)"
+          [[ "${status_code}" -eq 200 ]] || { echo "Failed to pull the definitions dump. Status code ${status_code}. File contents: $(head image/dump/definitions.sql.gz)"; exit 1; }
+
+    - run:
+        name: Build images
+        command: make image image-rhel
+
+    - setup-gcp
+
+    - run:
+        name: Push images
+        command: |
+          TAG="$(./get-tag)"
+          docker push "us.gcr.io/stackrox-ci/scanner:${TAG}"
+          docker push "us.gcr.io/stackrox-ci/scanner-db:${TAG}"
+
+          docker push "us.gcr.io/stackrox-ci/scanner-rhel:${TAG}"
+          docker push "us.gcr.io/stackrox-ci/scanner-db-rhel:${TAG}"
+
+          docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
+          docker tag "us.gcr.io/stackrox-ci/scanner:${TAG}" "stackrox/scanner:${TAG}"
+          docker push "stackrox/scanner:${TAG}"
+
+          docker tag "us.gcr.io/stackrox-ci/scanner-db:${TAG}" "stackrox/scanner-db:${TAG}"
+          docker push "stackrox/scanner-db:${TAG}"
+
+          docker tag "us.gcr.io/stackrox-ci/scanner-rhel:${TAG}" "stackrox/scanner-rhel:${TAG}"
+          docker push "stackrox/scanner-rhel:${TAG}"
+
+          docker tag "us.gcr.io/stackrox-ci/scanner-db-rhel:${TAG}" "stackrox/scanner-db-rhel:${TAG}"
+          docker push "stackrox/scanner-db-rhel:${TAG}"
+
+  provision-cluster:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker
+      - provision-gke-cluster:
+          cluster-id: alpine
+
+  e2e-tests:
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          cluster-id: alpine
+
+  e2e-tests-rhel:
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          cluster-id: rhel
+
+  provision-cluster-rhel:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker
+      - provision-gke-cluster:
+          cluster-id: rhel
 
 workflows:
   version: 2
@@ -244,11 +326,24 @@ workflows:
         filters:
           tags:
             only: /.*/
+    - provision-cluster-rhel:
+        context: docker-io-pull
+        filters:
+          tags:
+            only: /.*/
     - e2e-tests:
         context: docker-io-pull
         requires:
           - build
           - provision-cluster
+        filters:
+          tags:
+            only: /.*/
+    - e2e-tests-rhel:
+        context: docker-io-pull
+        requires:
+          - build
+          - provision-cluster-rhel
         filters:
           tags:
             only: /.*/
