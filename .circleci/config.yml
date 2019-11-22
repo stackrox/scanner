@@ -251,6 +251,10 @@ jobs:
     - setup-gcp
 
     - run:
+        name: Ensure image is not dirty
+        command: git diff --exit-code HEAD
+
+    - run:
         name: Push images
         command: |
           TAG="$(./get-tag)"
