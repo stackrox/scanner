@@ -83,7 +83,6 @@ commands:
 
           when: always
 
-
   provision-gke-cluster:
     parameters:
       cluster-id:
