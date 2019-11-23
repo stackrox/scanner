@@ -83,101 +83,6 @@ commands:
 
           when: always
 
-  generate-genesis-dump:
-    <<: *defaults
-    steps:
-      - checkout
-      - check-label-to-run:
-          label: ci-fetch-dumps
-      - run:
-          name: Build updater, and persist to workspace
-          command: |
-            make build-updater
-            mkdir -p /tmp/updater-bin
-            cp ./bin/updater /tmp/updater-bin/
-
-      - run:
-          name: Generate the genesis dump
-          command: |
-            mkdir -p /tmp/genesis-dump
-            ./bin/updater generate-dump --out-file /tmp/genesis-dump/dump.zip
-            ls -lrt /tmp/genesis-dump
-
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - genesis-dump
-            - updater-bin
-
-  create-postgres-dump-from-genesis-dump:
-    docker:
-      - *defaultImage
-      - image: postgres:12.0-alpine
-    working_directory: *defaultWorkingDirectory
-    steps:
-      - checkout
-      - check-label-to-run:
-          label: ci-fetch-dumps
-      - setup_remote_docker
-      - setup-gcp
-
-      - attach_workspace:
-          at: /tmp
-
-      - run:
-          name: Restore updater bin
-          command: |
-            cp /tmp/updater-bin/updater ./bin/
-
-      - run:
-          name: Load vuln contents into postgres
-          command: |
-            ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file /tmp/genesis-dump/dump.zip
-
-      - run:
-          name: Take a PG dump
-          command: |
-            pg_dump -U postgres postgres://127.0.0.1:5432 > pg-definitions.sql
-            gzip --best pg-definitions.sql
-
-      - run:
-          name: Upload PG dump to Google Storage
-          command: |
-            gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
-
-  create-diff-dumps:
-    <<: *defaults
-    steps:
-      - checkout
-      - check-label-to-run:
-          label: ci-fetch-dumps
-      - setup-gcp
-      - attach_workspace:
-          at: /tmp
-
-      - run:
-          name: Restore updater bin
-          command: |
-            cp /tmp/updater-bin/updater ./bin/
-
-      - run:
-          name: Create diff for each manifest
-          command: |
-            mkdir -p /tmp/diff-dumps
-            while IFS=$'\t' read -r dumploc timestamp; do
-              mkdir "/tmp/diff-dumps/${timestamp}"
-              dump_file_name="${dumploc##*/}"
-              echo "Pulling genesis dump from ${dumploc}"
-              gsutil cp "${dumploc}" .
-              timestamp_in_zip="$(unzip -p "${dump_file_name}" manifest.json | jq -r '.until')"
-              echo "Got timestamps -- from zip: ${timestamp_in_zip}; from manifest: ${timestamp}"
-              [[ "${timestamp_in_zip}" == "${timestamp}" ]] # Assertion on the manifest contents
-              ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --out-file "/tmp/diff-dumps/${timestamp}/diff.zip"
-            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp] | @tsv' < image/dump/genesis_manifests.json)
-
-      - run:
-          name: LS
-          command: ls -lrt /tmp/diff-dumps/*
 
   provision-gke-cluster:
     parameters:
@@ -361,6 +266,102 @@ jobs:
       - run:
           name: Run style checks on test code
           command: make -C qa-tests style
+
+  generate-genesis-dump:
+    <<: *defaults
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: ci-fetch-dumps
+      - run:
+          name: Build updater, and persist to workspace
+          command: |
+            make build-updater
+            mkdir -p /tmp/updater-bin
+            cp ./bin/updater /tmp/updater-bin/
+
+      - run:
+          name: Generate the genesis dump
+          command: |
+            mkdir -p /tmp/genesis-dump
+            ./bin/updater generate-dump --out-file /tmp/genesis-dump/dump.zip
+            ls -lrt /tmp/genesis-dump
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - genesis-dump
+            - updater-bin
+
+  create-postgres-dump-from-genesis-dump:
+    docker:
+      - *defaultImage
+      - image: postgres:12.0-alpine
+    working_directory: *defaultWorkingDirectory
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: ci-fetch-dumps
+      - setup_remote_docker
+      - setup-gcp
+
+      - attach_workspace:
+          at: /tmp
+
+      - run:
+          name: Restore updater bin
+          command: |
+            cp /tmp/updater-bin/updater ./bin/
+
+      - run:
+          name: Load vuln contents into postgres
+          command: |
+            ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file /tmp/genesis-dump/dump.zip
+
+      - run:
+          name: Take a PG dump
+          command: |
+            pg_dump -U postgres postgres://127.0.0.1:5432 > pg-definitions.sql
+            gzip --best pg-definitions.sql
+
+      - run:
+          name: Upload PG dump to Google Storage
+          command: |
+            gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
+
+  create-diff-dumps:
+    <<: *defaults
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: ci-fetch-dumps
+      - setup-gcp
+      - attach_workspace:
+          at: /tmp
+
+      - run:
+          name: Restore updater bin
+          command: |
+            cp /tmp/updater-bin/updater ./bin/
+
+      - run:
+          name: Create diff for each manifest
+          command: |
+            mkdir -p /tmp/diff-dumps
+            while IFS=$'\t' read -r dumploc timestamp; do
+              mkdir "/tmp/diff-dumps/${timestamp}"
+              dump_file_name="${dumploc##*/}"
+              echo "Pulling genesis dump from ${dumploc}"
+              gsutil cp "${dumploc}" .
+              timestamp_in_zip="$(unzip -p "${dump_file_name}" manifest.json | jq -r '.until')"
+              echo "Got timestamps -- from zip: ${timestamp_in_zip}; from manifest: ${timestamp}"
+              [[ "${timestamp_in_zip}" == "${timestamp}" ]] # Assertion on the manifest contents
+              ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --out-file "/tmp/diff-dumps/${timestamp}/diff.zip"
+            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp] | @tsv' < image/dump/genesis_manifests.json)
+
+      - run:
+          name: LS
+          command: ls -lrt /tmp/diff-dumps/*
 
   build:
     <<: *defaults
