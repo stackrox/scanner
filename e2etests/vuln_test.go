@@ -23,7 +23,12 @@ type expectedFeature struct {
 	expectedVulns []expectedVuln
 }
 
+type unExpectedFeature struct {
+	name          string
+}
+
 type singleTestCase struct {
+    imageRepo        string
 	imageTag         string
 	expectedFeatures []expectedFeature
 }
@@ -78,6 +83,45 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	}
 }
 
+func testNegativeDataImage(testCase singleTestCase, t *testing.T) {
+	conn := connectToScanner(t)
+	client := v1.NewScanServiceClient(conn)
+	scanResp := scanPublicImage(client, fmt.Sprintf("docker.io/%s:%s", testCase.imageRepo, testCase.imageTag), t)
+	scan, err := client.GetScan(context.Background(), &v1.GetScanRequest{
+		ImageSpec: scanResp.GetImage(),
+	})
+	require.NoError(t, err)
+
+	// If the test failed, print helpful debug information.
+	defer func() {
+		if t.Failed() {
+			for _, feat := range scan.GetImage().GetFeatures() {
+				fmt.Println(feat.GetName(), feat.GetVersion())
+			}
+			fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
+
+			componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
+				ImageSpec: scanResp.GetImage(),
+			})
+			require.NoError(t, err)
+			for _, components := range componentsMap.GetLayerToComponents() {
+				for _, component := range components.GetComponents() {
+					fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
+				}
+			}
+			fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
+		}
+	}()
+	for _, unExpectedFeat := range testCase.unExpectedFeatures {
+		t.Run(fmt.Sprintf("%s", unExpectedFeat.name), func(t *testing.T) {
+			matchingIdx := sliceutils.FindMatching(scan.GetImage().GetFeatures(), func(feature *v1.Feature) bool {
+				return feature.GetName() == unExpectedFeat.name
+			})
+			require.Equal(t, -1, matchingIdx)
+		})
+	}
+}
+
 // This test tests vulnerable images pushed up to docker.io/stackrox/vuln-images.
 // Images are pushed from https://github.com/stackrox/vuln-images.
 func TestStackroxVulnImages(t *testing.T) {
@@ -127,6 +171,23 @@ func TestStackroxVulnImages(t *testing.T) {
 	} {
 		t.Run(testCase.imageTag, func(t *testing.T) {
 			testSingleVulnImage(testCase, t)
+		})
+	}
+}
+
+// This test tests vulnerable images found in public repos.
+func TestPublicVulnImages(t *testing.T) {
+	for _, testCase := range []singleTestCase{
+		{
+			imageRepo: "apicurio/apicurio-studio-api"
+			imageTag: "latest",
+			unExpectedFeatures: []unExpectedFeature{
+				{"JBOSS"},
+			},
+		},
+	} {
+		t.Run(testCase.imageTag, func(t *testing.T) {
+			testNegativeDataImage(testCase, t)
 		})
 	}
 }
