@@ -179,35 +179,6 @@ commands:
           name: LS
           command: ls -lrt /tmp/diff-dumps/*
 
-  build:
-    <<: *defaults
-    steps:
-    - checkout
-    - setup_remote_docker
-    - setup-gcp
-
-    - run:
-        name: Pull definitions dump
-        command: |
-          gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/dump/definitions.sql.gz
-          [[ -f image/dump/definitions.sql.gz ]]
-
-    - run:
-        name: Build images
-        command: make image
-
-    - run:
-        name: Ensure image is not dirty
-        command: git diff --exit-code HEAD
-
-    - run:
-        name: Push images
-        command: |
-          TAG="$(./get-tag)"
-          docker push "us.gcr.io/stackrox-ci/scanner:${TAG}"
-          docker push "us.gcr.io/stackrox-ci/scanner-db:${TAG}"
-        when: always
-
   provision-gke-cluster:
     parameters:
       cluster-id:
