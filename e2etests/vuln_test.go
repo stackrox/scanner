@@ -179,7 +179,7 @@ func TestStackroxVulnImages(t *testing.T) {
 func TestPublicVulnImages(t *testing.T) {
 	for _, testCase := range []singleTestCase{
 		{
-			imageRepo: "apicurio/apicurio-studio-api"
+			imageRepo: "apicurio/apicurio-studio-api",
 			imageTag: "latest",
 			unExpectedFeatures: []unExpectedFeature{
 				{"JBOSS"},

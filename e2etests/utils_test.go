@@ -88,7 +88,7 @@ func scanPublicImage(client v1.ScanServiceClient, imageName string, t *testing.T
  	return scanImage(client, &v1.ScanImageRequest{
  		Image: imageName,
  		Registry: &v1.ScanImageRequest_RegistryData{
- 			Url:      "https://registry-1.docker.io"
+ 			Url:      "https://registry-1.docker.io",
  		},
  	}, t)
  }
