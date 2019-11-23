@@ -28,9 +28,10 @@ type unExpectedFeature struct {
 }
 
 type singleTestCase struct {
-    imageRepo        string
-	imageTag         string
-	expectedFeatures []expectedFeature
+    imageRepo           string
+	imageTag            string
+	expectedFeatures    []expectedFeature
+	unExpectedFeatures  []unExpectedFeature
 }
 
 func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
