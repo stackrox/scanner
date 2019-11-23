@@ -328,6 +328,27 @@ jobs:
           command: |
             gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
 
+  upload-nvd-dump-for-embedding-into-image:
+    <<: *defaults
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: ci-fetch-dumps
+      - setup-gcp
+      - attach_workspace:
+          at: /tmp
+
+      - run:
+          name: Generate NVD dump
+          command: |
+            zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out nvd-definitions.zip
+
+      - run:
+          name: Upload to Google Storage
+          command: |
+            gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+
+
   create-diff-dumps:
     <<: *defaults
     steps:
@@ -451,6 +472,10 @@ workflows:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - generate-genesis-dump
+    - upload-nvd-dump-for-embedding-into-image:
+        <<: *runOnAllTagsWithDockerIOPullCtx
+        requires:
+          - generate-genesis-dump
     - unit-tests:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - style-checks:
@@ -460,6 +485,7 @@ workflows:
         context: docker-io-and-stackrox-io-push
         requires:
           - create-postgres-dump-from-genesis-dump
+          - upload-nvd-dump-for-embedding-into-image
     - provision-cluster:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - provision-cluster-rhel:
