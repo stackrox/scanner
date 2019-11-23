@@ -1,7 +1,3 @@
 *
 !.gitignore
-<<<<<<< HEAD
-=======
-!cves*
 !genesis_manifests.json
->>>>>>> dd47ef7... Run diff command in CI
