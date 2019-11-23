@@ -81,6 +81,8 @@ commands:
             [[ -n "$CLUSTER_NAME" ]]
             gcloud container clusters delete "$CLUSTER_NAME" --async
 
+          when: always
+
   generate-genesis-dump:
     <<: *defaults
     steps:
@@ -488,29 +490,17 @@ workflows:
         requires:
           - create-postgres-dump-from-genesis-dump
     - provision-cluster:
-        context: docker-io-pull
-        filters:
-          tags:
-            only: /.*/
+        <<: *runOnAllTagsWithDockerIOPullCtx
     - provision-cluster-rhel:
-        context: docker-io-pull
-        filters:
-          tags:
-            only: /.*/
         <<: *runOnAllTagsWithDockerIOPullCtx
     - e2e-tests:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - build
           - provision-cluster
-        filters:
-          tags:
-            only: /.*/
     - e2e-tests-rhel:
+        <<: *runOnAllTagsWithDockerIOPullCtx
         context: docker-io-pull
         requires:
           - build
           - provision-cluster-rhel
-        filters:
-          tags:
-            only: /.*/
