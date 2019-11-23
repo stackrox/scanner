@@ -17,6 +17,7 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/wellknownkeys"
+	"github.com/stackrox/scanner/pkg/ziputil"
 )
 
 var (
@@ -28,25 +29,6 @@ var (
 
 // InMemNVDCacheUpdater is a callback that updates the inmem NVD cache from a directory of extracted nvd definitions.
 type InMemNVDCacheUpdater func(nvdDefinitionsDir string) error
-
-func loadVulns(osVulnsFile io.ReadCloser) ([]database.Vulnerability, error) {
-	defer utils.IgnoreError(osVulnsFile.Close)
-
-	var vulns []database.Vulnerability
-	if err := json.NewDecoder(osVulnsFile).Decode(&vulns); err != nil {
-		return nil, errors.Wrap(err, "JSON decoding failed")
-	}
-	return vulns, nil
-}
-
-func openFileInZip(zipR *zip.ReadCloser, name string) (io.ReadCloser, error) {
-	for _, file := range zipR.File {
-		if file.Name == name {
-			return file.Open()
-		}
-	}
-	return nil, errors.Errorf("file %q not found in zip", name)
-}
 
 func validateAndLoadManifest(f io.ReadCloser) (*Manifest, error) {
 	defer utils.IgnoreError(f.Close)
@@ -101,6 +83,34 @@ func determineWhetherToUpdate(db database.Datastore, manifest *Manifest) (bool, 
 	return manifest.Until.After(dbTime), nil
 }
 
+// LoadManifestFromDump validates and loads the manifest from the given zip file.
+func LoadManifestFromDump(zipR *zip.ReadCloser) (*Manifest, error) {
+	manifestFile, err := ziputil.OpenFileInZip(zipR, ManifestFileName)
+	if err != nil {
+		return nil, errors.Wrap(err, "opening manifest file")
+	}
+	manifest, err := validateAndLoadManifest(manifestFile)
+	if err != nil {
+		return nil, errors.Wrap(err, "loading/validating manifest")
+	}
+	return manifest, nil
+}
+
+// LoadOSVulnsFromDump loads the os vulns file from the dump into an in-memory slice.
+func LoadOSVulnsFromDump(zipR *zip.ReadCloser) ([]database.Vulnerability, error) {
+	osVulnsFile, err := ziputil.OpenFileInZip(zipR, OSVulnsFileName)
+	if err != nil {
+		return nil, errors.Wrap(err, "opening OS vulns file")
+	}
+	defer utils.IgnoreError(osVulnsFile.Close)
+
+	var vulns []database.Vulnerability
+	if err := json.NewDecoder(osVulnsFile).Decode(&vulns); err != nil {
+		return nil, errors.Wrap(err, "JSON decoding OS vulns")
+	}
+	return vulns, nil
+}
+
 // UpdateFromVulnDump updates the definitions (both in the DB and in the inMemUpdater) from the given zip file.
 // Check the well_known_names.go file for the manifest of the ZIP file.
 // The caller is responsible for providing a path to a scratchDir, which MUST be an empty, but existing, directory.
@@ -131,14 +141,10 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 		}
 	}()
 
-	log.Info("Loading manifest")
-	manifestFile, err := openFileInZip(zipR, ManifestFileName)
+	log.Info("Loading manifest...")
+	manifest, err := LoadManifestFromDump(zipR)
 	if err != nil {
-		return errors.Wrap(err, "opening manifest file")
-	}
-	manifest, err := validateAndLoadManifest(manifestFile)
-	if err != nil {
-		return errors.Wrap(err, "loading/validating manifest")
+		return err
 	}
 	log.Info("Loaded manifest")
 	shouldUpdate, err := determineWhetherToUpdate(db, manifest)
@@ -152,15 +158,12 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	log.Info("Running the update.")
 
 	log.Info("Loading OS vulns...")
-	osVulnsFile, err := openFileInZip(zipR, OSVulnsFileName)
+	osVulns, err := LoadOSVulnsFromDump(zipR)
 	if err != nil {
-		return errors.Wrap(err, "opening os vulns file")
-	}
-	osVulns, err := loadVulns(osVulnsFile)
-	if err != nil {
-		return errors.Wrap(err, "loading OS vulns")
+		return err
 	}
 	log.Infof("Done loading OS vulns. There are %d vulns to insert into the DB", len(osVulns))
+
 	if err := db.InsertVulnerabilities(osVulns); err != nil {
 		return errors.Wrap(err, "inserting vulns into the DB")
 	}

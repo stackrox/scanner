@@ -1,15 +1,12 @@
 package generatedump
 
 import (
-	"compress/flate"
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -27,18 +24,6 @@ type emptyDataStore struct {
 
 func (e emptyDataStore) GetKeyValue(key string) (string, error) {
 	return "", nil
-}
-
-func writeJSONObjectToFile(filePath string, object interface{}) error {
-	log.Info("Writing JSON file for updated vulns...")
-	f, err := os.Create(filePath)
-	if err != nil {
-		return errors.Wrap(err, "creating file")
-	}
-	if err := json.NewEncoder(f).Encode(object); err != nil {
-		return errors.Wrap(err, "writing JSON for vulns to file")
-	}
-	return nil
 }
 
 func generateDumpWithAllVulns(outFile string) error {
@@ -76,30 +61,21 @@ func generateDumpWithAllVulns(outFile string) error {
 	log.Infof("Finished fetching vulns (total: %d)", len(fetchedVulns))
 
 	log.Info("Writing JSON file for updated vulns...")
-	osVulnsFilePath := filepath.Join(dumpDir, vulndump.OSVulnsFileName)
-	err = writeJSONObjectToFile(osVulnsFilePath, fetchedVulns)
+	err = vulndump.WriteOSVulns(dumpDir, fetchedVulns)
 	if err != nil {
-		return errors.Wrap(err, "writing JSON file for OS vulns")
+		return err
 	}
 
 	log.Info("Writing manifest file...")
-	manifestFilePath := filepath.Join(dumpDir, vulndump.ManifestFileName)
-	err = writeJSONObjectToFile(manifestFilePath, vulndump.Manifest{
+	err = vulndump.WriteManifestFile(dumpDir, vulndump.Manifest{
 		Since: time.Time{}, // The zero time. Being explicit
 		Until: startTime,
 	})
 	if err != nil {
-		return errors.Wrap(err, "writing manifest file")
+		return err
 	}
 	log.Info("Zipping up the files...")
-	zipArchive := archiver.NewZip()
-	zipArchive.CompressionLevel = flate.BestCompression
-	err = zipArchive.Archive([]string{
-		manifestFilePath,
-		nvdSubDir,
-		osVulnsFilePath,
-	}, outFile)
-	if err != nil {
+	if err := vulndump.WriteZip(dumpDir, outFile); err != nil {
 		return errors.Wrap(err, "creating ZIP of the vuln dump")
 	}
 	log.Info("Done writing the zip with the entire vuln dump!")
@@ -155,6 +131,10 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 		case <-errSig.Done():
 			return nil, errSig.Err()
 		}
+	}
+
+	for _, updaters := range vulnsrc.Updaters() {
+		updaters.Clean()
 	}
 
 	vulnsWithMetadata, err := addMetadata(vulns, nvdDumpDir)

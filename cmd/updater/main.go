@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/stackrox/scanner/cmd/updater/diffdumps"
 	"github.com/stackrox/scanner/cmd/updater/generatedump"
 	"github.com/stackrox/scanner/cmd/updater/loaddump"
 
@@ -15,16 +15,18 @@ import (
 
 func main() {
 	c := &cobra.Command{
-		Short: "Commands related to fetching updated vulnerability definitions",
+		Short:        "Commands related to fetching updated vulnerability definitions",
+		SilenceUsage: true,
 	}
 
 	c.AddCommand(
+		diffdumps.Command(),
 		generatedump.Command(),
 		loaddump.Command(),
 	)
 
 	if err := c.Execute(); err != nil {
-		logrus.WithError(err).Error("Command execution failed")
+		// No need to log the error, Cobra does it already.
 		os.Exit(1)
 	}
 }
