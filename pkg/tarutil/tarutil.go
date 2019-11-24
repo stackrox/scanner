@@ -21,19 +21,16 @@ import (
 	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
-	"errors"
 	"io"
 	"io/ioutil"
 	"os/exec"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/stackrox/scanner/pkg/matcher"
 )
 
 var (
-	// ErrCouldNotExtract occurs when an extraction fails.
-	ErrCouldNotExtract = errors.New("tarutil: could not extract the archive")
-
 	// ErrExtractedFileTooBig occurs when a file to extract is too big.
 	ErrExtractedFileTooBig = errors.New("tarutil: could not extract one or more files from the archive: file too big")
 
@@ -59,7 +56,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
 	if err != nil {
-		return data, ErrCouldNotExtract
+		return data, errors.Wrap(err, "could not extract tar acrchive")
 	}
 	defer tr.Close()
 
@@ -70,7 +67,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			break
 		}
 		if err != nil {
-			return data, ErrCouldNotExtract
+			return data, errors.Wrap(err, "could not advance in the tar archive")
 		}
 
 		// Get element filename
