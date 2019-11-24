@@ -45,12 +45,16 @@ commands:
 
   setup-gcp:
     description: Set up GCP service account and configure gcloud
+    parameters:
+      service-account-env:
+        type: string
+        default: GOOGLE_SA_CIRCLECI_SCANNER
     steps:
       - run:
           name: Configure GCP service account and gcloud
           command: |
             cci-export GOOGLE_APPLICATION_CREDENTIALS /tmp/gcp.json
-            echo "${GOOGLE_SA_CIRCLECI_SCANNER}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
+            echo "${<< parameters.service-account-env >>}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
             chmod 0600 "${GOOGLE_APPLICATION_CREDENTIALS}"
             gcloud auth activate-service-account --key-file "${GOOGLE_APPLICATION_CREDENTIALS}"
             gcloud auth list
@@ -371,17 +375,27 @@ jobs:
             while IFS=$'\t' read -r dumploc timestamp; do
               mkdir "/tmp/diff-dumps/${timestamp}"
               dump_file_name="${dumploc##*/}"
+              dump_file_name_no_ext="${dump_file_name%.*}"
               echo "Pulling genesis dump from ${dumploc}"
               gsutil cp "${dumploc}" .
               timestamp_in_zip="$(unzip -p "${dump_file_name}" manifest.json | jq -r '.until')"
               echo "Got timestamps -- from zip: ${timestamp_in_zip}; from manifest: ${timestamp}"
               [[ "${timestamp_in_zip}" == "${timestamp}" ]] # Assertion on the manifest contents
-              ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --out-file "/tmp/diff-dumps/${timestamp}/diff.zip"
+              ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --out-file "/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
             done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp] | @tsv' < image/dump/genesis_manifests.json)
 
       - run:
           name: LS
           command: ls -lrt /tmp/diff-dumps/*
+
+  upload-diff-dumps:
+    <<: *defaults
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: ci-fetch-dumps
+      - setup-gcp:
+          service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
 
   build:
     <<: *defaults
@@ -476,6 +490,10 @@ workflows:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - generate-genesis-dump
+    - upload-diff-dumps:
+        <<: *runOnAllTagsWithDockerIOPullCtx
+        requires:
+          - create-diff-dumps
     - unit-tests:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - style-checks:
@@ -497,7 +515,6 @@ workflows:
           - provision-cluster
     - e2e-tests-rhel:
         <<: *runOnAllTagsWithDockerIOPullCtx
-        context: docker-io-pull
         requires:
           - build
           - provision-cluster-rhel
