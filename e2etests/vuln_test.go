@@ -125,7 +125,7 @@ func testNegativeDataImage(testCase singleTestCase, t *testing.T) {
 			matchingIdx := sliceutils.FindMatching(scan.GetImage().GetFeatures(), func(feature *v1.Feature) bool {
 				return feature.GetName() == unExpectedFeat.name
 			})
-			require.NotEqual(t, -1, matchingIdx)
+			require.Equal(t, -1, matchingIdx)
 		})
 	}
 }
