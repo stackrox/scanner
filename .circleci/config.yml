@@ -373,7 +373,6 @@ jobs:
           command: |
             mkdir -p /tmp/diff-dumps
             while IFS=$'\t' read -r dumploc timestamp; do
-              mkdir "/tmp/diff-dumps/${timestamp}"
               dump_file_name="${dumploc##*/}"
               dump_file_name_no_ext="${dump_file_name%.*}"
               echo "Pulling genesis dump from ${dumploc}"
@@ -384,9 +383,11 @@ jobs:
               ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --out-file "/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
             done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp] | @tsv' < image/dump/genesis_manifests.json)
 
-      - run:
-          name: LS
-          command: ls -lrt /tmp/diff-dumps/*
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - diff-dumps
+
 
   upload-diff-dumps:
     <<: *defaults
@@ -394,8 +395,25 @@ jobs:
       - checkout
       - check-label-to-run:
           label: ci-fetch-dumps
+
       - setup-gcp:
           service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
+
+      - attach_workspace:
+          at: /tmp
+
+      - run:
+          name: Upload each diff dump to the prod bucket
+          command: |
+            mkdir -p /tmp/diff-dumps
+            while IFS=$'\t' read -r dumploc diffloc; do
+              dump_file_name="${dumploc##*/}"
+              dump_file_name_no_ext="${dump_file_name%.*}"
+              expected_zip_file_loc="/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
+              [[ -f "${expected_zip_file_loc}" ]]
+              [[ -n "${diffloc}" ]]
+              gsutil cp "${expected_zip_file_loc}" "${diffloc}"
+            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .diffLocation] | @tsv' < image/dump/genesis_manifests.json)
 
   build:
     <<: *defaults
