@@ -101,6 +101,13 @@ func testNegativeDataImage(testCase singleTestCase, t *testing.T) {
 			}
 			fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
 
+			for _, feat := range scan.GetImage().GetFeatures() {
+            	for _, vuln := range feat.GetVulnerabilities() {
+            	    fmt.Println(vuln.GetName(), vuln.GetDescription())
+            	}
+            }
+            fmt.Println("DONE PRINTING VULNS FROM SCAN")
+
 			componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
 				ImageSpec: scanResp.GetImage(),
 			})
@@ -183,7 +190,7 @@ func TestPublicVulnImages(t *testing.T) {
 			imageRepo: "apicurio/apicurio-studio-api",
 			imageTag: "latest",
 			unExpectedFeatures: []unExpectedFeature{
-				{"JBOSS"},
+				{"jboss"},
 			},
 		},
 	} {
