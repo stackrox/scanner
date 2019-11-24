@@ -56,7 +56,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
 	if err != nil {
-		return data, errors.Wrap(err, "could not extract tar acrchive")
+		return data, errors.Wrap(err, "could not extract tar archive")
 	}
 	defer tr.Close()
 
