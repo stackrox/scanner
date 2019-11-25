@@ -122,12 +122,15 @@ func testMultipleFeatureCheck(testCase singleTestCase, t *testing.T) {
             fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
 		}
 	}()
+
+	featureCounts := make( map[string]int )
+	for _, feature := range scan.GetImage().GetFeatures() {
+	    featureCounts[feature.GetName()]++
+	}
+
 	for _, feature := range scan.GetImage().GetFeatures() {
 	    t.Run(fmt.Sprintf("%s", feature.GetName()), func(t *testing.T) {
-	        matchingIdx := sliceutils.FindMatching(scan.GetImage().GetFeatures(), func(feat *v1.Feature) bool {
-            	return feat.GetName() == feature.GetName()
-            })
-            require.Less(t, matchingIdx, 4)
+	        require.Less(t, featureCounts[feature.GetName()], 4)
 	    })
 	}
 }
