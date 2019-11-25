@@ -128,9 +128,9 @@ func testMultipleFeatureCheck(testCase singleTestCase, t *testing.T) {
 	    featureCounts[feature.GetName()]++
 	}
 
-	for _, feature := range scan.GetImage().GetFeatures() {
-	    t.Run(fmt.Sprintf("%s", feature.GetName()), func(t *testing.T) {
-	        require.Less(t, featureCounts[feature.GetName()], 4)
+    for _, feature := range featureCounts {
+	    t.Run(fmt.Sprintf("%s", feature), func(t *testing.T) {
+	        require.Less(t, featureCounts[feature], 4)
 	    })
 	}
 }
