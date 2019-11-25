@@ -123,9 +123,9 @@ func testMultipleFeatureCheck(testCase singleTestCase, t *testing.T) {
 		}
 	}()
 	for _, feature := range scan.GetImage().GetFeatures() {
-	    t.Run(fmt.Sprintf("%s", feature.name), func(t *testing.T) {
+	    t.Run(fmt.Sprintf("%s", feature.GetName()), func(t *testing.T) {
 	        matchingIdx := sliceutils.FindMatching(scan.GetImage().GetFeatures(), func(feat *v1.Feature) bool {
-            	return feat.GetName() == feature.name
+            	return feat.GetName() == feature.GetName()
             })
             require.Less(t, matchingIdx, 4)
 	    })
