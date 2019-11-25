@@ -24,6 +24,16 @@ func LoadJSONFileFromReader(r io.Reader) (*schema.NVDCVEFeedJSON10, error) {
 	return (*schema.NVDCVEFeedJSON10)(&feed), nil
 }
 
+// WriteJSONFileToWriter marshals the given NVD 1.0 file as JSON and writes it to the given writer.
+// The writer is NOT closed; that is the caller's responsibility.
+func WriteJSONFileToWriter(contents *schema.NVDCVEFeedJSON10, w io.Writer) error {
+	_, err := easyjson.MarshalToWriter((*feedWrapper)(contents), w)
+	if err != nil {
+		return errors.Wrap(err, "marshaling JSON into writer")
+	}
+	return nil
+}
+
 // MarshalNVDFeedCVEItem marshals the given NVD feed item using easyjson.
 func MarshalNVDFeedCVEItem(item *schema.NVDCVEFeedJSON10DefCVEItem) ([]byte, error) {
 	bytes, err := easyjson.Marshal((*itemWrapper)(item))
