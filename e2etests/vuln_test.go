@@ -86,7 +86,7 @@ func testMultipleFeatureCheck(testCase singleTestCase, t *testing.T) {
             	return feat.GetName() == feature.name
             })
             require.Less(t, matchingIdx, 4)
-	    }
+	    })
 	}
 }
 
