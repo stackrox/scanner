@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/facebookincubator/nvdtools/vulndb"
@@ -116,8 +117,9 @@ type stringPair struct {
 
 func lessThanLexicographically(pairs []stringPair) bool {
 	for _, pair := range pairs {
-		if pair.first != pair.second {
-			return pair.first < pair.second
+		cmp := strings.Compare(pair.first, pair.second)
+		if cmp != 0 {
+			return cmp < 0
 		}
 	}
 	return false
