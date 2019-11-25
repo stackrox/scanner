@@ -195,6 +195,14 @@ func TestPublicVulnImages(t *testing.T) {
 			imageRepo: "apicurio/apicurio-studio-api",
 			imageTag: "latest",
 		},
+		{
+			imageRepo: "codenvy/che-dashboard",
+			imageTag: "latest",
+		},
+		{
+			imageRepo: "haxqer/jira",
+			imageTag: "latest",
+		},
 	} {
 		t.Run(testCase.imageTag, func(t *testing.T) {
 			testMultipleFeatureCheck(testCase, t)
