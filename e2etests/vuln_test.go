@@ -85,7 +85,7 @@ func testMultipleFeatureCheck(testCase singleTestCase, t *testing.T) {
 	        matchingIdx := sliceutils.FindMatching(scan.GetImage().GetFeatures(), func(feat *v1.Feature) bool {
             	return feat.GetName() == feature.name
             })
-            require.Less(t, 4, matchingIdx)
+            require.Less(t, matchingIdx, 4)
 	    }
 	}
 }
