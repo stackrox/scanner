@@ -12,6 +12,9 @@ ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 RUN mkdir -p "${NVD_DEFINITIONS_DIR}" && chown -R 4000:4000 "${NVD_DEFINITIONS_DIR}"
 COPY ./dump/nvd/*.json "${NVD_DEFINITIONS_DIR}/"
 
+COPY ./dump/genesis_manifests.json /
+
+
 ENTRYPOINT ["/scanner"]
 
 # Make image STIG compliant: https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/

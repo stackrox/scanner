@@ -1,6 +1,8 @@
 package nvdtoolscache
 
 import (
+	"path/filepath"
+
 	"github.com/etcd-io/bbolt"
 	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
@@ -8,11 +10,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/nvdloader"
+	"github.com/stackrox/scanner/pkg/wellknowndirnames"
 )
 
 // This is a temporary path for the boltDB and is expected to be backed by
 // an empty dir
-const boltPath = "/var/lib/stackrox/temp.db"
+var (
+	boltPath = filepath.Join(wellknowndirnames.WriteableRoot, "temp.db")
+)
 
 func New() (Cache, error) {
 	opts := bbolt.Options{
