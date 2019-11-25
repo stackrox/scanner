@@ -41,7 +41,28 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	// If the test failed, print helpful debug information.
 	defer func() {
 		if t.Failed() {
-			printDebugDetails(scan, t)
+			for _, feat := range scan.GetImage().GetFeatures() {
+                fmt.Println(feat.GetName(), feat.GetVersion())
+            }
+            fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
+
+            for _, feat := range scan.GetImage().GetFeatures() {
+                for _, vuln := range feat.GetVulnerabilities() {
+                    fmt.Println(vuln.GetName(), vuln.GetDescription())
+                }
+            }
+            fmt.Println("DONE PRINTING VULNS FROM SCAN")
+
+            componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
+                ImageSpec: scanResp.GetImage(),
+            })
+            require.NoError(t, err)
+            for _, components := range componentsMap.GetLayerToComponents() {
+                for _, component := range components.GetComponents() {
+                	fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
+                }
+            }
+            fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
 		}
 	}()
 	for _, expectedFeat := range testCase.expectedFeatures {
@@ -77,10 +98,31 @@ func testMultipleFeatureCheck(testCase singleTestCase, t *testing.T) {
 	// If the test failed, print helpful debug information.
 	defer func() {
 		if t.Failed() {
-			printDebugDetails(scan, t)
+			for _, feat := range scan.GetImage().GetFeatures() {
+                fmt.Println(feat.GetName(), feat.GetVersion())
+            }
+            fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
+
+            for _, feat := range scan.GetImage().GetFeatures() {
+                for _, vuln := range feat.GetVulnerabilities() {
+                    fmt.Println(vuln.GetName(), vuln.GetDescription())
+                }
+            }
+            fmt.Println("DONE PRINTING VULNS FROM SCAN")
+
+            componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
+                ImageSpec: scanResp.GetImage(),
+            })
+            require.NoError(t, err)
+            for _, components := range componentsMap.GetLayerToComponents() {
+                for _, component := range components.GetComponents() {
+                	fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
+                }
+            }
+            fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
 		}
 	}()
-	for _, feature := range scan.GetImage().getFeatures() {
+	for _, feature := range scan.GetImage().GetFeatures() {
 	    t.Run(fmt.Sprintf("%s", feature.name), func(t *testing.T) {
 	        matchingIdx := sliceutils.FindMatching(scan.GetImage().GetFeatures(), func(feat *v1.Feature) bool {
             	return feat.GetName() == feature.name
@@ -88,31 +130,6 @@ func testMultipleFeatureCheck(testCase singleTestCase, t *testing.T) {
             require.Less(t, matchingIdx, 4)
 	    })
 	}
-}
-
-func printDebugDetails(GetScanResponse scan, t *testing.T) {
-    for _, feat := range scan.GetImage().GetFeatures() {
-    	fmt.Println(feat.GetName(), feat.GetVersion())
-    }
-    fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
-
-    for _, feat := range scan.GetImage().GetFeatures() {
-        for _, vuln := range feat.GetVulnerabilities() {
-            fmt.Println(vuln.GetName(), vuln.GetDescription())
-        }
-    }
-    fmt.Println("DONE PRINTING VULNS FROM SCAN")
-
-    componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
-    	ImageSpec: scanResp.GetImage(),
-    })
-    require.NoError(t, err)
-    for _, components := range componentsMap.GetLayerToComponents() {
-    	for _, component := range components.GetComponents() {
-    		fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
-    	}
-    }
-    fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
 }
 
 // This test tests vulnerable images pushed up to docker.io/stackrox/vuln-images.
