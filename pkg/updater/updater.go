@@ -35,12 +35,11 @@ var (
 )
 
 const (
-	updateInterval = 30 * time.Minute
-
 	ifModifiedSinceHeader = "If-Modified-Since"
 )
 
 type Updater struct {
+	interval        time.Duration
 	lastUpdatedTime time.Time
 	downloadURL     string
 	db              database.Datastore
@@ -109,7 +108,7 @@ func (u *Updater) doUpdate() error {
 }
 
 func (u *Updater) runForever() {
-	t := time.NewTicker(updateInterval)
+	t := time.NewTicker(u.interval)
 	defer t.Stop()
 	for {
 		select {
@@ -143,8 +142,8 @@ func (u *Updater) Stop() {
 	u.stopSig.Signal()
 }
 
-// NewUpdater returns a new updater instance, and starts running the update daemon.
-func NewUpdater(db database.Datastore, cpeDBUpdater vulndump.InMemNVDCacheUpdater) (*Updater, error) {
+// New returns a new updater instance, and starts running the update daemon.
+func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCacheUpdater) (*Updater, error) {
 	downloadURL, err := getRelevantDownloadURL()
 	if err != nil {
 		return nil, errors.Wrap(err, "getting relevant download URL")
@@ -156,6 +155,7 @@ func NewUpdater(db database.Datastore, cpeDBUpdater vulndump.InMemNVDCacheUpdate
 
 	stopSig := concurrency.NewSignal()
 	u := &Updater{
+		interval:        config.Interval,
 		downloadURL:     downloadURL,
 		db:              db,
 		cpeDBUpdater:    cpeDBUpdater,
