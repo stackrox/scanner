@@ -405,7 +405,6 @@ jobs:
           command: |
             gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
 
-
   create-diff-dumps:
     <<: *defaults
     steps:
@@ -441,8 +440,7 @@ jobs:
           paths:
             - diff-dumps
 
-
-  upload-diff-dumps:
+  upload-diff-dumps-and-offline-dumps:
     <<: *defaults
     steps:
       - checkout
@@ -467,6 +465,30 @@ jobs:
               [[ -n "${diffloc}" ]]
               gsutil cp "${expected_zip_file_loc}" "${diffloc}"
             done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .diffLocation] | @tsv' < image/dump/genesis_manifests.json)
+
+      - run:
+          name: Generate offline dump
+          command: |
+            mkdir -p /tmp/offline-dump
+
+            # Fetch the scanner dump which is marked as the base for offline dumps.
+            # For offline dumps, we just use one base (the oldest base which is in a version of scanner still supported)
+            # for simplicity.
+            offline_dumps="$(jq '.knownGenesisDumps | [.[] | select(.baseForOfflineDumps == true)]' < image/dump/genesis_manifests.json)"
+            echo "Got offline dumps list: ${offline_dumps}"
+            [[ "$(echo "${offline_dumps}" | jq 'length')" -eq 1 ]]
+            offline_diff_location="$(echo "${offline_dumps}" | jq -r '.[0] | .diffLocation')"
+            gsutil cp -r "${offline_diff_location}" /tmp/offline-dump/scanner-defs.zip
+
+            # Prepare k8s and istio dump
+            mkdir -p /tmp/scratch
+            gsutil cp -r gs://definitions.stackrox.io/cve/* /tmp/scratch/
+            cd /tmp/scratch
+            zip -r /tmp/offline-dump/k8s-istio.zip *
+
+            cd /tmp/offline-dump
+            zip scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
+            gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 
   build:
     <<: *defaults
@@ -528,7 +550,7 @@ workflows:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - generate-genesis-dump
-    - upload-diff-dumps:
+    - upload-diff-dumps-and-offline-dumps:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - create-diff-dumps
