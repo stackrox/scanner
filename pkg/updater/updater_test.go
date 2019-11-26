@@ -2,6 +2,7 @@ package updater
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -29,7 +30,7 @@ func TestFetchDumpFromGoogleStorage(t *testing.T) {
 	tempDir, err := ioutil.TempDir("", "go-fetch-dump-test")
 	require.NoError(t, err)
 	defer func() {
-		// require.NoError(t, os.RemoveAll(tempDir))
+		require.NoError(t, os.RemoveAll(tempDir))
 	}()
 
 	outputPath := filepath.Join(tempDir, "dump.zip")
