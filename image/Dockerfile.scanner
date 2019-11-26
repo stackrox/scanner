@@ -7,7 +7,6 @@ RUN apk update && \
     apk --no-cache add \
             ca-certificates \
             openssl \
-            tzdata \
             xz \
         && apk --repository "http://nl.alpinelinux.org/alpine/3.10/community" --no-cache add rpm \
         && apk --purge del apk-tools;

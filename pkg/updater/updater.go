@@ -24,12 +24,6 @@ var (
 		Timeout: 5 * time.Minute,
 	}
 
-	gmtLocation = func() *time.Location {
-		loc, err := time.LoadLocation("GMT")
-		utils.Must(err)
-		return loc
-	}()
-
 	diffDumpOutputPath = filepath.Join(wellknowndirnames.WriteableRoot, "diff-dump.zip")
 	diffDumpScratchDir = filepath.Join(wellknowndirnames.WriteableRoot, "diff-dump-scratch")
 )
@@ -53,8 +47,7 @@ func fetchDumpFromGoogleStorage(url string, lastUpdatedTime time.Time, outputPat
 	if err != nil {
 		return false, errors.Wrap(err, "constructing req")
 	}
-	lastUpdatedTimeInGMT := lastUpdatedTime.In(gmtLocation)
-	req.Header.Set(ifModifiedSinceHeader, lastUpdatedTimeInGMT.Format(time.RFC1123))
+	req.Header.Set(ifModifiedSinceHeader, lastUpdatedTime.UTC().Format(http.TimeFormat))
 	resp, err := client.Do(req)
 	if err != nil {
 		return false, errors.Wrap(err, "executing request")
