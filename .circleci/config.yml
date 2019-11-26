@@ -424,8 +424,8 @@ jobs:
 
             offline_dumps="$(jq '.knownGenesisDumps | [.[] | select(.baseForOfflineDumps == true)]' < image/dump/genesis_manifests.json)"
             echo "Got offline dumps list: ${offline_dumps}"
-            [[ "$(jq 'length' <<<"${offline_dumps}")" -eq 1 ]]
-            offline_diff_location="$(jq '.[0] | .diffLocation' <<<"${offline_dumps}")"
+            [[ "$(echo "${offline_dumps}" | jq 'length')" -eq 1 ]]
+            offline_diff_location="$(echo "${offline_dumps}" | jq '.[0] | .diffLocation')"
             gsutil cp -r "${offline_diff_location}" /tmp/offline-dump/scanner-defs.zip
 
             zip scanner-vuln-updates.zip /tmp/offline-dump/scanner-defs.zip /tmp/offline-dump/k8sistio.zip
