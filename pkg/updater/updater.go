@@ -24,8 +24,8 @@ var (
 		Timeout: 5 * time.Minute,
 	}
 
-	diffDumpOutputPath = filepath.Join(wellknowndirnames.WriteableRoot, "diff-dump.zip")
-	diffDumpScratchDir = filepath.Join(wellknowndirnames.WriteableRoot, "diff-dump-scratch")
+	diffDumpOutputPath = filepath.Join(wellknowndirnames.WriteableDir, "diff-dump.zip")
+	diffDumpScratchDir = filepath.Join(wellknowndirnames.WriteableDir, "diff-dump-scratch")
 )
 
 const (
@@ -41,9 +41,9 @@ type Updater struct {
 	stopSig         *concurrency.Signal
 }
 
-func fetchDumpFromGoogleStorage(url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
+func fetchDumpFromGoogleStorage(ctx concurrency.Waitable, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
 	// First, head the URL to see when it was last modified.
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, url, nil)
 	if err != nil {
 		return false, errors.Wrap(err, "constructing req")
 	}
@@ -84,7 +84,7 @@ func (u *Updater) doUpdate() error {
 	if err := os.RemoveAll(diffDumpScratchDir); err != nil {
 		return errors.Wrap(err, "removing diff dump scratch dir")
 	}
-	fetched, err := fetchDumpFromGoogleStorage(u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
+	fetched, err := fetchDumpFromGoogleStorage(u.stopSig, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
 	if err != nil {
 		return errors.Wrap(err, "fetching update from URL")
 	}

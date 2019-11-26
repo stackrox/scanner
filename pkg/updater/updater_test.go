@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/rox/pkg/fileutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -35,13 +36,13 @@ func TestFetchDumpFromGoogleStorage(t *testing.T) {
 
 	outputPath := filepath.Join(tempDir, "dump.zip")
 	// Should not fetch since it can't be updated in a time in the future.
-	updated, err := fetchDumpFromGoogleStorage(url, time.Now().Add(time.Minute), outputPath)
+	updated, err := fetchDumpFromGoogleStorage(concurrency.Never(), url, time.Now().Add(time.Minute), outputPath)
 	require.NoError(t, err)
 	assert.False(t, updated)
 	assertOnFileExistence(t, outputPath, false)
 
 	// Should definitely fetch.
-	updated, err = fetchDumpFromGoogleStorage(url, nov23, outputPath)
+	updated, err = fetchDumpFromGoogleStorage(concurrency.Never(), url, nov23, outputPath)
 	require.NoError(t, err)
 	assert.True(t, updated)
 	assertOnFileExistence(t, outputPath, true)

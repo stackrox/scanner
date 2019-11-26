@@ -13,10 +13,11 @@ import (
 	"github.com/stackrox/scanner/pkg/wellknowndirnames"
 )
 
-// This is a temporary path for the boltDB and is expected to be backed by
-// an empty dir
 var (
-	boltPath = filepath.Join(wellknowndirnames.WriteableRoot, "temp.db")
+	// BoltPath is a temporary path for the boltDB and is expected to be backed by
+	// an empty dir. Exported for localdev to be able to set it.
+	// TODO: Make this injectable instead.
+	BoltPath = filepath.Join(wellknowndirnames.WriteableDir, "temp.db")
 )
 
 func New() (Cache, error) {
@@ -25,7 +26,7 @@ func New() (Cache, error) {
 		FreelistType:   bbolt.FreelistMapType,
 		NoSync:         true,
 	}
-	db, err := bbolt.Open(boltPath, 0600, &opts)
+	db, err := bbolt.Open(BoltPath, 0600, &opts)
 	if err != nil {
 		return nil, err
 	}

@@ -47,16 +47,14 @@ func getRelevantDownloadURL() (string, error) {
 		return "", errors.New("invalid manifest, no genesis dumps")
 	}
 
-	var maxTimestamp time.Time
-	maxIdx := -1
+	var mostRecentGenesisDump *knownGenesisDump
 	for i, dump := range manifest.KnownGenesisDumps {
-		if maxIdx == -1 || dump.Timestamp.After(maxTimestamp) {
-			maxIdx = i
-			maxTimestamp = dump.Timestamp
+		if mostRecentGenesisDump == nil || dump.Timestamp.After(mostRecentGenesisDump.Timestamp) {
+			mostRecentGenesisDump = &manifest.KnownGenesisDumps[i]
 		}
 	}
 
-	diffLoc := manifest.KnownGenesisDumps[maxIdx].DiffLocation
+	diffLoc := mostRecentGenesisDump.DiffLocation
 	// Convert a gs:// URL to https://storage.googleapis.com URL.
 	if !strings.HasPrefix(diffLoc, gsPrefix) {
 		return "", errors.Errorf("invalid diff location %q: must start with %s", diffLoc, gsPrefix)
