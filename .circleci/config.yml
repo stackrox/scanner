@@ -542,6 +542,12 @@ workflows:
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-nvd-dump-for-embedding-into-image
+    - build-rhel:
+        <<: *runOnAllTags
+        context: docker-io-and-stackrox-io-push
+        requires:
+          - create-postgres-dump-from-genesis-dump
+          - upload-nvd-dump-for-embedding-into-image
     - provision-cluster:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - provision-cluster-rhel:
@@ -554,5 +560,5 @@ workflows:
     - e2e-tests-rhel:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
-          - build
+          - build-rhel
           - provision-cluster-rhel
