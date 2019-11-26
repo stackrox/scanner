@@ -155,6 +155,59 @@ commands:
             printf " %q" "${cmd[@]}"
             echo
 
+  build-and-push-image:
+    parameters:
+      make-image-target:
+        type: string
+      image-name-suffix:
+        type: string
+        default: ""
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - setup-gcp
+
+      - run:
+          name: Pull definitions dumps
+          command: |
+            gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/dump/definitions.sql.gz
+            gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
+            unzip -d image/dump /tmp/nvd-definitions.zip
+            rm /tmp/nvd-definitions.zip
+
+      - run:
+          name: Build images
+          command: make << parameters.make-image-target >>
+
+      - run:
+          name: Ensure image is not dirty
+          command: git diff --exit-code HEAD
+
+      - run:
+          name: Push images
+          command: |
+            tag="$(./get-tag)"
+            scanner_image_name="scanner<< parameters.image-name-suffix >>"
+            db_image_name="scanner-db<< parameters.image-name-suffix >>"
+
+            gcr_scanner_image="us.gcr.io/stackrox-ci/${scanner_image_name}:${tag}"
+            gcr_db_image="us.gcr.io/stackrox-ci/${db_image_name}:${tag}"
+
+            dockerhub_scanner_image="stackrox/${scanner_image_name}:${tag}"
+            dockerhub_db_image="stackrox/${db_image_name}:${tag}"
+
+            docker push "${gcr_scanner_image}"
+            docker push "${gcr_db_image}"
+
+            docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
+
+            docker tag "${gcr_scanner_image}" "${dockerhub_scanner_image}"
+            docker push "${dockerhub_scanner_image}"
+
+            docker tag "${gcr_db_image}" "${dockerhub_db_image}"
+            docker push "${dockerhub_db_image}"
+
   run-e2e-tests:
     parameters:
       cluster-id:
@@ -418,48 +471,15 @@ jobs:
   build:
     <<: *defaults
     steps:
-    - checkout
-    - setup_remote_docker
-    - setup-gcp
+      - build-and-push-image:
+          make-image-target: image
 
-    - run:
-        name: Pull definitions dumps
-        command: |
-          gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/dump/definitions.sql.gz
-          gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
-          unzip -d image/dump /tmp/nvd-definitions.zip
-          rm /tmp/nvd-definitions.zip
-
-    - run:
-        name: Build images
-        command: make image image-rhel
-
-    - run:
-        name: Ensure image is not dirty
-        command: git diff --exit-code HEAD
-
-    - run:
-        name: Push images
-        command: |
-          TAG="$(./get-tag)"
-          docker push "us.gcr.io/stackrox-ci/scanner:${TAG}"
-          docker push "us.gcr.io/stackrox-ci/scanner-db:${TAG}"
-
-          docker push "us.gcr.io/stackrox-ci/scanner-rhel:${TAG}"
-          docker push "us.gcr.io/stackrox-ci/scanner-db-rhel:${TAG}"
-
-          docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
-          docker tag "us.gcr.io/stackrox-ci/scanner:${TAG}" "stackrox/scanner:${TAG}"
-          docker push "stackrox/scanner:${TAG}"
-
-          docker tag "us.gcr.io/stackrox-ci/scanner-db:${TAG}" "stackrox/scanner-db:${TAG}"
-          docker push "stackrox/scanner-db:${TAG}"
-
-          docker tag "us.gcr.io/stackrox-ci/scanner-rhel:${TAG}" "stackrox/scanner-rhel:${TAG}"
-          docker push "stackrox/scanner-rhel:${TAG}"
-
-          docker tag "us.gcr.io/stackrox-ci/scanner-db-rhel:${TAG}" "stackrox/scanner-db-rhel:${TAG}"
-          docker push "stackrox/scanner-db-rhel:${TAG}"
+  build-rhel:
+    <<: *defaults
+    steps:
+      - build-and-push-image:
+          make-image-target: image-rhel
+          image-name-suffix: "-rhel"
 
   provision-cluster:
     <<: *defaults
@@ -522,6 +542,12 @@ workflows:
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-nvd-dump-for-embedding-into-image
+    - build-rhel:
+        <<: *runOnAllTags
+        context: docker-io-and-stackrox-io-push
+        requires:
+          - create-postgres-dump-from-genesis-dump
+          - upload-nvd-dump-for-embedding-into-image
     - provision-cluster:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - provision-cluster-rhel:
@@ -534,5 +560,5 @@ workflows:
     - e2e-tests-rhel:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
-          - build
+          - build-rhel
           - provision-cluster-rhel
