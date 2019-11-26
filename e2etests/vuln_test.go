@@ -24,9 +24,9 @@ type expectedFeature struct {
 }
 
 type singleTestCase struct {
-    imageRepo           string
-	imageTag            string
-	expectedFeatures    []expectedFeature
+	imageRepo        string
+	imageTag         string
+	expectedFeatures []expectedFeature
 }
 
 func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
@@ -42,27 +42,27 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	defer func() {
 		if t.Failed() {
 			for _, feat := range scan.GetImage().GetFeatures() {
-                fmt.Println(feat.GetName(), feat.GetVersion())
-            }
-            fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
+				fmt.Println(feat.GetName(), feat.GetVersion())
+			}
+			fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
 
-            for _, feat := range scan.GetImage().GetFeatures() {
-                for _, vuln := range feat.GetVulnerabilities() {
-                    fmt.Println(vuln.GetName(), vuln.GetDescription())
-                }
-            }
-            fmt.Println("DONE PRINTING VULNS FROM SCAN")
+			for _, feat := range scan.GetImage().GetFeatures() {
+				for _, vuln := range feat.GetVulnerabilities() {
+					fmt.Println(vuln.GetName(), vuln.GetDescription())
+				}
+			}
+			fmt.Println("DONE PRINTING VULNS FROM SCAN")
 
-            componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
-                ImageSpec: scanResp.GetImage(),
-            })
-            require.NoError(t, err)
-            for _, components := range componentsMap.GetLayerToComponents() {
-                for _, component := range components.GetComponents() {
-                	fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
-                }
-            }
-            fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
+			componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
+				ImageSpec: scanResp.GetImage(),
+			})
+			require.NoError(t, err)
+			for _, components := range componentsMap.GetLayerToComponents() {
+				for _, component := range components.GetComponents() {
+					fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
+				}
+			}
+			fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
 		}
 	}()
 	for _, expectedFeat := range testCase.expectedFeatures {
@@ -99,39 +99,39 @@ func testMultipleFeatureCheck(testCase singleTestCase, t *testing.T) {
 	defer func() {
 		if t.Failed() {
 			for _, feat := range scan.GetImage().GetFeatures() {
-                fmt.Println(feat.GetName(), feat.GetVersion())
-            }
-            fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
+				fmt.Println(feat.GetName(), feat.GetVersion())
+			}
+			fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
 
-            for _, feat := range scan.GetImage().GetFeatures() {
-                for _, vuln := range feat.GetVulnerabilities() {
-                    fmt.Println(vuln.GetName(), vuln.GetDescription())
-                }
-            }
-            fmt.Println("DONE PRINTING VULNS FROM SCAN")
+			for _, feat := range scan.GetImage().GetFeatures() {
+				for _, vuln := range feat.GetVulnerabilities() {
+					fmt.Println(vuln.GetName(), vuln.GetDescription())
+				}
+			}
+			fmt.Println("DONE PRINTING VULNS FROM SCAN")
 
-            componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
-                ImageSpec: scanResp.GetImage(),
-            })
-            require.NoError(t, err)
-            for _, components := range componentsMap.GetLayerToComponents() {
-                for _, component := range components.GetComponents() {
-                	fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
-                }
-            }
-            fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
+			componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
+				ImageSpec: scanResp.GetImage(),
+			})
+			require.NoError(t, err)
+			for _, components := range componentsMap.GetLayerToComponents() {
+				for _, component := range components.GetComponents() {
+					fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
+				}
+			}
+			fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
 		}
 	}()
 
-	featureCounts := make( map[string]int )
+	featureCounts := make(map[string]int)
 	for _, feature := range scan.GetImage().GetFeatures() {
-	    featureCounts[feature.GetName()]++
+		featureCounts[feature.GetName()]++
 	}
 
-    for feature, count := range featureCounts {
-	    t.Run(fmt.Sprintf("%s", feature), func(t *testing.T) {
-	        require.Less(t, count, 4)
-	    })
+	for feature, count := range featureCounts {
+		t.Run(fmt.Sprintf("%s", feature), func(t *testing.T) {
+			require.Less(t, count, 4)
+		})
 	}
 }
 
@@ -193,15 +193,15 @@ func TestPublicVulnImages(t *testing.T) {
 	for _, testCase := range []singleTestCase{
 		{
 			imageRepo: "apicurio/apicurio-studio-api",
-			imageTag: "latest",
+			imageTag:  "latest",
 		},
 		{
 			imageRepo: "codenvy/che-dashboard",
-			imageTag: "latest",
+			imageTag:  "latest",
 		},
 		{
 			imageRepo: "haxqer/jira",
-			imageTag: "latest",
+			imageTag:  "latest",
 		},
 	} {
 		t.Run(testCase.imageTag, func(t *testing.T) {
