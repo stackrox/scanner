@@ -5,3 +5,4 @@ scannerDBImage: us.gcr.io/stackrox-ci/scanner-db
 tag: latest
 
 logLevel: info
+updateInterval: 1h

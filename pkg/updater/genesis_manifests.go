@@ -15,7 +15,7 @@ const (
 	genesisManifestsLocation = "/genesis_manifests.json"
 
 	gsPrefix                = "gs://"
-	storageGoogleAPIsPrefix = "https://storage.google.apis.com/"
+	storageGoogleAPIsPrefix = "https://storage.googleapis.com/"
 )
 
 type knownGenesisDump struct {
