@@ -352,7 +352,6 @@ jobs:
           command: |
             gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
 
-
   create-diff-dumps:
     <<: *defaults
     steps:
@@ -388,8 +387,7 @@ jobs:
           paths:
             - diff-dumps
 
-
-  upload-diff-dumps:
+  upload-diff-dumps-and-offline-dumps:
     <<: *defaults
     steps:
       - checkout
@@ -414,6 +412,24 @@ jobs:
               [[ -n "${diffloc}" ]]
               gsutil cp "${expected_zip_file_loc}" "${diffloc}"
             done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .diffLocation] | @tsv' < image/dump/genesis_manifests.json)
+
+      - run:
+          name: Generate offline dump
+          command: |
+            # Prepare k8s and istio dump
+            mkdir -p /tmp/offline-dump
+            mkdir -p /tmp/scratch
+            gsutil cp -r gs://definitions.stackrox.io/cve/* /tmp/scratch/
+            zip -r /tmp/offline-dump/k8sistio.zip /tmp/scratch/*
+
+            offline_dumps="$(jq '.knownGenesisDumps | [.[] | select(.baseForOfflineDumps == true)]' < image/dump/genesis_manifests.json)"
+            echo "Got offline dumps list: ${offline_dumps}"
+            [[ "$(jq 'length' <<<"${offline_dumps}")" -eq 1 ]]
+            offline_diff_location="$(jq '.[0] | .diffLocation' <<<"${offline_dumps}")"
+            gsutil cp -r "${offline_diff_location}" /tmp/offline-dump/scanner-defs.zip
+
+            zip scanner-vuln-updates.zip /tmp/offline-dump/scanner-defs.zip /tmp/offline-dump/k8sistio.zip
+            gsutil cp scanner-vuln-updates.zip gs://definitions.stackrox.io/scanner-vuln-updates.zip
 
   build:
     <<: *defaults
@@ -508,7 +524,7 @@ workflows:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - generate-genesis-dump
-    - upload-diff-dumps:
+    - upload-diff-dumps-and-offline-dumps:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - create-diff-dumps
