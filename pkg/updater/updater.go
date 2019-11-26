@@ -106,6 +106,7 @@ func (u *Updater) doUpdate() error {
 		return errors.Wrap(err, "updating from vuln dump")
 	}
 	u.lastUpdatedTime = startTime
+	log.Info("Update cycle completed successfully!")
 	return nil
 }
 
