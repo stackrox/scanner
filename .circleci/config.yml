@@ -435,7 +435,7 @@ jobs:
 
             cd /tmp/offline-dump
             zip scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
-            gsutil cp scanner-vuln-updates.zip gs://definitions.stackrox.io/scanner-vuln-updates.zip
+            gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 
   build:
     <<: *defaults
