@@ -1,0 +1,9 @@
+{
+  "knownGenesisDumps": [
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20191120164321.zip",
+      "timestamp":  "2019-11-20T16:43:21.335508-08:00",
+      "diffLocation": "gs://definitions.stackrox.io/e799c68a-671f-44db-9682-f24248cd0ffe/diff.zip"
+    }
+  ]
+}

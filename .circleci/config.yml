@@ -1,22 +1,60 @@
 version: 2.1
 
+defaultImage: &defaultImage
+  image: docker.io/stackrox/apollo-ci:0.2.8
+  auth:
+    username: $DOCKER_IO_PULL_USERNAME
+    password: $DOCKER_IO_PULL_PASSWORD
+
+defaultWorkingDirectory: &defaultWorkingDirectory '/go/src/github.com/stackrox/scanner'
+
 defaults: &defaults
   docker:
-    - image: docker.io/stackrox/apollo-ci:0.2.6
-      auth:
-        username: $DOCKER_IO_PULL_USERNAME
-        password: $DOCKER_IO_PULL_PASSWORD
+    - *defaultImage
   working_directory: /go/src/github.com/stackrox/scanner
 
+runOnAllTags: &runOnAllTags
+  filters:
+    tags:
+      only: /.*/
+
+runOnAllTagsWithDockerIOPullCtx: &runOnAllTagsWithDockerIOPullCtx
+  <<: *runOnAllTags
+  context: docker-io-pull
+
 commands:
+  check-label-to-run:
+    description: Run on master or tags, but skip on PRs unless the given label is provided
+    parameters:
+      label:
+        type: string
+    steps:
+      - run:
+          name: Determine whether to run step
+          command: |
+            set +e
+            if [[ "${CIRCLE_BRANCH}" == "master" || -n "${CIRCLE_TAG}" ]]; then
+              echo "On master or tag, running the step"
+            else
+              .circleci/pr_has_label.sh "<< parameters.label >>"
+              if [[ $? -eq 1 ]]; then
+                echo "Skipping tests because we're on a PR. Apply the << parameters.label >> label to your PR if you want to run them."
+                circleci step halt
+              fi
+            fi
+
   setup-gcp:
     description: Set up GCP service account and configure gcloud
+    parameters:
+      service-account-env:
+        type: string
+        default: GOOGLE_SA_CIRCLECI_SCANNER
     steps:
       - run:
           name: Configure GCP service account and gcloud
           command: |
             cci-export GOOGLE_APPLICATION_CREDENTIALS /tmp/gcp.json
-            echo "${GOOGLE_SA_CIRCLECI_SCANNER}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
+            echo "${<< parameters.service-account-env >>}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
             chmod 0600 "${GOOGLE_APPLICATION_CREDENTIALS}"
             gcloud auth activate-service-account --key-file "${GOOGLE_APPLICATION_CREDENTIALS}"
             gcloud auth list
@@ -232,6 +270,151 @@ jobs:
           name: Run style checks on test code
           command: make -C qa-tests style
 
+  generate-genesis-dump:
+    <<: *defaults
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: ci-fetch-dumps
+      - run:
+          name: Build updater, and persist to workspace
+          command: |
+            make build-updater
+            mkdir -p /tmp/updater-bin
+            cp ./bin/updater /tmp/updater-bin/
+
+      - run:
+          name: Generate the genesis dump
+          command: |
+            mkdir -p /tmp/genesis-dump
+            ./bin/updater generate-dump --out-file /tmp/genesis-dump/dump.zip
+            ls -lrt /tmp/genesis-dump
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - genesis-dump
+            - updater-bin
+
+  create-postgres-dump-from-genesis-dump:
+    docker:
+      - *defaultImage
+      - image: postgres:12.0-alpine
+    working_directory: *defaultWorkingDirectory
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: ci-fetch-dumps
+      - setup_remote_docker
+      - setup-gcp
+
+      - attach_workspace:
+          at: /tmp
+
+      - run:
+          name: Restore updater bin
+          command: |
+            cp /tmp/updater-bin/updater ./bin/
+
+      - run:
+          name: Load vuln contents into postgres
+          command: |
+            ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file /tmp/genesis-dump/dump.zip
+
+      - run:
+          name: Take a PG dump
+          command: |
+            pg_dump -U postgres postgres://127.0.0.1:5432 > pg-definitions.sql
+            gzip --best pg-definitions.sql
+
+      - run:
+          name: Upload PG dump to Google Storage
+          command: |
+            gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
+
+  upload-nvd-dump-for-embedding-into-image:
+    <<: *defaults
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: ci-fetch-dumps
+      - setup-gcp
+      - attach_workspace:
+          at: /tmp
+
+      - run:
+          name: Generate NVD dump
+          command: |
+            zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out nvd-definitions.zip
+
+      - run:
+          name: Upload to Google Storage
+          command: |
+            gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+
+
+  create-diff-dumps:
+    <<: *defaults
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: ci-fetch-dumps
+      - setup-gcp
+      - attach_workspace:
+          at: /tmp
+
+      - run:
+          name: Restore updater bin
+          command: |
+            cp /tmp/updater-bin/updater ./bin/
+
+      - run:
+          name: Create diff for each manifest
+          command: |
+            mkdir -p /tmp/diff-dumps
+            while IFS=$'\t' read -r dumploc timestamp; do
+              dump_file_name="${dumploc##*/}"
+              dump_file_name_no_ext="${dump_file_name%.*}"
+              echo "Pulling genesis dump from ${dumploc}"
+              gsutil cp "${dumploc}" .
+              timestamp_in_zip="$(unzip -p "${dump_file_name}" manifest.json | jq -r '.until')"
+              echo "Got timestamps -- from zip: ${timestamp_in_zip}; from manifest: ${timestamp}"
+              [[ "${timestamp_in_zip}" == "${timestamp}" ]] # Assertion on the manifest contents
+              ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --out-file "/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
+            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp] | @tsv' < image/dump/genesis_manifests.json)
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - diff-dumps
+
+
+  upload-diff-dumps:
+    <<: *defaults
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: ci-fetch-dumps
+
+      - setup-gcp:
+          service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
+
+      - attach_workspace:
+          at: /tmp
+
+      - run:
+          name: Upload each diff dump to the prod bucket
+          command: |
+            mkdir -p /tmp/diff-dumps
+            while IFS=$'\t' read -r dumploc diffloc; do
+              dump_file_name="${dumploc##*/}"
+              dump_file_name_no_ext="${dump_file_name%.*}"
+              expected_zip_file_loc="/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
+              [[ -f "${expected_zip_file_loc}" ]]
+              [[ -n "${diffloc}" ]]
+              gsutil cp "${expected_zip_file_loc}" "${diffloc}"
+            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .diffLocation] | @tsv' < image/dump/genesis_manifests.json)
+
   build:
     <<: *defaults
     steps:
@@ -311,44 +494,45 @@ workflows:
 
   build:
     jobs:
+    - generate-genesis-dump:
+        <<: *runOnAllTagsWithDockerIOPullCtx
+    - create-postgres-dump-from-genesis-dump:
+        <<: *runOnAllTagsWithDockerIOPullCtx
+        requires:
+          - generate-genesis-dump
+    - create-diff-dumps:
+        <<: *runOnAllTagsWithDockerIOPullCtx
+        requires:
+          - generate-genesis-dump
+    - upload-nvd-dump-for-embedding-into-image:
+        <<: *runOnAllTagsWithDockerIOPullCtx
+        requires:
+          - generate-genesis-dump
+    - upload-diff-dumps:
+        <<: *runOnAllTagsWithDockerIOPullCtx
+        requires:
+          - create-diff-dumps
     - unit-tests:
-        context: docker-io-pull
-        filters:
-          tags:
-            only: /.*/
+        <<: *runOnAllTagsWithDockerIOPullCtx
     - style-checks:
-        context: docker-io-pull
-        filters:
-          tags:
-            only: /.*/
+        <<: *runOnAllTagsWithDockerIOPullCtx
     - build:
+        <<: *runOnAllTags
         context: docker-io-and-stackrox-io-push
-        filters:
-          tags:
-            only: /.*/
+        requires:
+          - create-postgres-dump-from-genesis-dump
+          - upload-nvd-dump-for-embedding-into-image
     - provision-cluster:
-        context: docker-io-pull
-        filters:
-          tags:
-            only: /.*/
+        <<: *runOnAllTagsWithDockerIOPullCtx
     - provision-cluster-rhel:
-        context: docker-io-pull
-        filters:
-          tags:
-            only: /.*/
+        <<: *runOnAllTagsWithDockerIOPullCtx
     - e2e-tests:
-        context: docker-io-pull
+        <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - build
           - provision-cluster
-        filters:
-          tags:
-            only: /.*/
     - e2e-tests-rhel:
-        context: docker-io-pull
+        <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - build
           - provision-cluster-rhel
-        filters:
-          tags:
-            only: /.*/
