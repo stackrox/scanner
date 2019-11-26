@@ -109,15 +109,21 @@ func (u *Updater) doUpdate() error {
 	return nil
 }
 
+func (u *Updater) doUpdateAndLogError() {
+	if err := u.doUpdate(); err != nil {
+		log.WithError(err).Error("Updater failed")
+	}
+}
+
 func (u *Updater) runForever() {
+	// Do an update at the very beginning.
+	u.doUpdateAndLogError()
 	t := time.NewTicker(u.interval)
 	defer t.Stop()
 	for {
 		select {
 		case <-t.C:
-			if err := u.doUpdate(); err != nil {
-				log.WithError(err).Error("Updater failed")
-			}
+			u.doUpdateAndLogError()
 		case <-u.stopSig.Done():
 			return
 		}
