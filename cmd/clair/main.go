@@ -129,7 +129,7 @@ func main() {
 	proxy.EnableProxyEnvironmentSetting(true)
 
 	// Check for dependencies.
-	for _, bin := range []string{"git", "rpm", "xz"} {
+	for _, bin := range []string{"rpm", "xz"} {
 		_, err := exec.LookPath(bin)
 		if err != nil {
 			log.WithError(err).WithField("dependency", bin).Fatal("failed to find dependency")
