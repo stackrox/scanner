@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/rox/pkg/httputil"
 	"github.com/stackrox/rox/pkg/utils"
@@ -83,6 +83,7 @@ func fetchDumpFromGoogleStorage(url string, lastUpdatedTime time.Time, outputPat
 }
 
 func (u *Updater) doUpdate() error {
+	log.Info("Starting an update cycle")
 	startTime := time.Now()
 	if err := os.RemoveAll(diffDumpOutputPath); err != nil {
 		return errors.Wrap(err, "removing diff dump output path")
@@ -95,6 +96,7 @@ func (u *Updater) doUpdate() error {
 		return errors.Wrap(err, "fetching update from URL")
 	}
 	if !fetched {
+		log.Info("No new update to fetch")
 		return nil
 	}
 	if err := os.MkdirAll(diffDumpScratchDir, 0755); err != nil {
@@ -114,7 +116,7 @@ func (u *Updater) runForever() {
 		select {
 		case <-t.C:
 			if err := u.doUpdate(); err != nil {
-				logrus.WithError(err).Error("Updater failed")
+				log.WithError(err).Error("Updater failed")
 			}
 		case <-u.stopSig.Done():
 			return
