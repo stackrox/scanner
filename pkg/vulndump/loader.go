@@ -80,6 +80,10 @@ func determineWhetherToUpdate(db database.Datastore, manifest *Manifest) (bool, 
 	if err := dbTime.UnmarshalText(bytes.TrimSpace([]byte(val))); err != nil {
 		return false, errors.Wrapf(err, "invalid timestamp in DB: %q", val)
 	}
+	// Protect against missing data.
+	if manifest.Since.After(dbTime) {
+		return false, errors.Errorf("cannot update with manifest: its start time (%s) is after the DB update time (%s)", manifest.Since, dbTime)
+	}
 	return manifest.Until.After(dbTime), nil
 }
 

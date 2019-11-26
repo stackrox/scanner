@@ -6,7 +6,6 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 RUN apk update && \
     apk --no-cache add \
             ca-certificates \
-            git \
             openssl \
             xz \
         && apk --repository "http://nl.alpinelinux.org/alpine/3.10/community" --no-cache add rpm \
@@ -18,5 +17,7 @@ COPY ./bin/scanner /
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 RUN mkdir -p "${NVD_DEFINITIONS_DIR}"
 COPY ./dump/nvd/*.json "${NVD_DEFINITIONS_DIR}/"
+
+COPY ./dump/genesis_manifests.json /
 
 ENTRYPOINT ["/scanner"]

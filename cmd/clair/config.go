@@ -19,9 +19,9 @@ import (
 	"os"
 	"time"
 
-	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/updater"
 	"gopkg.in/yaml.v2"
 )
 
@@ -34,8 +34,8 @@ type File struct {
 // Config is the global configuration for an instance of Clair.
 type Config struct {
 	Database database.RegistrableComponentConfig `yaml:"database"`
-	Updater  *clair.UpdaterConfig                `yaml:"updater"`
 	API      *api.Config                         `yaml:"api"`
+	Updater  updater.Config                      `yaml:"updater"`
 	LogLevel string                              `yaml:"logLevel"`
 }
 
@@ -45,7 +45,7 @@ func DefaultConfig() Config {
 		Database: database.RegistrableComponentConfig{
 			Type: "pgsql",
 		},
-		Updater: &clair.UpdaterConfig{
+		Updater: updater.Config{
 			Interval: 1 * time.Hour,
 		},
 		API: &api.Config{

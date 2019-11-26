@@ -180,14 +180,14 @@ db-image-rhel:
 deploy: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
-	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG --output-dir rendered-chart
+	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG,updateInterval=2m --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
 .PHONY: deploy-rhel
 deploy-rhel: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
-	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG,scannerImage="us.gcr.io/stackrox-ci/scanner-rhel",scannerDBImage="us.gcr.io/stackrox-ci/scanner-db-rhel" --output-dir rendered-chart
+	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG,updateInterval=2m,scannerImage="us.gcr.io/stackrox-ci/scanner-rhel",scannerDBImage="us.gcr.io/stackrox-ci/scanner-db-rhel" --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
 ###########

@@ -29,7 +29,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
-	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/ping"
@@ -39,6 +38,7 @@ import (
 	"github.com/stackrox/scanner/ext/imagefmt"
 	"github.com/stackrox/scanner/pkg/formatter"
 	"github.com/stackrox/scanner/pkg/stopper"
+	"github.com/stackrox/scanner/pkg/updater"
 
 	// Register database driver.
 	_ "github.com/stackrox/scanner/database/pgsql"
@@ -53,8 +53,6 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
-	_ "github.com/stackrox/scanner/ext/vulnmdsrc/nvd"
-	_ "github.com/stackrox/scanner/ext/vulnsrc/all"
 
 	// Register generators
 	_ "github.com/stackrox/scanner/cpe/java"
@@ -92,7 +90,7 @@ func Boot(config *Config) {
 	defer db.Close()
 
 	// Initialize the vulnerability cache prior to making the API available
-	_ = nvdtoolscache.Singleton()
+	vulncache := nvdtoolscache.Singleton()
 
 	go api.RunClairify(config.API, db)
 
@@ -109,13 +107,16 @@ func Boot(config *Config) {
 	go grpcAPI.Start()
 
 	// Start updater
-	st.Begin()
-	go clair.RunUpdater(config.Updater, db, st)
+	u, err := updater.New(config.Updater, db, vulncache.LoadFromDirectory)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to initialize updater")
+	}
 
 	// Wait for interruption and shutdown gracefully.
 	waitForSignals(syscall.SIGINT, syscall.SIGTERM)
 	log.Info("Received interruption, gracefully stopping ...")
 	st.Stop()
+	u.Stop()
 }
 
 func main() {
@@ -128,7 +129,7 @@ func main() {
 	proxy.EnableProxyEnvironmentSetting(true)
 
 	// Check for dependencies.
-	for _, bin := range []string{"git", "rpm", "xz"} {
+	for _, bin := range []string{"rpm", "xz"} {
 		_, err := exec.LookPath(bin)
 		if err != nil {
 			log.WithError(err).WithField("dependency", bin).Fatal("failed to find dependency")

@@ -1,6 +1,8 @@
 package nvdtoolscache
 
 import (
+	"path/filepath"
+
 	"github.com/etcd-io/bbolt"
 	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
@@ -8,11 +10,15 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/nvdloader"
+	"github.com/stackrox/scanner/pkg/wellknowndirnames"
 )
 
-// This is a temporary path for the boltDB and is expected to be backed by
-// an empty dir
-const boltPath = "/var/lib/stackrox/temp.db"
+var (
+	// BoltPath is a temporary path for the boltDB and is expected to be backed by
+	// an empty dir. Exported for localdev to be able to set it.
+	// TODO: Make this injectable instead.
+	BoltPath = filepath.Join(wellknowndirnames.WriteableDir, "temp.db")
+)
 
 func New() (Cache, error) {
 	opts := bbolt.Options{
@@ -20,7 +26,7 @@ func New() (Cache, error) {
 		FreelistType:   bbolt.FreelistMapType,
 		NoSync:         true,
 	}
-	db, err := bbolt.Open(boltPath, 0600, &opts)
+	db, err := bbolt.Open(BoltPath, 0600, &opts)
 	if err != nil {
 		return nil, err
 	}
