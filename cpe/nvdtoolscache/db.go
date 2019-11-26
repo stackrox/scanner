@@ -12,7 +12,7 @@ import (
 
 // This is a temporary path for the boltDB and is expected to be backed by
 // an empty dir
-const boltPath = "/var/lib/stackrox/temp.db"
+var BoltPath = "/var/lib/stackrox/temp.db"
 
 func New() (Cache, error) {
 	opts := bbolt.Options{
@@ -20,7 +20,7 @@ func New() (Cache, error) {
 		FreelistType:   bbolt.FreelistMapType,
 		NoSync:         true,
 	}
-	db, err := bbolt.Open(boltPath, 0600, &opts)
+	db, err := bbolt.Open(BoltPath, 0600, &opts)
 	if err != nil {
 		return nil, err
 	}
