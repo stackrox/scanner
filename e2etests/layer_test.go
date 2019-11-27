@@ -28,6 +28,6 @@ func TestLayersAndLocations(t *testing.T) {
 	}
 	// sha256:2a28f35f97b8a65f89f83a39efa0b3926a2f5e442c71ae99c549af29d535e54c is a layer that chowns the files
 	for _, f := range scan.GetImage().GetFeatures() {
-		assert.NotEqual(t, "256:2a28f35f97b8a65f89f83a39efa0b3926a2f5e442c71ae99c549af29d535e54c", f.GetAddedByLayer())
+		assert.NotEqual(t, "sha256:2a28f35f97b8a65f89f83a39efa0b3926a2f5e442c71ae99c549af29d535e54c", f.GetAddedByLayer())
 	}
 }
