@@ -35,8 +35,9 @@ type Updater struct {
 	lastUpdatedTime time.Time
 	client          *http.Client
 
-	interval    time.Duration
-	downloadURL string
+	interval           time.Duration
+	downloadURL        string
+	fetchIsFromCentral bool
 
 	db           database.Datastore
 	cpeDBUpdater vulndump.InMemNVDCacheUpdater
@@ -44,7 +45,7 @@ type Updater struct {
 	stopSig *concurrency.Signal
 }
 
-func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
+func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, fetchIsFromCentral bool, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
 	// First, head the URL to see when it was last modified.
 	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, url, nil)
 	if err != nil {
@@ -58,6 +59,11 @@ func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, url string,
 	defer utils.IgnoreError(resp.Body.Close)
 	if resp.StatusCode == http.StatusNotModified {
 		// Not modified
+		return false, nil
+	}
+	// If we're fetching from Central, 404s are okay.
+	if fetchIsFromCentral && resp.StatusCode == http.StatusNotFound {
+		log.Info("No vuln dumps were uploaded to Central")
 		return false, nil
 	}
 	if resp.StatusCode != http.StatusOK {
@@ -87,7 +93,7 @@ func (u *Updater) doUpdate() error {
 	if err := os.RemoveAll(diffDumpScratchDir); err != nil {
 		return errors.Wrap(err, "removing diff dump scratch dir")
 	}
-	fetched, err := fetchDumpFromURL(u.stopSig, u.client, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
+	fetched, err := fetchDumpFromURL(u.stopSig, u.client, u.fetchIsFromCentral, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
 	if err != nil {
 		return errors.Wrap(err, "fetching update from URL")
 	}
@@ -174,13 +180,14 @@ func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCac
 
 	stopSig := concurrency.NewSignal()
 	u := &Updater{
-		client:          client,
-		interval:        config.Interval,
-		downloadURL:     downloadURL,
-		db:              db,
-		cpeDBUpdater:    cpeDBUpdater,
-		stopSig:         &stopSig,
-		lastUpdatedTime: lastUpdatedTime,
+		fetchIsFromCentral: isCentral,
+		client:             client,
+		interval:           config.Interval,
+		downloadURL:        downloadURL,
+		db:                 db,
+		cpeDBUpdater:       cpeDBUpdater,
+		stopSig:            &stopSig,
+		lastUpdatedTime:    lastUpdatedTime,
 	}
 	go u.runForever()
 	return u, nil

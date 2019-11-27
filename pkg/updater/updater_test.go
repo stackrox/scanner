@@ -38,13 +38,13 @@ func TestFetchDumpFromGoogleStorage(t *testing.T) {
 
 	outputPath := filepath.Join(tempDir, "dump.zip")
 	// Should not fetch since it can't be updated in a time in the future.
-	updated, err := fetchDumpFromURL(concurrency.Never(), client, url, time.Now().Add(time.Minute), outputPath)
+	updated, err := fetchDumpFromURL(concurrency.Never(), client, false, url, time.Now().Add(time.Minute), outputPath)
 	require.NoError(t, err)
 	assert.False(t, updated)
 	assertOnFileExistence(t, outputPath, false)
 
 	// Should definitely fetch.
-	updated, err = fetchDumpFromURL(concurrency.Never(), client, url, nov23, outputPath)
+	updated, err = fetchDumpFromURL(concurrency.Never(), client, false, url, nov23, outputPath)
 	require.NoError(t, err)
 	assert.True(t, updated)
 	assertOnFileExistence(t, outputPath, true)
