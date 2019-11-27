@@ -46,14 +46,29 @@ type Layer struct {
 	Features         []Feature         `json:"Features,omitempty"`
 }
 
+type languageFeatureKey struct {
+	name, version, location string
+}
+
 func getLanguageData(db database.Datastore, layerName string) ([]database.FeatureVersion, error) {
-	componentMap, err := db.GetLayerLanguageComponents(layerName)
+	layersToComponents, err := db.GetLayerLanguageComponents(layerName)
 	if err != nil {
 		return nil, err
 	}
+
+	languageFeatureMap := make(map[languageFeatureKey]struct{})
 	var features []database.FeatureVersion
-	for layer, components := range componentMap {
-		features = append(features, cpe.CheckForVulnerabilities(layer, components)...)
+	for _, layerToComponents := range layersToComponents {
+		newFeatures := cpe.CheckForVulnerabilities(layerToComponents.Layer, layerToComponents.Components)
+		for _, fv := range newFeatures {
+			featureKey := languageFeatureKey{name: fv.Feature.Name, version: fv.Version, location: fv.Feature.Location}
+			if _, ok := languageFeatureMap[featureKey]; ok {
+				// Exact feature already exists at this location so this is probably a file modification and therefore dedupe
+				continue
+			}
+			languageFeatureMap[featureKey] = struct{}{}
+			features = append(features, fv)
+		}
 	}
 	return features, nil
 }
@@ -85,6 +100,7 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) Feature 
 		VersionFormat: stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
 		Version:       version,
 		AddedBy:       dbFeatureVersion.AddedBy.Name,
+		Location:      dbFeatureVersion.Feature.Location,
 	}
 }
 
@@ -137,7 +153,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		layer.NamespaceName = dbLayer.Namespace.Name
 	}
 
-	if withFeatures || withVulnerabilities && dbLayer.Features != nil {
+	if (withFeatures || withVulnerabilities) && dbLayer.Features != nil {
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion)
 
@@ -225,6 +241,7 @@ type Feature struct {
 	Version         string          `json:"Version,omitempty"`
 	Vulnerabilities []Vulnerability `json:"Vulnerabilities,omitempty"`
 	AddedBy         string          `json:"AddedBy,omitempty"`
+	Location        string          `json:"Location,omitempty"`
 }
 
 func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {

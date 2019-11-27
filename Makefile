@@ -157,6 +157,7 @@ build: deps
 scanner-image: build
 	@echo "+ $@"
 	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/Dockerfile.scanner image/
+	@docker tag us.gcr.io/stackrox-ci/scanner:$(TAG) stackrox/scanner:$(TAG)
 
 .PHONY: scanner-image-rhel
 scanner-image-rhel: build
@@ -168,6 +169,8 @@ db-image:
 	@echo "+ $@"
 	@test -f image/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
 	@docker build -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/Dockerfile.db image/
+	@docker tag us.gcr.io/stackrox-ci/scanner-db:$(TAG) stackrox/scanner-db:$(TAG)
+
 
 .PHONY: db-image-rhel
 db-image-rhel:

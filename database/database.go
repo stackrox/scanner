@@ -214,5 +214,5 @@ type Datastore interface {
 	AddImage(layer string, digest, name string) error
 	InsertLayerComponents(l string, c []*component.Component) error
 
-	GetLayerLanguageComponents(layer string) (map[string][]*component.Component, error)
+	GetLayerLanguageComponents(layer string) ([]*component.LayerToComponents, error)
 }

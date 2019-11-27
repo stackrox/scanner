@@ -18,13 +18,14 @@ message Feature {
     repeated Vulnerability vulnerabilities = 3;
     string                 feature_type    = 4;
     string                 added_by_layer  = 5;
+    string                 location        = 6;
 }
 
 message Vulnerability {
     string name        = 1;
     string description = 2;
     string link        = 3;
-    bytes metadata     = 4;
+    bytes  metadata    = 4;
     string fixed_by    = 5;
 }
 
