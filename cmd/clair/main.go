@@ -29,6 +29,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
+	"github.com/stackrox/rox/pkg/sync"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/ping"
@@ -82,15 +83,31 @@ func Boot(config *Config) {
 	rand.Seed(time.Now().UnixNano())
 	st := stopper.NewStopper()
 
-	// Open database
-	db, err := database.OpenWithRetries(config.Database, 5, 10*time.Second)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to open database despite multiple retries...")
-	}
+	// Open database and initialize vuln cache in parallel, prior to making the API available.
+	var wg sync.WaitGroup
+
+	var db database.Datastore
+	wg.Add(1)
+	go func() {
+		defer wg.Add(-1)
+		var err error
+		db, err = database.OpenWithRetries(config.Database, 5, 10*time.Second)
+		if err != nil {
+			log.WithError(err).Fatal("Failed to open database despite multiple retries...")
+		}
+	}()
+
+	var vulncache nvdtoolscache.Cache
+	wg.Add(1)
+	go func() {
+		defer wg.Add(-1)
+		vulncache = nvdtoolscache.Singleton()
+	}()
+
+	wg.Wait()
 	defer db.Close()
 
 	// Initialize the vulnerability cache prior to making the API available
-	vulncache := nvdtoolscache.Singleton()
 
 	go api.RunClairify(config.API, db)
 
