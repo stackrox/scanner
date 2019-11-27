@@ -3,7 +3,7 @@ package component
 // A Component represents a software component that is installed in an image.
 type Component struct {
 	// Analyzers MUST ensure that the name, version and source type are set in every component
-	// they return, since a component is not meaningful without those two fields.
+	// they return, since a component is not meaningful without those fields.
 	// All other fields are optional.
 
 	Name    string

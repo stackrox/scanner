@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/stackrox/rox/pkg/urlfmt"
 	"github.com/stackrox/rox/pkg/utils"
 )
 
@@ -16,6 +17,8 @@ const (
 
 	gsPrefix                = "gs://"
 	storageGoogleAPIsPrefix = "https://storage.googleapis.com/"
+
+	apiPathInCentral = "api/extensions/scannerdefinitions"
 )
 
 type knownGenesisDump struct {
@@ -30,21 +33,32 @@ type genesisManifest struct {
 // getRelevantDownloadURL gets the genesis manifests from the dump, finds the one
 // with the highest timestamp, and returns the location for the diff dump from that location.
 // This ensures that we get the smallest diff dump that works for this version of scanner.
-func getRelevantDownloadURL() (string, error) {
+func getRelevantDownloadURL(config Config) (downloadURL string, isCentral bool, err error) {
+	if config.FetchFromCentral {
+		centralEndpoint := config.CentralEndpoint
+		if centralEndpoint == "" {
+			centralEndpoint = "https://central.stackrox"
+		}
+		centralEndpoint, err = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
+		if err != nil {
+			return "", false, errors.Wrap(err, "normalizing central endpoint")
+		}
+		return fmt.Sprintf("%s/%s", centralEndpoint, apiPathInCentral), true, nil
+	}
 	genesisFile, err := os.Open(genesisManifestsLocation)
 	if err != nil {
-		return "", errors.Wrap(err, "opening manifests file")
+		return "", false, errors.Wrap(err, "opening manifests file")
 	}
 	defer utils.IgnoreError(genesisFile.Close)
 
 	var manifest genesisManifest
 	err = json.NewDecoder(genesisFile).Decode(&manifest)
 	if err != nil {
-		return "", errors.Wrap(err, "JSON-decoding manifest")
+		return "", false, errors.Wrap(err, "JSON-decoding manifest")
 	}
 
 	if len(manifest.KnownGenesisDumps) == 0 {
-		return "", errors.New("invalid manifest, no genesis dumps")
+		return "", false, errors.New("invalid manifest, no genesis dumps")
 	}
 
 	var mostRecentGenesisDump *knownGenesisDump
@@ -57,7 +71,7 @@ func getRelevantDownloadURL() (string, error) {
 	diffLoc := mostRecentGenesisDump.DiffLocation
 	// Convert a gs:// URL to https://storage.googleapis.com URL.
 	if !strings.HasPrefix(diffLoc, gsPrefix) {
-		return "", errors.Errorf("invalid diff location %q: must start with %s", diffLoc, gsPrefix)
+		return "", false, errors.Errorf("invalid diff location %q: must start with %s", diffLoc, gsPrefix)
 	}
-	return fmt.Sprintf("%s%s", storageGoogleAPIsPrefix, strings.TrimPrefix(diffLoc, "gs://")), nil
+	return fmt.Sprintf("%s%s", storageGoogleAPIsPrefix, strings.TrimPrefix(diffLoc, "gs://")), false, nil
 }

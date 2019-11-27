@@ -25,6 +25,8 @@ const (
 	certFilePath = certsPrefix + "cert.pem"
 	// KeyFilePath is where the key is stored.
 	keyFilePath = certsPrefix + "key.pem"
+
+	centralHostname = "central.stackrox"
 )
 
 var (
@@ -40,8 +42,8 @@ func leafCertificateFromFile() (tls.Certificate, error) {
 	return tls.LoadX509KeyPair(certFilePath, keyFilePath)
 }
 
-// TLSConfig returns a TLS config for a server that is in the Rox mTLS system.
-func TLSConfig() (*tls.Config, error) {
+// TLSServerConfig returns a TLS config for a server that is in the Rox mTLS system.
+func TLSServerConfig() (*tls.Config, error) {
 	serverTLSCert, err := leafCertificateFromFile()
 	if err != nil {
 		return nil, errors.Wrap(err, "tls conversion")
@@ -127,4 +129,24 @@ func config(serverBundle tls.Certificate) (*tls.Config, error) {
 	// However, we don't use enough of their ecosystem to fully use it yet.
 	cfg := defaultTLSServerConfig(certPool, []tls.Certificate{serverBundle})
 	return cfg, nil
+}
+
+// TLSClientConfigForCentral returns a TLS client config that can be used to talk to Central.
+func TLSClientConfigForCentral() (*tls.Config, error) {
+	certPool, err := trustedCertPool()
+	if err != nil {
+		return nil, errors.Wrap(err, "loading trusted cert pool")
+	}
+	leafCert, err := leafCertificateFromFile()
+	if err != nil {
+		return nil, errors.Wrap(err, "loading leaf cert")
+	}
+	conf := &tls.Config{
+		ServerName: centralHostname,
+		Certificates: []tls.Certificate{
+			leafCert,
+		},
+		RootCAs: certPool,
+	}
+	return conf, nil
 }

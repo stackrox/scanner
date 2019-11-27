@@ -14,34 +14,38 @@ import (
 	"github.com/stackrox/rox/pkg/httputil"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/mtls"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/wellknowndirnames"
 	"github.com/stackrox/scanner/pkg/wellknownkeys"
 )
 
 var (
-	client = http.Client{
-		Timeout: 5 * time.Minute,
-	}
-
 	diffDumpOutputPath = filepath.Join(wellknowndirnames.WriteableDir, "diff-dump.zip")
 	diffDumpScratchDir = filepath.Join(wellknowndirnames.WriteableDir, "diff-dump-scratch")
 )
 
 const (
 	ifModifiedSinceHeader = "If-Modified-Since"
+
+	defaulTimeout = 5 * time.Minute
 )
 
 type Updater struct {
-	interval        time.Duration
 	lastUpdatedTime time.Time
-	downloadURL     string
-	db              database.Datastore
-	cpeDBUpdater    vulndump.InMemNVDCacheUpdater
-	stopSig         *concurrency.Signal
+	client          *http.Client
+
+	interval           time.Duration
+	downloadURL        string
+	fetchIsFromCentral bool
+
+	db           database.Datastore
+	cpeDBUpdater vulndump.InMemNVDCacheUpdater
+
+	stopSig *concurrency.Signal
 }
 
-func fetchDumpFromGoogleStorage(ctx concurrency.Waitable, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
+func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, fetchIsFromCentral bool, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
 	// First, head the URL to see when it was last modified.
 	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, url, nil)
 	if err != nil {
@@ -55,6 +59,11 @@ func fetchDumpFromGoogleStorage(ctx concurrency.Waitable, url string, lastUpdate
 	defer utils.IgnoreError(resp.Body.Close)
 	if resp.StatusCode == http.StatusNotModified {
 		// Not modified
+		return false, nil
+	}
+	// If we're fetching from Central, 404s are okay.
+	if fetchIsFromCentral && resp.StatusCode == http.StatusNotFound {
+		log.Info("No vuln dumps were uploaded to Central")
 		return false, nil
 	}
 	if resp.StatusCode != http.StatusOK {
@@ -84,7 +93,7 @@ func (u *Updater) doUpdate() error {
 	if err := os.RemoveAll(diffDumpScratchDir); err != nil {
 		return errors.Wrap(err, "removing diff dump scratch dir")
 	}
-	fetched, err := fetchDumpFromGoogleStorage(u.stopSig, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
+	fetched, err := fetchDumpFromURL(u.stopSig, u.client, u.fetchIsFromCentral, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
 	if err != nil {
 		return errors.Wrap(err, "fetching update from URL")
 	}
@@ -146,10 +155,24 @@ func (u *Updater) Stop() {
 
 // New returns a new updater instance, and starts running the update daemon.
 func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCacheUpdater) (*Updater, error) {
-	downloadURL, err := getRelevantDownloadURL()
+	downloadURL, isCentral, err := getRelevantDownloadURL(config)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting relevant download URL")
 	}
+
+	client := &http.Client{
+		Timeout: defaulTimeout,
+	}
+	if isCentral {
+		clientConfig, err := mtls.TLSClientConfigForCentral()
+		if err != nil {
+			return nil, errors.Wrap(err, "generating TLS client config for Central")
+		}
+		client.Transport = &http.Transport{
+			TLSClientConfig: clientConfig,
+		}
+	}
+
 	lastUpdatedTime, err := getLastUpdatedTime(db)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting last updated time from DB")
@@ -157,12 +180,14 @@ func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCac
 
 	stopSig := concurrency.NewSignal()
 	u := &Updater{
-		interval:        config.Interval,
-		downloadURL:     downloadURL,
-		db:              db,
-		cpeDBUpdater:    cpeDBUpdater,
-		stopSig:         &stopSig,
-		lastUpdatedTime: lastUpdatedTime,
+		fetchIsFromCentral: isCentral,
+		client:             client,
+		interval:           config.Interval,
+		downloadURL:        downloadURL,
+		db:                 db,
+		cpeDBUpdater:       cpeDBUpdater,
+		stopSig:            &stopSig,
+		lastUpdatedTime:    lastUpdatedTime,
 	}
 	go u.runForever()
 	return u, nil
