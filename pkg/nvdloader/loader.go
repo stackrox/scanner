@@ -10,11 +10,15 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
 )
 
 var (
-	client = http.Client{Timeout: 2 * time.Minute}
+	client = http.Client{
+		Timeout:   2 * time.Minute,
+		Transport: proxy.RoundTripper(),
+	}
 )
 
 // DownloadFeedsToPath downloads the NVD feeds to the given path.

@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/stackrox/rox/pkg/httputil/proxy"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 )
@@ -39,6 +40,7 @@ func New(endpoint string, insecure bool) *Clairify {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
+			Proxy:           proxy.TransportFunc,
 		},
 	}
 	return &Clairify{
