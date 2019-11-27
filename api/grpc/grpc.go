@@ -14,7 +14,7 @@ import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/scanner/pkg/clairify/server/mtls"
+	"github.com/stackrox/scanner/pkg/mtls"
 	"google.golang.org/grpc"
 )
 
@@ -81,7 +81,7 @@ func (a *apiImpl) Start() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	conf, err := mtls.TLSConfig()
+	conf, err := mtls.TLSServerConfig()
 	if err != nil {
 		log.Fatal(err)
 	}

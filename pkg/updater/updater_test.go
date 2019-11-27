@@ -2,6 +2,7 @@ package updater
 
 import (
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -28,6 +29,7 @@ func assertOnFileExistence(t *testing.T, path string, shouldExist bool) {
 }
 
 func TestFetchDumpFromGoogleStorage(t *testing.T) {
+	client := &http.Client{Timeout: 30 * time.Second}
 	tempDir, err := ioutil.TempDir("", "go-fetch-dump-test")
 	require.NoError(t, err)
 	defer func() {
@@ -36,13 +38,13 @@ func TestFetchDumpFromGoogleStorage(t *testing.T) {
 
 	outputPath := filepath.Join(tempDir, "dump.zip")
 	// Should not fetch since it can't be updated in a time in the future.
-	updated, err := fetchDumpFromGoogleStorage(concurrency.Never(), url, time.Now().Add(time.Minute), outputPath)
+	updated, err := fetchDumpFromGoogleStorage(concurrency.Never(), client, url, time.Now().Add(time.Minute), outputPath)
 	require.NoError(t, err)
 	assert.False(t, updated)
 	assertOnFileExistence(t, outputPath, false)
 
 	// Should definitely fetch.
-	updated, err = fetchDumpFromGoogleStorage(concurrency.Never(), url, nov23, outputPath)
+	updated, err = fetchDumpFromGoogleStorage(concurrency.Never(), client, url, nov23, outputPath)
 	require.NoError(t, err)
 	assert.True(t, updated)
 	assertOnFileExistence(t, outputPath, true)

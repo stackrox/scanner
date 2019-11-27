@@ -16,9 +16,9 @@ import (
 	"github.com/sirupsen/logrus"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/pkg/clairify/server/mtls"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/mtls"
 	server "github.com/stackrox/scanner/pkg/scan"
 )
 
@@ -237,7 +237,7 @@ func (s *Server) Start() error {
 	var listener net.Listener
 	var err error
 
-	tlsConfig, err = mtls.TLSConfig()
+	tlsConfig, err = mtls.TLSServerConfig()
 	if err != nil {
 		return err
 	}
