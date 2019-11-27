@@ -17,6 +17,12 @@ type Component struct {
 	JavaPkgMetadata *JavaPkgMetadata
 }
 
+// LayerToComponents describes a layer to the components found in the layer
+type LayerToComponents struct {
+	Layer      string
+	Components []*Component
+}
+
 // JavaPkgMetadata contains additional metadata that Java-based components have.
 type JavaPkgMetadata struct {
 	ImplementationVersion string

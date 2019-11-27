@@ -177,6 +177,6 @@ func (mds *MockDatastore) InsertLayerComponents(l string, c []*component.Compone
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) GetLayerLanguageComponents(layer string) (map[string][]*component.Component, error) {
+func (mds *MockDatastore) GetLayerLanguageComponents(layer string) ([]*component.LayerToComponents, error) {
 	panic("required mock function not implemented")
 }

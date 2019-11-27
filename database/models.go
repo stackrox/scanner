@@ -47,6 +47,7 @@ type Feature struct {
 	Name       string
 	Namespace  Namespace
 	SourceType string
+	Location   string
 }
 
 type FeatureVersion struct {

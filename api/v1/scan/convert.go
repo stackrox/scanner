@@ -65,15 +65,16 @@ func convertFeatures(apiFeatures []apiV1.Feature) ([]*v1.Feature, error) {
 			Vulnerabilities: vulns,
 			FeatureType:     a.VersionFormat,
 			AddedByLayer:    a.AddedBy,
+			Location:        a.Location,
 		})
 	}
 	return features, nil
 }
 
-func convertComponents(componentsMap map[string][]*component.Component) map[string]*v1.LanguageLevelComponents {
-	converted := make(map[string]*v1.LanguageLevelComponents, len(componentsMap))
-	for k, v := range componentsMap {
-		converted[k] = convertComponentsSlice(v)
+func convertComponents(layersToComponents []*component.LayerToComponents) map[string]*v1.LanguageLevelComponents {
+	converted := make(map[string]*v1.LanguageLevelComponents, len(layersToComponents))
+	for _, layerToComponents := range layersToComponents {
+		converted[layerToComponents.Layer] = convertComponentsSlice(layerToComponents.Components)
 	}
 	return converted
 }

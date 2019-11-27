@@ -2,6 +2,7 @@ package cpe
 
 import (
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/facebookincubator/nvdtools/cvefeed"
@@ -44,7 +45,7 @@ func generateVersionKeys(c *component.Component) set.StringSet {
 	return set.NewStringSet(c.Version, strings.ReplaceAll(c.Version, ".", `\.`))
 }
 
-func normalVersionKeys(v string) string {
+func normalizeVersionKeys(v string) string {
 	return strings.ReplaceAll(v, `\.`, ".")
 }
 
@@ -60,50 +61,58 @@ func getFeaturesFromMatchResults(layer string, matchResults []matchResult) []dat
 	featuresMap := make(map[nameVersion]*database.FeatureVersion)
 	featuresToVulns := make(map[nameVersion]set.StringSet)
 	for _, m := range matchResults {
-		if len(m.CPEs) == 0 {
-			log.Errorf("Found 0 CPEs in match with CVE %q", m.CVE.ID())
+		if m.CPE.Attributes == nil {
 			continue
 		}
-		for _, cpe := range m.CPEs {
-			name, version := cpe.Product, normalVersionKeys(cpe.Version)
-			nameVersion := nameVersion{
-				name:    name,
-				version: version,
-			}
-
-			vulnSet, ok := featuresToVulns[nameVersion]
-			if !ok {
-				vulnSet = set.NewStringSet()
-				featuresToVulns[nameVersion] = vulnSet
-			}
-			if !vulnSet.Add(m.CVE.ID()) {
-				continue
-			}
-
-			feature, ok := featuresMap[nameVersion]
-			if !ok {
-				feature = &database.FeatureVersion{
-					Feature: database.Feature{
-						Name:       name,
-						SourceType: m.source.String(),
-					},
-					Version: version,
-					AddedBy: database.Layer{
-						Name: layer,
-					},
-				}
-				featuresMap[nameVersion] = feature
-			}
-			vuln := nvdtoolscache.NewVulnerability(m.CVE.(*nvd.Vuln).CVEItem)
-			vuln.FixedBy = cpe.FixedIn
-			feature.AffectedBy = append(feature.AffectedBy, *vuln)
+		cpe := m.CPE
+		name, version := cpe.Product, normalizeVersionKeys(cpe.Version)
+		nameVersion := nameVersion{
+			name:    name,
+			version: version,
 		}
+
+		vulnSet, ok := featuresToVulns[nameVersion]
+		if !ok {
+			vulnSet = set.NewStringSet()
+			featuresToVulns[nameVersion] = vulnSet
+		}
+		if !vulnSet.Add(m.CVE.ID()) {
+			continue
+		}
+		feature, ok := featuresMap[nameVersion]
+		if !ok {
+			feature = &database.FeatureVersion{
+				Feature: database.Feature{
+					Name:       name,
+					SourceType: m.Component.SourceType.String(),
+					Location:   m.Component.Location,
+				},
+				Version: version,
+				AddedBy: database.Layer{
+					Name: layer,
+				},
+			}
+			featuresMap[nameVersion] = feature
+		}
+		vuln := nvdtoolscache.NewVulnerability(m.CVE.(*nvd.Vuln).CVEItem)
+		vuln.FixedBy = cpe.FixedIn
+		feature.AffectedBy = append(feature.AffectedBy, *vuln)
 	}
 	features := make([]database.FeatureVersion, 0, len(featuresMap))
 	for _, feature := range featuresMap {
 		features = append(features, *feature)
 	}
 	return features
+}
+
+func getMostSpecificCPE(cpes []wfn.AttributesWithFixedIn) wfn.AttributesWithFixedIn {
+	max := cpes[0]
+	for _, c := range cpes {
+		if len(c.Version) > len(max.Version) {
+			max = c
+		}
+	}
+	return max
 }
 
 func getAttributes(c *component.Component) []*wfn.Attributes {
@@ -143,12 +152,7 @@ func filterMatchResultsByTargetSoftware(matchResults []matchResult) []matchResul
 	filteredResults := make([]matchResult, 0, len(matchResults))
 	for _, f := range matchResults {
 		// If the CPE has a language specified, then ensure that the language is ensured in the result CPE
-		var tgt string
-		for _, matchedAttribute := range f.CPEs {
-			if tgt = matchedAttribute.TargetSW; tgt != "" {
-				break
-			}
-		}
+		tgt := f.CPE.TargetSW
 		if tgt == "" {
 			return matchResults
 		}
@@ -162,17 +166,20 @@ func filterMatchResultsByTargetSoftware(matchResults []matchResult) []matchResul
 }
 
 type matchResult struct {
-	CVE    cvefeed.Vuln
-	CPEs   []wfn.AttributesWithFixedIn
-	source component.SourceType
+	CVE       cvefeed.Vuln
+	CPE       wfn.AttributesWithFixedIn
+	Component *component.Component
 }
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
 	cache := nvdtoolscache.Singleton()
 	var matchResults []matchResult
+
+	sort.Slice(components, func(i, j int) bool {
+		return components[i].Name < components[j].Name
+	})
 	for _, c := range components {
 		attributes := getAttributes(c)
-
 		products := set.NewStringSet()
 		for _, a := range attributes {
 			if a.Product != "" {
@@ -187,7 +194,11 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 		}
 		for _, v := range vulns {
 			if matchesWithFixed := v.MatchWithFixedIn(attributes, false); len(matchesWithFixed) > 0 {
-				matchResults = append(matchResults, matchResult{CVE: v, CPEs: matchesWithFixed, source: c.SourceType})
+				matchResults = append(matchResults, matchResult{
+					CVE:       v,
+					CPE:       getMostSpecificCPE(matchesWithFixed),
+					Component: c,
+				})
 			}
 		}
 	}

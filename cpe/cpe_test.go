@@ -132,6 +132,10 @@ func newDatabaseVuln(id string) database.Vulnerability {
 	}
 }
 
+func newComponent() *component.Component {
+	return &component.Component{}
+}
+
 func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -146,7 +150,8 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			name: "one match but not attributes (shouldn't happen)",
 			matches: []matchResult{
 				{
-					CVE: newMockCVEFeedVuln("cve1"),
+					CVE:       newMockCVEFeedVuln("cve1"),
+					Component: newComponent(),
 				},
 			},
 		},
@@ -155,14 +160,13 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			matches: []matchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []wfn.AttributesWithFixedIn{
-						{
-							Attributes: &wfn.Attributes{
-								Product: "product",
-								Version: "version",
-							},
+					CPE: wfn.AttributesWithFixedIn{
+						Attributes: &wfn.Attributes{
+							Product: "product",
+							Version: "version",
 						},
 					},
+					Component: newComponent(),
 				},
 			},
 			features: []database.FeatureVersion{
@@ -172,50 +176,6 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 						SourceType: "UnsetSourceType",
 					},
 					Version: "version",
-					AffectedBy: []database.Vulnerability{
-						newDatabaseVuln("cve1"),
-					},
-				},
-			},
-		},
-		{
-			name: "one match with two CPEs",
-			matches: []matchResult{
-				{
-					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []wfn.AttributesWithFixedIn{
-						{
-							Attributes: &wfn.Attributes{
-								Product: "product",
-								Version: "version",
-							},
-						},
-						{
-							Attributes: &wfn.Attributes{
-								Product: "product2",
-								Version: "version2",
-							},
-						},
-					},
-				},
-			},
-			features: []database.FeatureVersion{
-				{
-					Feature: database.Feature{
-						Name:       "product",
-						SourceType: "UnsetSourceType",
-					},
-					Version: "version",
-					AffectedBy: []database.Vulnerability{
-						newDatabaseVuln("cve1"),
-					},
-				},
-				{
-					Feature: database.Feature{
-						Name:       "product2",
-						SourceType: "UnsetSourceType",
-					},
-					Version: "version2",
 					AffectedBy: []database.Vulnerability{
 						newDatabaseVuln("cve1"),
 					},
@@ -227,25 +187,23 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			matches: []matchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []wfn.AttributesWithFixedIn{
-						{
-							Attributes: &wfn.Attributes{
-								Product: "product",
-								Version: "version",
-							},
+					CPE: wfn.AttributesWithFixedIn{
+						Attributes: &wfn.Attributes{
+							Product: "product",
+							Version: "version",
 						},
 					},
+					Component: newComponent(),
 				},
 				{
 					CVE: newMockCVEFeedVuln("cve2"),
-					CPEs: []wfn.AttributesWithFixedIn{
-						{
-							Attributes: &wfn.Attributes{
-								Product: "product",
-								Version: "version",
-							},
+					CPE: wfn.AttributesWithFixedIn{
+						Attributes: &wfn.Attributes{
+							Product: "product",
+							Version: "version",
 						},
 					},
+					Component: newComponent(),
 				},
 			},
 			features: []database.FeatureVersion{
@@ -267,25 +225,23 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 			matches: []matchResult{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
-					CPEs: []wfn.AttributesWithFixedIn{
-						{
-							Attributes: &wfn.Attributes{
-								Product: "product",
-								Version: "version",
-							},
+					CPE: wfn.AttributesWithFixedIn{
+						Attributes: &wfn.Attributes{
+							Product: "product",
+							Version: "version",
 						},
 					},
+					Component: newComponent(),
 				},
 				{
 					CVE: newMockCVEFeedVuln("cve2"),
-					CPEs: []wfn.AttributesWithFixedIn{
-						{
-							Attributes: &wfn.Attributes{
-								Product: "product2",
-								Version: "version2",
-							},
+					CPE: wfn.AttributesWithFixedIn{
+						Attributes: &wfn.Attributes{
+							Product: "product2",
+							Version: "version2",
 						},
 					},
+					Component: newComponent(),
 				},
 			},
 			features: []database.FeatureVersion{
