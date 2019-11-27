@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
 	"strings"
 	"time"
 
@@ -44,7 +43,7 @@ func getRelevantDownloadURL(config Config) (downloadURL string, isCentral bool, 
 		if err != nil {
 			return "", false, errors.Wrap(err, "normalizing central endpoint")
 		}
-		return path.Join(centralEndpoint, apiPathInCentral), true, nil
+		return fmt.Sprintf("%s/%s", centralEndpoint, apiPathInCentral), true, nil
 	}
 	genesisFile, err := os.Open(genesisManifestsLocation)
 	if err != nil {
