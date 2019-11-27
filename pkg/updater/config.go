@@ -10,6 +10,6 @@ type Config struct {
 	// Currently, we don't support fetching from both. It's one or the other depending on whether
 	// you're in offline mode or not.
 	FetchFromCentral bool `yaml:"fetchFromCentral"`
-	// Endpoint that central can be reached at. Defaults to central.stackrox:443 if not present in the config.
-	CentralEndpoint string `yaml:"centralURL"`
+	// Endpoint that central can be reached at. Defaults to central.stackrox if not present in the config.
+	CentralEndpoint string `yaml:"centralEndpoint"`
 }

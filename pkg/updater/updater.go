@@ -44,7 +44,7 @@ type Updater struct {
 	stopSig *concurrency.Signal
 }
 
-func fetchDumpFromGoogleStorage(ctx concurrency.Waitable, client *http.Client, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
+func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
 	// First, head the URL to see when it was last modified.
 	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, url, nil)
 	if err != nil {
@@ -87,7 +87,7 @@ func (u *Updater) doUpdate() error {
 	if err := os.RemoveAll(diffDumpScratchDir); err != nil {
 		return errors.Wrap(err, "removing diff dump scratch dir")
 	}
-	fetched, err := fetchDumpFromGoogleStorage(u.stopSig, u.client, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
+	fetched, err := fetchDumpFromURL(u.stopSig, u.client, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
 	if err != nil {
 		return errors.Wrap(err, "fetching update from URL")
 	}

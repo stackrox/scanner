@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/stackrox/rox/pkg/urlfmt"
 	"github.com/stackrox/rox/pkg/utils"
 )
 
@@ -38,6 +39,10 @@ func getRelevantDownloadURL(config Config) (downloadURL string, isCentral bool, 
 		centralEndpoint := config.CentralEndpoint
 		if centralEndpoint == "" {
 			centralEndpoint = "https://central.stackrox"
+		}
+		centralEndpoint, err = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
+		if err != nil {
+			return "", false, errors.Wrap(err, "normalizing central endpoint")
 		}
 		return path.Join(centralEndpoint, apiPathInCentral), true, nil
 	}
