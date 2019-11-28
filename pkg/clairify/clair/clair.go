@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/httputil/proxy"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 )
@@ -26,7 +27,8 @@ func NewClient(endpoint string) *Client {
 	endpoint = strings.TrimRight(endpoint, "/")
 	return &Client{
 		client: &http.Client{
-			Timeout: 1 * time.Minute,
+			Timeout:   1 * time.Minute,
+			Transport: proxy.RoundTripper(),
 		},
 		endpoint: endpoint,
 	}

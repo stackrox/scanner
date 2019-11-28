@@ -30,6 +30,7 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
@@ -107,7 +108,10 @@ const (
 )
 
 var (
-	client = &http.Client{Timeout: 10 * time.Second}
+	client = &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: proxy.RoundTripper(),
+	}
 )
 
 func httpGet(url string) (*http.Response, error) {

@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/scanner/pkg/version"
 )
 
@@ -31,7 +32,8 @@ const (
 // GetWithUserAgent performs an HTTP GET with the proper Clair User-Agent.
 func GetWithUserAgent(url string) (*http.Response, error) {
 	client := &http.Client{
-		Timeout: clientTimeout,
+		Timeout:   clientTimeout,
+		Transport: proxy.RoundTripper(),
 	}
 
 	req, err := http.NewRequest("GET", url, nil)

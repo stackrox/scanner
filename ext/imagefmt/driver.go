@@ -30,6 +30,7 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -134,7 +135,7 @@ func Extract(format, path string, headers map[string]string, filenameMatcher mat
 		// Send the request and handle the response.
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureTLS},
-			Proxy:           http.ProxyFromEnvironment,
+			Proxy:           proxy.TransportFunc,
 		}
 		client := &http.Client{Transport: tr}
 		r, err := client.Do(request)

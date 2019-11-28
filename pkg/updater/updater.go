@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/rox/pkg/httputil"
+	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/mtls"
@@ -161,7 +162,8 @@ func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCac
 	}
 
 	client := &http.Client{
-		Timeout: defaulTimeout,
+		Timeout:   defaulTimeout,
+		Transport: proxy.RoundTripper(),
 	}
 	if isCentral {
 		clientConfig, err := mtls.TLSClientConfigForCentral()

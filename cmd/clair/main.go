@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"math/rand"
@@ -58,6 +59,15 @@ import (
 	// Register generators
 	_ "github.com/stackrox/scanner/cpe/java"
 )
+
+const (
+	proxyConfigPath = "/run/secrets/stackrox.io/proxy-config"
+	proxyConfigFile = "config.yaml"
+)
+
+func init() {
+	proxy.UseWithDefaultTransport()
+}
 
 var debugRoutes = map[string]http.Handler{
 	"/debug/pprof":         http.HandlerFunc(pprof.Index),
@@ -143,7 +153,7 @@ func main() {
 	flagInsecureTLS := flag.Bool("insecure-tls", true, "Disable TLS server's certificate chain and hostname verification when pulling layers.")
 	flag.Parse()
 
-	proxy.EnableProxyEnvironmentSetting(true)
+	proxy.WatchProxyConfig(context.Background(), proxyConfigPath, proxyConfigFile, true)
 
 	// Check for dependencies.
 	for _, bin := range []string{"rpm", "xz"} {
