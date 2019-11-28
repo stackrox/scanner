@@ -342,6 +342,7 @@ github.com/stackrox/nvdtools v0.0.0-20191120225537-fe4e9a7e467f h1:lENqZ9C0tnHzR
 github.com/stackrox/nvdtools v0.0.0-20191120225537-fe4e9a7e467f/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
 github.com/stackrox/rox v0.0.0-20191127062245-99c8fc6f708b h1:vwAKFJtP5kqqJG1H9DOJh7EExubnmlxyiK7zSo72mfI=
 github.com/stackrox/rox v0.0.0-20191127062245-99c8fc6f708b/go.mod h1:Qshd7p6Hw8xBvPlJM3pKWh81R2s3qhbAdYIvA6pPStw=
+github.com/stackrox/rox v0.0.0-20191128130813-ae51554fc242/go.mod h1:Qshd7p6Hw8xBvPlJM3pKWh81R2s3qhbAdYIvA6pPStw=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2/go.mod h1:mjqs7N0Q6m5HpR7QfXVBZXZWSqTjQLeTujjA/xUp2uw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
