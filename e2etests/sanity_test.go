@@ -176,6 +176,7 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "debian:8",
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2011-3374",
 							Severity:      "Negligible",
+							Description:   "It was found that apt-key in apt, all versions, do not correctly validate gpg keys with the master keyring, leading to a potential man-in-the-middle attack.",
 						},
 						{
 							Name:          "CVE-2019-3462",
