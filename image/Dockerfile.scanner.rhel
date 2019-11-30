@@ -17,8 +17,9 @@ COPY ./dump/genesis_manifests.json /
 
 ENTRYPOINT ["/scanner"]
 
+
 # Make image STIG compliant: https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/
-ARG DSOP_URL=https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/raw/18d21ee5ed843e7b319e2670f47687f057db98a6/7.7
+ARG DSOP_URL=https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/raw/master/7.7
 RUN ( for i in dsop-fix-{1,2,3}.sh ; do curl -O "$DSOP_URL/$i" ; done; )
 RUN ( chmod +x /dsop-fix-{1,2}.sh && for i in /dsop-fix-{1,2}.sh; do sh "$i"; done; )
 RUN ( yum update -y --disableplugin=subscription-manager && rm -rf /var/cache/yum/ /var/tmp/* /tmp/* /var/tmp/.???* /tmp/.???*; )
