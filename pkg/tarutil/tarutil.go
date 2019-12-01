@@ -17,6 +17,7 @@ package tarutil
 
 import (
 	"archive/tar"
+	"archive/zip"
 	"bufio"
 	"bytes"
 	"compress/bzip2"
@@ -24,6 +25,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os/exec"
+	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -43,6 +46,9 @@ var (
 	gzipHeader  = []byte{0x1f, 0x8b}
 	bzip2Header = []byte{0x42, 0x5a, 0x68}
 	xzHeader    = []byte{0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00}
+
+	javaArchiveRegex = regexp.MustCompile(`^.*\.([jwe]ar|[jh]pi)$`)
+
 )
 
 // FilesMap is a map of files' paths to their contents.
@@ -85,11 +91,62 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		// Extract the element
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
 			d, _ := ioutil.ReadAll(tr)
+			if javaArchiveRegex.MatchString(hdr.Name) {
+				d, err = rewriteArchive(d)
+				if err != nil {
+					return nil, err
+				}
+			}
+			// Put the file directly
 			data[filename] = d
 		}
 	}
 
 	return data, nil
+}
+
+func rewriteArchive(data []byte) ([]byte, error) {
+	buf := bytes.NewReader(data)
+	r, err := zip.NewReader(buf, int64(len(data)))
+	if err != nil {
+		return nil, errors.Wrap(err, "error reading zip file")
+	}
+
+	filteredFiles := r.File[:0]
+	for _, f := range r.File {
+		base := filepath.Base(f.Name)
+		switch base {
+		case "MANIFEST.MF":
+			filteredFiles = append(filteredFiles, f)
+		case "pom.properties":
+			filteredFiles = append(filteredFiles, f)
+		}
+	}
+
+	outputBuf := new(bytes.Buffer)
+	// Create a new zip archive.
+	zipWriter := zip.NewWriter(outputBuf)
+	for _, f := range filteredFiles {
+		wr, err := zipWriter.Create(f.Name)
+		if err != nil {
+			return nil, errors.Wrap(err, "error creating zip writer")
+		}
+		r, err := f.Open()
+		if err != nil {
+			return nil, errors.Wrap(err, "error creating opening zip file")
+		}
+		_, err = io.Copy(wr, r)
+		if err != nil {
+			return nil, errors.Wrap(err, "error creating copying zip file")
+		}
+		if err := r.Close(); err != nil {
+			return nil, errors.Wrap(err, "error creating closing zip file")
+		}
+	}
+	if err := zipWriter.Close(); err != nil {
+		return nil, errors.Wrap(err, "error creating closing zip writer")
+	}
+	return outputBuf.Bytes(), nil
 }
 
 // XzReader implements io.ReadCloser for data compressed via `xz`.
