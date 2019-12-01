@@ -119,8 +119,8 @@ func rewriteArchive(data []byte) ([]byte, error) {
 			filteredFiles = append(filteredFiles, f)
 		case base == "pom.properties":
 			filteredFiles = append(filteredFiles, f)
-		case filepath.Ext(base) == ".jar":
-			// We will just rewrite the subarchive JARs at this point
+		case javaArchiveRegex.MatchString(f.Name):
+			// We will just rewrite the Java subarchives at this point
 			filteredFiles = append(filteredFiles, f)
 		}
 	}
