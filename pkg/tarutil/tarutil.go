@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/matcher"
 )
 
@@ -90,10 +91,13 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		// Extract the element
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
 			d, _ := ioutil.ReadAll(tr)
-			if javaArchiveRegex.MatchString(hdr.Name) {
-				d, err = rewriteArchive(d)
+			if len(d) != 0 && javaArchiveRegex.MatchString(hdr.Name) {
+				newData, err := rewriteArchive(d)
 				if err != nil {
-					return nil, errors.Wrapf(err, "error rewriting %q", hdr.Name)
+					// Log the error, but we haven't overwritten the original data
+					log.Errorf("error reading %q: %v", hdr.Name, err)
+				} else {
+					d = newData
 				}
 			}
 			// Put the file directly
@@ -104,6 +108,25 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	return data, nil
 }
 
+func copyZipEntry(writer *zip.Writer, f *zip.File) error {
+	wr, err := writer.Create(f.Name)
+	if err != nil {
+		return errors.Wrap(err, "error creating zip writer")
+	}
+	r, err := f.Open()
+	if err != nil {
+		return errors.Wrap(err, "error opening zip file")
+	}
+	_, err = io.Copy(wr, r)
+	if err != nil {
+		return errors.Wrap(err, "error copying zip file")
+	}
+	if err := r.Close(); err != nil {
+		return errors.Wrap(err, "error closing zip file")
+	}
+	return nil
+}
+
 func rewriteArchive(data []byte) ([]byte, error) {
 	buf := bytes.NewReader(data)
 	r, err := zip.NewReader(buf, int64(len(data)))
@@ -111,38 +134,16 @@ func rewriteArchive(data []byte) ([]byte, error) {
 		return nil, errors.Wrapf(err, "error reading zip file")
 	}
 
-	filteredFiles := r.File[:0]
-	for _, f := range r.File {
-		base := filepath.Base(f.Name)
-		switch {
-		case base == "MANIFEST.MF":
-			filteredFiles = append(filteredFiles, f)
-		case base == "pom.properties":
-			filteredFiles = append(filteredFiles, f)
-		case javaArchiveRegex.MatchString(f.Name):
-			// We will just rewrite the Java subarchives at this point
-			filteredFiles = append(filteredFiles, f)
-		}
-	}
-
 	outputBuf := new(bytes.Buffer)
 	// Create a new zip archive.
 	zipWriter := zip.NewWriter(outputBuf)
-	for _, f := range filteredFiles {
-		wr, err := zipWriter.Create(f.Name)
-		if err != nil {
-			return nil, errors.Wrap(err, "error creating zip writer")
-		}
-		r, err := f.Open()
-		if err != nil {
-			return nil, errors.Wrap(err, "error creating opening zip file")
-		}
-		_, err = io.Copy(wr, r)
-		if err != nil {
-			return nil, errors.Wrap(err, "error creating copying zip file")
-		}
-		if err := r.Close(); err != nil {
-			return nil, errors.Wrap(err, "error creating closing zip file")
+	for _, f := range r.File {
+		base := filepath.Base(f.Name)
+		if base == "MANIFEST.MF" || base == "pom.properties" || javaArchiveRegex.MatchString(f.Name) {
+			if err := copyZipEntry(zipWriter, f); err != nil {
+				_ = zipWriter.Close()
+				return nil, errors.Wrapf(err, "error copying zip entry for %q", f.Name)
+			}
 		}
 	}
 	if err := zipWriter.Close(); err != nil {
