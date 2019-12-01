@@ -48,7 +48,6 @@ var (
 	xzHeader    = []byte{0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00}
 
 	javaArchiveRegex = regexp.MustCompile(`^.*\.([jwe]ar|[jh]pi)$`)
-
 )
 
 // FilesMap is a map of files' paths to their contents.
@@ -115,10 +114,12 @@ func rewriteArchive(data []byte) ([]byte, error) {
 	filteredFiles := r.File[:0]
 	for _, f := range r.File {
 		base := filepath.Base(f.Name)
-		switch base {
-		case "MANIFEST.MF":
+		switch {
+		case base == "MANIFEST.MF":
 			filteredFiles = append(filteredFiles, f)
-		case "pom.properties":
+		case base == "pom.properties":
+			filteredFiles = append(filteredFiles, f)
+		case filepath.Ext(base) == ".jar":
 			filteredFiles = append(filteredFiles, f)
 		}
 	}
