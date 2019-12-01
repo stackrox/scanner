@@ -139,10 +139,7 @@ func rewriteArchive(data []byte) ([]byte, error) {
 	zipWriter := zip.NewWriter(outputBuf)
 	for _, f := range r.File {
 		base := filepath.Base(f.Name)
-		if base != "MANIFEST.MF" && base != "pom.properties" {
-			continue
-		}
-		if !javaArchiveRegex.MatchString(f.Name) {
+		if base != "MANIFEST.MF" && base != "pom.properties" && !javaArchiveRegex.MatchString(f.Name) {
 			continue
 		}
 		if err := copyZipEntry(zipWriter, f); err != nil {
