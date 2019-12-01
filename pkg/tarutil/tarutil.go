@@ -148,7 +148,7 @@ func rewriteArchive(data []byte) ([]byte, error) {
 		}
 	}
 	if err := zipWriter.Close(); err != nil {
-		return nil, errors.Wrap(err, "error creating closing zip writer")
+		return nil, errors.Wrap(err, "error closing zip writer")
 	}
 	return outputBuf.Bytes(), nil
 }
