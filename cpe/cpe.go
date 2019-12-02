@@ -108,6 +108,10 @@ func getMostSpecificCPE(cpes []wfn.AttributesWithFixedIn) wfn.AttributesWithFixe
 		if max.Vendor != "" && c.Vendor == "" {
 			continue
 		}
+		if max.Vendor == "" && c.Vendor != "" {
+			max = c
+			continue
+		}
 		if len(c.Version) > len(max.Version) {
 			max = c
 		}

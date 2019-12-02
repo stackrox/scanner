@@ -1,6 +1,8 @@
 package node
 
 import (
+	"strings"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/match"
@@ -9,7 +11,9 @@ import (
 )
 
 var (
-	knownPkgs = set.NewFrozenStringSet("cryptiles", "qs", "brace_expansion")
+	knownPkgs = set.NewFrozenStringSet("cryptiles", "qs", "brace_expansion", "jquery", "dompurify")
+
+	keywords = []string{".js", "node", "npm"}
 )
 
 type validator struct{}
@@ -20,6 +24,12 @@ func (v validator) ValidateResult(result match.Result) bool {
 	}
 	for _, a := range result.CVE.Config() {
 		if a.TargetSW == `node\.js` {
+			return true
+		}
+	}
+	descLower := strings.ToLower(result.Vuln.Description)
+	for _, k := range keywords {
+		if strings.Contains(descLower, k) {
 			return true
 		}
 	}
