@@ -3,13 +3,13 @@ package ruby
 import (
 	"fmt"
 	"regexp"
-	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/match"
 	"github.com/stackrox/scanner/cpe/validation"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/stringhelpers"
 )
 
 var (
@@ -43,7 +43,7 @@ func (v validator) ValidateResult(result match.Result) bool {
 	// Check if the vuln matches Ruby in the targetSW
 	for _, a := range result.CVE.Config() {
 		for _, k := range knownKeywords {
-			if anyContains(k, a.Vendor, a.Product, a.TargetSW) {
+			if stringhelpers.AnyContain([]string{a.Vendor, a.Product, a.TargetSW}, k) {
 				return true
 			}
 		}
@@ -54,14 +54,5 @@ func (v validator) ValidateResult(result match.Result) bool {
 		}
 	}
 	log.Debugf("Ruby failed validation: %s %s", result.CPE.Product, result.CVE.ID())
-	return false
-}
-
-func anyContains(s string, tgts ...string) bool {
-	for _, t := range tgts {
-		if strings.Contains(t, s) {
-			return true
-		}
-	}
 	return false
 }

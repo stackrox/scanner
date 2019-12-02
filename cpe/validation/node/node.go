@@ -11,6 +11,9 @@ import (
 )
 
 var (
+	// brace_expansion 1.1.6 -> CVE-2017-18077
+	// qs 6.2.1 -> CVE-2017-1000048
+	// cryptiles 1.1.6 -> CVE-2018-1000620
 	knownPkgs = set.NewFrozenStringSet("cryptiles", "qs", "brace_expansion", "jquery", "dompurify")
 
 	keywords = []string{".js", "node", "npm"}

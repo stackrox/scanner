@@ -19,6 +19,13 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 )
 
+var attributeGetter = map[component.SourceType]func(c *component.Component) []*wfn.Attributes{
+	component.PythonSourceType: python.GetPythonAttributes,
+	component.JavaSourceType:   java.GetJavaAttributes,
+	component.GemSourceType:    ruby.GetRubyAttributes,
+	component.NPMSourceType:    node.GetNodeAttributes,
+}
+
 type nameVersion struct {
 	name, version string
 }
@@ -82,18 +89,10 @@ func escapeDash(s string) string {
 }
 
 func getAttributes(c *component.Component) []*wfn.Attributes {
-	var attrs []*wfn.Attributes
-	switch c.SourceType {
-	case component.PythonSourceType:
-		attrs = python.GetPythonAttributes(c)
-	case component.GemSourceType:
-		attrs = ruby.GetRubyAttributes(c)
-	case component.NPMSourceType:
-		attrs = node.GetNodeAttributes(c)
-	case component.JavaSourceType:
-		attrs = java.GetJavaAttributes(c)
-	case component.UnsetSourceType:
-		log.Errorf("Attributes cannot be found for source type %q", c.SourceType.String())
+	attrs := attributeGetter[c.SourceType](c)
+	if attrs == nil {
+		log.Errorf("No attribute getter available for %q", c.SourceType.String())
+		return nil
 	}
 	for _, a := range attrs {
 		a.Product = escapeDash(a.Product)
@@ -152,6 +151,7 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 				validator, ok := validation.Validators[c.SourceType]
 				if !ok {
 					log.Errorf("could not find validator for source type: %q", c.SourceType)
+					continue
 				}
 				if !validator.ValidateResult(result) {
 					continue

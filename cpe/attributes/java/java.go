@@ -10,11 +10,15 @@ import (
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/attributes/common"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/stringhelpers"
 )
 
 var (
 	extensionRegex = regexp.MustCompile(`\.(RELEASE|GA|SEC.*)$`)
 
+	// rt stands for runtime and is in Java generally
+	// docker and mesos are explicitly blacklisted as the packages don't have any keywords
+	// and typically standalone
 	blacklistedPkgs = []string{"rt", "docker", "mesos"}
 
 	// predisposedKeywords are the keywords that are likely to be used to specify
@@ -40,10 +44,7 @@ var (
 
 func predisposed(c *component.Component) bool {
 	for _, keyword := range predisposedKeywords {
-		if strings.Contains(c.Name, keyword) {
-			return true
-		}
-		if strings.Contains(c.Location, keyword) {
+		if stringhelpers.AnyContain([]string{c.Name, c.Location}, keyword) {
 			return true
 		}
 	}
@@ -54,15 +55,16 @@ func ignored(c *component.Component) bool {
 	for _, ignore := range ignoredPkgs {
 		// Not ignored: postgresql-jdbc
 		// Ignored: postgresql with jdbc in manifest
-		if !strings.Contains(c.Name, ignore) {
-			if strings.Contains(strings.ToLower(c.JavaPkgMetadata.BundleName), ignore) {
-				log.Debugf("Java: ignored %q based on bundle name: %v", c.Name, c.JavaPkgMetadata.BundleName)
-				return true
-			}
-			if strings.Contains(filepath.Base(c.Location), ignore) {
-				log.Debugf("Java: ignored %q based on location: %v", c.Name, c.Location)
-				return true
-			}
+		if strings.Contains(c.Name, ignore) {
+			continue
+		}
+		if strings.Contains(strings.ToLower(c.JavaPkgMetadata.BundleName), ignore) {
+			log.Debugf("Java: ignored %q based on bundle name: %v", c.Name, c.JavaPkgMetadata.BundleName)
+			return true
+		}
+		if strings.Contains(filepath.Base(c.Location), ignore) {
+			log.Debugf("Java: ignored %q based on location: %v", c.Name, c.Location)
+			return true
 		}
 	}
 	return false
@@ -83,6 +85,8 @@ func getPossibleVendors(origins []string) set.StringSet {
 			}
 		}
 	}
+	// A lot of java pkgs have the vendor as apache so instead of having an empty with a lot of false positives
+	// just add apache in hopes of catching some edge cases
 	if vendorSet.Cardinality() == 0 {
 		vendorSet.Add("apache")
 	}
@@ -97,7 +101,9 @@ func GetJavaAttributes(c *component.Component) []*wfn.Attributes {
 	if ignored(c) {
 		return nil
 	}
-	// Purposefully ignore jboss unless it's exactly jboss
+	// Purposefully ignore jboss unless it's exactly jboss.
+	// JBoss is very difficult to handle as there are lots of flavors of its subpackage
+	// and there isn't an easy way to sort through the data so error on the side of false negatives
 	if c.Name != "jboss" && strings.Contains(c.Name, "jboss") {
 		return nil
 	}

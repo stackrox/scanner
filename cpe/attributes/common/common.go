@@ -39,14 +39,14 @@ func AddMutatedNameKeys(c *component.Component, nameSet set.StringSet) {
 	}
 }
 
-func GenerateAttributesFromSets(vendor, name, version set.StringSet, targetSW string) []*wfn.Attributes {
-	if vendor.Cardinality() == 0 {
-		vendor.Add("")
+func GenerateAttributesFromSets(vendosr, names, versions set.StringSet, targetSW string) []*wfn.Attributes {
+	if vendosr.Cardinality() == 0 {
+		vendosr.Add("")
 	}
-	attributes := make([]*wfn.Attributes, 0, vendor.Cardinality()*name.Cardinality()*version.Cardinality())
-	for vendor := range vendor {
-		for name := range name {
-			for version := range version {
+	attributes := make([]*wfn.Attributes, 0, vendosr.Cardinality()*names.Cardinality()*versions.Cardinality())
+	for vendor := range vendosr {
+		for name := range names {
+			for version := range versions {
 				attributes = append(attributes, &wfn.Attributes{
 					Vendor:   strings.ToLower(vendor),
 					Product:  strings.ToLower(name),

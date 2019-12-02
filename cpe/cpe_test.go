@@ -15,6 +15,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGetAttributeFuncs(t *testing.T) {
+	assert.Equal(t, int(component.SentinelEndSourceType-component.UnsetSourceType-1), len(attributeGetter))
+}
+
 func TestGetAttributes(t *testing.T) {
 	cases := []struct {
 		comp               *component.Component
