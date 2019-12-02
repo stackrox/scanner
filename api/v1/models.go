@@ -141,7 +141,7 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 	return false
 }
 
-func addLanguageVulns(db database.Datastore, layer Layer) {
+func addLanguageVulns(db database.Datastore, layer *Layer) {
 	if os.Getenv("LANGUAGE_VULNS") == "false" {
 		return
 	}
@@ -194,7 +194,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 			}
 			layer.Features = append(layer.Features, feature)
 		}
-		addLanguageVulns(db, layer)
+		addLanguageVulns(db, &layer)
 	}
 
 	return layer, nil
