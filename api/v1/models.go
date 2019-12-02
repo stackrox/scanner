@@ -16,6 +16,7 @@ package v1
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/stackrox/rox/pkg/stringutils"
@@ -168,24 +169,26 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 			layer.Features = append(layer.Features, feature)
 		}
 
-		// Add Language Features
-		languageFeatureVersions, err := getLanguageData(db, layer.Name)
-		if err != nil {
-			return layer, err
-		}
-
-		var languageFeatures []Feature
-		for _, dbFeatureVersion := range languageFeatureVersions {
-			feature := featureFromDatabaseModel(dbFeatureVersion)
-
-			for _, dbVuln := range dbFeatureVersion.AffectedBy {
-				feature.Vulnerabilities = append(feature.Vulnerabilities, VulnerabilityFromDatabaseModel(dbVuln))
+		if os.Getenv("LANGUAGE_VULNS") != "false" {
+			// Add Language Features
+			languageFeatureVersions, err := getLanguageData(db, layer.Name)
+			if err != nil {
+				return layer, err
 			}
-			if !shouldDedupeLanguageFeature(feature, layer.Features) {
-				languageFeatures = append(languageFeatures, feature)
+
+			var languageFeatures []Feature
+			for _, dbFeatureVersion := range languageFeatureVersions {
+				feature := featureFromDatabaseModel(dbFeatureVersion)
+
+				for _, dbVuln := range dbFeatureVersion.AffectedBy {
+					feature.Vulnerabilities = append(feature.Vulnerabilities, VulnerabilityFromDatabaseModel(dbVuln))
+				}
+				if !shouldDedupeLanguageFeature(feature, layer.Features) {
+					languageFeatures = append(languageFeatures, feature)
+				}
 			}
+			layer.Features = append(layer.Features, languageFeatures...)
 		}
-		layer.Features = append(layer.Features, languageFeatures...)
 	}
 
 	return layer, nil
