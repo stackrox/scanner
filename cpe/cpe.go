@@ -45,8 +45,11 @@ func generateVersionKeys(c *component.Component) set.StringSet {
 	return set.NewStringSet(c.Version, strings.ReplaceAll(c.Version, ".", `\.`))
 }
 
-func normalizeVersionKeys(v string) string {
-	return strings.ReplaceAll(v, `\.`, ".")
+func getNameVersionFromCPE(attr *wfn.Attributes) nameVersion {
+	return nameVersion{
+		name:    strings.ReplaceAll(attr.Product, `\-`, "-"),
+		version: strings.ReplaceAll(attr.Version, `\.`, "."),
+	}
 }
 
 type nameVersion struct {
@@ -65,11 +68,7 @@ func getFeaturesFromMatchResults(layer string, matchResults []matchResult) []dat
 			continue
 		}
 		cpe := m.CPE
-		name, version := cpe.Product, normalizeVersionKeys(cpe.Version)
-		nameVersion := nameVersion{
-			name:    name,
-			version: version,
-		}
+		nameVersion := getNameVersionFromCPE(cpe.Attributes)
 
 		vulnSet, ok := featuresToVulns[nameVersion]
 		if !ok {
@@ -83,11 +82,11 @@ func getFeaturesFromMatchResults(layer string, matchResults []matchResult) []dat
 		if !ok {
 			feature = &database.FeatureVersion{
 				Feature: database.Feature{
-					Name:       name,
+					Name:       nameVersion.name,
 					SourceType: m.Component.SourceType.String(),
 					Location:   m.Component.Location,
 				},
-				Version: version,
+				Version: nameVersion.version,
 				AddedBy: database.Layer{
 					Name: layer,
 				},
@@ -115,6 +114,10 @@ func getMostSpecificCPE(cpes []wfn.AttributesWithFixedIn) wfn.AttributesWithFixe
 	return max
 }
 
+func escapeDash(s string) string {
+	return strings.ReplaceAll(s, "-", `\-`)
+}
+
 func getAttributes(c *component.Component) []*wfn.Attributes {
 	vendorSet := set.NewStringSet()
 	nameSet := set.NewStringSet()
@@ -137,8 +140,8 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 					tgtSW = `node\.js`
 				}
 				attributes = append(attributes, &wfn.Attributes{
-					Vendor:   strings.ToLower(vendor),
-					Product:  strings.ToLower(name),
+					Vendor:   escapeDash(strings.ToLower(vendor)),
+					Product:  escapeDash(strings.ToLower(name)),
 					Version:  strings.ToLower(version),
 					TargetSW: tgtSW,
 				})
