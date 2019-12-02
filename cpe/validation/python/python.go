@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	knownPkgs = set.NewFrozenStringSet("ansible", "jinja2", "supervisor", "html5lib", "sqlalchemy")
+	knownPkgs = set.NewFrozenStringSet("ansible", "jinja2", "supervisor", "html5lib", "sqlalchemy", "paramiko")
 
 	keywords = []string{
-		"beaker", "flask", "pallets", "py",
+		"beaker", "flask", "pallets", "py", "pickle",
 	}
 )
 
