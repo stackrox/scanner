@@ -16,8 +16,10 @@ package v1
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
@@ -139,6 +141,31 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 	return false
 }
 
+func addLanguageVulns(db database.Datastore, layer *Layer) {
+	if os.Getenv("LANGUAGE_VULNS") == "false" {
+		return
+	}
+	// Add Language Features
+	languageFeatureVersions, err := getLanguageData(db, layer.Name)
+	if err != nil {
+		log.Errorf("error getting language data: %v", err)
+		return
+	}
+
+	var languageFeatures []Feature
+	for _, dbFeatureVersion := range languageFeatureVersions {
+		feature := featureFromDatabaseModel(dbFeatureVersion)
+
+		for _, dbVuln := range dbFeatureVersion.AffectedBy {
+			feature.Vulnerabilities = append(feature.Vulnerabilities, VulnerabilityFromDatabaseModel(dbVuln))
+		}
+		if !shouldDedupeLanguageFeature(feature, layer.Features) {
+			languageFeatures = append(languageFeatures, feature)
+		}
+	}
+	layer.Features = append(layer.Features, languageFeatures...)
+}
+
 func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, error) {
 	layer := Layer{
 		Name:             dbLayer.Name,
@@ -167,25 +194,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 			}
 			layer.Features = append(layer.Features, feature)
 		}
-
-		// Add Language Features
-		languageFeatureVersions, err := getLanguageData(db, layer.Name)
-		if err != nil {
-			return layer, err
-		}
-
-		var languageFeatures []Feature
-		for _, dbFeatureVersion := range languageFeatureVersions {
-			feature := featureFromDatabaseModel(dbFeatureVersion)
-
-			for _, dbVuln := range dbFeatureVersion.AffectedBy {
-				feature.Vulnerabilities = append(feature.Vulnerabilities, VulnerabilityFromDatabaseModel(dbVuln))
-			}
-			if !shouldDedupeLanguageFeature(feature, layer.Features) {
-				languageFeatures = append(languageFeatures, feature)
-			}
-		}
-		layer.Features = append(layer.Features, languageFeatures...)
+		addLanguageVulns(db, &layer)
 	}
 
 	return layer, nil

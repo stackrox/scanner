@@ -16,6 +16,7 @@ package clair
 
 import (
 	"io"
+	"os"
 	"regexp"
 
 	log "github.com/sirupsen/logrus"
@@ -173,6 +174,10 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
 	}
 
+	// If we want to disable LANGUAGE_VULNS, then we can just set this variable to false
+	if os.Getenv("LANGUAGE_VULNS") == "false" {
+		return namespace, featureVersions, nil, err
+	}
 	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())
 	if err != nil {
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
