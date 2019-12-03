@@ -43,7 +43,6 @@ func matchSuffix(fullPath string) bool {
 			return true
 		}
 	}
-
 	return false
 }
 

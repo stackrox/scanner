@@ -56,8 +56,8 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
 
-	// Register generators
-	_ "github.com/stackrox/scanner/cpe/java"
+	// Register validators
+	_ "github.com/stackrox/scanner/cpe/validation/all"
 )
 
 const (

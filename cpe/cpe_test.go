@@ -8,68 +8,15 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/facebookincubator/nvdtools/wfn"
+	"github.com/stackrox/scanner/cpe/match"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerateNameKeys(t *testing.T) {
-	cases := []struct {
-		name      string
-		keys      []string
-		hasVendor bool
-	}{
-		{
-			name: "",
-		},
-		{
-			name: "name",
-			keys: []string{
-				"name",
-			},
-		},
-		{
-			name: "struts-showcase",
-			keys: []string{
-				"struts",
-				"struts-showcase",
-				"struts_showcase",
-			},
-			hasVendor: true,
-		},
-		{
-			name: "struts2-showcase",
-			keys: []string{
-				"struts",
-				"struts2",
-				"struts2-showcase",
-				"struts2_showcase",
-			},
-			hasVendor: true,
-		},
-		{
-			name: "struts-showcase",
-			keys: []string{
-				"struts-showcase",
-				"struts_showcase",
-			},
-			hasVendor: false,
-		},
-		{
-			name: "struts2-showcase",
-			keys: []string{
-				"struts2-showcase",
-				"struts2_showcase",
-			},
-			hasVendor: false,
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			assert.ElementsMatch(t, c.keys, generateNameKeys(c.name, c.hasVendor).AsSlice())
-		})
-	}
+func TestGetAttributeFuncs(t *testing.T) {
+	assert.Equal(t, int(component.SentinelEndSourceType-component.UnsetSourceType-1), len(attributeGetter))
 }
 
 func TestGetAttributes(t *testing.T) {
@@ -79,25 +26,51 @@ func TestGetAttributes(t *testing.T) {
 	}{
 		{
 			comp: &component.Component{
-				Name:    "struts2-showcase",
-				Version: "1.3.12",
+				Name:            "struts2-showcase",
+				Version:         "1.3.12",
+				SourceType:      component.JavaSourceType,
+				JavaPkgMetadata: &component.JavaPkgMetadata{},
 			},
 			expectedAttributes: []*wfn.Attributes{
 				{
+					Vendor:  "apache",
 					Product: `struts2\-showcase`,
 					Version: "1.3.12",
 				},
 				{
+					Vendor:  "apache",
 					Product: `struts2\-showcase`,
 					Version: `1\.3\.12`,
 				},
 				{
+					Vendor:  "apache",
 					Product: "struts2_showcase",
 					Version: "1.3.12",
 				},
 				{
+					Vendor:  "apache",
 					Product: "struts2_showcase",
 					Version: `1\.3\.12`,
+				},
+				{
+					Vendor:  "apache",
+					Product: "struts2",
+					Version: "1.3.12",
+				},
+				{
+					Vendor:  "apache",
+					Product: "struts2",
+					Version: "1\\.3\\.12",
+				},
+				{
+					Vendor:  "apache",
+					Product: "struts",
+					Version: "1.3.12",
+				},
+				{
+					Vendor:  "apache",
+					Product: "struts",
+					Version: "1\\.3\\.12",
 				},
 			},
 		},
@@ -133,31 +106,33 @@ func newDatabaseVuln(id string) database.Vulnerability {
 }
 
 func newComponent() *component.Component {
-	return &component.Component{}
+	return &component.Component{
+		SourceType: component.JavaSourceType,
+	}
 }
 
 func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 	cases := []struct {
 		name     string
-		matches  []matchResult
+		matches  []match.Result
 		features []database.FeatureVersion
 	}{
 		{
 			name:    "no matches",
-			matches: []matchResult{},
+			matches: []match.Result{},
 		},
 		{
 			name: "one match but not attributes (shouldn't happen)",
-			matches: []matchResult{
+			matches: []match.Result{
 				{
-					CVE:       newMockCVEFeedVuln("cve1"),
-					Component: newComponent(),
+					CVE: newMockCVEFeedVuln("cve1"),
 				},
 			},
+			features: []database.FeatureVersion{},
 		},
 		{
 			name: "one match",
-			matches: []matchResult{
+			matches: []match.Result{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
 					CPE: wfn.AttributesWithFixedIn{
@@ -166,14 +141,13 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 							Version: "version",
 						},
 					},
-					Component: newComponent(),
 				},
 			},
 			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
 						Name:       "product",
-						SourceType: "UnsetSourceType",
+						SourceType: component.JavaSourceType.String(),
 					},
 					Version: "version",
 					AffectedBy: []database.Vulnerability{
@@ -184,7 +158,7 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		},
 		{
 			name: "two matches with same CPE",
-			matches: []matchResult{
+			matches: []match.Result{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
 					CPE: wfn.AttributesWithFixedIn{
@@ -193,7 +167,6 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 							Version: "version",
 						},
 					},
-					Component: newComponent(),
 				},
 				{
 					CVE: newMockCVEFeedVuln("cve2"),
@@ -203,14 +176,13 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 							Version: "version",
 						},
 					},
-					Component: newComponent(),
 				},
 			},
 			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
 						Name:       "product",
-						SourceType: "UnsetSourceType",
+						SourceType: component.JavaSourceType.String(),
 					},
 					Version: "version",
 					AffectedBy: []database.Vulnerability{
@@ -222,7 +194,7 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		},
 		{
 			name: "two matches with different CPE",
-			matches: []matchResult{
+			matches: []match.Result{
 				{
 					CVE: newMockCVEFeedVuln("cve1"),
 					CPE: wfn.AttributesWithFixedIn{
@@ -231,7 +203,6 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 							Version: "version",
 						},
 					},
-					Component: newComponent(),
 				},
 				{
 					CVE: newMockCVEFeedVuln("cve2"),
@@ -241,14 +212,13 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 							Version: "version2",
 						},
 					},
-					Component: newComponent(),
 				},
 			},
 			features: []database.FeatureVersion{
 				{
 					Feature: database.Feature{
 						Name:       "product",
-						SourceType: "UnsetSourceType",
+						SourceType: component.JavaSourceType.String(),
 					},
 					Version: "version",
 					AffectedBy: []database.Vulnerability{
@@ -258,7 +228,7 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 				{
 					Feature: database.Feature{
 						Name:       "product2",
-						SourceType: "UnsetSourceType",
+						SourceType: component.JavaSourceType.String(),
 					},
 					Version: "version2",
 					AffectedBy: []database.Vulnerability{
@@ -271,6 +241,10 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			for i := range c.matches {
+				c.matches[i].Component = newComponent()
+				c.matches[i].Vuln = nvdtoolscache.NewVulnerability(c.matches[i].CVE.(*nvd.Vuln).CVEItem)
+			}
 			features := getFeaturesFromMatchResults("", c.matches)
 			assert.ElementsMatch(t, c.features, features)
 		})

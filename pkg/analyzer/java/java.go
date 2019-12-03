@@ -15,13 +15,31 @@ import (
 
 var (
 	javaRegexp = regexp.MustCompile(`^.*\.([jwe]ar|[jh]pi)$`)
+
+	filteredJavaComponents = []string{
+		"annotation",
+		"spec",
+	}
 )
 
-func getOrigin(mf parsedManifestMF) string {
-	if mf.specificationVendor != "" {
-		return mf.specificationVendor
+// Filter some substrings: e.g. annotations and specs can be ignored for example
+func filterComponent(component string) bool {
+	for _, filteredSubstring := range filteredJavaComponents {
+		if strings.Contains(component, filteredSubstring) {
+			return true
+		}
 	}
-	return mf.implementationVendor
+	return false
+}
+
+func getOrigins(mf parsedManifestMF) []string {
+	var origins []string
+	for _, s := range []string{mf.implementationVendorID, mf.specificationVendor, mf.implementationVendor, mf.bundleSymbolicName} {
+		if s != "" {
+			origins = append(origins, s)
+		}
+	}
+	return origins
 }
 
 func newJavaComponent(location string) component.Component {
@@ -50,7 +68,7 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 		return nil, nil
 	}
 
-	manifest, err := parseManifestMF(manifestFile)
+	manifest, err := parseManifestMF(locationSoFar, manifestFile)
 	if err != nil {
 		log.Debugf("error parsing java manifest file: %v", err)
 		return nil, nil
@@ -64,11 +82,11 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 	topLevelComponent.JavaPkgMetadata = &component.JavaPkgMetadata{
 		ImplementationVersion: manifest.implementationVersion,
 		SpecificationVersion:  manifest.specificationVersion,
-		Origin:                getOrigin(manifest),
+		Origins:               getOrigins(manifest),
+		BundleName:            manifest.bundleName,
 	}
 
 	allComponents := []*component.Component{&topLevelComponent}
-
 	for _, pomPropsF := range pomProperties {
 		parsedPomProps, err := parseMavenPomProperties(pomPropsF)
 		if err != nil {
@@ -84,7 +102,7 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 			currentComponent = &newComponent
 		}
 		if parsedPomProps.groupID != "" {
-			currentComponent.JavaPkgMetadata.Origin = parsedPomProps.groupID
+			currentComponent.JavaPkgMetadata.Origins = append(currentComponent.JavaPkgMetadata.Origins, parsedPomProps.groupID)
 		}
 		if parsedPomProps.artifactID != "" {
 			currentComponent.Name = parsedPomProps.artifactID
@@ -97,6 +115,9 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 
 	for _, subArchiveF := range subArchives {
 		if subArchiveF.CompressedSize64 == 0 {
+			continue
+		}
+		if filterComponent(subArchiveF.Name) {
 			continue
 		}
 

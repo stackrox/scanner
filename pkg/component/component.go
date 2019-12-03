@@ -14,7 +14,8 @@ type Component struct {
 	// Location specifies a path to a file that the component's existence was derived from.
 	Location string
 
-	JavaPkgMetadata *JavaPkgMetadata
+	JavaPkgMetadata   *JavaPkgMetadata
+	PythonPkgMetadata *PythonPkgMetadata
 }
 
 // LayerToComponents describes a layer to the components found in the layer
@@ -27,6 +28,15 @@ type LayerToComponents struct {
 type JavaPkgMetadata struct {
 	ImplementationVersion string
 	MavenVersion          string
-	Origin                string
+	Origins               []string
 	SpecificationVersion  string
+	BundleName            string
+}
+
+type PythonPkgMetadata struct {
+	Homepage    string
+	AuthorEmail string
+	DownloadURL string
+	Summary     string
+	Description string
 }

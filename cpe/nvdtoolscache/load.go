@@ -113,6 +113,7 @@ func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 	if err != nil {
 		return 0, errors.Wrapf(err, "loading JSON file at path %q", path)
 	}
+
 	var numVulns int
 	for _, cve := range feed.CVEItems {
 		if cve == nil || cve.Configurations == nil {
@@ -121,6 +122,7 @@ func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 		if !isValidCVE(cve) {
 			continue
 		}
+
 		vuln := nvd.ToVuln(cve)
 		trimCVE(cve)
 

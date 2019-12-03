@@ -6,14 +6,17 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
 
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/cpe"
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
+	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
 
@@ -21,6 +24,7 @@ import (
 	_ "github.com/stackrox/scanner/database/pgsql"
 
 	// Register extensions.
+	_ "github.com/stackrox/scanner/cpe/validation/all"
 	_ "github.com/stackrox/scanner/ext/featurefmt/apk"
 	_ "github.com/stackrox/scanner/ext/featurefmt/dpkg"
 	_ "github.com/stackrox/scanner/ext/featurefmt/rpm"
@@ -49,11 +53,23 @@ type Config struct {
 	Layers []string
 }
 
-func main() {
-	// Need to export NVD_DEFINITIONS_DIR in order to get vulnerabilities
+func filterComponentsByName(components []*component.Component, name string) []*component.Component {
+	if name == "" {
+		return components
+	}
+	filtered := components[:0]
+	for _, c := range components {
+		if strings.Contains(c.Name, name) {
+			filtered = append(filtered, c)
+		}
+	}
+	return filtered
+}
 
+func analyzeLocalImage(path string) {
+	fmt.Println(path)
 	// Get local .tar.gz path
-	f, err := os.Open("")
+	f, err := os.Open(path)
 	if err != nil {
 		panic(err)
 	}
@@ -100,8 +116,11 @@ func main() {
 		layerTarReader := ioutil.NopCloser(bytes.NewBuffer(filemap[l]))
 		_, _, languageComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace})
 		if err != nil {
-			panic(err)
+			fmt.Println(err.Error())
+			return
 		}
+
+		languageComponents = filterComponentsByName(languageComponents, "")
 
 		t := time.Now()
 		features := cpe.CheckForVulnerabilities(l, languageComponents)
@@ -111,16 +130,36 @@ func main() {
 		})
 
 		total += time.Since(t)
-		fmt.Println(l)
+		fmt.Printf("%s (%d components)\n", l, len(languageComponents))
 		for _, f := range features {
-			fmt.Println("\t", f.Feature.Name, f.Version, fmt.Sprintf("(%d vulns)", len(f.AffectedBy)))
+			fmt.Println("\t", f.Feature.Name, f.Version, f.Feature.SourceType, f.Feature.Location, fmt.Sprintf("(%d vulns)", len(f.AffectedBy)))
 			sort.Slice(f.AffectedBy, func(i, j int) bool {
 				return f.AffectedBy[i].Name < f.AffectedBy[j].Name
 			})
 			for _, v := range f.AffectedBy {
-				fmt.Println("\t\t", v.Name)
+				fmt.Println("\t\t", v.Name, v.FixedBy)
 			}
 		}
 	}
-	fmt.Printf("\n%0.4f seconds took Checking for vulns", total.Seconds())
+	fmt.Printf("\n%0.4f seconds took Checking for vulns\n", total.Seconds())
+}
+
+func main() {
+	// Need to export NVD_DEFINITIONS_DIR in order to get vulnerabilities
+	//os.Setenv("NVD_DEFINITIONS_DIR", "")
+	nvdtoolscache.BoltPath = "/tmp/temp.db"
+	os.Setenv("NVD_DEFINITIONS_DIR", "/Users/connorgorman/repos/src/github.com/stackrox/scanner/image/dump/nvd")
+	nvdtoolscache.Singleton()
+
+	path := "/Users/connorgorman/repos/src/github.com/stackrox/scanner/images"
+	fis, err := ioutil.ReadDir(path)
+	if err != nil {
+		panic(err)
+	}
+	for _, fi := range fis {
+		if !strings.Contains(fi.Name(), "customerssh") {
+			continue
+		}
+		analyzeLocalImage(filepath.Join(path, fi.Name()))
+	}
 }
