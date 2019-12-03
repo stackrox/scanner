@@ -5,9 +5,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 # Scanner requires the following binaries.
 RUN apk update && \
     apk --no-cache add \
-            ca-certificates \
-            openssl \
-            xz \
+            ca-certificates xz \
         && apk --repository "http://nl.alpinelinux.org/alpine/3.10/community" --no-cache add rpm \
         && apk --purge del apk-tools;
 
