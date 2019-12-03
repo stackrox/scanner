@@ -30,8 +30,7 @@ func GenerateNameKeys(c *component.Component) set.StringSet {
 }
 
 func AddMutatedNameKeys(c *component.Component, nameSet set.StringSet) {
-	base := numRegex.ReplaceAllString(c.Name, "")
-	nameSet.Add(strings.TrimRight(base, "-_"))
+	nameSet.Add(strings.TrimRight(numRegex.ReplaceAllString(c.Name, ""), "-_"))
 	for name := range nameSet {
 		if idx := strings.Index(name, "-"); idx != -1 {
 			nameSet.Add(name[:idx])
@@ -39,12 +38,12 @@ func AddMutatedNameKeys(c *component.Component, nameSet set.StringSet) {
 	}
 }
 
-func GenerateAttributesFromSets(vendosr, names, versions set.StringSet, targetSW string) []*wfn.Attributes {
-	if vendosr.Cardinality() == 0 {
-		vendosr.Add("")
+func GenerateAttributesFromSets(vendors, names, versions set.StringSet, targetSW string) []*wfn.Attributes {
+	if vendors.Cardinality() == 0 {
+		vendors.Add("")
 	}
-	attributes := make([]*wfn.Attributes, 0, vendosr.Cardinality()*names.Cardinality()*versions.Cardinality())
-	for vendor := range vendosr {
+	attributes := make([]*wfn.Attributes, 0, vendors.Cardinality()*names.Cardinality()*versions.Cardinality())
+	for vendor := range vendors {
 		for name := range names {
 			for version := range versions {
 				attributes = append(attributes, &wfn.Attributes{

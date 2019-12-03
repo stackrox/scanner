@@ -44,15 +44,20 @@ func ignored(c *component.Component) bool {
 		// Ignore all clients, plugins, etc if they don't have the substring python so
 		// we should capture things like python-dns or pydns and then these will be predisposed and not split
 		// py is more prone to false positives as normal words have py, but it's proven to be fairly effective
-		if !strings.Contains(c.Name, excluded) && !strings.Contains(c.Name, "py") {
-			if strings.Contains(strings.ToLower(c.PythonPkgMetadata.Description), excluded) {
-				log.Debugf("Python pkg ignored: %q - description %q contained %q", c.Name, c.PythonPkgMetadata.Description, excluded)
-				return true
-			}
-			if strings.Contains(strings.ToLower(c.PythonPkgMetadata.Summary), excluded) {
-				log.Debugf("Python pkg ignored: %q - summary %q contained %q", c.Name, c.PythonPkgMetadata.Summary, excluded)
-				return true
-			}
+		nameLower := strings.ToLower(c.Name)
+		if strings.Contains(nameLower, excluded) {
+			continue
+		}
+		if strings.Contains(nameLower, "py") {
+			continue
+		}
+		if strings.Contains(strings.ToLower(c.PythonPkgMetadata.Description), excluded) {
+			log.Debugf("Python pkg ignored: %q - description %q contained %q", c.Name, c.PythonPkgMetadata.Description, excluded)
+			return true
+		}
+		if strings.Contains(strings.ToLower(c.PythonPkgMetadata.Summary), excluded) {
+			log.Debugf("Python pkg ignored: %q - summary %q contained %q", c.Name, c.PythonPkgMetadata.Summary, excluded)
+			return true
 		}
 	}
 	return false
@@ -91,7 +96,11 @@ func GetPythonAttributes(c *component.Component) []*wfn.Attributes {
 		startIdx := strings.Index(python.AuthorEmail, "@")
 		if startIdx != -1 && startIdx != len(python.AuthorEmail)-1 {
 			endIdx := strings.Index(python.AuthorEmail[startIdx+1:], ".")
-			vendorSet.Add(python.AuthorEmail[startIdx+1 : startIdx+endIdx+1])
+			if endIdx >= len(python.AuthorEmail) {
+				vendorSet.Add(python.AuthorEmail[startIdx+1:])
+			} else {
+				vendorSet.Add(python.AuthorEmail[startIdx+1 : startIdx+endIdx+1])
+			}
 		}
 	}
 	if strings.HasPrefix(python.DownloadURL, "https://pypi.org/project/") {
