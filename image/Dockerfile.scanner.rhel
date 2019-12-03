@@ -4,7 +4,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 # Scanner requires the following binaries.
 RUN yum update -y --disableplugin=subscription-manager && \
-    yum -y install ca-certificates
+    yum -y install ca-certificates xz
 
 COPY ./bin/scanner /
 
