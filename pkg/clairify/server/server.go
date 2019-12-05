@@ -191,6 +191,7 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logrus.Infof("PROCESSING IMAGE FROM STRING: %+v", imageRequest)
 	image, err := types.GenerateImageFromString(imageRequest.Image)
 	if err != nil {
 		clairError(w, http.StatusBadRequest, err)

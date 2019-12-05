@@ -50,6 +50,7 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 	if err != nil {
 		return "", err
 	}
+	logrus.Infof("PROCESSING IMAGE: %+v", image)
 	sha, layer, err := process(storage, image, reg)
 	if err != nil {
 		return sha, err
