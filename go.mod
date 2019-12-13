@@ -7,11 +7,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker-credential-helpers v0.6.3
-	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/etcd-io/bbolt v1.3.3
-	github.com/facebookincubator/flog v0.0.0-20190930132826-d2511d0ce33c // indirect
 	github.com/facebookincubator/nvdtools v0.1.4-0.20191024132624-1cb041402875
-	github.com/frankban/quicktest v1.6.0 // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/gorilla/mux v1.7.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
@@ -21,24 +18,20 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/lib/pq v1.2.0
-	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
+	github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1
-	github.com/pierrec/lz4 v2.3.0+incompatible // indirect
 	github.com/pkg/errors v0.8.1
-	github.com/prometheus/client_golang v0.9.1
+	github.com/prometheus/client_golang v0.9.2
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
-	github.com/stackrox/rox v0.0.0-20191128130813-ae51554fc242
+	github.com/stackrox/rox v0.0.0-20191213231105-021819b7ce05
 	github.com/stretchr/testify v1.4.0
-	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de
 	golang.org/x/tools v0.0.0-20191018203202-04252eccb9d5
 	google.golang.org/grpc v1.24.0
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/yaml.v2 v2.2.3
+	gopkg.in/yaml.v2 v2.2.4
 	honnef.co/go/tools v0.0.1-2019.2.3
 )
 
