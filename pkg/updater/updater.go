@@ -51,7 +51,6 @@ func (u *Updater) fetchDumpFromURL() (io.ReadCloser, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "executing request")
 	}
-	defer utils.IgnoreError(resp.Body.Close)
 	if resp.StatusCode == http.StatusNotModified {
 		// Not modified
 		return nil, nil

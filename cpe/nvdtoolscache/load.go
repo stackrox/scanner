@@ -61,7 +61,7 @@ func (c *cacheImpl) LoadFromZip(zipR *zip.Reader) error {
 		}
 		numVulns += vulns
 	}
-	log.Infof("%d vulns add from zip", numVulns)
+	log.Infof("%d vulns added from zip", numVulns)
 	return nil
 }
 
