@@ -1,8 +1,9 @@
 package loaddump
 
 import (
+	"archive/zip"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -21,7 +22,7 @@ func Command() *cobra.Command {
 	var (
 		postgresHost string
 		postgresPort int
-		dumpFile     string
+		dumpFilepath string
 	)
 
 	c.RunE = func(_ *cobra.Command, _ []string) error {
@@ -38,13 +39,21 @@ func Command() *cobra.Command {
 		defer db.Close()
 		log.Info("Successfully opened DB")
 
-		// We don't want to bother with an in-mem update.
-		scratchDir, err := ioutil.TempDir("", "vuln-updater-load-dump")
-		if err != nil {
-			return errors.Wrap(err, "creating scratch dir")
-		}
 		log.Info("Updating DB with vuln dump")
-		err = vulndump.UpdateFromVulnDump(dumpFile, scratchDir, db, nil)
+		dumpFile, err := os.Open(dumpFilepath)
+		if err != nil {
+			return errors.Wrap(err, "error opening dump file")
+		}
+		fi, err := dumpFile.Stat()
+		if err != nil {
+			return errors.Wrap(err, "error getting dump file stats")
+		}
+		zipR, err := zip.NewReader(dumpFile, fi.Size())
+		if err != nil {
+			return errors.Wrap(err, "opening zip file")
+		}
+
+		err = vulndump.UpdateFromVulnDump(zipR, db, nil)
 		if err != nil {
 			return errors.Wrap(err, "updating DB from dump")
 		}
@@ -55,7 +64,7 @@ func Command() *cobra.Command {
 
 	c.Flags().StringVar(&postgresHost, "postgres-host", "127.0.0.1", "postgres host")
 	c.Flags().IntVar(&postgresPort, "postgres-port", 5432, "postgres port")
-	c.Flags().StringVar(&dumpFile, "dump-file", "", "path to dump file")
+	c.Flags().StringVar(&dumpFilepath, "dump-file", "", "path to dump file")
 	utils.Must(c.MarkFlagRequired("dump-file"))
 
 	return c

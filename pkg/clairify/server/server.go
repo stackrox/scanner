@@ -171,6 +171,53 @@ func getAuth(authHeader string) (string, string, error) {
 	return strings.TrimSpace(spl[0]), strings.TrimSpace(spl[1]), nil
 }
 
+func (s *Server) ScanImageWithResults(w http.ResponseWriter, r *http.Request) {
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	var imageRequest types.ImageRequest
+	if err := json.Unmarshal(data, &imageRequest); err != nil {
+		clairError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	username, password, err := getAuth(r.Header.Get("Authorization"))
+	if err != nil {
+		clairError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	logrus.Infof("PROCESSING IMAGE FROM STRING: %+v", imageRequest)
+	image, err := types.GenerateImageFromString(imageRequest.Image)
+	if err != nil {
+		clairError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	l, err := server.ProcessImageWithReturn(s.storage, image, imageRequest.Registry, username, password, imageRequest.Insecure)
+	if err != nil {
+		clairError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	v1Layer, err := v1.LayerFromDatabaseModel(s.storage, *l, true, true)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	bytes, err := json.Marshal(&v1Layer)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	w.Write(bytes)
+}
+
 // ScanImage implements pushing an image's layers to Clair.
 func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 	data, err := ioutil.ReadAll(r.Body)
@@ -228,6 +275,7 @@ func (s *Server) Start() error {
 	for _, root := range apiRoots {
 		r.HandleFunc(fmt.Sprintf("/%s/ping", root), s.Ping).Methods("GET")
 		r.HandleFunc(fmt.Sprintf("/%s/image", root), s.ScanImage).Methods("POST")
+		r.HandleFunc(fmt.Sprintf("/%s/image/results", root), s.ScanImageWithResults).Methods("POST")
 
 		r.HandleFunc(fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA).Methods("GET")
 		r.HandleFunc(fmt.Sprintf("/%s/image/{registry}/{remote}/{tag}", root), s.GetResultsByImage).Methods("GET")

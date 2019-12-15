@@ -5,14 +5,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"os"
-	"path/filepath"
 	"time"
 
-	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/fileutils"
 	"github.com/stackrox/rox/pkg/timeutil"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
@@ -28,7 +24,7 @@ var (
 )
 
 // InMemNVDCacheUpdater is a callback that updates the inmem NVD cache from a directory of extracted nvd definitions.
-type InMemNVDCacheUpdater func(nvdDefinitionsDir string) error
+type InMemNVDCacheUpdater func(zipR *zip.Reader) error
 
 func validateAndLoadManifest(f io.ReadCloser) (*Manifest, error) {
 	defer utils.IgnoreError(f.Close)
@@ -88,7 +84,7 @@ func determineWhetherToUpdate(db database.Datastore, manifest *Manifest) (bool, 
 }
 
 // LoadManifestFromDump validates and loads the manifest from the given zip file.
-func LoadManifestFromDump(zipR *zip.ReadCloser) (*Manifest, error) {
+func LoadManifestFromDump(zipR *zip.Reader) (*Manifest, error) {
 	manifestFile, err := ziputil.OpenFileInZip(zipR, ManifestFileName)
 	if err != nil {
 		return nil, errors.Wrap(err, "opening manifest file")
@@ -101,7 +97,7 @@ func LoadManifestFromDump(zipR *zip.ReadCloser) (*Manifest, error) {
 }
 
 // LoadOSVulnsFromDump loads the os vulns file from the dump into an in-memory slice.
-func LoadOSVulnsFromDump(zipR *zip.ReadCloser) ([]database.Vulnerability, error) {
+func LoadOSVulnsFromDump(zipR *zip.Reader) ([]database.Vulnerability, error) {
 	osVulnsFile, err := ziputil.OpenFileInZip(zipR, OSVulnsFileName)
 	if err != nil {
 		return nil, errors.Wrap(err, "opening OS vulns file")
@@ -119,31 +115,8 @@ func LoadOSVulnsFromDump(zipR *zip.ReadCloser) ([]database.Vulnerability, error)
 // Check the well_known_names.go file for the manifest of the ZIP file.
 // The caller is responsible for providing a path to a scratchDir, which MUST be an empty, but existing, directory.
 // This function will delete the directory before returning.
-func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore, inMemUpdater InMemNVDCacheUpdater) error {
-	log.Infof("Attempting to update from vuln dump at %q", zipPath)
-	if !fileutils.DirExistsAndIsEmpty(scratchDir) {
-		return errors.Errorf("scratchDir %q invalid: must be an empty directory", scratchDir)
-	}
-	defer func() {
-		if err := os.RemoveAll(scratchDir); err != nil {
-			log.WithError(err).WithField("dir", scratchDir).Warn("Failed to clean up scratch dir")
-		}
-	}()
-
-	if filepath.Ext(zipPath) != ".zip" {
-		return errors.Errorf("invalid path %q: only .zip files are supported", zipPath)
-	}
-
-	zipR, err := zip.OpenReader(zipPath)
-	if err != nil {
-		return errors.Wrap(err, "opening zip file")
-	}
-	var zipFileClosed bool
-	defer func() {
-		if !zipFileClosed {
-			_ = zipR.Close()
-		}
-	}()
+func UpdateFromVulnDump(zipR *zip.Reader, db database.Datastore, inMemUpdater InMemNVDCacheUpdater) error {
+	log.Infof("Attempting to update from vuln dump")
 
 	log.Info("Loading manifest...")
 	manifest, err := LoadManifestFromDump(zipR)
@@ -156,7 +129,7 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 		return errors.Wrap(err, "determining whether to update")
 	}
 	if !shouldUpdate {
-		log.Infof("DB already contains all the vulns in the dump at %q. Nothing to do here!", zipPath)
+		log.Info("DB already contains all the vulns in the dump. Nothing to do here!")
 		return nil
 	}
 	log.Info("Running the update.")
@@ -173,17 +146,9 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	}
 	log.Info("Done inserting vulns into the DB")
 
-	// Explicitly close the zip file because the
-	// archiver.Extract function below calls zip.Open again.
-	_ = zipR.Close()
-	zipFileClosed = true
-
 	if inMemUpdater != nil {
-		if err := archiver.DefaultZip.Extract(zipPath, NVDDirName, scratchDir); err != nil {
-			log.WithError(err).Error("Failed to extract NVD dump from ZIP")
-		}
-		if err := inMemUpdater(filepath.Join(scratchDir, "nvd")); err != nil {
-			return errors.Wrap(err, "couldn't update in mem NVD copy")
+		if err := inMemUpdater(zipR); err != nil {
+			log.WithError(err).Error("Failed update NVD definitions from ZIP")
 		}
 	}
 	marshaledDumpTS, err := manifest.Until.MarshalText()

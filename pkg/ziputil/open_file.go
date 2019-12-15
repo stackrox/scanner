@@ -10,7 +10,7 @@ import (
 // OpenFileInZip opens the given file in the zip, and returns the ReadCloser.
 // It returns an error if the file was not found, or if there was an error opening
 // the file.
-func OpenFileInZip(zipR *zip.ReadCloser, name string) (io.ReadCloser, error) {
+func OpenFileInZip(zipR *zip.Reader, name string) (io.ReadCloser, error) {
 	for _, file := range zipR.File {
 		if file.Name == name {
 			return file.Open()

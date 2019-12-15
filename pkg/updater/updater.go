@@ -1,11 +1,11 @@
 package updater
 
 import (
+	"archive/zip"
 	"bytes"
 	"io"
+	"io/ioutil"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/pkg/errors"
@@ -17,19 +17,13 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/mtls"
 	"github.com/stackrox/scanner/pkg/vulndump"
-	"github.com/stackrox/scanner/pkg/wellknowndirnames"
 	"github.com/stackrox/scanner/pkg/wellknownkeys"
-)
-
-var (
-	diffDumpOutputPath = filepath.Join(wellknowndirnames.WriteableDir, "diff-dump.zip")
-	diffDumpScratchDir = filepath.Join(wellknowndirnames.WriteableDir, "diff-dump-scratch")
 )
 
 const (
 	ifModifiedSinceHeader = "If-Modified-Since"
 
-	defaulTimeout = 5 * time.Minute
+	defaultTimeout = 5 * time.Minute
 )
 
 type Updater struct {
@@ -46,66 +40,58 @@ type Updater struct {
 	stopSig *concurrency.Signal
 }
 
-func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, fetchIsFromCentral bool, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
+func (u *Updater) fetchDumpFromURL() (io.ReadCloser, error) {
 	// First, head the URL to see when it was last modified.
-	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(concurrency.AsContext(u.stopSig), http.MethodGet, u.downloadURL, nil)
 	if err != nil {
-		return false, errors.Wrap(err, "constructing req")
+		return nil, errors.Wrap(err, "constructing req")
 	}
-	req.Header.Set(ifModifiedSinceHeader, lastUpdatedTime.UTC().Format(http.TimeFormat))
-	resp, err := client.Do(req)
+	req.Header.Set(ifModifiedSinceHeader, u.lastUpdatedTime.UTC().Format(http.TimeFormat))
+	resp, err := u.client.Do(req)
 	if err != nil {
-		return false, errors.Wrap(err, "executing request")
+		return nil, errors.Wrap(err, "executing request")
 	}
 	defer utils.IgnoreError(resp.Body.Close)
 	if resp.StatusCode == http.StatusNotModified {
 		// Not modified
-		return false, nil
+		return nil, nil
 	}
 	// If we're fetching from Central, 404s are okay.
-	if fetchIsFromCentral && resp.StatusCode == http.StatusNotFound {
+	if u.fetchIsFromCentral && resp.StatusCode == http.StatusNotFound {
 		log.Info("No vuln dumps were uploaded to Central")
-		return false, nil
+		return nil, nil
 	}
 	if resp.StatusCode != http.StatusOK {
-		return false, errors.Errorf("invalid response from google storage; got code %d", resp.StatusCode)
+		return nil, errors.Errorf("invalid response from google storage; got code %d", resp.StatusCode)
 	}
 	if err := httputil.ResponseToError(resp); err != nil {
-		return false, err
+		return nil, err
 	}
-	outFile, err := os.Create(outputPath)
-	if err != nil {
-		return false, errors.Wrap(err, "creating output file")
-	}
-	defer utils.IgnoreError(outFile.Close)
-	_, err = io.Copy(outFile, resp.Body)
-	if err != nil {
-		return false, errors.Wrap(err, "streaming response to file")
-	}
-	return true, nil
+	return resp.Body, nil
 }
 
 func (u *Updater) doUpdate() error {
 	log.Info("Starting an update cycle")
 	startTime := time.Now()
-	if err := os.RemoveAll(diffDumpOutputPath); err != nil {
-		return errors.Wrap(err, "removing diff dump output path")
-	}
-	if err := os.RemoveAll(diffDumpScratchDir); err != nil {
-		return errors.Wrap(err, "removing diff dump scratch dir")
-	}
-	fetched, err := fetchDumpFromURL(u.stopSig, u.client, u.fetchIsFromCentral, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
+	body, err := u.fetchDumpFromURL()
 	if err != nil {
 		return errors.Wrap(err, "fetching update from URL")
 	}
-	if !fetched {
+	if body == nil {
 		log.Info("No new update to fetch")
 		return nil
 	}
-	if err := os.MkdirAll(diffDumpScratchDir, 0755); err != nil {
-		return errors.Wrap(err, "creating scratch dir")
+	defer utils.IgnoreError(body.Close)
+
+	zipBytes, err := ioutil.ReadAll(body)
+	if err != nil {
+		return errors.Wrap(err, "error reading from response body")
 	}
-	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, u.db, u.cpeDBUpdater); err != nil {
+	zipR, err := zip.NewReader(bytes.NewReader(zipBytes), int64(len(zipBytes)))
+	if err != nil {
+		return errors.Wrap(err, "error opening zip reader")
+	}
+	if err := vulndump.UpdateFromVulnDump(zipR, u.db, u.cpeDBUpdater); err != nil {
 		return errors.Wrap(err, "updating from vuln dump")
 	}
 	u.lastUpdatedTime = startTime
@@ -149,6 +135,10 @@ func getLastUpdatedTime(db database.Datastore) (time.Time, error) {
 	return dbTime, nil
 }
 
+func (u *Updater) RunForever() {
+	u.runForever()
+}
+
 // Stop stops the updater.
 func (u *Updater) Stop() {
 	u.stopSig.Signal()
@@ -156,13 +146,13 @@ func (u *Updater) Stop() {
 
 // New returns a new updater instance, and starts running the update daemon.
 func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCacheUpdater) (*Updater, error) {
-	downloadURL, isCentral, err := getRelevantDownloadURL(config)
+	downloadURL, isCentral, err := getRelevantDownloadURL(config, db)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting relevant download URL")
 	}
 
 	client := &http.Client{
-		Timeout:   defaulTimeout,
+		Timeout:   defaultTimeout,
 		Transport: proxy.RoundTripper(),
 	}
 	if isCentral {
@@ -191,6 +181,5 @@ func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCac
 		stopSig:            &stopSig,
 		lastUpdatedTime:    lastUpdatedTime,
 	}
-	go u.runForever()
 	return u, nil
 }

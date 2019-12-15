@@ -20,6 +20,12 @@ var (
 	BoltPath = filepath.Join(wellknowndirnames.WriteableDir, "temp.db")
 )
 
+func NewWithDB(db *bbolt.DB) Cache {
+	return &cacheImpl{
+		DB: db,
+	}
+}
+
 func New() (Cache, error) {
 	opts := bbolt.Options{
 		NoFreelistSync: true,

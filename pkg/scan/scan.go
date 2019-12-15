@@ -39,6 +39,31 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	return nil
 }
 
+func ProcessImageWithReturn(storage database.Datastore, image *types.Image, registry, username, password string, insecure bool) (*database.Layer, error) {
+	var reg types.Registry
+	var err error
+	if insecure {
+		reg, err = types.InsecureDockerRegistryCreator(registry, username, password)
+	} else {
+		reg, err = types.DockerRegistryCreator(registry, username, password)
+	}
+	if err != nil {
+		return nil, err
+	}
+	logrus.Infof("PROCESSING IMAGE: %+v", image)
+	sha, layer, err := process(storage, image, reg)
+	if err != nil {
+		return nil, err
+	}
+	image.SHA = sha
+
+	fullLayer, err := storage.FindLayer(layer, true, true)
+	if err != nil {
+		return nil, err
+	}
+	return &fullLayer, nil
+}
+
 func ProcessImage(storage database.Datastore, image *types.Image, registry, username, password string, insecure bool) (string, error) {
 	var reg types.Registry
 	var err error

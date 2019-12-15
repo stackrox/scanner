@@ -4,12 +4,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/stackrox/rox/pkg/concurrency"
-	"github.com/stackrox/rox/pkg/fileutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -22,12 +20,6 @@ var (
 	nov23 = time.Date(2019, time.November, 23, 0, 0, 0, 0, time.Local)
 )
 
-func assertOnFileExistence(t *testing.T, path string, shouldExist bool) {
-	exists, err := fileutils.Exists(path)
-	require.NoError(t, err)
-	require.Equal(t, shouldExist, exists)
-}
-
 func TestFetchDumpFromGoogleStorage(t *testing.T) {
 	client := &http.Client{Timeout: 30 * time.Second}
 	tempDir, err := ioutil.TempDir("", "go-fetch-dump-test")
@@ -36,16 +28,24 @@ func TestFetchDumpFromGoogleStorage(t *testing.T) {
 		require.NoError(t, os.RemoveAll(tempDir))
 	}()
 
-	outputPath := filepath.Join(tempDir, "dump.zip")
-	// Should not fetch since it can't be updated in a time in the future.
-	updated, err := fetchDumpFromURL(concurrency.Never(), client, false, url, time.Now().Add(time.Minute), outputPath)
-	require.NoError(t, err)
-	assert.False(t, updated)
-	assertOnFileExistence(t, outputPath, false)
+	sig := concurrency.NewSignal()
+	updater := &Updater{
+		lastUpdatedTime:    time.Now().Add(time.Minute),
+		client:             client,
+		interval:           0,
+		downloadURL:        url,
+		fetchIsFromCentral: false,
+		stopSig:            &sig,
+	}
 
-	// Should definitely fetch.
-	updated, err = fetchDumpFromURL(concurrency.Never(), client, false, url, nov23, outputPath)
+	// Should not fetch since it can't be updated in a time in the future.
+	closer, err := updater.fetchDumpFromURL()
 	require.NoError(t, err)
-	assert.True(t, updated)
-	assertOnFileExistence(t, outputPath, true)
+	assert.Nil(t, closer)
+
+	updater.lastUpdatedTime = nov23
+	// Should definitely fetch.
+	closer, err = updater.fetchDumpFromURL()
+	require.NoError(t, err)
+	assert.NotNil(t, closer)
 }

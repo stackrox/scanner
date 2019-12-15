@@ -1,6 +1,8 @@
 package nvdtoolscache
 
 import (
+	"archive/zip"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -36,6 +38,30 @@ func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 	log.Infof("Total vulns: %d", totalVulns)
 
 	utils.Must(c.sync())
+	return nil
+}
+
+func (c *cacheImpl) LoadFromZip(zipR *zip.Reader) error {
+	var numVulns int
+	for _, f := range zipR.File {
+		if !strings.HasPrefix(f.Name, "nvd/") {
+			continue
+		}
+		if filepath.Ext(f.Name) != ".json" {
+			continue
+		}
+		readCloser, err := f.Open()
+		if err != nil {
+			return errors.Wrapf(err, "error opening file from zip: %q", f.Name)
+		}
+		defer readCloser.Close()
+		vulns, err := c.handleReader(readCloser)
+		if err != nil {
+			return errors.Wrapf(err, "error parsing vulns from zip: %q", f.Name)
+		}
+		numVulns += vulns
+	}
+	log.Infof("%d vulns add from zip", numVulns)
 	return nil
 }
 
@@ -102,16 +128,10 @@ func trimCVE(cve *schema.NVDCVEFeedJSON10DefCVEItem) {
 	cve.Configurations.CVEDataVersion = ""
 }
 
-func (c *cacheImpl) handleJSONFile(path string) (int, error) {
-	f, err := os.Open(path)
+func (c *cacheImpl) handleReader(reader io.Reader) (int, error) {
+	feed, err := nvdloader.LoadJSONFileFromReader(reader)
 	if err != nil {
-		return 0, errors.Wrapf(err, "opening file at %q", path)
-	}
-	defer utils.IgnoreError(f.Close)
-
-	feed, err := nvdloader.LoadJSONFileFromReader(f)
-	if err != nil {
-		return 0, errors.Wrapf(err, "loading JSON file at path %q", path)
+		return 0, errors.Wrap(err, "loading JSON reader")
 	}
 
 	var numVulns int
@@ -133,4 +153,13 @@ func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 		numVulns++
 	}
 	return numVulns, nil
+}
+
+func (c *cacheImpl) handleJSONFile(path string) (int, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, errors.Wrapf(err, "opening file at %q", path)
+	}
+	defer utils.IgnoreError(f.Close)
+	return c.handleReader(f)
 }

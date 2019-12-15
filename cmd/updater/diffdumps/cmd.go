@@ -20,18 +20,27 @@ import (
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
-func validateAndOpenDump(zipPath string) (*zip.ReadCloser, error) {
+func validateAndOpenDump(zipPath string) (*zip.Reader, error) {
 	if filepath.Ext(zipPath) != ".zip" {
 		return nil, errors.Errorf("invalid dump %q; expected zip file", zipPath)
 	}
-	zipR, err := zip.OpenReader(zipPath)
+	zipFile, err := os.Open(zipPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error opening zip path: %q", zipPath)
+	}
+	fi, err := zipFile.Stat()
+	if err != nil {
+		return nil, errors.Wrapf(err, "error stating file: %q", zipPath)
+	}
+
+	zipR, err := zip.NewReader(zipFile, fi.Size())
 	if err != nil {
 		return nil, errors.Wrap(err, "opening ZIP")
 	}
 	return zipR, nil
 }
 
-func validateAndGetManifest(zipR *zip.ReadCloser) (*vulndump.Manifest, error) {
+func validateAndGetManifest(zipR *zip.Reader) (*vulndump.Manifest, error) {
 	manifest, err := vulndump.LoadManifestFromDump(zipR)
 	if err != nil {
 		return nil, err
@@ -79,7 +88,7 @@ func generateNVDDiff(outputDir string, baseLastModifiedTime time.Time, headF *zi
 	return nil
 }
 
-func generateNVDDiffs(outputDir string, baseLastModifiedTime time.Time, headZipR *zip.ReadCloser) error {
+func generateNVDDiffs(outputDir string, baseLastModifiedTime time.Time, headZipR *zip.Reader) error {
 	nvdSubDir := filepath.Join(outputDir, vulndump.NVDDirName)
 	if err := os.MkdirAll(nvdSubDir, 0755); err != nil {
 		return errors.Wrap(err, "creating subdir for NVD")
@@ -142,7 +151,7 @@ func vulnsAreEqual(v1, v2 database.Vulnerability) bool {
 	return reflect.DeepEqual(v1, v2)
 }
 
-func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
+func generateOSVulnsDiff(outputDir string, baseZipR *zip.Reader, headZipR *zip.Reader) error {
 	baseVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
 	if err != nil {
 		return errors.Wrap(err, "loading OS vulns from base dump")
@@ -195,12 +204,10 @@ func Command() *cobra.Command {
 		if err != nil {
 			return errors.Wrap(err, "loading base dump")
 		}
-		defer utils.IgnoreError(baseZipR.Close)
 		headZipR, err := validateAndOpenDump(headDumpFile)
 		if err != nil {
 			return errors.Wrap(err, "loading head dump")
 		}
-		defer utils.IgnoreError(headZipR.Close)
 		baseManifest, err := validateAndGetManifest(baseZipR)
 		if err != nil {
 			return errors.Wrap(err, "loading manifest from base dump")
