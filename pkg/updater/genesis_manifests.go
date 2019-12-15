@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/urlfmt"
 	"github.com/stackrox/rox/pkg/utils"
-	"github.com/stackrox/scanner/database"
 )
 
 const (
@@ -34,7 +33,7 @@ type genesisManifest struct {
 // getRelevantDownloadURL gets the genesis manifests from the dump, finds the one
 // with the highest timestamp, and returns the location for the diff dump from that location.
 // This ensures that we get the smallest diff dump that works for this version of scanner.
-func getRelevantDownloadURL(config Config, db database.Datastore) (downloadURL string, isCentral bool, err error) {
+func getRelevantDownloadURL(config Config) (downloadURL string, isCentral bool, err error) {
 	if config.FetchFromCentral {
 		centralEndpoint := config.CentralEndpoint
 		if centralEndpoint == "" {

@@ -146,7 +146,7 @@ func (u *Updater) Stop() {
 
 // New returns a new updater instance, and starts running the update daemon.
 func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCacheUpdater) (*Updater, error) {
-	downloadURL, isCentral, err := getRelevantDownloadURL(config, db)
+	downloadURL, isCentral, err := getRelevantDownloadURL(config)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting relevant download URL")
 	}
