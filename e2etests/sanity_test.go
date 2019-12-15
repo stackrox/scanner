@@ -177,6 +177,25 @@ func TestImageSanity(t *testing.T) {
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2011-3374",
 							Severity:      "Negligible",
 							Description:   "It was found that apt-key in apt, all versions, do not correctly validate gpg keys with the master keyring, leading to a potential man-in-the-middle attack.",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ImpactScore":         float64(2.9),
+										"PublishedDateTime":   "2019-01-28T21:29Z",
+										"Score":               4.3,
+										"Vectors":             "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+										"ExploitabilityScore": 8.6,
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         1.4,
+										"Score":               3.7,
+										"Vectors":             "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+									},
+									"LastModifiedDateTime": "2019-12-04T15:35Z",
+									"PublishedDateTime":    "2019-11-26T00:15Z",
+								},
+							},
 						},
 						{
 							Name:          "CVE-2019-3462",
