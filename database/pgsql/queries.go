@@ -147,20 +147,12 @@ const (
 
 	removeLayer = `DELETE FROM Layer WHERE name = $1`
 
-	// lock.go
-	insertLock        = `INSERT INTO Lock(name, owner, until) VALUES($1, $2, $3)`
-	searchLock        = `SELECT owner, until FROM Lock WHERE name = $1`
-	updateLock        = `UPDATE Lock SET until = $3 WHERE name = $1 AND owner = $2`
-	removeLock        = `DELETE FROM Lock WHERE name = $1 AND owner = $2`
-	removeLockExpired = `DELETE FROM LOCK WHERE until < CURRENT_TIMESTAMP`
-
 	// vulnerability.go
 	searchVulnerabilityBase = `
 	  SELECT v.id, v.name, n.id, n.name, n.version_format, v.description, v.link, v.severity, v.metadata
 	  FROM Vulnerability v JOIN Namespace n ON v.namespace_id = n.id`
 	searchVulnerabilityForUpdate          = ` FOR UPDATE OF v`
 	searchVulnerabilityByNamespaceAndName = ` WHERE n.name = $1 AND v.name = $2 AND v.deleted_at IS NULL`
-	searchVulnerabilityByID               = ` WHERE v.id = $1`
 	searchVulnerabilityByNamespace        = ` WHERE n.name = $1 AND v.deleted_at IS NULL
 		  				  AND v.id >= $2
 						  ORDER BY v.id

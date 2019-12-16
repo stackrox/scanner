@@ -22,7 +22,6 @@ import (
 
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
-	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -359,23 +358,6 @@ func testInsertLayerUpdate(t *testing.T, datastore database.Datastore) {
 			assert.True(t, cmpFV(l3uf.Features[0], f7), "Updated layer should have %#v but actually have %#v", f7, l4uf.Features[0])
 		}
 	}
-}
-
-func testInsertLayerDelete(t *testing.T, datastore database.Datastore) {
-	err := datastore.DeleteLayer("TestInsertLayerX")
-	assert.Equal(t, commonerr.ErrNotFound, err)
-
-	err = datastore.DeleteLayer("TestInsertLayer3")
-	assert.Nil(t, err)
-
-	_, err = datastore.FindLayer("TestInsertLayer3", false, false)
-	assert.Equal(t, commonerr.ErrNotFound, err)
-
-	_, err = datastore.FindLayer("TestInsertLayer4a", false, false)
-	assert.Equal(t, commonerr.ErrNotFound, err)
-
-	_, err = datastore.FindLayer("TestInsertLayer4b", true, false)
-	assert.Equal(t, commonerr.ErrNotFound, err)
 }
 
 func cmpFV(a, b database.FeatureVersion) bool {

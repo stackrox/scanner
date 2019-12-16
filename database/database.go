@@ -118,19 +118,6 @@ type Datastore interface {
 	// affect them.
 	FindLayer(name string, withFeatures, withVulnerabilities bool) (Layer, error)
 
-	// DeleteLayer deletes a Layer from the database and every layers that are
-	// based on it, recursively.
-	DeleteLayer(name string) error
-
-	// ListVulnerabilities returns the list of vulnerabilities of a particular
-	// Namespace.
-	//
-	// The Limit and page parameters are used to paginate the return list.
-	// The first given page should be 0.
-	// The function should return the next available page. If there are no more
-	// pages, -1 has to be returned.
-	ListVulnerabilities(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
-
 	// InsertVulnerabilities stores the given Vulnerabilities in the database,
 	// updating them if necessary.
 	//
@@ -152,30 +139,6 @@ type Datastore interface {
 	// createNotification equals to true.
 	InsertVulnerabilities(vulnerabilities []Vulnerability) error
 
-	// FindVulnerability retrieves a Vulnerability from the database, including
-	// the FixedIn list.
-	FindVulnerability(namespaceName, name string) (Vulnerability, error)
-
-	// DeleteVulnerability removes a Vulnerability from the database.
-	//
-	// It has to create a Notification that will contain the old Vulnerability.
-	DeleteVulnerability(namespaceName, name string) error
-
-	// InsertVulnerabilityFixes adds new FixedIn Feature or update the Versions
-	// of existing ones to the specified Vulnerability in the database.
-	//
-	// It has has to create a Notification that will contain the old and the
-	// updated Vulnerability.
-	InsertVulnerabilityFixes(vulnerabilityNamespace, vulnerabilityName string, fixes []FeatureVersion) error
-
-	// DeleteVulnerabilityFix removes a FixedIn Feature from the specified
-	// Vulnerability in the database. It can be used to store the fact that a
-	// Vulnerability no longer affects the given Feature in any Version.
-	//
-	// It has has to create a Notification that will contain the old and the
-	// updated Vulnerability.
-	DeleteVulnerabilityFix(vulnerabilityNamespace, vulnerabilityName, featureName string) error
-
 	// InsertKeyValue stores or updates a simple key/value pair in the database.
 	InsertKeyValue(key, value string) error
 
@@ -183,24 +146,6 @@ type Datastore interface {
 	//
 	// It returns an empty string if there is no such key.
 	GetKeyValue(key string) (string, error)
-
-	// Lock creates or renew a Lock in the database with the given name, owner
-	// and duration.
-	//
-	// After the specified duration, the Lock expires by itself if it hasn't been
-	// unlocked, and thus, let other users create a Lock with the same name.
-	// However, the owner can renew its Lock by setting renew to true.
-	// Lock should not block, it should instead returns whether the Lock has been
-	// successfully acquired/renewed. If it's the case, the expiration time of
-	// that Lock is returned as well.
-	Lock(name string, owner string, duration time.Duration, renew bool) (bool, time.Time)
-
-	// Unlock releases an existing Lock.
-	Unlock(name, owner string)
-
-	// FindLock returns the owner of a Lock specified by the name, and its
-	// expiration time if it exists.
-	FindLock(name string) (string, time.Time, error)
 
 	// Ping returns the health status of the database.
 	Ping() bool
