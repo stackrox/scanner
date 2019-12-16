@@ -89,8 +89,8 @@ func escapeDash(s string) string {
 }
 
 func getAttributes(c *component.Component) []*wfn.Attributes {
-	getAttributes, ok := attributeGetter[c.SourceType]
-	if !ok {
+	getAttributes := attributeGetter[c.SourceType]
+	if getAttributes == nil {
 		log.Errorf("No attribute getter available for %q", c.SourceType.String())
 		return nil
 	}
