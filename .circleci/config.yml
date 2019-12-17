@@ -208,6 +208,18 @@ commands:
             docker tag "${gcr_db_image}" "${dockerhub_db_image}"
             docker push "${dockerhub_db_image}"
 
+            if [[ -n "$CIRCLE_TAG" ]]; then
+                docker login -u "$STACKROX_IO_PUSH_USERNAME" -p "$STACKROX_IO_PUSH_PASSWORD" stackrox.io
+
+                stackrox_io_scanner_image="stackrox.io/${scanner_image_name}:${tag}"
+                stackrox_io_scanner_db_image="stackrox.io/${db_image_name}:${tag}"
+
+                docker tag "${gcr_scanner_image}" "${stackrox_io_scanner_image}"
+                docker tag "${gcr_db_image}" "${stackrox_io_scanner_db_image}"
+
+                docker push "${stackrox_io_scanner_image}"
+                docker push "${stackrox_io_scanner_db_image}"
+            fi
   run-e2e-tests:
     parameters:
       cluster-id:
