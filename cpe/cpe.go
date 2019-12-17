@@ -89,11 +89,12 @@ func escapeDash(s string) string {
 }
 
 func getAttributes(c *component.Component) []*wfn.Attributes {
-	attrs := attributeGetter[c.SourceType](c)
-	if attrs == nil {
+	getAttributes := attributeGetter[c.SourceType]
+	if getAttributes == nil {
 		log.Errorf("No attribute getter available for %q", c.SourceType.String())
 		return nil
 	}
+	attrs := getAttributes(c)
 	for _, a := range attrs {
 		a.Product = escapeDash(a.Product)
 		a.Vendor = escapeDash(a.Vendor)
