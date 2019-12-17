@@ -217,8 +217,8 @@ commands:
                 docker tag "${gcr_scanner_image}" "${stackrox_io_scanner_image}"
                 docker tag "${gcr_db_image}" "${stackrox_io_scanner_db_image}"
 
-                echo "docker push ${stackrox_io_scanner_image}"
-                echo "docker push ${stackrox_io_scanner_db_image}"
+                docker push "${stackrox_io_scanner_image}"
+                docker push "${stackrox_io_scanner_db_image}"
             fi
   run-e2e-tests:
     parameters:
