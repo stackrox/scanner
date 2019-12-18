@@ -364,7 +364,7 @@ jobs:
   create-postgres-dump-from-genesis-dump:
     docker:
       - *defaultImage
-      - image: postgres:12.0-alpine
+      - image: postgres:11.6-alpine
     working_directory: *defaultWorkingDirectory
     steps:
       - checkout
@@ -389,13 +389,13 @@ jobs:
       - run:
           name: Take a PG dump
           command: |
-            pg_dump -U postgres postgres://127.0.0.1:5432 > pg-definitions.sql
+            pg_dump -format=plain --no-owner --no-acl -U postgres postgres://127.0.0.1:5432 > pg-definitions.sql
             gzip --best pg-definitions.sql
 
       - run:
           name: Upload PG dump to Google Storage
           command: |
-            gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
+            gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump/google-sql-compatible.tar.gz
 
   upload-nvd-dump-for-embedding-into-image:
     <<: *defaults
