@@ -25,10 +25,15 @@ var (
 	// Therefore, if a dump has a start time before this timestamp, its start timestamp MUST be the zero time,
 	// and its end timestamp MUST be after this time.
 	earliestDump = timeutil.MustParse(time.RFC3339, "2019-11-19T00:00:00Z")
+
+	updateLockName = "update"
 )
 
-// InMemNVDCacheUpdater is a callback that updates the inmem NVD cache from a directory of extracted nvd definitions.
-type InMemNVDCacheUpdater func(nvdDefinitionsDir string) error
+type InMemNVDCache interface {
+	LoadFromDirectory(nvdDefinitionsDir string) error
+	GetLastUpdate() time.Time
+	SetLastUpdate(t time.Time)
+}
 
 func validateAndLoadManifest(f io.ReadCloser) (*Manifest, error) {
 	defer utils.IgnoreError(f.Close)
@@ -115,11 +120,70 @@ func LoadOSVulnsFromDump(zipR *zip.ReadCloser) ([]database.Vulnerability, error)
 	return vulns, nil
 }
 
+func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) error {
+	shouldUpdate, err := determineWhetherToUpdate(db, manifest)
+	if err != nil {
+		return errors.Wrap(err, "determining whether to update")
+	}
+	if !shouldUpdate {
+		log.Info("DB already contains all the vulns in the dump. Nothing to do here!")
+		return nil
+	}
+	log.Info("Running the update.")
+
+	gotLock, _ := db.Lock(updateLockName, instanceName, updateInterval, false)
+	if !gotLock {
+		owner, _, err := db.FindLock(updateLockName)
+		if err != nil {
+			return err
+		}
+		log.Infof("DB update lock already acquired by %q", owner)
+		return nil
+	}
+
+	log.Info("Loading OS vulns...")
+	osVulns, err := LoadOSVulnsFromDump(zipR)
+	if err != nil {
+		return err
+	}
+	log.Infof("Done loading OS vulns. There are %d vulns to insert into the DB", len(osVulns))
+
+	if err := db.InsertVulnerabilities(osVulns); err != nil {
+		return errors.Wrap(err, "inserting vulns into the DB")
+	}
+	log.Info("Done inserting vulns into the DB")
+	marshaledDumpTS, err := manifest.Until.MarshalText()
+	// Really shouldn't happen because we literally just unmarshaled it.
+	utils.Must(err)
+	if err := db.InsertKeyValue(wellknownkeys.VulnUpdateTimestampKey, string(marshaledDumpTS)); err != nil {
+		return errors.Wrap(err, "couldn't update timestamp key in DB")
+	}
+	return nil
+}
+
+func loadInMemUpdater(cache InMemNVDCache, manifest *Manifest, zipPath, scratchDir string) error {
+	if cache != nil {
+		updateTime := cache.GetLastUpdate()
+		if !updateTime.IsZero() && !manifest.Until.After(updateTime) {
+			return nil
+		}
+		if err := archiver.DefaultZip.Extract(zipPath, NVDDirName, scratchDir); err != nil {
+			log.WithError(err).Error("Failed to extract NVD dump from ZIP")
+			return err
+		}
+		if err := cache.LoadFromDirectory(filepath.Join(scratchDir, "nvd")); err != nil {
+			return errors.Wrap(err, "couldn't update in mem NVD copy")
+		}
+		cache.SetLastUpdate(manifest.Until)
+	}
+	return nil
+}
+
 // UpdateFromVulnDump updates the definitions (both in the DB and in the inMemUpdater) from the given zip file.
 // Check the well_known_names.go file for the manifest of the ZIP file.
 // The caller is responsible for providing a path to a scratchDir, which MUST be an empty, but existing, directory.
 // This function will delete the directory before returning.
-func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore, inMemUpdater InMemNVDCacheUpdater) error {
+func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore, updateInterval time.Duration, instanceName string, cache InMemNVDCache) error {
 	log.Infof("Attempting to update from vuln dump at %q", zipPath)
 	if !fileutils.DirExistsAndIsEmpty(scratchDir) {
 		return errors.Errorf("scratchDir %q invalid: must be an empty directory", scratchDir)
@@ -151,46 +215,19 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 		return err
 	}
 	log.Info("Loaded manifest")
-	shouldUpdate, err := determineWhetherToUpdate(db, manifest)
-	if err != nil {
-		return errors.Wrap(err, "determining whether to update")
-	}
-	if !shouldUpdate {
-		log.Infof("DB already contains all the vulns in the dump at %q. Nothing to do here!", zipPath)
-		return nil
-	}
-	log.Info("Running the update.")
 
-	log.Info("Loading OS vulns...")
-	osVulns, err := LoadOSVulnsFromDump(zipR)
-	if err != nil {
-		return err
+	if err := loadOSVulns(zipR, manifest, db, updateInterval, instanceName); err != nil {
+		return errors.Wrap(err, "error loading OS vulns")
 	}
-	log.Infof("Done loading OS vulns. There are %d vulns to insert into the DB", len(osVulns))
-
-	if err := db.InsertVulnerabilities(osVulns); err != nil {
-		return errors.Wrap(err, "inserting vulns into the DB")
-	}
-	log.Info("Done inserting vulns into the DB")
 
 	// Explicitly close the zip file because the
 	// archiver.Extract function below calls zip.Open again.
 	_ = zipR.Close()
 	zipFileClosed = true
 
-	if inMemUpdater != nil {
-		if err := archiver.DefaultZip.Extract(zipPath, NVDDirName, scratchDir); err != nil {
-			log.WithError(err).Error("Failed to extract NVD dump from ZIP")
-		}
-		if err := inMemUpdater(filepath.Join(scratchDir, "nvd")); err != nil {
-			return errors.Wrap(err, "couldn't update in mem NVD copy")
-		}
+	if err := loadInMemUpdater(cache, manifest, zipPath, scratchDir); err != nil {
+		return errors.Wrap(err, "error loading into inmem cache")
 	}
-	marshaledDumpTS, err := manifest.Until.MarshalText()
-	// Really shouldn't happen because we literally just unmarshaled it.
-	utils.Must(err)
-	if err := db.InsertKeyValue(wellknownkeys.VulnUpdateTimestampKey, string(marshaledDumpTS)); err != nil {
-		return errors.Wrap(err, "couldn't update timestamp key in DB")
-	}
+
 	return nil
 }

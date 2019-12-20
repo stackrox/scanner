@@ -25,6 +25,7 @@ import (
 
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/lib/pq"
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/remind101/migrate"
 	log "github.com/sirupsen/logrus"
@@ -32,6 +33,10 @@ import (
 	"github.com/stackrox/scanner/database/pgsql/migrations"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"gopkg.in/yaml.v2"
+)
+
+const (
+	passwordFile = "/run/secrets/stackrox.io/secrets/password"
 )
 
 var (
@@ -132,6 +137,11 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		return nil, fmt.Errorf("pgsql: could not load configuration: %v", err)
 	}
 
+	password, err := ioutil.ReadFile(passwordFile)
+	if err != nil {
+		return nil, errors.Wrapf(err, "pgsql: could not load password file %q", passwordFile)
+	}
+
 	dbName, pgSourceURL, err := parseConnectionString(pg.config.Source)
 	if err != nil {
 		return nil, err
@@ -146,7 +156,8 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 	}
 
 	// Open database.
-	pg.DB, err = sql.Open("postgres", pg.config.Source)
+	src := fmt.Sprintf("%s password=%s", pg.config.Source, password)
+	pg.DB, err = sql.Open("postgres", src)
 	if err != nil {
 		pg.Close()
 		return nil, fmt.Errorf("pgsql: could not open database: %v", err)

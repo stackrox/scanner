@@ -20,6 +20,11 @@ spec:
       containers:
         - name: scanner
           image:  {{ .Values.scannerImage}}:{{ .Values.tag }}
+          env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
           resources:
             limits:
               cpu: 2
@@ -47,26 +52,17 @@ spec:
               readOnly: true
             - name: vuln-temp-db
               mountPath: /var/lib/stackrox
-        - name: db
-          image: {{.Values.scannerDBImage}}:{{.Values.tag}}
-          resources:
-            limits:
-              cpu: 2
-              memory: 4Gi
-            requests:
-              cpu: 200m
-              memory: 200Mi
-          volumeMounts:
-            - name: db-data
-              mountPath: /var/lib/postgresql/data
+            - name: scanner-db-password
+              mountPath: /run/secrets/stackrox.io/secrets
       volumes:
         - name: config
           configMap:
             name: {{ .Values.appName }}-config
-        - name: db-data
-          emptyDir: {}
         - name: vuln-temp-db
           emptyDir: {}
         - name: scanner-tls-volume
           secret:
             secretName: scanner-tls
+        - name: scanner-db-password
+          secret:
+            secretName: scanner-db-password

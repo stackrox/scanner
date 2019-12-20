@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}-db
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.appName }}-db
+spec:
+  replicas: 1
+  minReadySeconds: 15
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}-db
+  template:
+    metadata:
+      namespace: {{ .Values.namespace }}
+      labels:
+        app: {{ .Values.appName }}-db
+    spec:
+      securityContext:
+        fsGroup: 70
+      containers:
+        - name: db
+          command: ["/usr/local/bin/docker-entrypoint.sh", "postgres", "-c", "config_file=/etc/postgresql.conf"]
+          ports:
+          - name: postgresql
+            containerPort: 5432
+          image: {{.Values.scannerDBImage}}:{{.Values.tag}}
+          env:
+          - name: POSTGRES_PASSWORD_FILE
+            value: /run/secrets/stackrox.io/secrets/password
+          resources:
+            limits:
+              cpu: 2
+              memory: 4Gi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+            - name: scanner-db-tls-volume
+              mountPath: /run/secrets/stackrox.io/certs
+            - name: scanner-db-password
+              mountPath: /run/secrets/stackrox.io/secrets
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.appName }}-config
+        - name: db-data
+          emptyDir: {}
+        - name: scanner-db-tls-volume
+          secret:
+            secretName: scanner-tls
+            defaultMode: 0640
+            items:
+            - key: cert.pem
+              path: server.crt
+            - key: key.pem
+              path: server.key
+            - key: ca.pem
+              path: root.crt
+        - name: scanner-db-password
+          secret:
+            secretName: scanner-db-password

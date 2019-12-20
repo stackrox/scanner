@@ -153,6 +153,24 @@ type Datastore interface {
 	// Close closes the database and frees any allocated resource.
 	Close()
 
+	// Lock creates or renew a Lock in the database with the given name, owner
+	// and duration.
+	//
+	// After the specified duration, the Lock expires by itself if it hasn't been
+	// unlocked, and thus, let other users create a Lock with the same name.
+	// However, the owner can renew its Lock by setting renew to true.
+	// Lock should not block, it should instead returns whether the Lock has been
+	// successfully acquired/renewed. If it's the case, the expiration time of
+	// that Lock is returned as well.
+	Lock(name string, owner string, duration time.Duration, renew bool) (bool, time.Time)
+
+	// Unlock releases an existing Lock.
+	Unlock(name, owner string)
+
+	// FindLock returns the owner of a Lock specified by the name, and its
+	// expiration time if it exists.
+	FindLock(name string) (string, time.Time, error)
+
 	// Image
 	GetLayerBySHA(sha string) (string, bool, error)
 	GetLayerByName(name string) (string, bool, error)

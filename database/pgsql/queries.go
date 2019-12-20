@@ -188,6 +188,13 @@ const (
           AND name = $2
           AND deleted_at IS NULL
     RETURNING id`
+
+	// locks
+	insertLock        = `INSERT INTO Lock(name, owner, until) VALUES($1, $2, $3)`
+	searchLock        = `SELECT owner, until FROM Lock WHERE name = $1`
+	updateLock        = `UPDATE Lock SET until = $3 WHERE name = $1 AND owner = $2`
+	removeLock        = `DELETE FROM Lock WHERE name = $1 AND owner = $2`
+	removeLockExpired = `DELETE FROM LOCK WHERE until < CURRENT_TIMESTAMP`
 )
 
 // buildInputArray constructs a PostgreSQL input array from the specified integers.
