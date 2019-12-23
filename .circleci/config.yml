@@ -171,9 +171,9 @@ commands:
       - run:
           name: Pull definitions dumps
           command: |
-            gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/dump/definitions.sql.gz
+            gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
             gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
-            unzip -d image/dump /tmp/nvd-definitions.zip
+            unzip -d image/scanner/dump /tmp/nvd-definitions.zip
             rm /tmp/nvd-definitions.zip
 
       - run:
