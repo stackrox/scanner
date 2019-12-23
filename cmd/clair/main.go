@@ -114,6 +114,7 @@ func Boot(config *Config) {
 		vulncache = nvdtoolscache.Singleton()
 	}()
 
+	// Initialize the vulnerability cache prior to making the API available
 	wg.Wait()
 	defer db.Close()
 
@@ -124,7 +125,6 @@ func Boot(config *Config) {
 	}
 	u.RunOnce()
 
-	// Initialize the vulnerability cache prior to making the API available
 	go api.RunClairify(config.API, db)
 
 	grpcAPI := grpc.NewAPI(grpc.Config{

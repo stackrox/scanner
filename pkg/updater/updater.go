@@ -33,12 +33,8 @@ const (
 )
 
 var (
-	podName string
-)
-
-func init() {
 	podName = os.Getenv("POD_NAME")
-}
+)
 
 type Updater struct {
 	lastUpdatedTime time.Time
@@ -49,7 +45,7 @@ type Updater struct {
 	fetchIsFromCentral bool
 
 	db         database.Datastore
-	cpeDBCache vulndump.InMemNVDCache
+	cpeDBCache vulndump.NVDCache
 
 	stopSig *concurrency.Signal
 }
@@ -128,7 +124,6 @@ func (u *Updater) doUpdateAndLogError() {
 }
 
 func (u *Updater) runForever() {
-	// Do an update at the very beginning.
 	t := time.NewTicker(u.interval)
 	defer t.Stop()
 	for {
@@ -162,7 +157,7 @@ func (u *Updater) Stop() {
 }
 
 // New returns a new updater instance, and starts running the update daemon.
-func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCache) (*Updater, error) {
+func New(config Config, db database.Datastore, cpeDBUpdater vulndump.NVDCache) (*Updater, error) {
 	downloadURL, isCentral, err := getRelevantDownloadURL(config)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting relevant download URL")

@@ -2,6 +2,7 @@ package nvdtoolscache
 
 import (
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/etcd-io/bbolt"
@@ -39,7 +40,8 @@ func New() (Cache, error) {
 type cacheImpl struct {
 	*bbolt.DB
 
-	updatedTime time.Time
+	updateLock      sync.Mutex
+	lastUpdatedTime time.Time
 }
 
 func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSON10DefCVEItem) error {
@@ -95,11 +97,17 @@ func (c *cacheImpl) GetVulnsForProducts(products []string) ([]cvefeed.Vuln, erro
 }
 
 func (c *cacheImpl) GetLastUpdate() time.Time {
-	return c.updatedTime
+	c.updateLock.Lock()
+	defer c.updateLock.Unlock()
+
+	return c.lastUpdatedTime
 }
 
 func (c *cacheImpl) SetLastUpdate(t time.Time) {
-	c.updatedTime = t
+	c.updateLock.Lock()
+	defer c.updateLock.Unlock()
+
+	c.lastUpdatedTime = t
 }
 
 func (c *cacheImpl) sync() error {

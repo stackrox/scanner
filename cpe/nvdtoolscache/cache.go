@@ -8,5 +8,5 @@ import (
 type Cache interface {
 	GetVulnsForProducts(products []string) ([]cvefeed.Vuln, error)
 
-	vulndump.InMemNVDCache
+	vulndump.NVDCache
 }

@@ -21,8 +21,8 @@ RUN yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x
       "postgresql${PG_MAJOR}" \
       "postgresql${PG_MAJOR}-server"
 
-# this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)                 
-RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PGDATA"                 
+# this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
+RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PGDATA"
 
 RUN localedef -f UTF-8 -i en_US en_US.UTF-8
 
@@ -42,7 +42,7 @@ RUN set -x \
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-COPY ./db.rhel/docker-entrypoint.sh /usr/local/bin/
+COPY ./rhel/docker-entrypoint.sh /usr/local/bin/
 RUN chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
@@ -62,3 +62,5 @@ RUN rpm -e --nodeps curl rpm rpm-libs rpm-build-libs rpm-python subscription-man
 COPY ./*.conf /etc/
 
 COPY ./dump/definitions.sql.gz /docker-entrypoint-initdb.d/
+
+ENV POSTGRES_PASSWORD_FILE=/run/secrets/stackrox.io/secrets/password

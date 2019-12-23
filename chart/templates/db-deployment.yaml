@@ -26,9 +26,6 @@ spec:
           - name: postgresql
             containerPort: 5432
           image: {{.Values.scannerDBImage}}:{{.Values.tag}}
-          env:
-          - name: POSTGRES_PASSWORD_FILE
-            value: /run/secrets/stackrox.io/secrets/password
           resources:
             limits:
               cpu: 2

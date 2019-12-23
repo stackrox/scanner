@@ -12,6 +12,7 @@ import (
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/rox/pkg/fileutils"
 	"github.com/stackrox/rox/pkg/timeutil"
 	"github.com/stackrox/rox/pkg/utils"
@@ -29,7 +30,7 @@ var (
 	updateLockName = "update"
 )
 
-type InMemNVDCache interface {
+type NVDCache interface {
 	LoadFromDirectory(nvdDefinitionsDir string) error
 	GetLastUpdate() time.Time
 	SetLastUpdate(t time.Time)
@@ -120,6 +121,31 @@ func LoadOSVulnsFromDump(zipR *zip.ReadCloser) ([]database.Vulnerability, error)
 	return vulns, nil
 }
 
+func renew(sig *concurrency.Signal, db database.Datastore, interval time.Duration, expiration time.Time, instanceName string) {
+	// Give a buffer for this instance to renew the lock
+	expirationDuration := time.Until(expiration) - 10*time.Second
+	for {
+		select {
+		case <-time.After(expirationDuration):
+			gotLock, newExpiration := db.Lock(updateLockName, instanceName, interval, true)
+			if !gotLock {
+				owner, _, err := db.FindLock(updateLockName)
+				if err != nil {
+					log.Error("error finding lock")
+					return
+				}
+				log.Errorf("DB update lock could not be renewed because it has already been acquired by %q", owner)
+				return
+			}
+			expirationDuration = time.Until(newExpiration) - 10*time.Second
+		case <-sig.Done():
+			db.Unlock(updateLockName, instanceName)
+			return
+		}
+	}
+
+}
+
 func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) error {
 	shouldUpdate, err := determineWhetherToUpdate(db, manifest)
 	if err != nil {
@@ -131,7 +157,7 @@ func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore
 	}
 	log.Info("Running the update.")
 
-	gotLock, _ := db.Lock(updateLockName, instanceName, updateInterval, false)
+	gotLock, expiration := db.Lock(updateLockName, instanceName, updateInterval, false)
 	if !gotLock {
 		owner, _, err := db.FindLock(updateLockName)
 		if err != nil {
@@ -140,6 +166,11 @@ func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore
 		log.Infof("DB update lock already acquired by %q", owner)
 		return nil
 	}
+	finishedSig := concurrency.NewSignal()
+	go renew(&finishedSig, db, updateInterval, expiration, instanceName)
+	defer func() {
+		finishedSig.Signal()
+	}()
 
 	log.Info("Loading OS vulns...")
 	osVulns, err := LoadOSVulnsFromDump(zipR)
@@ -161,7 +192,7 @@ func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore
 	return nil
 }
 
-func loadInMemUpdater(cache InMemNVDCache, manifest *Manifest, zipPath, scratchDir string) error {
+func loadNVDUpdater(cache NVDCache, manifest *Manifest, zipPath, scratchDir string) error {
 	if cache != nil {
 		updateTime := cache.GetLastUpdate()
 		if !updateTime.IsZero() && !manifest.Until.After(updateTime) {
@@ -179,11 +210,11 @@ func loadInMemUpdater(cache InMemNVDCache, manifest *Manifest, zipPath, scratchD
 	return nil
 }
 
-// UpdateFromVulnDump updates the definitions (both in the DB and in the inMemUpdater) from the given zip file.
+// UpdateFromVulnDump updates the definitions (both in the DB and in the NVDCache) from the given zip file.
 // Check the well_known_names.go file for the manifest of the ZIP file.
 // The caller is responsible for providing a path to a scratchDir, which MUST be an empty, but existing, directory.
 // This function will delete the directory before returning.
-func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore, updateInterval time.Duration, instanceName string, cache InMemNVDCache) error {
+func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore, updateInterval time.Duration, instanceName string, cache NVDCache) error {
 	log.Infof("Attempting to update from vuln dump at %q", zipPath)
 	if !fileutils.DirExistsAndIsEmpty(scratchDir) {
 		return errors.Errorf("scratchDir %q invalid: must be an empty directory", scratchDir)
@@ -225,7 +256,7 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	_ = zipR.Close()
 	zipFileClosed = true
 
-	if err := loadInMemUpdater(cache, manifest, zipPath, scratchDir); err != nil {
+	if err := loadNVDUpdater(cache, manifest, zipPath, scratchDir); err != nil {
 		return errors.Wrap(err, "error loading into inmem cache")
 	}
 
