@@ -131,7 +131,7 @@ func renew(sig *concurrency.Signal, db database.Datastore, interval time.Duratio
 			if !gotLock {
 				owner, _, err := db.FindLock(updateLockName)
 				if err != nil {
-					log.Error("error finding lock")
+					log.Errorf("error finding lock: %v", err)
 					return
 				}
 				log.Errorf("DB update lock could not be renewed because it has already been acquired by %q", owner)
@@ -168,9 +168,7 @@ func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore
 	}
 	finishedSig := concurrency.NewSignal()
 	go renew(&finishedSig, db, updateInterval, expiration, instanceName)
-	defer func() {
-		finishedSig.Signal()
-	}()
+	defer finishedSig.Signal()
 
 	log.Info("Loading OS vulns...")
 	osVulns, err := LoadOSVulnsFromDump(zipR)
