@@ -151,32 +151,32 @@ image-rhel: scanner-image-rhel db-image-rhel
 .PHONY: build
 build: deps
 	@echo "+ $@"
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o image/bin/scanner ./cmd/clair
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o image/scanner/bin/scanner ./cmd/clair
 
 .PHONY: scanner-image
 scanner-image: build
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/Dockerfile.scanner image/
+	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/alpine/Dockerfile image/scanner
 	@docker tag us.gcr.io/stackrox-ci/scanner:$(TAG) stackrox/scanner:$(TAG)
 
 .PHONY: scanner-image-rhel
 scanner-image-rhel: build
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/scanner-rhel:$(TAG) -f image/Dockerfile.scanner.rhel image/
+	@docker build -t us.gcr.io/stackrox-ci/scanner-rhel:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner
 
 .PHONY: db-image
 db-image:
 	@echo "+ $@"
-	@test -f image/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/Dockerfile.db image/
+	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
+	@docker build -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/db/alpine/Dockerfile image/db
 	@docker tag us.gcr.io/stackrox-ci/scanner-db:$(TAG) stackrox/scanner-db:$(TAG)
 
 
 .PHONY: db-image-rhel
 db-image-rhel:
 	@echo "+ $@"
-	@test -f image/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t us.gcr.io/stackrox-ci/scanner-db-rhel:$(TAG) -f image/Dockerfile.db.rhel image/
+	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
+	@docker build -t us.gcr.io/stackrox-ci/scanner-db-rhel:$(TAG) -f image/db/rhel/Dockerfile image/db
 
 
 .PHONY: deploy

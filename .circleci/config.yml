@@ -171,9 +171,9 @@ commands:
       - run:
           name: Pull definitions dumps
           command: |
-            gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/dump/definitions.sql.gz
+            gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
             gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
-            unzip -d image/dump /tmp/nvd-definitions.zip
+            unzip -d image/scanner/dump /tmp/nvd-definitions.zip
             rm /tmp/nvd-definitions.zip
 
       - run:
@@ -445,7 +445,7 @@ jobs:
               echo "Got timestamps -- from zip: ${timestamp_in_zip}; from manifest: ${timestamp}"
               [[ "${timestamp_in_zip}" == "${timestamp}" ]] # Assertion on the manifest contents
               ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --out-file "/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
-            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp] | @tsv' < image/dump/genesis_manifests.json)
+            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp] | @tsv' < image/scanner/dump/genesis_manifests.json)
 
       - persist_to_workspace:
           root: /tmp
@@ -476,7 +476,7 @@ jobs:
               [[ -f "${expected_zip_file_loc}" ]]
               [[ -n "${diffloc}" ]]
               gsutil cp "${expected_zip_file_loc}" "${diffloc}"
-            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .diffLocation] | @tsv' < image/dump/genesis_manifests.json)
+            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .diffLocation] | @tsv' < image/scanner/dump/genesis_manifests.json)
 
       - run:
           name: Generate offline dump
@@ -486,7 +486,7 @@ jobs:
             # Fetch the scanner dump which is marked as the base for offline dumps.
             # For offline dumps, we just use one base (the oldest base which is in a version of scanner still supported)
             # for simplicity.
-            offline_dumps="$(jq '.knownGenesisDumps | [.[] | select(.baseForOfflineDumps == true)]' < image/dump/genesis_manifests.json)"
+            offline_dumps="$(jq '.knownGenesisDumps | [.[] | select(.baseForOfflineDumps == true)]' < image/scanner/dump/genesis_manifests.json)"
             echo "Got offline dumps list: ${offline_dumps}"
             [[ "$(echo "${offline_dumps}" | jq 'length')" -eq 1 ]]
             offline_diff_location="$(echo "${offline_dumps}" | jq -r '.[0] | .diffLocation')"

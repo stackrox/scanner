@@ -29,7 +29,11 @@ var (
 const (
 	ifModifiedSinceHeader = "If-Modified-Since"
 
-	defaulTimeout = 5 * time.Minute
+	defaultTimeout = 5 * time.Minute
+)
+
+var (
+	podName = os.Getenv("POD_NAME")
 )
 
 type Updater struct {
@@ -40,8 +44,8 @@ type Updater struct {
 	downloadURL        string
 	fetchIsFromCentral bool
 
-	db           database.Datastore
-	cpeDBUpdater vulndump.InMemNVDCacheUpdater
+	db         database.Datastore
+	cpeDBCache vulndump.NVDCache
 
 	stopSig *concurrency.Signal
 }
@@ -105,7 +109,7 @@ func (u *Updater) doUpdate() error {
 	if err := os.MkdirAll(diffDumpScratchDir, 0755); err != nil {
 		return errors.Wrap(err, "creating scratch dir")
 	}
-	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, u.db, u.cpeDBUpdater); err != nil {
+	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, u.db, u.interval, podName, u.cpeDBCache); err != nil {
 		return errors.Wrap(err, "updating from vuln dump")
 	}
 	u.lastUpdatedTime = startTime
@@ -120,8 +124,6 @@ func (u *Updater) doUpdateAndLogError() {
 }
 
 func (u *Updater) runForever() {
-	// Do an update at the very beginning.
-	u.doUpdateAndLogError()
 	t := time.NewTicker(u.interval)
 	defer t.Stop()
 	for {
@@ -155,14 +157,14 @@ func (u *Updater) Stop() {
 }
 
 // New returns a new updater instance, and starts running the update daemon.
-func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCacheUpdater) (*Updater, error) {
+func New(config Config, db database.Datastore, cpeDBUpdater vulndump.NVDCache) (*Updater, error) {
 	downloadURL, isCentral, err := getRelevantDownloadURL(config)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting relevant download URL")
 	}
 
 	client := &http.Client{
-		Timeout:   defaulTimeout,
+		Timeout:   defaultTimeout,
 		Transport: proxy.RoundTripper(),
 	}
 	if isCentral {
@@ -187,10 +189,19 @@ func New(config Config, db database.Datastore, cpeDBUpdater vulndump.InMemNVDCac
 		interval:           config.Interval,
 		downloadURL:        downloadURL,
 		db:                 db,
-		cpeDBUpdater:       cpeDBUpdater,
+		cpeDBCache:         cpeDBUpdater,
 		stopSig:            &stopSig,
 		lastUpdatedTime:    lastUpdatedTime,
 	}
-	go u.runForever()
 	return u, nil
+}
+
+func (u *Updater) RunOnce() {
+	if err := u.doUpdate(); err != nil {
+		log.WithError(err).Error("Updater failed")
+	}
+}
+
+func (u *Updater) RunForever() {
+	u.runForever()
 }

@@ -114,10 +114,16 @@ func Boot(config *Config) {
 		vulncache = nvdtoolscache.Singleton()
 	}()
 
+	// Initialize the vulnerability cache prior to making the API available
 	wg.Wait()
 	defer db.Close()
 
-	// Initialize the vulnerability cache prior to making the API available
+	// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up to date
+	u, err := updater.New(config.Updater, db, vulncache)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to initialize updater")
+	}
+	u.RunOnce()
 
 	go api.RunClairify(config.API, db)
 
@@ -133,11 +139,7 @@ func Boot(config *Config) {
 
 	go grpcAPI.Start()
 
-	// Start updater
-	u, err := updater.New(config.Updater, db, vulncache.LoadFromDirectory)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to initialize updater")
-	}
+	go u.RunForever()
 
 	// Wait for interruption and shutdown gracefully.
 	waitForSignals(syscall.SIGINT, syscall.SIGTERM)
@@ -170,7 +172,6 @@ func main() {
 	}
 
 	// Initialize logging system
-
 	logLevel, err := log.ParseLevel(strings.ToUpper(config.LogLevel))
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Invalid log level: %v", err)
