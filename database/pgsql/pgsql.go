@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -138,7 +139,11 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 	}
 
 	src := pg.config.Source
-	if strings.Contains(pg.config.Source, "password") {
+
+	if _, err := os.Stat(passwordFile); err != nil {
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
 		password, err := ioutil.ReadFile(passwordFile)
 		if err != nil {
 			return nil, errors.Wrapf(err, "pgsql: could not load password file %q", passwordFile)
