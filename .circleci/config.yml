@@ -392,11 +392,6 @@ jobs:
             pg_dump -U postgres postgres://127.0.0.1:5432 > pg-definitions.sql
             gzip --best pg-definitions.sql
 
-      - run:
-          name: Upload PG dump to Google Storage
-          command: |
-            gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
-
   upload-nvd-dump-for-embedding-into-image:
     <<: *defaults
     steps:
@@ -411,11 +406,6 @@ jobs:
           name: Generate NVD dump
           command: |
             zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out nvd-definitions.zip
-
-      - run:
-          name: Upload to Google Storage
-          command: |
-            gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
 
   create-diff-dumps:
     <<: *defaults
@@ -497,10 +487,6 @@ jobs:
             gsutil cp -r gs://definitions.stackrox.io/cve/* /tmp/scratch/
             cd /tmp/scratch
             zip -r /tmp/offline-dump/k8s-istio.zip *
-
-            cd /tmp/offline-dump
-            zip scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
-            gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 
   build:
     <<: *defaults
