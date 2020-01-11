@@ -139,11 +139,7 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 	}
 
 	src := pg.config.Source
-
-	if _, err := os.Stat(passwordFile); err != nil {
-		if !os.IsNotExist(err) {
-			return nil, err
-		}
+	if _, err := os.Stat(passwordFile); err == nil {
 		password, err := ioutil.ReadFile(passwordFile)
 		if err != nil {
 			return nil, errors.Wrapf(err, "pgsql: could not load password file %q", passwordFile)
