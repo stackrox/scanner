@@ -145,6 +145,8 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 			return nil, errors.Wrapf(err, "pgsql: could not load password file %q", passwordFile)
 		}
 		src = fmt.Sprintf("%s password=%s", pg.config.Source, password)
+	} else if !os.IsNotExist(err) {
+		log.Errorf("error stating password file %q: %v", passwordFile, err)
 	}
 
 	dbName, pgSourceURL, err := parseConnectionString(pg.config.Source)
