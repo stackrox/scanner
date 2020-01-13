@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -137,9 +138,15 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		return nil, fmt.Errorf("pgsql: could not load configuration: %v", err)
 	}
 
-	password, err := ioutil.ReadFile(passwordFile)
-	if err != nil {
-		return nil, errors.Wrapf(err, "pgsql: could not load password file %q", passwordFile)
+	src := pg.config.Source
+	if _, err := os.Stat(passwordFile); err == nil {
+		password, err := ioutil.ReadFile(passwordFile)
+		if err != nil {
+			return nil, errors.Wrapf(err, "pgsql: could not load password file %q", passwordFile)
+		}
+		src = fmt.Sprintf("%s password=%s", pg.config.Source, password)
+	} else if !os.IsNotExist(err) {
+		log.Errorf("error stating password file %q: %v", passwordFile, err)
 	}
 
 	dbName, pgSourceURL, err := parseConnectionString(pg.config.Source)
@@ -156,7 +163,6 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 	}
 
 	// Open database.
-	src := fmt.Sprintf("%s password=%s", pg.config.Source, password)
 	pg.DB, err = sql.Open("postgres", src)
 	if err != nil {
 		pg.Close()
