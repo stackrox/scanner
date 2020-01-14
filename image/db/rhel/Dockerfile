@@ -1,6 +1,10 @@
 # Modified for RHEL from https://github.com/docker-library/postgres/tree/master/12
 
-FROM registry.access.redhat.com/ubi7/ubi
+ARG BASE_REGISTRY=registry.access.redhat.com
+ARG BASE_IMAGE=ubi7/ubi
+ARG BASE_TAG=7.7
+
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
 ENV PG_MAJOR 12
 ENV GOSU_VERSION 1.11
@@ -48,13 +52,6 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
 CMD ["postgres"]
-
-# Make image STIG compliant: https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/
-ARG DSOP_URL=https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/raw/18d21ee5ed843e7b319e2670f47687f057db98a6/7.7
-RUN ( for i in dsop-fix-{1,2,3}.sh ; do curl -O "$DSOP_URL/$i" ; done; )
-RUN ( chmod +x /dsop-fix-{1,2}.sh && for i in /dsop-fix-{1,2}.sh; do sh "$i"; done; )
-RUN ( yum update -y --disableplugin=subscription-manager && rm -rf /var/cache/yum/ /var/tmp/* /tmp/* /var/tmp/.???* /tmp/.???*; )
-RUN ( chmod +x /dsop-fix-3.sh && /dsop-fix-3.sh && rm -rf /dsop-fix*.sh ; )
 
 # Remove package manager
 RUN rpm -e --nodeps curl rpm rpm-libs rpm-build-libs rpm-python subscription-manager subscription-manager-rhsm yum yum-utils yum-plugin-ovl

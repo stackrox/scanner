@@ -1,4 +1,8 @@
-FROM registry.access.redhat.com/ubi7/ubi
+ARG BASE_REGISTRY=registry.access.redhat.com
+ARG BASE_IMAGE=ubi7/ubi
+ARG BASE_TAG=7.7
+
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -16,14 +20,6 @@ COPY ./dump/genesis_manifests.json /
 
 
 ENTRYPOINT ["/scanner"]
-
-
-# Make image STIG compliant: https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/
-ARG DSOP_URL=https://dccscr.dsop.io/dsop/redhat/ubi/ubi7/raw/master/7.7
-RUN ( for i in dsop-fix-{1,2,3}.sh ; do curl -O "$DSOP_URL/$i" ; done; )
-RUN ( chmod +x /dsop-fix-{1,2}.sh && for i in /dsop-fix-{1,2}.sh; do sh "$i"; done; )
-RUN ( yum update -y --disableplugin=subscription-manager && rm -rf /var/cache/yum/ /var/tmp/* /tmp/* /var/tmp/.???* /tmp/.???*; )
-RUN ( chmod +x /dsop-fix-3.sh && /dsop-fix-3.sh && rm -rf /dsop-fix*.sh ; )
 
 # Remove package manager
 RUN rpm -e subscription-manager yum yum-utils yum-plugin-ovl
