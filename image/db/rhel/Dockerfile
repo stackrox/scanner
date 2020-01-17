@@ -7,11 +7,9 @@ ARG BASE_TAG=7.7
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
 ENV PG_MAJOR 12
-ENV GOSU_VERSION 1.11
-ENV ARCH amd64
-ENV LANG en_US.utf8
 ENV PATH $PATH:/usr/pgsql-$PG_MAJOR/bin/
 ENV PGDATA /var/lib/postgresql/data
+ENV POSTGRES_PASSWORD_FILE=/run/secrets/stackrox.io/secrets/password
 
 RUN groupadd -g 70 postgres
 RUN adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh
@@ -21,43 +19,26 @@ RUN yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x
     yum update -y --disableplugin=subscription-manager && \
     yum install -y \
       ca-certificates \
-      nss_wrapper \
       "postgresql${PG_MAJOR}" \
       "postgresql${PG_MAJOR}-server"
 
-# this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
-RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PGDATA"
+# Remove package manager
+RUN rpm -e --nodeps curl rpm rpm-libs rpm-build-libs rpm-python subscription-manager subscription-manager-rhsm yum yum-utils yum-plugin-ovl
 
 RUN localedef -f UTF-8 -i en_US en_US.UTF-8
 
-# gosu download
-ADD "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$ARCH" /usr/local/bin/gosu
-ADD "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$ARCH.asc" /usr/local/bin/gosu.asc
-
-# gosu verification and permissions
-RUN set -x \
-	&& export GNUPGHOME="$(mktemp -d)" \
-	&& gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-	&& { command -v gpgconf > /dev/null && gpgconf --kill all || :; } \
-	&& rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
-	&& chmod +x /usr/local/bin/gosu \
-	&& gosu nobody true
-
 RUN mkdir /docker-entrypoint-initdb.d
-
 COPY ./rhel/docker-entrypoint.sh /usr/local/bin/
 RUN chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
+
+COPY ./*.conf /etc/
+COPY ./dump/definitions.sql.gz /docker-entrypoint-initdb.d/
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
 CMD ["postgres"]
 
-# Remove package manager
-RUN rpm -e --nodeps curl rpm rpm-libs rpm-build-libs rpm-python subscription-manager subscription-manager-rhsm yum yum-utils yum-plugin-ovl
+HEALTHCHECK --interval=10s --timeout=5s CMD pg_isready -U postgres
 
-COPY ./*.conf /etc/
-
-COPY ./dump/definitions.sql.gz /docker-entrypoint-initdb.d/
-
-ENV POSTGRES_PASSWORD_FILE=/run/secrets/stackrox.io/secrets/password
+USER 70:70
