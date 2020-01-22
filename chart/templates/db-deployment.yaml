@@ -20,7 +20,7 @@ spec:
       securityContext:
         fsGroup: 70
       initContainers:
-        - name: init-chmod-dbdata
+        - name: init-db
           image: {{.Values.scannerDBImage}}:{{.Values.tag}}
           command:
           - /bin/sh
