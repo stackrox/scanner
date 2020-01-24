@@ -19,6 +19,21 @@ spec:
     spec:
       securityContext:
         fsGroup: 70
+      initContainers:
+        - name: init-db
+          image: {{.Values.scannerDBImage}}:{{.Values.tag}}
+          command:
+          - /bin/sh
+          - -c
+          - |
+            mkdir -p /var/lib/postgresql/data
+            chmod 700 /var/lib/postgresql/data
+            chown -R postgres:postgres /var/lib/postgresql
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+          securityContext:
+            runAsUser: 0
       containers:
         - name: db
           command: ["/usr/local/bin/docker-entrypoint.sh", "postgres", "-c", "config_file=/etc/postgresql.conf"]
@@ -40,6 +55,9 @@ spec:
               mountPath: /run/secrets/stackrox.io/certs
             - name: scanner-db-password
               mountPath: /run/secrets/stackrox.io/secrets
+          securityContext:
+            runAsUser: 70
+            runAsGroup: 70
       volumes:
         - name: config
           configMap:
