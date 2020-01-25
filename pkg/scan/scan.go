@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
@@ -17,6 +18,11 @@ import (
 
 const (
 	emptyLayer = "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4"
+)
+
+var (
+	registryMap  = make(map[string]types.Registry)
+	registryLock sync.Mutex
 )
 
 func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string) error {
@@ -42,14 +48,25 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 func ProcessImage(storage database.Datastore, image *types.Image, registry, username, password string, insecure bool) (string, error) {
 	var reg types.Registry
 	var err error
-	if insecure {
-		reg, err = types.InsecureDockerRegistryCreator(registry, username, password)
-	} else {
-		reg, err = types.DockerRegistryCreator(registry, username, password)
+	var ok bool
+
+	registryLock.Lock()
+	registryKey := registry + ":" + username + ":" + password
+	reg, ok = registryMap[registryKey]
+	if !ok {
+		if insecure {
+			reg, err = types.InsecureDockerRegistryCreator(registry, username, password)
+		} else {
+			reg, err = types.DockerRegistryCreator(registry, username, password)
+		}
 	}
 	if err != nil {
+		registryLock.Unlock()
 		return "", err
 	}
+	registryMap[registryKey] = reg
+	registryLock.Unlock()
+
 	sha, layer, err := process(storage, image, reg)
 	if err != nil {
 		return sha, err
