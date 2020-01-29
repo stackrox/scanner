@@ -4,6 +4,7 @@ package e2etests
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
@@ -41,5 +42,67 @@ func TestPythonComponents(t *testing.T) {
 		got, ok := gotComponents[layer]
 		assert.True(t, ok, "Layer %q not in got components", layer)
 		assert.ElementsMatch(t, components.GetComponents(), got.GetComponents())
+	}
+}
+
+func TestRemovedComponents(t *testing.T) {
+	cases := []struct {
+		distro            string
+		missingComponents []string
+	}{
+		{
+			distro: "debian",
+			missingComponents: []string{
+				"apt",
+				"curl",
+			},
+		},
+		{
+			distro: "ubuntu",
+			missingComponents: []string{
+				"apt",
+				"curl",
+			},
+		},
+		{
+			distro: "alpine",
+			missingComponents: []string{
+				"apk",
+				"curl",
+			},
+		},
+		{
+			distro: "centos",
+			missingComponents: []string{
+				"rpm",
+				"yum",
+				"curl",
+			},
+		},
+		{
+			distro: "rhel",
+			missingComponents: []string{
+				"rpm",
+				"yum",
+				"curl",
+			},
+		},
+	}
+	conn := connectToScanner(t)
+	client := v1.NewScanServiceClient(conn)
+	for _, c := range cases {
+		t.Run(c.distro, func(t *testing.T) {
+			scanResp := scanDockerIOStackRoxImage(client, fmt.Sprintf("stackrox/vuln-images:%s-package-removal", c.distro), t)
+			scan, err := client.GetScan(context.Background(), &v1.GetScanRequest{
+				ImageSpec: scanResp.GetImage(),
+			})
+			require.NoError(t, err)
+
+			for _, f := range scan.GetImage().GetFeatures() {
+				for _, missing := range c.missingComponents {
+					assert.NotEqual(t, missing, f.GetName())
+				}
+			}
+		})
 	}
 }
