@@ -38,6 +38,8 @@ import (
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
+	"github.com/stackrox/scanner/pkg/clairify/server"
+	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/formatter"
 	"github.com/stackrox/scanner/pkg/stopper"
 	"github.com/stackrox/scanner/pkg/updater"
@@ -125,7 +127,8 @@ func Boot(config *Config) {
 	}
 	u.RunOnce()
 
-	go api.RunClairify(config.API, db)
+	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
+	go api.RunClairify(serv)
 
 	grpcAPI := grpc.NewAPI(grpc.Config{
 		Port:         config.API.GRPCPort,
@@ -144,6 +147,7 @@ func Boot(config *Config) {
 	// Wait for interruption and shutdown gracefully.
 	waitForSignals(syscall.SIGINT, syscall.SIGTERM)
 	log.Info("Received interruption, gracefully stopping ...")
+	serv.Close()
 	st.Stop()
 	u.Stop()
 }
