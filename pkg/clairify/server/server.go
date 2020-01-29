@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
@@ -266,5 +267,7 @@ func (s *Server) Start() error {
 
 // Close closes the server's connections
 func (s *Server) Close() {
-	s.httpServer.Close()
+	if err := s.httpServer.Shutdown(context.Background()); err != nil {
+		logrus.Error(err)
+	}
 }

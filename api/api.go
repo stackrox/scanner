@@ -15,12 +15,8 @@
 package api
 
 import (
-	"fmt"
-
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/server"
-	"github.com/stackrox/scanner/pkg/clairify/types"
 )
 
 // Config is the configuration for the API service.
@@ -29,8 +25,7 @@ type Config struct {
 	GRPCPort  int
 }
 
-func RunClairify(cfg *Config, store database.Datastore) {
-	serv := server.New(fmt.Sprintf(":%d", cfg.HTTPSPort), store, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
+func RunClairify(serv *server.Server) {
 	if err := serv.Start(); err != nil {
 		log.Fatal(err)
 	}
