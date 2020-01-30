@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
@@ -47,10 +48,10 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 	// Create a map to store packages and ensure their uniqueness
 	packagesMap := make(map[string]database.FeatureVersion)
-	removedPackagesMap := make(map[string]struct{})
+	removedPackagesMap := set.NewStringSet()
 
 	var pkg database.FeatureVersion
-	var removed bool
+	var currentPkgIsRemoved bool
 	var err error
 	scanner := bufio.NewScanner(strings.NewReader(string(f)))
 	for scanner.Scan() {
@@ -103,25 +104,23 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 				pkg.Version = version
 			}
 		} else if strings.HasPrefix(line, "Status: ") {
-			removed = strings.Contains(line, "deinstall")
+			currentPkgIsRemoved = strings.Contains(line, "deinstall")
 		} else if line == "" {
-			pkg.Feature.Name = ""
-			pkg.Version = ""
-			removed = false
+			pkg = database.FeatureVersion{}
+			currentPkgIsRemoved = false
 		}
 
 		// Add the package to the result array if we have all the informations
 		if pkg.Feature.Name != "" && pkg.Version != "" {
 			key := pkg.Feature.Name + "#" + pkg.Version
 
-			if !removed {
+			if !currentPkgIsRemoved {
 				packagesMap[key] = pkg
 			} else {
-				removedPackagesMap[key] = struct{}{}
+				removedPackagesMap.Add(key)
 			}
-			pkg.Feature.Name = ""
-			pkg.Version = ""
-			removed = false
+			pkg = database.FeatureVersion{}
+			currentPkgIsRemoved = false
 		}
 	}
 
@@ -129,7 +128,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	packages := make([]database.FeatureVersion, 0, len(packagesMap))
 	for key, pkg := range packagesMap {
 		// Ignore packages that were removed
-		if _, ok := removedPackagesMap[key]; ok {
+		if removedPackagesMap.Contains(key) {
 			continue
 		}
 		packages = append(packages, pkg)
