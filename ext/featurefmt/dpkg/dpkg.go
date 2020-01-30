@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
@@ -47,8 +48,10 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 	// Create a map to store packages and ensure their uniqueness
 	packagesMap := make(map[string]database.FeatureVersion)
+	removedPackagesMap := set.NewStringSet()
 
 	var pkg database.FeatureVersion
+	var currentPkgIsRemoved bool
 	var err error
 	scanner := bufio.NewScanner(strings.NewReader(string(f)))
 	for scanner.Scan() {
@@ -57,7 +60,6 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		if strings.HasPrefix(line, "Package: ") {
 			// Package line
 			// Defines the name of the package
-
 			pkg.Feature.Name = strings.TrimSpace(strings.TrimPrefix(line, "Package: "))
 			pkg.Version = ""
 		} else if strings.HasPrefix(line, "Source: ") {
@@ -67,19 +69,26 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(line, -1)[0]
 			md := map[string]string{}
+
 			for i, n := range srcCapture {
 				md[dpkgSrcCaptureRegexpNames[i]] = strings.TrimSpace(n)
+
 			}
 
 			pkg.Feature.Name = md["name"]
+
 			if md["version"] != "" {
 				version := md["version"]
 				err = versionfmt.Valid(dpkg.ParserName, version)
+
 				if err != nil {
 					log.WithError(err).WithField("version", string(line[1])).Warning("could not parse package version. skipping")
+
 				} else {
 					pkg.Version = version
+
 				}
+
 			}
 		} else if strings.HasPrefix(line, "Version: ") && pkg.Version == "" {
 			// Version line
@@ -94,22 +103,34 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			} else {
 				pkg.Version = version
 			}
+		} else if strings.HasPrefix(line, "Status: ") {
+			currentPkgIsRemoved = strings.Contains(line, "deinstall")
 		} else if line == "" {
-			pkg.Feature.Name = ""
-			pkg.Version = ""
+			pkg = database.FeatureVersion{}
+			currentPkgIsRemoved = false
 		}
 
 		// Add the package to the result array if we have all the informations
 		if pkg.Feature.Name != "" && pkg.Version != "" {
-			packagesMap[pkg.Feature.Name+"#"+pkg.Version] = pkg
-			pkg.Feature.Name = ""
-			pkg.Version = ""
+			key := pkg.Feature.Name + "#" + pkg.Version
+
+			if !currentPkgIsRemoved {
+				packagesMap[key] = pkg
+			} else {
+				removedPackagesMap.Add(key)
+			}
+			pkg = database.FeatureVersion{}
+			currentPkgIsRemoved = false
 		}
 	}
 
 	// Convert the map to a slice
 	packages := make([]database.FeatureVersion, 0, len(packagesMap))
-	for _, pkg := range packagesMap {
+	for key, pkg := range packagesMap {
+		// Ignore packages that were removed
+		if removedPackagesMap.Contains(key) {
+			continue
+		}
 		packages = append(packages, pkg)
 	}
 

@@ -1,0 +1,3 @@
+FROM registry.access.redhat.com/ubi7/ubi
+
+RUN rpm -e --nodeps curl yum yum-utils yum-plugin-ovl subscription-manager rpm rpm-libs rpm-build-libs rpm-python subscription-manager-rhsm

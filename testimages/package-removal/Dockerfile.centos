@@ -1,0 +1,3 @@
+FROM centos
+
+RUN rpm -e --nodeps curl yum rpm rpm-libs rpm-build-libs
