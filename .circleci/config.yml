@@ -355,6 +355,10 @@ jobs:
             ./bin/updater generate-dump --out-file /tmp/genesis-dump/dump.zip
             ls -lrt /tmp/genesis-dump
 
+      - store_artifacts:
+          path: /tmp/genesis-dump/dump.zip
+          destination: genesis-dump.zip
+
       - persist_to_workspace:
           root: /tmp
           paths:
