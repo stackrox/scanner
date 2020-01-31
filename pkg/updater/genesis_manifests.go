@@ -15,7 +15,7 @@ import (
 const (
 	genesisManifestsLocation = "/genesis_manifests.json"
 
-	gsPrefix                = "gs://"
+	gsPrefix = "gs://"
 
 	apiPathInCentral = "api/extensions/scannerdefinitions"
 )
