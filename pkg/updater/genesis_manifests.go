@@ -15,8 +15,7 @@ import (
 const (
 	genesisManifestsLocation = "/genesis_manifests.json"
 
-	gsPrefix                = "gs://"
-	storageGoogleAPIsPrefix = "https://storage.googleapis.com/"
+	gsPrefix = "gs://"
 
 	apiPathInCentral = "api/extensions/scannerdefinitions"
 )
@@ -69,9 +68,9 @@ func getRelevantDownloadURL(config Config) (downloadURL string, isCentral bool, 
 	}
 
 	diffLoc := mostRecentGenesisDump.DiffLocation
-	// Convert a gs:// URL to https://storage.googleapis.com URL.
+	// Convert a gs:// URL to definitions.stackrox.io
 	if !strings.HasPrefix(diffLoc, gsPrefix) {
 		return "", false, errors.Errorf("invalid diff location %q: must start with %s", diffLoc, gsPrefix)
 	}
-	return fmt.Sprintf("%s%s", storageGoogleAPIsPrefix, strings.TrimPrefix(diffLoc, "gs://")), false, nil
+	return fmt.Sprintf("https://%s", strings.TrimPrefix(diffLoc, "gs://")), false, nil
 }

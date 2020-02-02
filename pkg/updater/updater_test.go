@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	url = "https://storage.googleapis.com/definitions.stackrox.io/e799c68a-671f-44db-9682-f24248cd0ffe/diff.zip"
+	url = "https://definitions.stackrox.io/e799c68a-671f-44db-9682-f24248cd0ffe/diff.zip"
 )
 
 var (
