@@ -42,6 +42,7 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/formatter"
 	"github.com/stackrox/scanner/pkg/stopper"
+	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
 
 	// Register database driver.
@@ -184,6 +185,12 @@ func main() {
 	log.SetLevel(logLevel)
 	log.SetOutput(os.Stdout)
 	log.SetFormatter(&formatter.JSONExtendedFormatter{ShowLn: true})
+
+	// Set the max extractable file size from the config.
+	if config.MaxExtractableFileSize > 0 {
+		tarutil.SetMaxExtractableFileSize(config.MaxExtractableFileSize)
+		log.Infof("Max extractable file size set to %d", config.MaxExtractableFileSize)
+	}
 
 	// Enable TLS server's certificate chain and hostname verification
 	// when pulling layers if specified

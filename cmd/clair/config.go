@@ -21,6 +21,7 @@ import (
 
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
 	"gopkg.in/yaml.v2"
 )
@@ -33,10 +34,11 @@ type File struct {
 
 // Config is the global configuration for an instance of Clair.
 type Config struct {
-	Database database.RegistrableComponentConfig `yaml:"database"`
-	API      *api.Config                         `yaml:"api"`
-	Updater  updater.Config                      `yaml:"updater"`
-	LogLevel string                              `yaml:"logLevel"`
+	Database               database.RegistrableComponentConfig `yaml:"database"`
+	API                    *api.Config                         `yaml:"api"`
+	Updater                updater.Config                      `yaml:"updater"`
+	LogLevel               string                              `yaml:"logLevel"`
+	MaxExtractableFileSize int64                               `yaml:"maxExtractableFileSize"`
 }
 
 // DefaultConfig is a configuration that can be used as a fallback value.
@@ -52,7 +54,8 @@ func DefaultConfig() Config {
 			HTTPSPort: 8080,
 			GRPCPort:  8443,
 		},
-		LogLevel: "info",
+		LogLevel:               "info",
+		MaxExtractableFileSize: tarutil.DefaultMaxExtractableFileSize,
 	}
 }
 
