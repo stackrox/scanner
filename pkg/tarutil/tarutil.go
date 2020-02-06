@@ -145,7 +145,7 @@ func rewriteArchive(data []byte) ([]byte, error) {
 	buf := bytes.NewReader(data)
 	r, err := zip.NewReader(buf, int64(len(data)))
 	if err != nil {
-		return nil, errors.Wrapf(err, "error reading zip file")
+		return nil, errors.Wrap(err, "error reading zip file")
 	}
 
 	outputBuf := new(bytes.Buffer)

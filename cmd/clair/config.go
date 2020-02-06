@@ -34,11 +34,11 @@ type File struct {
 
 // Config is the global configuration for an instance of Clair.
 type Config struct {
-	Database               database.RegistrableComponentConfig `yaml:"database"`
-	API                    *api.Config                         `yaml:"api"`
-	Updater                updater.Config                      `yaml:"updater"`
-	LogLevel               string                              `yaml:"logLevel"`
-	MaxExtractableFileSize int64                               `yaml:"maxExtractableFileSize"`
+	Database                 database.RegistrableComponentConfig `yaml:"database"`
+	API                      *api.Config                         `yaml:"api"`
+	Updater                  updater.Config                      `yaml:"updater"`
+	LogLevel                 string                              `yaml:"logLevel"`
+	MaxExtractableFileSizeKB int64                               `yaml:"maxExtractableFileSizeKB"`
 }
 
 // DefaultConfig is a configuration that can be used as a fallback value.
@@ -54,8 +54,8 @@ func DefaultConfig() Config {
 			HTTPSPort: 8080,
 			GRPCPort:  8443,
 		},
-		LogLevel:               "info",
-		MaxExtractableFileSize: tarutil.DefaultMaxExtractableFileSize,
+		LogLevel:                 "info",
+		MaxExtractableFileSizeKB: tarutil.DefaultMaxExtractableFileSize,
 	}
 }
 

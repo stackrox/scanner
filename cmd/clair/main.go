@@ -187,9 +187,9 @@ func main() {
 	log.SetFormatter(&formatter.JSONExtendedFormatter{ShowLn: true})
 
 	// Set the max extractable file size from the config.
-	if config.MaxExtractableFileSize > 0 {
-		tarutil.SetMaxExtractableFileSize(config.MaxExtractableFileSize)
-		log.Infof("Max extractable file size set to %d", config.MaxExtractableFileSize)
+	if config.MaxExtractableFileSizeKB > 0 {
+		tarutil.SetMaxExtractableFileSize(config.MaxExtractableFileSizeKB * 1024)
+		log.Infof("Max extractable file size set to %d", config.MaxExtractableFileSizeKB)
 	}
 
 	// Enable TLS server's certificate chain and hostname verification
