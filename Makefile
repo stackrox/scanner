@@ -164,20 +164,12 @@ scanner-image: build
 $(CURDIR)/image/scanner/rhel/bundle.tar.gz:
 	$(CURDIR)/image/scanner/rhel/create-bundle.sh $(CURDIR)/image/scanner $@
 
-.PHONY: $(CURDIR)/image/scanner/rhel/prebuild.sh
-$(CURDIR)/image/scanner/rhel/prebuild.sh:
-	$(CURDIR)/image/scanner/rhel/create-prebuild.sh $@
-
 .PHONY: $(CURDIR)/image/db/rhel/bundle.tar.gz
 $(CURDIR)/image/db/rhel/bundle.tar.gz:
 	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $@
 
-.PHONY: $(CURDIR)/image/db/rhel/prebuild.sh
-$(CURDIR)/image/db/rhel/prebuild.sh:
-	$(CURDIR)/image/db/rhel/create-prebuild.sh $@
-
 .PHONY: scanner-image-rhel
-scanner-image-rhel: build $(CURDIR)/image/scanner/rhel/prebuild.sh $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image-rhel: build $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@docker build -t us.gcr.io/stackrox-ci/scanner-rhel:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
@@ -190,7 +182,7 @@ db-image:
 
 
 .PHONY: db-image-rhel
-db-image-rhel: build $(CURDIR)/image/db/rhel/prebuild.sh $(CURDIR)/image/db/rhel/bundle.tar.gz
+db-image-rhel: build $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
 	@docker build -t us.gcr.io/stackrox-ci/scanner-db-rhel:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel

@@ -35,11 +35,11 @@ postgres_url="https://download.postgresql.org/pub/repos/yum/12/redhat/rhel-7.7-x
 postgres_major="12"
 postgres_minor="12.1-2PGDG.rhel7.x86_64"
 
-curl -o "${bundle_root}/postgres.rpm" \
+curl -s -o "${bundle_root}/postgres.rpm" \
     "${postgres_url}/postgresql${postgres_major}-${postgres_minor}.rpm"
-curl -o "${bundle_root}/postgres-server.rpm" \
+curl -s -o "${bundle_root}/postgres-server.rpm" \
     "${postgres_url}/postgresql${postgres_major}-server-${postgres_minor}.rpm"
-curl -o "${bundle_root}/postgres-libs.rpm" \
+curl -s -o "${bundle_root}/postgres-libs.rpm" \
     "${postgres_url}/postgresql${postgres_major}-libs-${postgres_minor}.rpm"
 
 # =============================================================================

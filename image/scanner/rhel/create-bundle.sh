@@ -29,7 +29,6 @@ chmod -R 755 "${bundle_root}"
 # Dockerfile.
 
 cp -p "${INPUT_ROOT}/bin/scanner" "${bundle_root}/"
-#chmod +x "${bundle_root}/scanner"
 cp -p "${INPUT_ROOT}/dump/genesis_manifests.json" "${bundle_root}/"
 cp -p "${INPUT_ROOT}/dump/nvd/"*.json "${bundle_root}/${NVD_DEFINITIONS_DIR}"
 
