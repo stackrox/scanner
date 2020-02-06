@@ -159,10 +159,27 @@ scanner-image: build
 	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/alpine/Dockerfile image/scanner
 	@docker tag us.gcr.io/stackrox-ci/scanner:$(TAG) stackrox/scanner:$(TAG)
 
+
+.PHONY: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+$(CURDIR)/image/scanner/rhel/bundle.tar.gz:
+	$(CURDIR)/image/scanner/rhel/create-bundle.sh $(CURDIR)/image/scanner $@
+
+.PHONY: $(CURDIR)/image/scanner/rhel/prebuild.sh
+$(CURDIR)/image/scanner/rhel/prebuild.sh:
+	$(CURDIR)/image/scanner/rhel/create-prebuild.sh $@
+
+.PHONY: $(CURDIR)/image/db/rhel/bundle.tar.gz
+$(CURDIR)/image/db/rhel/bundle.tar.gz:
+	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $@
+
+.PHONY: $(CURDIR)/image/db/rhel/prebuild.sh
+$(CURDIR)/image/db/rhel/prebuild.sh:
+	$(CURDIR)/image/db/rhel/create-prebuild.sh $@
+
 .PHONY: scanner-image-rhel
-scanner-image-rhel: build
+scanner-image-rhel: build $(CURDIR)/image/scanner/rhel/prebuild.sh $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/scanner-rhel:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner
+	@docker build -t us.gcr.io/stackrox-ci/scanner-rhel:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: db-image
 db-image:
@@ -173,11 +190,10 @@ db-image:
 
 
 .PHONY: db-image-rhel
-db-image-rhel:
+db-image-rhel: build $(CURDIR)/image/db/rhel/prebuild.sh $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t us.gcr.io/stackrox-ci/scanner-db-rhel:$(TAG) -f image/db/rhel/Dockerfile image/db
-
+	@docker build -t us.gcr.io/stackrox-ci/scanner-db-rhel:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered
