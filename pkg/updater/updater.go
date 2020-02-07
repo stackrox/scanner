@@ -124,7 +124,9 @@ func (u *Updater) doUpdate(mode updateMode) error {
 	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, db, u.interval, podName, u.cpeDBCache); err != nil {
 		return errors.Wrap(err, "updating from vuln dump")
 	}
-	u.lastUpdatedTime = startTime
+	if mode == updateNVDCacheAndPostgres {
+		u.lastUpdatedTime = startTime
+	}
 	log.Info("Update cycle completed successfully!")
 	return nil
 }
@@ -136,6 +138,9 @@ func (u *Updater) doUpdateAndLogError() {
 }
 
 func (u *Updater) runForever() {
+	// Do an initial update as soon as we start.
+	u.doUpdateAndLogError()
+
 	t := time.NewTicker(u.interval)
 	defer t.Stop()
 	for {
