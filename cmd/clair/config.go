@@ -38,7 +38,7 @@ type Config struct {
 	API                      *api.Config                         `yaml:"api"`
 	Updater                  updater.Config                      `yaml:"updater"`
 	LogLevel                 string                              `yaml:"logLevel"`
-	MaxExtractableFileSizeKB int64                               `yaml:"maxExtractableFileSizeKB"`
+	MaxExtractableFileSizeMB int64                               `yaml:"maxExtractableFileSizeMB"`
 }
 
 // DefaultConfig is a configuration that can be used as a fallback value.
@@ -55,7 +55,7 @@ func DefaultConfig() Config {
 			GRPCPort:  8443,
 		},
 		LogLevel:                 "info",
-		MaxExtractableFileSizeKB: tarutil.DefaultMaxExtractableFileSize,
+		MaxExtractableFileSizeMB: tarutil.DefaultMaxExtractableFileSizeMB,
 	}
 }
 

@@ -35,8 +35,8 @@ import (
 )
 
 const (
-	// DefaultMaxExtractableFileSize is the default value for the max extractable file size.
-	DefaultMaxExtractableFileSize = 200 * 1024 * 1024 // 200 MiB
+	// DefaultMaxExtractableFileSizeMB is the default value for the max extractable file size.
+	DefaultMaxExtractableFileSizeMB = 200
 )
 
 var (
@@ -46,7 +46,7 @@ var (
 	// maxExtractableFileSize enforces the maximum size of a single file within a
 	// tarball that will be extracted. This protects against malicious files that
 	// may used in an attempt to perform a Denial of Service attack.
-	maxExtractableFileSize int64 = DefaultMaxExtractableFileSize
+	maxExtractableFileSize int64 = DefaultMaxExtractableFileSizeMB * 1024 * 1024
 
 	readLen     = 6 // max bytes to sniff
 	gzipHeader  = []byte{0x1f, 0x8b}
