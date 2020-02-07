@@ -21,6 +21,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stretchr/testify/assert"
 )
@@ -70,12 +71,16 @@ func TestExtractUncompressedData(t *testing.T) {
 }
 
 func TestMaxExtractableFileSize(t *testing.T) {
-	for _, filename := range testTarballs {
-		f, err := os.Open(testfilepath(filename))
-		assert.Nil(t, err)
-		defer f.Close()
-		MaxExtractableFileSize = 50
-		_, err = ExtractFiles(f, matcher.NewPrefixWhitelistMatcher("test"))
-		assert.Equal(t, ErrExtractedFileTooBig, err)
-	}
+	f, err := os.Open(testfilepath("utils_test.tar.gz"))
+	assert.Nil(t, err)
+	defer utils.IgnoreError(f.Close)
+	contents, err := ExtractFiles(f, matcher.NewPrefixWhitelistMatcher("test_big.txt"))
+	assert.NoError(t, err)
+	// test_big.txt is of size 57 bytes.
+	assert.Contains(t, contents, "test_big.txt")
+
+	SetMaxExtractableFileSize(50)
+	contents, err = ExtractFiles(f, matcher.NewPrefixWhitelistMatcher("test_big.txt"))
+	assert.NoError(t, err)
+	assert.Empty(t, contents)
 }

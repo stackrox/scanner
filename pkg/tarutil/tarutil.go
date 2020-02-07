@@ -34,14 +34,16 @@ import (
 	"github.com/stackrox/scanner/pkg/matcher"
 )
 
-var (
-	// ErrExtractedFileTooBig occurs when a file to extract is too big.
-	ErrExtractedFileTooBig = errors.New("tarutil: could not extract one or more files from the archive: file too big")
+const (
+	// DefaultMaxExtractableFileSizeMB is the default value for the max extractable file size.
+	DefaultMaxExtractableFileSizeMB = 200
+)
 
-	// MaxExtractableFileSize enforces the maximum size of a single file within a
+var (
+	// maxExtractableFileSize enforces the maximum size of a single file within a
 	// tarball that will be extracted. This protects against malicious files that
 	// may used in an attempt to perform a Denial of Service attack.
-	MaxExtractableFileSize int64 = 200 * 1024 * 1024 // 200 MiB
+	maxExtractableFileSize int64 = DefaultMaxExtractableFileSizeMB * 1024 * 1024
 
 	readLen     = 6 // max bytes to sniff
 	gzipHeader  = []byte{0x1f, 0x8b}
@@ -50,6 +52,15 @@ var (
 
 	javaArchiveRegex = regexp.MustCompile(`^.*\.([jwe]ar|[jh]pi)$`)
 )
+
+// SetMaxExtractableFileSize sets the max extractable file size.
+// It is NOT thread-safe, and callers must ensure that it is called
+// only when no scans are in progress (ex: during initialization).
+// See comments on the maxExtractableFileSize variable for
+// more details on its purpose.
+func SetMaxExtractableFileSize(val int64) {
+	maxExtractableFileSize = val
+}
 
 // FilesMap is a map of files' paths to their contents.
 type FilesMap map[string][]byte
@@ -84,8 +95,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		}
 
 		// File size limit
-		if hdr.Size > MaxExtractableFileSize {
-			return data, ErrExtractedFileTooBig
+		if hdr.Size > maxExtractableFileSize {
+			log.Errorf("Skipping file %q because it was too large (%d bytes)", filename, hdr.Size)
+			continue
 		}
 
 		// Extract the element
@@ -131,7 +143,7 @@ func rewriteArchive(data []byte) ([]byte, error) {
 	buf := bytes.NewReader(data)
 	r, err := zip.NewReader(buf, int64(len(data)))
 	if err != nil {
-		return nil, errors.Wrapf(err, "error reading zip file")
+		return nil, errors.Wrap(err, "error reading zip file")
 	}
 
 	outputBuf := new(bytes.Buffer)

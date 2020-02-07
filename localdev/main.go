@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackrox/rox/pkg/utils"
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
@@ -76,7 +77,7 @@ func analyzeLocalImage(path string) {
 
 	// Extract
 	var matcher manifestMatcher
-	tarutil.MaxExtractableFileSize = 1024 * 1024 * 1024
+	tarutil.SetMaxExtractableFileSize(1024 * 1024 * 1024)
 	filemap, err := tarutil.ExtractFiles(f, &matcher)
 	if err != nil {
 		panic(err)
@@ -148,7 +149,7 @@ func main() {
 	// Need to export NVD_DEFINITIONS_DIR in order to get vulnerabilities
 	//os.Setenv("NVD_DEFINITIONS_DIR", "")
 	nvdtoolscache.BoltPath = "/tmp/temp.db"
-	os.Setenv("NVD_DEFINITIONS_DIR", "/Users/connorgorman/repos/src/github.com/stackrox/scanner/image/dump/nvd")
+	utils.Must(os.Setenv("NVD_DEFINITIONS_DIR", "/Users/connorgorman/repos/src/github.com/stackrox/scanner/image/dump/nvd"))
 	nvdtoolscache.Singleton()
 
 	path := "/Users/connorgorman/repos/src/github.com/stackrox/scanner/images"
