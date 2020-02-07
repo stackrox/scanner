@@ -40,9 +40,6 @@ const (
 )
 
 var (
-	// ErrExtractedFileTooBig occurs when a file to extract is too big.
-	ErrExtractedFileTooBig = errors.New("tarutil: could not extract one or more files from the archive: file too big")
-
 	// maxExtractableFileSize enforces the maximum size of a single file within a
 	// tarball that will be extracted. This protects against malicious files that
 	// may used in an attempt to perform a Denial of Service attack.
@@ -99,7 +96,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 		// File size limit
 		if hdr.Size > maxExtractableFileSize {
-			return data, ErrExtractedFileTooBig
+			log.Errorf("Skipping file %q because it was too large (%d bytes)", filename, hdr.Size)
+			continue
 		}
 
 		// Extract the element
