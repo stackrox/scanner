@@ -120,12 +120,13 @@ func Boot(config *Config) {
 	wg.Wait()
 	defer db.Close()
 
-	// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up to date
 	u, err := updater.New(config.Updater, db, vulncache)
 	if err != nil {
 		log.WithError(err).Fatal("Failed to initialize updater")
 	}
-	u.RunOnce()
+
+	// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up to date
+	u.UpdateNVDCacheOnly()
 
 	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
 	go api.RunClairify(serv)
