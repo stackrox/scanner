@@ -74,7 +74,7 @@ func TestMaxExtractableFileSize(t *testing.T) {
 		f, err := os.Open(testfilepath(filename))
 		assert.Nil(t, err)
 		defer f.Close()
-		maxExtractableFileSize = 50
+		SetMaxExtractableFileSize(50)
 		_, err = ExtractFiles(f, matcher.NewPrefixWhitelistMatcher("test"))
 		assert.Equal(t, ErrExtractedFileTooBig, err)
 	}
