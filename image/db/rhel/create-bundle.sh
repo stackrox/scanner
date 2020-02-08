@@ -18,7 +18,7 @@ OUTPUT_BUNDLE="$2"
 
 # Create tmp directory with stackrox directory structure
 bundle_root="$(mktemp -d)"
-mkdir -p "${bundle_root}"/{usr/local/bin,etc,docker-entrypoint-initdb.d}
+mkdir -p "${bundle_root}/"{"usr/local/bin","etc","docker-entrypoint-initdb.d"}
 chmod -R 755 "${bundle_root}"
 
 # =============================================================================

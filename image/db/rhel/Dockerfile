@@ -18,9 +18,10 @@ RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
   yum install -y --nogpgcheck --disableplugin=subscription-manager \
     ca-certificates \
     libicu \
-    systemd-sysv && \
-  yum install -y --nogpgcheck --disableplugin=subscription-manager \
-    postgres-libs.rpm postgres-server.rpm postgres.rpm && \
+    systemd-sysv \
+    postgres-libs.rpm \
+    postgres-server.rpm \
+    postgres.rpm && \
   rm postgres-libs.rpm postgres-server.rpm postgres.rpm \
   ;
 

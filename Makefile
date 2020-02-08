@@ -159,9 +159,8 @@ scanner-image: build
 	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/alpine/Dockerfile image/scanner
 	@docker tag us.gcr.io/stackrox-ci/scanner:$(TAG) stackrox/scanner:$(TAG)
 
-
 .PHONY: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
-$(CURDIR)/image/scanner/rhel/bundle.tar.gz:
+$(CURDIR)/image/scanner/rhel/bundle.tar.gz: build
 	$(CURDIR)/image/scanner/rhel/create-bundle.sh $(CURDIR)/image/scanner $@
 
 .PHONY: $(CURDIR)/image/db/rhel/bundle.tar.gz
@@ -182,7 +181,7 @@ db-image:
 
 
 .PHONY: db-image-rhel
-db-image-rhel: build $(CURDIR)/image/db/rhel/bundle.tar.gz
+db-image-rhel: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
 	@docker build -t us.gcr.io/stackrox-ci/scanner-db-rhel:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
