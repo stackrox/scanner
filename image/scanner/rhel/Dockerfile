@@ -6,26 +6,21 @@ FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-# Scanner requires the following binaries.
-RUN yum update -y --disableplugin=subscription-manager && \
-    yum -y install ca-certificates xz
+RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
+    yum install -y --nogpgcheck --disableplugin=subscription-manager \
+      ca-certificates xz && \
+    rpm -e subscription-manager yum yum-utils yum-plugin-ovl \
+    ;
 
-COPY ./bin/scanner /
+ADD bundle.tar.gz /
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 RUN mkdir -p "${NVD_DEFINITIONS_DIR}" && chown -R 4000:4000 "${NVD_DEFINITIONS_DIR}"
-COPY ./dump/nvd/*.json "${NVD_DEFINITIONS_DIR}/"
-
-COPY ./dump/genesis_manifests.json /
-
-
-ENTRYPOINT ["/scanner"]
-
-# Remove package manager
-RUN rpm -e subscription-manager yum yum-utils yum-plugin-ovl
-
 RUN chown -R 4000:4000 /tmp
+
+RUN chmod +rx "/scanner"
+ENTRYPOINT ["/scanner"]
 
 USER 4000:4000
 
-
+HEALTHCHECK CMD curl --insecure --fail https://127.0.0.1:8080/clarify/ping

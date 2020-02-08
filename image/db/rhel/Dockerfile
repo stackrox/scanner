@@ -1,5 +1,3 @@
-# Modified for RHEL from https://github.com/docker-library/postgres/tree/master/12
-
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi7/ubi
 ARG BASE_TAG=7.7
@@ -14,25 +12,35 @@ ENV POSTGRES_PASSWORD_FILE=/run/secrets/stackrox.io/secrets/password
 RUN groupadd -g 70 postgres
 RUN adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh
 
-# Install postgres packages from https://yum.postgresql.org/
-RUN yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm && \
-    yum update -y --disableplugin=subscription-manager && \
-    yum install -y \
-      ca-certificates \
-      "postgresql${PG_MAJOR}" \
-      "postgresql${PG_MAJOR}-server"
+ADD bundle.tar.gz /
 
-# Remove package manager
-RUN rpm -e --nodeps curl rpm rpm-libs rpm-build-libs rpm-python subscription-manager subscription-manager-rhsm yum yum-utils yum-plugin-ovl
+RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
+  yum install -y --nogpgcheck --disableplugin=subscription-manager \
+    ca-certificates \
+    libicu \
+    systemd-sysv \
+    postgres-libs.rpm \
+    postgres-server.rpm \
+    postgres.rpm && \
+  rm postgres-libs.rpm postgres-server.rpm postgres.rpm \
+  ;
+
+RUN rpm -e --nodeps \
+  rpm \
+  rpm-build-libs \
+  rpm-libs \
+  rpm-python \
+  subscription-manager \
+  subscription-manager-rhsm \
+  yum \
+  yum-plugin-ovl \
+  yum-utils \
+  ;
 
 RUN localedef -f UTF-8 -i en_US en_US.UTF-8
 
-RUN mkdir /docker-entrypoint-initdb.d
-COPY ./rhel/docker-entrypoint.sh /usr/local/bin/
-RUN chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
-
-COPY ./*.conf /etc/
-COPY ./dump/definitions.sql.gz /docker-entrypoint-initdb.d/
+RUN chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
+  chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
