@@ -245,8 +245,10 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	}
 	log.Info("Loaded manifest")
 
-	if err := loadOSVulns(zipR, manifest, db, updateInterval, instanceName); err != nil {
-		return errors.Wrap(err, "error loading OS vulns")
+	if db != nil {
+		if err := loadOSVulns(zipR, manifest, db, updateInterval, instanceName); err != nil {
+			return errors.Wrap(err, "error loading OS vulns")
+		}
 	}
 
 	// Explicitly close the zip file because the
@@ -254,8 +256,10 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	_ = zipR.Close()
 	zipFileClosed = true
 
-	if err := loadNVDUpdater(cache, manifest, zipPath, scratchDir); err != nil {
-		return errors.Wrap(err, "error loading into inmem cache")
+	if cache != nil {
+		if err := loadNVDUpdater(cache, manifest, zipPath, scratchDir); err != nil {
+			return errors.Wrap(err, "error loading into inmem cache")
+		}
 	}
 
 	return nil

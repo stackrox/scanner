@@ -89,7 +89,14 @@ func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, fetchIsFrom
 	return true, nil
 }
 
-func (u *Updater) doUpdate() error {
+type updateMode int
+
+const (
+	updateNVDCacheAndPostgres updateMode = iota
+	updateNVDCacheOnly
+)
+
+func (u *Updater) doUpdate(mode updateMode) error {
 	log.Info("Starting an update cycle")
 	startTime := time.Now()
 	if err := os.RemoveAll(diffDumpOutputPath); err != nil {
@@ -109,21 +116,31 @@ func (u *Updater) doUpdate() error {
 	if err := os.MkdirAll(diffDumpScratchDir, 0755); err != nil {
 		return errors.Wrap(err, "creating scratch dir")
 	}
-	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, u.db, u.interval, podName, u.cpeDBCache); err != nil {
+
+	var db database.Datastore
+	if mode == updateNVDCacheAndPostgres {
+		db = u.db
+	}
+	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, db, u.interval, podName, u.cpeDBCache); err != nil {
 		return errors.Wrap(err, "updating from vuln dump")
 	}
-	u.lastUpdatedTime = startTime
+	if mode == updateNVDCacheAndPostgres {
+		u.lastUpdatedTime = startTime
+	}
 	log.Info("Update cycle completed successfully!")
 	return nil
 }
 
 func (u *Updater) doUpdateAndLogError() {
-	if err := u.doUpdate(); err != nil {
+	if err := u.doUpdate(updateNVDCacheAndPostgres); err != nil {
 		log.WithError(err).Error("Updater failed")
 	}
 }
 
 func (u *Updater) runForever() {
+	// Do an initial update as soon as we start.
+	u.doUpdateAndLogError()
+
 	t := time.NewTicker(u.interval)
 	defer t.Stop()
 	for {
@@ -196,8 +213,8 @@ func New(config Config, db database.Datastore, cpeDBUpdater vulndump.NVDCache) (
 	return u, nil
 }
 
-func (u *Updater) RunOnce() {
-	if err := u.doUpdate(); err != nil {
+func (u *Updater) UpdateNVDCacheOnly() {
+	if err := u.doUpdate(updateNVDCacheOnly); err != nil {
 		log.WithError(err).Error("Updater failed")
 	}
 }
