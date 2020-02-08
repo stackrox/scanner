@@ -85,7 +85,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 
 	// Pull the master branch.
 	var commit string
-	commit, err = u.pullRepository()
+	commit, err = u.pullRepositoryWithRetries()
 	if err != nil {
 		return
 	}
@@ -157,6 +157,30 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 
 func (u *updater) Clean() {
 	os.RemoveAll(u.repositoryLocalPath)
+}
+
+const (
+	maxRetries = 5
+)
+
+func (u *updater) pullRepositoryWithRetries() (string, error) {
+	var err error
+	for i := 0; i < maxRetries; i++ {
+		// This ensures we clone from scratch into a new temp directory.
+		u.repositoryLocalPath = ""
+
+		var commit string
+		commit, err = u.pullRepository()
+		if err == nil {
+			return commit, nil
+		}
+		if u.repositoryLocalPath != "" {
+			if err := os.RemoveAll(u.repositoryLocalPath); err != nil {
+				log.WithError(err).Warnf("Ubuntu: Failed to remove local git repo path: %q", u.repositoryLocalPath)
+			}
+		}
+	}
+	return "", err
 }
 
 func (u *updater) pullRepository() (commit string, err error) {
