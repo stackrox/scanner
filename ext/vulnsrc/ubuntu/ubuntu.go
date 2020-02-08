@@ -85,10 +85,12 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 
 	// Pull the master branch.
 	var commit string
-	commit, err = u.pullRepository()
+	commit, err = u.pullRepositoryWithRetries()
 	if err != nil {
 		return
 	}
+
+	log.WithField("updater", "ubuntu").Info("git repository pulled successfully")
 
 	// Get the latest revision number we successfully applied in the database.
 	dbCommit, err := datastore.GetKeyValue(updaterFlag)
@@ -102,11 +104,14 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		return
 	}
 
+	log.WithField("updater", "ubuntu").Info("Collecting modified vulnerabilities")
 	// Get the list of vulnerabilities that we have to update.
 	modifiedCVE, err := collectModifiedVulnerabilities(u.repositoryLocalPath)
 	if err != nil {
 		return resp, err
 	}
+
+	log.WithField("updater", "ubuntu").Infof("Got %d CVEs to parse", len(modifiedCVE))
 
 	notes := make(map[string]struct{})
 	for cvePath := range modifiedCVE {
@@ -159,6 +164,30 @@ func (u *updater) Clean() {
 	os.RemoveAll(u.repositoryLocalPath)
 }
 
+const (
+	maxRetries = 5
+)
+
+func (u *updater) pullRepositoryWithRetries() (string, error) {
+	var err error
+	for i := 0; i < maxRetries; i++ {
+		// This ensures we clone from scratch into a new temp directory.
+		u.repositoryLocalPath = ""
+
+		var commit string
+		commit, err = u.pullRepository()
+		if err == nil {
+			return commit, nil
+		}
+		if u.repositoryLocalPath != "" {
+			if err := os.RemoveAll(u.repositoryLocalPath); err != nil {
+				log.WithError(err).Warnf("Ubuntu: Failed to remove local git repo path: %q", u.repositoryLocalPath)
+			}
+		}
+	}
+	return "", err
+}
+
 func (u *updater) pullRepository() (commit string, err error) {
 	// If the repository doesn't exist, clone it.
 	if _, pathExists := os.Stat(u.repositoryLocalPath); u.repositoryLocalPath == "" || os.IsNotExist(pathExists) {
@@ -166,7 +195,8 @@ func (u *updater) pullRepository() (commit string, err error) {
 			return "", vulnsrc.ErrFilesystem
 		}
 
-		cmd := exec.Command("git", "clone", trackerGitURL, ".")
+		log.WithField("updater", "ubuntu").Infof("running git clone to %s", u.repositoryLocalPath)
+		cmd := exec.Command("git", "clone", "--depth", "1", trackerGitURL, ".")
 		cmd.Dir = u.repositoryLocalPath
 		if out, err := cmd.CombinedOutput(); err != nil {
 			u.Clean()
