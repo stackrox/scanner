@@ -203,7 +203,10 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		}
 	}
 
-	log.WithField("count", len(elsaList)).Info("Got list of Oracle updates to process")
+	log.WithFields(map[string]interface{}{
+		"count":   len(elsaList),
+		"updater": "oracle",
+	}).Info("Got list of Oracle updates to process")
 
 	respChan := make(chan elsaResp)
 	urlChan := make(chan string, len(elsaList))
@@ -227,7 +230,7 @@ forloop:
 			resp.Vulnerabilities = append(resp.Vulnerabilities, elsaResp.vulns...)
 			numProcessed++
 			if numProcessed%100 == 0 {
-				log.Infof("Oracle: Processed %d/%d ELSAs", numProcessed, len(elsaList))
+				log.WithField("updater", "oracle").Infof("Processed %d/%d ELSAs", numProcessed, len(elsaList))
 			}
 		case <-errSig.Done():
 			return resp, errSig.Err()

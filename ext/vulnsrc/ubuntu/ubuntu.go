@@ -90,6 +90,8 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		return
 	}
 
+	log.WithField("updater", "ubuntu").Info("git repository pulled successfully")
+
 	// Get the latest revision number we successfully applied in the database.
 	dbCommit, err := datastore.GetKeyValue(updaterFlag)
 	if err != nil {
@@ -102,11 +104,14 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		return
 	}
 
+	log.WithField("updater", "ubuntu").Info("Collecting modified vulnerabilities")
 	// Get the list of vulnerabilities that we have to update.
 	modifiedCVE, err := collectModifiedVulnerabilities(u.repositoryLocalPath)
 	if err != nil {
 		return resp, err
 	}
+
+	log.WithField("updater", "ubuntu").Infof("Got %d CVEs to parse", len(modifiedCVE))
 
 	notes := make(map[string]struct{})
 	for cvePath := range modifiedCVE {
@@ -190,7 +195,8 @@ func (u *updater) pullRepository() (commit string, err error) {
 			return "", vulnsrc.ErrFilesystem
 		}
 
-		cmd := exec.Command("git", "clone", trackerGitURL, ".")
+		log.WithField("updater", "ubuntu").Infof("running git clone to %s", u.repositoryLocalPath)
+		cmd := exec.Command("git", "clone", "--depth", "1", trackerGitURL, ".")
 		cmd.Dir = u.repositoryLocalPath
 		if out, err := cmd.CombinedOutput(); err != nil {
 			u.Clean()

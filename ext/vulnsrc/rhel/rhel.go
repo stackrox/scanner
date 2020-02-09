@@ -174,9 +174,9 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		return vulnsrc.UpdateResponse{}, errors.Wrap(err, "parsing RHSA bulk response")
 	}
 	resp.Vulnerabilities = append(resp.Vulnerabilities, vs...)
-	log.Infof("RHEL: done fetching giant update file. Got %d vulns (%d RHSAs)", len(vs), coveredIDs.Cardinality())
+	log.WithField("updater", "rhel").Infof("Done fetching giant update file. Got %d vulns (%d RHSAs)", len(vs), coveredIDs.Cardinality())
 
-	log.Info("RHEL: Fetching remaining IDs which weren't in the giant update file")
+	log.WithField("updater", "rhel").Info("Fetching remaining IDs which weren't in the giant update file")
 	ovalDirectoryResp, err := getWithRetriesAndBackoff(ovalURI)
 	if err != nil {
 		log.WithError(err).Error("could not fetch RHEL's update list")
@@ -202,7 +202,10 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 	}
 
 	const printEvery = 100
-	log.WithField("count", len(remainingRHSAURLs)).Info("RHEL: got remaining RHSAs to fetch")
+	log.WithFields(map[string]interface{}{
+		"updater": "rhel",
+		"count":   len(remainingRHSAURLs),
+	}).Info("Got remaining RHSAs to fetch")
 	for i, rhsaURL := range remainingRHSAURLs {
 		r, err := getWithRetriesAndBackoff(ovalURI + rhsaURL)
 		if err != nil {
@@ -216,7 +219,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		}
 		resp.Vulnerabilities = append(resp.Vulnerabilities, currentVulns...)
 		if (i+1)%printEvery == 0 {
-			log.Infof("Finished collecting %d/%d additional RHSAs", i+1, len(remainingRHSAURLs))
+			log.WithField("updater", "rhel").Infof("Finished collecting %d/%d additional RHSAs", i+1, len(remainingRHSAURLs))
 		}
 	}
 
