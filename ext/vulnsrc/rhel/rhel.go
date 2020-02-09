@@ -151,7 +151,7 @@ func getWithRetriesAndBackoff(url string) (*http.Response, error) {
 }
 
 func init() {
-	vulnsrc.RegisterUpdater("rhel", &updater{})
+	vulnsrc.RegisterUpdater("rhel", &updater{}, 18074)
 }
 
 func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {

@@ -102,8 +102,9 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 	// Fetch updates in parallel.
 	log.Info("fetching vulnerability updates")
 	responseC := make(chan *vulnsrc.UpdateResponse)
-	for n, u := range vulnsrc.Updaters() {
-		go func(name string, u vulnsrc.Updater) {
+	updaters := vulnsrc.Updaters()
+	for n, u := range updaters {
+		go func(name string, u vulnsrc.ExpectedCountAwareUpdater) {
 			response, err := u.Update(datastore)
 			if err != nil {
 				log.WithError(err).WithField("updater name", name).Error("an error occurred when fetching update")
@@ -111,9 +112,14 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 				return
 			}
 
+			count := len(response.Vulnerabilities)
 			select {
 			case responseC <- &response:
-				log.WithField("updater name", name).Info("finished fetching")
+				log.WithFields(map[string]interface{}{
+					"updater name": name,
+					"count":        count,
+				}).Info("finished fetching")
+
 			case <-errSig.Done():
 				log.WithField("updater name", name).Warn("Exiting with error since another updater failed")
 			}
@@ -121,7 +127,7 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 	}
 
 	// Collect results of updates.
-	for i := 0; i < len(vulnsrc.Updaters()); i++ {
+	for i := 0; i < len(updaters); i++ {
 		select {
 		case resp := <-responseC:
 			vulns = append(vulns, doVulnerabilitiesNamespacing(resp.Vulnerabilities)...)
@@ -133,8 +139,8 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 		}
 	}
 
-	for _, updaters := range vulnsrc.Updaters() {
-		updaters.Clean()
+	for _, updater := range updaters {
+		updater.Clean()
 	}
 
 	vulnsWithMetadata, err := addMetadata(vulns, nvdDumpDir)

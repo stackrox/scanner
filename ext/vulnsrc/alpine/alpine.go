@@ -40,7 +40,7 @@ const (
 )
 
 func init() {
-	vulnsrc.RegisterUpdater("alpine", &updater{})
+	vulnsrc.RegisterUpdater("alpine", &updater{}, 12028)
 }
 
 type updater struct {

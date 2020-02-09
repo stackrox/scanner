@@ -49,6 +49,13 @@ const (
 	defaultUpdaterFlagValue   = ""
 )
 
+var (
+	alasRE = regexp.MustCompile(`\s+`)
+
+	// "ALAS2-2018-1097" becomes "https://alas.aws.amazon.com/AL2/ALAS-2018-1097.html".
+	alas2RE = regexp.MustCompile(`^ALAS2-(.+)$`)
+)
+
 type updater struct {
 	UpdaterFlag   string
 	MirrorListURI string
@@ -66,7 +73,7 @@ func init() {
 		Namespace:     amazonLinux1Namespace,
 		LinkFormat:    amazonLinux1LinkFormat,
 	}
-	vulnsrc.RegisterUpdater("amzn1", &amazonLinux1Updater)
+	vulnsrc.RegisterUpdater("amzn1", &amazonLinux1Updater, 1214)
 
 	// Register updater for Amazon Linux 2.
 	amazonLinux2Updater := updater{
@@ -76,7 +83,7 @@ func init() {
 		Namespace:     amazonLinux2Namespace,
 		LinkFormat:    amazonLinux2LinkFormat,
 	}
-	vulnsrc.RegisterUpdater("amzn2", &amazonLinux2Updater)
+	vulnsrc.RegisterUpdater("amzn2", &amazonLinux2Updater, 303)
 }
 
 func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
@@ -271,9 +278,7 @@ func (u *updater) alasToLink(alas ALAS) string {
 	}
 
 	if u.Name == amazonLinux2Name {
-		// "ALAS2-2018-1097" becomes "https://alas.aws.amazon.com/AL2/ALAS-2018-1097.html".
-		re := regexp.MustCompile(`^ALAS2-(.+)$`)
-		return fmt.Sprintf(u.LinkFormat, "ALAS-"+re.FindStringSubmatch(alas.ID)[1])
+		return fmt.Sprintf(u.LinkFormat, "ALAS-"+alas2RE.FindStringSubmatch(alas.ID)[1])
 	}
 
 	return ""
@@ -296,8 +301,7 @@ func (u *updater) alasToSeverity(alas ALAS) database.Severity {
 }
 
 func (u *updater) alasToDescription(alas ALAS) string {
-	re := regexp.MustCompile(`\s+`)
-	return re.ReplaceAllString(strings.TrimSpace(alas.Description), " ")
+	return alasRE.ReplaceAllString(strings.TrimSpace(alas.Description), " ")
 }
 
 func (u *updater) alasToFeatureVersions(alas ALAS) []database.FeatureVersion {

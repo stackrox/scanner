@@ -84,7 +84,7 @@ type criterion struct {
 type updater struct{}
 
 func init() {
-	vulnsrc.RegisterUpdater("oracle", &updater{})
+	vulnsrc.RegisterUpdater("oracle", &updater{}, 3125)
 }
 
 func compareELSA(left, right int) int {

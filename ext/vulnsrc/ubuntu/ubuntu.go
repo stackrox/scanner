@@ -77,7 +77,7 @@ type updater struct {
 }
 
 func init() {
-	vulnsrc.RegisterUpdater("ubuntu", &updater{})
+	vulnsrc.RegisterUpdater("ubuntu", &updater{}, 32592)
 }
 
 func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {

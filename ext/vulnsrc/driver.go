@@ -31,7 +31,7 @@ var (
 	ErrGitFailure = errors.New("vulnsrc: something went wrong when interacting with git")
 
 	updatersM sync.RWMutex
-	updaters  = make(map[string]Updater)
+	updaters  = make(map[string]ExpectedCountAwareUpdater)
 )
 
 // UpdateResponse represents the sum of results of an update.
@@ -46,8 +46,7 @@ type DataStore interface {
 	GetKeyValue(key string) (string, error)
 }
 
-// Updater represents anything that can fetch vulnerabilities and insert them
-// into a Clair datastore.
+// Updater represents anything that can fetch vulnerabilities from an external source.
 type Updater interface {
 	// Update gets vulnerability updates.
 	Update(DataStore) (UpdateResponse, error)
@@ -57,11 +56,34 @@ type Updater interface {
 	Clean()
 }
 
+// A ExpectedCountAwareUpdater is an Updater with a ExpectedCount() method.
+type ExpectedCountAwareUpdater interface {
+	Updater
+	// ExpectedCount returns the known number of vulnerabilities that the updater's source has.
+	// Callers can compare count with the number of vulnerabilities in UpdateResponse
+	// to ensure that the updater has not missed any vulnerabilities that it previously
+	// used to fetch.
+	ExpectedCount() int
+}
+
+type expectedCountAwareUpdater struct {
+	Updater
+	count int
+}
+
+func (u expectedCountAwareUpdater) ExpectedCount() int {
+	return u.count
+}
+
+func wrapUpdaterWithCount(u Updater, count int) ExpectedCountAwareUpdater {
+	return &expectedCountAwareUpdater{Updater: u, count: count}
+}
+
 // RegisterUpdater makes an Updater available by the provided name.
 //
 // If called twice with the same name, the name is blank, or if the provided
 // Updater is nil, this function panics.
-func RegisterUpdater(name string, u Updater) {
+func RegisterUpdater(name string, u Updater, expectedCount int) {
 	if name == "" {
 		panic("vulnsrc: could not register an Updater with an empty name")
 	}
@@ -70,6 +92,8 @@ func RegisterUpdater(name string, u Updater) {
 		panic("vulnsrc: could not register a nil Updater")
 	}
 
+	countableUpdater := wrapUpdaterWithCount(u, expectedCount)
+
 	updatersM.Lock()
 	defer updatersM.Unlock()
 
@@ -77,15 +101,15 @@ func RegisterUpdater(name string, u Updater) {
 		panic("vulnsrc: RegisterUpdater called twice for " + name)
 	}
 
-	updaters[name] = u
+	updaters[name] = countableUpdater
 }
 
 // Updaters returns the list of the registered Updaters.
-func Updaters() map[string]Updater {
+func Updaters() map[string]ExpectedCountAwareUpdater {
 	updatersM.RLock()
 	defer updatersM.RUnlock()
 
-	ret := make(map[string]Updater)
+	ret := make(map[string]ExpectedCountAwareUpdater)
 	for k, v := range updaters {
 		ret[k] = v
 	}

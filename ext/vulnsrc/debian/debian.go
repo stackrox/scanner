@@ -55,7 +55,7 @@ type jsonRel struct {
 type updater struct{}
 
 func init() {
-	vulnsrc.RegisterUpdater("debian", &updater{})
+	vulnsrc.RegisterUpdater("debian", &updater{}, 25555)
 }
 
 func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
