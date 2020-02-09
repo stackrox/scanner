@@ -76,7 +76,7 @@ func (u expectedCountAwareUpdater) ExpectedCount() int {
 }
 
 func wrapUpdaterWithCount(u Updater, count int) ExpectedCountAwareUpdater {
-	return &expectedCountAwareUpdater{Updater: u, count: count}
+	return expectedCountAwareUpdater{Updater: u, count: count}
 }
 
 // RegisterUpdater makes an Updater available by the provided name.

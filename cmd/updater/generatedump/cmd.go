@@ -113,6 +113,12 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 			}
 
 			count := len(response.Vulnerabilities)
+			if count < u.ExpectedCount() {
+				err := errors.Errorf("expected %d, but obtained only %d vulnerabilities for updater %s", u.ExpectedCount(), count, name)
+				log.Error(err)
+				errSig.SignalWithError(err)
+				return
+			}
 			select {
 			case responseC <- &response:
 				log.WithFields(map[string]interface{}{
