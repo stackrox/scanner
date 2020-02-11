@@ -518,6 +518,24 @@ jobs:
       - build-and-push-image:
           make-image-target: image-rhel
           image-name-suffix: "-rhel"
+      - run:
+          name: Check if tagged
+            # remove false before commit
+            if [[ false && -z "$CIRCLE_TAG" ]]; then
+                circleci step halt
+                exit 0
+            fi
+      - setup-gcp
+      - run:
+          name: Upload rhel bundles
+          command: |
+            gcloud auth list
+            tag="$(./get-tag)"
+            # remove TEST_PATH before commit
+            TEST_PATH="f4797d572d06eea8bef7d8ceb9cbe2f08adb8ec6"
+            GCP_DSOP_BUCKET="gs://dsop-artifacts.stackrox.io/${TEST_PATH}"
+            gsutil cp "image/scanner/rhel/bundle.tar.gz" "${GCP_DSOP_BUCKET}/scanner-rhel/${tag}/"
+            gsutil cp "image/db/rhel/bundle.tar.gz" "${GCP_DSOP_BUCKET}/scanner-db-rhel/${tag}/"
 
   provision-cluster:
     <<: *defaults
