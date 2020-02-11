@@ -520,6 +520,7 @@ jobs:
           image-name-suffix: "-rhel"
       - run:
           name: Check if tagged
+          command: |
             # remove false before commit
             if [[ false && -z "$CIRCLE_TAG" ]]; then
                 circleci step halt
