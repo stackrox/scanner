@@ -15,12 +15,15 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/httputil"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/mtls"
 	server "github.com/stackrox/scanner/pkg/scan"
+	"google.golang.org/grpc/codes"
 )
 
 // Server is the HTTP server for Clairify.
@@ -30,15 +33,17 @@ type Server struct {
 	endpoint                string
 	storage                 database.Datastore
 	httpServer              *http.Server
+	licenseStatusProvider   licenses.StatusProvider
 }
 
 // New returns a new instantiation of the Server.
-func New(serverEndpoint string, db database.Datastore, creator, insecureCreator types.RegistryClientCreator) *Server {
+func New(serverEndpoint string, db database.Datastore, licenseStatusProvider licenses.StatusProvider, creator, insecureCreator types.RegistryClientCreator) *Server {
 	return &Server{
 		registryCreator:         creator,
 		insecureRegistryCreator: insecureCreator,
 		endpoint:                serverEndpoint,
 		storage:                 db,
+		licenseStatusProvider:   licenseStatusProvider,
 	}
 }
 
@@ -167,7 +172,7 @@ func getAuth(authHeader string) (string, string, error) {
 	}
 	spl := strings.SplitN(string(decoded), ":", 2)
 	if len(spl) != 2 {
-		return "", "", fmt.Errorf("malformed basic auth")
+		return "", "", errors.New("malformed basic auth")
 	}
 	return strings.TrimSpace(spl[0]), strings.TrimSpace(spl[1]), nil
 }
@@ -219,6 +224,31 @@ func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("{}"))
 }
 
+type licenseRequirementMode int
+
+const (
+	licenseNotRequired licenseRequirementMode = iota
+	licenseRequired
+)
+
+func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !s.licenseStatusProvider.LicenseValid() {
+			httputil.WriteGRPCStyleError(w, codes.Internal, licenses.ErrNoValidLicense)
+			return
+		}
+		f(w, r)
+	}
+}
+
+func (s *Server) handleFuncRouter(r *mux.Router, path string, handlerFunc http.HandlerFunc, method string, licenseMode licenseRequirementMode) {
+	actualHandlerFunc := handlerFunc
+	if licenseMode == licenseRequired {
+		actualHandlerFunc = s.wrapHandlerFuncWithLicenseCheck(handlerFunc)
+	}
+	r.HandleFunc(path, actualHandlerFunc).Methods(method)
+}
+
 // Start starts the server listening.
 func (s *Server) Start() error {
 	r := mux.NewRouter()
@@ -226,12 +256,11 @@ func (s *Server) Start() error {
 	apiRoots := []string{"clairify", "scanner"}
 
 	for _, root := range apiRoots {
-		r.HandleFunc(fmt.Sprintf("/%s/ping", root), s.Ping).Methods("GET")
-		r.HandleFunc(fmt.Sprintf("/%s/image", root), s.ScanImage).Methods("POST")
-
-		r.HandleFunc(fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA).Methods("GET")
-		r.HandleFunc(fmt.Sprintf("/%s/image/{registry}/{remote}/{tag}", root), s.GetResultsByImage).Methods("GET")
-		r.HandleFunc(fmt.Sprintf("/%s/image/{registry}/{namespace}/{repo}/{tag}", root), s.GetResultsByImage).Methods("GET")
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/ping", root), s.Ping, http.MethodGet, licenseNotRequired)
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/image", root), s.ScanImage, http.MethodPost, licenseRequired)
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA, http.MethodGet, licenseRequired)
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/image/{registry}/{remote}/{tag}", root), s.GetResultsByImage, http.MethodGet, licenseRequired)
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/image/{registry}/{namespace}/{repo}/{tag}", root), s.GetResultsByImage, http.MethodGet, licenseRequired)
 	}
 
 	var tlsConfig *tls.Config
