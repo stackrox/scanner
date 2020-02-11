@@ -41,6 +41,7 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/formatter"
+	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/stopper"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
@@ -121,7 +122,14 @@ func Boot(config *Config) {
 	wg.Wait()
 	defer db.Close()
 
-	u, err := updater.New(config.Updater, db, vulncache)
+	managerCtx, managerCtxCancel := context.WithCancel(context.Background())
+	licenseManager, err := licenses.NewManager(managerCtx, config.CentralEndpoint)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to initialize license manager")
+	}
+	_ = licenseManager
+
+	u, err := updater.New(config.Updater, config.CentralEndpoint, db, vulncache)
 	if err != nil {
 		log.WithError(err).Fatal("Failed to initialize updater")
 	}
@@ -149,6 +157,7 @@ func Boot(config *Config) {
 	// Wait for interruption and shutdown gracefully.
 	waitForSignals(syscall.SIGINT, syscall.SIGTERM)
 	log.Info("Received interruption, gracefully stopping ...")
+	managerCtxCancel()
 	serv.Close()
 	st.Stop()
 	u.Stop()
