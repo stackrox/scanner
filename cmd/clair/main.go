@@ -41,7 +41,6 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/formatter"
-	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/stopper"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
@@ -97,15 +96,6 @@ func Boot(config *Config) {
 	rand.Seed(time.Now().UnixNano())
 	st := stopper.NewStopper()
 
-	// Start polling for licenses first thing: ideally we will fetch the license
-	// by the time we connect to the DB.
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	licenseManager, err := licenses.NewManager(ctx, config.CentralEndpoint)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to initialize license manager")
-	}
-	_ = licenseManager
 	// Open database and initialize vuln cache in parallel, prior to making the API available.
 	var wg sync.WaitGroup
 
