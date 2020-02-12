@@ -6,8 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func fetchFromSecret(secretPath string) string {
-	licenseKeyBytes, err := ioutil.ReadFile(secretPath)
+func maybeFetchFromSecret() string {
+	licenseKeyBytes, err := ioutil.ReadFile(secretLicensePath)
 	if err != nil {
 		// Avoid logging the error so as to not leak the file name.
 		log.Debug("no license found through secret")

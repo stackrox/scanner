@@ -29,7 +29,7 @@ type Manager interface {
 	ValidLicenseExists() bool
 }
 
-type licenseFetchAndValidateFunc func(ctx concurrency.Waitable, centralEndpoint string, client *http.Client, secretPath string) (expiry time.Time, err error)
+type licenseFetchAndValidateFunc func(ctx concurrency.Waitable, centralEndpoint string, client *http.Client) (expiry time.Time, err error)
 
 type timeoutProvider struct {
 	intervalBetweenPolls time.Duration
@@ -37,7 +37,6 @@ type timeoutProvider struct {
 }
 
 type manager struct {
-	secretPath                  string
 	centralEndpoint             string
 	timeouts                    timeoutProvider
 	licenseFetchAndValidateFunc licenseFetchAndValidateFunc
@@ -65,11 +64,11 @@ func NewManager(ctx concurrency.Waitable, centralEndpoint string) (Manager, erro
 		Timeout:   requestTimeout,
 		Transport: &http.Transport{TLSClientConfig: clientConf},
 	}
-	return newManager(ctx, centralEndpoint, fetchLicenseFromSecretOrCentralAndValidate, client, defaultTimeoutProvider, secretLicensePath)
+	return newManager(ctx, centralEndpoint, fetchLicenseFromSecretOrCentralAndValidate, client, defaultTimeoutProvider)
 }
 
 func newManager(ctx concurrency.Waitable, formattedCentralEndpoint string, validateFunc licenseFetchAndValidateFunc, client *http.Client,
-	timeouts timeoutProvider, secretPath string) (Manager, error) {
+	timeouts timeoutProvider) (Manager, error) {
 
 	if timeouts.expiryGracePeriod == 0 || timeouts.intervalBetweenPolls == 0 {
 		return nil, errors.Errorf("invalid timeouts: %v", timeouts)
@@ -80,7 +79,6 @@ func newManager(ctx concurrency.Waitable, formattedCentralEndpoint string, valid
 		client:                      client,
 		licenseFetchAndValidateFunc: validateFunc,
 		timeouts:                    timeouts,
-		secretPath:                  secretPath,
 	}
 	go m.controlLoop(ctx)
 	return m, nil
@@ -90,8 +88,8 @@ func (m *manager) ValidLicenseExists() bool {
 	return m.validLicenseExists.Get()
 }
 
-func fetchLicenseFromSecretOrCentralAndValidate(ctx concurrency.Waitable, centralEndpoint string, client *http.Client, secretPath string) (time.Time, error) {
-	license := fetchFromSecret(secretPath)
+func fetchLicenseFromSecretOrCentralAndValidate(ctx concurrency.Waitable, centralEndpoint string, client *http.Client) (time.Time, error) {
+	license := maybeFetchFromSecret()
 	if license != "" {
 		expiry, err := validate(license)
 		if err == nil {
@@ -127,7 +125,7 @@ func (m *manager) controlLoop(ctx concurrency.Waitable) {
 	for {
 		m.reconcileExpiryAndFlag()
 
-		expiry, err := m.licenseFetchAndValidateFunc(ctx, m.centralEndpoint, m.client, m.secretPath)
+		expiry, err := m.licenseFetchAndValidateFunc(ctx, m.centralEndpoint, m.client)
 		if err != nil {
 			log.WithError(err).Error("Failed to fetch license. Will retry...")
 			if concurrency.WaitWithTimeout(ctx, m.timeouts.intervalBetweenPolls) {

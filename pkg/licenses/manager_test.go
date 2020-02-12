@@ -24,7 +24,7 @@ func TestManager(t *testing.T) {
 	const intervalBetweenPolls = 20 * time.Millisecond
 	const gracePeriod = 500 * time.Millisecond
 
-	licenseValidateFunc := func(_ concurrency.Waitable, _ string, _ *http.Client, _ string) (time.Time, error) {
+	licenseValidateFunc := func(_ concurrency.Waitable, _ string, _ *http.Client) (time.Time, error) {
 		if failedPollsSoFar < numPolls {
 			failedPollsSoFar++
 			return time.Time{}, errors.New("FAIL")
@@ -47,7 +47,7 @@ func TestManager(t *testing.T) {
 	}
 
 	m, err := newManager(concurrency.Never(), "", licenseValidateFunc, nil,
-		timeoutProvider{intervalBetweenPolls: intervalBetweenPolls, expiryGracePeriod: gracePeriod}, "")
+		timeoutProvider{intervalBetweenPolls: intervalBetweenPolls, expiryGracePeriod: gracePeriod})
 	require.NoError(t, err)
 
 	a.False(m.ValidLicenseExists())
