@@ -20,9 +20,10 @@ type licenseResponse struct {
 	LicenseKey string `json:"licenseKey"`
 }
 
-func fetchFromCentral(ctx concurrency.Waitable, centralEndpoint string, client *http.Client) (string, error) {
-	log.Infof("Attempting to fetch license from Central at %s", centralEndpoint)
-	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, fmt.Sprintf("%s/%s", centralEndpoint, apiPath), nil)
+func fetchFromCentral(ctx concurrency.Waitable, formattedCentralEndpoint string, client *http.Client) (string, error) {
+	url := fmt.Sprintf("%s/%s", formattedCentralEndpoint, apiPath)
+	log.Infof("Attempting to fetch license from Central at %s", url)
+	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, url, nil)
 	if err != nil {
 		return "", errors.Wrap(err, "creating request")
 	}

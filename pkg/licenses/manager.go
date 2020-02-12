@@ -20,7 +20,6 @@ var (
 	defaultTimeoutProvider = timeoutProvider{
 		intervalBetweenPolls: 30 * time.Second,
 		expiryGracePeriod:    time.Hour,
-		expirySafetyBuffer:   time.Hour,
 	}
 )
 
@@ -34,7 +33,6 @@ type licenseFetchAndValidateFunc func(ctx concurrency.Waitable, centralEndpoint 
 type timeoutProvider struct {
 	intervalBetweenPolls time.Duration
 	expiryGracePeriod    time.Duration
-	expirySafetyBuffer   time.Duration
 }
 
 type manager struct {
@@ -73,7 +71,7 @@ func NewManager(ctx concurrency.Waitable, centralEndpoint string) (Manager, erro
 func newManager(ctx concurrency.Waitable, formattedCentralEndpoint string, validateFunc licenseFetchAndValidateFunc, client *http.Client,
 	timeouts timeoutProvider) (Manager, error) {
 
-	if timeouts.expiryGracePeriod == 0 || timeouts.expirySafetyBuffer == 0 || timeouts.intervalBetweenPolls == 0 {
+	if timeouts.expiryGracePeriod == 0 || timeouts.intervalBetweenPolls == 0 {
 		return nil, errors.Errorf("invalid timeouts: %v", timeouts)
 	}
 
@@ -103,6 +101,35 @@ func fetchLicenseFromCentralAndValidate(ctx concurrency.Waitable, centralEndpoin
 	return expiry, nil
 }
 
+func (m *manager) updateLicenseExpiry(newExpiry time.Time) (updated bool) {
+	m.licenseExpiryLock.Lock()
+	defer m.licenseExpiryLock.Unlock()
+
+	if !m.licenseExpiry.Equal(newExpiry) {
+		updated = true
+		m.licenseExpiry = newExpiry
+	}
+
+	return updated
+}
+
+func (m *manager) unsetFlagIfLicenseExpired() {
+	m.licenseExpiryLock.Lock()
+	defer m.licenseExpiryLock.Unlock()
+
+	if m.licenseExpiry.Before(time.Now()) {
+		m.validLicenseExists.Set(false)
+	}
+}
+
+func expiryOrIntervalLater(expiry time.Time, interval time.Duration) time.Time {
+	now := time.Now()
+	if expiry.After(now) {
+		return expiry
+	}
+	return now.Add(interval)
+}
+
 func (m *manager) controlLoop(ctx concurrency.Waitable) {
 	for {
 		expiry, err := m.licenseFetchAndValidateFunc(ctx, m.centralEndpoint, m.client)
@@ -113,35 +140,17 @@ func (m *manager) controlLoop(ctx concurrency.Waitable) {
 			}
 			continue
 		}
-		log.Infof("Fetched new license that is valid until %s", expiry)
-		var isDifferentLicense bool
-		concurrency.WithLock(&m.licenseExpiryLock, func() {
-			if !m.licenseExpiry.Equal(expiry) {
-				isDifferentLicense = true
-				m.licenseExpiry = expiry
-			}
-		})
+
+		isDifferentLicense := m.updateLicenseExpiry(expiry)
+		log.Infof("Fetched license that is valid until %s. Is a different license: %v", expiry, isDifferentLicense)
+
 		if isDifferentLicense {
 			m.validLicenseExists.Set(true)
-			concurrency.AfterFunc(time.Until(expiry.Add(m.timeouts.expiryGracePeriod)), func() {
-				concurrency.WithLock(&m.licenseExpiryLock, func() {
-					if m.licenseExpiry.Before(time.Now()) {
-						m.validLicenseExists.Set(false)
-					}
-				})
-			}, ctx)
+			concurrency.AfterFunc(time.Until(expiry.Add(m.timeouts.expiryGracePeriod)), m.unsetFlagIfLicenseExpired, ctx)
 		}
 
-		// Start polling for a new license one hour before the old one expires.
-		deadline := expiry.Add(-m.timeouts.expirySafetyBuffer)
-		if deadline.After(time.Now()) {
-			if concurrency.WaitWithDeadline(ctx, deadline) {
-				return
-			}
-		} else {
-			if concurrency.WaitWithTimeout(ctx, m.timeouts.intervalBetweenPolls) {
-				return
-			}
+		if concurrency.WaitWithDeadline(ctx, expiryOrIntervalLater(expiry, m.timeouts.intervalBetweenPolls)) {
+			return
 		}
 	}
 }

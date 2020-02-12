@@ -18,10 +18,10 @@ func TestManager(t *testing.T) {
 	var shortExpiry time.Time
 	var shortExpiryReturned concurrency.Flag
 	var returnLongExpiry concurrency.Flag
+	var returnedLongExpiry concurrency.Flag
 
 	const numPolls = 5
 	const intervalBetweenPolls = 20 * time.Millisecond
-	const safetyBuffer = 100 * time.Millisecond
 	const gracePeriod = 500 * time.Millisecond
 
 	licenseValidateFunc := func(_ concurrency.Waitable, _ string, _ *http.Client) (time.Time, error) {
@@ -36,16 +36,18 @@ func TestManager(t *testing.T) {
 
 		}
 		if returnLongExpiry.Get() {
+			a.False(returnedLongExpiry.Get(), "we shouldn't have to return long expiry more than once!")
+			returnedLongExpiry.Set(true)
 			return time.Now().Add(time.Hour), nil
 		}
 
-		// Make sure the polling doesn't start again before the safety buffer time!
-		a.True(time.Until(shortExpiry) < safetyBuffer)
+		// Make sure the polling doesn't start again until we hit expiry!
+		a.True(shortExpiry.Before(time.Now()))
 		return shortExpiry, nil
 	}
 
 	m, err := newManager(concurrency.Never(), "", licenseValidateFunc, nil,
-		timeoutProvider{intervalBetweenPolls: intervalBetweenPolls, expirySafetyBuffer: safetyBuffer, expiryGracePeriod: gracePeriod})
+		timeoutProvider{intervalBetweenPolls: intervalBetweenPolls, expiryGracePeriod: gracePeriod})
 	require.NoError(t, err)
 
 	a.False(m.ValidLicenseExists())
@@ -53,8 +55,8 @@ func TestManager(t *testing.T) {
 	// It should poll enough times to get the short expiry.
 	a.True(concurrency.PollWithTimeout(shortExpiryReturned.Get, 10*time.Millisecond, 200*time.Millisecond))
 
-	// Now, we have a valid license.
-	a.True(m.ValidLicenseExists())
+	// Now, we should have a valid license.
+	a.True(concurrency.PollWithTimeout(m.ValidLicenseExists, 10*time.Millisecond, 100*time.Millisecond))
 
 	// Sleep until the short expiry, and then make sure we still have a valid license.
 	time.Sleep(time.Until(shortExpiry))
