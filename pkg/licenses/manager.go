@@ -3,11 +3,7 @@ package licenses
 import (
 	"io/ioutil"
 	"net/http"
-<<<<<<< HEAD
-=======
 	"os"
-	"sync"
->>>>>>> c092ea6... Chart changes
 	"time"
 
 	"github.com/pkg/errors"
