@@ -33,17 +33,17 @@ type Server struct {
 	endpoint                string
 	storage                 database.Datastore
 	httpServer              *http.Server
-	licenseStatusProvider   licenses.StatusProvider
+	licenseManager          licenses.Manager
 }
 
 // New returns a new instantiation of the Server.
-func New(serverEndpoint string, db database.Datastore, licenseStatusProvider licenses.StatusProvider, creator, insecureCreator types.RegistryClientCreator) *Server {
+func New(serverEndpoint string, db database.Datastore, licenseManager licenses.Manager, creator, insecureCreator types.RegistryClientCreator) *Server {
 	return &Server{
 		registryCreator:         creator,
 		insecureRegistryCreator: insecureCreator,
 		endpoint:                serverEndpoint,
 		storage:                 db,
-		licenseStatusProvider:   licenseStatusProvider,
+		licenseManager:          licenseManager,
 	}
 }
 
@@ -233,7 +233,7 @@ const (
 
 func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !s.licenseStatusProvider.LicenseValid() {
+		if !s.licenseManager.ValidLicenseExists() {
 			httputil.WriteGRPCStyleError(w, codes.Internal, licenses.ErrNoValidLicense)
 			return
 		}
