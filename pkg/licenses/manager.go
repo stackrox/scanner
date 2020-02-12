@@ -1,7 +1,13 @@
 package licenses
 
 import (
+	"io/ioutil"
 	"net/http"
+<<<<<<< HEAD
+=======
+	"os"
+	"sync"
+>>>>>>> c092ea6... Chart changes
 	"time"
 
 	"github.com/pkg/errors"
@@ -13,6 +19,8 @@ import (
 
 const (
 	requestTimeout = 30 * time.Second
+
+	secretLicensePath = "/run/secrets/stackrox.io/ef97c1c1-0027-4f4a-b398-ca49fff5be17/license.lic"
 )
 
 var (
@@ -46,8 +54,44 @@ type manager struct {
 	licenseExpiry time.Time
 }
 
+type secretBasedManager struct {
+	expiry time.Time
+}
+
+func (m *secretBasedManager) ValidLicenseExists() bool {
+	return m.expiry.After(time.Now())
+}
+
+func maybeInitializeFromSecret() Manager {
+	licenseBytes, err := ioutil.ReadFile(secretLicensePath)
+	if err != nil {
+		// Avoid logging the error so as to not leak the file name.
+		log.Debug("no license found through secret")
+		return nil
+	}
+	expiry, err := validate(string(licenseBytes))
+	if err != nil {
+		log.WithError(err).Debug("invalid license found from secret")
+		return nil
+	}
+	// The secret-based manager path will only be used in dev when we are running scanner standalone.
+	// It will NOT be advertised to customers. For simplicity here, don't bother polling the secret or anything.
+	// Just bounce scanner. This code path will basically only be hit when the dev license expires.
+	time.AfterFunc(time.Until(expiry), func() {
+		log.Debug("license in secret is expiring, bouncing scanner...")
+		os.Exit(1)
+	})
+	log.Debugf("Initializing license from secret. Expiry: %s", expiry)
+	return &secretBasedManager{expiry: expiry}
+}
+
 // NewManager returns a new manager.
 func NewManager(ctx concurrency.Waitable, centralEndpoint string) (Manager, error) {
+	secretBased := maybeInitializeFromSecret()
+	if secretBased != nil {
+		return secretBased, nil
+	}
+
 	if centralEndpoint == "" {
 		centralEndpoint = "https://central.stackrox"
 	}

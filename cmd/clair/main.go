@@ -41,6 +41,7 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/formatter"
+	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/stopper"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
@@ -95,6 +96,11 @@ func waitForSignals(signals ...os.Signal) {
 func Boot(config *Config) {
 	rand.Seed(time.Now().UnixNano())
 	st := stopper.NewStopper()
+
+	_, err := licenses.NewManager(context.Background(), config.CentralEndpoint)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Open database and initialize vuln cache in parallel, prior to making the API available.
 	var wg sync.WaitGroup
