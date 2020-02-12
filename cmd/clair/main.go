@@ -97,6 +97,14 @@ func Boot(config *Config) {
 	rand.Seed(time.Now().UnixNano())
 	st := stopper.NewStopper()
 
+	// Start polling for licenses first thing: ideally we will fetch the license
+	// by the time we connect to the DB.
+	managerCtx, managerCtxCancel := context.WithCancel(context.Background())
+	licenseManager, err := licenses.NewManager(managerCtx, config.CentralEndpoint)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to initialize license manager")
+	}
+	_ = licenseManager
 	// Open database and initialize vuln cache in parallel, prior to making the API available.
 	var wg sync.WaitGroup
 
@@ -121,13 +129,6 @@ func Boot(config *Config) {
 	// Initialize the vulnerability cache prior to making the API available
 	wg.Wait()
 	defer db.Close()
-
-	managerCtx, managerCtxCancel := context.WithCancel(context.Background())
-	licenseManager, err := licenses.NewManager(managerCtx, config.CentralEndpoint)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to initialize license manager")
-	}
-	_ = licenseManager
 
 	u, err := updater.New(config.Updater, config.CentralEndpoint, db, vulncache)
 	if err != nil {

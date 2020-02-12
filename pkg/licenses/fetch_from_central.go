@@ -2,8 +2,8 @@ package licenses
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"path"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -22,7 +22,7 @@ type licenseResponse struct {
 
 func (m *manager) fetchFromCentral(ctx concurrency.Waitable) (string, error) {
 	log.Infof("Attempting to fetch license from Central at %s", m.centralEndpoint)
-	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, path.Join(m.centralEndpoint, apiPath), nil)
+	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, fmt.Sprintf("%s/%s", m.centralEndpoint, apiPath), nil)
 	if err != nil {
 		return "", errors.Wrap(err, "creating request")
 	}
