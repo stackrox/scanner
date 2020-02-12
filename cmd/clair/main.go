@@ -99,8 +99,9 @@ func Boot(config *Config) {
 
 	// Start polling for licenses first thing: ideally we will fetch the license
 	// by the time we connect to the DB.
-	managerCtx, managerCtxCancel := context.WithCancel(context.Background())
-	licenseManager, err := licenses.NewManager(managerCtx, config.CentralEndpoint)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	licenseManager, err := licenses.NewManager(ctx, config.CentralEndpoint)
 	if err != nil {
 		log.WithError(err).Fatal("Failed to initialize license manager")
 	}
@@ -158,7 +159,6 @@ func Boot(config *Config) {
 	// Wait for interruption and shutdown gracefully.
 	waitForSignals(syscall.SIGINT, syscall.SIGTERM)
 	log.Info("Received interruption, gracefully stopping ...")
-	managerCtxCancel()
 	serv.Close()
 	st.Stop()
 	u.Stop()
