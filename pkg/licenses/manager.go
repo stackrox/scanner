@@ -43,7 +43,7 @@ type manager struct {
 
 	validLicenseExists concurrency.Flag
 
-	licenseExpiry     time.Time
+	licenseExpiry time.Time
 }
 
 // NewManager returns a new manager.
