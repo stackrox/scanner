@@ -23,15 +23,15 @@ func TestScannerRejectsLicense(t *testing.T) {
 	cli := client.New(getScannerHTTPEndpoint(), true)
 	require.NoError(t, cli.Ping())
 
-	for _, urlAndMethod := range []struct{
-		url string
+	for _, urlAndMethod := range []struct {
+		url    string
 		method string
 	}{
 		{
 			http.MethodPost,
 			"scanner/image",
 		},
-	}{
+	} {
 		req, err := http.NewRequest(urlAndMethod.method, fmt.Sprintf("%s/%s", endpoint, urlAndMethod.url), nil)
 		require.NoError(t, err)
 		resp, err := httpClient.Do(req)
