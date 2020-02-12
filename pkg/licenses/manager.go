@@ -107,12 +107,13 @@ func expiryOrIntervalLater(expiry time.Time, interval time.Duration) time.Time {
 	return now.Add(interval)
 }
 
+func (m *manager) reconcileExpiryAndFlag() {
+	m.validLicenseExists.Set(m.licenseExpiry.Add(m.timeouts.expiryGracePeriod).After(time.Now()))
+}
+
 func (m *manager) controlLoop(ctx concurrency.Waitable) {
 	for {
-		now := time.Now()
-		if m.validLicenseExists.Get() && m.licenseExpiry.Add(m.timeouts.expiryGracePeriod).Before(now) {
-			m.validLicenseExists.Set(false)
-		}
+		m.reconcileExpiryAndFlag()
 
 		expiry, err := m.licenseFetchAndValidateFunc(ctx, m.centralEndpoint, m.client)
 		if err != nil {
@@ -125,11 +126,7 @@ func (m *manager) controlLoop(ctx concurrency.Waitable) {
 		log.Infof("Fetched license that is valid until %s.", expiry)
 
 		m.licenseExpiry = expiry
-		if m.licenseExpiry.Add(m.timeouts.expiryGracePeriod).After(now) {
-			m.validLicenseExists.Set(true)
-		} else {
-			m.validLicenseExists.Set(false)
-		}
+		m.reconcileExpiryAndFlag()
 
 		if concurrency.WaitWithDeadline(ctx, expiryOrIntervalLater(m.licenseExpiry, m.timeouts.intervalBetweenPolls)) {
 			return
