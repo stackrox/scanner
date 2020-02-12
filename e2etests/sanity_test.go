@@ -26,7 +26,7 @@ func getMatchingFeature(featureList []v1.Feature, featureToFind v1.Feature, t *t
 	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list", featureToFind)
 	return featureList[candidateIdx]
 }
-func verifyImageHasExpectedFeatures(client *httpClient.Clairify, username, password string, imageRequest *types.ImageRequest, expectedFeatures []v1.Feature, t *testing.T) {
+func verifyImageHasExpectedFeatures(client *client.Clairify, username, password string, imageRequest *types.ImageRequest, expectedFeatures []v1.Feature, t *testing.T) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
