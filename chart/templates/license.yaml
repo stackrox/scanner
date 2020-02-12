@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: scanner-license
+  namespace: {{ .Values.namespace }}
+type: Opaque
+data:
+  license.lic: {{ .Files.Get "dev-license.lic" | b64enc }}

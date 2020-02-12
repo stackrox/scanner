@@ -13,6 +13,8 @@ import (
 
 const (
 	requestTimeout = 30 * time.Second
+
+	secretLicensePath = "/run/secrets/stackrox.io/ef97c1c1-0027-4f4a-b398-ca49fff5be17/license.lic"
 )
 
 var (
@@ -35,15 +37,14 @@ type timeoutProvider struct {
 }
 
 type manager struct {
-	centralEndpoint string
-	client          *http.Client
-	timeouts        timeoutProvider
-
+	centralEndpoint             string
+	timeouts                    timeoutProvider
 	licenseFetchAndValidateFunc licenseFetchAndValidateFunc
 
-	validLicenseExists concurrency.Flag
+	client *http.Client
 
-	licenseExpiry time.Time
+	validLicenseExists concurrency.Flag
+	licenseExpiry      time.Time
 }
 
 // NewManager returns a new manager.
@@ -63,7 +64,7 @@ func NewManager(ctx concurrency.Waitable, centralEndpoint string) (Manager, erro
 		Timeout:   requestTimeout,
 		Transport: &http.Transport{TLSClientConfig: clientConf},
 	}
-	return newManager(ctx, centralEndpoint, fetchLicenseFromCentralAndValidate, client, defaultTimeoutProvider)
+	return newManager(ctx, centralEndpoint, fetchLicenseFromSecretOrCentralAndValidate, client, defaultTimeoutProvider)
 }
 
 func newManager(ctx concurrency.Waitable, formattedCentralEndpoint string, validateFunc licenseFetchAndValidateFunc, client *http.Client,
@@ -87,7 +88,16 @@ func (m *manager) ValidLicenseExists() bool {
 	return m.validLicenseExists.Get()
 }
 
-func fetchLicenseFromCentralAndValidate(ctx concurrency.Waitable, centralEndpoint string, client *http.Client) (time.Time, error) {
+func fetchLicenseFromSecretOrCentralAndValidate(ctx concurrency.Waitable, centralEndpoint string, client *http.Client) (time.Time, error) {
+	license := maybeFetchFromSecret()
+	if license != "" {
+		expiry, err := validate(license)
+		if err == nil {
+			return expiry, nil
+		}
+		log.WithError(err).Warn("Invalid license from secret, trying to fetch from Central")
+	}
+
 	license, err := fetchFromCentral(ctx, centralEndpoint, client)
 	if err != nil {
 		return time.Time{}, errors.Wrap(err, "fetching license from central")
