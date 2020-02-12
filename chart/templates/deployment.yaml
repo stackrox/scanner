@@ -55,6 +55,8 @@ spec:
               readOnly: true
             - name: vuln-temp-db
               mountPath: /var/lib/stackrox
+            - name: scanner-db-password
+              mountPath: /run/secrets/stackrox.io/secrets
       volumes:
         - name: config
           configMap:
