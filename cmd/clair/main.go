@@ -121,7 +121,7 @@ func Boot(config *Config) {
 	wg.Wait()
 	defer db.Close()
 
-	u, err := updater.New(config.Updater, db, vulncache)
+	u, err := updater.New(config.Updater, config.CentralEndpoint, db, vulncache)
 	if err != nil {
 		log.WithError(err).Fatal("Failed to initialize updater")
 	}

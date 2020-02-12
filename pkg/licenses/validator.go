@@ -31,11 +31,11 @@ var (
 	}()
 )
 
-// Validate validates a license key, checking that the signature is valid,
+// validate validates a license key, checking that the signature is valid,
 // and that the license is valid at time.Now().
 // If it is valid, it returns a nil error, and the expiration time of the
 // license.
-func Validate(licenseKey string) (expiry time.Time, err error) {
+func validate(licenseKey string) (expiry time.Time, err error) {
 	return validateWithValidator(licenseKey, validatorInstance)
 }
 

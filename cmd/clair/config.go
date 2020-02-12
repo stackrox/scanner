@@ -39,6 +39,9 @@ type Config struct {
 	Updater                  updater.Config                      `yaml:"updater"`
 	LogLevel                 string                              `yaml:"logLevel"`
 	MaxExtractableFileSizeMB int64                               `yaml:"maxExtractableFileSizeMB"`
+
+	// CentralEndpoint is the endpoint that central can be reached at. Defaults to central.stackrox if not present in the config.
+	CentralEndpoint string `yaml:"centralEndpoint"`
 }
 
 // DefaultConfig is a configuration that can be used as a fallback value.
