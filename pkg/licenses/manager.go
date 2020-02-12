@@ -1,9 +1,7 @@
 package licenses
 
 import (
-	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -31,7 +29,7 @@ type Manager interface {
 	ValidLicenseExists() bool
 }
 
-type licenseFetchAndValidateFunc func(ctx concurrency.Waitable, centralEndpoint string, client *http.Client) (expiry time.Time, err error)
+type licenseFetchAndValidateFunc func(ctx concurrency.Waitable, centralEndpoint string, client *http.Client, secretPath string) (expiry time.Time, err error)
 
 type timeoutProvider struct {
 	intervalBetweenPolls time.Duration
@@ -39,55 +37,19 @@ type timeoutProvider struct {
 }
 
 type manager struct {
-	centralEndpoint string
-	client          *http.Client
-	timeouts        timeoutProvider
-
+	secretPath                  string
+	centralEndpoint             string
+	timeouts                    timeoutProvider
 	licenseFetchAndValidateFunc licenseFetchAndValidateFunc
 
+	client *http.Client
+
 	validLicenseExists concurrency.Flag
-
-	licenseExpiry time.Time
-}
-
-type secretBasedManager struct {
-	expiry time.Time
-}
-
-func (m *secretBasedManager) ValidLicenseExists() bool {
-	return m.expiry.After(time.Now())
-}
-
-func maybeInitializeFromSecret() Manager {
-	licenseBytes, err := ioutil.ReadFile(secretLicensePath)
-	if err != nil {
-		// Avoid logging the error so as to not leak the file name.
-		log.Debug("no license found through secret")
-		return nil
-	}
-	expiry, err := validate(string(licenseBytes))
-	if err != nil {
-		log.WithError(err).Debug("invalid license found from secret")
-		return nil
-	}
-	// The secret-based manager path will only be used in dev when we are running scanner standalone.
-	// It will NOT be advertised to customers. For simplicity here, don't bother polling the secret or anything.
-	// Just bounce scanner. This code path will basically only be hit when the dev license expires.
-	time.AfterFunc(time.Until(expiry), func() {
-		log.Debug("license in secret is expiring, bouncing scanner...")
-		os.Exit(1)
-	})
-	log.Debugf("Initializing license from secret. Expiry: %s", expiry)
-	return &secretBasedManager{expiry: expiry}
+	licenseExpiry      time.Time
 }
 
 // NewManager returns a new manager.
 func NewManager(ctx concurrency.Waitable, centralEndpoint string) (Manager, error) {
-	secretBased := maybeInitializeFromSecret()
-	if secretBased != nil {
-		return secretBased, nil
-	}
-
 	if centralEndpoint == "" {
 		centralEndpoint = "https://central.stackrox"
 	}
@@ -103,11 +65,11 @@ func NewManager(ctx concurrency.Waitable, centralEndpoint string) (Manager, erro
 		Timeout:   requestTimeout,
 		Transport: &http.Transport{TLSClientConfig: clientConf},
 	}
-	return newManager(ctx, centralEndpoint, fetchLicenseFromCentralAndValidate, client, defaultTimeoutProvider)
+	return newManager(ctx, centralEndpoint, fetchLicenseFromSecretOrCentralAndValidate, client, defaultTimeoutProvider, secretLicensePath)
 }
 
 func newManager(ctx concurrency.Waitable, formattedCentralEndpoint string, validateFunc licenseFetchAndValidateFunc, client *http.Client,
-	timeouts timeoutProvider) (Manager, error) {
+	timeouts timeoutProvider, secretPath string) (Manager, error) {
 
 	if timeouts.expiryGracePeriod == 0 || timeouts.intervalBetweenPolls == 0 {
 		return nil, errors.Errorf("invalid timeouts: %v", timeouts)
@@ -118,6 +80,7 @@ func newManager(ctx concurrency.Waitable, formattedCentralEndpoint string, valid
 		client:                      client,
 		licenseFetchAndValidateFunc: validateFunc,
 		timeouts:                    timeouts,
+		secretPath:                  secretPath,
 	}
 	go m.controlLoop(ctx)
 	return m, nil
@@ -127,7 +90,16 @@ func (m *manager) ValidLicenseExists() bool {
 	return m.validLicenseExists.Get()
 }
 
-func fetchLicenseFromCentralAndValidate(ctx concurrency.Waitable, centralEndpoint string, client *http.Client) (time.Time, error) {
+func fetchLicenseFromSecretOrCentralAndValidate(ctx concurrency.Waitable, centralEndpoint string, client *http.Client, secretPath string) (time.Time, error) {
+	license := fetchFromSecret(secretPath)
+	if license != "" {
+		expiry, err := validate(license)
+		if err == nil {
+			return expiry, nil
+		}
+		log.WithError(err).Warn("Invalid license from secret, trying to fetch from Central")
+	}
+
 	license, err := fetchFromCentral(ctx, centralEndpoint, client)
 	if err != nil {
 		return time.Time{}, errors.Wrap(err, "fetching license from central")
@@ -155,7 +127,7 @@ func (m *manager) controlLoop(ctx concurrency.Waitable) {
 	for {
 		m.reconcileExpiryAndFlag()
 
-		expiry, err := m.licenseFetchAndValidateFunc(ctx, m.centralEndpoint, m.client)
+		expiry, err := m.licenseFetchAndValidateFunc(ctx, m.centralEndpoint, m.client, m.secretPath)
 		if err != nil {
 			log.WithError(err).Error("Failed to fetch license. Will retry...")
 			if concurrency.WaitWithTimeout(ctx, m.timeouts.intervalBetweenPolls) {
