@@ -41,6 +41,7 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/formatter"
+	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/stopper"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
@@ -96,6 +97,13 @@ func Boot(config *Config) {
 	rand.Seed(time.Now().UnixNano())
 	st := stopper.NewStopper()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	manager, err := licenses.NewManager(ctx, config.CentralEndpoint)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to initialize license manager")
+	}
+
 	// Open database and initialize vuln cache in parallel, prior to making the API available.
 	var wg sync.WaitGroup
 
@@ -129,7 +137,7 @@ func Boot(config *Config) {
 	// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up to date
 	u.UpdateNVDCacheOnly()
 
-	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
+	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db, manager, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
 	go api.RunClairify(serv)
 
 	grpcAPI := grpc.NewAPI(grpc.Config{
@@ -139,7 +147,7 @@ func Boot(config *Config) {
 
 	grpcAPI.Register(
 		ping.NewService(),
-		scan.NewService(db),
+		scan.NewService(manager, db),
 	)
 
 	go grpcAPI.Start()

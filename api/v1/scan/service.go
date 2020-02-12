@@ -12,6 +12,7 @@ import (
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/licenses"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -25,17 +26,30 @@ type Service interface {
 }
 
 // NewService returns the service for scanning
-func NewService(db database.Datastore) Service {
+func NewService(licenseManager licenses.Manager, db database.Datastore) Service {
 	return &serviceImpl{
-		db: db,
+		licenseManager: licenseManager,
+		db:             db,
 	}
 }
 
 type serviceImpl struct {
-	db database.Datastore
+	licenseManager licenses.Manager
+	db             database.Datastore
+}
+
+func (s *serviceImpl) checkLicense() error {
+	if !s.licenseManager.ValidLicenseExists() {
+		return status.Error(codes.Internal, licenses.ErrNoValidLicense.Error())
+	}
+	return nil
 }
 
 func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
+	if err := s.checkLicense(); err != nil {
+		return nil, err
+	}
+
 	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec())
 	if err != nil {
 		return nil, err
@@ -50,6 +64,10 @@ func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.Ge
 }
 
 func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (*v1.ScanImageResponse, error) {
+	if err := s.checkLicense(); err != nil {
+		return nil, err
+	}
+
 	image, err := types.GenerateImageFromString(req.GetImage())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "could not parse image %q", req.GetImage())
@@ -124,6 +142,10 @@ func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec) (string, 
 }
 
 func (s *serviceImpl) GetScan(ctx context.Context, req *v1.GetScanRequest) (*v1.GetScanResponse, error) {
+	if err := s.checkLicense(); err != nil {
+		return nil, err
+	}
+
 	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec())
 	if err != nil {
 		return nil, err
