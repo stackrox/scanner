@@ -13,6 +13,6 @@ func fetchFromSecret(secretPath string) string {
 		log.Debug("no license found through secret")
 		return ""
 	}
-	log.Debugf("Got license from secret.")
+	log.Debug("Got license from secret.")
 	return string(licenseKeyBytes)
 }
