@@ -1,5 +1,3 @@
-// +build e2e
-
 package e2etests
 
 import (
@@ -17,6 +15,7 @@ import (
 )
 
 const (
+	scannerHTTPEndpointEnv = "SCANNER_ENDPOINT"
 	scannerGRPCEndpointEnv = "SCANNER_GRPC_ENDPOINT"
 	dockerIOUsernameEnv    = "DOCKER_IO_PULL_USERNAME"
 	dockerIOPasswordEnv    = "DOCKER_IO_PULL_PASSWORD"
@@ -42,6 +41,10 @@ func mustGetEnv(key string, t *testing.T) string {
 	val := os.Getenv(key)
 	require.NotEmpty(t, val, "No %s env found", key)
 	return val
+}
+
+func getScannerHTTPEndpoint() string {
+	return stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080")
 }
 
 func connectToScanner(t *testing.T) *grpc.ClientConn {
