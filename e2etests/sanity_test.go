@@ -79,7 +79,7 @@ func verifyImageHasExpectedFeatures(client *httpClient.Clairify, username, passw
 }
 
 func TestImageSanity(t *testing.T) {
-	cli := client.New(getScannerHTTPEndpoint(), true)
+	cli := client.New(getScannerHTTPEndpoint(t), true)
 
 	for _, testCase := range []struct {
 		image            string

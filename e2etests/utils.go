@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/rox/pkg/urlfmt"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -43,8 +44,10 @@ func mustGetEnv(key string, t *testing.T) string {
 	return val
 }
 
-func getScannerHTTPEndpoint() string {
-	return stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080")
+func getScannerHTTPEndpoint(t *testing.T) string {
+	url, err := urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
+	require.NoError(t, err)
+	return url
 }
 
 func connectToScanner(t *testing.T) *grpc.ClientConn {
