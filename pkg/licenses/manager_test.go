@@ -53,7 +53,7 @@ func TestManager(t *testing.T) {
 	a.False(m.ValidLicenseExists())
 
 	// It should poll enough times to get the short expiry.
-	a.True(concurrency.PollWithTimeout(shortExpiryReturned.Get, 10*time.Millisecond, 200*time.Millisecond))
+	a.True(concurrency.PollWithTimeout(shortExpiryReturned.Get, 10*time.Millisecond, 400*time.Millisecond))
 
 	// Now, we should have a valid license.
 	a.True(concurrency.PollWithTimeout(m.ValidLicenseExists, 10*time.Millisecond, 100*time.Millisecond))
