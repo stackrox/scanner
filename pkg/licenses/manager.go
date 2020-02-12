@@ -2,7 +2,6 @@ package licenses
 
 import (
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -44,7 +43,6 @@ type manager struct {
 
 	validLicenseExists concurrency.Flag
 
-	licenseExpiryLock sync.Mutex
 	licenseExpiry     time.Time
 }
 
@@ -101,27 +99,6 @@ func fetchLicenseFromCentralAndValidate(ctx concurrency.Waitable, centralEndpoin
 	return expiry, nil
 }
 
-func (m *manager) updateLicenseExpiry(newExpiry time.Time) (updated bool) {
-	m.licenseExpiryLock.Lock()
-	defer m.licenseExpiryLock.Unlock()
-
-	if !m.licenseExpiry.Equal(newExpiry) {
-		updated = true
-		m.licenseExpiry = newExpiry
-	}
-
-	return updated
-}
-
-func (m *manager) unsetFlagIfLicenseExpired() {
-	m.licenseExpiryLock.Lock()
-	defer m.licenseExpiryLock.Unlock()
-
-	if m.licenseExpiry.Before(time.Now()) {
-		m.validLicenseExists.Set(false)
-	}
-}
-
 func expiryOrIntervalLater(expiry time.Time, interval time.Duration) time.Time {
 	now := time.Now()
 	if expiry.After(now) {
@@ -132,6 +109,11 @@ func expiryOrIntervalLater(expiry time.Time, interval time.Duration) time.Time {
 
 func (m *manager) controlLoop(ctx concurrency.Waitable) {
 	for {
+		now := time.Now()
+		if m.validLicenseExists.Get() && m.licenseExpiry.Add(m.timeouts.expiryGracePeriod).Before(now) {
+			m.validLicenseExists.Set(false)
+		}
+
 		expiry, err := m.licenseFetchAndValidateFunc(ctx, m.centralEndpoint, m.client)
 		if err != nil {
 			log.WithError(err).Error("Failed to fetch license. Will retry...")
@@ -140,16 +122,16 @@ func (m *manager) controlLoop(ctx concurrency.Waitable) {
 			}
 			continue
 		}
+		log.Infof("Fetched license that is valid until %s.", expiry)
 
-		isDifferentLicense := m.updateLicenseExpiry(expiry)
-		log.Infof("Fetched license that is valid until %s. Is a different license: %v", expiry, isDifferentLicense)
-
-		if isDifferentLicense {
+		m.licenseExpiry = expiry
+		if m.licenseExpiry.Add(m.timeouts.expiryGracePeriod).After(now) {
 			m.validLicenseExists.Set(true)
-			concurrency.AfterFunc(time.Until(expiry.Add(m.timeouts.expiryGracePeriod)), m.unsetFlagIfLicenseExpired, ctx)
+		} else {
+			m.validLicenseExists.Set(false)
 		}
 
-		if concurrency.WaitWithDeadline(ctx, expiryOrIntervalLater(expiry, m.timeouts.intervalBetweenPolls)) {
+		if concurrency.WaitWithDeadline(ctx, expiryOrIntervalLater(m.licenseExpiry, m.timeouts.intervalBetweenPolls)) {
 			return
 		}
 	}
