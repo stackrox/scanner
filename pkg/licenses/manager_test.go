@@ -51,7 +51,7 @@ func TestManager(t *testing.T) {
 	a.False(m.ValidLicenseExists())
 
 	// It should poll enough times to get the short expiry.
-	a.True(concurrency.PollWithTimeout(shortExpiryReturned.Get, 10 * time.Millisecond, 200 * time.Millisecond))
+	a.True(concurrency.PollWithTimeout(shortExpiryReturned.Get, 10*time.Millisecond, 200*time.Millisecond))
 
 	// Now, we have a valid license.
 	a.True(m.ValidLicenseExists())
@@ -61,17 +61,17 @@ func TestManager(t *testing.T) {
 	a.True(m.ValidLicenseExists())
 
 	// Make sure the license is valid even as we get closer to the grace period.
-	time.Sleep(gracePeriod/2)
+	time.Sleep(gracePeriod / 2)
 	a.True(m.ValidLicenseExists())
 
 	// Make sure that soon after the grace period, the license stops being valid.
-	time.Sleep(gracePeriod/2)
+	time.Sleep(gracePeriod / 2)
 	a.True(concurrency.PollWithTimeout(func() bool {
 		return !m.ValidLicenseExists()
-	}, 10 * time.Millisecond, 100 * time.Millisecond))
+	}, 10*time.Millisecond, 100*time.Millisecond))
 
 	// Now, simulate us getting a new license with a long-expiry.
 	returnLongExpiry.Set(true)
-	a.True(concurrency.PollWithTimeout(m.ValidLicenseExists, 10 * time.Millisecond, 100 * time.Millisecond))
+	a.True(concurrency.PollWithTimeout(m.ValidLicenseExists, 10*time.Millisecond, 100*time.Millisecond))
 
 }

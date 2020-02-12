@@ -13,7 +13,7 @@ import (
 
 // These are copied from proto. We're just calling directly over HTTP for simplicity.
 const (
-	apiPath = "v1/licenses/getactive"
+	apiPath = "v1/licenses/activekey"
 )
 
 type licenseResponse struct {
