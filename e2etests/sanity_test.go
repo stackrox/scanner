@@ -4,7 +4,6 @@ package e2etests
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"testing"
 
@@ -80,9 +79,7 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password 
 }
 
 func TestImageSanity(t *testing.T) {
-	endpoint := os.Getenv("SCANNER_ENDPOINT")
-	require.NotEmpty(t, endpoint, "no scanner endpoint specified")
-	cli := client.New(endpoint, true)
+	cli := client.New(getScannerHTTPEndpoint(t), true)
 
 	for _, testCase := range []struct {
 		image            string

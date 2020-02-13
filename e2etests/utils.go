@@ -1,6 +1,6 @@
-// +build e2e
-
 package e2etests
+
+//lint:file-ignore U1000 These functions are used, but staticcheck is not smart about build tags.
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/rox/pkg/urlfmt"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -17,6 +18,7 @@ import (
 )
 
 const (
+	scannerHTTPEndpointEnv = "SCANNER_ENDPOINT"
 	scannerGRPCEndpointEnv = "SCANNER_GRPC_ENDPOINT"
 	dockerIOUsernameEnv    = "DOCKER_IO_PULL_USERNAME"
 	dockerIOPasswordEnv    = "DOCKER_IO_PULL_PASSWORD"
@@ -42,6 +44,12 @@ func mustGetEnv(key string, t *testing.T) string {
 	val := os.Getenv(key)
 	require.NotEmpty(t, val, "No %s env found", key)
 	return val
+}
+
+func getScannerHTTPEndpoint(t *testing.T) string {
+	url, err := urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
+	require.NoError(t, err)
+	return url
 }
 
 func connectToScanner(t *testing.T) *grpc.ClientConn {
