@@ -1,4 +1,4 @@
-// +build e2e-nolicense
+// +build e2e_nolicense
 
 package e2etests
 

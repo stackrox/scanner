@@ -225,7 +225,7 @@ e2e-tests: deps
 .PHONY: no-license-tests
 no-license-tests: deps
 	@echo "+ $@"
-	go test -tags e2e-nolicense -count=1 ./e2etests/...
+	go test -tags e2e_nolicense -count=1 ./e2etests/...
 
 ####################
 ## Generated Srcs ##
