@@ -1,5 +1,7 @@
 package e2etests
 
+//lint:file-ignore U1000 These functions are used, but staticcheck is not smart about build tags.
+
 import (
 	"context"
 	"crypto/tls"
