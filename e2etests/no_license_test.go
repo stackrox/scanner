@@ -15,7 +15,6 @@ import (
 	"time"
 
 	v1 "github.com/stackrox/scanner/generated/api/v1"
-	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -31,13 +30,15 @@ var (
 
 func TestScannerRejectsLicenseHTTP(t *testing.T) {
 	endpoint := getScannerHTTPEndpoint(t)
-	cli := client.New(endpoint, true)
-	require.NoError(t, cli.Ping())
 
 	for _, urlAndMethod := range []struct {
 		method string
 		url    string
 	}{
+		{
+			http.MethodGet,
+			"ping",
+		},
 		{
 			http.MethodPost,
 			"image",
