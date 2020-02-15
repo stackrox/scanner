@@ -224,13 +224,6 @@ func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("{}"))
 }
 
-type licenseRequirementMode int
-
-const (
-	licenseNotRequired licenseRequirementMode = iota
-	licenseRequired
-)
-
 func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !s.licenseManager.ValidLicenseExists() {
@@ -241,12 +234,8 @@ func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc) http.Handle
 	}
 }
 
-func (s *Server) handleFuncRouter(r *mux.Router, path string, handlerFunc http.HandlerFunc, method string, licenseMode licenseRequirementMode) {
-	actualHandlerFunc := handlerFunc
-	if licenseMode == licenseRequired {
-		actualHandlerFunc = s.wrapHandlerFuncWithLicenseCheck(handlerFunc)
-	}
-	r.HandleFunc(path, actualHandlerFunc).Methods(method)
+func (s *Server) handleFuncRouter(r *mux.Router, path string, handlerFunc http.HandlerFunc, method string) {
+	r.HandleFunc(path, s.wrapHandlerFuncWithLicenseCheck(handlerFunc)).Methods(method)
 }
 
 // Start starts the server listening.
@@ -256,11 +245,11 @@ func (s *Server) Start() error {
 	apiRoots := []string{"clairify", "scanner"}
 
 	for _, root := range apiRoots {
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/ping", root), s.Ping, http.MethodGet, licenseNotRequired)
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/image", root), s.ScanImage, http.MethodPost, licenseRequired)
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA, http.MethodGet, licenseRequired)
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/image/{registry}/{remote}/{tag}", root), s.GetResultsByImage, http.MethodGet, licenseRequired)
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/image/{registry}/{namespace}/{repo}/{tag}", root), s.GetResultsByImage, http.MethodGet, licenseRequired)
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/ping", root), s.Ping, http.MethodGet)
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/image", root), s.ScanImage, http.MethodPost)
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA, http.MethodGet)
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/image/{registry}/{remote}/{tag}", root), s.GetResultsByImage, http.MethodGet)
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/image/{registry}/{namespace}/{repo}/{tag}", root), s.GetResultsByImage, http.MethodGet)
 	}
 
 	var tlsConfig *tls.Config
