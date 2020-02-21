@@ -658,18 +658,11 @@ workflows:
             - upload-nvd-dump-for-embedding-into-image
       - provision-cluster:
           <<: *runOnAllTagsWithDockerIOPullCtx
-      - provision-cluster-rhel:
-          <<: *runOnAllTagsWithDockerIOPullCtx
       - e2e-tests:
           <<: *runOnAllTagsWithDockerIOPullCtx
           requires:
             - build
             - provision-cluster
-      - e2e-tests-rhel:
-          <<: *runOnAllTagsWithDockerIOPullCtx
-          requires:
-            - build-rhel
-            - provision-cluster-rhel
 
   build:
     jobs:
