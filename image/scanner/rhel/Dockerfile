@@ -9,7 +9,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
     yum install -y --nogpgcheck --disableplugin=subscription-manager \
       ca-certificates xz && \
-    rpm -e subscription-manager yum dnf python3-dnf dnf-data dnf-plugin-subscription-manager \
+    rpm -e subscription-manager yum $(rpm -qa *dnf*) \
     ;
 
 ADD bundle.tar.gz /
