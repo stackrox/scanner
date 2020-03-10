@@ -9,7 +9,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
     yum install -y --nogpgcheck --disableplugin=subscription-manager \
       ca-certificates xz && \
-    rpm -e subscription-manager yum $(rpm -qa *dnf*) \
+    rpm -e subscription-manager yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) \
     ;
 
 ADD bundle.tar.gz /
