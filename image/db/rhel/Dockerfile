@@ -1,6 +1,6 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi7/ubi
-ARG BASE_TAG=7.7
+ARG BASE_IMAGE=ubi8/ubi
+ARG BASE_TAG=8.1
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
@@ -31,10 +31,10 @@ RUN rpm -e --nodeps \
   rpm-libs \
   rpm-python \
   subscription-manager \
-  subscription-manager-rhsm \
+  python3-subscription-manager-rhsm \
   yum \
-  yum-plugin-ovl \
-  yum-utils \
+  $(rpm -qa *hawkey*) \
+  $(rpm -qa *dnf*) \
   ;
 
 RUN localedef -f UTF-8 -i en_US en_US.UTF-8
