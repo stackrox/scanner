@@ -22,6 +22,7 @@ RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
     postgres-libs.rpm \
     postgres-server.rpm \
     postgres.rpm \
+    glibc-locale-source \
     glibc-langpack-en && \
   rm postgres-libs.rpm postgres-server.rpm postgres.rpm \
   ;
