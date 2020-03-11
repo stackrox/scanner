@@ -29,7 +29,7 @@ RUN rpm -e --nodeps \
   rpm \
   rpm-build-libs \
   rpm-libs \
-  rpm-python \
+  python3-rpm \
   subscription-manager \
   python3-subscription-manager-rhsm \
   yum \
