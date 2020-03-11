@@ -37,6 +37,7 @@ RUN rpm -e --nodeps \
   yum \
   $(rpm -qa *hawkey*) \
   $(rpm -qa *dnf*) \
+  curl \
   ;
 
 RUN localedef -f UTF-8 -i en_US en_US.UTF-8
