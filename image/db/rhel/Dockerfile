@@ -22,6 +22,7 @@ RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
     postgres-libs.rpm \
     postgres-server.rpm \
     postgres.rpm \
+    # glibc-locale-source and glibc-langpack-en added in the UBI8 upgrade because they're no longer in the base image
     glibc-locale-source \
     glibc-langpack-en && \
   rm postgres-libs.rpm postgres-server.rpm postgres.rpm \
@@ -35,8 +36,11 @@ RUN rpm -e --nodeps \
   subscription-manager \
   python3-subscription-manager-rhsm \
   yum \
+  # Addded in UBI8 upgrade, need to remove it because it depends on dnf
   $(rpm -qa *hawkey*) \
+  # Added in UBI8 upgrade, need to remove it so we don't violate our "no package manager" policy
   $(rpm -qa *dnf*) \
+  # Added in UBI8 upgrade, need to remove it so we don't violate our "no curl" policy
   curl \
   ;
 

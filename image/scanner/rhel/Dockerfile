@@ -9,6 +9,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
     yum install -y --nogpgcheck --disableplugin=subscription-manager \
       ca-certificates xz && \
+      # hawkey and dnf added in UBI8 upgrade so we don't violate our "no package manager" policy
     rpm -e subscription-manager yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) \
     ;
 
