@@ -1,6 +1,6 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi7/ubi
-ARG BASE_TAG=7.7
+ARG BASE_IMAGE=ubi8/ubi
+ARG BASE_TAG=8.1
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
@@ -21,7 +21,10 @@ RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
     systemd-sysv \
     postgres-libs.rpm \
     postgres-server.rpm \
-    postgres.rpm && \
+    postgres.rpm \
+    # glibc-locale-source and glibc-langpack-en added in the UBI8 upgrade because they're no longer in the base image
+    glibc-locale-source \
+    glibc-langpack-en && \
   rm postgres-libs.rpm postgres-server.rpm postgres.rpm \
   ;
 
@@ -29,12 +32,16 @@ RUN rpm -e --nodeps \
   rpm \
   rpm-build-libs \
   rpm-libs \
-  rpm-python \
+  python3-rpm \
   subscription-manager \
-  subscription-manager-rhsm \
+  python3-subscription-manager-rhsm \
   yum \
-  yum-plugin-ovl \
-  yum-utils \
+  # Addded in UBI8 upgrade, need to remove it because it depends on dnf
+  $(rpm -qa *hawkey*) \
+  # Added in UBI8 upgrade, need to remove it so we don't violate our "no package manager" policy
+  $(rpm -qa *dnf*) \
+  # Added in UBI8 upgrade, need to remove it so we don't violate our "no curl" policy
+  curl \
   ;
 
 RUN localedef -f UTF-8 -i en_US en_US.UTF-8

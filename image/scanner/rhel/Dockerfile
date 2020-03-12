@@ -1,6 +1,6 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi7/ubi
-ARG BASE_TAG=7.7
+ARG BASE_IMAGE=ubi8/ubi
+ARG BASE_TAG=8.1
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
@@ -9,7 +9,8 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
     yum install -y --nogpgcheck --disableplugin=subscription-manager \
       ca-certificates xz && \
-    rpm -e subscription-manager yum yum-utils yum-plugin-ovl \
+      # hawkey and dnf added in UBI8 upgrade so we don't violate our "no package manager" policy
+    rpm -e subscription-manager yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) \
     ;
 
 ADD bundle.tar.gz /
