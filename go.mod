@@ -27,7 +27,7 @@ require (
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
-	github.com/stackrox/rox v0.0.0-20200211232419-516cb8b27a42
+	github.com/stackrox/rox v0.0.0-20200323210805-c398a933445c
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de
 	golang.org/x/tools v0.0.0-20191130070609-6e064ea0cf2d
