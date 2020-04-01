@@ -38,5 +38,5 @@ curl -sS --fail \
 	-H "Authorization: token ${GITHUB_TOKEN}" \
 	"https://api.github.com/repos/stackrox/scanner/pulls/${pr_number}/requested_reviewers" \
 	-d'{
-	"team_reviewers": ["dev-license-update-approvers"]
+	"reviewers": ["viswajithiii", "connorgorman"]
 }'
