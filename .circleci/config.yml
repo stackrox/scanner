@@ -610,8 +610,98 @@ jobs:
       - provision-gke-cluster:
           cluster-id: rhel
 
+  update-dev-license-if-required:
+    <<: *defaults
+    steps:
+      - checkout
+
+      - add_ssh_keys:
+          fingerprints:
+            - "94:30:99:21:98:a6:ae:0d:25:ed:69:b2:19:9d:dc:02"
+
+      - run:
+          name: Checkout rox code, copy dev license
+          command: |
+            cd /tmp
+            git clone git@github.com:stackrox/rox.git --depth 1
+            cd -
+            cp /tmp/rox/deploy/common/dev-license.lic ./chart/dev-license.lic
+
+      - run:
+          name: Exit early if there is no git diff
+          command: |
+            if ! git diff --exit-code -- ./chart/dev-license.lic; then
+              echo "No git diff"
+              circleci step halt
+            fi
+
+      - run:
+          name: Configure git
+          command: |
+            git config user.email "roxbot@stackrox.com"
+            git config user.name "RoxBot"
+
+      - run:
+          name: Add SSH key of github.com
+          command: |
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+
+      - run:
+          name: Create temporary branch with license update commit
+          command: |
+            git add
+            git checkout -b "roxbot-tmp/update-dev-license-${CIRCLE_BUILD_NUM}"
+            git commit \
+              -m"Sync development license from rox ($(date '+%Y-%m-%d'))"
+
+      - run:
+          name: Push updated dev license to remote
+          command: |
+            commit="$(git rev-parse "roxbot-tmp/update-dev-license-${CIRCLE_BUILD_NUM}")"
+
+            git checkout master
+
+            for i in $(seq 1 3); do
+              echo "Attempting to merge into master (attempt $i of 3) ..."
+
+              git fetch && git reset --hard origin/master
+              # Note that the above `git reset --hard` requires a clean working tree. We therefore
+              # cherry-pick the license update commit instead of generating it now such that we
+              # invoke all scripts from the current branch (mostly relevant for testing purposes).
+              git cherry-pick "$commit"
+              if git push origin master:"roxbot/update-dev-license-${CIRCLE_BUILD_NUM}"; then
+                echo "Success!"
+                exit 0
+              fi
+
+              echo "Push did not succeed. Sleeping for 10 seconds, then trying again."
+              sleep 10
+            done
+
+            echo "Failed to merge into master."
+            exit 1
+
+      - run:
+          name: Create PR
+          command: |
+            git checkout "$CIRCLE_BRANCH"
+            scripts/ci/create-dev-license-update-pr.sh "roxbot/regenerate-dev-license-${CIRCLE_BUILD_NUM}"
+
+
 workflows:
   version: 2
+
+  update-dev-license-if-required-daily:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only: master
+
+    jobs:
+      - update-dev-license-if-required:
+          <<: *runOnAllTagsWithDockerIOPullCtx
 
   update-dumps-hourly:
     triggers:
