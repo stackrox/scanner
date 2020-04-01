@@ -630,7 +630,6 @@ jobs:
           name: Checkout rox code, copy dev license
           command: |
             git clone git@github.com:stackrox/rox.git --depth 1 /tmp/rox
-            cd -
             cp /tmp/rox/deploy/common/dev-license.lic "${license_file_path}"
 
       - run:
