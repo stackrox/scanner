@@ -685,7 +685,7 @@ jobs:
           name: Create PR
           command: |
             git checkout "$CIRCLE_BRANCH"
-            scripts/ci/create-dev-license-update-pr.sh "roxbot/regenerate-dev-license-${CIRCLE_BUILD_NUM}"
+            .circleci/create-dev-license-update-pr.sh "roxbot/update-dev-license-${CIRCLE_BUILD_NUM}"
 
 
 workflows:
