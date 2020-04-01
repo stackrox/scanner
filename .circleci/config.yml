@@ -619,19 +619,25 @@ jobs:
           fingerprints:
             - "94:30:99:21:98:a6:ae:0d:25:ed:69:b2:19:9d:dc:02"
 
+      -run:
+          name: Export common variables
+          command: |
+            cci-export license_file_path chart/dev-license.lic
+            cci-export temp_branch_name "roxbot-tmp/update-dev-license-${CIRCLE_BUILD_NUM}"
+            cci-export branch_name "roxbot/update-dev-license-${CIRCLE_BUILD_NUM}"
+
       - run:
           name: Checkout rox code, copy dev license
           command: |
-            cd /tmp
-            git clone git@github.com:stackrox/rox.git --depth 1
+            git clone git@github.com:stackrox/rox.git --depth 1 /tmp/rox
             cd -
-            cp /tmp/rox/deploy/common/dev-license.lic ./chart/dev-license.lic
+            cp /tmp/rox/deploy/common/dev-license.lic "${license_file_path}"
 
       - run:
-          name: Exit early if there is no git diff
+          name: Exit early if there is no diff
           command: |
-            if git diff --exit-code -- chart/dev-license.lic; then
-              echo "No git diff"
+            if git diff --exit-code -- "${license_file_path}"; then
+              echo "No git diff, exiting now..."
               circleci step halt
             fi
 
@@ -649,15 +655,15 @@ jobs:
       - run:
           name: Create temporary branch with license update commit
           command: |
-            git add
-            git checkout -b "roxbot-tmp/update-dev-license-${CIRCLE_BUILD_NUM}"
+            git add chart/dev-license.lic
+            git checkout -b "${temp_branch_name}"
             git commit \
               -m"Sync development license from rox ($(date '+%Y-%m-%d'))"
 
       - run:
           name: Push updated dev license to remote
           command: |
-            commit="$(git rev-parse "roxbot-tmp/update-dev-license-${CIRCLE_BUILD_NUM}")"
+            commit="$(git rev-parse "${temp_branch_name}")"
 
             git checkout master
 
@@ -669,7 +675,7 @@ jobs:
               # cherry-pick the license update commit instead of generating it now such that we
               # invoke all scripts from the current branch (mostly relevant for testing purposes).
               git cherry-pick "$commit"
-              if git push origin master:"roxbot/update-dev-license-${CIRCLE_BUILD_NUM}"; then
+              if git push origin master:"${branch_name}"; then
                 echo "Success!"
                 exit 0
               fi
@@ -685,7 +691,7 @@ jobs:
           name: Create PR
           command: |
             git checkout "$CIRCLE_BRANCH"
-            .circleci/create-dev-license-update-pr.sh "roxbot/update-dev-license-${CIRCLE_BUILD_NUM}"
+            .circleci/create-dev-license-update-pr.sh "${branch_name}"
 
 
 workflows:
