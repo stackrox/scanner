@@ -619,7 +619,7 @@ jobs:
           fingerprints:
             - "94:30:99:21:98:a6:ae:0d:25:ed:69:b2:19:9d:dc:02"
 
-      -run:
+      - run:
           name: Export common variables
           command: |
             cci-export license_file_path chart/dev-license.lic
