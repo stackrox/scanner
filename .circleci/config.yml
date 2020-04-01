@@ -655,7 +655,7 @@ jobs:
       - run:
           name: Create temporary branch with license update commit
           command: |
-            git add chart/dev-license.lic
+            git add "${license_file_path}"
             git checkout -b "${temp_branch_name}"
             git commit \
               -m"Sync development license from rox ($(date '+%Y-%m-%d'))"
