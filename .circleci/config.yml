@@ -761,8 +761,6 @@ workflows:
 
   build:
     jobs:
-    - update-dev-license-if-required:
-        <<: *runOnAllTagsWithDockerIOPullCtx
     - generate-genesis-dump:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - create-postgres-dump-from-genesis-dump:
