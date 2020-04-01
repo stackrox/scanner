@@ -610,8 +610,103 @@ jobs:
       - provision-gke-cluster:
           cluster-id: rhel
 
+  update-dev-license-if-required:
+    <<: *defaults
+    steps:
+      - checkout
+
+      - add_ssh_keys:
+          fingerprints:
+            - "94:30:99:21:98:a6:ae:0d:25:ed:69:b2:19:9d:dc:02"
+
+      - run:
+          name: Export common variables
+          command: |
+            cci-export license_file_path chart/dev-license.lic
+            cci-export temp_branch_name "roxbot-tmp/update-dev-license-${CIRCLE_BUILD_NUM}"
+            cci-export branch_name "roxbot/update-dev-license-${CIRCLE_BUILD_NUM}"
+
+      - run:
+          name: Checkout rox code, copy dev license
+          command: |
+            git clone git@github.com:stackrox/rox.git --depth 1 /tmp/rox
+            cp /tmp/rox/deploy/common/dev-license.lic "${license_file_path}"
+
+      - run:
+          name: Exit early if there is no diff
+          command: |
+            if git diff --exit-code -- "${license_file_path}"; then
+              echo "No git diff, exiting now..."
+              circleci step halt
+            fi
+
+      - run:
+          name: Configure git
+          command: |
+            git config user.email "roxbot@stackrox.com"
+            git config user.name "RoxBot"
+
+      - run:
+          name: Add SSH key of github.com
+          command: |
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+
+      - run:
+          name: Create temporary branch with license update commit
+          command: |
+            git add "${license_file_path}"
+            git checkout -b "${temp_branch_name}"
+            git commit \
+              -m"Sync development license from rox ($(date '+%Y-%m-%d'))"
+
+      - run:
+          name: Push updated dev license to remote
+          command: |
+            commit="$(git rev-parse "${temp_branch_name}")"
+
+            git checkout master
+
+            for i in $(seq 1 3); do
+              echo "Attempting to merge into master (attempt $i of 3) ..."
+
+              git fetch && git reset --hard origin/master
+              # Note that the above `git reset --hard` requires a clean working tree. We therefore
+              # cherry-pick the license update commit instead of generating it now such that we
+              # invoke all scripts from the current branch (mostly relevant for testing purposes).
+              git cherry-pick "$commit"
+              if git push origin master:"${branch_name}"; then
+                echo "Success!"
+                exit 0
+              fi
+
+              echo "Push did not succeed. Sleeping for 10 seconds, then trying again."
+              sleep 10
+            done
+
+            echo "Failed to merge into master."
+            exit 1
+
+      - run:
+          name: Create PR
+          command: |
+            git checkout "$CIRCLE_BRANCH"
+            .circleci/create-dev-license-update-pr.sh "${branch_name}"
+
+
 workflows:
   version: 2
+
+  update-dev-license-if-required-daily:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only: master
+
+    jobs:
+      - update-dev-license-if-required:
+          <<: *runOnAllTagsWithDockerIOPullCtx
 
   update-dumps-hourly:
     triggers:
