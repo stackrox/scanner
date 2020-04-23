@@ -28,6 +28,7 @@ chmod -R 755 "${bundle_root}"
 # would be otherwise downloaded or included via a COPY command in the
 # Dockerfile.
 
+cp -p "${INPUT_ROOT}/scripts/*" "${bundle_root}/"
 cp -p "${INPUT_ROOT}/bin/scanner" "${bundle_root}/"
 cp -p "${INPUT_ROOT}/dump/genesis_manifests.json" "${bundle_root}/"
 cp -p "${INPUT_ROOT}/dump/nvd/"*.json "${bundle_root}/${NVD_DEFINITIONS_DIR}"
