@@ -18,7 +18,7 @@ COPY ./dump/nvd/*.json "${NVD_DEFINITIONS_DIR}/"
 COPY ./dump/genesis_manifests.json /
 COPY ./scripts/* /
 
-RUN chown -R 4000:4000 /etc/ssl && save-dir-contents /etc/ssl
+RUN chown -R 4000:4000 /etc/ssl && /save-dir-contents /etc/ssl
 VOLUME /etc/ssl
 
 USER 4000:4000

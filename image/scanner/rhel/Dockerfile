@@ -21,7 +21,7 @@ RUN chown -R 4000:4000 /tmp
 
 COPY ./scripts/* /
 
-RUN chown -R 4000:4000 /etc/ssl && save-dir-contents /etc/ssl
+RUN chown -R 4000:4000 /etc/ssl && /save-dir-contents /etc/ssl
 VOLUME /etc/ssl
 
 RUN chmod +rx "/scanner"
