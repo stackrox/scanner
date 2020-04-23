@@ -23,7 +23,7 @@ RUN chown -R 4000:4000 /etc/ssl && /save-dir-contents /etc/ssl
 VOLUME /etc/ssl
 
 RUN chmod +rx "/scanner"
-ENTRYPOINT ["/scanner"]
+ENTRYPOINT ["/entrypoint.sh"]
 
 USER 4000:4000
 

@@ -23,4 +23,4 @@ VOLUME /etc/ssl
 
 USER 4000:4000
 
-ENTRYPOINT ["/scanner"]
+ENTRYPOINT ["/entrypoint.sh"]
