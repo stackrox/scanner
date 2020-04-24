@@ -19,8 +19,11 @@ ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 RUN mkdir -p "${NVD_DEFINITIONS_DIR}" && chown -R 4000:4000 "${NVD_DEFINITIONS_DIR}"
 RUN chown -R 4000:4000 /tmp
 
+RUN chown -R 4000:4000 /etc/ssl && /save-dir-contents /etc/ssl
+VOLUME /etc/ssl
+
 RUN chmod +rx "/scanner"
-ENTRYPOINT ["/scanner"]
+ENTRYPOINT ["/entrypoint.sh"]
 
 USER 4000:4000
 
