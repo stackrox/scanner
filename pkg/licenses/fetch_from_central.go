@@ -46,5 +46,6 @@ func fetchFromCentral(ctx concurrency.Waitable, formattedCentralEndpoint string,
 	if license.LicenseKey == "" {
 		return "", errors.New("Central returned status 200 but an empty license")
 	}
+	log.Infof("Resp status code: %d, license %v", resp.StatusCode, license)
 	return license.LicenseKey, nil
 }
