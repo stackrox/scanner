@@ -36,7 +36,7 @@ func fetchFromCentral(ctx concurrency.Waitable, formattedCentralEndpoint string,
 	if resp.StatusCode != http.StatusOK {
 		// Intentionally don't stick more from the response over here, want to make sure
 		// not to accidentally log license keys.
-		return "", errors.Wrapf(err, "got status code %d", resp.StatusCode)
+		return "", errors.Errorf("got status code %d", resp.StatusCode)
 	}
 	var license licenseResponse
 	err = json.NewDecoder(resp.Body).Decode(&license)
