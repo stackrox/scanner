@@ -31,7 +31,7 @@ cp -p "${INPUT_ROOT}/dump/definitions.sql.gz" "${bundle_root}/docker-entrypoint-
 cp -p "${INPUT_ROOT}/rhel/docker-entrypoint.sh" "${bundle_root}/usr/local/bin/"
 cp -p "${INPUT_ROOT}"/*.conf "${bundle_root}/etc/"
 
-postgres_url="https://download.postgresql.org/pub/repos/yum/12/redhat/rhel-8.1-x86_64"
+postgres_url="https://download.postgresql.org/pub/repos/yum/12/redhat/rhel-8.2-x86_64"
 postgres_major="12"
 postgres_minor="12.1-2PGDG.rhel8.x86_64"
 
