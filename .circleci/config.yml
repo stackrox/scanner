@@ -688,7 +688,7 @@ jobs:
       - provision-gke-cluster:
           cluster-id: rhel
 
-  update-dev-license-if-required:
+  update-license-and-signing-keys-if-required:
     <<: *defaults
     steps:
       - checkout
@@ -701,19 +701,45 @@ jobs:
           name: Export common variables
           command: |
             cci-export license_file_path chart/dev-license.lic
-            cci-export temp_branch_name "roxbot-tmp/update-dev-license-${CIRCLE_BUILD_NUM}"
-            cci-export branch_name "roxbot/update-dev-license-${CIRCLE_BUILD_NUM}"
+            cci-export temp_branch_name "roxbot-tmp/update-license-or-keys-${CIRCLE_BUILD_NUM}"
+            cci-export branch_name "roxbot/update-license-or-keys-${CIRCLE_BUILD_NUM}"
 
       - run:
           name: Checkout rox code, copy dev license
           command: |
-            git clone git@github.com:stackrox/rox.git --depth 1 /tmp/rox
+            git clone git@github.com:stackrox/rox.git /tmp/rox
             cp /tmp/rox/deploy/common/dev-license.lic "${license_file_path}"
+
+      - run:
+          name: Check if all_keys.go is different between the version of rox submoduled and HEAD
+          command: |
+            rox_dep="$(go mod graph | grep 'github.com/stackrox/scanner github.com/stackrox/rox')"
+            echo "Got rox dep: ${rox_dep}"
+            [[ -n "${rox_dep}" ]]
+            # The above is a line like
+            # github.com/stackrox/scanner github.com/stackrox/rox@v0.0.0-20200323210805-c398a933445c
+            # The following line retrieves the last SHA (the component after the last dash)
+            sha="${rox_dep##*-}"
+            echo "Extracted SHA: ${sha}"
+            [[ -n "${sha}" ]]
+            set +e
+            git --git-dir /tmp/rox/.git diff --exit-code "${sha}" -- pkg/license/publickeys/all_keys.go
+            code=$?
+            set -e
+            if [[ "${code}" -eq 1 ]]; then
+              echo "Pulling in new signing keys from rox!"
+              make deps
+              go env -w GOPRIVATE=github.com/stackrox
+              go get github.com/stackrox/rox@master
+              go mod tidy
+            else
+              [[ "${code}" -eq 0 ]]
+            fi
 
       - run:
           name: Exit early if there is no diff
           command: |
-            if git diff --exit-code -- "${license_file_path}"; then
+            if git diff --exit-code; then
               echo "No git diff, exiting now..."
               circleci step halt
             fi
@@ -730,15 +756,14 @@ jobs:
             ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
       - run:
-          name: Create temporary branch with license update commit
+          name: Create temporary branch with new commit
           command: |
-            git add "${license_file_path}"
             git checkout -b "${temp_branch_name}"
             git commit \
-              -m"Sync development license from rox ($(date '+%Y-%m-%d'))"
+              -am"Sync development license from rox ($(date '+%Y-%m-%d'))"
 
       - run:
-          name: Push updated dev license to remote
+          name: Push branch to remote
           command: |
             commit="$(git rev-parse "${temp_branch_name}")"
 
@@ -774,7 +799,7 @@ jobs:
 workflows:
   version: 2
 
-  update-dev-license-if-required-daily:
+  update-license-and-signing-keys-if-required-daily:
     triggers:
       - schedule:
           cron: "0 0 * * *"
@@ -783,7 +808,7 @@ workflows:
               only: master
 
     jobs:
-      - update-dev-license-if-required:
+      - update-license-and-signing-keys-if-required:
           <<: *runOnAllTagsWithDockerIOPullCtx
 
   update-dumps-hourly:
