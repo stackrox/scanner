@@ -47,9 +47,7 @@ func mustGetEnv(key string, t *testing.T) string {
 }
 
 func getScannerHTTPEndpoint(t *testing.T) string {
-	url, err := urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
-	require.NoError(t, err)
-	return url
+	return urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 }
 
 func connectToScanner(t *testing.T) *grpc.ClientConn {

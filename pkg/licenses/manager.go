@@ -52,10 +52,7 @@ func NewManager(ctx concurrency.Waitable, centralEndpoint string) (Manager, erro
 	if centralEndpoint == "" {
 		centralEndpoint = "https://central.stackrox"
 	}
-	centralEndpoint, err := urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
-	if err != nil {
-		return nil, errors.Wrap(err, "formatting central endpoint")
-	}
+	centralEndpoint = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 	clientConf, err := mtls.TLSClientConfigForCentral()
 	if err != nil {
 		return nil, errors.Wrap(err, "creating client")

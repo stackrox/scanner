@@ -16,7 +16,8 @@ var (
 		publickeys.Dev,
 		publickeys.DevOld,
 		publickeys.Demos,
-		publickeys.Prod,
+		publickeys.ProdV1,
+		publickeys.ProdV2,
 		publickeys.QA,
 	}
 

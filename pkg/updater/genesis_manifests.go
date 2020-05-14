@@ -37,10 +37,7 @@ func getRelevantDownloadURL(config Config, centralEndpoint string) (downloadURL 
 		if centralEndpoint == "" {
 			centralEndpoint = "https://central.stackrox"
 		}
-		centralEndpoint, err = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
-		if err != nil {
-			return "", false, errors.Wrap(err, "normalizing central endpoint")
-		}
+		centralEndpoint = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 		return fmt.Sprintf("%s/%s", centralEndpoint, apiPathInCentral), true, nil
 	}
 	genesisFile, err := os.Open(genesisManifestsLocation)
