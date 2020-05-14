@@ -10,9 +10,9 @@ require (
 	github.com/etcd-io/bbolt v1.3.3
 	github.com/facebookincubator/nvdtools v0.1.4-0.20191024132624-1cb041402875
 	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
-	github.com/golang/protobuf v1.3.2
+	github.com/golang/protobuf v1.3.5
 	github.com/gorilla/mux v1.7.3
-	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.11.4-0.20191004150533-c677e419aa5c
 	github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible
@@ -22,13 +22,14 @@ require (
 	github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/opencontainers/go-digest v1.0.0-rc1
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v0.9.2
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
-	github.com/stackrox/rox v0.0.0-20200323210805-c398a933445c
+	github.com/stackrox/rox v0.0.0-20200514201203-38f7800e2e7a
 	github.com/stretchr/testify v1.4.0
+	go.etcd.io/bbolt v1.3.4 // indirect
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de
 	golang.org/x/tools v0.0.0-20191130070609-6e064ea0cf2d
 	google.golang.org/grpc v1.24.0
