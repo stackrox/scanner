@@ -3,6 +3,7 @@
 package e2etests
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"testing"
@@ -39,6 +40,18 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password 
 		t.Fatal(spew.Sdump(env.Layer.Features))
 	}
 
+	// Filter out vulnerabilities with no metadata
+	for idx, feature := range env.Layer.Features {
+		filteredVulns := feature.Vulnerabilities[:0]
+		for _, vuln := range feature.Vulnerabilities {
+			if vuln.Metadata != nil {
+				filteredVulns = append(filteredVulns, vuln)
+			}
+		}
+		// env.Layer.Features is a []Feature so cannot just assign to feature
+		env.Layer.Features[idx].Vulnerabilities = filteredVulns
+	}
+
 	for _, feature := range expectedFeatures {
 		t.Run(fmt.Sprintf("%s/%s", feature.Name, feature.Version), func(t *testing.T) {
 			matching := getMatchingFeature(env.Layer.Features, feature, t)
@@ -46,6 +59,13 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password 
 				sort.Slice(matching.Vulnerabilities, func(i, j int) bool {
 					return matching.Vulnerabilities[i].Name < matching.Vulnerabilities[j].Name
 				})
+			}
+
+			if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
+				matchingBytes, _ := json.MarshalIndent(matching.Vulnerabilities, "", "  ")
+				featureVulnsBytes, _ := json.MarshalIndent(feature.Vulnerabilities, "", "  ")
+				fmt.Printf("Matching: %s\n", matchingBytes)
+				fmt.Printf("Feature: %s\n", featureVulnsBytes)
 			}
 			require.Equal(t, len(matching.Vulnerabilities), len(feature.Vulnerabilities))
 			for i, matchingVuln := range matching.Vulnerabilities {
