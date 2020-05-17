@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil"
 	v1 "github.com/stackrox/scanner/api/v1"
@@ -112,39 +112,27 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 	s.getClairLayer(w, r, layer)
 }
 
+func parseImagePath(path string) (string, error) {
+	image := strings.TrimPrefix(path, "/scanner/image/")
+	image = strings.TrimPrefix(image, "/clairify/image/")
+
+	// last value needs to be tag
+	tagIdx := strings.LastIndex(image, "/")
+	if tagIdx == -1 {
+		return "", errors.Errorf("invalid image format: %q", image)
+	}
+	basePath := image[:tagIdx]
+	tag := image[tagIdx+1:]
+	return fmt.Sprintf("%s:%s", basePath, tag), nil
+}
+
 // GetResultsByImage implements retrieving scan data via image name.
 func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	var remote string
-	var ok bool
-	remote, ok = vars[`remote`]
-	if !ok {
-		namespace, ok := vars[`namespace`]
-		if !ok {
-			clairErrorString(w, http.StatusBadRequest, "image remote or both namespace and repo must be provided")
-			return
-		}
-		repo, ok := vars[`repo`]
-		if !ok {
-			clairErrorString(w, http.StatusBadRequest, "image remote or both namespace and repo must be provided")
-			return
-		}
-		remote = fmt.Sprintf("%s/%s", namespace, repo)
-	}
-
-	registry, ok := vars[`registry`]
-	if !ok {
-		clairErrorString(w, http.StatusBadRequest, "image registry must be provided")
+	image, err := parseImagePath(r.URL.Path)
+	if err != nil {
+		clairErrorString(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	tag, ok := vars[`tag`]
-	if !ok {
-		clairErrorString(w, http.StatusBadRequest, "image tag must be provided")
-		return
-	}
-	image := fmt.Sprintf("%s/%s:%s", registry, remote, tag)
 	logrus.Debugf("Getting layer sha by name %s", image)
 	layer, exists, err := s.storage.GetLayerByName(image)
 	if err != nil {
@@ -203,7 +191,7 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = server.ProcessImage(s.storage, image, imageRequest.Registry, username, password, imageRequest.Insecure)
+	_, err = server.ProcessImage(s.storage, image, &imageRequest, username, password)
 	if err != nil {
 		clairErrorString(w, http.StatusInternalServerError, "error processing image %q: %v", imageRequest.Image, err)
 		return
@@ -246,10 +234,10 @@ func (s *Server) Start() error {
 
 	for _, root := range apiRoots {
 		s.handleFuncRouter(r, fmt.Sprintf("/%s/ping", root), s.Ping, http.MethodGet)
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/image", root), s.ScanImage, http.MethodPost)
 		s.handleFuncRouter(r, fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA, http.MethodGet)
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/image/{registry}/{remote}/{tag}", root), s.GetResultsByImage, http.MethodGet)
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/image/{registry}/{namespace}/{repo}/{tag}", root), s.GetResultsByImage, http.MethodGet)
+		s.handleFuncRouter(r, fmt.Sprintf("/%s/image", root), s.ScanImage, http.MethodPost)
+
+		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.wrapHandlerFuncWithLicenseCheck(s.GetResultsByImage)).Methods(http.MethodGet)
 	}
 
 	var tlsConfig *tls.Config

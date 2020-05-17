@@ -35,13 +35,15 @@ type Registry interface {
 
 	GetUsername() string
 	GetPassword() string
+	UnsupportedHEADCall() bool
 }
 
 // DockerRegistryWrapper allows the docker registry client to be interfaced for testing.
 type DockerRegistryWrapper struct {
 	*registry.Registry
-	Username string
-	Password string
+	Username            string
+	Password            string
+	UnsupportedHeadCall bool
 }
 
 // GetUsername returns the username for the registry
@@ -64,32 +66,39 @@ func (d *DockerRegistryWrapper) GetURL() string {
 	return d.URL
 }
 
+// UnsupportedHEADCall returns whether or not we can use the HEAD method to fetch the manifest digests
+func (d *DockerRegistryWrapper) UnsupportedHEADCall() bool {
+	return d.UnsupportedHeadCall
+}
+
 // RegistryClientCreator returns an implementation of Registry.
-type RegistryClientCreator func(url, username, password string) (Registry, error)
+type RegistryClientCreator func(url, username, password string, unsupportedHeadCall bool) (Registry, error)
 
 // DockerRegistryCreator allows for registries to be interfaced.
-func DockerRegistryCreator(url, username, password string) (Registry, error) {
+func DockerRegistryCreator(url, username, password string, unsupportedHeadCall bool) (Registry, error) {
 	reg, err := registry.New(url, username, password)
 	if err != nil {
 		return nil, err
 	}
 	return &DockerRegistryWrapper{
-		Username: username,
-		Password: password,
+		Username:            username,
+		Password:            password,
+		UnsupportedHeadCall: unsupportedHeadCall,
 
 		Registry: reg,
 	}, nil
 }
 
 // InsecureDockerRegistryCreator allows for registries to be interfaced.
-func InsecureDockerRegistryCreator(url, username, password string) (Registry, error) {
+func InsecureDockerRegistryCreator(url, username, password string, unsupportedHeadCall bool) (Registry, error) {
 	reg, err := registry.NewInsecure(url, username, password)
 	if err != nil {
 		return nil, err
 	}
 	return &DockerRegistryWrapper{
-		Username: username,
-		Password: password,
+		Username:            username,
+		Password:            password,
+		UnsupportedHeadCall: unsupportedHeadCall,
 
 		Registry: reg,
 	}, nil
@@ -97,9 +106,10 @@ func InsecureDockerRegistryCreator(url, username, password string) (Registry, er
 
 // ImageRequest is sent to add an image to Clair.
 type ImageRequest struct {
-	Image    string `json:"image"`
-	Registry string `json:"registry"`
-	Insecure bool   `json:"insecure"`
+	Image               string `json:"image"`
+	Registry            string `json:"registry"`
+	Insecure            bool   `json:"insecure"`
+	UnsupportedHeadCall bool   `json:"unsupportedHeadCall"`
 }
 
 // Image contains image naming metadata.

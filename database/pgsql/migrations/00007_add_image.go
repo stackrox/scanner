@@ -14,8 +14,9 @@ func init() {
 
 			`CREATE TABLE IF NOT EXISTS LanguageLayer (
 		layer_id int NOT NULL,
-        layer_name VARCHAR(128) NOT NULL UNIQUE,
-	    component_data BYTEA NOT NULL);`,
+        layer_name VARCHAR(128) NOT NULL,
+        component_data BYTEA NOT NULL,
+        PRIMARY KEY( layer_id, layer_name ));`,
 		}),
 	})
 }

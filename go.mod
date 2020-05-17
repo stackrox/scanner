@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/NYTimes/gziphandler v1.1.1
+	github.com/containers/image/v5 v5.1.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker-credential-helpers v0.6.3

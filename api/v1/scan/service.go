@@ -75,7 +75,12 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 
 	reg := req.GetRegistry()
 
-	digest, err := server.ProcessImage(s.db, image, reg.GetUrl(), reg.GetUsername(), reg.GetPassword(), reg.GetInsecure())
+	digest, err := server.ProcessImage(s.db, image, &types.ImageRequest{
+		Image:               image.String(),
+		Registry:            reg.GetUrl(),
+		Insecure:            reg.GetInsecure(),
+		UnsupportedHeadCall: reg.GetUnsupportedHeadCall(),
+	}, reg.GetUsername(), reg.GetPassword())
 	if err != nil {
 		return nil, err
 	}

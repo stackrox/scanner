@@ -32,10 +32,11 @@ message Vulnerability {
 message ScanImageRequest {
     string image = 1;
     message RegistryData {
-        string url      = 1;
-        string username = 2;
-        string password = 3;
-        bool   insecure = 4;
+        string url                   = 1;
+        string username              = 2;
+        string password              = 3;
+        bool   insecure              = 4;
+        bool   unsupported_head_call = 5;
     }
     RegistryData registry = 2;
 }
