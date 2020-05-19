@@ -393,7 +393,8 @@ func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer, existingLayer *
 	if len(delIDs) > 0 {
 		_, err = tx.Exec(insertLayerDiffFeatureVersion, layer.ID, "del", buildInputArray(delIDs))
 		if err != nil {
-			return handleError("insertLayerDiffFeatureVersion.Del", err)
+			// TODO: Figure out why this error is hit. Priceline is hitting it but we cannot reproduce it.
+			log.WithError(err).Warnf("Failed to insert layer diff feature version.Del. layerID: %d, addIDs: %+v; delIDs: %+v, add: %+v, del: %+v", layer.ID, addIDs, delIDs, add, del)
 		}
 	}
 
