@@ -16,6 +16,7 @@ package pgsql
 
 import (
 	"database/sql"
+	"strconv"
 	"strings"
 	"time"
 
@@ -393,8 +394,12 @@ func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer, existingLayer *
 	if len(delIDs) > 0 {
 		_, err = tx.Exec(insertLayerDiffFeatureVersion, layer.ID, "del", buildInputArray(delIDs))
 		if err != nil {
+			parentID := "no_parent"
+			if layer.Parent != nil {
+				parentID = strconv.Itoa(layer.Parent.ID)
+			}
 			// TODO: Figure out why this error is hit. Priceline is hitting it but we cannot reproduce it.
-			log.WithError(err).Warnf("Failed to insert layer diff feature version.Del. layerID: %d, addIDs: %+v; delIDs: %+v, add: %+v, del: %+v", layer.ID, addIDs, delIDs, add, del)
+			log.WithError(err).Warnf("Failed to insert layer diff feature version.Del. layerID: %d, parent layer ID: %s, addIDs: %+v; delIDs: %+v, add: %+v, del: %+v", layer.ID, parentID, addIDs, delIDs, add, del)
 		}
 	}
 
