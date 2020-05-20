@@ -240,6 +240,32 @@ func TestImageSanity(t *testing.T) {
 
 							FixedBy: "1.0.9.8.5",
 						},
+						{
+							Name:          "CVE-2020-3810",
+							NamespaceName: "debian:8",
+							Description:   "Missing input validation in the ar/tar implementations of APT before version 2.1.2 could result in denial of service when processing specially crafted deb files.",
+							Link:          "https://security-tracker.debian.org/tracker/CVE-2020-3810",
+							Severity:      "Medium",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         2.9,
+										"Score":               4.3,
+										"Vectors":             "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         3.6,
+										"Score":               5.5,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+									},
+									"LastModifiedDateTime": "2020-05-18T16:36Z",
+									"PublishedDateTime":    "2020-05-15T14:15Z",
+								},
+							},
+							FixedBy: "1.0.9.8.6",
+						},
 					},
 					AddedBy: "sha256:9f0706ba7422412cd468804fee456786f88bed94bf9aea6dde2a47f770d19d27",
 				},
