@@ -48,9 +48,18 @@ const (
 
 	ovalURI        = "https://www.redhat.com/security/data/oval/"
 	allRHSAsXMLBZ2 = ovalURI + "com.redhat.rhsa-all.xml.bz2"
+
+	bulkOVALURI = ovalURI + "v2/"
 )
 
 var (
+	bulkRHSAXMLBZ2URLs = []string{
+		allRHSAsXMLBZ2,
+		bulkOVALURI + "RHEL6/rhel-6.oval.xml.bz2",
+		bulkOVALURI + "RHEL7/rhel-7-including-unpatched.oval.xml.bz2",
+		bulkOVALURI + "RHEL8/rhel-8-including-unpatched.oval.xml.bz2",
+	}
+
 	ignoredCriterions = []string{
 		" is signed with Red Hat ",
 		" Client is installed",
@@ -58,6 +67,7 @@ var (
 		" ComputeNode is installed",
 	}
 
+	cveIDRegexp    = regexp.MustCompile(`^oval:com\.redhat\.cve:def:(\d+)$`)
 	rhsaIDRegexp   = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
 	rhsaFileRegexp = regexp.MustCompile(`com.redhat.rhsa-(\d+).xml`)
 )
@@ -154,35 +164,48 @@ func init() {
 	vulnsrc.RegisterUpdater("rhel", &updater{})
 }
 
-func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
+func parseBzip(reader io.ReadCloser, coveredIDs set.IntSet) (resp []database.Vulnerability, err error) {
+	defer utils.IgnoreError(reader.Close)
+
+	decompressingReader := bzip2.NewReader(reader)
+	return parseRHSA(decompressingReader, coveredIDs)
+}
+
+func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
 	log.WithField("package", "RHEL").Info("Start fetching vulnerabilities")
 
-	log.Info("RHEL: fetching giant update file")
+	log.Info("RHEL: fetching bulk OVAL URIs")
 	// RedHat has one giant file with almost all the RHSAs, except some which they don't keep in this for some reason.
 	// We fetch this file first, since it's just one HTTP call.
 	// We then iterate over the list of other files, and fetch all the RHSAs that weren't included in this one.
-	allRHSAsResp, err := getWithRetriesAndBackoff(allRHSAsXMLBZ2)
-	if err != nil {
-		log.WithError(err).Error("could not download RHEL's giant update file")
-		return resp, commonerr.ErrCouldNotDownload
-	}
-	defer utils.IgnoreError(allRHSAsResp.Body.Close)
 
-	decompressingReader := bzip2.NewReader(allRHSAsResp.Body)
-	vs, coveredIDs, err := parseRHSA(decompressingReader)
-	if err != nil {
-		return vulnsrc.UpdateResponse{}, errors.Wrap(err, "parsing RHSA bulk response")
-	}
-	resp.Vulnerabilities = append(resp.Vulnerabilities, vs...)
-	log.Infof("RHEL: done fetching giant update file. Got %d vulns (%d RHSAs)", len(vs), coveredIDs.Cardinality())
+	var finalResp vulnsrc.UpdateResponse
+	coveredIDs := set.NewIntSet()
+	for _, url := range bulkRHSAXMLBZ2URLs {
+		rhsaResp, err := getWithRetriesAndBackoff(url)
+		if err != nil {
+			log.WithError(err).Errorf("could not download RHEL's OVAL file from %s", url)
+			return finalResp, commonerr.ErrCouldNotDownload
+		}
+		previouslyCovered := len(coveredIDs)
+		vulns, err := parseBzip(rhsaResp.Body, coveredIDs)
+		if err != nil {
+			log.WithError(err).Errorf("could not prase RHEL's OVAL file from %s", url)
+			return finalResp, commonerr.ErrCouldNotParse
+		}
+		log.Infof("RHEL: done fetching OVAL file %s. Got %d vulns (%d RHSAs)", url, len(vulns), coveredIDs.Cardinality()-previouslyCovered)
 
-	log.Info("RHEL: Fetching remaining IDs which weren't in the giant update file")
+		finalResp.Vulnerabilities = append(finalResp.Vulnerabilities, vulns...)
+	}
+
+	log.Info("RHEL: Fetching remaining IDs which weren't in the OVAL files")
 	ovalDirectoryResp, err := getWithRetriesAndBackoff(ovalURI)
 	if err != nil {
 		log.WithError(err).Error("could not fetch RHEL's update list")
-		return resp, commonerr.ErrCouldNotDownload
+		return finalResp, commonerr.ErrCouldNotDownload
 	}
 	defer utils.IgnoreError(ovalDirectoryResp.Body.Close)
+
 	var remainingRHSAURLs []string
 	scanner := bufio.NewScanner(ovalDirectoryResp.Body)
 	for scanner.Scan() {
@@ -194,7 +217,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		}
 		rhsaNo, err := strconv.Atoi(regexMatch[1])
 		if err != nil {
-			return resp, errors.Wrapf(err, "invalid RHSA file name: %s. Bad regex?", regexMatch[0])
+			return finalResp, errors.Wrapf(err, "invalid RHSA file name: %s. Bad regex?", regexMatch[0])
 		}
 		if rhsaNo > firstRHEL5RHSA && !coveredIDs.Contains(rhsaNo) {
 			remainingRHSAURLs = append(remainingRHSAURLs, regexMatch[0])
@@ -207,25 +230,24 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		r, err := getWithRetriesAndBackoff(ovalURI + rhsaURL)
 		if err != nil {
 			log.WithError(err).Error("could not download RHEL's update list")
-			return resp, commonerr.ErrCouldNotDownload
+			return finalResp, commonerr.ErrCouldNotDownload
 		}
-		currentVulns, _, err := parseRHSA(r.Body)
+		currentVulns, err := parseRHSA(r.Body, coveredIDs)
 		_ = r.Body.Close()
 		if err != nil {
-			return resp, err
+			return finalResp, err
 		}
-		resp.Vulnerabilities = append(resp.Vulnerabilities, currentVulns...)
+		finalResp.Vulnerabilities = append(finalResp.Vulnerabilities, currentVulns...)
 		if (i+1)%printEvery == 0 {
 			log.Infof("Finished collecting %d/%d additional RHSAs", i+1, len(remainingRHSAURLs))
 		}
 	}
-
-	return resp, nil
+	return finalResp, nil
 }
 
 func (u *updater) Clean() {}
 
-func parseRHSA(ovalReader io.Reader) (vulnerabilities []database.Vulnerability, parsedRHSAIDs set.IntSet, err error) {
+func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) (vulnerabilities []database.Vulnerability, err error) {
 	// Decode the XML.
 	var ov oval
 	err = xml.NewDecoder(ovalReader).Decode(&ov)
@@ -235,28 +257,50 @@ func parseRHSA(ovalReader io.Reader) (vulnerabilities []database.Vulnerability, 
 		return
 	}
 
-	parsedRHSAIDs = set.NewIntSet()
-
 	// Iterate over the definitions and collect any vulnerabilities that affect
 	// at least one package.
 	for _, definition := range ov.Definitions {
+		cveRegexMatch := cveIDRegexp.FindStringSubmatch(definition.ID)
+		if len(cveRegexMatch) >= 2 && len(definition.References) > 0 {
+			pkgs := toFeatureVersions(definition.Criteria)
+			if len(pkgs) == 0 {
+				continue
+			}
+
+			ref := definition.References[0]
+			cveVuln := database.Vulnerability{
+				Name:        ref.ID,
+				Link:        ref.URI,
+				Severity:    database.UnknownSeverity,
+				Description: description(definition),
+			}
+			cveVuln.FixedIn = append(cveVuln.FixedIn, pkgs...)
+			vulnerabilities = append(vulnerabilities, cveVuln)
+			continue
+		}
+
 		regexMatch := rhsaIDRegexp.FindStringSubmatch(definition.ID)
 		// Not an RHSA, some other kind of RHEL ID
 		if len(regexMatch) < 2 {
 			// Make sure we don't miss anything.
 			if !(strings.HasPrefix(definition.ID, "oval:com.redhat.rhba:def") || strings.HasPrefix(definition.ID, "oval:com.redhat.rhea:def")) {
-				return nil, nil, errors.Wrapf(err, "invalid ID: %s", definition.ID)
+				return nil, errors.Wrapf(err, "invalid ID: %s", definition.ID)
 			}
 			continue
 		}
 		rhsaNo, err := strconv.Atoi(regexMatch[1])
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "invalid RHSA id format: %s", definition.ID)
+			return nil, errors.Wrapf(err, "invalid RHSA id format: %s", definition.ID)
 		}
 		if rhsaNo < firstRHEL5RHSA {
 			continue
 		}
-		parsedRHSAIDs.Add(rhsaNo)
+		// If we have already parsed this RHSA, then don't parse it again
+		// This can happen because we parse the giant file of RHSAs and then individual files
+		// for each Release (e.g. RHEL6, RHEL7, RHEL8)
+		if !parsedRHSAIDs.Add(rhsaNo) {
+			continue
+		}
 		pkgs := toFeatureVersions(definition.Criteria)
 		if len(pkgs) > 0 {
 			rhsaVuln := database.Vulnerability{
@@ -281,7 +325,6 @@ func parseRHSA(ovalReader io.Reader) (vulnerabilities []database.Vulnerability, 
 					Namespace: rhsaVuln.Namespace,
 					Link:      c.Href,
 					FixedIn:   rhsaVuln.FixedIn,
-					FixedBy:   rhsaVuln.FixedBy,
 					Severity:  database.UnknownSeverity,
 				})
 			}
@@ -374,14 +417,20 @@ func toFeatureVersions(criteria criteria) []database.FeatureVersion {
 			osVersion      int
 			err            error
 		)
+		featureVersion.Version = versionfmt.MaxVersion
 
 		// Attempt to parse package data from trees of criterions.
 		for _, c := range criterions {
 			if strings.Contains(c.Comment, " is installed") {
-				const prefixLen = len("Red Hat Enterprise Linux ")
-				osVersion, err = strconv.Atoi(strings.TrimSpace(c.Comment[prefixLen : prefixLen+strings.Index(c.Comment[prefixLen:], " ")]))
-				if err != nil {
-					log.WithField("criterion comment", c.Comment).Warning("could not parse Red Hat release version from criterion comment")
+				if strings.HasPrefix(c.Comment, "Red Hat Enterprise Linux ") {
+					const prefixLen = len("Red Hat Enterprise Linux ")
+					osVersion, err = strconv.Atoi(strings.TrimSpace(c.Comment[prefixLen : prefixLen+strings.Index(c.Comment[prefixLen:], " ")]))
+					if err != nil {
+						log.WithField("criterion comment", c.Comment).Warning("could not parse Red Hat release version from criterion comment")
+					}
+				} else {
+					feature := strings.TrimSuffix(c.Comment, " is installed")
+					featureVersion.Feature.Name = feature
 				}
 			} else if strings.Contains(c.Comment, " is earlier than ") {
 				const prefixLen = len(" is earlier than ")
@@ -404,7 +453,7 @@ func toFeatureVersions(criteria criteria) []database.FeatureVersion {
 			continue
 		}
 
-		if featureVersion.Feature.Namespace.Name != "" && featureVersion.Feature.Name != "" && featureVersion.Version != "" {
+		if featureVersion.Feature.Namespace.Name != "" && featureVersion.Feature.Name != "" {
 			featureVersionParameters[featureVersion.Feature.Namespace.Name+":"+featureVersion.Feature.Name] = featureVersion
 		} else {
 			log.WithField("criterions", fmt.Sprintf("%v", criterions)).Warning("could not determine a valid package from criterions")
