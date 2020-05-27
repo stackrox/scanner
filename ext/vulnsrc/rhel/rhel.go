@@ -431,6 +431,7 @@ func toFeatureVersions(criteria criteria) []database.FeatureVersion {
 				} else {
 					feature := strings.TrimSuffix(c.Comment, " is installed")
 					featureVersion.Feature.Name = feature
+					featureVersion.Feature.Namespace.VersionFormat = rpm.ParserName
 				}
 			} else if strings.Contains(c.Comment, " is earlier than ") {
 				const prefixLen = len(" is earlier than ")
