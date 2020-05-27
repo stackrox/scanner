@@ -220,6 +220,7 @@ commands:
     steps:
       - checkout
       - setup_remote_docker
+      - setup-gcp
       - attach_workspace:
           at: /tmp
 
@@ -229,8 +230,8 @@ commands:
             .circleci/pr_has_label.sh "generate-dumps-on-pr"
             if [[ $? -eq 1 ]]; then
               echo "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
-              # gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
-              # gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
+              gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
+              gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
             else
               cp /tmp/postgres/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
               zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/nvd-definitions.zip
@@ -474,18 +475,19 @@ jobs:
             - postgres
 
       - check-on-master-or-tag
-
+      - setup-gcp
       - run:
           name: Upload PG dump to Google Storage
           command: |
             echo "On master or tag, uploading pg dump result to GCS"
-            # gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
+            gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
 
   upload-nvd-dump-for-embedding-into-image:
     <<: *defaults
     steps:
       - checkout
       - check-on-master-or-tag
+      - setup-gcp
       - attach_workspace:
           at: /tmp
 
@@ -497,13 +499,14 @@ jobs:
       - run:
           name: Upload to Google Storage
           command: |
-            # gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+            gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
 
   create-diff-dumps:
     <<: *defaults
     steps:
       - checkout
       - check-on-master-or-tag
+      - setup-gcp
       - attach_workspace:
           at: /tmp
 
@@ -515,7 +518,6 @@ jobs:
       - run:
           name: Create diff for each manifest
           command: |
-            exit 1
             mkdir -p /tmp/diff-dumps
             while IFS=$'\t' read -r dumploc timestamp; do
               dump_file_name="${dumploc##*/}"
@@ -538,14 +540,14 @@ jobs:
     steps:
       - checkout
       - check-on-master-or-tag
-
+      - setup-gcp:
+          service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
       - attach_workspace:
           at: /tmp
 
       - run:
           name: Upload each diff dump to the prod bucket
           command: |
-            exit 1
             mkdir -p /tmp/diff-dumps
             while IFS=$'\t' read -r dumploc diffloc; do
               dump_file_name="${dumploc##*/}"
@@ -553,13 +555,12 @@ jobs:
               expected_zip_file_loc="/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
               [[ -f "${expected_zip_file_loc}" ]]
               [[ -n "${diffloc}" ]]
-              #gsutil cp "${expected_zip_file_loc}" "${diffloc}"
+              gsutil cp "${expected_zip_file_loc}" "${diffloc}"
             done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .diffLocation] | @tsv' < image/scanner/dump/genesis_manifests.json)
 
       - run:
           name: Generate offline dump
           command: |
-            exit 1
             mkdir -p /tmp/offline-dump
 
             # Fetch the scanner dump which is marked as the base for offline dumps.
@@ -569,17 +570,17 @@ jobs:
             echo "Got offline dumps list: ${offline_dumps}"
             [[ "$(echo "${offline_dumps}" | jq 'length')" -eq 1 ]]
             offline_diff_location="$(echo "${offline_dumps}" | jq -r '.[0] | .diffLocation')"
-            #gsutil cp -r "${offline_diff_location}" /tmp/offline-dump/scanner-defs.zip
+            gsutil cp -r "${offline_diff_location}" /tmp/offline-dump/scanner-defs.zip
 
             # Prepare k8s and istio dump
             mkdir -p /tmp/scratch
-            #gsutil cp -r gs://definitions.stackrox.io/cve/* /tmp/scratch/
+            gsutil cp -r gs://definitions.stackrox.io/cve/* /tmp/scratch/
             cd /tmp/scratch
             zip -r /tmp/offline-dump/k8s-istio.zip *
 
             cd /tmp/offline-dump
             zip scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
-            #gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
+            gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 
   build:
     <<: *defaults
@@ -600,15 +601,15 @@ jobs:
                 circleci step halt
                 exit 0
             fi
+      - setup-gcp
       - run:
           name: Upload rhel bundles
           command: |
-            exit 1
             gcloud auth list
             tag="$(./get-tag)"
             GCP_DSOP_BUCKET="gs://dsop-artifacts.stackrox.io"
-            #gsutil cp "image/scanner/rhel/bundle.tar.gz" "${GCP_DSOP_BUCKET}/scanner-rhel/${tag}/"
-            #gsutil cp "image/db/rhel/bundle.tar.gz"      "${GCP_DSOP_BUCKET}/scanner-db-rhel/${tag}/"
+            gsutil cp "image/scanner/rhel/bundle.tar.gz" "${GCP_DSOP_BUCKET}/scanner-rhel/${tag}/"
+            gsutil cp "image/db/rhel/bundle.tar.gz"      "${GCP_DSOP_BUCKET}/scanner-db-rhel/${tag}/"
 
   provision-cluster:
     <<: *defaults
