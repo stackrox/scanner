@@ -22,6 +22,10 @@ var (
 	BoltPath = filepath.Join(wellknowndirnames.WriteableDir, "temp.db")
 )
 
+func newWithDB(db *bbolt.DB) Cache {
+	return &cacheImpl{DB: db}
+}
+
 func New() (Cache, error) {
 	opts := bbolt.Options{
 		NoFreelistSync: true,
@@ -32,9 +36,7 @@ func New() (Cache, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &cacheImpl{
-		DB: db,
-	}, nil
+	return newWithDB(db), nil
 }
 
 type cacheImpl struct {
@@ -52,13 +54,13 @@ func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSO
 	productAlreadyWritten := set.NewStringSet()
 	return c.Update(func(tx *bbolt.Tx) error {
 		for _, a := range vuln.Config() {
+			if !productAlreadyWritten.Add(a.Product) {
+				continue
+			}
 			product := []byte(a.Product)
 			bucket, err := tx.CreateBucketIfNotExists(product)
 			if err != nil {
 				return err
-			}
-			if !productAlreadyWritten.Add(a.Product) {
-				continue
 			}
 			if err := bucket.Put([]byte(cve.CVE.CVEDataMeta.ID), bytes); err != nil {
 				return err
