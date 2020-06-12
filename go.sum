@@ -497,8 +497,8 @@ github.com/stackrox/nvdtools v0.0.0-20191120225537-fe4e9a7e467f h1:lENqZ9C0tnHzR
 github.com/stackrox/nvdtools v0.0.0-20191120225537-fe4e9a7e467f/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
 github.com/stackrox/rox v0.0.0-20191128130813-ae51554fc242 h1:eJ83LNVVCvQWmCoRlanA34p20QjQkPBr2j4npz3UurA=
 github.com/stackrox/rox v0.0.0-20191128130813-ae51554fc242/go.mod h1:Qshd7p6Hw8xBvPlJM3pKWh81R2s3qhbAdYIvA6pPStw=
-github.com/stackrox/rox v0.0.0-20200514201203-38f7800e2e7a h1:gX6Eih89KK+S4VH0eJT9lXZbmq2AobxBSr4aNkycBhQ=
-github.com/stackrox/rox v0.0.0-20200514201203-38f7800e2e7a/go.mod h1:aiM6cgf5Yqwj4RFbtR1fuUF9LQ5VbLRAjBVq02n1abo=
+github.com/stackrox/rox v0.0.0-20200611210702-487e18ab27d9 h1:/sS418Imi992RPimbmmpGLRjg3mbtJsk7cCb69aZQ18=
+github.com/stackrox/rox v0.0.0-20200611210702-487e18ab27d9/go.mod h1:U9Lsvyl725kP3v7TWt048ULF429c8K6lE6MnO72sMF4=
 github.com/stackrox/scanner v0.0.0-20191202203519-a2a15f33f41a/go.mod h1:2GKn2VH/P+4lsFJG8NlpTdgrU+nelhk8Ogtdx6XjaI0=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2/go.mod h1:mjqs7N0Q6m5HpR7QfXVBZXZWSqTjQLeTujjA/xUp2uw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
