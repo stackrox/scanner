@@ -1,7 +1,6 @@
 package nvdtoolscache
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -104,7 +103,6 @@ func trimCVE(cve *schema.NVDCVEFeedJSON10DefCVEItem) {
 }
 
 func (c *cacheImpl) handleJSONFile(path string) (int, error) {
-	fmt.Println("Handling", path)
 	f, err := os.Open(path)
 	if err != nil {
 		return 0, errors.Wrapf(err, "opening file at %q", path)

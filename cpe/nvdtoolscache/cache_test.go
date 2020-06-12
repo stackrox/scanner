@@ -6,8 +6,8 @@ import (
 
 	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/stackrox/rox/pkg/bolthelper"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gotest.tools/assert"
 )
 
 func mustGetVuln(t *testing.T, cache Cache) cvefeed.Vuln {
@@ -29,11 +29,11 @@ func TestCache(t *testing.T) {
 	require.NoError(t, cache.LoadFromDirectory("./testdata/before"))
 
 	vuln := mustGetVuln(t, cache)
-	assert.Equal(t, vuln.ID(), "CVE-2020-7608")
-	assert.Equal(t, vuln.CVSSv3BaseScore(), 6.5)
+	assert.Equal(t, "CVE-2020-7608", vuln.ID())
+	assert.Equal(t, 6.5, vuln.CVSSv3BaseScore())
 
 	require.NoError(t, cache.LoadFromDirectory("./testdata/after"))
 	vuln = mustGetVuln(t, cache)
 	assert.Equal(t, vuln.ID(), "CVE-2020-7608")
-	assert.Equal(t, vuln.CVSSv3BaseScore(), 5.3)
+	assert.Equal(t, 5.3, vuln.CVSSv3BaseScore())
 }
