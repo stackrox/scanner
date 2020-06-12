@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil"
+	clair "github.com/stackrox/scanner"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/types"
@@ -205,6 +206,11 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 
 	_, err = server.ProcessImage(s.storage, image, imageRequest.Registry, username, password, imageRequest.Insecure)
 	if err != nil {
+		// Add a distinct error for unsupported operating systems
+		if err == clair.ErrUnsupported {
+			clairErrorString(w, http.StatusUnsupportedMediaType, "error processing image %q: %v", imageRequest.Image, err)
+			return
+		}
 		clairErrorString(w, http.StatusInternalServerError, "error processing image %q: %v", imageRequest.Image, err)
 		return
 	}

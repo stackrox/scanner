@@ -70,9 +70,13 @@ func (c *Clairify) sendRequest(request *http.Request, timeout time.Duration) ([]
 		return nil, err
 	}
 	defer response.Body.Close()
-	if response.StatusCode == http.StatusNotFound {
+	switch response.StatusCode {
+	case http.StatusNotFound:
 		return nil, ErrorScanNotFound
+	case http.StatusUnsupportedMediaType:
+		return nil, ErrorUnsupportedOS
 	}
+
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
