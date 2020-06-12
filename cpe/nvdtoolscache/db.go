@@ -49,12 +49,16 @@ func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSO
 	if err != nil {
 		return err
 	}
+	productAlreadyWritten := set.NewStringSet()
 	return c.Update(func(tx *bbolt.Tx) error {
 		for _, a := range vuln.Config() {
 			product := []byte(a.Product)
 			bucket, err := tx.CreateBucketIfNotExists(product)
 			if err != nil {
 				return err
+			}
+			if !productAlreadyWritten.Add(a.Product) {
+				continue
 			}
 			if err := bucket.Put([]byte(cve.CVE.CVEDataMeta.ID), bytes); err != nil {
 				return err
