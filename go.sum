@@ -510,7 +510,6 @@ github.com/stackrox/rox v0.0.0-20191128130813-ae51554fc242 h1:eJ83LNVVCvQWmCoRla
 github.com/stackrox/rox v0.0.0-20191128130813-ae51554fc242/go.mod h1:Qshd7p6Hw8xBvPlJM3pKWh81R2s3qhbAdYIvA6pPStw=
 github.com/stackrox/rox v0.0.0-20200611210702-487e18ab27d9 h1:/sS418Imi992RPimbmmpGLRjg3mbtJsk7cCb69aZQ18=
 github.com/stackrox/rox v0.0.0-20200611210702-487e18ab27d9/go.mod h1:U9Lsvyl725kP3v7TWt048ULF429c8K6lE6MnO72sMF4=
-github.com/stackrox/rox v0.0.0-20200612201145-9e41f125643c h1:SCe9XqRwAaOrkFy5FGj4FVY8MisbhXypJHQAuLKuR24=
 github.com/stackrox/scanner v0.0.0-20191202203519-a2a15f33f41a/go.mod h1:2GKn2VH/P+4lsFJG8NlpTdgrU+nelhk8Ogtdx6XjaI0=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 h1:JNEGSiWg6D3lcBCMCBqN3ELniXujt+0QNHLhNnO0w3s=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2/go.mod h1:mjqs7N0Q6m5HpR7QfXVBZXZWSqTjQLeTujjA/xUp2uw=

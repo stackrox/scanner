@@ -34,7 +34,6 @@ require (
 	golang.org/x/tools v0.0.0-20191130070609-6e064ea0cf2d
 	google.golang.org/grpc v1.24.0
 	gopkg.in/yaml.v2 v2.2.4
-	gotest.tools v2.2.0+incompatible
 	honnef.co/go/tools v0.0.1-2019.2.3
 )
 
