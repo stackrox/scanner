@@ -56,9 +56,6 @@ func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSO
 			if err != nil {
 				return err
 			}
-			if bucket.Get([]byte(cve.CVE.CVEDataMeta.ID)) != nil {
-				continue
-			}
 			if err := bucket.Put([]byte(cve.CVE.CVEDataMeta.ID), bytes); err != nil {
 				return err
 			}
