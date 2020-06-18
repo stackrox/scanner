@@ -147,14 +147,14 @@ func renew(sig *concurrency.Signal, db database.Datastore, interval time.Duratio
 }
 
 func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) error {
-	shouldUpdate, err := determineWhetherToUpdate(db, manifest)
-	if err != nil {
-		return errors.Wrap(err, "determining whether to update")
-	}
-	if !shouldUpdate {
-		log.Info("DB already contains all the vulns in the dump. Nothing to do here!")
-		return nil
-	}
+	//shouldUpdate, err := determineWhetherToUpdate(db, manifest)
+	//if err != nil {
+	//	return errors.Wrap(err, "determining whether to update")
+	//}
+	//if !shouldUpdate {
+	//	log.Info("DB already contains all the vulns in the dump. Nothing to do here!")
+	//	return nil
+	//}
 	log.Info("Running the update.")
 
 	gotLock, expiration := db.Lock(updateLockName, instanceName, updateInterval, false)
