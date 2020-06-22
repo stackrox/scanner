@@ -19,7 +19,7 @@ data:
 
           # Number of elements kept in the cache
           # Values unlikely to change (e.g. namespaces) are cached in order to save prevent needless roundtrips to the database.
-          cachesize: 0
+          cachesize: 16384
 
       api:
         httpsPort: 8080
