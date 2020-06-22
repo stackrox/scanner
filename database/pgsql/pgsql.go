@@ -198,12 +198,6 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		}
 	}
 
-	// Initialize cache.
-	// TODO(Quentin-M): Benchmark with a simple LRU Cache.
-	if pg.config.CacheSize > 0 {
-		pg.cache, _ = lru.New(pg.config.CacheSize)
-	}
-
 	return &pg, nil
 }
 
