@@ -25,7 +25,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"strings"
-	"syscall"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -45,6 +44,7 @@ import (
 	"github.com/stackrox/scanner/pkg/stopper"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
+	"golang.org/x/sys/unix"
 
 	// Register database driver.
 	_ "github.com/stackrox/scanner/database/pgsql"
@@ -155,7 +155,7 @@ func Boot(config *Config) {
 	go u.RunForever()
 
 	// Wait for interruption and shutdown gracefully.
-	waitForSignals(syscall.SIGINT, syscall.SIGTERM)
+	waitForSignals(os.Interrupt, unix.SIGTERM)
 	log.Info("Received interruption, gracefully stopping ...")
 	serv.Close()
 	st.Stop()
