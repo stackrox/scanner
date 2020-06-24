@@ -61,6 +61,11 @@ func TestParseImagePath(t *testing.T) {
 			expectError: false,
 		},
 		{
+			path:        "/scanner/image/docker.pkg.github.com/stackrox/rox/ubuntu/14.04/",
+			image:       "",
+			expectError: true,
+		},
+		{
 			path:        "/scanner/image/",
 			image:       "",
 			expectError: true,

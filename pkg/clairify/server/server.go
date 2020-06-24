@@ -123,6 +123,9 @@ func parseImagePath(path string) (string, error) {
 	}
 	basePath := image[:tagIdx]
 	tag := image[tagIdx+1:]
+	if tag == "" {
+		return "", errors.Errorf("invalid image format: %q. Tag is required", image)
+	}
 	return fmt.Sprintf("%s:%s", basePath, tag), nil
 }
 
