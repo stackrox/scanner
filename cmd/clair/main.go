@@ -38,10 +38,8 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
 	"github.com/stackrox/scanner/pkg/clairify/server"
-	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/formatter"
 	"github.com/stackrox/scanner/pkg/licenses"
-	"github.com/stackrox/scanner/pkg/stopper"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
 	"golang.org/x/sys/unix"
@@ -95,7 +93,6 @@ func waitForSignals(signals ...os.Signal) {
 // Boot starts Clair instance with the provided config.
 func Boot(config *Config) {
 	rand.Seed(time.Now().UnixNano())
-	st := stopper.NewStopper()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -137,7 +134,7 @@ func Boot(config *Config) {
 	// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up to date
 	u.UpdateNVDCacheOnly()
 
-	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db, manager, types.DockerRegistryCreator, types.InsecureDockerRegistryCreator)
+	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db, manager)
 	go api.RunClairify(serv)
 
 	grpcAPI := grpc.NewAPI(grpc.Config{
@@ -158,7 +155,6 @@ func Boot(config *Config) {
 	waitForSignals(os.Interrupt, unix.SIGTERM)
 	log.Info("Received interruption, gracefully stopping ...")
 	serv.Close()
-	st.Stop()
 	u.Stop()
 }
 

@@ -28,22 +28,18 @@ import (
 
 // Server is the HTTP server for Clairify.
 type Server struct {
-	registryCreator         types.RegistryClientCreator
-	insecureRegistryCreator types.RegistryClientCreator
-	endpoint                string
-	storage                 database.Datastore
-	httpServer              *http.Server
-	licenseManager          licenses.Manager
+	endpoint       string
+	storage        database.Datastore
+	httpServer     *http.Server
+	licenseManager licenses.Manager
 }
 
 // New returns a new instantiation of the Server.
-func New(serverEndpoint string, db database.Datastore, licenseManager licenses.Manager, creator, insecureCreator types.RegistryClientCreator) *Server {
+func New(serverEndpoint string, db database.Datastore, licenseManager licenses.Manager) *Server {
 	return &Server{
-		registryCreator:         creator,
-		insecureRegistryCreator: insecureCreator,
-		endpoint:                serverEndpoint,
-		storage:                 db,
-		licenseManager:          licenseManager,
+		endpoint:       serverEndpoint,
+		storage:        db,
+		licenseManager: licenseManager,
 	}
 }
 
@@ -88,7 +84,6 @@ func (s *Server) getClairLayer(w http.ResponseWriter, r *http.Request, layerName
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Write(bytes)
 }
 
@@ -193,7 +188,7 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 
 	username, password, err := getAuth(r.Header.Get("Authorization"))
 	if err != nil {
-		clairError(w, http.StatusBadRequest, err)
+		clairError(w, http.StatusUnauthorized, err)
 		return
 	}
 
@@ -220,7 +215,7 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 }
 
 // Ping implements a simple handler for verifying that Clairify is up.
-func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Ping(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("{}"))
 }
 
@@ -277,10 +272,7 @@ func (s *Server) Start() error {
 	}
 	s.httpServer = srv
 	logrus.Infof("Listening on %s", s.endpoint)
-	if listener != nil {
-		return srv.Serve(listener)
-	}
-	return srv.ListenAndServe()
+	return srv.Serve(listener)
 }
 
 // Close closes the server's connections
