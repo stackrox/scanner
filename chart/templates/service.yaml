@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   ports:
-  - name: https
+  - name: tcp-postgres
     port: 5432
     targetPort: postgresql
   selector:
