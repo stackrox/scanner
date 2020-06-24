@@ -84,7 +84,6 @@ func (s *Server) getClairLayer(w http.ResponseWriter, r *http.Request, layerName
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Write(bytes)
 }
 
