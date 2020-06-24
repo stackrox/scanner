@@ -34,3 +34,43 @@ func TestGetAuth(t *testing.T) {
 	_, _, err = getAuth(base64Header)
 	assert.NoError(t, err)
 }
+
+func TestParseImagePath(t *testing.T) {
+	cases := []struct {
+		path, image string
+		expectError bool
+	}{
+		{
+			path:        "/scanner/image/docker.io/library/nginx/latest",
+			image:       "docker.io/library/nginx:latest",
+			expectError: false,
+		},
+		{
+			path:        "/clairify/image/docker.io/library/nginx/latest",
+			image:       "docker.io/library/nginx:latest",
+			expectError: false,
+		},
+		{
+			path:        "/scanner/image/stackrox.io/main/3.0.42.0",
+			image:       "stackrox.io/main:3.0.42.0",
+			expectError: false,
+		},
+		{
+			path:        "/scanner/image/docker.pkg.github.com/stackrox/rox/ubuntu/14.04",
+			image:       "docker.pkg.github.com/stackrox/rox/ubuntu:14.04",
+			expectError: false,
+		},
+		{
+			path:        "/scanner/image/",
+			image:       "",
+			expectError: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.path, func(t *testing.T) {
+			image, err := parseImagePath(c.path)
+			assert.Equal(t, c.expectError, err != nil)
+			assert.Equal(t, c.image, image)
+		})
+	}
+}
