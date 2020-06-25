@@ -22,8 +22,12 @@ const (
 	disableMergeJoin         = `SET LOCAL enable_mergejoin = off`
 
 	// keyvalue.go
-	updateKeyValue = `UPDATE KeyValue SET value = $1 WHERE key = $2`
-	insertKeyValue = `INSERT INTO KeyValue(key, value) VALUES($1, $2)`
+	upsertKeyValue = `
+		INSERT INTO KeyValue(key, value)
+		VALUES($1, $2)
+		ON CONFLICT (key)
+		DO UPDATE SET value = $2
+	`
 	searchKeyValue = `SELECT value FROM KeyValue WHERE key = $1`
 
 	// namespace.go

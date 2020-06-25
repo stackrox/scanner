@@ -312,7 +312,7 @@ func handleError(desc string, err error) error {
 	return err
 }
 
-// isErrUniqueViolation determines is the given error is a unique contraint violation.
+// isErrUniqueViolation determines is the given error is a unique constraint violation.
 func isErrUniqueViolation(err error) bool {
 	pqErr, ok := err.(*pq.Error)
 	return ok && pqErr.Code == "23505"

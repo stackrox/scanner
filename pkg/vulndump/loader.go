@@ -182,7 +182,7 @@ func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore
 	}
 	log.Info("Done inserting vulns into the DB")
 	marshaledDumpTS, err := manifest.Until.MarshalText()
-	// Really shouldn't happen because we literally just unmarshaled it.
+	// Really shouldn't happen because we literally just unmarshalled it.
 	utils.Must(err)
 	if err := db.InsertKeyValue(wellknownkeys.VulnUpdateTimestampKey, string(marshaledDumpTS)); err != nil {
 		return errors.Wrap(err, "couldn't update timestamp key in DB")
