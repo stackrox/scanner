@@ -31,7 +31,7 @@ func (pgSQL *pgSQL) InsertKeyValue(key, value string) error {
 
 	defer observeQueryTime("InsertKeyValue", "all", time.Now())
 
-	_, err := pgSQL.Exec(upsertKeyValue, value, key)
+	_, err := pgSQL.Exec(upsertKeyValue, key, value)
 	if err != nil {
 		return handleError("upsertKeyValue", err)
 	}
