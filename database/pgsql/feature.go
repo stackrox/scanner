@@ -229,7 +229,6 @@ func linkFeatureVersionToVulnerabilities(tx *sql.Tx, featureVersion database.Fea
 	if err = rows.Err(); err != nil {
 		return handleError("searchVulnerabilityFixedInFeature.Rows()", err)
 	}
-	rows.Close()
 
 	// Insert into Vulnerability_Affects_FeatureVersion.
 	for _, affect := range affects {

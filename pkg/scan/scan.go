@@ -157,7 +157,7 @@ func fetchLayers(reg types.Registry, image *types.Image) (string, []string, erro
 
 	digest, manifestType, err := reg.ManifestDigest(image.Remote, ref)
 	if err != nil {
-		// Some registries have no implemented the docker registry API correctly so the fall back here is to just try all the manifest types
+		// Some registries have not implemented the docker registry API correctly so the fall back here is to just try all the manifest types
 		manifestTypes := []string{registry.MediaTypeManifestList, schema2.MediaTypeManifest, schema1.MediaTypeSignedManifest, schema1.MediaTypeManifest}
 		for _, m := range manifestTypes {
 			layers, manifestErr := handleManifest(reg, m, image.Remote, ref)

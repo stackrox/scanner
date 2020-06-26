@@ -126,7 +126,7 @@ type Datastore interface {
 	// affected by the Vulnerability, along with the version in which the
 	// vulnerability is fixed. It is the responsibility of the implementation to
 	// update the list properly.
-	// A version equals to versionfmt.MinVersion means that the given Feature is
+	// A version equal to versionfmt.MinVersion means that the given Feature is
 	// not being affected by the Vulnerability at all and thus, should be removed
 	// from the list.
 	// It is important that Features should be unique in the FixedIn list. For
