@@ -135,6 +135,7 @@ const (
 	insertLayer = `
 		INSERT INTO Layer(name, engineversion, parent_id, namespace_id, created_at)
 		VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP)
+		ON CONFLICT DO NOTHING
 		RETURNING id
 	`
 
