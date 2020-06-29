@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/guregu/null/zero"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stretchr/testify/assert"
@@ -266,7 +267,7 @@ func testInsertLayerTree(t *testing.T, datastore database.Datastore) {
 
 	// Re-insert layers to ensure no errors due to `ON CONFLICT DO NOTHING` clause.
 	for _, layer := range layers {
-		err = datastore.InsertLayer(layer)
+		err = datastore.InsertLayerTx(layer, zero.IntFrom(0), zero.IntFrom(0))
 		assert.Nil(t, err)
 	}
 

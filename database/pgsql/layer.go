@@ -292,6 +292,10 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 		}
 	}
 
+	return pgSQL.InsertLayerTx(&layer, namespaceID, parentID)
+}
+
+func (pgSQL *pgSQL) InsertLayerTx(layer *database.Layer, namespaceID, parentID zero.Int) error {
 	// Begin transaction.
 	tx, err := pgSQL.Begin()
 	if err != nil {
@@ -304,6 +308,12 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 			Scan(&layer.ID)
 		if err != nil {
 			tx.Rollback()
+
+			if err == sql.ErrNoRows {
+				// Ignore this error, another process collided.
+				log.Debug("Attempted to insert duplicate layer.")
+				return nil
+			}
 			return handleError("insertLayer", err)
 		}
 	} else {
@@ -323,15 +333,14 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 	}
 
 	// Update Layer_diff_FeatureVersion now.
-	err = pgSQL.updateDiffFeatureVersions(tx, &layer, &existingLayer)
+	err = pgSQL.updateDiffFeatureVersions(tx, layer)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	// Commit transaction.
-	err = tx.Commit()
-	if err != nil {
+	if err = tx.Commit(); err != nil {
 		tx.Rollback()
 		return handleError("InsertLayer.Commit()", err)
 	}
@@ -339,7 +348,7 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 	return nil
 }
 
-func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer, existingLayer *database.Layer) error {
+func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer *database.Layer) error {
 	// add and del are the FeatureVersion diff we should insert.
 	var add []database.FeatureVersion
 	var del []database.FeatureVersion

@@ -17,6 +17,7 @@ package database
 import (
 	"time"
 
+	"github.com/guregu/null/zero"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
@@ -25,6 +26,7 @@ import (
 type MockDatastore struct {
 	FctListNamespaces             func() ([]Namespace, error)
 	FctInsertLayer                func(Layer) error
+	FctInsertLayerTx              func(*Layer, zero.Int, zero.Int) error
 	FctFindLayer                  func(name string, withFeatures, withVulnerabilities bool) (Layer, error)
 	FctDeleteLayer                func(name string) error
 	FctListVulnerabilities        func(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
@@ -47,6 +49,13 @@ type MockDatastore struct {
 func (mds *MockDatastore) InsertLayer(layer Layer) error {
 	if mds.FctInsertLayer != nil {
 		return mds.FctInsertLayer(layer)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) InsertLayerTx(layer *Layer, namespaceID, parentID zero.Int) error {
+	if mds.FctInsertLayerTx != nil {
+		return mds.FctInsertLayerTx(layer, namespaceID, parentID)
 	}
 	panic("required mock function not implemented")
 }
