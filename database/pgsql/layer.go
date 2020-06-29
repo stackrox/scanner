@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/guregu/null/zero"
+	"github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/commonerr"
@@ -303,9 +304,9 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 		// Insert a new layer.
 		err = tx.QueryRow(insertLayer, layer.Name, layer.EngineVersion, parentID, namespaceID).
 			Scan(&layer.ID)
+		log.Info(err.(*pq.Error))
 		if err != nil {
 			tx.Rollback()
-
 			if isErrUniqueViolation(err) {
 				// Ignore this error, another process collided.
 				log.Debug("Attempted to insert duplicate layer.")
