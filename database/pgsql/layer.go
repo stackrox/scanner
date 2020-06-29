@@ -302,15 +302,8 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 		// Insert a new layer.
 		err = tx.QueryRow(insertLayer, layer.Name, layer.EngineVersion, parentID, namespaceID).
 			Scan(&layer.ID)
-		log.Info(err)
 		if err != nil {
 			tx.Rollback()
-
-			if isErrUniqueViolation(err) {
-				// Ignore this error, another process collided.
-				log.Debug("Attempted to insert duplicate layer.")
-				return nil
-			}
 			return handleError("insertLayer", err)
 		}
 	} else {

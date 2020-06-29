@@ -264,6 +264,12 @@ func testInsertLayerTree(t *testing.T, datastore database.Datastore) {
 		assert.Nil(t, err)
 	}
 
+	// Re-insert layers to ensure no errors due to `ON CONFLICT DO NOTHING` clause.
+	for _, layer := range layers {
+		err = datastore.InsertLayer(layer)
+		assert.Nil(t, err)
+	}
+
 	l4a := retrievedLayers["TestInsertLayer4a"]
 	if assert.NotNil(t, l4a.Namespace) {
 		assert.Equal(t, "TestInsertLayerNamespace2", l4a.Namespace.Name)
