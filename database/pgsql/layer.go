@@ -296,7 +296,6 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 	// Begin transaction.
 	tx, err := pgSQL.Begin()
 	if err != nil {
-		tx.Rollback()
 		return handleError("InsertLayer.Begin()", err)
 	}
 
