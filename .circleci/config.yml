@@ -351,6 +351,63 @@ commands:
 
       - teardown-gke
 
+  run-db-integration-tests:
+    steps:
+      - checkout
+      - setup_remote_docker
+      - setup-gcp
+
+      - attach_workspace:
+          at: /tmp
+
+      - attach-gke-cluster:
+          cluster-id: alpine
+
+      - run:
+          name: Deploy into the cluster
+          command: make deploy
+
+      - wait-for-scanner-and-pf:
+          condition: Ready
+
+      - run:
+          name: Run sanity tests
+          command: |
+            CLAIR_TEST_PGSQL=postgresql://postgres@scanner-db.stackrox:5432/%s?sslmode=disable make db-integration-tests
+
+      - run:
+          name: Collect k8s logs
+          command: |
+            .circleci/collect-service-logs.sh stackrox
+            .circleci/collect-service-logs.sh kube-system
+          when: always
+
+      - run:
+          name: Verify the scanner did not restart
+          command: |
+            if [[ "$(ls /tmp/k8s-service-logs/stackrox/*-previous.log | wc -l)" != 0 ]]; then
+                ls /tmp/k8s-service-logs/stackrox/*-previous.log
+                exit 1
+            fi
+            cat nohup.out || true
+          when: always
+
+      - store_artifacts:
+          path: /tmp/k8s-service-logs
+          destination: k8s-service-logs-<< parameters.cluster-id >>
+
+      - run:
+          name: Verify the scanner did not restart
+          command: |
+            if [[ "$(ls /tmp/k8s-service-logs/stackrox/*-previous.log | wc -l)" != 0 ]]; then
+                ls /tmp/k8s-service-logs/stackrox/*-previous.log
+                exit 1
+            fi
+            cat nohup.out || true
+          when: always
+
+      - teardown-gke
+
 jobs:
   unit-tests:
     <<: *defaults
@@ -602,6 +659,11 @@ jobs:
       - run-e2e-tests:
           cluster-id: rhel
 
+  db-integration-tests:
+    <<: *defaults
+    steps:
+      - run-db-integration-tests
+
   provision-cluster-rhel:
     <<: *defaults
     steps:
@@ -753,6 +815,11 @@ workflows:
             - upload-nvd-dump-for-embedding-into-image
       - provision-cluster:
           <<: *runOnAllTagsWithDockerIOPullCtx
+      - db-integration-tests:
+          <<: *runOnAllTagsWithDockerIOPullCtx
+          requires:
+            - build
+            - provision-cluster
       - e2e-tests:
           <<: *runOnAllTagsWithDockerIOPullCtx
           requires:
@@ -799,6 +866,11 @@ workflows:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - provision-cluster-rhel:
         <<: *runOnAllTagsWithDockerIOPullCtx
+    - db-integration-tests:
+        <<: *runOnAllTagsWithDockerIOPullCtx
+        requires:
+          - build
+          - provision-cluster
     - e2e-tests:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
