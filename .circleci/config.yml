@@ -83,6 +83,19 @@ commands:
 
             [[ "${success}" -gt 0 ]]
 
+  scanner-db-pf:
+    description: Port-forward the scanner db
+    steps:
+      - run:
+          name: Port-forward
+          command: |
+            sleep 5
+            kubectl -n stackrox get pod
+            POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner-db")].metadata.name}')"
+            [[ -n "${POD}" ]]
+            kubectl -n stackrox wait "--for=condition=Ready" "pod/${POD}" --timeout=3m
+            nohup kubectl port-forward -n stackrox "${POD}" "5432:5432" & # PostgreSQL endpoint.
+
   setup-gcp:
     description: Set up GCP service account and configure gcloud
     parameters:
@@ -370,10 +383,11 @@ commands:
       - wait-for-scanner-and-pf:
           condition: Ready
 
+      - scanner-db-pf
+
       - run:
-          name: Run sanity tests
-          command: |
-            CLAIR_TEST_PGSQL=postgresql://postgres@scanner-db.stackrox:5432/%s?sslmode=disable make db-integration-tests
+          name: Run integration tests
+          command: make db-integration-tests
 
       - run:
           name: Collect k8s logs
