@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/guregu/null/zero"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/retry"
 	"github.com/stackrox/scanner/pkg/component"
@@ -110,11 +109,6 @@ type Datastore interface {
 	// The function has to be idempotent, inserting a layer that already exists
 	// shouldn't return an error.
 	InsertLayer(Layer) error
-
-	// InsertLayerTx is the transaction portion of InsertLayer.
-	// This is exposed for testing purposes, only, and should not be used for anything
-	// except testing.
-	InsertLayerTx(*Layer, zero.Int, zero.Int) error
 
 	// FindLayer retrieves a Layer from the database.
 	//

@@ -263,10 +263,12 @@ func testInsertLayerTree(t *testing.T, datastore database.Datastore) {
 		assert.Nil(t, err)
 	}
 
-	// Re-insert layers to ensure no errors due to `ON CONFLICT DO NOTHING` clause.
-	for _, layer := range layers {
-		err = datastore.InsertLayerTx(&layer, zero.IntFrom(0), zero.IntFrom(0))
-		assert.Nil(t, err)
+	if pgsql, ok := datastore.(*pgSQL); ok {
+		// Re-insert layers to ensure no errors due to `ON CONFLICT DO NOTHING` clause.
+		for _, layer := range layers {
+			err = pgsql.insertLayerTx(&layer, zero.IntFrom(0), zero.IntFrom(0))
+			assert.Nil(t, err)
+		}
 	}
 
 	l4a := retrievedLayers["TestInsertLayer4a"]

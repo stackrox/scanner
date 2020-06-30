@@ -292,10 +292,10 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 		}
 	}
 
-	return pgSQL.InsertLayerTx(&layer, namespaceID, parentID)
+	return pgSQL.insertLayerTx(&layer, namespaceID, parentID)
 }
 
-func (pgSQL *pgSQL) InsertLayerTx(layer *database.Layer, namespaceID, parentID zero.Int) error {
+func (pgSQL *pgSQL) insertLayerTx(layer *database.Layer, namespaceID, parentID zero.Int) error {
 	// Begin transaction.
 	tx, err := pgSQL.Begin()
 	if err != nil {
