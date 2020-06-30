@@ -871,8 +871,10 @@ workflows:
         requires:
           - build
           - provision-cluster
+          - db-integration-tests
     - e2e-tests-rhel:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - build-rhel
           - provision-cluster-rhel
+          - db-integration-tests
