@@ -397,29 +397,9 @@ commands:
             .circleci/collect-service-logs.sh kube-system
           when: always
 
-      - run:
-          name: Verify the scanner did not restart
-          command: |
-            if [[ "$(ls /tmp/k8s-service-logs/stackrox/*-previous.log | wc -l)" != 0 ]]; then
-                ls /tmp/k8s-service-logs/stackrox/*-previous.log
-                exit 1
-            fi
-            cat nohup.out || true
-          when: always
-
       - store_artifacts:
           path: /tmp/k8s-service-logs
           destination: k8s-service-logs-alpine
-
-      - run:
-          name: Verify the scanner did not restart
-          command: |
-            if [[ "$(ls /tmp/k8s-service-logs/stackrox/*-previous.log | wc -l)" != 0 ]]; then
-                ls /tmp/k8s-service-logs/stackrox/*-previous.log
-                exit 1
-            fi
-            cat nohup.out || true
-          when: always
 
       - teardown-gke
 
