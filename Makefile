@@ -225,7 +225,7 @@ e2e-tests: deps
 .PHONY: db-integration-tests
 db-integration-tests: deps
 	@echo "+ $@"
-	go test -tags db_integration ./database/pgsql
+	go test -tags db_integration -count=1 ./database/pgsql
 
 .PHONY: no-license-tests
 no-license-tests: deps

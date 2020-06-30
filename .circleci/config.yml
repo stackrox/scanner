@@ -95,6 +95,7 @@ commands:
             [[ -n "${POD}" ]]
             kubectl -n stackrox wait "--for=condition=Ready" "pod/${POD}" --timeout=3m
             nohup kubectl port-forward -n stackrox "${POD}" "5432:5432" & # PostgreSQL endpoint.
+            sleep 10
 
   setup-gcp:
     description: Set up GCP service account and configure gcloud
