@@ -113,7 +113,7 @@ func LoadFileForTest(name string) []byte {
 }
 
 // TestLister runs a Lister on each provided instance of TestData and asserts
-// the ouput to be equal to the expected output.
+// the output to be equal to the expected output.
 func TestLister(t *testing.T, l Lister, testData []TestData) {
 	for _, td := range testData {
 		featureVersions, err := l.ListFeatures(td.Files)

@@ -17,6 +17,7 @@ package rpm
 
 import (
 	"bufio"
+	"errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -63,10 +64,9 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// Extract binary package names because RHSA refers to binary package names.
 	out, err := exec.Command("rpm", "--dbpath", tmpDir, "-qa", "--qf", "%{NAME} %{EPOCH}:%{VERSION}-%{RELEASE}\n").CombinedOutput()
 	if err != nil {
-		log.WithError(err).WithField("output", string(out)).Error("could not query RPM")
-		// Do not bubble up because we probably won't be able to fix it,
-		// the database must be corrupted
-		return []database.FeatureVersion{}, nil
+		log.WithError(err).WithField("output", string(out)).Error("could not query RPM: either the DB is corrupted or FIPs mode is enabled")
+		// Bubble up because this may be fixable by using a different base image.
+		return []database.FeatureVersion{}, errors.New("could not query RPM: either the DB is corrupted or FIPs mode is enabled")
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
