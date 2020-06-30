@@ -327,6 +327,13 @@ commands:
       - run-db-integration-tests
 
       - run:
+          name: Collect k8s logs
+          command: |
+            .circleci/collect-service-logs.sh stackrox
+            .circleci/collect-service-logs.sh kube-system
+          when: always
+
+      - run:
           name: Delete license and bounce pod
           command: |
             kubectl -n stackrox delete secret scanner-license
@@ -349,7 +356,6 @@ commands:
             .circleci/collect-service-logs.sh stackrox
             .circleci/collect-service-logs.sh kube-system
           when: always
-
 
       - store_artifacts:
           path: /tmp/k8s-service-logs
