@@ -394,7 +394,7 @@ commands:
 
       - store_artifacts:
           path: /tmp/k8s-service-logs
-          destination: k8s-service-logs-<< parameters.cluster-id >>
+          destination: k8s-service-logs-alpine
 
       - run:
           name: Verify the scanner did not restart
