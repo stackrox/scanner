@@ -22,6 +22,7 @@ require (
 	github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/opencontainers/go-digest v1.0.0-rc1
+	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v0.9.2
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2

@@ -1,4 +1,4 @@
-// +build db-integration
+// +build db_integration
 
 // Copyright 2017 clair authors
 //
@@ -17,7 +17,6 @@
 package pgsql
 
 import (
-	"fmt"
 	"math/rand"
 	"runtime"
 	"strconv"
@@ -26,6 +25,7 @@ import (
 	"time"
 
 	"github.com/pborman/uuid"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stretchr/testify/assert"
@@ -117,7 +117,7 @@ func TestRaceAffects(t *testing.T) {
 				assert.Nil(t, err)
 			}
 		}
-		fmt.Println("finished to insert vulnerabilities")
+		log.Info("Finished inserting vulnerabilities")
 	}()
 
 	go func() {
@@ -126,7 +126,7 @@ func TestRaceAffects(t *testing.T) {
 			featureVersions[i].ID, err = datastore.insertFeatureVersion(featureVersions[i])
 			assert.Nil(t, err)
 		}
-		fmt.Println("finished to insert featureVersions")
+		log.Info("finished inserting featureVersions")
 	}()
 
 	wg.Wait()
