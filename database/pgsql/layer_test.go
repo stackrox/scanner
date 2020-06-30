@@ -1,4 +1,4 @@
-// +build db-integration
+// +build db_integration
 
 // Copyright 2017 clair authors
 //
@@ -18,6 +18,7 @@ package pgsql
 
 import (
 	"fmt"
+	"github.com/stackrox/scanner/pkg/commonerr"
 	"testing"
 
 	"github.com/guregu/null/zero"
@@ -119,9 +120,6 @@ func TestInsertLayer(t *testing.T) {
 
 	// Update layer.
 	testInsertLayerUpdate(t, datastore)
-
-	// Delete layer.
-	testInsertLayerDelete(t, datastore)
 }
 
 func testInsertLayerInvalid(t *testing.T, datastore database.Datastore) {
@@ -267,7 +265,7 @@ func testInsertLayerTree(t *testing.T, datastore database.Datastore) {
 
 	// Re-insert layers to ensure no errors due to `ON CONFLICT DO NOTHING` clause.
 	for _, layer := range layers {
-		err = datastore.InsertLayerTx(layer, zero.IntFrom(0), zero.IntFrom(0))
+		err = datastore.InsertLayerTx(&layer, zero.IntFrom(0), zero.IntFrom(0))
 		assert.Nil(t, err)
 	}
 
@@ -326,7 +324,8 @@ func testInsertLayerUpdate(t *testing.T, datastore database.Datastore) {
 
 	// Try to re-insert without increasing the EngineVersion.
 	err := datastore.InsertLayer(l3u)
-	assert.Nil(t, err)
+	assert.Error(t, err)
+	assert.Equal(t, commonerr.ErrNoNeedToInsert, err)
 
 	l3uf, err := datastore.FindLayer(l3u.Name, true, false)
 	if assert.Nil(t, err) {
