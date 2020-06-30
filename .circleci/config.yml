@@ -625,11 +625,6 @@ jobs:
       - run-e2e-tests:
           cluster-id: rhel
 
-  db-integration-tests:
-    <<: *defaults
-    steps:
-      - run-db-integration-tests
-
   provision-cluster-rhel:
     <<: *defaults
     steps:
