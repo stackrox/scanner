@@ -18,12 +18,12 @@ package pgsql
 
 import (
 	"fmt"
-	"github.com/stackrox/scanner/pkg/commonerr"
 	"testing"
 
 	"github.com/guregu/null/zero"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stretchr/testify/assert"
 )
 

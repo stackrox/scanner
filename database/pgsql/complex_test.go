@@ -17,7 +17,6 @@
 package pgsql
 
 import (
-	log "github.com/sirupsen/logrus"
 	"math/rand"
 	"runtime"
 	"strconv"
@@ -26,6 +25,7 @@ import (
 	"time"
 
 	"github.com/pborman/uuid"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stretchr/testify/assert"
