@@ -15,6 +15,8 @@
 package api
 
 import (
+	"net/http"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/clairify/server"
 )
@@ -27,6 +29,13 @@ type Config struct {
 
 func RunClairify(serv *server.Server) {
 	if err := serv.Start(); err != nil {
-		log.Fatal(err)
+		if err != http.ErrServerClosed {
+			// (*http.Server).Shutdown was not called, and there is something truly wrong.
+			log.Fatal(err)
+		}
+
+		// (*http.Server).Shutdown causes (*http.Server).Start to return http.ErrServerClosed.
+		// This is ok, and we should let the scanner shutdown gracefully.
+		log.Info(err)
 	}
 }
