@@ -34,7 +34,7 @@ func RunClairify(serv *server.Server) {
 			log.Fatal(err)
 		}
 
-		// (*http.Server).Shutdown causes (*http.Server).Start to return http.ErrServerClosed.
+		// (*http.Server).Shutdown causes (*http.Server).Serve to return http.ErrServerClosed.
 		// This is ok, and we should let the scanner shutdown gracefully.
 		log.Info(err)
 	}
