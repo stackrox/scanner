@@ -83,6 +83,20 @@ commands:
 
             [[ "${success}" -gt 0 ]]
 
+  scanner-db-pf:
+    description: Port-forward the scanner db
+    steps:
+      - run:
+          name: Port-forward
+          command: |
+            sleep 5
+            kubectl -n stackrox get pod
+            POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner-db")].metadata.name}')"
+            [[ -n "${POD}" ]]
+            kubectl -n stackrox wait "--for=condition=Ready" "pod/${POD}" --timeout=3m
+            nohup kubectl port-forward -n stackrox "${POD}" "5432:5432" & # PostgreSQL endpoint.
+            sleep 10
+
   setup-gcp:
     description: Set up GCP service account and configure gcloud
     parameters:
@@ -310,6 +324,15 @@ commands:
             cat nohup.out || true
           when: always
 
+      - run-db-integration-tests
+
+      - run:
+          name: Collect k8s logs
+          command: |
+            .circleci/collect-service-logs.sh stackrox
+            .circleci/collect-service-logs.sh kube-system
+          when: always
+
       - run:
           name: Delete license and bounce pod
           command: |
@@ -334,7 +357,6 @@ commands:
             .circleci/collect-service-logs.sh kube-system
           when: always
 
-
       - store_artifacts:
           path: /tmp/k8s-service-logs
           destination: k8s-service-logs-<< parameters.cluster-id >>
@@ -350,6 +372,13 @@ commands:
           when: always
 
       - teardown-gke
+
+  run-db-integration-tests:
+    steps:
+      - scanner-db-pf
+      - run:
+          name: Run db integration tests
+          command: make db-integration-tests
 
 jobs:
   unit-tests:

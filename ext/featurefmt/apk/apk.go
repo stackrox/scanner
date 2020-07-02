@@ -56,10 +56,10 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		case line[:2] == "P:":
 			ipkg.Feature.Name = line[2:]
 		case line[:2] == "V:":
-			version := string(line[2:])
+			version := line[2:]
 			err := versionfmt.Valid(dpkg.ParserName, version)
 			if err != nil {
-				log.WithError(err).WithField("version", version).Warning("could not parse package version. skipping")
+				log.WithError(err).WithField("version", version).Warning("could not parse package version; skipping")
 			} else {
 				ipkg.Version = version
 			}

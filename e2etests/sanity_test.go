@@ -5,6 +5,7 @@ package e2etests
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"sort"
 	"testing"
 
@@ -102,9 +103,10 @@ func TestImageSanity(t *testing.T) {
 	cli := client.New(getScannerHTTPEndpoint(t), true)
 
 	for _, testCase := range []struct {
-		image            string
-		registry         string
-		expectedFeatures []v1.Feature
+		image              string
+		registry           string
+		username, password string
+		expectedFeatures   []v1.Feature
 	}{
 		{
 			image:    "docker.io/library/nginx:1.10",
@@ -284,12 +286,54 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			image:    "us.gcr.io/stackrox-ci/qa/apache/server:latest",
+			registry: "https://us.gcr.io",
+			username: "_json_key",
+			password: os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER"),
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "cron",
+					NamespaceName: "ubuntu:14.04",
+					VersionFormat: "dpkg",
+					Version:       "3.0pl1-124ubuntu2",
+
+					AddedBy: "sha256:bae382666908fd87a3a3646d7eb7176fa42226027d3256cac38ee0b79bdb0491",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2017-9525",
+							NamespaceName: "ubuntu:14.04",
+							Description:   "In the cron package through 3.0pl1-128 on Debian, and through 3.0pl1-128ubuntu2 on Ubuntu, the postinst maintainer script allows for group-crontab-to-root privilege escalation via symlink attacks against unsafe usage of the chown and chmod programs.",
+							Link:          "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-9525",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 3.4,
+										"ImpactScore":         10.0,
+										"Score":               6.9,
+										"Vectors":             "AV:L/AC:M/Au:N/C:C/I:C/A:C",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 0.8,
+										"ImpactScore":         5.9,
+										"Score":               6.7,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2019-03-21T23:29Z",
+									"PublishedDateTime":    "2017-06-09T16:29Z",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			verifyImageHasExpectedFeatures(cli, "", "", &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
+			verifyImageHasExpectedFeatures(cli, testCase.username, testCase.password, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
 		})
 	}
-
 }
 
 func deepGet(m map[string]interface{}, keys ...string) interface{} {

@@ -1,4 +1,4 @@
-// +build db-integration
+// +build db_integration
 
 // Copyright 2016 clair authors
 //

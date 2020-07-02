@@ -200,9 +200,15 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 
 	// Initialize cache.
 	// TODO(Quentin-M): Benchmark with a simple LRU Cache.
-	if pg.config.CacheSize > 0 {
-		pg.cache, _ = lru.New(pg.config.CacheSize)
-	}
+	//
+	// (Potentially temporary) fix to ROX-4987.
+	// The DB is not persisted, so if the DB crashes during a scan,
+	// we will get a foreign key constraint violation.
+	// This is because the DB is cleared, but the cache logic assumes the DB
+	// has the entry for the foreign key.
+	//if pg.config.CacheSize > 0 {
+	//	pg.cache, _ = lru.New(pg.config.CacheSize)
+	//}
 
 	return &pg, nil
 }
@@ -306,7 +312,7 @@ func handleError(desc string, err error) error {
 	return err
 }
 
-// isErrUniqueViolation determines is the given error is a unique contraint violation.
+// isErrUniqueViolation determines is the given error is a unique constraint violation.
 func isErrUniqueViolation(err error) bool {
 	pqErr, ok := err.(*pq.Error)
 	return ok && pqErr.Code == "23505"

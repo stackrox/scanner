@@ -22,8 +22,12 @@ const (
 	disableMergeJoin         = `SET LOCAL enable_mergejoin = off`
 
 	// keyvalue.go
-	updateKeyValue = `UPDATE KeyValue SET value = $1 WHERE key = $2`
-	insertKeyValue = `INSERT INTO KeyValue(key, value) VALUES($1, $2)`
+	upsertKeyValue = `
+		INSERT INTO KeyValue(key, value)
+		VALUES($1, $2)
+		ON CONFLICT (key)
+		DO UPDATE SET value = $2
+	`
 	searchKeyValue = `SELECT value FROM KeyValue WHERE key = $1`
 
 	// namespace.go
@@ -130,8 +134,10 @@ const (
 
 	insertLayer = `
 		INSERT INTO Layer(name, engineversion, parent_id, namespace_id, created_at)
-    VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP)
-    RETURNING id`
+		VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP)
+		ON CONFLICT DO NOTHING
+		RETURNING id
+	`
 
 	updateLayer = `UPDATE LAYER SET engineversion = $2, namespace_id = $3 WHERE id = $1`
 

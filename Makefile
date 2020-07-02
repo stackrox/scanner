@@ -222,6 +222,11 @@ e2e-tests: deps
 	@echo "+ $@"
 	go test -tags e2e -count=1 ./e2etests/...
 
+.PHONY: db-integration-tests
+db-integration-tests: deps
+	@echo "+ $@"
+	go test -tags db_integration -count=1 ./database/pgsql
+
 .PHONY: no-license-tests
 no-license-tests: deps
 	@echo "+ $@"

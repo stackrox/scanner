@@ -1,4 +1,4 @@
-// +build db-integration
+// +build db_integration
 
 // Copyright 2017 clair authors
 //
@@ -20,8 +20,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/guregu/null/zero"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -118,9 +120,6 @@ func TestInsertLayer(t *testing.T) {
 
 	// Update layer.
 	testInsertLayerUpdate(t, datastore)
-
-	// Delete layer.
-	testInsertLayerDelete(t, datastore)
 }
 
 func testInsertLayerInvalid(t *testing.T, datastore database.Datastore) {
@@ -264,6 +263,14 @@ func testInsertLayerTree(t *testing.T, datastore database.Datastore) {
 		assert.Nil(t, err)
 	}
 
+	if pgsql, ok := datastore.(*pgSQL); ok {
+		// Re-insert layers to ensure no errors due to `ON CONFLICT DO NOTHING` clause.
+		for _, layer := range layers {
+			err = pgsql.insertLayerTx(&layer, zero.IntFrom(0), zero.IntFrom(0))
+			assert.Nil(t, err)
+		}
+	}
+
 	l4a := retrievedLayers["TestInsertLayer4a"]
 	if assert.NotNil(t, l4a.Namespace) {
 		assert.Equal(t, "TestInsertLayerNamespace2", l4a.Namespace.Name)
@@ -319,7 +326,8 @@ func testInsertLayerUpdate(t *testing.T, datastore database.Datastore) {
 
 	// Try to re-insert without increasing the EngineVersion.
 	err := datastore.InsertLayer(l3u)
-	assert.Nil(t, err)
+	assert.Error(t, err)
+	assert.Equal(t, commonerr.ErrNoNeedToInsert, err)
 
 	l3uf, err := datastore.FindLayer(l3u.Name, true, false)
 	if assert.Nil(t, err) {

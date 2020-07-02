@@ -110,7 +110,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			currentPkgIsRemoved = false
 		}
 
-		// Add the package to the result array if we have all the informations
+		// Add the package to the result array if we have all the information
 		if pkg.Feature.Name != "" && pkg.Version != "" {
 			key := pkg.Feature.Name + "#" + pkg.Version
 
