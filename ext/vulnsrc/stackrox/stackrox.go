@@ -37,9 +37,6 @@ const (
 )
 
 type updater struct {
-
-
-	repositoryLocalPath string
 }
 
 func init() {
