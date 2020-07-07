@@ -193,7 +193,7 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 	_, err = server.ProcessImage(s.storage, image, imageRequest.Registry, username, password, imageRequest.Insecure)
 	if err != nil {
 		// TODO: Remove
-		logrus.Infof("Error: %v", err)
+		logrus.Error("Error is ErrUnsupported:", err == clair.ErrUnsupported)
 		// Add a distinct error for unsupported operating systems
 		if err == clair.ErrUnsupported {
 			clairErrorString(w, http.StatusUnsupportedMediaType, "error processing image %q: %v", imageRequest.Image, err)
