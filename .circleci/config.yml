@@ -29,7 +29,6 @@ commands:
       - run:
           name: Determine whether to run step
           command: |
-            set +e
             if [[ "${CIRCLE_BRANCH}" == "master" || -n "${CIRCLE_TAG}" ]]; then
               echo "On master or tag, running the step"
             else
@@ -46,7 +45,6 @@ commands:
       - run:
           name: Determine whether to run step
           command: |
-            set +e
             if [[ "${CIRCLE_BRANCH}" == "master" || -n "${CIRCLE_TAG}" ]]; then
               echo "On master or tag, running the step"
             else
