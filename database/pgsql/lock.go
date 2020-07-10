@@ -53,11 +53,14 @@ func (pgSQL *pgSQL) Lock(name string, owner string, duration time.Duration, rene
 	}
 
 	// Lock.
-	_, err := pgSQL.Exec(insertLock, name, owner, until)
+	var id int
+	err := pgSQL.QueryRow(insertLock, name, owner, until).Scan(&id)
 	if err != nil {
-		if !isErrUniqueViolation(err) {
-			handleError("insertLock", err)
-		}
+		handleError("insertLock", err)
+		return false, until
+	}
+	if id == 0 {
+		// Already locked.
 		return false, until
 	}
 

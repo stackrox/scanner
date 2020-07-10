@@ -185,7 +185,7 @@ const (
     RETURNING id`
 
 	// locks
-	insertLock        = `INSERT INTO Lock(name, owner, until) VALUES($1, $2, $3)`
+	insertLock        = `INSERT INTO Lock(name, owner, until) VALUES($1, $2, $3) ON CONFLICT DO NOTHING RETURNING id`
 	searchLock        = `SELECT owner, until FROM Lock WHERE name = $1`
 	updateLock        = `UPDATE Lock SET until = $3 WHERE name = $1 AND owner = $2`
 	removeLock        = `DELETE FROM Lock WHERE name = $1 AND owner = $2`
