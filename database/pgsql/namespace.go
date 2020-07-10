@@ -38,9 +38,19 @@ func (pgSQL *pgSQL) insertNamespace(namespace database.Namespace) (int, error) {
 	defer observeQueryTime("insertNamespace", "all", time.Now())
 
 	var id int
-	err := pgSQL.QueryRow(soiNamespace, namespace.Name, namespace.VersionFormat).Scan(&id)
+	err := pgSQL.QueryRow(insertNamespace, namespace.Name, namespace.VersionFormat).Scan(&id)
 	if err != nil {
-		return 0, handleError("soiNamespace", err)
+		return 0, handleError("insertNamespace", err)
+	}
+	if id == 0 {
+		// Query Namespace for the ID because it already exists.
+		err := pgSQL.QueryRow(searchNamespace, namespace.Name).Scan(&id)
+		if err != nil {
+			return 0, handleError("searchNamespace", err)
+		}
+		if id == 0 {
+			return 0, handleError("searchNamespace", commonerr.ErrNotFound)
+		}
 	}
 
 	if pgSQL.cache != nil {

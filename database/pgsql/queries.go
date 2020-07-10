@@ -31,7 +31,7 @@ const (
 	searchKeyValue = `SELECT value FROM KeyValue WHERE key = $1`
 
 	// namespace.go
-	soiNamespace = `
+	insertNamespace = `
 		INSERT INTO Namespace(name, version_format)
 		VALUES($1, $2)
 		ON CONFLICT (name)
@@ -42,7 +42,7 @@ const (
 	searchNamespace = `SELECT id FROM Namespace WHERE name = $1`
 
 	// feature.go
-	soiFeature = `
+	insertFeature = `
 		INSERT INTO Feature(name, namespace_id)
 		VALUES($1, $2)
 		ON CONFLICT (name, namespace_id)
@@ -50,10 +50,12 @@ const (
 		RETURNING id
 	`
 
+	searchFeature = `SELECT id FROM Feature WHERE name = $1 AND namespace_id = $2`
+
 	searchFeatureVersion = `
 		SELECT id FROM FeatureVersion WHERE feature_id = $1 AND version = $2`
 
-	soiFeatureVersion = `
+	insertFeatureVersion = `
 		INSERT INTO FeatureVersion(feature_id, version)
 		VALUES($1, $2)
 		ON CONFLICT (feature_id, version)
@@ -164,7 +166,7 @@ const (
 		VALUES($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
 		RETURNING id`
 
-	soiVulnerabilityFixedInFeature = `
+	insertVulnerabilityFixedInFeature = `
 		INSERT INTO Vulnerability_FixedIn_Feature(vulnerability_id, feature_id, version)
 		VALUES($1, $2, $3)
 		ON CONFLICT (vulnerability_id, feature_id)
