@@ -24,7 +24,7 @@ import (
 // Lock tries to set a temporary lock in the database.
 //
 // Lock does not block, instead, it returns true and its expiration time
-// is the lock has been successfully acquired or false otherwise
+// if the lock has been successfully acquired or false otherwise
 func (pgSQL *pgSQL) Lock(name string, owner string, duration time.Duration, renew bool) (bool, time.Time) {
 	if name == "" || owner == "" || duration == 0 {
 		log.Warning("could not create an invalid lock")
