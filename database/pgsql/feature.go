@@ -16,10 +16,10 @@ package pgsql
 
 import (
 	"database/sql"
-	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/commonerr"

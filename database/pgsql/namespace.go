@@ -15,9 +15,9 @@
 package pgsql
 
 import (
-	log "github.com/sirupsen/logrus"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/commonerr"
 )
