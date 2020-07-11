@@ -56,6 +56,7 @@ func (pgSQL *pgSQL) Lock(name string, owner string, duration time.Duration, rene
 	var id int
 	err := pgSQL.QueryRow(insertLock, name, owner, until).Scan(&id)
 	if err != nil {
+		log.WithError(err).WithField("Description", "Ross").Error("insertLock")
 		handleError("insertLock", err)
 		return false, until
 	}

@@ -16,6 +16,7 @@ package pgsql
 
 import (
 	"database/sql"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 
@@ -52,15 +53,18 @@ func (pgSQL *pgSQL) insertFeature(feature database.Feature) (int, error) {
 	var id int
 	err = pgSQL.QueryRow(insertFeature, feature.Name, namespaceID).Scan(&id)
 	if err != nil {
+		log.WithError(err).WithField("Description", "Ross").Error("insertFeature")
 		return 0, handleError("insertFeature", err)
 	}
 	if id == 0 {
 		// Query Feature because it already exists.
 		err := pgSQL.QueryRow(searchFeature, feature.Name, namespaceID).Scan(&id)
 		if err != nil {
+			log.WithError(err).WithField("Description", "Ross").Error("searchFeature")
 			return 0, handleError("searchFeature", err)
 		}
 		if id == 0 {
+			log.WithError(err).WithField("Description", "Ross").Error("searchFeature2")
 			return 0, handleError("searchFeature", commonerr.ErrNotFound)
 		}
 	}
@@ -144,6 +148,7 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 
 	if err != nil {
 		tx.Rollback()
+		log.WithError(err).WithField("Description", "Ross").Error("insertFeatureVersion")
 		return 0, handleError("insertFeatureVersion", err)
 	}
 
@@ -152,10 +157,12 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 		err := pgSQL.QueryRow(searchFeatureVersion, featureID, fv.Version).Scan(&fv.ID)
 		if err != nil {
 			tx.Rollback()
+			log.WithError(err).WithField("Description", "Ross").Error("searchFeatureVersion")
 			return 0, handleError("searchFeatureVersion", err)
 		}
 		if id == 0 {
 			tx.Rollback()
+			log.WithError(err).WithField("Description", "Ross").Error("searchFeatureVersion2")
 			return 0, handleError("searchFeatureVersion", commonerr.ErrNotFound)
 		}
 

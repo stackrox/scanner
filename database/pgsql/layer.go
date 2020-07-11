@@ -421,23 +421,3 @@ func createNV(features []database.FeatureVersion) (map[string]*database.FeatureV
 
 	return mapNV, sliceNV
 }
-
-func (pgSQL *pgSQL) DeleteLayer(name string) error {
-	defer observeQueryTime("DeleteLayer", "all", time.Now())
-
-	result, err := pgSQL.Exec(removeLayer, name)
-	if err != nil {
-		return handleError("removeLayer", err)
-	}
-
-	affected, err := result.RowsAffected()
-	if err != nil {
-		return handleError("removeLayer.RowsAffected()", err)
-	}
-
-	if affected <= 0 {
-		return commonerr.ErrNotFound
-	}
-
-	return nil
-}
