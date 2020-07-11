@@ -143,8 +143,6 @@ const (
 			FROM FeatureVersion fv
 			WHERE fv.id = ANY($3::integer[])`
 
-	removeLayer = `DELETE FROM Layer WHERE name = $1`
-
 	// vulnerability.go
 	searchVulnerabilityBase = `
 	  SELECT v.id, v.name, n.id, n.name, n.version_format, v.description, v.link, v.severity, v.metadata

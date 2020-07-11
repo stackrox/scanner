@@ -15,6 +15,7 @@
 package pgsql
 
 import (
+	"database/sql"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -40,7 +41,7 @@ func (pgSQL *pgSQL) insertNamespace(namespace database.Namespace) (int, error) {
 
 	var id int
 	err := pgSQL.QueryRow(insertNamespace, namespace.Name, namespace.VersionFormat).Scan(&id)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		log.WithError(err).WithField("Description", "Ross").Error("insertNamespace")
 		return 0, handleError("insertNamespace", err)
 	}
