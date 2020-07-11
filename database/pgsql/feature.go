@@ -52,11 +52,11 @@ func (pgSQL *pgSQL) insertFeature(feature database.Feature) (int, error) {
 	// Find or create Feature.
 	var id int
 	err = pgSQL.QueryRow(insertFeature, feature.Name, namespaceID).Scan(&id)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		log.WithError(err).WithField("Description", "Ross").Error("insertFeature")
 		return 0, handleError("insertFeature", err)
 	}
-	if id == 0 {
+	if err == sql.ErrNoRows {
 		// Query Feature because it already exists.
 		err := pgSQL.QueryRow(searchFeature, feature.Name, namespaceID).Scan(&id)
 		if err != nil {
@@ -146,13 +146,13 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	err = tx.QueryRow(insertFeatureVersion, featureID, fv.Version).Scan(&fv.ID)
 	observeQueryTime("insertFeatureVersion", "insertFeatureVersion", t)
 
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		tx.Rollback()
 		log.WithError(err).WithField("Description", "Ross").Error("insertFeatureVersion")
 		return 0, handleError("insertFeatureVersion", err)
 	}
 
-	if fv.ID == 0 {
+	if err == sql.ErrNoRows {
 		// Query Feature Version for id.
 		err := pgSQL.QueryRow(searchFeatureVersion, featureID, fv.Version).Scan(&fv.ID)
 		if err != nil {

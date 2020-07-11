@@ -45,7 +45,7 @@ func (pgSQL *pgSQL) insertNamespace(namespace database.Namespace) (int, error) {
 		log.WithError(err).WithField("Description", "Ross").Error("insertNamespace")
 		return 0, handleError("insertNamespace", err)
 	}
-	if id == 0 {
+	if err == sql.ErrNoRows {
 		// Query Namespace for the ID because it already exists.
 		err := pgSQL.QueryRow(searchNamespace, namespace.Name).Scan(&id)
 		if err != nil {

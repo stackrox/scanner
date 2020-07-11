@@ -15,6 +15,7 @@
 package pgsql
 
 import (
+	"database/sql"
 	"errors"
 	"time"
 
@@ -55,12 +56,12 @@ func (pgSQL *pgSQL) Lock(name string, owner string, duration time.Duration, rene
 	// Lock.
 	var id int
 	err := pgSQL.QueryRow(insertLock, name, owner, until).Scan(&id)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		log.WithError(err).WithField("Description", "Ross").Error("insertLock")
 		handleError("insertLock", err)
 		return false, until
 	}
-	if id == 0 {
+	if err == sql.ErrNoRows {
 		// Already locked.
 		return false, until
 	}
