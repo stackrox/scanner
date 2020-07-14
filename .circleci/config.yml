@@ -23,6 +23,19 @@ runOnAllTagsWithDockerIOPullCtx: &runOnAllTagsWithDockerIOPullCtx
   context: docker-io-pull
 
 commands:
+  check-on-master-or-tag:
+    description: Run on master or tags only
+    steps:
+      - run:
+          name: Determine whether to run step
+          command: |
+            if [[ "${CIRCLE_BRANCH}" == "master" || -n "${CIRCLE_TAG}" ]]; then
+              echo "On master or tag, running the step"
+            else
+              echo "Not on master or tag, halting step"
+              circleci step halt
+            fi
+
   check-label-to-run:
     description: Run on master or tags, but skip on PRs unless the given label is provided
     parameters:
@@ -32,7 +45,6 @@ commands:
       - run:
           name: Determine whether to run step
           command: |
-            set +e
             if [[ "${CIRCLE_BRANCH}" == "master" || -n "${CIRCLE_TAG}" ]]; then
               echo "On master or tag, running the step"
             else
@@ -221,14 +233,22 @@ commands:
       - checkout
       - setup_remote_docker
       - setup-gcp
+      - attach_workspace:
+          at: /tmp
 
       - run:
           name: Pull definitions dumps
           command: |
-            gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
-            gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
+            if .circleci/pr_has_label.sh "generate-dumps-on-pr"; [[ $? -eq 1 ]]; then
+              echo "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
+              gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
+              gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
+            else
+              cp /tmp/postgres/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
+              zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/nvd-definitions.zip
+            fi
+
             unzip -d image/scanner/dump /tmp/nvd-definitions.zip
-            rm /tmp/nvd-definitions.zip
 
       - run:
           name: Build images
@@ -416,7 +436,7 @@ jobs:
     steps:
       - checkout
       - check-label-to-run:
-          label: ci-fetch-dumps
+          label: generate-dumps-on-pr
       - run:
           name: Build updater, and persist to workspace
           command: |
@@ -449,10 +469,8 @@ jobs:
     steps:
       - checkout
       - check-label-to-run:
-          label: ci-fetch-dumps
+          label: generate-dumps-on-pr
       - setup_remote_docker
-      - setup-gcp
-
       - attach_workspace:
           at: /tmp
 
@@ -469,20 +487,32 @@ jobs:
       - run:
           name: Take a PG dump
           command: |
-            pg_dump -U postgres postgres://127.0.0.1:5432 > pg-definitions.sql
-            gzip --best pg-definitions.sql
+            mkdir /tmp/postgres
+            pg_dump -U postgres postgres://127.0.0.1:5432 > /tmp/postgres/pg-definitions.sql
+            gzip --best /tmp/postgres/pg-definitions.sql
 
+      - store_artifacts:
+          path: /tmp/postgres/pg-definitions.sql.gz
+          destination: pg-definitions.sql.gz
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - postgres
+
+      - check-on-master-or-tag
+      - setup-gcp
       - run:
           name: Upload PG dump to Google Storage
           command: |
+            echo "On master or tag, uploading pg dump result to GCS"
             gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
 
   upload-nvd-dump-for-embedding-into-image:
     <<: *defaults
     steps:
       - checkout
-      - check-label-to-run:
-          label: ci-fetch-dumps
+      - check-on-master-or-tag
       - setup-gcp
       - attach_workspace:
           at: /tmp
@@ -501,8 +531,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - check-label-to-run:
-          label: ci-fetch-dumps
+      - check-on-master-or-tag
       - setup-gcp
       - attach_workspace:
           at: /tmp
@@ -536,12 +565,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - check-label-to-run:
-          label: ci-fetch-dumps
-
+      - check-on-master-or-tag
       - setup-gcp:
           service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
-
       - attach_workspace:
           at: /tmp
 

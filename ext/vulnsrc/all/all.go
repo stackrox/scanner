@@ -7,5 +7,6 @@ import (
 	_ "github.com/stackrox/scanner/ext/vulnsrc/debian"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/oracle"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/rhel"
+	_ "github.com/stackrox/scanner/ext/vulnsrc/stackrox"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
 )
