@@ -33,7 +33,7 @@ cp -p "${INPUT_ROOT}"/*.conf "${bundle_root}/etc/"
 
 postgres_url="https://download.postgresql.org/pub/repos/yum/12/redhat/rhel-8.2-x86_64"
 postgres_major="12"
-postgres_minor="12.1-2PGDG.rhel8.x86_64"
+postgres_minor="12.3-5PGDG.rhel8.x86_64"
 
 curl -s -o "${bundle_root}/postgres.rpm" \
     "${postgres_url}/postgresql${postgres_major}-${postgres_minor}.rpm"
