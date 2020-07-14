@@ -507,7 +507,7 @@ jobs:
           name: Upload PG dump to Google Storage
           command: |
             echo "On master or tag, uploading pg dump result to GCS"
-            gsutil cp pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
+            gsutil cp /tmp/postgres/pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
 
   upload-nvd-dump-for-embedding-into-image:
     <<: *defaults
