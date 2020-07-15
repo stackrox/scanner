@@ -139,8 +139,6 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 		}
 	}
 
-
-
 	vulnsWithMetadata, err := addMetadata(vulns, nvdDumpDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "adding metadata to vulns")

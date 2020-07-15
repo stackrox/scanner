@@ -199,7 +199,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 	if config.SkipFixableCentOSVulns {
 		countBefore := len(filtered)
 		filtered = filterFixableCentOSVulns(filtered)
-		log.Infof("Skipping fixable centOS vulns: filtered out %d", countBefore - len(filtered))
+		log.Infof("Skipping fixable centOS vulns: filtered out %d", countBefore-len(filtered))
 	}
 	log.Infof("Diffed OS vulns; base had %d, head had %d, and the diff has %d", len(baseVulns), len(headVulns), len(filtered))
 	if err := vulndump.WriteOSVulns(outputDir, filtered); err != nil {

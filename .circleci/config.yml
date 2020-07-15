@@ -513,7 +513,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - check-on-master-or-tag
+      - check-label-to-run:
+          label: generate-dumps-on-pr
+
       - setup-gcp
       - attach_workspace:
           at: /tmp
@@ -526,13 +528,18 @@ jobs:
       - run:
           name: Upload to Google Storage
           command: |
-            gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+            cmd=()
+            if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
+              cmd=(echo "Would do")
+            fi
+            "${cmd[@]}" gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
 
   create-diff-dumps:
     <<: *defaults
     steps:
       - checkout
-      - check-on-master-or-tag
+      - check-label-to-run:
+          label: generate-dumps-on-pr
       - setup-gcp
       - attach_workspace:
           at: /tmp
@@ -567,7 +574,8 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - check-on-master-or-tag
+      - check-label-to-run:
+          label: generate-dumps-on-pr
       - setup-gcp:
           service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
       - attach_workspace:
@@ -583,8 +591,13 @@ jobs:
               expected_zip_file_loc="/tmp/diff-dumps/dump${idx}/diff.zip"
               [[ -f "${expected_zip_file_loc}" ]]
               [[ -n "${diffloc}" ]]
-              echo "Would do" gsutil cp "${expected_zip_file_loc}" "${diffloc}"
+              echo "Found file at ${expected_zip_file_loc}"
               du -skh "${expected_zip_file_loc}"
+              cmd=()
+              if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
+                cmd+=(echo "Would do")
+              fi
+              "${cmd[@]}" gsutil cp "${expected_zip_file_loc}" "${diffloc}"
             done < <(jq -r '.knownGenesisDumps | .[]| [.diffLocation] | @tsv' < image/scanner/dump/genesis_manifests.json)
 
       - run:
@@ -609,7 +622,12 @@ jobs:
 
             cd /tmp/offline-dump
             zip scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
-            gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
+            du -skh scanner-vuln-updates.zip
+            cmd=()
+            if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
+              cmd+=(echo "Would do")
+            fi
+            "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 
   build:
     <<: *defaults
