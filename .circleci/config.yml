@@ -585,19 +585,16 @@ jobs:
       - run:
           name: Upload each diff dump to the prod bucket
           command: |
-            find /tmp/diff-dumps
-            set -x
             idx=-1
             while IFS=$'\t' read -r diffloc; do
               idx=$((idx+1))
               expected_zip_file_loc="/tmp/diff-dumps/dump${idx}/diff.zip"
               [[ -f "${expected_zip_file_loc}" ]]
-              [[ -n "${diffloc}" ]]
-              echo "Found file at ${expected_zip_file_loc}"
-              du -skh "${expected_zip_file_loc}"
               if [[ -z "${diffloc}" ]]; then
                 continue
               fi
+              echo "Found file at ${expected_zip_file_loc}"
+              du -skh "${expected_zip_file_loc}"
               cmd=()
               if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
                 cmd+=(echo "Would do")
