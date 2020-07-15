@@ -530,7 +530,7 @@ jobs:
           command: |
             cmd=()
             if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
-              cmd=(echo "Would do")
+              cmd+=(echo "Would do")
             fi
             "${cmd[@]}" gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
 
