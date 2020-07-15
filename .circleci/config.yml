@@ -594,6 +594,9 @@ jobs:
               [[ -n "${diffloc}" ]]
               echo "Found file at ${expected_zip_file_loc}"
               du -skh "${expected_zip_file_loc}"
+              if [[ -z "${diffloc}" ]]; then
+                continue
+              fi
               cmd=()
               if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
                 cmd+=(echo "Would do")
@@ -609,11 +612,11 @@ jobs:
             # Fetch the scanner dump which is marked as the base for offline dumps.
             # For offline dumps, we just use one base (the oldest base which is in a version of scanner still supported)
             # for simplicity.
-            offline_dumps="$(jq '.knownGenesisDumps | [.[] | select(.baseForOfflineDumps == true)]' < image/scanner/dump/genesis_manifests.json)"
+            offline_dumps="$(jq '.knownGenesisDumps | [.[] | map(.baseForOfflineDumps == true) | indices]' < image/scanner/dump/genesis_manifests.json)"
             echo "Got offline dumps list: ${offline_dumps}"
             [[ "$(echo "${offline_dumps}" | jq 'length')" -eq 1 ]]
-            offline_diff_location="$(echo "${offline_dumps}" | jq -r '.[0] | .diffLocation')"
-            gsutil cp -r "${offline_diff_location}" /tmp/offline-dump/scanner-defs.zip
+            offline_diff_location="/tmp/diff-dumps/dump$(echo "${offline_dumps}" | jq -r '.[0]')/diff.zip"
+            cp "${offline_diff_location}" /tmp/offline-dump/scanner-defs.zip
 
             # Prepare k8s and istio dump
             mkdir -p /tmp/scratch
