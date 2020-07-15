@@ -22,6 +22,21 @@ mkdir -p "${bundle_root}/"{"usr/local/bin","etc","docker-entrypoint-initdb.d"}
 chmod -R 755 "${bundle_root}"
 
 # =============================================================================
+# Get latest postgres minor version
+
+postgres_repo_url="https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
+postgres_major="12"
+
+build_dir="$(mktemp -d)"
+docker build -q -t postgres-minor-image "${build_dir}" -f - <<EOF
+FROM registry.access.redhat.com/ubi8/ubi:8.2
+RUN dnf install -y "${postgres_repo_url}"
+ENTRYPOINT dnf list postgresql${postgres_major}-server.x86_64 | tail -n 1 | awk '{print \$2}'
+EOF
+postgres_minor="$(docker run --rm postgres-minor-image).x86_64"
+rm -rf "${build_dir}"
+
+# =============================================================================
 
 # Add files to be included in the Dockerfile here. This includes artifacts that
 # would be otherwise downloaded or included via a COPY command in the
@@ -31,10 +46,8 @@ cp -p "${INPUT_ROOT}/dump/definitions.sql.gz" "${bundle_root}/docker-entrypoint-
 cp -p "${INPUT_ROOT}/rhel/docker-entrypoint.sh" "${bundle_root}/usr/local/bin/"
 cp -p "${INPUT_ROOT}"/*.conf "${bundle_root}/etc/"
 
+# Get postgres RPMs directly
 postgres_url="https://download.postgresql.org/pub/repos/yum/12/redhat/rhel-8.2-x86_64"
-postgres_major="12"
-postgres_minor="12.3-5PGDG.rhel8.x86_64"
-
 curl -s -o "${bundle_root}/postgres.rpm" \
     "${postgres_url}/postgresql${postgres_major}-${postgres_minor}.rpm"
 curl -s -o "${bundle_root}/postgres-server.rpm" \
