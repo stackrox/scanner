@@ -564,6 +564,7 @@ jobs:
               [[ "${timestamp_in_zip}" == "${timestamp}" ]] # Assertion on the manifest contents
               ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --config "${config}" --out-file "/tmp/diff-dumps/dump${idx}/diff.zip"
             done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp, (.config // empty | tostring)] | @tsv' < image/scanner/dump/genesis_manifests.json)
+            du -d 2 -kh "/tmp/diff-dumps"
 
       - persist_to_workspace:
           root: /tmp
