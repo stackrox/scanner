@@ -553,7 +553,7 @@ jobs:
           name: Create diff for each manifest
           command: |
             mkdir -p /tmp/diff-dumps
-            idx=0
+            idx=-1
             while IFS=$'\t' read -r dumploc timestamp config; do
               idx=$((idx+1))
               dump_file_name="${dumploc##*/}"
@@ -585,8 +585,9 @@ jobs:
       - run:
           name: Upload each diff dump to the prod bucket
           command: |
-            mkdir -p /tmp/diff-dumps
-            idx=0
+            find /tmp/diff-dumps
+            set -x
+            idx=-1
             while IFS=$'\t' read -r diffloc; do
               idx=$((idx+1))
               expected_zip_file_loc="/tmp/diff-dumps/dump${idx}/diff.zip"
