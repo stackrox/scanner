@@ -546,16 +546,17 @@ jobs:
           name: Create diff for each manifest
           command: |
             mkdir -p /tmp/diff-dumps
-            while IFS=$'\t' read -r dumploc timestamp; do
+            idx=0
+            while IFS=$'\t' read -r dumploc timestamp config; do
+              idx=$((idx+1))
               dump_file_name="${dumploc##*/}"
-              dump_file_name_no_ext="${dump_file_name%.*}"
               echo "Pulling genesis dump from ${dumploc}"
               gsutil cp "${dumploc}" .
               timestamp_in_zip="$(unzip -p "${dump_file_name}" manifest.json | jq -r '.until')"
               echo "Got timestamps -- from zip: ${timestamp_in_zip}; from manifest: ${timestamp}"
               [[ "${timestamp_in_zip}" == "${timestamp}" ]] # Assertion on the manifest contents
-              ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --out-file "/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
-            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp] | @tsv' < image/scanner/dump/genesis_manifests.json)
+              ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --config "${config}" --out-file "/tmp/diff-dumps/dump${idx}/diff.zip"
+            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp, (.config // empty | tostring)] | @tsv' < image/scanner/dump/genesis_manifests.json)
 
       - persist_to_workspace:
           root: /tmp
@@ -576,14 +577,15 @@ jobs:
           name: Upload each diff dump to the prod bucket
           command: |
             mkdir -p /tmp/diff-dumps
-            while IFS=$'\t' read -r dumploc diffloc; do
-              dump_file_name="${dumploc##*/}"
-              dump_file_name_no_ext="${dump_file_name%.*}"
-              expected_zip_file_loc="/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
+            idx=0
+            while IFS=$'\t' read -r diffloc; do
+              idx=$((idx+1))
+              expected_zip_file_loc="/tmp/diff-dumps/dump${idx}/diff.zip"
               [[ -f "${expected_zip_file_loc}" ]]
               [[ -n "${diffloc}" ]]
-              gsutil cp "${expected_zip_file_loc}" "${diffloc}"
-            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .diffLocation] | @tsv' < image/scanner/dump/genesis_manifests.json)
+              echo "Would do" gsutil cp "${expected_zip_file_loc}" "${diffloc}"
+              du -skh "${expected_zip_file_loc}"
+            done < <(jq -r '.knownGenesisDumps | .[]| [.diffLocation] | @tsv' < image/scanner/dump/genesis_manifests.json)
 
       - run:
           name: Generate offline dump
