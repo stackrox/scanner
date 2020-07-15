@@ -165,7 +165,7 @@ func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnera
 	return filtered
 }
 
-func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, config config) error {
+func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, cfg config) error {
 	baseVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
 	if err != nil {
 		return errors.Wrap(err, "loading OS vulns from base dump")
@@ -196,7 +196,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 		}
 	}
 
-	if config.SkipFixableCentOSVulns {
+	if cfg.SkipFixableCentOSVulns {
 		countBefore := len(filtered)
 		filtered = filterFixableCentOSVulns(filtered)
 		log.Infof("Skipping fixable centOS vulns: filtered out %d", countBefore-len(filtered))
@@ -225,9 +225,9 @@ func Command() *cobra.Command {
 	)
 
 	c.RunE = func(_ *cobra.Command, _ []string) error {
-		var config config
+		var cfg config
 		if configStringified != "" {
-			if err := json.Unmarshal([]byte(configStringified), &config); err != nil {
+			if err := json.Unmarshal([]byte(configStringified), &cfg); err != nil {
 				return errors.Wrap(err, "parsing passed config")
 			}
 		}
@@ -271,7 +271,7 @@ func Command() *cobra.Command {
 		log.Info("Done generating NVD diff.")
 
 		log.Info("Generating OS vulns diff...")
-		if err := generateOSVulnsDiff(stagingDir, baseZipR, headZipR, config); err != nil {
+		if err := generateOSVulnsDiff(stagingDir, baseZipR, headZipR, cfg); err != nil {
 			return errors.Wrap(err, "creating OS vulns diff")
 		}
 		log.Info("Generated OS vulns diff")
