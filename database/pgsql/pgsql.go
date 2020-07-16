@@ -312,12 +312,6 @@ func handleError(desc string, err error) error {
 	return err
 }
 
-// isErrUniqueViolation determines is the given error is a unique constraint violation.
-func isErrUniqueViolation(err error) bool {
-	pqErr, ok := err.(*pq.Error)
-	return ok && pqErr.Code == "23505"
-}
-
 func observeQueryTime(query, subquery string, start time.Time) {
 	promQueryDurationMilliseconds.
 		WithLabelValues(query, subquery).

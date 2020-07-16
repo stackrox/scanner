@@ -15,6 +15,7 @@
 package pgsql
 
 import (
+	"database/sql"
 	"errors"
 	"time"
 
@@ -24,7 +25,7 @@ import (
 // Lock tries to set a temporary lock in the database.
 //
 // Lock does not block, instead, it returns true and its expiration time
-// is the lock has been successfully acquired or false otherwise
+// if the lock has been successfully acquired or false otherwise
 func (pgSQL *pgSQL) Lock(name string, owner string, duration time.Duration, renew bool) (bool, time.Time) {
 	if name == "" || owner == "" || duration == 0 {
 		log.Warning("could not create an invalid lock")
@@ -53,11 +54,14 @@ func (pgSQL *pgSQL) Lock(name string, owner string, duration time.Duration, rene
 	}
 
 	// Lock.
-	_, err := pgSQL.Exec(insertLock, name, owner, until)
-	if err != nil {
-		if !isErrUniqueViolation(err) {
-			handleError("insertLock", err)
-		}
+	var id int
+	err := pgSQL.QueryRow(insertLock, name, owner, until).Scan(&id)
+	if err != nil && err != sql.ErrNoRows {
+		handleError("insertLock", err)
+		return false, until
+	}
+	if err == sql.ErrNoRows {
+		// Already locked.
 		return false, until
 	}
 

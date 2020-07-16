@@ -50,9 +50,19 @@ func (pgSQL *pgSQL) insertFeature(feature database.Feature) (int, error) {
 
 	// Find or create Feature.
 	var id int
-	err = pgSQL.QueryRow(soiFeature, feature.Name, namespaceID).Scan(&id)
-	if err != nil {
-		return 0, handleError("soiFeature", err)
+	err = pgSQL.QueryRow(insertFeature, feature.Name, namespaceID).Scan(&id)
+	if err != nil && err != sql.ErrNoRows {
+		return 0, handleError("insertFeature", err)
+	}
+	if err == sql.ErrNoRows {
+		// Query Feature because it already exists.
+		err := pgSQL.QueryRow(searchFeature, feature.Name, namespaceID).Scan(&id)
+		if err != nil {
+			return 0, handleError("searchFeature", err)
+		}
+		if id == 0 {
+			return 0, handleError("searchFeature", commonerr.ErrNotFound)
+		}
 	}
 
 	if pgSQL.cache != nil {
@@ -112,7 +122,6 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	// Begin transaction.
 	tx, err := pgSQL.Begin()
 	if err != nil {
-		tx.Rollback()
 		return 0, handleError("insertFeatureVersion.Begin()", err)
 	}
 
@@ -129,19 +138,27 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 		return 0, handleError("insertFeatureVersion.lockVulnerabilityAffects", err)
 	}
 
-	// Find or create FeatureVersion.
-	var created bool
-
 	t = time.Now()
-	err = tx.QueryRow(soiFeatureVersion, featureID, fv.Version).Scan(&created, &fv.ID)
-	observeQueryTime("insertFeatureVersion", "soiFeatureVersion", t)
+	err = tx.QueryRow(insertFeatureVersion, featureID, fv.Version).Scan(&fv.ID)
+	observeQueryTime("insertFeatureVersion", "insertFeatureVersion", t)
 
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		tx.Rollback()
-		return 0, handleError("soiFeatureVersion", err)
+		return 0, handleError("insertFeatureVersion", err)
 	}
 
-	if !created {
+	if err == sql.ErrNoRows {
+		// Query Feature Version for id.
+		err := pgSQL.QueryRow(searchFeatureVersion, featureID, fv.Version).Scan(&fv.ID)
+		if err != nil {
+			tx.Rollback()
+			return 0, handleError("searchFeatureVersion", err)
+		}
+		if id == 0 {
+			tx.Rollback()
+			return 0, handleError("searchFeatureVersion", commonerr.ErrNotFound)
+		}
+
 		// The featureVersion already existed, no need to link it to
 		// vulnerabilities.
 		tx.Commit()

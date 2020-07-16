@@ -15,6 +15,7 @@
 package pgsql
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/stackrox/scanner/database"
@@ -38,9 +39,19 @@ func (pgSQL *pgSQL) insertNamespace(namespace database.Namespace) (int, error) {
 	defer observeQueryTime("insertNamespace", "all", time.Now())
 
 	var id int
-	err := pgSQL.QueryRow(soiNamespace, namespace.Name, namespace.VersionFormat).Scan(&id)
-	if err != nil {
-		return 0, handleError("soiNamespace", err)
+	err := pgSQL.QueryRow(insertNamespace, namespace.Name, namespace.VersionFormat).Scan(&id)
+	if err != nil && err != sql.ErrNoRows {
+		return 0, handleError("insertNamespace", err)
+	}
+	if err == sql.ErrNoRows {
+		// Query Namespace for the ID because it already exists.
+		err := pgSQL.QueryRow(searchNamespace, namespace.Name).Scan(&id)
+		if err != nil {
+			return 0, handleError("searchNamespace", err)
+		}
+		if id == 0 {
+			return 0, handleError("searchNamespace", commonerr.ErrNotFound)
+		}
 	}
 
 	if pgSQL.cache != nil {

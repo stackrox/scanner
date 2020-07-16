@@ -31,45 +31,37 @@ const (
 	searchKeyValue = `SELECT value FROM KeyValue WHERE key = $1`
 
 	// namespace.go
-	soiNamespace = `
-		WITH new_namespace AS (
-			INSERT INTO Namespace(name, version_format)
-			SELECT CAST($1 AS VARCHAR), CAST($2 AS VARCHAR)
-			WHERE NOT EXISTS (SELECT name FROM Namespace WHERE name = $1)
-			RETURNING id
-		)
-		SELECT id FROM Namespace WHERE name = $1
-		UNION
-		SELECT id FROM new_namespace`
+	insertNamespace = `
+		INSERT INTO Namespace(name, version_format)
+		VALUES($1, $2)
+		ON CONFLICT (name)
+		DO NOTHING
+		RETURNING id
+	`
 
 	searchNamespace = `SELECT id FROM Namespace WHERE name = $1`
-	listNamespace   = `SELECT id, name, version_format FROM Namespace`
 
 	// feature.go
-	soiFeature = `
-		WITH new_feature AS (
-			INSERT INTO Feature(name, namespace_id)
-			SELECT CAST($1 AS VARCHAR), CAST($2 AS INTEGER)
-			WHERE NOT EXISTS (SELECT id FROM Feature WHERE name = $1 AND namespace_id = $2)
-			RETURNING id
-		)
-		SELECT id FROM Feature WHERE name = $1 AND namespace_id = $2
-		UNION
-		SELECT id FROM new_feature`
+	insertFeature = `
+		INSERT INTO Feature(name, namespace_id)
+		VALUES($1, $2)
+		ON CONFLICT (name, namespace_id)
+		DO NOTHING
+		RETURNING id
+	`
+
+	searchFeature = `SELECT id FROM Feature WHERE name = $1 AND namespace_id = $2`
 
 	searchFeatureVersion = `
 		SELECT id FROM FeatureVersion WHERE feature_id = $1 AND version = $2`
 
-	soiFeatureVersion = `
-		WITH new_featureversion AS (
-			INSERT INTO FeatureVersion(feature_id, version)
-			SELECT CAST($1 AS INTEGER), CAST($2 AS VARCHAR)
-			WHERE NOT EXISTS (SELECT id FROM FeatureVersion WHERE feature_id = $1 AND version = $2)
-			RETURNING id
-		)
-		SELECT false, id FROM FeatureVersion WHERE feature_id = $1 AND version = $2
-		UNION
-		SELECT true, id FROM new_featureversion`
+	insertFeatureVersion = `
+		INSERT INTO FeatureVersion(feature_id, version)
+		VALUES($1, $2)
+		ON CONFLICT (feature_id, version)
+		DO NOTHING
+		RETURNING id
+	`
 
 	searchVulnerabilityFixedInFeature = `
 		SELECT id, vulnerability_id, version FROM Vulnerability_FixedIn_Feature
@@ -151,8 +143,6 @@ const (
 			FROM FeatureVersion fv
 			WHERE fv.id = ANY($3::integer[])`
 
-	removeLayer = `DELETE FROM Layer WHERE name = $1`
-
 	// vulnerability.go
 	searchVulnerabilityBase = `
 	  SELECT v.id, v.name, n.id, n.name, n.version_format, v.description, v.link, v.severity, v.metadata
@@ -174,16 +164,13 @@ const (
 		VALUES($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
 		RETURNING id`
 
-	soiVulnerabilityFixedInFeature = `
-		WITH new_fixedinfeature AS (
-			INSERT INTO Vulnerability_FixedIn_Feature(vulnerability_id, feature_id, version)
-			SELECT CAST($1 AS INTEGER), CAST($2 AS INTEGER), CAST($3 AS VARCHAR)
-			WHERE NOT EXISTS (SELECT id FROM Vulnerability_FixedIn_Feature WHERE vulnerability_id = $1 AND feature_id = $2)
-			RETURNING id
-		)
-		SELECT false, id FROM Vulnerability_FixedIn_Feature WHERE vulnerability_id = $1 AND feature_id = $2
-		UNION
-		SELECT true, id FROM new_fixedinfeature`
+	insertVulnerabilityFixedInFeature = `
+		INSERT INTO Vulnerability_FixedIn_Feature(vulnerability_id, feature_id, version)
+		VALUES($1, $2, $3)
+		ON CONFLICT (vulnerability_id, feature_id)
+		DO NOTHING
+		RETURNING id
+	`
 
 	searchFeatureVersionByFeature = `SELECT id, version FROM FeatureVersion WHERE feature_id = $1`
 
@@ -196,7 +183,7 @@ const (
     RETURNING id`
 
 	// locks
-	insertLock        = `INSERT INTO Lock(name, owner, until) VALUES($1, $2, $3)`
+	insertLock        = `INSERT INTO Lock(name, owner, until) VALUES($1, $2, $3) ON CONFLICT DO NOTHING RETURNING id`
 	searchLock        = `SELECT owner, until FROM Lock WHERE name = $1`
 	updateLock        = `UPDATE Lock SET until = $3 WHERE name = $1 AND owner = $2`
 	removeLock        = `DELETE FROM Lock WHERE name = $1 AND owner = $2`
