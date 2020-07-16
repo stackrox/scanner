@@ -2,6 +2,7 @@ package diffdumps
 
 import (
 	"archive/zip"
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -16,6 +17,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/nvdloader"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
@@ -142,7 +144,28 @@ func vulnsAreEqual(v1, v2 database.Vulnerability) bool {
 	return reflect.DeepEqual(v1, v2)
 }
 
-func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
+func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnerability {
+	var filtered []database.Vulnerability
+	for _, vuln := range vulns {
+		if !strings.HasPrefix(vuln.Namespace.Name, "centos") {
+			filtered = append(filtered, vuln)
+			continue
+		}
+		var newFixedIn []database.FeatureVersion
+		for _, fixedIn := range vuln.FixedIn {
+			if fixedIn.Version != versionfmt.MaxVersion {
+				newFixedIn = append(newFixedIn, fixedIn)
+			}
+		}
+		if len(newFixedIn) > 0 {
+			vuln.FixedIn = newFixedIn
+			filtered = append(filtered, vuln)
+		}
+	}
+	return filtered
+}
+
+func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, cfg config) error {
 	baseVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
 	if err != nil {
 		return errors.Wrap(err, "loading OS vulns from base dump")
@@ -172,11 +195,21 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 			filtered = append(filtered, headVuln)
 		}
 	}
+
+	if cfg.SkipFixableCentOSVulns {
+		countBefore := len(filtered)
+		filtered = filterFixableCentOSVulns(filtered)
+		log.Infof("Skipping fixable centOS vulns: filtered out %d", countBefore-len(filtered))
+	}
 	log.Infof("Diffed OS vulns; base had %d, head had %d, and the diff has %d", len(baseVulns), len(headVulns), len(filtered))
 	if err := vulndump.WriteOSVulns(outputDir, filtered); err != nil {
 		return err
 	}
 	return nil
+}
+
+type config struct {
+	SkipFixableCentOSVulns bool `json:"skipFixableCentOSVulns"`
 }
 
 func Command() *cobra.Command {
@@ -185,12 +218,19 @@ func Command() *cobra.Command {
 	}
 
 	var (
-		baseDumpFile string
-		headDumpFile string
-		outFile      string
+		baseDumpFile      string
+		headDumpFile      string
+		outFile           string
+		configStringified string
 	)
 
 	c.RunE = func(_ *cobra.Command, _ []string) error {
+		var cfg config
+		if configStringified != "" {
+			if err := json.Unmarshal([]byte(configStringified), &cfg); err != nil {
+				return errors.Wrap(err, "parsing passed config")
+			}
+		}
 		baseZipR, err := validateAndOpenDump(baseDumpFile)
 		if err != nil {
 			return errors.Wrap(err, "loading base dump")
@@ -231,7 +271,7 @@ func Command() *cobra.Command {
 		log.Info("Done generating NVD diff.")
 
 		log.Info("Generating OS vulns diff...")
-		if err := generateOSVulnsDiff(stagingDir, baseZipR, headZipR); err != nil {
+		if err := generateOSVulnsDiff(stagingDir, baseZipR, headZipR, cfg); err != nil {
 			return errors.Wrap(err, "creating OS vulns diff")
 		}
 		log.Info("Generated OS vulns diff")
@@ -256,6 +296,7 @@ func Command() *cobra.Command {
 	c.Flags().StringVar(&baseDumpFile, "base-dump", "", "path to base dump")
 	c.Flags().StringVar(&headDumpFile, "head-dump", "", `path to "head" (updated) dump`)
 	c.Flags().StringVar(&outFile, "out-file", "", "path to write the diff-ed dump to")
+	c.Flags().StringVar(&configStringified, "config", "", "config for the given dump (should be serialized JSON)")
 	utils.Must(
 		c.MarkFlagRequired("base-dump"),
 		c.MarkFlagRequired("head-dump"),
