@@ -513,7 +513,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - check-on-master-or-tag
+      - check-label-to-run:
+          label: generate-dumps-on-pr
+
       - setup-gcp
       - attach_workspace:
           at: /tmp
@@ -526,13 +528,18 @@ jobs:
       - run:
           name: Upload to Google Storage
           command: |
-            gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+            cmd=()
+            if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
+              cmd+=(echo "Would do")
+            fi
+            "${cmd[@]}" gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
 
   create-diff-dumps:
     <<: *defaults
     steps:
       - checkout
-      - check-on-master-or-tag
+      - check-label-to-run:
+          label: generate-dumps-on-pr
       - setup-gcp
       - attach_workspace:
           at: /tmp
@@ -546,16 +553,18 @@ jobs:
           name: Create diff for each manifest
           command: |
             mkdir -p /tmp/diff-dumps
-            while IFS=$'\t' read -r dumploc timestamp; do
+            idx=-1
+            while IFS=$'\t' read -r dumploc timestamp config; do
+              idx=$((idx+1))
               dump_file_name="${dumploc##*/}"
-              dump_file_name_no_ext="${dump_file_name%.*}"
               echo "Pulling genesis dump from ${dumploc}"
               gsutil cp "${dumploc}" .
               timestamp_in_zip="$(unzip -p "${dump_file_name}" manifest.json | jq -r '.until')"
               echo "Got timestamps -- from zip: ${timestamp_in_zip}; from manifest: ${timestamp}"
               [[ "${timestamp_in_zip}" == "${timestamp}" ]] # Assertion on the manifest contents
-              ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --out-file "/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
-            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp] | @tsv' < image/scanner/dump/genesis_manifests.json)
+              ./bin/updater diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --config "${config}" --out-file "/tmp/diff-dumps/dump${idx}/diff.zip"
+            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp, (.config // empty | tostring)] | @tsv' < image/scanner/dump/genesis_manifests.json)
+            du -d 2 -kh "/tmp/diff-dumps"
 
       - persist_to_workspace:
           root: /tmp
@@ -566,7 +575,8 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - check-on-master-or-tag
+      - check-label-to-run:
+          label: generate-dumps-on-pr
       - setup-gcp:
           service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
       - attach_workspace:
@@ -575,15 +585,22 @@ jobs:
       - run:
           name: Upload each diff dump to the prod bucket
           command: |
-            mkdir -p /tmp/diff-dumps
-            while IFS=$'\t' read -r dumploc diffloc; do
-              dump_file_name="${dumploc##*/}"
-              dump_file_name_no_ext="${dump_file_name%.*}"
-              expected_zip_file_loc="/tmp/diff-dumps/${dump_file_name_no_ext}/diff.zip"
+            idx=-1
+            while IFS=$'\t' read -r diffloc; do
+              idx=$((idx+1))
+              expected_zip_file_loc="/tmp/diff-dumps/dump${idx}/diff.zip"
               [[ -f "${expected_zip_file_loc}" ]]
-              [[ -n "${diffloc}" ]]
-              gsutil cp "${expected_zip_file_loc}" "${diffloc}"
-            done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .diffLocation] | @tsv' < image/scanner/dump/genesis_manifests.json)
+              if [[ -z "${diffloc}" ]]; then
+                continue
+              fi
+              echo "Found file at ${expected_zip_file_loc}"
+              du -skh "${expected_zip_file_loc}"
+              cmd=()
+              if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
+                cmd+=(echo "Would do")
+              fi
+              "${cmd[@]}" gsutil cp "${expected_zip_file_loc}" "${diffloc}"
+            done < <(jq -r '.knownGenesisDumps | .[]| [.diffLocation] | @tsv' < image/scanner/dump/genesis_manifests.json)
 
       - run:
           name: Generate offline dump
@@ -593,11 +610,11 @@ jobs:
             # Fetch the scanner dump which is marked as the base for offline dumps.
             # For offline dumps, we just use one base (the oldest base which is in a version of scanner still supported)
             # for simplicity.
-            offline_dumps="$(jq '.knownGenesisDumps | [.[] | select(.baseForOfflineDumps == true)]' < image/scanner/dump/genesis_manifests.json)"
+            offline_dumps="$(jq '.knownGenesisDumps | map(.baseForOfflineDumps == true) | indices(true)' < image/scanner/dump/genesis_manifests.json)"
             echo "Got offline dumps list: ${offline_dumps}"
             [[ "$(echo "${offline_dumps}" | jq 'length')" -eq 1 ]]
-            offline_diff_location="$(echo "${offline_dumps}" | jq -r '.[0] | .diffLocation')"
-            gsutil cp -r "${offline_diff_location}" /tmp/offline-dump/scanner-defs.zip
+            offline_diff_location="/tmp/diff-dumps/dump$(echo "${offline_dumps}" | jq -r '.[0]')/diff.zip"
+            cp "${offline_diff_location}" /tmp/offline-dump/scanner-defs.zip
 
             # Prepare k8s and istio dump
             mkdir -p /tmp/scratch
@@ -607,7 +624,12 @@ jobs:
 
             cd /tmp/offline-dump
             zip scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
-            gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
+            du -skh scanner-vuln-updates.zip
+            cmd=()
+            if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
+              cmd+=(echo "Would do")
+            fi
+            "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 
   build:
     <<: *defaults

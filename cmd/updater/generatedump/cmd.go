@@ -120,6 +120,12 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 		}(n, u)
 	}
 
+	defer func() {
+		for _, updaters := range vulnsrc.Updaters() {
+			updaters.Clean()
+		}
+	}()
+
 	// Collect results of updates.
 	for i := 0; i < len(vulnsrc.Updaters()); i++ {
 		select {
@@ -131,10 +137,6 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 		case <-errSig.Done():
 			return nil, errSig.Err()
 		}
-	}
-
-	for _, updaters := range vulnsrc.Updaters() {
-		updaters.Clean()
 	}
 
 	vulnsWithMetadata, err := addMetadata(vulns, nvdDumpDir)
