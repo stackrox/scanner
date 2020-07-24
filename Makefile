@@ -11,6 +11,7 @@ RHEL_BUILD_IMAGE := stackrox/scanner-rhel:builder-1
 LOCAL_VOLUME_ARGS := -v$(CURDIR):/src:delegated -v $(GOPATH):/go:delegated
 GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
 BUILD_FLAGS := -e CGO_ENABLED=1,GOOS=linux,GOARCH=amd64
+BUILD_CMD := go build -ldflags="-linkmode=external"  -o image/scanner/bin/scanner ./cmd/clair
 
 #####################################################################
 ###### Binaries we depend on (need to be defined on top) ############
@@ -165,33 +166,28 @@ scanner-image-rhel-builder:
 	@echo "+ $@"
 	docker build -t $(RHEL_BUILD_IMAGE) -f build/Dockerfile_rhel build/
 
-.PHONY: build
-build-no-deps:
-	@echo "+ $@"
-	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-linkmode=external"  -o image/scanner/bin/scanner ./cmd/clair
-
 .PHONY: scanner-build-dockerized
 scanner-build-dockerized: scanner-image-builder
 	@echo "+ $@"
 ifdef CI
-	docker container create --name builder $(BUILD_IMAGE) make build-no-deps
+	docker container create --name builder $(BUILD_IMAGE) $(BUILD_CMD)
 	docker cp $(GOPATH) builder:/
 	docker start -i builder
 	docker cp builder:/go/src/github.com/stackrox/scanner/cmd/clair cmd/clair
 else
-	docker run $(BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(BUILD_IMAGE) go build -ldflags="-linkmode=external"  -o image/scanner/bin/scanner ./cmd/clair
+	docker run $(BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(BUILD_IMAGE) $(BUILD_CMD)
 endif
 
 .PHONY: scanner-rhel-build-dockerized
 scanner-rhel-build-dockerized: scanner-image-rhel-builder
 	@echo "+ $@"
 ifdef CI
-	docker container create --name builder $(RHEL_BUILD_IMAGE) make build-no-deps
+	docker container create --name builder $(RHEL_BUILD_IMAGE) $(BUILD_CMD)
 	docker cp $(GOPATH) builder:/
 	docker start -i builder
 	docker cp builder:/go/src/github.com/stackrox/scanner/cmd/clair cmd/clair
 else
-	docker run $(BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(RHEL_BUILD_IMAGE) go build -ldflags="-linkmode=external"  -o image/scanner/bin/scanner ./cmd/clair
+	docker run $(BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(RHEL_BUILD_IMAGE) $(BUILD_CMD)
 endif
 
 .PHONY: scanner-image
