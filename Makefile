@@ -173,7 +173,7 @@ ifdef CI
 	docker container create --name builder $(BUILD_IMAGE) $(BUILD_CMD)
 	docker cp $(GOPATH) builder:/
 	docker start -i builder
-	docker cp builder:/go/src/github.com/stackrox/scanner/cmd/clair cmd/clair
+	docker cp builder:/go/src/github.com/stackrox/scanner/image/scanner/bin/scanner image/scanner/bin/scanner
 else
 	docker run $(BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(BUILD_IMAGE) $(BUILD_CMD)
 endif
@@ -185,7 +185,7 @@ ifdef CI
 	docker container create --name builder $(RHEL_BUILD_IMAGE) $(BUILD_CMD)
 	docker cp $(GOPATH) builder:/
 	docker start -i builder
-	docker cp builder:/go/src/github.com/stackrox/scanner/cmd/clair cmd/clair
+	docker cp builder:/go/src/github.com/stackrox/scanner/image/scanner/bin/scanner image/scanner/bin/scanner
 else
 	docker run $(BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(RHEL_BUILD_IMAGE) $(BUILD_CMD)
 endif
