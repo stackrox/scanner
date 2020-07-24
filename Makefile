@@ -167,7 +167,7 @@ scanner-image-rhel-builder:
 	docker build -t $(RHEL_BUILD_IMAGE) -f build/Dockerfile_rhel build/
 
 .PHONY: scanner-build-dockerized
-scanner-build-dockerized: scanner-image-builder
+scanner-build-dockerized: scanner-image-builder deps
 	@echo "+ $@"
 ifdef CI
 	docker container create --name builder $(BUILD_IMAGE) $(BUILD_CMD)
@@ -179,7 +179,7 @@ else
 endif
 
 .PHONY: scanner-rhel-build-dockerized
-scanner-rhel-build-dockerized: scanner-image-rhel-builder
+scanner-rhel-build-dockerized: scanner-image-rhel-builder deps
 	@echo "+ $@"
 ifdef CI
 	docker container create --name builder $(RHEL_BUILD_IMAGE) $(BUILD_CMD)
