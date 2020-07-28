@@ -29,17 +29,10 @@ func newWithDB(db *bbolt.DB) Cache {
 }
 
 func initializeDB(db *bbolt.DB) error {
-	tx, err := db.Begin(true)
-	if err != nil {
+	return db.Update(func(tx *bbolt.Tx) error {
+		_, err := tx.CreateBucket(cveToProductBucket)
 		return err
-	}
-
-	if _, err := tx.CreateBucket(cveToProductBucket); err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-
-	return tx.Commit()
+	})
 }
 
 func New() (Cache, error) {
