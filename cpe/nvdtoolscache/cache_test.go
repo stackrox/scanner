@@ -17,14 +17,23 @@ func mustGetVuln(t *testing.T, cache Cache, product string) cvefeed.Vuln {
 	return vulns[0]
 }
 
+func mustNotGetVuln(t *testing.T, cache Cache, product string) bool {
+	vulns, err := cache.GetVulnsForProducts([]string{product})
+	require.NoError(t, err)
+	return len(vulns) == 0
+}
+
 func TestCache(t *testing.T) {
 	db, err := bolthelper.NewTemp(t.Name())
+	require.NoError(t, err)
+	err = initializeDB(db)
 	require.NoError(t, err)
 	defer func() {
 		_ = db.Close()
 		_ = os.RemoveAll(db.Path())
 	}()
 
+	// Initialize cache.
 	cache := newWithDB(db)
 	require.NoError(t, cache.LoadFromDirectory("./testdata/before"))
 
@@ -36,7 +45,11 @@ func TestCache(t *testing.T) {
 	assert.Equal(t, "CVE-2020-1745", vuln.ID())
 	assert.Equal(t, 4, len(vuln.Config()))
 
+	assert.True(t, mustNotGetVuln(t, cache, `undertow`))
+
+	// Update cache.
 	require.NoError(t, cache.LoadFromDirectory("./testdata/after"))
+
 	vuln = mustGetVuln(t, cache, `yargs\-parser`)
 	assert.Equal(t, vuln.ID(), "CVE-2020-7608")
 	assert.Equal(t, 5.3, vuln.CVSSv3BaseScore())
@@ -44,4 +57,6 @@ func TestCache(t *testing.T) {
 	vuln = mustGetVuln(t, cache, `undertow`)
 	assert.Equal(t, "CVE-2020-1745", vuln.ID())
 	assert.Equal(t, 1, len(vuln.Config()))
+
+	assert.True(t, mustNotGetVuln(t, cache, `tomcat`))
 }

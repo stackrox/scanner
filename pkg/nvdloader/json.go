@@ -14,6 +14,9 @@ type itemWrapper schema.NVDCVEFeedJSON10DefCVEItem
 // easyjson:json
 type feedWrapper schema.NVDCVEFeedJSON10
 
+// easyjson:json
+type strSliceWrapper []string
+
 // LoadJSONFileFromReader uses easy JSON to load the NVD feed from a given io.Reader.
 // It does NOT close the reader; that is the caller's responsibility.
 func LoadJSONFileFromReader(r io.Reader) (*schema.NVDCVEFeedJSON10, error) {
@@ -50,4 +53,20 @@ func UnmarshalNVDFeedCVEItem(bytes []byte) (*schema.NVDCVEFeedJSON10DefCVEItem, 
 		return nil, errors.Wrap(err, "unmarshaling CVE item")
 	}
 	return (*schema.NVDCVEFeedJSON10DefCVEItem)(&item), nil
+}
+
+func MarshalStringSlice(strs []string) ([]byte, error) {
+	bytes, err := easyjson.Marshal((strSliceWrapper)(strs))
+	if err != nil {
+		return nil, errors.Wrap(err, "marshaling string slice as JSON")
+	}
+	return bytes, nil
+}
+
+func UnmarshalStringSlice(bytes []byte) ([]string, error) {
+	var strSlice strSliceWrapper
+	if err := easyjson.Unmarshal(bytes, &strSlice); err != nil {
+		return nil, errors.Wrap(err, "unmarshaling string slice")
+	}
+	return strSlice, nil
 }
