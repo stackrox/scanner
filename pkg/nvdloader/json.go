@@ -1,6 +1,7 @@
 package nvdloader
 
 import (
+	"encoding/json"
 	"io"
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
@@ -50,4 +51,22 @@ func UnmarshalNVDFeedCVEItem(bytes []byte) (*schema.NVDCVEFeedJSON10DefCVEItem, 
 		return nil, errors.Wrap(err, "unmarshaling CVE item")
 	}
 	return (*schema.NVDCVEFeedJSON10DefCVEItem)(&item), nil
+}
+
+// MarshalStringSlice marshals the given string slice.
+func MarshalStringSlice(strs []string) ([]byte, error) {
+	bytes, err := json.Marshal(strs)
+	if err != nil {
+		return nil, errors.Wrap(err, "marshaling string slice as JSON")
+	}
+	return bytes, nil
+}
+
+// UnmarshalStringSlice unmarshals the given bytes into a string slice.
+func UnmarshalStringSlice(bytes []byte) ([]string, error) {
+	var strSlice []string
+	if err := json.Unmarshal(bytes, &strSlice); err != nil {
+		return nil, errors.Wrap(err, "unmarshaling string slice")
+	}
+	return strSlice, nil
 }

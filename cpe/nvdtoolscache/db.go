@@ -20,10 +20,19 @@ var (
 	// an empty dir. Exported for localdev to be able to set it.
 	// TODO: Make this injectable instead.
 	BoltPath = filepath.Join(wellknowndirnames.WriteableDir, "temp.db")
+
+	cveToProductBucket = []byte("stackrox-cve-to-product")
 )
 
 func newWithDB(db *bbolt.DB) Cache {
 	return &cacheImpl{DB: db}
+}
+
+func initializeDB(db *bbolt.DB) error {
+	return db.Update(func(tx *bbolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists(cveToProductBucket)
+		return err
+	})
 }
 
 func New() (Cache, error) {
@@ -34,6 +43,9 @@ func New() (Cache, error) {
 	}
 	db, err := bbolt.Open(BoltPath, 0600, &opts)
 	if err != nil {
+		return nil, err
+	}
+	if err := initializeDB(db); err != nil {
 		return nil, err
 	}
 	return newWithDB(db), nil
@@ -51,18 +63,54 @@ func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSO
 	if err != nil {
 		return err
 	}
+	// Track the products that are associated with this CVE.
 	productAlreadyWritten := set.NewStringSet()
+	// Track the products that are no longer associated with this CVE.
+	productsToDelete := set.NewStringSet()
 	return c.Update(func(tx *bbolt.Tx) error {
+		// Get the CVE to product mapping.
+		cveBucket := tx.Bucket(cveToProductBucket)
+		productBytes := cveBucket.Get([]byte(cve.CVE.CVEDataMeta.ID))
+		if productBytes != nil {
+			products, err := nvdloader.UnmarshalStringSlice(productBytes)
+			if err != nil {
+				return err
+			}
+			productsToDelete.AddAll(products...)
+		}
+
+		// Update the associated product buckets with the CVE.
 		for _, a := range vuln.Config() {
 			if !productAlreadyWritten.Add(a.Product) {
 				continue
 			}
+			productsToDelete.Remove(a.Product)
+
 			product := []byte(a.Product)
 			bucket, err := tx.CreateBucketIfNotExists(product)
 			if err != nil {
 				return err
 			}
 			if err := bucket.Put([]byte(cve.CVE.CVEDataMeta.ID), bytes); err != nil {
+				return err
+			}
+		}
+
+		// Update the CVE bucket with the latest products.
+		productBytes, err = nvdloader.MarshalStringSlice(productAlreadyWritten.AsSlice())
+		if err != nil {
+			return err
+		}
+		if err := cveBucket.Put([]byte(cve.CVE.CVEDataMeta.ID), productBytes); err != nil {
+			return err
+		}
+
+		for product := range productsToDelete {
+			bucket := tx.Bucket([]byte(product))
+			if bucket == nil {
+				return errors.Errorf("Bucket %s does not exist", product)
+			}
+			if err := bucket.Delete([]byte(cve.CVE.CVEDataMeta.ID)); err != nil {
 				return err
 			}
 		}

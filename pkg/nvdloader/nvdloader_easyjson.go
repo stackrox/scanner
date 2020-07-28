@@ -45,7 +45,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(in *jlexer.Lexer
 				if out.CVE == nil {
 					out.CVE = new(schema.CVEJSON40)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in, &*out.CVE)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in, out.CVE)
 			}
 		case "configurations":
 			if in.IsNull() {
@@ -55,7 +55,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(in *jlexer.Lexer
 				if out.Configurations == nil {
 					out.Configurations = new(schema.NVDCVEFeedJSON10DefConfigurations)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(in, &*out.Configurations)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(in, out.Configurations)
 			}
 		case "impact":
 			if in.IsNull() {
@@ -65,7 +65,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(in *jlexer.Lexer
 				if out.Impact == nil {
 					out.Impact = new(schema.NVDCVEFeedJSON10DefImpact)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(in, &*out.Impact)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(in, out.Impact)
 			}
 		case "lastModifiedDate":
 			out.LastModifiedDate = string(in.String())
@@ -192,7 +192,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(i
 				if out.BaseMetricV2 == nil {
 					out.BaseMetricV2 = new(schema.NVDCVEFeedJSON10DefImpactBaseMetricV2)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(in, &*out.BaseMetricV2)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(in, out.BaseMetricV2)
 			}
 		case "baseMetricV3":
 			if in.IsNull() {
@@ -202,7 +202,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(i
 				if out.BaseMetricV3 == nil {
 					out.BaseMetricV3 = new(schema.NVDCVEFeedJSON10DefImpactBaseMetricV3)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(in, &*out.BaseMetricV3)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(in, out.BaseMetricV3)
 			}
 		default:
 			in.SkipRecursive()
@@ -267,7 +267,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(i
 				if out.CVSSV3 == nil {
 					out.CVSSV3 = new(schema.CVSSV30)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(in, &*out.CVSSV3)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(in, out.CVSSV3)
 			}
 		case "exploitabilityScore":
 			out.ExploitabilityScore = float64(in.Float64())
@@ -743,7 +743,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(i
 				if out.CVSSV2 == nil {
 					out.CVSSV2 = new(schema.CVSSV20)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema6(in, &*out.CVSSV2)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema6(in, out.CVSSV2)
 			}
 		case "exploitabilityScore":
 			out.ExploitabilityScore = float64(in.Float64())
@@ -1173,7 +1173,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(i
 						if v1 == nil {
 							v1 = new(schema.NVDCVEFeedJSON10DefNode)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(in, &*v1)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(in, v1)
 					}
 					out.Nodes = append(out.Nodes, v1)
 					in.WantComma()
@@ -1272,7 +1272,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(i
 						if v4 == nil {
 							v4 = new(schema.NVDCVEFeedJSON10DefCPEMatch)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(in, &*v4)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(in, v4)
 					}
 					out.CPEMatch = append(out.CPEMatch, v4)
 					in.WantComma()
@@ -1303,7 +1303,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(i
 						if v5 == nil {
 							v5 = new(schema.NVDCVEFeedJSON10DefNode)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(in, &*v5)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(in, v5)
 					}
 					out.Children = append(out.Children, v5)
 					in.WantComma()
@@ -1439,7 +1439,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(i
 						if v10 == nil {
 							v10 = new(schema.NVDCVEFeedJSON10DefCPEName)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(in, &*v10)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(in, v10)
 					}
 					out.CPEName = append(out.CPEName, v10)
 					in.WantComma()
@@ -1655,7 +1655,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in
 				if out.Affects == nil {
 					out.Affects = new(schema.CVEJSON40Affects)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(in, &*out.Affects)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(in, out.Affects)
 			}
 		case "CVE_data_meta":
 			if in.IsNull() {
@@ -1665,7 +1665,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in
 				if out.CVEDataMeta == nil {
 					out.CVEDataMeta = new(schema.CVEJSON40CVEDataMeta)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema11(in, &*out.CVEDataMeta)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema11(in, out.CVEDataMeta)
 			}
 		case "data_format":
 			out.DataFormat = string(in.String())
@@ -1681,7 +1681,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in
 				if out.Description == nil {
 					out.Description = new(schema.CVEJSON40Description)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(in, &*out.Description)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(in, out.Description)
 			}
 		case "problemtype":
 			if in.IsNull() {
@@ -1691,7 +1691,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in
 				if out.Problemtype == nil {
 					out.Problemtype = new(schema.CVEJSON40Problemtype)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(in, &*out.Problemtype)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(in, out.Problemtype)
 			}
 		case "references":
 			if in.IsNull() {
@@ -1701,7 +1701,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in
 				if out.References == nil {
 					out.References = new(schema.CVEJSON40References)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(in, &*out.References)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(in, out.References)
 			}
 		default:
 			in.SkipRecursive()
@@ -1862,7 +1862,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(
 						if v13 == nil {
 							v13 = new(schema.CVEJSON40Reference)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(in, &*v13)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(in, v13)
 					}
 					out.ReferenceData = append(out.ReferenceData, v13)
 					in.WantComma()
@@ -2066,7 +2066,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(
 						if v19 == nil {
 							v19 = new(schema.CVEJSON40ProblemtypeProblemtypeData)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(in, &*v19)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(in, v19)
 					}
 					out.ProblemtypeData = append(out.ProblemtypeData, v19)
 					in.WantComma()
@@ -2157,7 +2157,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(
 						if v22 == nil {
 							v22 = new(schema.CVEJSON40LangString)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(in, &*v22)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(in, v22)
 					}
 					out.Description = append(out.Description, v22)
 					in.WantComma()
@@ -2307,7 +2307,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(
 						if v25 == nil {
 							v25 = new(schema.CVEJSON40LangString)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(in, &*v25)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(in, v25)
 					}
 					out.DescriptionData = append(out.DescriptionData, v25)
 					in.WantComma()
@@ -2453,7 +2453,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(
 				if out.Vendor == nil {
 					out.Vendor = new(schema.CVEJSON40AffectsVendor)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(in, &*out.Vendor)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(in, out.Vendor)
 			}
 		default:
 			in.SkipRecursive()
@@ -2528,7 +2528,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(
 						if v28 == nil {
 							v28 = new(schema.CVEJSON40AffectsVendorVendorData)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(in, &*v28)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(in, v28)
 					}
 					out.VendorData = append(out.VendorData, v28)
 					in.WantComma()
@@ -2603,7 +2603,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(
 				if out.Product == nil {
 					out.Product = new(schema.CVEJSON40AffectsVendorVendorDataProduct)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(in, &*out.Product)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(in, out.Product)
 			}
 		case "vendor_name":
 			out.VendorName = string(in.String())
@@ -2690,7 +2690,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(
 						if v31 == nil {
 							v31 = new(schema.CVEJSON40Product)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(in, &*v31)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(in, v31)
 					}
 					out.ProductData = append(out.ProductData, v31)
 					in.WantComma()
@@ -2767,7 +2767,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(
 				if out.Version == nil {
 					out.Version = new(schema.CVEJSON40ProductVersion)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(in, &*out.Version)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(in, out.Version)
 			}
 		default:
 			in.SkipRecursive()
@@ -2852,7 +2852,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(
 						if v34 == nil {
 							v34 = new(schema.CVEJSON40ProductVersionVersionData)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(in, &*v34)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(in, v34)
 					}
 					out.VersionData = append(out.VersionData, v34)
 					in.WantComma()
@@ -3012,7 +3012,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(in *jlexer.Lexe
 						if v37 == nil {
 							v37 = new(schema.NVDCVEFeedJSON10DefCVEItem)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(in, &*v37)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(in, v37)
 					}
 					out.CVEItems = append(out.CVEItems, v37)
 					in.WantComma()
@@ -3161,7 +3161,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(
 				if out.CVE == nil {
 					out.CVE = new(schema.CVEJSON40)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in, &*out.CVE)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in, out.CVE)
 			}
 		case "configurations":
 			if in.IsNull() {
@@ -3171,7 +3171,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(
 				if out.Configurations == nil {
 					out.Configurations = new(schema.NVDCVEFeedJSON10DefConfigurations)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(in, &*out.Configurations)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(in, out.Configurations)
 			}
 		case "impact":
 			if in.IsNull() {
@@ -3181,7 +3181,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(
 				if out.Impact == nil {
 					out.Impact = new(schema.NVDCVEFeedJSON10DefImpact)
 				}
-				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(in, &*out.Impact)
+				easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(in, out.Impact)
 			}
 		case "lastModifiedDate":
 			out.LastModifiedDate = string(in.String())
