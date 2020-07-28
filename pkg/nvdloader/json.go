@@ -1,6 +1,7 @@
 package nvdloader
 
 import (
+	"encoding/json"
 	"io"
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
@@ -13,9 +14,6 @@ type itemWrapper schema.NVDCVEFeedJSON10DefCVEItem
 
 // easyjson:json
 type feedWrapper schema.NVDCVEFeedJSON10
-
-// easyjson:json
-type strSliceWrapper []string
 
 // LoadJSONFileFromReader uses easy JSON to load the NVD feed from a given io.Reader.
 // It does NOT close the reader; that is the caller's responsibility.
@@ -56,7 +54,7 @@ func UnmarshalNVDFeedCVEItem(bytes []byte) (*schema.NVDCVEFeedJSON10DefCVEItem, 
 }
 
 func MarshalStringSlice(strs []string) ([]byte, error) {
-	bytes, err := easyjson.Marshal((strSliceWrapper)(strs))
+	bytes, err := json.Marshal(strs)
 	if err != nil {
 		return nil, errors.Wrap(err, "marshaling string slice as JSON")
 	}
@@ -64,8 +62,8 @@ func MarshalStringSlice(strs []string) ([]byte, error) {
 }
 
 func UnmarshalStringSlice(bytes []byte) ([]string, error) {
-	var strSlice strSliceWrapper
-	if err := easyjson.Unmarshal(bytes, &strSlice); err != nil {
+	var strSlice []string
+	if err := json.Unmarshal(bytes, &strSlice); err != nil {
 		return nil, errors.Wrap(err, "unmarshaling string slice")
 	}
 	return strSlice, nil

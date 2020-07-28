@@ -30,7 +30,7 @@ func newWithDB(db *bbolt.DB) Cache {
 
 func initializeDB(db *bbolt.DB) error {
 	return db.Update(func(tx *bbolt.Tx) error {
-		_, err := tx.CreateBucket(cveToProductBucket)
+		_, err := tx.CreateBucketIfNotExists(cveToProductBucket)
 		return err
 	})
 }
@@ -107,6 +107,9 @@ func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSO
 
 		for product := range productsToDelete {
 			bucket := tx.Bucket([]byte(product))
+			if bucket == nil {
+				return errors.Errorf("Bucket %s does not exist", product)
+			}
 			if err := bucket.Delete([]byte(cve.CVE.CVEDataMeta.ID)); err != nil {
 				return err
 			}

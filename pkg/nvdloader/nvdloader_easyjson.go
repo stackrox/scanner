@@ -18,73 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(in *jlexer.Lexer, out *strSliceWrapper) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		in.Skip()
-		*out = nil
-	} else {
-		in.Delim('[')
-		if *out == nil {
-			if !in.IsDelim(']') {
-				*out = make(strSliceWrapper, 0, 4)
-			} else {
-				*out = strSliceWrapper{}
-			}
-		} else {
-			*out = (*out)[:0]
-		}
-		for !in.IsDelim(']') {
-			var v1 string
-			v1 = string(in.String())
-			*out = append(*out, v1)
-			in.WantComma()
-		}
-		in.Delim(']')
-	}
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader(out *jwriter.Writer, in strSliceWrapper) {
-	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-		out.RawString("null")
-	} else {
-		out.RawByte('[')
-		for v2, v3 := range in {
-			if v2 > 0 {
-				out.RawByte(',')
-			}
-			out.String(string(v3))
-		}
-		out.RawByte(']')
-	}
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v strSliceWrapper) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v strSliceWrapper) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *strSliceWrapper) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *strSliceWrapper) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(l, v)
-}
-func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(in *jlexer.Lexer, out *itemWrapper) {
+func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(in *jlexer.Lexer, out *itemWrapper) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -147,7 +81,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(in *jlexer.Lexe
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(out *jwriter.Writer, in itemWrapper) {
+func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader(out *jwriter.Writer, in itemWrapper) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -211,25 +145,25 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(out *jwriter.Wr
 // MarshalJSON supports json.Marshaler interface
 func (v itemWrapper) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(&w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v itemWrapper) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *itemWrapper) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(&r, v)
+	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *itemWrapper) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(l, v)
+	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(l, v)
 }
 func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(in *jlexer.Lexer, out *schema.NVDCVEFeedJSON10DefImpact) {
 	isTopLevel := in.IsStart()
@@ -1231,17 +1165,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(i
 					out.Nodes = (out.Nodes)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v4 *schema.NVDCVEFeedJSON10DefNode
+					var v1 *schema.NVDCVEFeedJSON10DefNode
 					if in.IsNull() {
 						in.Skip()
-						v4 = nil
+						v1 = nil
 					} else {
-						if v4 == nil {
-							v4 = new(schema.NVDCVEFeedJSON10DefNode)
+						if v1 == nil {
+							v1 = new(schema.NVDCVEFeedJSON10DefNode)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(in, v4)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(in, v1)
 					}
-					out.Nodes = append(out.Nodes, v4)
+					out.Nodes = append(out.Nodes, v1)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -1280,14 +1214,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(o
 		}
 		{
 			out.RawByte('[')
-			for v5, v6 := range in.Nodes {
-				if v5 > 0 {
+			for v2, v3 := range in.Nodes {
+				if v2 > 0 {
 					out.RawByte(',')
 				}
-				if v6 == nil {
+				if v3 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(out, *v6)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(out, *v3)
 				}
 			}
 			out.RawByte(']')
@@ -1330,17 +1264,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(i
 					out.CPEMatch = (out.CPEMatch)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v7 *schema.NVDCVEFeedJSON10DefCPEMatch
+					var v4 *schema.NVDCVEFeedJSON10DefCPEMatch
 					if in.IsNull() {
 						in.Skip()
-						v7 = nil
+						v4 = nil
 					} else {
-						if v7 == nil {
-							v7 = new(schema.NVDCVEFeedJSON10DefCPEMatch)
+						if v4 == nil {
+							v4 = new(schema.NVDCVEFeedJSON10DefCPEMatch)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(in, v7)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(in, v4)
 					}
-					out.CPEMatch = append(out.CPEMatch, v7)
+					out.CPEMatch = append(out.CPEMatch, v4)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -1361,17 +1295,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(i
 					out.Children = (out.Children)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v8 *schema.NVDCVEFeedJSON10DefNode
+					var v5 *schema.NVDCVEFeedJSON10DefNode
 					if in.IsNull() {
 						in.Skip()
-						v8 = nil
+						v5 = nil
 					} else {
-						if v8 == nil {
-							v8 = new(schema.NVDCVEFeedJSON10DefNode)
+						if v5 == nil {
+							v5 = new(schema.NVDCVEFeedJSON10DefNode)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(in, v8)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(in, v5)
 					}
-					out.Children = append(out.Children, v8)
+					out.Children = append(out.Children, v5)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -1404,14 +1338,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(o
 		}
 		{
 			out.RawByte('[')
-			for v9, v10 := range in.CPEMatch {
-				if v9 > 0 {
+			for v6, v7 := range in.CPEMatch {
+				if v6 > 0 {
 					out.RawByte(',')
 				}
-				if v10 == nil {
+				if v7 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(out, *v10)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(out, *v7)
 				}
 			}
 			out.RawByte(']')
@@ -1427,14 +1361,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(o
 		}
 		{
 			out.RawByte('[')
-			for v11, v12 := range in.Children {
-				if v11 > 0 {
+			for v8, v9 := range in.Children {
+				if v8 > 0 {
 					out.RawByte(',')
 				}
-				if v12 == nil {
+				if v9 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(out, *v12)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(out, *v9)
 				}
 			}
 			out.RawByte(']')
@@ -1497,17 +1431,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(i
 					out.CPEName = (out.CPEName)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v13 *schema.NVDCVEFeedJSON10DefCPEName
+					var v10 *schema.NVDCVEFeedJSON10DefCPEName
 					if in.IsNull() {
 						in.Skip()
-						v13 = nil
+						v10 = nil
 					} else {
-						if v13 == nil {
-							v13 = new(schema.NVDCVEFeedJSON10DefCPEName)
+						if v10 == nil {
+							v10 = new(schema.NVDCVEFeedJSON10DefCPEName)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(in, v13)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(in, v10)
 					}
-					out.CPEName = append(out.CPEName, v13)
+					out.CPEName = append(out.CPEName, v10)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -1550,14 +1484,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(o
 		}
 		{
 			out.RawByte('[')
-			for v14, v15 := range in.CPEName {
-				if v14 > 0 {
+			for v11, v12 := range in.CPEName {
+				if v11 > 0 {
 					out.RawByte(',')
 				}
-				if v15 == nil {
+				if v12 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(out, *v15)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(out, *v12)
 				}
 			}
 			out.RawByte(']')
@@ -1920,17 +1854,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(
 					out.ReferenceData = (out.ReferenceData)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v16 *schema.CVEJSON40Reference
+					var v13 *schema.CVEJSON40Reference
 					if in.IsNull() {
 						in.Skip()
-						v16 = nil
+						v13 = nil
 					} else {
-						if v16 == nil {
-							v16 = new(schema.CVEJSON40Reference)
+						if v13 == nil {
+							v13 = new(schema.CVEJSON40Reference)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(in, v16)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(in, v13)
 					}
-					out.ReferenceData = append(out.ReferenceData, v16)
+					out.ReferenceData = append(out.ReferenceData, v13)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -1961,14 +1895,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v17, v18 := range in.ReferenceData {
-				if v17 > 0 {
+			for v14, v15 := range in.ReferenceData {
+				if v14 > 0 {
 					out.RawByte(',')
 				}
-				if v18 == nil {
+				if v15 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(out, *v18)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(out, *v15)
 				}
 			}
 			out.RawByte(']')
@@ -2015,9 +1949,9 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v19 string
-					v19 = string(in.String())
-					out.Tags = append(out.Tags, v19)
+					var v16 string
+					v16 = string(in.String())
+					out.Tags = append(out.Tags, v16)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2068,11 +2002,11 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(
 		}
 		{
 			out.RawByte('[')
-			for v20, v21 := range in.Tags {
-				if v20 > 0 {
+			for v17, v18 := range in.Tags {
+				if v17 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v21))
+				out.String(string(v18))
 			}
 			out.RawByte(']')
 		}
@@ -2124,17 +2058,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(
 					out.ProblemtypeData = (out.ProblemtypeData)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v22 *schema.CVEJSON40ProblemtypeProblemtypeData
+					var v19 *schema.CVEJSON40ProblemtypeProblemtypeData
 					if in.IsNull() {
 						in.Skip()
-						v22 = nil
+						v19 = nil
 					} else {
-						if v22 == nil {
-							v22 = new(schema.CVEJSON40ProblemtypeProblemtypeData)
+						if v19 == nil {
+							v19 = new(schema.CVEJSON40ProblemtypeProblemtypeData)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(in, v22)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(in, v19)
 					}
-					out.ProblemtypeData = append(out.ProblemtypeData, v22)
+					out.ProblemtypeData = append(out.ProblemtypeData, v19)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2165,14 +2099,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v23, v24 := range in.ProblemtypeData {
-				if v23 > 0 {
+			for v20, v21 := range in.ProblemtypeData {
+				if v20 > 0 {
 					out.RawByte(',')
 				}
-				if v24 == nil {
+				if v21 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(out, *v24)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(out, *v21)
 				}
 			}
 			out.RawByte(']')
@@ -2215,17 +2149,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(
 					out.Description = (out.Description)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v25 *schema.CVEJSON40LangString
+					var v22 *schema.CVEJSON40LangString
 					if in.IsNull() {
 						in.Skip()
-						v25 = nil
+						v22 = nil
 					} else {
-						if v25 == nil {
-							v25 = new(schema.CVEJSON40LangString)
+						if v22 == nil {
+							v22 = new(schema.CVEJSON40LangString)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(in, v25)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(in, v22)
 					}
-					out.Description = append(out.Description, v25)
+					out.Description = append(out.Description, v22)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2256,14 +2190,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v26, v27 := range in.Description {
-				if v26 > 0 {
+			for v23, v24 := range in.Description {
+				if v23 > 0 {
 					out.RawByte(',')
 				}
-				if v27 == nil {
+				if v24 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(out, *v27)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(out, *v24)
 				}
 			}
 			out.RawByte(']')
@@ -2365,17 +2299,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(
 					out.DescriptionData = (out.DescriptionData)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v28 *schema.CVEJSON40LangString
+					var v25 *schema.CVEJSON40LangString
 					if in.IsNull() {
 						in.Skip()
-						v28 = nil
+						v25 = nil
 					} else {
-						if v28 == nil {
-							v28 = new(schema.CVEJSON40LangString)
+						if v25 == nil {
+							v25 = new(schema.CVEJSON40LangString)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(in, v28)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(in, v25)
 					}
-					out.DescriptionData = append(out.DescriptionData, v28)
+					out.DescriptionData = append(out.DescriptionData, v25)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2406,14 +2340,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v29, v30 := range in.DescriptionData {
-				if v29 > 0 {
+			for v26, v27 := range in.DescriptionData {
+				if v26 > 0 {
 					out.RawByte(',')
 				}
-				if v30 == nil {
+				if v27 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(out, *v30)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(out, *v27)
 				}
 			}
 			out.RawByte(']')
@@ -2586,17 +2520,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(
 					out.VendorData = (out.VendorData)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v31 *schema.CVEJSON40AffectsVendorVendorData
+					var v28 *schema.CVEJSON40AffectsVendorVendorData
 					if in.IsNull() {
 						in.Skip()
-						v31 = nil
+						v28 = nil
 					} else {
-						if v31 == nil {
-							v31 = new(schema.CVEJSON40AffectsVendorVendorData)
+						if v28 == nil {
+							v28 = new(schema.CVEJSON40AffectsVendorVendorData)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(in, v31)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(in, v28)
 					}
-					out.VendorData = append(out.VendorData, v31)
+					out.VendorData = append(out.VendorData, v28)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2627,14 +2561,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v32, v33 := range in.VendorData {
-				if v32 > 0 {
+			for v29, v30 := range in.VendorData {
+				if v29 > 0 {
 					out.RawByte(',')
 				}
-				if v33 == nil {
+				if v30 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(out, *v33)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(out, *v30)
 				}
 			}
 			out.RawByte(']')
@@ -2748,17 +2682,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(
 					out.ProductData = (out.ProductData)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v34 *schema.CVEJSON40Product
+					var v31 *schema.CVEJSON40Product
 					if in.IsNull() {
 						in.Skip()
-						v34 = nil
+						v31 = nil
 					} else {
-						if v34 == nil {
-							v34 = new(schema.CVEJSON40Product)
+						if v31 == nil {
+							v31 = new(schema.CVEJSON40Product)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(in, v34)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(in, v31)
 					}
-					out.ProductData = append(out.ProductData, v34)
+					out.ProductData = append(out.ProductData, v31)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2789,14 +2723,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v35, v36 := range in.ProductData {
-				if v35 > 0 {
+			for v32, v33 := range in.ProductData {
+				if v32 > 0 {
 					out.RawByte(',')
 				}
-				if v36 == nil {
+				if v33 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(out, *v36)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(out, *v33)
 				}
 			}
 			out.RawByte(']')
@@ -2910,17 +2844,17 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(
 					out.VersionData = (out.VersionData)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v37 *schema.CVEJSON40ProductVersionVersionData
+					var v34 *schema.CVEJSON40ProductVersionVersionData
 					if in.IsNull() {
 						in.Skip()
-						v37 = nil
+						v34 = nil
 					} else {
-						if v37 == nil {
-							v37 = new(schema.CVEJSON40ProductVersionVersionData)
+						if v34 == nil {
+							v34 = new(schema.CVEJSON40ProductVersionVersionData)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(in, v37)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(in, v34)
 					}
-					out.VersionData = append(out.VersionData, v37)
+					out.VersionData = append(out.VersionData, v34)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2951,14 +2885,14 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v38, v39 := range in.VersionData {
-				if v38 > 0 {
+			for v35, v36 := range in.VersionData {
+				if v35 > 0 {
 					out.RawByte(',')
 				}
-				if v39 == nil {
+				if v36 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(out, *v39)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(out, *v36)
 				}
 			}
 			out.RawByte(']')
@@ -3025,7 +2959,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(
 	}
 	out.RawByte('}')
 }
-func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader2(in *jlexer.Lexer, out *feedWrapper) {
+func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(in *jlexer.Lexer, out *feedWrapper) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -3070,17 +3004,17 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader2(in *jlexer.Lexe
 					out.CVEItems = (out.CVEItems)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v40 *schema.NVDCVEFeedJSON10DefCVEItem
+					var v37 *schema.NVDCVEFeedJSON10DefCVEItem
 					if in.IsNull() {
 						in.Skip()
-						v40 = nil
+						v37 = nil
 					} else {
-						if v40 == nil {
-							v40 = new(schema.NVDCVEFeedJSON10DefCVEItem)
+						if v37 == nil {
+							v37 = new(schema.NVDCVEFeedJSON10DefCVEItem)
 						}
-						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(in, v40)
+						easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(in, v37)
 					}
-					out.CVEItems = append(out.CVEItems, v40)
+					out.CVEItems = append(out.CVEItems, v37)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -3095,7 +3029,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader2(in *jlexer.Lexe
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader2(out *jwriter.Writer, in feedWrapper) {
+func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(out *jwriter.Writer, in feedWrapper) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -3161,14 +3095,14 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader2(out *jwriter.Wr
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v41, v42 := range in.CVEItems {
-				if v41 > 0 {
+			for v38, v39 := range in.CVEItems {
+				if v38 > 0 {
 					out.RawByte(',')
 				}
-				if v42 == nil {
+				if v39 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(out, *v42)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(out, *v39)
 				}
 			}
 			out.RawByte(']')
@@ -3180,25 +3114,25 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader2(out *jwriter.Wr
 // MarshalJSON supports json.Marshaler interface
 func (v feedWrapper) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader2(&w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v feedWrapper) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader2(w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *feedWrapper) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader2(&r, v)
+	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *feedWrapper) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader2(l, v)
+	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(l, v)
 }
 func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(in *jlexer.Lexer, out *schema.NVDCVEFeedJSON10DefCVEItem) {
 	isTopLevel := in.IsStart()
