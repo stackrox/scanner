@@ -41,10 +41,10 @@ func init() {
 	featurens.RegisterDetector("lsb-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
+func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 	f, hasFile := files["etc/lsb-release"]
 	if !hasFile {
-		return nil, nil
+		return nil
 	}
 
 	var OS, version string
@@ -80,17 +80,17 @@ func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
 	case "centos", "rhel", "fedora", "amzn", "ol", "oracle":
 		versionFormat = rpm.ParserName
 	default:
-		return nil, nil
+		return nil
 	}
 
 	if OS != "" && version != "" {
 		return &database.Namespace{
 			Name:          OS + ":" + version,
 			VersionFormat: versionFormat,
-		}, nil
+		}
 	}
 
-	return nil, nil
+	return nil
 }
 
 func (d *detector) RequiredFilenames() []string {

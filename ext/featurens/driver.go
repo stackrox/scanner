@@ -36,7 +36,7 @@ var (
 type Detector interface {
 	// Detect attempts to determine a Namespace from a FilesMap of an image
 	// layer.
-	Detect(tarutil.FilesMap) (*database.Namespace, error)
+	Detect(tarutil.FilesMap) *database.Namespace
 
 	// RequiredFilenames returns the list of files required to be in the FilesMap
 	// provided to the Detect method.
@@ -69,24 +69,20 @@ func RegisterDetector(name string, d Detector) {
 
 // Detect iterators through all registered Detectors and returns the first
 // non-nil detected namespace.
-func Detect(files tarutil.FilesMap) (*database.Namespace, error) {
+func Detect(files tarutil.FilesMap) *database.Namespace {
 	detectorsM.RLock()
 	defer detectorsM.RUnlock()
 
 	for name, detector := range detectors {
-		namespace, err := detector.Detect(files)
-		if err != nil {
-			log.WithError(err).WithField("name", name).Warning("failed while attempting to detect namespace")
-			return nil, err
-		}
+		namespace := detector.Detect(files)
 
 		if namespace != nil {
 			log.WithFields(log.Fields{"name": name, "namespace": namespace.Name}).Debug("detected namespace")
-			return namespace, nil
+			return namespace
 		}
 	}
 
-	return nil, nil
+	return nil
 }
 
 // RequiredFilenames returns the total list of files required for all
@@ -112,8 +108,7 @@ type TestData struct {
 // asserts the output to be equal to the expected output.
 func TestDetector(t *testing.T, d Detector, testData []TestData) {
 	for _, td := range testData {
-		namespace, err := d.Detect(td.Files)
-		assert.Nil(t, err)
+		namespace := d.Detect(td.Files)
 
 		if namespace == nil {
 			assert.Equal(t, td.ExpectedNamespace, namespace)

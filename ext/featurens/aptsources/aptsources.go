@@ -35,10 +35,10 @@ func init() {
 	featurens.RegisterDetector("apt-sources", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
+func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 	f, hasFile := files["etc/apt/sources.list"]
 	if !hasFile {
-		return nil, nil
+		return nil
 	}
 
 	var OS, version string
@@ -82,9 +82,9 @@ func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
 		return &database.Namespace{
 			Name:          OS + ":" + version,
 			VersionFormat: dpkg.ParserName,
-		}, nil
+		}
 	}
-	return nil, nil
+	return nil
 }
 
 func (d detector) RequiredFilenames() []string {
