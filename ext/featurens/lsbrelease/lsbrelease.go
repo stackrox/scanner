@@ -25,6 +25,7 @@ import (
 
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
+	"github.com/stackrox/scanner/ext/featurens/util"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -72,10 +73,7 @@ func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
 		}
 	}
 
-	// Keep OS consistent with redhatrelease.go.
-	if OS == "ol" {
-		OS = "oracle"
-	}
+	OS = util.NormalizeOSName(OS)
 
 	// Determine the VersionFormat.
 	var versionFormat string
