@@ -25,6 +25,18 @@ import (
 func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
+			ExpectedNamespace: &database.Namespace{Name: "amzn:2"},
+			Files: tarutil.FilesMap{
+				"etc/system-release": []byte(`Amazon Linux release 2 (Karoo)`),
+			},
+		},
+		{
+			ExpectedNamespace: &database.Namespace{Name: "amzn:2018.03"},
+			Files: tarutil.FilesMap{
+				"etc/system-release": []byte(`Amazon Linux AMI release 2018.03`),
+			},
+		},
+		{
 			ExpectedNamespace: &database.Namespace{Name: "oracle:6"},
 			Files: tarutil.FilesMap{
 				"etc/oracle-release": []byte(`Oracle Linux Server release 6.8`),
@@ -46,6 +58,12 @@ func TestDetector(t *testing.T) {
 			ExpectedNamespace: &database.Namespace{Name: "centos:7"},
 			Files: tarutil.FilesMap{
 				"etc/redhat-release": []byte(`Red Hat Enterprise Linux Server release 7.2 (Maipo)`),
+			},
+		},
+		{
+			ExpectedNamespace: &database.Namespace{Name: "centos:8"},
+			Files: tarutil.FilesMap{
+				"etc/redhat-release": []byte(`Red Hat Enterprise Linux release 8.0 (Ootpa)`),
 			},
 		},
 		{
