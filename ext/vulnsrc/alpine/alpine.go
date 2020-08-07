@@ -37,8 +37,6 @@ import (
 )
 
 const (
-	// This Alpine vulnerability database affects origin packages, which has
-	// `origin` field of itself.
 	// secdbGitURL  = "https://github.com/alpinelinux/alpine-secdb" // No longer valid
 	baseURL      = "https://secdb.alpinelinux.org/" // Web source for alpine vuln data
 	updaterFlag  = "alpine-secdbUpdater"
@@ -77,6 +75,10 @@ func (u *updater) processFile(filename string) {
 	// find hash of file contents as part of checking for changes
 	fileHasher := sha256.New()
 	fileContents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.WithField("package", "Alpine").Fatal(err)
+		return
+	}
 	fileHasher.Write(fileContents[:])
 
 	// Must be a better way to achieve this...
@@ -85,7 +87,6 @@ func (u *updater) processFile(filename string) {
 	u.hashSlice = append(u.hashSlice, fileHash)
 
 	file.WriteString(string(fileContents[:]))
-	return
 }
 
 func (u *updater) processFiles(_ int, element *goquery.Selection) {
