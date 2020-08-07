@@ -72,12 +72,17 @@ func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
 		}
 	}
 
+	// Keep OS consistent with redhatrelease.go.
+	if OS == "ol" {
+		OS = "oracle"
+	}
+
 	// Determine the VersionFormat.
 	var versionFormat string
 	switch OS {
 	case "debian", "ubuntu":
 		versionFormat = dpkg.ParserName
-	case "centos", "rhel", "fedora", "amzn", "ol", "oracle":
+	case "centos", "rhel", "fedora", "amzn", "oracle":
 		versionFormat = rpm.ParserName
 	default:
 		return nil, nil
