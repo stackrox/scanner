@@ -25,6 +25,7 @@ import (
 
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
+	"github.com/stackrox/scanner/ext/featurens/util"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -79,12 +80,14 @@ func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 		}
 	}
 
+	OS = util.NormalizeOSName(OS)
+
 	// Determine the VersionFormat.
 	var versionFormat string
 	switch OS {
 	case "debian", "ubuntu":
 		versionFormat = dpkg.ParserName
-	case "centos", "rhel", "fedora", "amzn", "ol", "oracle":
+	case "centos", "rhel", "fedora", "amzn", "oracle":
 		versionFormat = rpm.ParserName
 	default:
 		return nil
