@@ -59,7 +59,7 @@ func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 			return &database.Namespace{
 				Name:          "amzn" + ":" + r[3],
 				VersionFormat: rpm.ParserName,
-			}, nil
+			}
 		}
 
 		// Attempt to match Oracle Linux.
