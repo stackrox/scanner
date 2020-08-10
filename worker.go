@@ -26,7 +26,7 @@ import (
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/features"
+	featureFlags "github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/singletons/analyzers"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
@@ -162,18 +162,16 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
 	namespace = DetectNamespace(name, files, parent)
 
-	if !features.ContinueUnknownOS.Enabled() || namespace != nil {
-		// Detect features.
-		featureVersions, err = detectFeatureVersions(name, files, namespace, parent)
-		if err != nil && (!features.ContinueUnknownOS.Enabled() || err != ErrUnsupported) {
-			return nil, nil, nil, err
-		}
-		if len(featureVersions) > 0 {
-			log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
-		}
+	// Detect features.
+	featureVersions, err = detectFeatureVersions(name, files, namespace, parent)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if len(featureVersions) > 0 {
+		log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
 	}
 
-	if !features.LanguageVulns.Enabled() {
+	if !featureFlags.LanguageVulns.Enabled() {
 		return namespace, featureVersions, nil, err
 	}
 	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())
@@ -270,6 +268,11 @@ func detectFeatureVersions(name string, files tarutil.FilesMap, namespace *datab
 		}
 
 		log.WithFields(log.Fields{"feature name": feature.Feature.Name, "feature version": feature.Version, logLayerName: name}).Warning("Namespace unknown")
+		if featureFlags.ContinueUnknownOS.Enabled() {
+			features = nil
+			return
+		}
+
 		err = ErrUnsupported
 		return
 	}
