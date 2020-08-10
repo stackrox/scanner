@@ -1,4 +1,4 @@
-// Copyright 2017 clair authors
+// Copyright 2018 clair authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import (
 )
 
 const (
-	// secdbGitURL  = "https://github.com/alpinelinux/alpine-secdb" // No longer valid
 	baseURL      = "https://secdb.alpinelinux.org/" // Web source for alpine vuln data
 	updaterFlag  = "alpine-secdbUpdater"
 	nvdURLPrefix = "https://cve.mitre.org/cgi-bin/cvename.cgi?name="
