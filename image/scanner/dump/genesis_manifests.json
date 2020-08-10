@@ -32,9 +32,9 @@
       "diffLocation": "gs://definitions.stackrox.io/843a826a-2599-4761-a68e-3498749c7b8f/diff.zip"
     },
     {
-      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20200807210258.zip",
-      "timestamp": "2020-08-07T21:02:58.166356201Z",
-      "diffLocation": "gs://definitions.stackrox.io/d664922a-6ba7-4e2f-8b47-4df50b3c5c6b/diff.zip"
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-2020081022014963.zip",
+      "timestamp": "2020-08-10T22:01:49.631585946Z",
+      "diffLocation": "gs://definitions.stackrox.io/a082418b-cf2e-48de-a8e7-a4596ed2fe5d/diff.zip"
     }
   ]
 }
