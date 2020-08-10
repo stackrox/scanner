@@ -17,8 +17,6 @@
 package alpine
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -49,7 +47,6 @@ func init() {
 type updater struct {
 	repositoryLocalPath string
 	currentDir          string
-	hashSlice           [][32]byte
 }
 
 func (u *updater) processFile(filename string) {
@@ -71,19 +68,11 @@ func (u *updater) processFile(filename string) {
 	}
 	defer file.Close()
 
-	// find hash of file contents as part of checking for changes
-	fileHasher := sha256.New()
 	fileContents, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.WithField("package", "Alpine").Fatal(err)
 		return
 	}
-	fileHasher.Write(fileContents[:])
-
-	// Must be a better way to achieve this...
-	var fileHash [32]byte
-	copy(fileHash[:], fileHasher.Sum(nil))
-	u.hashSlice = append(u.hashSlice, fileHash)
 
 	file.WriteString(string(fileContents[:]))
 }
@@ -115,22 +104,13 @@ func (u *updater) processVersions(_ int, element *goquery.Selection) {
 	href, exists := element.Attr("href")
 	if exists {
 		if href != "../" {
-			log.WithField("package", "Alpine").Debug(href)
+			log.WithField("package", "alpine").Debug(href)
 			// create Version directory
-			os.Mkdir(filepath.Join(u.repositoryLocalPath, href), 0700)
+			_ = os.Mkdir(filepath.Join(u.repositoryLocalPath, href), 0700)
 			u.currentDir = href
 			u.processVersionDir(href)
 		}
 	}
-}
-
-func sliceXOR(a, b [32]byte) (result [32]byte) {
-	var tmpval [32]byte
-	for i := 0; i < 32; i++ {
-		tmpval[i] = a[i] ^ b[i]
-	}
-	result = tmpval
-	return
 }
 
 func (u *updater) getVulnFiles(repoPath, tempDirPrefix string) (commit string, err error) {
@@ -146,7 +126,6 @@ func (u *updater) getVulnFiles(repoPath, tempDirPrefix string) (commit string, e
 		u.repositoryLocalPath = repoPath
 	}
 
-	u.hashSlice = nil
 	u.currentDir = ""
 
 	// Get root directory of web server
@@ -163,12 +142,7 @@ func (u *updater) getVulnFiles(repoPath, tempDirPrefix string) (commit string, e
 	}
 	document.Find("a").Each(u.processVersions)
 
-	// Find XOR of all file hash values to use as commit hash replacement. Used to detect for changes to source files
-	var tmpCommit [32]byte
-	for i := 0; i < len(u.hashSlice); i++ {
-		tmpCommit = sliceXOR(tmpCommit, u.hashSlice[i])
-	}
-	commit = hex.EncodeToString(tmpCommit[:])
+	commit = "00000000000000000000000000000000"
 
 	return
 }
@@ -183,22 +157,9 @@ func (u *updater) Update(db vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err
 		return
 	}
 
-	// Ask the database for the latest commit we successfully applied.
-	var dbCommit string
-	dbCommit, err = db.GetKeyValue(updaterFlag)
-	if err != nil {
-		return
-	}
-
 	// Set the updaterFlag to equal the commit processed.
 	resp.FlagName = updaterFlag
 	resp.FlagValue = commit
-
-	// Short-circuit if there have been no updates.
-	if commit == dbCommit {
-		log.WithField("package", "alpine").Debug("no update")
-		return
-	}
 
 	// Get the list of namespaces from the repository.
 	var namespaces []string
