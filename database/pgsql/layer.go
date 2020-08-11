@@ -24,6 +24,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/features"
 )
 
 func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities bool) (database.Layer, error) {
@@ -332,11 +333,13 @@ func (pgSQL *pgSQL) insertLayerTx(layer *database.Layer, namespaceID, parentID z
 		}
 	}
 
-	// Update Layer_diff_FeatureVersion now.
-	err = pgSQL.updateDiffFeatureVersions(tx, layer)
-	if err != nil {
-		tx.Rollback()
-		return err
+	if !features.ContinueUnknownOS.Enabled() || layer.Namespace != nil {
+		// Update Layer_diff_FeatureVersion now.
+		err = pgSQL.updateDiffFeatureVersions(tx, layer)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	// Commit transaction.

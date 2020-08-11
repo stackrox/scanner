@@ -41,7 +41,7 @@ func init() {
 
 type detector struct{}
 
-func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
+func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 	file, exists := files[alpineReleasePath]
 	if exists {
 		scanner := bufio.NewScanner(bytes.NewBuffer(file))
@@ -53,12 +53,12 @@ func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
 				return &database.Namespace{
 					Name:          osName + ":" + "v" + versionNumbers[0] + "." + versionNumbers[1],
 					VersionFormat: dpkg.ParserName,
-				}, nil
+				}
 			}
 		}
 	}
 
-	return nil, nil
+	return nil
 }
 
 func (d detector) RequiredFilenames() []string {

@@ -16,7 +16,6 @@ package clair
 
 import (
 	"io"
-	"os"
 	"regexp"
 
 	log "github.com/sirupsen/logrus"
@@ -27,6 +26,7 @@ import (
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/component"
+	featureFlags "github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/singletons/analyzers"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
@@ -160,10 +160,7 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 }
 
 func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
-	namespace, err = DetectNamespace(name, files, parent)
-	if err != nil {
-		return nil, nil, nil, err
-	}
+	namespace = DetectNamespace(name, files, parent)
 
 	// Detect features.
 	featureVersions, err = detectFeatureVersions(name, files, namespace, parent)
@@ -174,8 +171,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
 	}
 
-	// If we want to disable LANGUAGE_VULNS, then we can just set this variable to false
-	if os.Getenv("LANGUAGE_VULNS") == "false" {
+	if !featureFlags.LanguageVulns.Enabled() {
 		return namespace, featureVersions, nil, err
 	}
 	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())
@@ -206,14 +202,11 @@ func detectContent(imageFormat, name, path string, headers map[string]string, pa
 	return detectFromFiles(files, name, parent)
 }
 
-func DetectNamespace(name string, files tarutil.FilesMap, parent *database.Layer) (namespace *database.Namespace, err error) {
-	namespace, err = featurens.Detect(files)
-	if err != nil {
-		return
-	}
+func DetectNamespace(name string, files tarutil.FilesMap, parent *database.Layer) *database.Namespace {
+	namespace := featurens.Detect(files)
 	if namespace != nil {
 		log.WithFields(log.Fields{logLayerName: name, "detected namespace": namespace.Name}).Debug("detected namespace")
-		return
+		return namespace
 	}
 
 	// Fallback to the parent's namespace.
@@ -221,11 +214,11 @@ func DetectNamespace(name string, files tarutil.FilesMap, parent *database.Layer
 		namespace = parent.Namespace
 		if namespace != nil {
 			log.WithFields(log.Fields{logLayerName: name, "detected namespace": namespace.Name}).Debug("detected namespace (from parent)")
-			return
+			return namespace
 		}
 	}
 
-	return
+	return nil
 }
 
 func detectFeatureVersions(name string, files tarutil.FilesMap, namespace *database.Namespace, parent *database.Layer) (features []database.FeatureVersion, err error) {
@@ -275,6 +268,11 @@ func detectFeatureVersions(name string, files tarutil.FilesMap, namespace *datab
 		}
 
 		log.WithFields(log.Fields{"feature name": feature.Feature.Name, "feature version": feature.Version, logLayerName: name}).Warning("Namespace unknown")
+		if featureFlags.ContinueUnknownOS.Enabled() {
+			features = nil
+			return
+		}
+
 		err = ErrUnsupported
 		return
 	}
