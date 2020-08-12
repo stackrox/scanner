@@ -15,27 +15,24 @@
 package alpine
 
 import (
-	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestYAMLParsing(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	path := filepath.Join(filepath.Dir(filename))
+	secdb, err := newSecDB(filepath.Join(path, "/testdata/v34_main.yaml"))
+	require.Nil(t, err)
+	vulns := secdb.Vulnerabilities()
 
-	testData, _ := os.Open(path + "/testdata/v34_main.yaml")
-	defer testData.Close()
-
-	vulns, err := parseYAML(testData)
-	if err != nil {
-		assert.Nil(t, err)
-	}
 	assert.Equal(t, 105, len(vulns))
 	assert.Equal(t, "CVE-2016-5387", vulns[0].Name)
+	assert.Equal(t, "alpine:v3.4", vulns[0].Namespace.Name)
 	assert.Equal(t, "alpine:v3.4", vulns[0].FixedIn[0].Feature.Namespace.Name)
 	assert.Equal(t, "apache2", vulns[0].FixedIn[0].Feature.Name)
 	assert.Equal(t, "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-5387", vulns[0].Link)
