@@ -104,10 +104,7 @@ func analyzeLocalImage(path string) {
 		if err != nil {
 			panic(err)
 		}
-		namespace, err = clair.DetectNamespace(l, files, nil)
-		if err != nil {
-			panic(err)
-		}
+		namespace = clair.DetectNamespace(l, files, nil)
 		if namespace != nil {
 			break
 		}
