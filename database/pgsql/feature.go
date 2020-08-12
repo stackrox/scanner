@@ -149,6 +149,7 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 
 	if err == sql.ErrNoRows {
 		// Query Feature Version for id.
+		// It is possible another replica inserted the feature version right before this replica attempted.
 		err := pgSQL.QueryRow(searchFeatureVersion, featureID, fv.Version).Scan(&fv.ID)
 		if err != nil {
 			tx.Rollback()
