@@ -1,4 +1,4 @@
-// Copyright 2017 clair authors
+// Copyright 2019 clair authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,18 +13,20 @@
 // limitations under the License.
 
 // Package ubuntu implements a vulnerability source updater using the
-// Ubuntu CVE Tracker.
+// Ubuntu Linux OVAL Database.
 package ubuntu
 
 import (
 	"bufio"
+	"compress/bzip2"
+	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"os"
-	"os/exec"
+	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
@@ -35,345 +37,389 @@ import (
 )
 
 const (
-	trackerGitURL = "https://git.launchpad.net/ubuntu-cve-tracker"
-	updaterFlag   = "ubuntuUpdater"
-	cveURL        = "http://people.ubuntu.com/~ubuntu-security/cve/%s"
+	ovalURI = "https://people.canonical.com/~ubuntu-security/oval/"
+
+	// "Thu, 30 Nov 2017 03:07:57 GMT
+	timeFormatLastModified = "Mon, 2 Jan 2006 15:04:05 MST"
+
+	// timestamp format 2017-10-23T04:07:14
+	timeFormatOVAL = "2006-1-2T15:04:05"
+
+	updaterFlag = "ubuntuUpdater"
+
+	ubuntuOvalFilePrefix = "com.ubuntu."
 )
 
 var (
-	ubuntuIgnoredReleases = map[string]struct{}{
-		"upstream": {},
-		"devel":    {},
-
-		"dapper":   {},
-		"edgy":     {},
-		"feisty":   {},
-		"gutsy":    {},
-		"hardy":    {},
-		"intrepid": {},
-		"jaunty":   {},
-		"karmic":   {},
-		"lucid":    {},
-		"maverick": {},
-		"natty":    {},
-		"oneiric":  {},
-		"saucy":    {},
-
-		"vivid/ubuntu-core":          {},
-		"vivid/stable-phone-overlay": {},
-
-		// Syntax error
-		"Patches": {},
-		// Product
-		"product": {},
-	}
-
-	affectsCaptureRegexp      = regexp.MustCompile(`(?P<release>.*)_(?P<package>.*): (?P<status>[^\s]*)( \(+(?P<note>[^()]*)\)+)?`)
-	affectsCaptureRegexpNames = affectsCaptureRegexp.SubexpNames()
+	ignoredCriterions          []string
+	ubuntuPackageCommentRegexp = regexp.MustCompile(`^(.*) package in ([a-z]+) (?:(?:was vulnerable|is related to the CVE in some way) but has been fixed \(note: '(.*)'\)|is affected and needs fixing).$`)
+	ubuntuOvalFileRegexp       = regexp.MustCompile(`com.ubuntu.([a-z]+).cve.oval.xml.bz2`)
+	ubuntuOvalIgnoredRegexp    = regexp.MustCompile(`(artful|cosmic|trusty|precise)`)
 )
 
-type updater struct {
-	repositoryLocalPath string
+type oval struct {
+	Timestamp   string       `xml:"generator>timestamp"`
+	Definitions []definition `xml:"definitions>definition"`
 }
+
+type definition struct {
+	Title       string      `xml:"metadata>title"`
+	Description string      `xml:"metadata>description"`
+	References  []reference `xml:"metadata>reference"`
+	Severity    string      `xml:"metadata>advisory>severity"`
+	Criteria    criteria    `xml:"criteria"`
+}
+
+type reference struct {
+	Source string `xml:"source,attr"`
+	URI    string `xml:"ref_url,attr"`
+}
+
+type criteria struct {
+	Operator   string      `xml:"operator,attr"`
+	Criterias  []*criteria `xml:"criteria"`
+	Criterions []criterion `xml:"criterion"`
+}
+
+type criterion struct {
+	TestRef string `xml:"test_ref,attr"`
+	Comment string `xml:"comment,attr"`
+}
+
+type updater struct{}
 
 func init() {
 	vulnsrc.RegisterUpdater("ubuntu", &updater{})
 }
 
 func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
-	log.WithField("package", "Ubuntu").Info("Start fetching vulnerabilities")
+	log.WithField("package", "Ubuntu Linux").Info("Start fetching vulnerabilities")
 
-	// Pull the master branch.
-	var commit string
-	commit, err = u.pullRepository()
-	if err != nil {
-		return
-	}
-
-	// Get the latest revision number we successfully applied in the database.
-	dbCommit, err := datastore.GetKeyValue(updaterFlag)
+	// ubuntu has one single xml file per release for all the products,
+	// there are no incremental xml files. We store into the database
+	// the value of the generation timestamp of the latest file we
+	// parsed.
+	flagValue, err := datastore.GetKeyValue(updaterFlag)
 	if err != nil {
 		return resp, err
 	}
+	log.WithField("flagvalue", flagValue).Debug("Generation timestamp of latest parsed file")
 
-	// Short-circuit if there have been no updates.
-	if commit == dbCommit {
-		log.WithField("package", "ubuntu").Debug("no update")
-		return
+	if flagValue == "" {
+		flagValue = "0"
 	}
 
-	// Get the list of vulnerabilities that we have to update.
-	modifiedCVE, err := collectModifiedVulnerabilities(u.repositoryLocalPath)
+	// this contains the modification time of the most recent
+	// file expressed as unix time (int64)
+	latestOval, err := strconv.ParseInt(flagValue, 10, 64)
 	if err != nil {
+		// something went wrong, force parsing of all files
+		latestOval = 0
+	}
+
+	// Fetch the update list.
+	r, err := http.Get(ovalURI)
+	if err != nil {
+		err = fmt.Errorf("cannot download Ubuntu update list: %v", err)
 		return resp, err
 	}
+	defer r.Body.Close()
 
-	notes := make(map[string]struct{})
-	for cvePath := range modifiedCVE {
-		// Open the CVE file.
-		file, err := os.Open(u.repositoryLocalPath + "/" + cvePath)
-		if err != nil {
-			// This can happen when a file is modified and then moved in another
-			// commit.
+	var ovalFiles []string
+	var generationTimes []int64
+
+	scanner := bufio.NewScanner(r.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+		r := ubuntuOvalFileRegexp.FindStringSubmatch(line)
+		if len(r) != 2 {
+			continue
+		}
+		release := r[1]
+
+		// check if we should ignore this release
+		ignored := ubuntuOvalIgnoredRegexp.FindString(release)
+		if ignored != "" {
 			continue
 		}
 
-		// Parse the vulnerability.
-		v, unknownReleases, err := parseUbuntuCVE(file)
+		ovalFile := ovalURI + ubuntuOvalFilePrefix + release + ".cve.oval.xml.bz2"
+		log.WithFields(log.Fields{
+			"ovalFile": ovalFile,
+			"updater":  "Ubuntu Linux",
+		}).Debug("file to check")
+
+		// Do not fetch the entire file to get the value of the
+		// creation time. Rely on the "latest modified time"
+		// value of the file hosted on the remote server.
+		timestamp, err := getLatestModifiedTime(ovalFile)
+		if err != nil {
+			log.WithError(err).WithField("ovalFile", ovalFile).Warning("Ignoring OVAL file")
+		}
+
+		if timestamp > latestOval {
+			ovalFiles = append(ovalFiles, ovalFile)
+		}
+	}
+
+	for _, oval := range ovalFiles {
+		log.WithFields(log.Fields{
+			"ovalFile": oval,
+			"updater":  "Ubuntu Linux",
+		}).Debug("downloading")
+		// Download the oval XML file.
+		r, err := http.Get(oval)
+		if err != nil {
+			log.WithError(err).Error("could not download Ubuntu update list")
+			return resp, commonerr.ErrCouldNotDownload
+		}
+
+		// Parse the XML.
+		vs, generationTime, err := parseOval(bzip2.NewReader(r.Body))
 		if err != nil {
 			return resp, err
 		}
+		generationTimes = append(generationTimes, generationTime)
 
-		// Add the vulnerability to the response.
-		resp.Vulnerabilities = append(resp.Vulnerabilities, v)
-
-		// Store any unknown releases as notes.
-		for k := range unknownReleases {
-			note := fmt.Sprintf("Ubuntu %s is not mapped to any version number (eg. trusty->14.04). Please update me.", k)
-			notes[note] = struct{}{}
-
-			// If we encountered unknown Ubuntu release, we don't want the revision
-			// number to be considered as managed.
-			commit = dbCommit
-		}
-
-		// Close the file manually.
-		//
-		// We do that instead of using defer because defer works on a function-level scope.
-		// We would open many files and close them all at once at the end of the function,
-		// which could lead to exceed fs.file-max.
-		file.Close()
+		// Collect vulnerabilities.
+		resp.Vulnerabilities = append(resp.Vulnerabilities, vs...)
 	}
 
-	// Add flag and notes.
-	resp.FlagName = updaterFlag
-	resp.FlagValue = commit
-	for note := range notes {
-		resp.Notes = append(resp.Notes, note)
+	// Set the flag if we found anything.
+	if len(generationTimes) > 0 {
+		resp.FlagName = updaterFlag
+		resp.FlagValue = strconv.FormatInt(latest(generationTimes), 10)
+	} else {
+		log.WithField("package", "Ubuntu Linux").Debug("no update")
+	}
+
+	return resp, nil
+}
+
+// Get the latest modification time of a remote file
+// expressed as unix time
+func getLatestModifiedTime(url string) (int64, error) {
+	resp, err := http.Head(url)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	lastModified := resp.Header.Get("Last-Modified")
+	if len(lastModified) == 0 {
+		return 0, fmt.Errorf("last modified header missing")
+	}
+
+	timestamp, err := time.Parse(timeFormatLastModified, lastModified)
+	if err != nil {
+		return 0, err
+	}
+
+	return timestamp.Unix(), nil
+}
+
+func latest(values []int64) (ret int64) {
+	for _, element := range values {
+		if element > ret {
+			ret = element
+		}
+	}
+	return
+}
+
+func (u *updater) Clean() {}
+
+func parseOval(ovalReader io.Reader) (vulnerabilities []database.Vulnerability, generationTime int64, err error) {
+	// Decode the XML.
+	var ov oval
+	err = xml.NewDecoder(ovalReader).Decode(&ov)
+	if err != nil {
+		log.WithError(err).Error("could not decode XML")
+		err = commonerr.ErrCouldNotParse
+		return
+	}
+
+	timestamp, err := time.Parse(timeFormatOVAL, ov.Timestamp)
+	if err != nil {
+		return
+	}
+	generationTime = timestamp.Unix()
+
+	// Iterate over the definitions and collect any vulnerabilities
+	// that affect at least one package.
+	for _, definition := range ov.Definitions {
+		pkgs := toFeatureVersions(definition.Criteria)
+		if len(pkgs) > 0 {
+			vulnerability := database.Vulnerability{
+				Name:        name(definition),
+				Link:        link(definition),
+				Severity:    severity(definition),
+				Description: description(definition),
+				FixedIn:     pkgs,
+			}
+			vulnerabilities = append(vulnerabilities, vulnerability)
+		}
 	}
 
 	return
 }
 
-func (u *updater) Clean() {
-	os.RemoveAll(u.repositoryLocalPath)
-}
+func getCriterions(node criteria) [][]criterion {
+	// Filter useless criterions.
+	var criterions []criterion
+	for _, c := range node.Criterions {
+		ignored := false
 
-func (u *updater) pullRepository() (commit string, err error) {
-	// If the repository doesn't exist, clone it.
-	if _, pathExists := os.Stat(u.repositoryLocalPath); u.repositoryLocalPath == "" || os.IsNotExist(pathExists) {
-		if u.repositoryLocalPath, err = ioutil.TempDir(os.TempDir(), "ubuntu-cve-tracker"); err != nil {
-			return "", vulnsrc.ErrFilesystem
+		for _, ignoredItem := range ignoredCriterions {
+			if strings.Contains(c.Comment, ignoredItem) {
+				ignored = true
+				break
+			}
 		}
 
-		cmd := exec.Command("git", "clone", trackerGitURL, ".")
-		cmd.Dir = u.repositoryLocalPath
-		if out, err := cmd.CombinedOutput(); err != nil {
-			u.Clean()
-			log.WithError(err).WithField("output", string(out)).Error("could not pull ubuntu-cve-tracker repository")
-			return "", commonerr.ErrCouldNotDownload
+		if !ignored {
+			criterions = append(criterions, c)
+		}
+	}
+
+	// assume AND if not specifically OR
+	if node.Operator == "OR" {
+		var possibilities [][]criterion
+		for _, c := range criterions {
+			possibilities = append(possibilities, []criterion{c})
+		}
+		return possibilities
+	} else {
+		return [][]criterion{criterions}
+	}
+}
+
+func getPossibilities(node criteria) [][]criterion {
+	if len(node.Criterias) == 0 {
+		return getCriterions(node)
+	}
+
+	var possibilitiesToCompose [][][]criterion
+	for _, criteria := range node.Criterias {
+		possibilitiesToCompose = append(possibilitiesToCompose, getPossibilities(*criteria))
+	}
+	if len(node.Criterions) > 0 {
+		possibilitiesToCompose = append(possibilitiesToCompose, getCriterions(node))
+	}
+
+	var possibilities [][]criterion
+	// assume AND if not OR
+	if node.Operator == "OR" {
+		for _, possibilityGroup := range possibilitiesToCompose {
+			for _, possibility := range possibilityGroup {
+				possibilities = append(possibilities, possibility)
+			}
 		}
 	} else {
-		// The repository already exists and it needs to be refreshed via a pull.
-		cmd := exec.Command("git", "pull")
-		cmd.Dir = u.repositoryLocalPath
-		if _, err := cmd.CombinedOutput(); err != nil {
-			return "", vulnsrc.ErrGitFailure
+		for _, possibility := range possibilitiesToCompose[0] {
+			possibilities = append(possibilities, possibility)
+		}
+
+		for _, possibilityGroup := range possibilitiesToCompose[1:] {
+			var newPossibilities [][]criterion
+
+			for _, possibility := range possibilities {
+				for _, possibilityInGroup := range possibilityGroup {
+					var p []criterion
+					p = append(p, possibility...)
+					p = append(p, possibilityInGroup...)
+					newPossibilities = append(newPossibilities, p)
+				}
+			}
+
+			possibilities = newPossibilities
 		}
 	}
 
-	cmd := exec.Command("git", "rev-parse", "HEAD")
-	cmd.Dir = u.repositoryLocalPath
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", vulnsrc.ErrGitFailure
-	}
-
-	commit = strings.TrimSpace(string(out))
-	return
+	return possibilities
 }
 
-func collectModifiedVulnerabilities(repositoryLocalPath string) (map[string]struct{}, error) {
-	modifiedCVE := make(map[string]struct{})
+func toFeatureVersions(criteria criteria) []database.FeatureVersion {
+	var featureVersionParametersArray []database.FeatureVersion
+	possibilities := getPossibilities(criteria)
+	for _, criterions := range possibilities {
+		var featureVersion database.FeatureVersion
 
-	// Handle a brand new database.
-
-	for _, folder := range []string{"active", "retired"} {
-		d, err := os.Open(repositoryLocalPath + "/" + folder)
-		if err != nil {
-			log.WithError(err).Error("could not open Ubuntu vulnerabilities repository's folder")
-			return nil, vulnsrc.ErrFilesystem
-		}
-
-		// Get the FileInfo of all the files in the directory.
-		names, err := d.Readdirnames(-1)
-		if err != nil {
-			log.WithError(err).Error("could not read Ubuntu vulnerabilities repository's folder")
-			return nil, vulnsrc.ErrFilesystem
-		}
-
-		// Add the vulnerabilities to the list.
-		for _, name := range names {
-			if strings.HasPrefix(name, "CVE-") {
-				modifiedCVE[folder+"/"+name] = struct{}{}
-			}
-		}
-
-		// Close the file manually.
-		//
-		// We do that instead of using defer because defer works on a function-level scope.
-		// We would open many files and close them all at once at the end of the function,
-		// which could lead to exceed fs.file-max.
-		d.Close()
-	}
-
-	return modifiedCVE, nil
-
-}
-
-func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability, unknownReleases map[string]struct{}, err error) {
-	unknownReleases = make(map[string]struct{})
-	readingDescription := false
-	scanner := bufio.NewScanner(fileContent)
-
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-
-		// Skip any comments.
-		if strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		// Parse the name.
-		if strings.HasPrefix(line, "Candidate:") {
-			vulnerability.Name = strings.TrimSpace(strings.TrimPrefix(line, "Candidate:"))
-			vulnerability.Link = fmt.Sprintf(cveURL, vulnerability.Name)
-			continue
-		}
-
-		// Parse the priority.
-		if strings.HasPrefix(line, "Priority:") {
-			priority := strings.TrimSpace(strings.TrimPrefix(line, "Priority:"))
-
-			// Handle syntax error: Priority: medium (heap-protector)
-			if strings.Contains(priority, " ") {
-				priority = priority[:strings.Index(priority, " ")]
-			}
-
-			vulnerability.Severity = SeverityFromPriority(priority)
-			continue
-		}
-
-		// Parse the description.
-		if strings.HasPrefix(line, "Description:") {
-			readingDescription = true
-			vulnerability.Description = strings.TrimSpace(strings.TrimPrefix(line, "Description:")) // In case there is a formatting error and the description starts on the same line
-			continue
-		}
-		if readingDescription {
-			if strings.HasPrefix(line, "Ubuntu-Description:") || strings.HasPrefix(line, "Notes:") || strings.HasPrefix(line, "Bugs:") || strings.HasPrefix(line, "Priority:") || strings.HasPrefix(line, "Discovered-by:") || strings.HasPrefix(line, "Assigned-to:") {
-				readingDescription = false
-			} else {
-				vulnerability.Description = vulnerability.Description + " " + line
-				continue
-			}
-		}
-
-		// Try to parse the package that the vulnerability affects.
-		affectsCaptureArr := affectsCaptureRegexp.FindAllStringSubmatch(line, -1)
-		if len(affectsCaptureArr) > 0 {
-			affectsCapture := affectsCaptureArr[0]
-
-			md := map[string]string{}
-			for i, n := range affectsCapture {
-				md[affectsCaptureRegexpNames[i]] = strings.TrimSpace(n)
-			}
-
-			// Ignore Linux kernels.
-			if strings.HasPrefix(md["package"], "linux") {
-				continue
-			}
-
-			// Only consider the package if its status is needed, active, deferred, not-affected or
-			// released. Ignore DNE (package does not exist), needs-triage, ignored, pending.
-			if md["status"] == "needed" || md["status"] == "active" || md["status"] == "deferred" || md["status"] == "released" || md["status"] == "not-affected" {
-				md["release"] = strings.Split(md["release"], "/")[0]
-				if _, isReleaseIgnored := ubuntuIgnoredReleases[md["release"]]; isReleaseIgnored {
-					continue
-				}
-				if _, isReleaseKnown := database.UbuntuReleasesMapping[md["release"]]; !isReleaseKnown {
-					unknownReleases[md["release"]] = struct{}{}
-					continue
-				}
-
-				var version string
-				if md["status"] == "released" {
-					if md["note"] != "" {
-						err := versionfmt.Valid(dpkg.ParserName, md["note"])
-						if err != nil {
-							log.WithError(err).WithField("version", md["note"]).Warning("could not parse package version. skipping")
-						}
-						version = md["note"]
+		// Attempt to parse package data from trees of criterions.
+		for _, c := range criterions {
+			if match := ubuntuPackageCommentRegexp.FindStringSubmatch(c.Comment); match != nil {
+				var version = versionfmt.MaxVersion
+				if len(match[3]) > 0 {
+					version = match[3]
+					err := versionfmt.Valid(dpkg.ParserName, version)
+					if err != nil {
+						log.WithError(err).WithField("version", version).Warning("could not parse package version. skipping")
 					}
-				} else if md["status"] == "not-affected" {
-					version = versionfmt.MinVersion
-				} else {
-					version = versionfmt.MaxVersion
 				}
-				if version == "" {
-					continue
+				if version != versionfmt.MaxVersion {
+					featureVersion.Version = version
 				}
-
-				// Create and add the new package.
-				featureVersion := database.FeatureVersion{
-					Feature: database.Feature{
-						Namespace: database.Namespace{
-							Name:          "ubuntu:" + database.UbuntuReleasesMapping[md["release"]],
-							VersionFormat: dpkg.ParserName,
-						},
-						Name: md["package"],
+				featureVersion.Feature = database.Feature{
+					Name: match[1],
+					Namespace: database.Namespace{
+						Name: fmt.Sprintf("ubuntu:%s", match[2]),
+						VersionFormat: dpkg.ParserName,
 					},
-					Version: version,
 				}
-				vulnerability.FixedIn = append(vulnerability.FixedIn, featureVersion)
 			}
+		}
+
+		if featureVersion.Feature.Namespace.Name != "" && featureVersion.Feature.Name != "" {
+			featureVersionParametersArray = append(featureVersionParametersArray, featureVersion)
 		}
 	}
 
-	// Trim extra spaces in the description
-	vulnerability.Description = strings.TrimSpace(vulnerability.Description)
+	return featureVersionParametersArray
+}
 
-	// If no link has been provided (CVE-2006-NNN0 for instance), add the link to the tracker
-	if vulnerability.Link == "" {
-		vulnerability.Link = trackerGitURL
-	}
+func description(def definition) (desc string) {
+	// It is much more faster to proceed like this than using a Replacer.
+	desc = strings.Replace(def.Description, "\n\n\n", " ", -1)
+	desc = strings.Replace(desc, "\n\n", " ", -1)
+	desc = strings.Replace(desc, "\n", " ", -1)
+	return
+}
 
-	// If no priority has been provided (CVE-2007-0667 for instance), set the priority to Unknown
-	if vulnerability.Severity == "" {
-		vulnerability.Severity = database.UnknownSeverity
+func name(def definition) string {
+	// only return the CVE identifier which is the first word
+	return strings.Split(def.Title, " ")[0]
+}
+
+func link(def definition) (link string) {
+	for _, reference := range def.References {
+		if reference.Source == "CVE" {
+			link = reference.URI
+			break
+		}
 	}
 
 	return
 }
 
-// SeverityFromPriority converts an priority from the Ubuntu CVE Tracker into
-// a database.Severity.
-func SeverityFromPriority(priority string) database.Severity {
-	switch priority {
-	case "untriaged":
+func severity(def definition) (severity database.Severity) {
+	switch def.Severity {
+	case "":
 		return database.UnknownSeverity
-	case "negligible":
+	case "Untriaged":
+		return database.UnknownSeverity
+	case "Negligible":
 		return database.NegligibleSeverity
-	case "low":
+	case "Low":
 		return database.LowSeverity
-	case "medium":
+	case "Medium":
 		return database.MediumSeverity
-	case "high":
+	case "High":
 		return database.HighSeverity
-	case "critical":
+	case "Critical":
 		return database.CriticalSeverity
 	default:
-		log.Warningf("could not determine a vulnerability severity from: %s", priority)
+		log.Warningf("could not determine a vulnerability severity from: %s", def.Severity)
 		return database.UnknownSeverity
+
 	}
 }
