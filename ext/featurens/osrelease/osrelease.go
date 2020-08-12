@@ -49,12 +49,12 @@ func init() {
 	featurens.RegisterDetector("os-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
+func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 	var OS, version string
 
 	for _, filePath := range blacklistFilenames {
 		if _, hasFile := files[filePath]; hasFile {
-			return nil, nil
+			return nil
 		}
 	}
 
@@ -90,16 +90,16 @@ func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
 	case "centos", "rhel", "fedora", "amzn", "oracle":
 		versionFormat = rpm.ParserName
 	default:
-		return nil, nil
+		return nil
 	}
 
 	if OS != "" && version != "" {
 		return &database.Namespace{
 			Name:          OS + ":" + version,
 			VersionFormat: versionFormat,
-		}, nil
+		}
 	}
-	return nil, nil
+	return nil
 }
 
 func (d detector) RequiredFilenames() []string {

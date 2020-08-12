@@ -63,7 +63,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			pkg.Feature.Name = strings.TrimSpace(strings.TrimPrefix(line, "Package: "))
 			pkg.Version = ""
 		} else if strings.HasPrefix(line, "Source: ") {
-			// Source line (Optionnal)
+			// Source line (Optional)
 			// Gives the name of the source package
 			// May also specifies a version
 

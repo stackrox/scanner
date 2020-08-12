@@ -42,7 +42,7 @@ func init() {
 	featurens.RegisterDetector("redhat-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
+func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 	for _, filePath := range d.RequiredFilenames() {
 		f, hasFile := files[filePath]
 		if !hasFile {
@@ -59,7 +59,7 @@ func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
 			return &database.Namespace{
 				Name:          "amzn" + ":" + r[3],
 				VersionFormat: rpm.ParserName,
-			}, nil
+			}
 		}
 
 		// Attempt to match Oracle Linux.
@@ -68,7 +68,7 @@ func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
 			return &database.Namespace{
 				Name:          strings.ToLower(r[1]) + ":" + r[3],
 				VersionFormat: rpm.ParserName,
-			}, nil
+			}
 		}
 
 		// Attempt to match RHEL.
@@ -78,20 +78,20 @@ func (d detector) Detect(files tarutil.FilesMap) (*database.Namespace, error) {
 			return &database.Namespace{
 				Name:          "centos" + ":" + r[3],
 				VersionFormat: rpm.ParserName,
-			}, nil
+			}
 		}
 
-		// Atempt to match CentOS.
+		// Attempt to match CentOS.
 		r = centosReleaseRegexp.FindStringSubmatch(string(f))
 		if len(r) == 4 {
 			return &database.Namespace{
 				Name:          strings.ToLower(r[1]) + ":" + r[3],
 				VersionFormat: rpm.ParserName,
-			}, nil
+			}
 		}
 	}
 
-	return nil, nil
+	return nil
 }
 
 func (d detector) RequiredFilenames() []string {

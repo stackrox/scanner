@@ -16,7 +16,6 @@ package v1
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -25,6 +24,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/features"
 )
 
 // These are possible package prefixes or suffixes. Package managers sometimes annotate
@@ -142,9 +142,6 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 }
 
 func addLanguageVulns(db database.Datastore, layer *Layer) {
-	if os.Getenv("LANGUAGE_VULNS") == "false" {
-		return
-	}
 	// Add Language Features
 	languageFeatureVersions, err := getLanguageData(db, layer.Name)
 	if err != nil {
@@ -194,7 +191,9 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 			}
 			layer.Features = append(layer.Features, feature)
 		}
-		addLanguageVulns(db, &layer)
+		if features.LanguageVulns.Enabled() {
+			addLanguageVulns(db, &layer)
+		}
 	}
 
 	return layer, nil
