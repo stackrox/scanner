@@ -2,9 +2,10 @@ package e2etests
 
 import (
 	"context"
+	"testing"
+
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestFeatureMultipleImages(t *testing.T) {
