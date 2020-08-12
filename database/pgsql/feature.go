@@ -154,7 +154,7 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 			tx.Rollback()
 			return 0, handleError("searchFeatureVersion", err)
 		}
-		if fv.ID == 0 {
+		if id == 0 {
 			tx.Rollback()
 			return 0, handleError("searchFeatureVersion", commonerr.ErrNotFound)
 		}
