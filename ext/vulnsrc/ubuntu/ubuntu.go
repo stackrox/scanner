@@ -356,9 +356,7 @@ func toFeatureVersions(criteria criteria) []database.FeatureVersion {
 						log.WithError(err).WithField("version", version).Warning("could not parse package version. skipping")
 					}
 				}
-				if version != versionfmt.MaxVersion {
-					featureVersion.Version = version
-				}
+				featureVersion.Version = version
 				featureVersion.Feature = database.Feature{
 					Name: match[1],
 					Namespace: database.Namespace{
