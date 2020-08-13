@@ -289,9 +289,8 @@ func getCriterions(node criteria) [][]criterion {
 			possibilities = append(possibilities, []criterion{c})
 		}
 		return possibilities
-	} else {
-		return [][]criterion{criterions}
 	}
+	return [][]criterion{criterions}
 }
 
 func getPossibilities(node criteria) [][]criterion {
@@ -311,14 +310,10 @@ func getPossibilities(node criteria) [][]criterion {
 	// assume AND if not OR
 	if node.Operator == "OR" {
 		for _, possibilityGroup := range possibilitiesToCompose {
-			for _, possibility := range possibilityGroup {
-				possibilities = append(possibilities, possibility)
-			}
+			possibilities = append(possibilities, possibilityGroup...)
 		}
 	} else {
-		for _, possibility := range possibilitiesToCompose[0] {
-			possibilities = append(possibilities, possibility)
-		}
+		possibilities = append(possibilities, possibilitiesToCompose[0]...)
 
 		for _, possibilityGroup := range possibilitiesToCompose[1:] {
 			var newPossibilities [][]criterion
@@ -360,7 +355,7 @@ func toFeatureVersions(criteria criteria) []database.FeatureVersion {
 				featureVersion.Feature = database.Feature{
 					Name: match[1],
 					Namespace: database.Namespace{
-						Name: fmt.Sprintf("ubuntu:%s", match[2]),
+						Name:          fmt.Sprintf("ubuntu:%s", match[2]),
 						VersionFormat: dpkg.ParserName,
 					},
 				}
