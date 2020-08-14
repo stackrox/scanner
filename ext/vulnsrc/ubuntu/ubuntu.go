@@ -92,31 +92,11 @@ func init() {
 	vulnsrc.RegisterUpdater("ubuntu", &updater{})
 }
 
-func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
+func (u *updater) Update(_ vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
 	log.WithField("package", "Ubuntu Linux").Info("Start fetching vulnerabilities")
 
 	// ubuntu has one single xml file per release for all the products,
-	// there are no incremental xml files. We store into the database
-	// the value of the generation timestamp of the latest file we
-	// parsed.
-	flagValue, err := datastore.GetKeyValue(updaterFlag)
-	if err != nil {
-		return resp, err
-	}
-	log.WithField("flagvalue", flagValue).Debug("Generation timestamp of latest parsed file")
-
-	if flagValue == "" {
-		flagValue = "0"
-	}
-
-	// this contains the modification time of the most recent
-	// file expressed as unix time (int64)
-	latestOval, err := strconv.ParseInt(flagValue, 10, 64)
-	if err != nil {
-		// something went wrong, force parsing of all files
-		latestOval = 0
-	}
-
+	// there are no incremental xml files.
 	// Fetch the update list.
 	r, err := http.Get(ovalURI)
 	if err != nil {
@@ -149,17 +129,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 			"updater":  "Ubuntu Linux",
 		}).Debug("file to check")
 
-		// Do not fetch the entire file to get the value of the
-		// creation time. Rely on the "latest modified time"
-		// value of the file hosted on the remote server.
-		timestamp, err := getLatestModifiedTime(ovalFile)
-		if err != nil {
-			log.WithError(err).WithField("ovalFile", ovalFile).Warning("Ignoring OVAL file")
-		}
-
-		if timestamp > latestOval {
-			ovalFiles = append(ovalFiles, ovalFile)
-		}
+		ovalFiles = append(ovalFiles, ovalFile)
 	}
 
 	for _, oval := range ovalFiles {
@@ -194,28 +164,6 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 	}
 
 	return resp, nil
-}
-
-// Get the latest modification time of a remote file
-// expressed as unix time
-func getLatestModifiedTime(url string) (int64, error) {
-	resp, err := http.Head(url)
-	if err != nil {
-		return 0, err
-	}
-	defer resp.Body.Close()
-
-	lastModified := resp.Header.Get("Last-Modified")
-	if len(lastModified) == 0 {
-		return 0, fmt.Errorf("last modified header missing")
-	}
-
-	timestamp, err := time.Parse(timeFormatLastModified, lastModified)
-	if err != nil {
-		return 0, err
-	}
-
-	return timestamp.Unix(), nil
 }
 
 func latest(values []int64) (ret int64) {
@@ -395,20 +343,20 @@ func link(def definition) (link string) {
 }
 
 func severity(def definition) (severity database.Severity) {
-	switch def.Severity {
+	switch strings.ToLower(def.Severity) {
 	case "":
 		return database.UnknownSeverity
-	case "Untriaged":
+	case "untriaged":
 		return database.UnknownSeverity
-	case "Negligible":
+	case "negligible":
 		return database.NegligibleSeverity
-	case "Low":
+	case "low":
 		return database.LowSeverity
-	case "Medium":
+	case "medium":
 		return database.MediumSeverity
-	case "High":
+	case "high":
 		return database.HighSeverity
-	case "Critical":
+	case "critical":
 		return database.CriticalSeverity
 	default:
 		log.Warningf("could not determine a vulnerability severity from: %s", def.Severity)
