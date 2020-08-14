@@ -300,7 +300,7 @@ func toFeatureVersions(criteria criteria) []database.FeatureVersion {
 				featureVersion.Feature = database.Feature{
 					Name: match[1],
 					Namespace: database.Namespace{
-						Name:          fmt.Sprintf("ubuntu:%s", match[2]),
+						Name:          fmt.Sprintf("ubuntu:%s", database.UbuntuReleasesMapping[match[2]]),
 						VersionFormat: dpkg.ParserName,
 					},
 				}
