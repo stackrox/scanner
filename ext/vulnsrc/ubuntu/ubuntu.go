@@ -39,9 +39,6 @@ import (
 const (
 	ovalURI = "https://people.canonical.com/~ubuntu-security/oval/"
 
-	// "Thu, 30 Nov 2017 03:07:57 GMT
-	timeFormatLastModified = "Mon, 2 Jan 2006 15:04:05 MST"
-
 	// timestamp format 2017-10-23T04:07:14
 	timeFormatOVAL = "2006-1-2T15:04:05"
 
