@@ -723,8 +723,10 @@ jobs:
             echo "Extracted SHA: ${sha}"
             [[ -n "${sha}" ]]
             set +e
-            git --git-dir /tmp/rox/.git diff --exit-code "${sha}" -- pkg/license/publickeys/all_keys.go
+            cd /tmp/rox
+            git diff --exit-code "${sha}" -- pkg/license/publickeys/all_keys.go
             code=$?
+            cd -
             set -e
             if [[ "${code}" -eq 1 ]]; then
               echo "Pulling in new signing keys from rox!"
