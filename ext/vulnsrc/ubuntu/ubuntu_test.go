@@ -49,7 +49,7 @@ func TestUbuntuParser(t *testing.T) {
 			{
 				Feature: database.Feature{
 					Namespace: database.Namespace{
-						Name:          "ubuntu:xenial",
+						Name:          "ubuntu:16.04",
 						VersionFormat: dpkg.ParserName,
 					},
 					Name: "libmspack",
@@ -59,7 +59,7 @@ func TestUbuntuParser(t *testing.T) {
 			{
 				Feature: database.Feature{
 					Namespace: database.Namespace{
-						Name:          "ubuntu:xenial",
+						Name:          "ubuntu:16.04",
 						VersionFormat: dpkg.ParserName,
 					},
 					Name: "cabextract",
