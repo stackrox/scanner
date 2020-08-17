@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/etcd-io/bbolt"
 	"github.com/facebookincubator/nvdtools/cvefeed"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
@@ -13,6 +12,7 @@ import (
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/nvdloader"
 	"github.com/stackrox/scanner/pkg/wellknowndirnames"
+	"go.etcd.io/bbolt"
 )
 
 var (
