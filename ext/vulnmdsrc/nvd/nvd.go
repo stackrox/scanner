@@ -174,13 +174,13 @@ func SeverityFromCVSS(meta *Metadata) database.Severity {
 	switch {
 	case score < 1.0:
 		return database.NegligibleSeverity
-	case score < 3.9:
+	case score < 4.0:
 		return database.LowSeverity
-	case score < 6.9:
+	case score < 7.0:
 		return database.MediumSeverity
-	case score < 8.9:
+	case score < 9.0:
 		return database.HighSeverity
-	case score <= 10:
+	case score <= 10.0:
 		return database.CriticalSeverity
 	}
 	return database.UnknownSeverity
