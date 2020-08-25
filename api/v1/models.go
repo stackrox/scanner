@@ -25,6 +25,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
 // These are possible package prefixes or suffixes. Package managers sometimes annotate
@@ -163,7 +164,7 @@ func addLanguageVulns(db database.Datastore, layer *Layer) {
 	layer.Features = append(layer.Features, languageFeatures...)
 }
 
-func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, error) {
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, []Note, error) {
 	layer := Layer{
 		Name:             dbLayer.Name,
 		IndexedByVersion: dbLayer.EngineVersion,
@@ -173,8 +174,21 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		layer.ParentName = dbLayer.Parent.Name
 	}
 
+	var notes []Note
 	if dbLayer.Namespace != nil {
 		layer.NamespaceName = dbLayer.Namespace.Name
+
+		if wellknownnamespaces.KnownStaleNamespaces.Contains(layer.NamespaceName) {
+			notes = append(notes, OSCVEsStale)
+		} else if !wellknownnamespaces.KnownSupportedNamespaces.Contains(layer.NamespaceName) {
+			notes = append(notes, OSCVEsUnavailable)
+		}
+	} else {
+		notes = append(notes, OSCVEsUnavailable)
+	}
+
+	if !features.LanguageVulns.Enabled() {
+		notes = append(notes, LanguageCVEsUnavailable)
 	}
 
 	if (withFeatures || withVulnerabilities) && dbLayer.Features != nil {
@@ -196,7 +210,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		}
 	}
 
-	return layer, nil
+	return layer, notes, nil
 }
 
 type Namespace struct {
@@ -296,8 +310,21 @@ type OrderedLayerName struct {
 
 type LayerEnvelope struct {
 	Layer *Layer `json:"Layer,omitempty"`
+	Notes []Note `json:"Notes,omitempty"`
 	Error *Error `json:"Error,omitempty"`
 }
+
+type Note int
+
+const (
+	// OSCVEsUnavailable labels scans of images with unknown namespaces or obsolete namespaces.
+	OSCVEsUnavailable Note = iota
+	// OSCVEsStale labels scans of images with namespaces whose CVEs are known to be stale.
+	OSCVEsStale
+	// LanguageCVEsUnavailable labels scans of images with without language CVEs.
+	// This is typically only populated when language CVEs are not enabled.
+	LanguageCVEsUnavailable
+)
 
 type VulnerabilityEnvelope struct {
 	Vulnerability   *Vulnerability   `json:"Vulnerability,omitempty"`

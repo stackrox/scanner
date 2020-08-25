@@ -97,7 +97,7 @@ func (s *serviceImpl) getLayer(layerName string) (*v1.GetScanResponse, error) {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	layer, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, true, true)
+	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, true, true)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
