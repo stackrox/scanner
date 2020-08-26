@@ -164,7 +164,7 @@ func addLanguageVulns(db database.Datastore, layer *Layer) {
 	layer.Features = append(layer.Features, languageFeatures...)
 }
 
-func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, []Note, error) {
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, *[]Note, error) {
 	layer := Layer{
 		Name:             dbLayer.Name,
 		IndexedByVersion: dbLayer.EngineVersion,
@@ -210,7 +210,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		}
 	}
 
-	return layer, notes, nil
+	return layer, &notes, nil
 }
 
 type Namespace struct {
@@ -309,9 +309,9 @@ type OrderedLayerName struct {
 }
 
 type LayerEnvelope struct {
-	Layer *Layer `json:"Layer,omitempty"`
-	Notes []Note `json:"Notes,omitempty"`
-	Error *Error `json:"Error,omitempty"`
+	Layer *Layer  `json:"Layer,omitempty"`
+	Notes *[]Note `json:"Notes,omitempty"`
+	Error *Error  `json:"Error,omitempty"`
 }
 
 type Note int

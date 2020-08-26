@@ -101,7 +101,7 @@ func (s *serviceImpl) getLayer(layerName string) (*v1.GetScanResponse, error) {
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	logrus.Infof("notes: %+v", notes)
+	logrus.Info(notes)
 
 	features, err := convertFeatures(layer.Features)
 	if err != nil {
