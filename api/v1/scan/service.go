@@ -97,10 +97,11 @@ func (s *serviceImpl) getLayer(layerName string) (*v1.GetScanResponse, error) {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, true, true)
+	layer, notes, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, true, true)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	logrus.Infof("notes: %+v", notes)
 
 	features, err := convertFeatures(layer.Features)
 	if err != nil {
