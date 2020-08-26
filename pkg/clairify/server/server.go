@@ -75,6 +75,7 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName string) {
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
+	logrus.Infof("notes: %+v", notes)
 	env := &v1.LayerEnvelope{
 		Layer: &layer,
 		Notes: notes,
