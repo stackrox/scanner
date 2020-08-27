@@ -120,11 +120,11 @@ func TestNotesNoLanguageVulns(t *testing.T) {
 		Name:          "example",
 		EngineVersion: 0,
 		Parent:        nil,
-		Namespace:     &database.Namespace{
+		Namespace: &database.Namespace{
 			Name:          "ubuntu:20.04",
 			VersionFormat: "dpkg",
 		},
-		Features:      nil,
+		Features: nil,
 	}
 	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
 	assert.NoError(t, err)
@@ -137,11 +137,11 @@ func TestNotesStaleCVEs(t *testing.T) {
 		Name:          "example",
 		EngineVersion: 0,
 		Parent:        nil,
-		Namespace:     &database.Namespace{
+		Namespace: &database.Namespace{
 			Name:          "ubuntu:13.04",
 			VersionFormat: "dpkg",
 		},
-		Features:      nil,
+		Features: nil,
 	}
 	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
 	assert.NoError(t, err)
@@ -154,11 +154,11 @@ func TestNotesUnavailableCVEs(t *testing.T) {
 		Name:          "example",
 		EngineVersion: 0,
 		Parent:        nil,
-		Namespace:     &database.Namespace{
+		Namespace: &database.Namespace{
 			Name:          "fedora:32",
 			VersionFormat: "rpm",
 		},
-		Features:      nil,
+		Features: nil,
 	}
 	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
 	assert.NoError(t, err)
