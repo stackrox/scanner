@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -106,4 +109,69 @@ func TestShouldDedupeLanguageFeature(t *testing.T) {
 			assert.Equal(t, c.dedupe, shouldDedupeLanguageFeature(c.feature, c.osFeatures))
 		})
 	}
+}
+
+func TestNotesNoLanguageVulns(t *testing.T) {
+	envIsolator := testutils.NewEnvIsolator(t)
+	envIsolator.Setenv(features.LanguageVulns.EnvVar(), "false")
+	defer envIsolator.RestoreAll()
+
+	dbLayer := database.Layer{
+		Name:          "example",
+		EngineVersion: 0,
+		Parent:        nil,
+		Namespace:     &database.Namespace{
+			Name:          "ubuntu:20.04",
+			VersionFormat: "dpkg",
+		},
+		Features:      nil,
+	}
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, notes)
+	assert.Contains(t, notes, LanguageCVEsUnavailable)
+}
+
+func TestNotesStaleCVEs(t *testing.T) {
+	envIsolator := testutils.NewEnvIsolator(t)
+	envIsolator.Setenv(features.LanguageVulns.EnvVar(), "false")
+	defer envIsolator.RestoreAll()
+
+	dbLayer := database.Layer{
+		Name:          "example",
+		EngineVersion: 0,
+		Parent:        nil,
+		Namespace:     &database.Namespace{
+			Name:          "ubuntu:13.04",
+			VersionFormat: "dpkg",
+		},
+		Features:      nil,
+	}
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, notes)
+	assert.Contains(t, notes, LanguageCVEsUnavailable)
+	assert.Contains(t, notes, OSCVEsStale)
+}
+
+func TestNotesUnavailableCVEs(t *testing.T) {
+	envIsolator := testutils.NewEnvIsolator(t)
+	envIsolator.Setenv(features.LanguageVulns.EnvVar(), "false")
+	defer envIsolator.RestoreAll()
+
+	dbLayer := database.Layer{
+		Name:          "example",
+		EngineVersion: 0,
+		Parent:        nil,
+		Namespace:     &database.Namespace{
+			Name:          "fedora:32",
+			VersionFormat: "rpm",
+		},
+		Features:      nil,
+	}
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, notes)
+	assert.Contains(t, notes, LanguageCVEsUnavailable)
+	assert.Contains(t, notes, OSCVEsUnavailable)
 }
