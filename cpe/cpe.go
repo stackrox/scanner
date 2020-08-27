@@ -102,6 +102,8 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 	return attrs
 }
 
+// getMostSpecificCPE deterministically returns the CPE that is the most specific
+// from the set of matches. This function requires that len(cpes) > 0
 func getMostSpecificCPE(cpes []wfn.AttributesWithFixedIn) wfn.AttributesWithFixedIn {
 	mostSpecificCPE := cpes[0]
 	for _, cpe := range cpes[1:] {
