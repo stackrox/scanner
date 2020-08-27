@@ -117,7 +117,7 @@ func compareAttributes(c1, c2 wfn.AttributesWithFixedIn) int {
 func getMostSpecificCPE(cpes []wfn.AttributesWithFixedIn) wfn.AttributesWithFixedIn {
 	mostSpecificCPE := cpes[0]
 	for _, cpe := range cpes[1:] {
-		if compareAttributes(cpe, mostSpecificCPE) == 1 {
+		if compareAttributes(cpe, mostSpecificCPE) > 0 {
 			mostSpecificCPE = cpe
 		}
 	}
