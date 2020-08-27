@@ -103,20 +103,16 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 }
 
 func getMostSpecificCPE(cpes []wfn.AttributesWithFixedIn) wfn.AttributesWithFixedIn {
-	max := cpes[0]
-	for _, c := range cpes {
-		if max.Vendor != "" && c.Vendor == "" {
-			continue
+	sort.Slice(cpes, func(i, j int) bool {
+		if cpes[i].Vendor != cpes[j].Vendor {
+			return cpes[i].Vendor > cpes[j].Vendor
 		}
-		if max.Vendor == "" && c.Vendor != "" {
-			max = c
-			continue
+		if cpes[i].Product != cpes[j].Product {
+			return cpes[i].Product > cpes[j].Product
 		}
-		if len(c.Version) > len(max.Version) {
-			max = c
-		}
-	}
-	return max
+		return cpes[i].Version > cpes[j].Version
+	})
+	return cpes[0]
 }
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
