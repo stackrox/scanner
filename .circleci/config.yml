@@ -106,7 +106,7 @@ commands:
             kubectl -n stackrox get pod
             POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner-db")].metadata.name}')"
             [[ -n "${POD}" ]]
-            kubectl -n stackrox wait "--for=condition=Ready" "pod/${POD}" --timeout=3m
+            kubectl -n stackrox wait "--for=condition=Ready" "pod/${POD}" --timeout=10m
             nohup kubectl port-forward -n stackrox "${POD}" "5432:5432" & # PostgreSQL endpoint.
             sleep 10
 
