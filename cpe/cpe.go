@@ -103,16 +103,22 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 }
 
 func getMostSpecificCPE(cpes []wfn.AttributesWithFixedIn) wfn.AttributesWithFixedIn {
-	sort.Slice(cpes, func(i, j int) bool {
-		if cpes[i].Vendor != cpes[j].Vendor {
-			return cpes[i].Vendor > cpes[j].Vendor
+	mostSpecificCPE := cpes[0]
+	for _, cpe := range cpes[1:] {
+		if cpe.Vendor > mostSpecificCPE.Vendor {
+			mostSpecificCPE = cpe
+			continue
 		}
-		if cpes[i].Product != cpes[j].Product {
-			return cpes[i].Product > cpes[j].Product
+		if cpe.Product > mostSpecificCPE.Product {
+			mostSpecificCPE = cpe
+			continue
 		}
-		return cpes[i].Version > cpes[j].Version
-	})
-	return cpes[0]
+		if cpe.Version > mostSpecificCPE.Version {
+			mostSpecificCPE = cpe
+			continue
+		}
+	}
+	return mostSpecificCPE
 }
 
 func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
