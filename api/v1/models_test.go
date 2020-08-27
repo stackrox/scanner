@@ -128,15 +128,11 @@ func TestNotesNoLanguageVulns(t *testing.T) {
 	}
 	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, notes)
+	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, LanguageCVEsUnavailable)
 }
 
 func TestNotesStaleCVEs(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	envIsolator.Setenv(features.LanguageVulns.EnvVar(), "false")
-	defer envIsolator.RestoreAll()
-
 	dbLayer := database.Layer{
 		Name:          "example",
 		EngineVersion: 0,
@@ -149,16 +145,11 @@ func TestNotesStaleCVEs(t *testing.T) {
 	}
 	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, notes)
-	assert.Contains(t, notes, LanguageCVEsUnavailable)
+	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsStale)
 }
 
 func TestNotesUnavailableCVEs(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	envIsolator.Setenv(features.LanguageVulns.EnvVar(), "false")
-	defer envIsolator.RestoreAll()
-
 	dbLayer := database.Layer{
 		Name:          "example",
 		EngineVersion: 0,
@@ -171,7 +162,6 @@ func TestNotesUnavailableCVEs(t *testing.T) {
 	}
 	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, notes)
-	assert.Contains(t, notes, LanguageCVEsUnavailable)
+	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsUnavailable)
 }
