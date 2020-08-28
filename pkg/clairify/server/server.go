@@ -60,7 +60,7 @@ func clairError(w http.ResponseWriter, status int, err error) {
 	clairErrorString(w, status, err.Error())
 }
 
-func (s *Server) getClairLayer(w http.ResponseWriter, r *http.Request, layerName string) {
+func (s *Server) getClairLayer(w http.ResponseWriter, layerName string) {
 	dbLayer, err := s.storage.FindLayer(layerName, true, true)
 	if err == commonerr.ErrNotFound {
 		clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layerName)
@@ -70,13 +70,14 @@ func (s *Server) getClairLayer(w http.ResponseWriter, r *http.Request, layerName
 		return
 	}
 
-	layer, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, true, true)
+	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, true, true)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
 	env := &v1.LayerEnvelope{
 		Layer: &layer,
+		Notes: notes,
 	}
 
 	bytes, err := json.Marshal(env)
@@ -104,7 +105,7 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusNotFound, "Could not find sha %q", sha)
 		return
 	}
-	s.getClairLayer(w, r, layer)
+	s.getClairLayer(w, layer)
 }
 
 func parseImagePath(path string) (string, error) {
@@ -141,7 +142,7 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusNotFound, "Could not find image %q", image)
 		return
 	}
-	s.getClairLayer(w, r, layer)
+	s.getClairLayer(w, layer)
 }
 
 func getAuth(authHeader string) (string, string, error) {
