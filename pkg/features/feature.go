@@ -21,22 +21,18 @@ func (f *feature) Name() string {
 }
 
 func (f *feature) Enabled() bool {
-	switch strings.ToLower(os.Getenv(f.envVar)) {
+	envVal := os.Getenv(f.envVar)
+	if envVal == "" && f.noRoxAllowed {
+		// Remove ROX_ prefix.
+		envVal = os.Getenv(f.envVar[4:])
+	}
+
+	switch strings.ToLower(envVal) {
 	case "false":
 		return false
 	case "true":
 		return true
+	default:
+		return f.defaultValue
 	}
-
-	if f.noRoxAllowed {
-		// Remove the ROX_ prefix.
-		switch strings.ToLower(os.Getenv(f.envVar[4:])) {
-		case "false":
-			return false
-		case "true":
-			return true
-		}
-	}
-
-	return f.defaultValue
 }
