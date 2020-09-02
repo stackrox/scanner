@@ -2,6 +2,7 @@ package redhatloader
 
 import (
 	"fmt"
+	"github.com/stackrox/scanner/pkg/vulndump"
 	"io"
 	"net/http"
 	"os"
@@ -15,7 +16,7 @@ import (
 )
 
 func init() {
-	vulnloader.RegisterLoader("redhat", &loader{})
+	vulnloader.RegisterLoader(vulndump.RedHatDirName, &loader{})
 }
 
 const (
@@ -24,7 +25,7 @@ const (
 
 var (
 	client = http.Client{
-		Timeout:   2 * time.Minute,
+		Timeout:   3 * time.Minute,
 		Transport: proxy.RoundTripper(),
 	}
 )

@@ -3,6 +3,7 @@ package nvdloader
 import (
 	"compress/gzip"
 	"fmt"
+	"github.com/stackrox/scanner/pkg/vulndump"
 	"io"
 	"net/http"
 	"os"
@@ -23,7 +24,7 @@ var (
 )
 
 func init() {
-	vulnloader.RegisterLoader("nvd", &loader{})
+	vulnloader.RegisterLoader(vulndump.NVDDirName, &loader{})
 }
 
 type loader struct{}

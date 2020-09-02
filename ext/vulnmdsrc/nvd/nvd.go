@@ -27,6 +27,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/vulnmdsrc"
 	"github.com/stackrox/scanner/pkg/commonerr"
 )
 
@@ -39,7 +40,7 @@ type appender struct {
 }
 
 type metadataEnricher struct {
-	metadata *Metadata
+	metadata *vulnmdsrc.Metadata
 	summary  string
 }
 
@@ -58,31 +59,10 @@ func newMetadataEnricher(nvd *nvdEntry) *metadataEnricher {
 	}
 }
 
-type Metadata struct {
-	PublishedDateTime    string
-	LastModifiedDateTime string
-	CVSSv2               NVDmetadataCVSSv2
-	CVSSv3               NVDmetadataCVSSv3
-}
-
-type NVDmetadataCVSSv2 struct {
-	Vectors             string
-	Score               float64
-	ExploitabilityScore float64
-	ImpactScore         float64
-}
-
-type NVDmetadataCVSSv3 struct {
-	Vectors             string
-	Score               float64
-	ExploitabilityScore float64
-	ImpactScore         float64
-}
-
-func (a *appender) BuildCache(nvdDumpDir string) error {
+func (a *appender) BuildCache(dumpDir string) error {
 	a.metadata = make(map[string]*metadataEnricher)
 
-	fileInfos, err := ioutil.ReadDir(nvdDumpDir)
+	fileInfos, err := ioutil.ReadDir(dumpDir)
 	if err != nil {
 		return errors.Wrap(err, "failed to read dir")
 	}
@@ -92,7 +72,7 @@ func (a *appender) BuildCache(nvdDumpDir string) error {
 		if filepath.Ext(fileName) != ".json" {
 			continue
 		}
-		f, err := os.Open(filepath.Join(nvdDumpDir, fileName))
+		f, err := os.Open(filepath.Join(dumpDir, fileName))
 		if err != nil {
 			return errors.Wrapf(err, "could not open NVD data file %s", fileName)
 		}
@@ -125,32 +105,10 @@ func (a *appender) parseDataFeed(r io.Reader) error {
 	return nil
 }
 
-func (a *appender) getHighestCVSSMetadata(cves []string) *Metadata {
-	var maxScore float64
-	var maxMetadata *Metadata
-	for _, cve := range cves {
-		if enricher, ok := a.metadata[cve]; ok {
-			nvdMetadata := enricher.metadata
-			if nvdMetadata.CVSSv3.Score != 0 && nvdMetadata.CVSSv3.Score > maxScore {
-				maxScore = nvdMetadata.CVSSv3.Score
-				maxMetadata = nvdMetadata
-			} else if nvdMetadata.CVSSv2.Score > maxScore {
-				maxScore = nvdMetadata.CVSSv2.Score
-				maxMetadata = nvdMetadata
-			}
-		}
-	}
-
-	return maxMetadata
-}
-
-func (a *appender) Append(name string, subCVEs []string, appendFunc AppendFunc) error {
+func (a *appender) Append(name string, _ []string, appendFunc vulnmdsrc.AppendFunc) error {
 	if enricher, ok := a.metadata[name]; ok {
 		appendFunc(appenderName, enricher, SeverityFromCVSS(enricher.metadata))
 		return nil
-	}
-	if nvdMetadata := a.getHighestCVSSMetadata(subCVEs); nvdMetadata != nil {
-		appendFunc(appenderName, &metadataEnricher{metadata: nvdMetadata}, SeverityFromCVSS(nvdMetadata))
 	}
 	return nil
 }
@@ -166,7 +124,7 @@ func (a *appender) PurgeCache() {
 //
 // The Negligible level is set for CVSS scores between [0, 1), replacing the
 // specified None level, originally used for a score of 0.
-func SeverityFromCVSS(meta *Metadata) database.Severity {
+func SeverityFromCVSS(meta *vulnmdsrc.Metadata) database.Severity {
 	score := meta.CVSSv3.Score
 	if score == 0 {
 		score = meta.CVSSv2.Score

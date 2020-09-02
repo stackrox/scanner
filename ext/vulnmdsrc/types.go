@@ -1,8 +1,29 @@
-package nvd
+package vulnmdsrc
 
 import (
 	"github.com/stackrox/scanner/database"
 )
+
+type Metadata struct {
+	PublishedDateTime    string
+	LastModifiedDateTime string
+	CVSSv2               MetadataCVSSv2
+	CVSSv3               MetadataCVSSv3
+}
+
+type MetadataCVSSv2 struct {
+	Vectors             string
+	Score               float64
+	ExploitabilityScore float64
+	ImpactScore         float64
+}
+
+type MetadataCVSSv3 struct {
+	Vectors             string
+	Score               float64
+	ExploitabilityScore float64
+	ImpactScore         float64
+}
 
 type MetadataEnricher interface {
 	Metadata() interface{}
@@ -17,7 +38,7 @@ type AppendFunc func(metadataKey string, metadata MetadataEnricher, severity dat
 type Appender interface {
 	// BuildCache loads metadata into memory such that it can be quickly accessed
 	// for future calls to Append.
-	BuildCache(nvdDumpDir string) error
+	BuildCache(dumpDir string) error
 
 	// AddMetadata adds metadata to the given database.Vulnerability.
 	// It is expected that the fetcher uses .Lock.Lock() when manipulating the Metadata map.

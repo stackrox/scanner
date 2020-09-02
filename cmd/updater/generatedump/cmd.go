@@ -1,6 +1,8 @@
 package generatedump
 
 import (
+	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/pkg/vulnloader"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -15,7 +17,6 @@ import (
 	"github.com/stackrox/scanner/ext/vulnmdsrc/nvd"
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"github.com/stackrox/scanner/pkg/vulndump"
-	nvdloader2 "github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 )
 
 // An empty datastore makes all the updaters assume they're starting from scratch.
@@ -43,28 +44,20 @@ func generateDumpWithAllVulns(outFile string) error {
 		_ = os.RemoveAll(dumpDir)
 	}()
 
-	nvdSubDir := filepath.Join(dumpDir, vulndump.NVDDirName)
-	if err := os.MkdirAll(nvdSubDir, 0755); err != nil {
-		return errors.Wrap(err, "creating subdir for NVD")
-	}
+	for name, loader := range vulnloader.Loaders() {
+		subDir := filepath.Join(dumpDir, name)
+		if err := os.MkdirAll(subDir, 0755); err != nil {
+			return errors.Wrapf(err, "creating subdir for %s", name)
+		}
 
-	log.Info("Downloading NVD...")
-	if err := nvdloader2.DownloadFeedsToPath(nvdSubDir); err != nil {
-		return errors.Wrap(err, "downloading NVD")
-	}
-
-	redhatSubDir := filepath.Join(dumpDir, vulndump.RedHatDirName)
-	if err := os.MkdirAll(redhatSubDir, 0755); err != nil {
-		return errors.Wrap(err, "creating subdir for Red Hat")
-	}
-
-	log.Info("Downloading Red Hat...")
-	if err := nvdloader2.DownloadFeedsToPath(nvdSubDir); err != nil {
-		return errors.Wrap(err, "downloading NVD")
+		log.Infof("Downloading %s...", name)
+		if err := loader.DownloadFeedsToPath(subDir); err != nil {
+			errors.Wrapf(err, "downloading %s", name)
+		}
 	}
 
 	log.Info("Fetching OS vulns...")
-	fetchedVulns, err := fetchVulns(emptyDataStore{}, nvdSubDir)
+	fetchedVulns, err := fetchVulns(emptyDataStore{})
 	if err != nil {
 		return errors.Wrap(err, "fetching vulns")
 	}
@@ -106,7 +99,7 @@ func Command() *cobra.Command {
 }
 
 // fetch get data from the registered fetchers, in parallel.
-func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []database.Vulnerability, err error) {
+func fetchVulns(datastore vulnsrc.DataStore) (vulns []database.Vulnerability, err error) {
 	errSig := concurrency.NewErrorSignal()
 
 	// Fetch updates in parallel.
@@ -149,7 +142,7 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 		}
 	}
 
-	vulnsWithMetadata, err := addMetadata(vulns, nvdDumpDir)
+	vulnsWithMetadata, err := addMetadata(vulns)
 	if err != nil {
 		return nil, errors.Wrap(err, "adding metadata to vulns")
 	}
@@ -157,7 +150,7 @@ func fetchVulns(datastore vulnsrc.DataStore, nvdDumpDir string) (vulns []databas
 }
 
 // Add metadata to the specified vulnerabilities using the NVD metadata fetcher.
-func addMetadata(vulnerabilities []database.Vulnerability, nvdDumpDir string) ([]database.Vulnerability, error) {
+func addMetadata(vulnerabilities []database.Vulnerability) ([]database.Vulnerability, error) {
 	log.Info("adding metadata to vulnerabilities")
 
 	nvdAppender := nvd.SingletonAppender()
@@ -175,8 +168,8 @@ func addMetadata(vulnerabilities []database.Vulnerability, nvdDumpDir string) ([
 	return vulnerabilities, nil
 }
 
-func appendFuncForVuln(v *database.Vulnerability) nvd.AppendFunc {
-	return func(metadataKey string, enricher nvd.MetadataEnricher, severity database.Severity) {
+func appendFuncForVuln(v *database.Vulnerability) vulnmdsrc.AppendFunc {
+	return func(metadataKey string, enricher vulnmdsrc.MetadataEnricher, severity database.Severity) {
 		// If necessary, initialize the metadata map for the vulnerability.
 		if v.Metadata == nil {
 			v.Metadata = make(map[string]interface{})
