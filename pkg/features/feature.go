@@ -9,6 +9,7 @@ type feature struct {
 	envVar       string
 	name         string
 	defaultValue bool
+	noRoxAllowed bool
 }
 
 func (f *feature) EnvVar() string {
@@ -25,7 +26,17 @@ func (f *feature) Enabled() bool {
 		return false
 	case "true":
 		return true
-	default:
-		return f.defaultValue
 	}
+
+	if f.noRoxAllowed {
+		// Remove the ROX_ prefix.
+		switch strings.ToLower(os.Getenv(f.envVar[4:])) {
+		case "false":
+			return false
+		case "true":
+			return true
+		}
+	}
+
+	return f.defaultValue
 }
