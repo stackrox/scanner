@@ -3,42 +3,42 @@ module github.com/stackrox/scanner
 go 1.13
 
 require (
-	cloud.google.com/go/storage v1.1.0
+	cloud.google.com/go/storage v1.10.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker-credential-helpers v0.6.3
 	github.com/facebookincubator/nvdtools v0.1.4-0.20191024132624-1cb041402875
-	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
-	github.com/golang/protobuf v1.3.5
-	github.com/gorilla/mux v1.7.3
+	github.com/gogo/protobuf v1.3.1
+	github.com/golang/protobuf v1.4.2
+	github.com/gorilla/mux v1.7.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.11.4-0.20191004150533-c677e419aa5c
 	github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/heroku/docker-registry-client v0.0.0
-	github.com/lib/pq v1.2.0
-	github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63
+	github.com/lib/pq v1.7.0
+	github.com/mailru/easyjson v0.7.6
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/opencontainers/go-digest v1.0.0-rc1
+	github.com/opencontainers/go-digest v1.0.0
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v0.9.3
+	github.com/prometheus/client_golang v1.7.1
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
-	github.com/stackrox/rox v0.0.0-20200813232042-403e0ab8a77e
+	github.com/stackrox/rox v0.0.0-20200902200840-183e12662c50
 	github.com/stretchr/testify v1.6.1
 	go.etcd.io/bbolt v1.3.5
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
-	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd
-	golang.org/x/tools v0.0.0-20200519015757-0d0afa43d58a
-	google.golang.org/api v0.13.0
-	google.golang.org/grpc v1.29.1
+	golang.org/x/sys v0.0.0-20200803210538-64077c9b5642
+	golang.org/x/tools v0.0.0-20200804011535-6c149bb5ef0d
+	google.golang.org/api v0.30.0
+	google.golang.org/grpc v1.31.0
 	gopkg.in/yaml.v2 v2.3.0
-	honnef.co/go/tools v0.0.1-2020.1.4
+	honnef.co/go/tools v0.0.1-2020.1.5
 )
 
 replace (
