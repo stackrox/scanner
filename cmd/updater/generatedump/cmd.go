@@ -14,8 +14,8 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/vulnmdsrc/nvd"
 	"github.com/stackrox/scanner/ext/vulnsrc"
-	"github.com/stackrox/scanner/pkg/nvdloader"
 	"github.com/stackrox/scanner/pkg/vulndump"
+	nvdloader2 "github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 )
 
 // An empty datastore makes all the updaters assume they're starting from scratch.
@@ -49,7 +49,17 @@ func generateDumpWithAllVulns(outFile string) error {
 	}
 
 	log.Info("Downloading NVD...")
-	if err := nvdloader.DownloadFeedsToPath(nvdSubDir); err != nil {
+	if err := nvdloader2.DownloadFeedsToPath(nvdSubDir); err != nil {
+		return errors.Wrap(err, "downloading NVD")
+	}
+
+	redhatSubDir := filepath.Join(dumpDir, vulndump.RedHatDirName)
+	if err := os.MkdirAll(redhatSubDir, 0755); err != nil {
+		return errors.Wrap(err, "creating subdir for Red Hat")
+	}
+
+	log.Info("Downloading Red Hat...")
+	if err := nvdloader2.DownloadFeedsToPath(nvdSubDir); err != nil {
 		return errors.Wrap(err, "downloading NVD")
 	}
 

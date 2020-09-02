@@ -10,7 +10,7 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
-	"github.com/stackrox/scanner/pkg/nvdloader"
+	nvdloader2 "github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 	"github.com/stackrox/scanner/pkg/wellknowndirnames"
 	"go.etcd.io/bbolt"
 )
@@ -59,7 +59,7 @@ type cacheImpl struct {
 }
 
 func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSON10DefCVEItem) error {
-	bytes, err := nvdloader.MarshalNVDFeedCVEItem(cve)
+	bytes, err := nvdloader2.MarshalNVDFeedCVEItem(cve)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSO
 		cveBucket := tx.Bucket(cveToProductBucket)
 		productBytes := cveBucket.Get([]byte(cve.CVE.CVEDataMeta.ID))
 		if productBytes != nil {
-			products, err := nvdloader.UnmarshalStringSlice(productBytes)
+			products, err := nvdloader2.UnmarshalStringSlice(productBytes)
 			if err != nil {
 				return err
 			}
@@ -97,7 +97,7 @@ func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSO
 		}
 
 		// Update the CVE bucket with the latest products.
-		productBytes, err = nvdloader.MarshalStringSlice(productAlreadyWritten.AsSlice())
+		productBytes, err = nvdloader2.MarshalStringSlice(productAlreadyWritten.AsSlice())
 		if err != nil {
 			return err
 		}
@@ -131,7 +131,7 @@ func (c *cacheImpl) GetVulnsForProducts(products []string) ([]cvefeed.Vuln, erro
 				if !vulnSet.Add(string(k)) {
 					return nil
 				}
-				vuln, err := nvdloader.UnmarshalNVDFeedCVEItem(v)
+				vuln, err := nvdloader2.UnmarshalNVDFeedCVEItem(v)
 				if err != nil {
 					return errors.Wrapf(err, "unmarshaling vuln %s", string(k))
 				}

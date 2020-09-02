@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
-	"github.com/stackrox/scanner/pkg/nvdloader"
+	nvdloader2 "github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 )
 
 func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
@@ -109,7 +109,7 @@ func (c *cacheImpl) handleJSONFile(path string) (int, error) {
 	}
 	defer utils.IgnoreError(f.Close)
 
-	feed, err := nvdloader.LoadJSONFileFromReader(f)
+	feed, err := nvdloader2.LoadJSONFileFromReader(f)
 	if err != nil {
 		return 0, errors.Wrapf(err, "loading JSON file at path %q", path)
 	}
