@@ -18,7 +18,7 @@ var (
 	Flags = make(map[string]FeatureFlag)
 )
 
-func registerFeature(name, envVar string, defaultValue bool) FeatureFlag {
+func registerFeature(name, envVar string, defaultValue, noRoxAllowed bool) FeatureFlag {
 	if !strings.HasPrefix(envVar, "ROX_") {
 		panic(fmt.Sprintf("invalid env var: %s, must start with ROX_", envVar))
 	}
@@ -26,6 +26,7 @@ func registerFeature(name, envVar string, defaultValue bool) FeatureFlag {
 		name:         name,
 		envVar:       envVar,
 		defaultValue: defaultValue,
+		noRoxAllowed: noRoxAllowed,
 	}
 	Flags[f.Name()] = f
 	return f
