@@ -25,9 +25,8 @@ type redhatEntry struct {
 	CVSSv3Vector        string `json:"cvss3_scoring_vector"`
 }
 
-// TODO:
 func (r *redhatEntry) Summary() string {
-	return ""
+	return r.BugzillaDescription
 }
 
 func (r *redhatEntry) Metadata() *vulnmdsrc.Metadata {
