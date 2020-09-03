@@ -1,7 +1,7 @@
 package vulnloader
 
 var (
-	loaders  = make(map[string]Loader)
+	loaders = make(map[string]Loader)
 )
 
 // Loader represents anything that can fetch vulnerabilities and store them in some directory.
@@ -10,7 +10,7 @@ type Loader interface {
 	DownloadFeedsToPath(string) error
 }
 
-// RegisterUpdater makes a Loader available by the provided name.
+// RegisterLoader makes a Loader available by the provided name.
 //
 // If called twice with the same name, the name is blank, or if the provided
 // Loader is nil, this function panics.

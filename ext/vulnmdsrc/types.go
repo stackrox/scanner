@@ -48,4 +48,7 @@ type Appender interface {
 	// PurgeCache deallocates metadata from memory after all calls to Append are
 	// finished.
 	PurgeCache()
+
+	// Name returns the name of the appender
+	Name() string
 }

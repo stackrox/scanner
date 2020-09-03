@@ -2,7 +2,6 @@ package redhatloader
 
 import (
 	"fmt"
-	"github.com/stackrox/scanner/pkg/vulndump"
 	"io"
 	"net/http"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
 )
 
@@ -30,17 +30,21 @@ var (
 	}
 )
 
-type loader struct {}
+type loader struct{}
 
 // DownloadFeedsToPath downloads the Red Hat feeds to the given path.
-// The directory must exist already.
 // If this function is successful, it will fill the directory with
 // one json file for each 1000-item page of the Red Hat data.
 func (l *loader) DownloadFeedsToPath(outputDir string) error {
+	redhatDir := filepath.Join(outputDir, vulndump.RedHatDirName)
+	if err := os.MkdirAll(redhatDir, 0755); err != nil {
+		return errors.Wrapf(err, "creating subdir for %s", vulndump.RedHatDirName)
+	}
+
 	var done bool
 	for page := 1; !done; page++ {
 		var err error
-		if done, err = downloadFeedForPage(outputDir, page); err != nil {
+		if done, err = downloadFeedForPage(redhatDir, page); err != nil {
 			return err
 		}
 	}

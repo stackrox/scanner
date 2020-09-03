@@ -16,10 +16,10 @@ package nvd
 
 import (
 	"fmt"
-	"github.com/stackrox/scanner/ext/vulnmdsrc"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/ext/vulnmdsrc"
 )
 
 type nvd struct {
@@ -109,7 +109,6 @@ var vectorValuesToLetters = map[string]string{
 	"CHANGED":   "C",
 	"UNCHANGED": "U",
 }
-
 
 func (n *nvdEntry) Summary() string {
 	for _, desc := range n.CVE.Description.DescriptionData {

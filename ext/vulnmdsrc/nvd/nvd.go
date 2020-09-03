@@ -26,9 +26,10 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/vulnmdsrc"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/cvss"
+	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
 const (
@@ -60,6 +61,7 @@ func newMetadataEnricher(nvd *nvdEntry) *metadataEnricher {
 }
 
 func (a *appender) BuildCache(dumpDir string) error {
+	dumpDir = filepath.Join(dumpDir, vulndump.NVDDirName)
 	a.metadata = make(map[string]*metadataEnricher)
 
 	fileInfos, err := ioutil.ReadDir(dumpDir)
@@ -107,7 +109,7 @@ func (a *appender) parseDataFeed(r io.Reader) error {
 
 func (a *appender) Append(name string, _ []string, appendFunc vulnmdsrc.AppendFunc) error {
 	if enricher, ok := a.metadata[name]; ok {
-		appendFunc(appenderName, enricher, SeverityFromCVSS(enricher.metadata))
+		appendFunc(appenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
 		return nil
 	}
 	return nil
@@ -117,29 +119,6 @@ func (a *appender) PurgeCache() {
 	a.metadata = nil
 }
 
-// SeverityFromCVSS converts the CVSS Score (0.0 - 10.0) into a
-// database.Severity following the qualitative rating scale available in the
-// CVSS v3.0 specification (https://www.first.org/cvss/specification-document),
-// Table 14.
-//
-// The Negligible level is set for CVSS scores between [0, 1), replacing the
-// specified None level, originally used for a score of 0.
-func SeverityFromCVSS(meta *vulnmdsrc.Metadata) database.Severity {
-	score := meta.CVSSv3.Score
-	if score == 0 {
-		score = meta.CVSSv2.Score
-	}
-	switch {
-	case score < 1.0:
-		return database.NegligibleSeverity
-	case score < 4.0:
-		return database.LowSeverity
-	case score < 7.0:
-		return database.MediumSeverity
-	case score < 9.0:
-		return database.HighSeverity
-	case score <= 10.0:
-		return database.CriticalSeverity
-	}
-	return database.UnknownSeverity
+func (a *appender) Name() string {
+	return appenderName
 }

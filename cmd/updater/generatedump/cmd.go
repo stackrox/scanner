@@ -1,11 +1,8 @@
 package generatedump
 
 import (
-	"github.com/stackrox/scanner/ext/vulnmdsrc"
-	"github.com/stackrox/scanner/pkg/vulnloader"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -14,16 +11,17 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/ext/vulnmdsrc/nvd"
+	"github.com/stackrox/scanner/ext/vulnmdsrc"
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"github.com/stackrox/scanner/pkg/vulndump"
+	"github.com/stackrox/scanner/pkg/vulnloader"
 )
 
 // An empty datastore makes all the updaters assume they're starting from scratch.
 type emptyDataStore struct {
 }
 
-func (e emptyDataStore) GetKeyValue(key string) (string, error) {
+func (e emptyDataStore) GetKeyValue(_ string) (string, error) {
 	return "", nil
 }
 
@@ -45,19 +43,14 @@ func generateDumpWithAllVulns(outFile string) error {
 	}()
 
 	for name, loader := range vulnloader.Loaders() {
-		subDir := filepath.Join(dumpDir, name)
-		if err := os.MkdirAll(subDir, 0755); err != nil {
-			return errors.Wrapf(err, "creating subdir for %s", name)
-		}
-
 		log.Infof("Downloading %s...", name)
-		if err := loader.DownloadFeedsToPath(subDir); err != nil {
-			errors.Wrapf(err, "downloading %s", name)
+		if err := loader.DownloadFeedsToPath(dumpDir); err != nil {
+			return errors.Wrapf(err, "downloading %s", name)
 		}
 	}
 
 	log.Info("Fetching OS vulns...")
-	fetchedVulns, err := fetchVulns(emptyDataStore{})
+	fetchedVulns, err := fetchVulns(emptyDataStore{}, dumpDir)
 	if err != nil {
 		return errors.Wrap(err, "fetching vulns")
 	}
@@ -99,7 +92,7 @@ func Command() *cobra.Command {
 }
 
 // fetch get data from the registered fetchers, in parallel.
-func fetchVulns(datastore vulnsrc.DataStore) (vulns []database.Vulnerability, err error) {
+func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.Vulnerability, err error) {
 	errSig := concurrency.NewErrorSignal()
 
 	// Fetch updates in parallel.
@@ -142,7 +135,7 @@ func fetchVulns(datastore vulnsrc.DataStore) (vulns []database.Vulnerability, er
 		}
 	}
 
-	vulnsWithMetadata, err := addMetadata(vulns)
+	vulnsWithMetadata, err := addMetadata(vulns, dumpDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "adding metadata to vulns")
 	}
@@ -150,17 +143,24 @@ func fetchVulns(datastore vulnsrc.DataStore) (vulns []database.Vulnerability, er
 }
 
 // Add metadata to the specified vulnerabilities using the NVD metadata fetcher.
-func addMetadata(vulnerabilities []database.Vulnerability) ([]database.Vulnerability, error) {
+func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]database.Vulnerability, error) {
 	log.Info("adding metadata to vulnerabilities")
 
-	nvdAppender := nvd.SingletonAppender()
-	if err := nvdAppender.BuildCache(nvdDumpDir); err != nil {
-		return nil, errors.Wrap(err, "failed to build cache from the NVD feed dump")
+	defer func() {
+		for _, appender := range vulnmdsrc.Appenders() {
+			appender.PurgeCache()
+		}
+	}()
+	for _, appender := range vulnmdsrc.Appenders() {
+		if err := appender.BuildCache(dumpDir); err != nil {
+			return nil, errors.Wrapf(err, "failed to build cache from the %s feed dump", appender.Name())
+		}
 	}
-	defer nvdAppender.PurgeCache()
+
 	for i := range vulnerabilities {
 		vuln := &vulnerabilities[i]
-		if err := nvdAppender.Append(vuln.Name, vuln.SubCVEs, appendFuncForVuln(vuln)); err != nil {
+		appender := vulnmdsrc.SingletonAppender(vuln)
+		if err := appender.Append(vuln.Name, vuln.SubCVEs, appendFuncForVuln(vuln)); err != nil {
 			return nil, errors.Wrapf(err, "Failed to append metadata for vuln %s", vuln.Name)
 		}
 	}

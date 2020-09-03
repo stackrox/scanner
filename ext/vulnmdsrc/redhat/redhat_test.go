@@ -1,18 +1,4 @@
-// Copyright 2018 clair authors
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-package nvd
+package redhat
 
 import (
 	"os"
@@ -28,7 +14,7 @@ func TestNVDParser(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	path := filepath.Join(filepath.Dir(filename))
 
-	dataFilePath := filepath.Join(path, "/testdata/nvd_test.json")
+	dataFilePath := filepath.Join(path, "/testdata/redhat_test.json")
 	testData, err := os.Open(dataFilePath)
 	if err != nil {
 		t.Fatalf("Error opening %q: %v", dataFilePath, err)
@@ -85,7 +71,7 @@ func TestNVDParserErrors(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	path := filepath.Join(filepath.Dir(filename))
 
-	dataFilePath := filepath.Join(path, "/testdata/nvd_test_incorrect_format.json")
+	dataFilePath := filepath.Join(path, "/testdata/redhat_test_incorrect_format.json")
 	testData, err := os.Open(dataFilePath)
 	if err != nil {
 		t.Fatalf("Error opening %q: %v", dataFilePath, err)
@@ -97,6 +83,6 @@ func TestNVDParserErrors(t *testing.T) {
 
 	err = a.parseDataFeed(testData)
 	if err == nil {
-		t.Fatalf("Expected error parsing NVD data file: %q", dataFilePath)
+		t.Fatalf("Expected error parsing Red Hat data file: %q", dataFilePath)
 	}
 }

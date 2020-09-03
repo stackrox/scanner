@@ -171,7 +171,7 @@ func parseBzip(reader io.ReadCloser, coveredIDs set.IntSet) (resp []database.Vul
 	return parseRHSA(decompressingReader, coveredIDs)
 }
 
-func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
+func (u *updater) Update(_ vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
 	log.WithField("package", "RHEL").Info("Start fetching vulnerabilities")
 
 	log.Info("RHEL: fetching bulk OVAL URIs")
