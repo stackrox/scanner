@@ -18,15 +18,21 @@ var (
 	Flags = make(map[string]FeatureFlag)
 )
 
-func registerFeature(name, envVar string, defaultValue, noRoxAllowed bool) FeatureFlag {
+func registerFeature(name, envVar string, defaultValue bool, opts ...FeatureFlagOption) FeatureFlag {
 	if !strings.HasPrefix(envVar, "ROX_") {
 		panic(fmt.Sprintf("invalid env var: %s, must start with ROX_", envVar))
 	}
+
+	var appliedOpts options
+	for _, opt := range opts {
+		opt.apply(&appliedOpts)
+	}
+
 	f := &feature{
 		name:         name,
 		envVar:       envVar,
 		defaultValue: defaultValue,
-		noRoxAllowed: noRoxAllowed,
+		options:      appliedOpts,
 	}
 	Flags[f.Name()] = f
 	return f
