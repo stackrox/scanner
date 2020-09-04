@@ -1,0 +1,30 @@
+[
+  {
+    "CVE": "CVE-2012-0001",
+    "severity": null,
+    "public_date": "2018-01-10T22:29Z",
+    "bugzilla_description": "A CVE without CVSSv2 or CVSSv3",
+    "cvss_score": null,
+    "cvss_scoring_vector": null,
+    "cvss3_score": null,
+    "cvss3_scoring_vector": null
+  },
+  {
+    "CVE": "CVE-2012-0001",
+    "severity": "moderate",
+    "bugzilla_description": "A CVE with only CVSSv2",
+    "cvss_score": "4.0",
+    "cvss_scoring_vector": "AV:N/AC:L/Au:S/C:P/I:N/A:N",
+    "cvss3_score": null,
+    "cvss3_scoring_vector": null
+  },
+  {
+    "CVE": "CVE-2018-0001",
+    "severity": "important",
+    "bugzilla_description": "A CVE with standard CVSSv2 and CVSSv3",
+    "cvss_score": "7.5",
+    "cvss_scoring_vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+    "cvss3_score": "9.8",
+    "cvss3_scoring_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+  }
+]

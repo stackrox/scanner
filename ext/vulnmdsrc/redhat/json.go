@@ -1,6 +1,7 @@
 package redhat
 
 import (
+	"math"
 	"strconv"
 
 	"github.com/facebookincubator/nvdtools/cvss2"
@@ -8,9 +9,7 @@ import (
 	"github.com/stackrox/scanner/ext/vulnmdsrc"
 )
 
-type redhat struct {
-	Entries []redhatEntry
-}
+type redhat []redhatEntry
 
 // See https://access.redhat.com/documentation/en-us/red_hat_security_data_api/1.0/html/red_hat_security_data_api/cve#cve_format
 // for other fields, if necessary.
@@ -43,8 +42,8 @@ func (r *redhatEntry) Metadata() *vulnmdsrc.Metadata {
 		metadata.CVSSv2 = vulnmdsrc.MetadataCVSSv2{
 			Vectors:             r.CVSSv2Vector,
 			Score:               cvss2Score,
-			ExploitabilityScore: v.ExploitabilityScore(),
-			ImpactScore:         v.ImpactScore(false),
+			ExploitabilityScore: roundTo1Decimal(v.ExploitabilityScore()),
+			ImpactScore:         roundTo1Decimal(v.ImpactScore(false)),
 		}
 	}
 
@@ -57,8 +56,8 @@ func (r *redhatEntry) Metadata() *vulnmdsrc.Metadata {
 		metadata.CVSSv3 = vulnmdsrc.MetadataCVSSv3{
 			Vectors:             r.CVSSv3Vector,
 			Score:               cvss3Score,
-			ExploitabilityScore: v.ExploitabilityScore(),
-			ImpactScore:         v.ImpactScore(),
+			ExploitabilityScore: roundUp(v.ExploitabilityScore()),
+			ImpactScore:         roundUp(v.ImpactScore()),
 		}
 	}
 
@@ -67,4 +66,15 @@ func (r *redhatEntry) Metadata() *vulnmdsrc.Metadata {
 
 func (r *redhatEntry) Name() string {
 	return r.CVE
+}
+
+// Used for CVSSv2
+func roundTo1Decimal(x float64) float64 {
+	return math.Round(x*10) / 10
+}
+
+// Used for CVSSv3
+func roundUp(x float64) float64 {
+	// round up to one decimal
+	return math.Ceil(x*10) / 10
 }

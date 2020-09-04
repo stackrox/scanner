@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNVDParser(t *testing.T) {
+func TestRedHatParser(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	path := filepath.Join(filepath.Dir(filename))
 
@@ -58,7 +58,7 @@ func TestNVDParser(t *testing.T) {
 			ImpactScore:         6.4,
 		},
 		CVSSv3: vulnmdsrc.MetadataCVSSv3{
-			Vectors:             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+			Vectors:             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 			Score:               9.8,
 			ExploitabilityScore: 3.9,
 			ImpactScore:         5.9,

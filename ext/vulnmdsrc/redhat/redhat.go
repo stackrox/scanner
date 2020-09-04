@@ -79,7 +79,7 @@ func (a *appender) parseDataFeed(r io.Reader) error {
 		return commonerr.ErrCouldNotParse
 	}
 
-	for _, redhatEntry := range redhat.Entries {
+	for _, redhatEntry := range redhat {
 		// Create metadata entry.
 		enricher := newMetadataEnricher(&redhatEntry)
 		if enricher.metadata != nil {

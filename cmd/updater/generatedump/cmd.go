@@ -12,6 +12,7 @@ import (
 	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/ext/vulnmdsrc/all"
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
@@ -147,11 +148,11 @@ func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]da
 	log.Info("adding metadata to vulnerabilities")
 
 	defer func() {
-		for _, appender := range vulnmdsrc.Appenders() {
+		for _, appender := range all.Appenders() {
 			appender.PurgeCache()
 		}
 	}()
-	for _, appender := range vulnmdsrc.Appenders() {
+	for _, appender := range all.Appenders() {
 		if err := appender.BuildCache(dumpDir); err != nil {
 			return nil, errors.Wrapf(err, "failed to build cache from the %s feed dump", appender.Name())
 		}
@@ -159,7 +160,7 @@ func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]da
 
 	for i := range vulnerabilities {
 		vuln := &vulnerabilities[i]
-		appender := vulnmdsrc.SingletonAppender(vuln)
+		appender := all.SingletonAppender(vuln)
 		if err := appender.Append(vuln.Name, vuln.SubCVEs, appendFuncForVuln(vuln)); err != nil {
 			return nil, errors.Wrapf(err, "Failed to append metadata for vuln %s", vuln.Name)
 		}
