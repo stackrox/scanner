@@ -16,6 +16,9 @@ import (
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
+
+	// Needed to register all vuln loaders.
+	_ "github.com/stackrox/scanner/pkg/vulnloader/all"
 )
 
 // An empty datastore makes all the updaters assume they're starting from scratch.

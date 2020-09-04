@@ -42,13 +42,15 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 	}
 
 	var done bool
-	for page := 1; !done; page++ {
+	var page int
+	for page = 1; !done; page++ {
 		var err error
 		if done, err = downloadFeedForPage(redhatDir, page); err != nil {
 			return err
 		}
 	}
-	return nil
+
+	return os.Remove(filepath.Join(redhatDir, fmt.Sprintf("%d.json", page-1)))
 }
 
 func downloadFeedForPage(outputDir string, page int) (bool, error) {
