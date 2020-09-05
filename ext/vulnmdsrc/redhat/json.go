@@ -78,9 +78,14 @@ func (r *redhatEntry) Metadata() *vulnmdsrc.Metadata {
 		if err != nil || v.Validate() != nil {
 			return nil
 		}
+		score := r.CVSSv2.Score()
+		if score == nil {
+			tmpScore := v.BaseScore()
+			score = &tmpScore
+		}
 		metadata.CVSSv2 = vulnmdsrc.MetadataCVSSv2{
 			Vectors:             r.CVSSv2Vector,
-			Score:               *r.CVSSv2.Score(),
+			Score:               *score,
 			ExploitabilityScore: roundTo1Decimal(v.ExploitabilityScore()),
 			ImpactScore:         roundTo1Decimal(v.ImpactScore(false)),
 		}
@@ -91,9 +96,14 @@ func (r *redhatEntry) Metadata() *vulnmdsrc.Metadata {
 		if err != nil || v.Validate() != nil {
 			return nil
 		}
+		score := r.CVSSv3.Score()
+		if score == nil {
+			tmpScore := v.BaseScore()
+			score = &tmpScore
+		}
 		metadata.CVSSv3 = vulnmdsrc.MetadataCVSSv3{
 			Vectors:             r.CVSSv3Vector,
-			Score:               *r.CVSSv3.Score(),
+			Score:               *score,
 			ExploitabilityScore: roundUp(v.ExploitabilityScore()),
 			ImpactScore:         roundUp(v.ImpactScore()),
 		}
