@@ -76,6 +76,7 @@ func (a *appender) BuildCache(dumpDir string) error {
 func (a *appender) parseDataFeed(r io.Reader) error {
 	var redhat redhat
 	if err := json.NewDecoder(r).Decode(&redhat); err != nil {
+		log.Infof("%+v", err)
 		return commonerr.ErrCouldNotParse
 	}
 
