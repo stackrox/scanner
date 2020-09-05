@@ -11,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/ext/vulnmdsrc"
-	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/cvss"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
@@ -76,8 +75,7 @@ func (a *appender) BuildCache(dumpDir string) error {
 func (a *appender) parseDataFeed(r io.Reader) error {
 	var redhat redhat
 	if err := json.NewDecoder(r).Decode(&redhat); err != nil {
-		log.Infof("%+v", err)
-		return commonerr.ErrCouldNotParse
+		return err
 	}
 
 	for _, redhatEntry := range redhat {

@@ -19,6 +19,15 @@
     "cvss3_scoring_vector": null
   },
   {
+    "CVE": "CVE-2012-0002",
+    "severity": "moderate",
+    "bugzilla_description": "A CVE with only CVSSv3",
+    "cvss_score": null,
+    "cvss_scoring_vector": null,
+    "cvss3_score": "4.6",
+    "cvss3_scoring_vector": "CVSS:3.1/AV:P/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:H"
+  },
+  {
     "CVE": "CVE-2018-0001",
     "severity": "important",
     "bugzilla_description": "A CVE with standard CVSSv2 and CVSSv3",
@@ -26,5 +35,13 @@
     "cvss_scoring_vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
     "cvss3_score": "9.8",
     "cvss3_scoring_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+  },
+  {
+    "CVE": "CVE-2014-4715",
+    "severity": "moderate",
+    "public_date": "2014-07-03T00:00:00Z",
+    "bugzilla_description": "CVE-2014-4715 lz4: LZ4_decompress_generic() integer overflow (32-bit arches)",
+    "cvss_score": 6.0,
+    "cvss_scoring_vector": "AV:L/AC:H/Au:S/C:C/I:C/A:C"
   }
 ]
