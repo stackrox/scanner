@@ -28,7 +28,7 @@ func getMatchingFeature(featureList []v1.Feature, featureToFind v1.Feature, t *t
 	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list", featureToFind)
 	return featureList[candidateIdx]
 }
-func verifyImageHasExpectedFeatures(client *client.Clairify, username, password string, imageRequest *types.ImageRequest, expectedFeatures []v1.Feature, t *testing.T) {
+func verifyImageHasExpectedFeatures(client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, expectedFeatures []v1.Feature, t *testing.T) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
@@ -75,14 +75,14 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password 
 					assert.Nil(t, matchingVuln.Metadata, "Expected no metadata for %s but got some", expectedVuln.Name)
 				} else {
 					for _, keys := range [][]string{
-						{"NVD", "CVSSv2", "ExploitabilityScore"},
-						{"NVD", "CVSSv2", "Score"},
-						{"NVD", "CVSSv2", "ImpactScore"},
-						{"NVD", "CVSSv2", "Vectors"},
-						{"NVD", "CVSSv3", "ExploitabilityScore"},
-						{"NVD", "CVSSv3", "Score"},
-						{"NVD", "CVSSv3", "ImpactScore"},
-						{"NVD", "CVSSv3", "Vectors"},
+						{source, "CVSSv2", "ExploitabilityScore"},
+						{source, "CVSSv2", "Score"},
+						{source, "CVSSv2", "ImpactScore"},
+						{source, "CVSSv2", "Vectors"},
+						{source, "CVSSv3", "ExploitabilityScore"},
+						{source, "CVSSv3", "Score"},
+						{source, "CVSSv3", "ImpactScore"},
+						{source, "CVSSv3", "Vectors"},
 					} {
 						assert.NotNil(t, deepGet(expectedVuln.Metadata, keys...), "Value for nil for %+v", keys)
 						assert.Equal(t, deepGet(expectedVuln.Metadata, keys...), deepGet(matchingVuln.Metadata, keys...), "Failed for %+v", keys)
@@ -106,11 +106,13 @@ func TestImageSanity(t *testing.T) {
 		image              string
 		registry           string
 		username, password string
+		source             string
 		expectedFeatures   []v1.Feature
 	}{
 		{
 			image:    "docker.io/library/nginx:1.10",
 			registry: "https://registry-1.docker.io",
+			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:            "diffutils",
@@ -183,6 +185,7 @@ func TestImageSanity(t *testing.T) {
 		{
 			image:    "docker.io/kaizheh/apache-struts2-cve-2017-5638:latest",
 			registry: "https://registry-1.docker.io",
+			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apt",
@@ -276,6 +279,7 @@ func TestImageSanity(t *testing.T) {
 		{
 			image:    "docker.io/anchore/anchore-engine:v0.5.0",
 			registry: "https://registry-1.docker.io",
+			source:   "Red Hat",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "procps-ng",
@@ -347,6 +351,7 @@ func TestImageSanity(t *testing.T) {
 			registry: "https://us.gcr.io",
 			username: "_json_key",
 			password: os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER"),
+			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "cron",
@@ -387,7 +392,7 @@ func TestImageSanity(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			verifyImageHasExpectedFeatures(cli, testCase.username, testCase.password, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
+			verifyImageHasExpectedFeatures(cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
 		})
 	}
 }
