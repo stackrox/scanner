@@ -289,23 +289,16 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "centos:7",
 							Description:   "DOCUMENTATION: Since the kernel's proc_pid_readdir() returns PID entries in ascending numeric order, a process occupying a high PID can use inotify events to determine when the process list is being scanned, and fork/exec to obtain a lower PID, thus avoiding enumeration. An unprivileged attacker can hide a process from procps-ng's utilities by exploiting a race condition in reading /proc/PID entries.             STATEMENT: The /proc filesystem is not a reliable mechanism to account for processes running on a system, as it is unable to offer snapshot semantics. Short-lived processes have always been able to escape detection by tools that monitor /proc. This CVE simply identifies a reliable way to do so using inotify. Process accounting for security purposes, or with a requirement to record very short-running processes and those attempting to evade detection, should be performed with more robust methods such as auditd(8) (the Linux Audit Daemon) or systemtap.",
 							Link:          "https://access.redhat.com/security/cve/CVE-2018-1121",
-							Severity:      "Medium",
+							Severity:      "Low",
 							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
-									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 8.6,
-										"ImpactScore":         2.9,
-										"Score":               4.3,
-										"Vectors":             "AV:N/AC:M/Au:N/C:N/I:P/A:N",
-									},
+								"Red Hat": map[string]interface{}{
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 2.2,
-										"ImpactScore":         3.6,
-										"Score":               5.9,
-										"Vectors":             "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+										"ExploitabilityScore": 1.3,
+										"ImpactScore":         2.5,
+										"Score":               3.9,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 									},
-									"LastModifiedDateTime": "2020-06-30T16:15Z",
-									"PublishedDateTime":    "2018-06-13T20:29Z",
+									"PublishedDateTime":    "2018-05-17T17:00:00Z",
 								},
 							},
 						},
@@ -314,23 +307,16 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "centos:7",
 							Description:   "DOCUMENTATION: Due to incorrect accounting when decoding and escaping Unicode data in procfs, ps is vulnerable to overflowing an mmap()ed region when formatting the process list for display. Since ps maps a guard page at the end of the buffer, impact is limited to a crash.",
 							Link:          "https://access.redhat.com/security/cve/CVE-2018-1123",
-							Severity:      "High",
+							Severity:      "Low",
 							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
-									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 10.0,
-										"ImpactScore":         2.9,
-										"Score":               5.0,
-										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
-									},
+								"Red Hat": map[string]interface{}{
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 3.9,
-										"ImpactScore":         3.6,
-										"Score":               7.5,
-										"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+										"ExploitabilityScore": 1.3,
+										"ImpactScore":         2.5,
+										"Score":               3.9,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 									},
-									"LastModifiedDateTime": "2019-10-09T23:38Z",
-									"PublishedDateTime":    "2018-05-23T14:29Z",
+									"PublishedDateTime":    "2018-05-17T17:00:00Z",
 								},
 							},
 						},
@@ -339,23 +325,16 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "centos:7",
 							Description:   "DOCUMENTATION: If a process inspected by pgrep has an argument longer than INT_MAX bytes, \"int bytes\" could wrap around back to a large positive int (rather than approaching zero), leading to a stack buffer overflow via strncat().                          MITIGATION: The procps suite on Red Hat Enterprise Linux is built with FORTIFY, which limits the impact of this stack overflow (and others like it) to a crash.",
 							Link:          "https://access.redhat.com/security/cve/CVE-2018-1125",
-							Severity:      "High",
+							Severity:      "Medium",
 							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
-									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 10.0,
-										"ImpactScore":         2.9,
-										"Score":               5.0,
-										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
-									},
+								"Red Hat": map[string]interface{}{
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 3.9,
-										"ImpactScore":         3.6,
-										"Score":               7.5,
-										"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         2.5,
+										"Score":               4.4,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L\"",
 									},
-									"LastModifiedDateTime": "2019-10-09T23:38Z",
-									"PublishedDateTime":    "2018-05-23T14:29Z",
+									"PublishedDateTime":    "2018-05-17T17:00:00Z",
 								},
 							},
 						},
