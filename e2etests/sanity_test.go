@@ -296,9 +296,15 @@ func TestImageSanity(t *testing.T) {
 							Severity:      "Low",
 							Metadata: map[string]interface{}{
 								"Red Hat": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 1.3,
-										"ImpactScore":         2.5,
+										"ExploitabilityScore": 1.4,
+										"ImpactScore":         2.6,
 										"Score":               3.9,
 										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 									},
@@ -314,9 +320,15 @@ func TestImageSanity(t *testing.T) {
 							Severity:      "Low",
 							Metadata: map[string]interface{}{
 								"Red Hat": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 1.3,
-										"ImpactScore":         2.5,
+										"ExploitabilityScore": 1.4,
+										"ImpactScore":         2.6,
 										"Score":               3.9,
 										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 									},
@@ -332,11 +344,17 @@ func TestImageSanity(t *testing.T) {
 							Severity:      "Medium",
 							Metadata: map[string]interface{}{
 								"Red Hat": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 1.8,
-										"ImpactScore":         2.5,
+										"ExploitabilityScore": 1.9,
+										"ImpactScore":         2.6,
 										"Score":               4.4,
-										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L\"",
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L",
 									},
 									"PublishedDateTime": "2018-05-17T17:00:00Z",
 								},
