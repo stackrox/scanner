@@ -303,8 +303,8 @@ func TestImageSanity(t *testing.T) {
 										"Vectors":             "",
 									},
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 1.4,
-										"ImpactScore":         2.6,
+										"ExploitabilityScore": 1.3,
+										"ImpactScore":         2.5,
 										"Score":               3.9,
 										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 									},
@@ -327,8 +327,8 @@ func TestImageSanity(t *testing.T) {
 										"Vectors":             "",
 									},
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 1.4,
-										"ImpactScore":         2.6,
+										"ExploitabilityScore": 1.3,
+										"ImpactScore":         2.5,
 										"Score":               3.9,
 										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 									},
@@ -351,8 +351,8 @@ func TestImageSanity(t *testing.T) {
 										"Vectors":             "",
 									},
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 1.9,
-										"ImpactScore":         2.6,
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         2.5,
 										"Score":               4.4,
 										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L",
 									},

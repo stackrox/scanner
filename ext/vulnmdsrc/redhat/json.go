@@ -104,8 +104,8 @@ func (r *redhatEntry) Metadata() *vulnmdsrc.Metadata {
 		metadata.CVSSv3 = vulnmdsrc.MetadataCVSSv3{
 			Vectors:             r.CVSSv3Vector,
 			Score:               *score,
-			ExploitabilityScore: roundUp(v.ExploitabilityScore()),
-			ImpactScore:         roundUp(v.ImpactScore()),
+			ExploitabilityScore: roundTo1Decimal(v.ExploitabilityScore()),
+			ImpactScore:         roundTo1Decimal(v.ImpactScore()),
 		}
 	}
 
@@ -116,13 +116,7 @@ func (r *redhatEntry) Name() string {
 	return r.CVE
 }
 
-// Used for CVSSv2
+// Used for CVSSv2 and CVSSv3 subscores.
 func roundTo1Decimal(x float64) float64 {
 	return math.Round(x*10) / 10
-}
-
-// Used for CVSSv3
-func roundUp(x float64) float64 {
-	// round up to one decimal
-	return math.Ceil(x*10) / 10
 }

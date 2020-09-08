@@ -55,8 +55,7 @@ func TestRedHatParser(t *testing.T) {
 			Vectors:             "CVSS:3.1/AV:P/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:H",
 			Score:               4.6,
 			ExploitabilityScore: 0.4,
-			// https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator gives 4.2...
-			ImpactScore: 4.3,
+			ImpactScore:         4.2,
 		},
 	}
 	assert.Equal(t, wantMetadata, gotMetadata.Metadata())
