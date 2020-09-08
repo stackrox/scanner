@@ -34,7 +34,7 @@ type loader struct{}
 
 // DownloadFeedsToPath downloads the Red Hat feeds to the given path.
 // If this function is successful, it will fill the directory with
-// one json file for each 1000-item page of the Red Hat data.
+// one json file for each page of the Red Hat data.
 func (l *loader) DownloadFeedsToPath(outputDir string) error {
 	redhatDir := filepath.Join(outputDir, vulndump.RedHatDirName)
 	if err := os.MkdirAll(redhatDir, 0755); err != nil {
