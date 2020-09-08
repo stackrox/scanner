@@ -94,7 +94,7 @@ func TestRedHatParser(t *testing.T) {
 	assert.Equal(t, wantMetadata, gotMetadata.Metadata())
 }
 
-func TestNVDParserErrors(t *testing.T) {
+func TestRedHatParserErrors(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	path := filepath.Join(filepath.Dir(filename))
 
