@@ -163,7 +163,7 @@ func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]da
 
 	for i := range vulnerabilities {
 		vuln := &vulnerabilities[i]
-		appender := all.SingletonAppender(vuln)
+		appender := all.AppenderForVuln(vuln)
 		if err := appender.Append(vuln.Name, vuln.SubCVEs, appendFuncForVuln(vuln)); err != nil {
 			return nil, errors.Wrapf(err, "Failed to append metadata for vuln %s", vuln.Name)
 		}

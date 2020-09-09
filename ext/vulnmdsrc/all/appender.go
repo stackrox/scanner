@@ -17,8 +17,8 @@ func Appenders() []vulnmdsrc.Appender {
 	}
 }
 
-// SingletonAppender returns the appropriate Appender singleton based on the given vulnerability.
-func SingletonAppender(vuln *database.Vulnerability) vulnmdsrc.Appender {
+// AppenderForVuln returns the appropriate Appender based on the given vulnerability.
+func AppenderForVuln(vuln *database.Vulnerability) vulnmdsrc.Appender {
 	if strings.HasPrefix(vuln.Namespace.Name, "centos") {
 		return redhat.SingletonAppender()
 	}
