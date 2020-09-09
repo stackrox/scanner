@@ -73,7 +73,7 @@ func (a *appender) BuildCache(dumpDir string) error {
 }
 
 func (a *appender) parseDataFeed(r io.Reader) error {
-	var redhat redhat
+	var redhat redhatEntries
 	if err := json.NewDecoder(r).Decode(&redhat); err != nil {
 		return err
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/stackrox/scanner/ext/vulnmdsrc"
 )
 
-type redhat []redhatEntry
+type redhatEntries []redhatEntry
 
 // See https://access.redhat.com/documentation/en-us/red_hat_security_data_api/1.0/html/red_hat_security_data_api/cve#cve_format
 // for other fields, if necessary.
