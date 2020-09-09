@@ -41,16 +41,14 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 		return errors.Wrapf(err, "creating subdir for %s", vulndump.RedHatDirName)
 	}
 
-	var done bool
-	var page int
-	for page = 1; !done; page++ {
+	for page, done := 1, false; !done; page++ {
 		var err error
 		if done, err = downloadFeedForPage(redhatDir, page); err != nil {
 			return err
 		}
 	}
 
-	return os.Remove(filepath.Join(redhatDir, fmt.Sprintf("%d.json", page-1)))
+	return nil
 }
 
 func downloadFeedForPage(outputDir string, page int) (bool, error) {
@@ -74,7 +72,11 @@ func downloadFeedForPage(outputDir string, page int) (bool, error) {
 	}
 
 	// Empty pages return empty JSON lists, [].
-	return n == 2, nil
+	if n == 2 {
+		return true, os.Remove(path)
+	}
+
+	return false, nil
 }
 
 func jsonFeedURLForPage(page int) string {
