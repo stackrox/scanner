@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	appenderName string = "Red Hat"
+	AppenderName string = "Red Hat"
 )
 
 type appender struct {
@@ -110,11 +110,11 @@ func (a *appender) getHighestCVSSMetadata(cves []string) *vulnmdsrc.Metadata {
 
 func (a *appender) Append(name string, subCVEs []string, appendFunc vulnmdsrc.AppendFunc) error {
 	if enricher, ok := a.metadata[name]; ok {
-		appendFunc(appenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
+		appendFunc(AppenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
 		return nil
 	}
 	if redhatMetadata := a.getHighestCVSSMetadata(subCVEs); redhatMetadata != nil {
-		appendFunc(appenderName, &metadataEnricher{metadata: redhatMetadata}, cvss.SeverityFromCVSS(redhatMetadata))
+		appendFunc(AppenderName, &metadataEnricher{metadata: redhatMetadata}, cvss.SeverityFromCVSS(redhatMetadata))
 	}
 	return nil
 }
@@ -124,5 +124,5 @@ func (a *appender) PurgeCache() {
 }
 
 func (a *appender) Name() string {
-	return appenderName
+	return AppenderName
 }
