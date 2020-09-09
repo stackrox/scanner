@@ -33,6 +33,7 @@ import (
 )
 
 const (
+	// AppenderName represents the name of this appender.
 	AppenderName string = "NVD"
 )
 
