@@ -15,7 +15,7 @@ type Loader interface {
 // If called twice with the same name, the name is blank, or if the provided
 // Loader is nil, this function panics.
 //
-// Note: this function is not thread-safe.
+// Note: this function is not thread-safe, but should only be used in `init` functions.
 func RegisterLoader(name string, l Loader) {
 	if name == "" {
 		panic("vulnloader: could not register a Loader with an empty name")
@@ -36,11 +36,5 @@ func RegisterLoader(name string, l Loader) {
 //
 // Note: this function is not thread-safe.
 func Loaders() map[string]Loader {
-	// Return a copy instead of the actual map.
-	ret := make(map[string]Loader)
-	for k, v := range loaders {
-		ret[k] = v
-	}
-
-	return ret
+	return loaders
 }
