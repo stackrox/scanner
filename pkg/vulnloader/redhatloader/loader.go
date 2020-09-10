@@ -41,14 +41,13 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 		return errors.Wrapf(err, "creating subdir for %s", vulndump.RedHatDirName)
 	}
 
-	for page, done := 1, false; !done; page++ {
-		var err error
-		if done, err = downloadFeedForPage(redhatDir, page); err != nil {
+	page := 1
+	for {
+		if done, err := downloadFeedForPage(redhatDir, page); err != nil || done {
 			return err
 		}
+		page++
 	}
-
-	return nil
 }
 
 func downloadFeedForPage(outputDir string, page int) (bool, error) {
