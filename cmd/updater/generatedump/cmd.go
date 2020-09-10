@@ -150,11 +150,7 @@ func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.V
 func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]database.Vulnerability, error) {
 	log.Info("adding metadata to vulnerabilities")
 
-	defer func() {
-		for _, appender := range vulnmdsrc.Appenders() {
-			appender.PurgeCache()
-		}
-	}()
+	defer purgeCaches()
 	for _, appender := range vulnmdsrc.Appenders() {
 		if err := appender.BuildCache(dumpDir); err != nil {
 			return nil, errors.Wrapf(err, "failed to build cache from the %s feed dump", appender.Name())
@@ -170,6 +166,12 @@ func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]da
 	}
 
 	return vulnerabilities, nil
+}
+
+func purgeCaches() {
+	for _, appender := range vulnmdsrc.Appenders() {
+		appender.PurgeCache()
+	}
 }
 
 func appendFuncForVuln(v *database.Vulnerability) types.AppendFunc {
