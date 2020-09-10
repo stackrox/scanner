@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,8 +37,8 @@ func TestRedHatParser(t *testing.T) {
 	// Item with only CVSSv2.
 	gotMetadata, ok := a.metadata["CVE-2012-0001"]
 	assert.True(t, ok)
-	wantMetadata := &vulnmdsrc.Metadata{
-		CVSSv2: vulnmdsrc.MetadataCVSSv2{
+	wantMetadata := &types.Metadata{
+		CVSSv2: types.MetadataCVSSv2{
 			Vectors:             "AV:N/AC:L/Au:S/C:P/I:N/A:N",
 			Score:               4.0,
 			ExploitabilityScore: 8.0,
@@ -50,8 +50,8 @@ func TestRedHatParser(t *testing.T) {
 	// Item with only CVSSv3.
 	gotMetadata, ok = a.metadata["CVE-2012-0002"]
 	assert.True(t, ok)
-	wantMetadata = &vulnmdsrc.Metadata{
-		CVSSv3: vulnmdsrc.MetadataCVSSv3{
+	wantMetadata = &types.Metadata{
+		CVSSv3: types.MetadataCVSSv3{
 			Vectors:             "CVSS:3.1/AV:P/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:H",
 			Score:               4.6,
 			ExploitabilityScore: 0.4,
@@ -63,14 +63,14 @@ func TestRedHatParser(t *testing.T) {
 	// Item with both CVSSv2 and CVSSv3 has CVSSv2 information returned.
 	gotMetadata, ok = a.metadata["CVE-2018-0001"]
 	assert.True(t, ok)
-	wantMetadata = &vulnmdsrc.Metadata{
-		CVSSv2: vulnmdsrc.MetadataCVSSv2{
+	wantMetadata = &types.Metadata{
+		CVSSv2: types.MetadataCVSSv2{
 			Vectors:             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 			Score:               7.5,
 			ExploitabilityScore: 10.0,
 			ImpactScore:         6.4,
 		},
-		CVSSv3: vulnmdsrc.MetadataCVSSv3{
+		CVSSv3: types.MetadataCVSSv3{
 			Vectors:             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 			Score:               9.8,
 			ExploitabilityScore: 3.9,
@@ -82,9 +82,9 @@ func TestRedHatParser(t *testing.T) {
 	// float CVSS instead of string
 	gotMetadata, ok = a.metadata["CVE-2014-4715"]
 	assert.True(t, ok)
-	wantMetadata = &vulnmdsrc.Metadata{
+	wantMetadata = &types.Metadata{
 		PublishedDateTime: "2014-07-03T00:00:00Z",
-		CVSSv2: vulnmdsrc.MetadataCVSSv2{
+		CVSSv2: types.MetadataCVSSv2{
 			Vectors:             "AV:L/AC:H/Au:S/C:C/I:C/A:C",
 			Score:               6.0,
 			ExploitabilityScore: 1.5,

@@ -20,7 +20,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,8 +51,8 @@ func TestNVDParser(t *testing.T) {
 	// Item with only CVSSv2.
 	gotMetadata, ok := a.metadata["CVE-2012-0001"]
 	assert.True(t, ok)
-	wantMetadata := &vulnmdsrc.Metadata{
-		CVSSv2: vulnmdsrc.MetadataCVSSv2{
+	wantMetadata := &types.Metadata{
+		CVSSv2: types.MetadataCVSSv2{
 			Vectors:             "AV:N/AC:L/Au:S/C:P/I:N/A:N",
 			Score:               4.0,
 			ExploitabilityScore: 8.0,
@@ -64,14 +64,14 @@ func TestNVDParser(t *testing.T) {
 	// Item with both CVSSv2 and CVSSv3 has CVSSv2 information returned.
 	gotMetadata, ok = a.metadata["CVE-2018-0001"]
 	assert.True(t, ok)
-	wantMetadata = &vulnmdsrc.Metadata{
-		CVSSv2: vulnmdsrc.MetadataCVSSv2{
+	wantMetadata = &types.Metadata{
+		CVSSv2: types.MetadataCVSSv2{
 			Vectors:             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 			Score:               7.5,
 			ExploitabilityScore: 10.0,
 			ImpactScore:         6.4,
 		},
-		CVSSv3: vulnmdsrc.MetadataCVSSv3{
+		CVSSv3: types.MetadataCVSSv3{
 			Vectors:             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 			Score:               9.8,
 			ExploitabilityScore: 3.9,

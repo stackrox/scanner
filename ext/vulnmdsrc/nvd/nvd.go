@@ -26,7 +26,7 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/cvss"
 	"github.com/stackrox/scanner/pkg/vulndump"
@@ -42,7 +42,7 @@ type appender struct {
 }
 
 type metadataEnricher struct {
-	metadata *vulnmdsrc.Metadata
+	metadata *types.Metadata
 	summary  string
 }
 
@@ -108,7 +108,7 @@ func (a *appender) parseDataFeed(r io.Reader) error {
 	return nil
 }
 
-func (a *appender) Append(name string, _ []string, appendFunc vulnmdsrc.AppendFunc) error {
+func (a *appender) Append(name string, _ []string, appendFunc types.AppendFunc) error {
 	if enricher, ok := a.metadata[name]; ok {
 		appendFunc(AppenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
 		return nil

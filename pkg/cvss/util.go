@@ -2,7 +2,7 @@ package cvss
 
 import (
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 )
 
 // SeverityFromCVSS converts the CVSS Score (0.0 - 10.0) into a
@@ -12,7 +12,7 @@ import (
 //
 // The Negligible level is set for CVSS scores between [0, 1), replacing the
 // specified None level, originally used for a score of 0.
-func SeverityFromCVSS(meta *vulnmdsrc.Metadata) database.Severity {
+func SeverityFromCVSS(meta *types.Metadata) database.Severity {
 	score := meta.CVSSv3.Score
 	if score == 0 {
 		score = meta.CVSSv2.Score

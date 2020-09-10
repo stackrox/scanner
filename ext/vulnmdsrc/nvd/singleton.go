@@ -1,7 +1,7 @@
 package nvd
 
 import (
-	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 )
 
 var (
@@ -9,6 +9,6 @@ var (
 )
 
 // SingletonAppender returns the instance of the NVD appender.
-func SingletonAppender() vulnmdsrc.Appender {
+func SingletonAppender() types.Appender {
 	return nvdAppender
 }

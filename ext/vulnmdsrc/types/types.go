@@ -1,4 +1,4 @@
-package vulnmdsrc
+package types
 
 import (
 	"github.com/stackrox/scanner/database"

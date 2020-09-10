@@ -8,7 +8,7 @@ import (
 	"github.com/facebookincubator/nvdtools/cvss2"
 	"github.com/facebookincubator/nvdtools/cvss3"
 	"github.com/stackrox/rox/pkg/errorhelpers"
-	"github.com/stackrox/scanner/ext/vulnmdsrc"
+	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 )
 
 type redhatEntries []redhatEntry
@@ -68,8 +68,8 @@ func (r *redhatEntry) Summary() string {
 	return r.BugzillaDescription
 }
 
-func (r *redhatEntry) Metadata() *vulnmdsrc.Metadata {
-	metadata := &vulnmdsrc.Metadata{
+func (r *redhatEntry) Metadata() *types.Metadata {
+	metadata := &types.Metadata{
 		PublishedDateTime: r.PublicDate,
 	}
 
@@ -83,7 +83,7 @@ func (r *redhatEntry) Metadata() *vulnmdsrc.Metadata {
 			tmpScore := v.BaseScore()
 			score = &tmpScore
 		}
-		metadata.CVSSv2 = vulnmdsrc.MetadataCVSSv2{
+		metadata.CVSSv2 = types.MetadataCVSSv2{
 			Vectors:             r.CVSSv2Vector,
 			Score:               *score,
 			ExploitabilityScore: roundTo1Decimal(v.ExploitabilityScore()),
@@ -101,7 +101,7 @@ func (r *redhatEntry) Metadata() *vulnmdsrc.Metadata {
 			tmpScore := v.BaseScore()
 			score = &tmpScore
 		}
-		metadata.CVSSv3 = vulnmdsrc.MetadataCVSSv3{
+		metadata.CVSSv3 = types.MetadataCVSSv3{
 			Vectors:             r.CVSSv3Vector,
 			Score:               *score,
 			ExploitabilityScore: roundTo1Decimal(v.ExploitabilityScore()),
