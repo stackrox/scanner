@@ -10,6 +10,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
+	"github.com/stackrox/rox/pkg/retry"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
@@ -52,30 +53,36 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 
 func downloadFeedForPage(outputDir string, page int) (bool, error) {
 	url := jsonFeedURLForPage(page)
-	resp, err := client.Get(url)
-	if err != nil {
-		return false, errors.Wrapf(err, "failed to download feed for page %d", page)
-	}
-	defer utils.IgnoreError(resp.Body.Close)
+	done := false
+	err := retry.WithRetry(func() error {
+		resp, err := client.Get(url)
+		if err != nil {
+			return errors.Wrapf(err, "failed to download feed for page %d", page)
+		}
+		defer utils.IgnoreError(resp.Body.Close)
 
-	path := filepath.Join(outputDir, fmt.Sprintf("%d.json", page))
-	outF, err := os.Create(path)
-	if err != nil {
-		return false, errors.Wrapf(err, "failed to create file %s", path)
-	}
-	defer utils.IgnoreError(outF.Close)
+		path := filepath.Join(outputDir, fmt.Sprintf("%d.json", page))
+		outF, err := os.Create(path)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create file %s", path)
+		}
+		defer utils.IgnoreError(outF.Close)
 
-	n, err := io.Copy(outF, resp.Body)
-	if err != nil {
-		return false, errors.Wrap(err, "copying resp body to file")
-	}
+		n, err := io.Copy(outF, resp.Body)
+		if err != nil {
+			return errors.Wrap(err, "copying resp body to file")
+		}
 
-	// Empty pages return empty JSON lists, [].
-	if n == 2 {
-		return true, os.Remove(path)
-	}
+		// Empty pages return empty JSON lists, [].
+		if n == 2 {
+			done = true
+			return os.Remove(path)
+		}
 
-	return false, nil
+		return nil
+	}, retry.Tries(5))
+
+	return done, err
 }
 
 func jsonFeedURLForPage(page int) string {
