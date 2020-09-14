@@ -43,7 +43,7 @@ func TestNVDParser(t *testing.T) {
 	}
 
 	// Items without CVSSv2 aren't returned.
-	assert.Len(t, a.metadata, 2)
+	assert.Len(t, a.metadata, 3)
 	_, ok := a.metadata["CVE-2002-0001"]
 	assert.False(t, ok)
 
@@ -72,6 +72,26 @@ func TestNVDParser(t *testing.T) {
 		},
 		CVSSv3: NVDmetadataCVSSv3{
 			Vectors:             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+			Score:               9.8,
+			ExploitabilityScore: 3.9,
+			ImpactScore:         5.9,
+		},
+	}
+	assert.Equal(t, wantMetadata, gotMetadata.Metadata())
+
+	// Item with both CVSSv2 and CVSSv3 has CVSSv2 information returned.
+	// CVSS:3.1
+	gotMetadata, ok = a.metadata["CVE-2018-0002"]
+	assert.True(t, ok)
+	wantMetadata = &Metadata{
+		CVSSv2: NVDmetadataCVSSv2{
+			Vectors:             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+			Score:               7.5,
+			ExploitabilityScore: 10.0,
+			ImpactScore:         6.4,
+		},
+		CVSSv3: NVDmetadataCVSSv3{
+			Vectors:             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 			Score:               9.8,
 			ExploitabilityScore: 3.9,
 			ImpactScore:         5.9,

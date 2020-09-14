@@ -79,6 +79,7 @@ type nvdBaseMetricV3 struct {
 
 type nvdCVSSv3 struct {
 	Score              float64 `json:"baseScore"`
+	Version            string  `json:"version"`
 	AttackVector       string  `json:"attackVector"`
 	AttackComplexity   string  `json:"attackComplexity"`
 	PrivilegesRequired string  `json:"privilegesRequired"`
@@ -171,7 +172,7 @@ func (n *nvdCVSSv3) String() string {
 	str = strings.TrimSuffix(str, "/")
 
 	if len(str) > 0 {
-		return fmt.Sprintf("CVSS:3.0/%s", str)
+		return fmt.Sprintf("CVSS:%s/%s", n.Version, str)
 	}
 	return str
 }
