@@ -28,7 +28,7 @@ func getMatchingFeature(featureList []v1.Feature, featureToFind v1.Feature, t *t
 	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list", featureToFind)
 	return featureList[candidateIdx]
 }
-func verifyImageHasExpectedFeatures(client *client.Clairify, username, password string, imageRequest *types.ImageRequest, expectedFeatures []v1.Feature, t *testing.T) {
+func verifyImageHasExpectedFeatures(client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, expectedFeatures []v1.Feature, t *testing.T) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
@@ -75,14 +75,14 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password 
 					assert.Nil(t, matchingVuln.Metadata, "Expected no metadata for %s but got some", expectedVuln.Name)
 				} else {
 					for _, keys := range [][]string{
-						{"NVD", "CVSSv2", "ExploitabilityScore"},
-						{"NVD", "CVSSv2", "Score"},
-						{"NVD", "CVSSv2", "ImpactScore"},
-						{"NVD", "CVSSv2", "Vectors"},
-						{"NVD", "CVSSv3", "ExploitabilityScore"},
-						{"NVD", "CVSSv3", "Score"},
-						{"NVD", "CVSSv3", "ImpactScore"},
-						{"NVD", "CVSSv3", "Vectors"},
+						{source, "CVSSv2", "ExploitabilityScore"},
+						{source, "CVSSv2", "Score"},
+						{source, "CVSSv2", "ImpactScore"},
+						{source, "CVSSv2", "Vectors"},
+						{source, "CVSSv3", "ExploitabilityScore"},
+						{source, "CVSSv3", "Score"},
+						{source, "CVSSv3", "ImpactScore"},
+						{source, "CVSSv3", "Vectors"},
 					} {
 						assert.NotNil(t, deepGet(expectedVuln.Metadata, keys...), "Value for nil for %+v", keys)
 						assert.Equal(t, deepGet(expectedVuln.Metadata, keys...), deepGet(matchingVuln.Metadata, keys...), "Failed for %+v", keys)
@@ -106,11 +106,13 @@ func TestImageSanity(t *testing.T) {
 		image              string
 		registry           string
 		username, password string
+		source             string
 		expectedFeatures   []v1.Feature
 	}{
 		{
 			image:    "docker.io/library/nginx:1.10",
 			registry: "https://registry-1.docker.io",
+			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:            "diffutils",
@@ -183,6 +185,7 @@ func TestImageSanity(t *testing.T) {
 		{
 			image:    "docker.io/kaizheh/apache-struts2-cve-2017-5638:latest",
 			registry: "https://registry-1.docker.io",
+			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apt",
@@ -276,6 +279,7 @@ func TestImageSanity(t *testing.T) {
 		{
 			image:    "docker.io/anchore/anchore-engine:v0.5.0",
 			registry: "https://registry-1.docker.io",
+			source:   "Red Hat",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "procps-ng",
@@ -289,23 +293,22 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "centos:7",
 							Description:   "DOCUMENTATION: Since the kernel's proc_pid_readdir() returns PID entries in ascending numeric order, a process occupying a high PID can use inotify events to determine when the process list is being scanned, and fork/exec to obtain a lower PID, thus avoiding enumeration. An unprivileged attacker can hide a process from procps-ng's utilities by exploiting a race condition in reading /proc/PID entries.             STATEMENT: The /proc filesystem is not a reliable mechanism to account for processes running on a system, as it is unable to offer snapshot semantics. Short-lived processes have always been able to escape detection by tools that monitor /proc. This CVE simply identifies a reliable way to do so using inotify. Process accounting for security purposes, or with a requirement to record very short-running processes and those attempting to evade detection, should be performed with more robust methods such as auditd(8) (the Linux Audit Daemon) or systemtap.",
 							Link:          "https://access.redhat.com/security/cve/CVE-2018-1121",
-							Severity:      "Medium",
+							Severity:      "Low",
 							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
+								"Red Hat": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 8.6,
-										"ImpactScore":         2.9,
-										"Score":               4.3,
-										"Vectors":             "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
 									},
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 2.2,
-										"ImpactScore":         3.6,
-										"Score":               5.9,
-										"Vectors":             "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+										"ExploitabilityScore": 1.3,
+										"ImpactScore":         2.5,
+										"Score":               3.9,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 									},
-									"LastModifiedDateTime": "2020-06-30T16:15Z",
-									"PublishedDateTime":    "2018-06-13T20:29Z",
+									"PublishedDateTime": "2018-05-17T17:00:00Z",
 								},
 							},
 						},
@@ -314,23 +317,22 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "centos:7",
 							Description:   "DOCUMENTATION: Due to incorrect accounting when decoding and escaping Unicode data in procfs, ps is vulnerable to overflowing an mmap()ed region when formatting the process list for display. Since ps maps a guard page at the end of the buffer, impact is limited to a crash.",
 							Link:          "https://access.redhat.com/security/cve/CVE-2018-1123",
-							Severity:      "High",
+							Severity:      "Low",
 							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
+								"Red Hat": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 10.0,
-										"ImpactScore":         2.9,
-										"Score":               5.0,
-										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
 									},
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 3.9,
-										"ImpactScore":         3.6,
-										"Score":               7.5,
-										"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+										"ExploitabilityScore": 1.3,
+										"ImpactScore":         2.5,
+										"Score":               3.9,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 									},
-									"LastModifiedDateTime": "2019-10-09T23:38Z",
-									"PublishedDateTime":    "2018-05-23T14:29Z",
+									"PublishedDateTime": "2018-05-17T17:00:00Z",
 								},
 							},
 						},
@@ -339,23 +341,22 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "centos:7",
 							Description:   "DOCUMENTATION: If a process inspected by pgrep has an argument longer than INT_MAX bytes, \"int bytes\" could wrap around back to a large positive int (rather than approaching zero), leading to a stack buffer overflow via strncat().                          MITIGATION: The procps suite on Red Hat Enterprise Linux is built with FORTIFY, which limits the impact of this stack overflow (and others like it) to a crash.",
 							Link:          "https://access.redhat.com/security/cve/CVE-2018-1125",
-							Severity:      "High",
+							Severity:      "Medium",
 							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
+								"Red Hat": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 10.0,
-										"ImpactScore":         2.9,
-										"Score":               5.0,
-										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
 									},
 									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 3.9,
-										"ImpactScore":         3.6,
-										"Score":               7.5,
-										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         2.5,
+										"Score":               4.4,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L",
 									},
-									"LastModifiedDateTime": "2019-10-09T23:38Z",
-									"PublishedDateTime":    "2018-05-23T14:29Z",
+									"PublishedDateTime": "2018-05-17T17:00:00Z",
 								},
 							},
 						},
@@ -368,6 +369,7 @@ func TestImageSanity(t *testing.T) {
 			registry: "https://us.gcr.io",
 			username: "_json_key",
 			password: os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER"),
+			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "cron",
@@ -408,7 +410,7 @@ func TestImageSanity(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			verifyImageHasExpectedFeatures(cli, testCase.username, testCase.password, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
+			verifyImageHasExpectedFeatures(cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
 		})
 	}
 }

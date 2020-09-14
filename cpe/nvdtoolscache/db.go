@@ -10,7 +10,7 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
-	"github.com/stackrox/scanner/pkg/nvdloader"
+	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 	"github.com/stackrox/scanner/pkg/wellknowndirnames"
 	"go.etcd.io/bbolt"
 )

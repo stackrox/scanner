@@ -19,8 +19,8 @@ import (
 	"github.com/stackrox/scanner/cmd/updater/common"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
-	"github.com/stackrox/scanner/pkg/nvdloader"
 	"github.com/stackrox/scanner/pkg/vulndump"
+	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 )
 
 func generateNVDDiff(outputDir string, baseLastModifiedTime time.Time, headF *zip.File) error {
