@@ -84,14 +84,14 @@ func TestNVDParser(t *testing.T) {
 	// CVSS:3.1
 	gotMetadata, ok = a.metadata["CVE-2018-0002"]
 	assert.True(t, ok)
-	wantMetadata = &Metadata{
-		CVSSv2: NVDmetadataCVSSv2{
+	wantMetadata = &types.Metadata{
+		CVSSv2: types.MetadataCVSSv2{
 			Vectors:             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 			Score:               7.5,
 			ExploitabilityScore: 10.0,
 			ImpactScore:         6.4,
 		},
-		CVSSv3: NVDmetadataCVSSv3{
+		CVSSv3: types.MetadataCVSSv3{
 			Vectors:             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 			Score:               9.8,
 			ExploitabilityScore: 3.9,
