@@ -53,7 +53,7 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 
 func downloadFeedForPage(outputDir string, page int) (bool, error) {
 	url := jsonFeedURLForPage(page)
-	done := false
+	var done bool
 	err := retry.WithRetry(func() error {
 		resp, err := client.Get(url)
 		if err != nil {
