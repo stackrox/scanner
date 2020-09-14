@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
-	"github.com/stackrox/scanner/pkg/nvdloader"
+	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 )
 
 func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {

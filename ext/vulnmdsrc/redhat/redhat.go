@@ -1,20 +1,4 @@
-// Copyright 2017 clair authors
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-// Package nvd implements a vulnerability metadata appender using the NIST NVD
-// database.
-package nvd
+package redhat
 
 import (
 	"bufio"
@@ -27,14 +11,13 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
-	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/cvss"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
 const (
 	// AppenderName represents the name of this appender.
-	AppenderName string = "NVD"
+	AppenderName string = "Red Hat"
 )
 
 type appender struct {
@@ -54,15 +37,15 @@ func (m *metadataEnricher) Summary() string {
 	return m.summary
 }
 
-func newMetadataEnricher(nvd *nvdEntry) *metadataEnricher {
+func newMetadataEnricher(redhat *redhatEntry) *metadataEnricher {
 	return &metadataEnricher{
-		metadata: nvd.Metadata(),
-		summary:  nvd.Summary(),
+		metadata: redhat.Metadata(),
+		summary:  redhat.Summary(),
 	}
 }
 
 func (a *appender) BuildCache(dumpDir string) error {
-	dumpDir = filepath.Join(dumpDir, vulndump.NVDDirName)
+	dumpDir = filepath.Join(dumpDir, vulndump.RedHatDirName)
 	a.metadata = make(map[string]*metadataEnricher)
 
 	fileInfos, err := ioutil.ReadDir(dumpDir)
@@ -77,11 +60,11 @@ func (a *appender) BuildCache(dumpDir string) error {
 		}
 		f, err := os.Open(filepath.Join(dumpDir, fileName))
 		if err != nil {
-			return errors.Wrapf(err, "could not open NVD data file %s", fileName)
+			return errors.Wrapf(err, "could not open Red Hat data file %s", fileName)
 		}
 
 		if err := a.parseDataFeed(bufio.NewReader(f)); err != nil {
-			return errors.Wrapf(err, "could not parse NVD data file %s", fileName)
+			return errors.Wrapf(err, "could not parse Red Hat data file %s", fileName)
 		}
 		_ = f.Close()
 	}
@@ -91,27 +74,48 @@ func (a *appender) BuildCache(dumpDir string) error {
 }
 
 func (a *appender) parseDataFeed(r io.Reader) error {
-	var nvd nvd
-
-	if err := json.NewDecoder(r).Decode(&nvd); err != nil {
-		return commonerr.ErrCouldNotParse
+	var redhat redhatEntries
+	if err := json.NewDecoder(r).Decode(&redhat); err != nil {
+		return err
 	}
 
-	for _, nvdEntry := range nvd.Entries {
+	for _, redhatEntry := range redhat {
 		// Create metadata entry.
-		enricher := newMetadataEnricher(&nvdEntry)
+		enricher := newMetadataEnricher(&redhatEntry)
 		if enricher.metadata != nil {
-			a.metadata[nvdEntry.Name()] = enricher
+			a.metadata[redhatEntry.Name()] = enricher
 		}
 	}
 
 	return nil
 }
 
-func (a *appender) Append(name string, _ []string, appendFunc types.AppendFunc) error {
+func (a *appender) getHighestCVSSMetadata(cves []string) *types.Metadata {
+	var maxScore float64
+	var maxMetadata *types.Metadata
+	for _, cve := range cves {
+		if enricher, ok := a.metadata[cve]; ok {
+			redhatMetadata := enricher.metadata
+			if redhatMetadata.CVSSv3.Score != 0 && redhatMetadata.CVSSv3.Score > maxScore {
+				maxScore = redhatMetadata.CVSSv3.Score
+				maxMetadata = redhatMetadata
+			} else if redhatMetadata.CVSSv2.Score > maxScore {
+				maxScore = redhatMetadata.CVSSv2.Score
+				maxMetadata = redhatMetadata
+			}
+		}
+	}
+
+	return maxMetadata
+}
+
+func (a *appender) Append(name string, subCVEs []string, appendFunc types.AppendFunc) error {
 	if enricher, ok := a.metadata[name]; ok {
 		appendFunc(AppenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
 		return nil
+	}
+	if redhatMetadata := a.getHighestCVSSMetadata(subCVEs); redhatMetadata != nil {
+		appendFunc(AppenderName, &metadataEnricher{metadata: redhatMetadata}, cvss.SeverityFromCVSS(redhatMetadata))
 	}
 	return nil
 }
