@@ -1,6 +1,7 @@
 package dotnetcoreruntime
 
 import (
+	"github.com/sirupsen/logrus"
 	"os"
 	"regexp"
 	"strings"
@@ -25,6 +26,11 @@ func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) bool {
 		return false
 	}
 
+	match := matchRegex(fullPath)
+	if match {
+		logrus.Info(fullPath)
+	}
+
 	return matchRegex(fullPath)
 }
 
@@ -44,12 +50,15 @@ func parseMetadata(filePath string, _ []byte) *component.Component {
 	dirs := strings.Split(filePath, "/")
 	name := dirs[len(dirs) - 3]
 	version := dirs[len(dirs) - 2]
-	return &component.Component{
+	// TODO: Just return this.
+	c := &component.Component{
 		Location:   filePath,
 		SourceType: component.DotNetCoreRuntimeSourceType,
 		Name: name,
 		Version: version,
 	}
+	logrus.Info(*c)
+	return c
 }
 
 func Analyzer() analyzer.Analyzer {
