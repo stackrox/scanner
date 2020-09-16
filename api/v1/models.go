@@ -142,6 +142,8 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 	return false
 }
 
+// addLanguageVulns adds language-based features into the given layer.
+// Assumes layer is not nil.
 func addLanguageVulns(db database.Datastore, layer *Layer) {
 	// Add Language Features
 	languageFeatureVersions, err := getLanguageData(db, layer.Name)
