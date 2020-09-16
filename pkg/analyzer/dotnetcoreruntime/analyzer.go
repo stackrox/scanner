@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/analyzer/internal/common"
 	"github.com/stackrox/scanner/pkg/component"
@@ -26,11 +25,6 @@ func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) bool {
 		return false
 	}
 
-	match := matchRegex(fullPath)
-	if match {
-		logrus.Info(fullPath)
-	}
-
 	return matchRegex(fullPath)
 }
 
@@ -46,19 +40,17 @@ func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component,
 // Observation and experimentation showed that the `dotnet` CLI detects runtimes solely based on the
 // directory path.
 func parseMetadata(filePath string, _ []byte) *component.Component {
-	// Based on dotNetCorePattern, we know we will find the version in the second to last index (the last will be blank).
+	// Based on dotNetCorePattern, we know we will find the version in the second to last index
+	// and the name in the third to last index (the last will be blank).
 	dirs := strings.Split(filePath, "/")
 	name := dirs[len(dirs)-3]
 	version := dirs[len(dirs)-2]
-	// TODO: Just return this.
-	c := &component.Component{
+	return &component.Component{
 		Location:   filePath,
 		SourceType: component.DotNetCoreRuntimeSourceType,
 		Name:       name,
 		Version:    version,
 	}
-	logrus.Info(*c)
-	return c
 }
 
 func Analyzer() analyzer.Analyzer {

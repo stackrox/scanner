@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/nvdtools/wfn"
-	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/attributes/common"
 	"github.com/stackrox/scanner/pkg/component"
@@ -34,11 +33,7 @@ func GetDotNetCoreRuntimeAttributes(c *component.Component) []*wfn.Attributes {
 	majorMinorVersion := c.Version[:strings.LastIndex(c.Version, ".")]
 	versionSet := set.NewStringSet(majorMinorVersion, escapePeriod(majorMinorVersion))
 
-	// TODO: Remove logs
-	attrs := common.GenerateAttributesFromSets(vendorSet, nameSet, versionSet, "")
-	logrus.Info(attrs)
-
-	return attrs
+	return common.GenerateAttributesFromSets(vendorSet, nameSet, versionSet, "")
 }
 
 func escapePeriod(str string) string {
