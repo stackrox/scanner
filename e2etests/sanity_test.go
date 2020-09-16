@@ -5,7 +5,6 @@ package e2etests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stackrox/scanner/pkg/component"
 	"os"
 	"sort"
 	"testing"
@@ -14,6 +13,7 @@ import (
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
+	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -415,11 +415,11 @@ func TestImageSanity(t *testing.T) {
 			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
-					Name:    ".net_core",
-					Version: "3.1",
+					Name:          ".net_core",
+					Version:       "3.1",
 					VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
-					Location: "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.8/",
-					AddedBy: "sha256:6de7a0eb259829ec99159c372a28634edce28ecef9f72d235a809b813a6ec9f8",
+					Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.8/",
+					AddedBy:       "sha256:6de7a0eb259829ec99159c372a28634edce28ecef9f72d235a809b813a6ec9f8",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:        "CVE-2020-0605",
