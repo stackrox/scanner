@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(in *jlexer.Lexer, out *itemWrapper) {
+func easyjson77cee5bfDecodeGithubComStackroxScannerPkgVulnloaderNvdloader(in *jlexer.Lexer, out *itemWrapper) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -81,7 +81,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(in *jlexer.Lexer
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader(out *jwriter.Writer, in itemWrapper) {
+func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(out *jwriter.Writer, in itemWrapper) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -145,25 +145,25 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader(out *jwriter.Wri
 // MarshalJSON supports json.Marshaler interface
 func (v itemWrapper) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader(&w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v itemWrapper) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader(w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *itemWrapper) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(&r, v)
+	easyjson77cee5bfDecodeGithubComStackroxScannerPkgVulnloaderNvdloader(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *itemWrapper) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader(l, v)
+	easyjson77cee5bfDecodeGithubComStackroxScannerPkgVulnloaderNvdloader(l, v)
 }
 func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(in *jlexer.Lexer, out *schema.NVDCVEFeedJSON10DefImpact) {
 	isTopLevel := in.IsStart()
@@ -2959,7 +2959,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(
 	}
 	out.RawByte('}')
 }
-func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(in *jlexer.Lexer, out *feedWrapper) {
+func easyjson77cee5bfDecodeGithubComStackroxScannerPkgVulnloaderNvdloader1(in *jlexer.Lexer, out *feedWrapper) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -3029,7 +3029,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(in *jlexer.Lexe
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(out *jwriter.Writer, in feedWrapper) {
+func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(out *jwriter.Writer, in feedWrapper) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -3114,25 +3114,25 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(out *jwriter.Wr
 // MarshalJSON supports json.Marshaler interface
 func (v feedWrapper) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(&w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v feedWrapper) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgNvdloader1(w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *feedWrapper) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(&r, v)
+	easyjson77cee5bfDecodeGithubComStackroxScannerPkgVulnloaderNvdloader1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *feedWrapper) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson77cee5bfDecodeGithubComStackroxScannerPkgNvdloader1(l, v)
+	easyjson77cee5bfDecodeGithubComStackroxScannerPkgVulnloaderNvdloader1(l, v)
 }
 func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(in *jlexer.Lexer, out *schema.NVDCVEFeedJSON10DefCVEItem) {
 	isTopLevel := in.IsStart()

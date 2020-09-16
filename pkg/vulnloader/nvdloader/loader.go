@@ -12,6 +12,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/vulndump"
+	"github.com/stackrox/scanner/pkg/vulnloader"
 )
 
 var (
@@ -21,14 +23,23 @@ var (
 	}
 )
 
+func init() {
+	vulnloader.RegisterLoader(vulndump.NVDDirName, &loader{})
+}
+
+type loader struct{}
+
 // DownloadFeedsToPath downloads the NVD feeds to the given path.
-// The directory must exist already.
 // If this function is successful, it will fill the directory with
 // one json file for each year of NVD data.
-func DownloadFeedsToPath(outputDir string) error {
+func (l *loader) DownloadFeedsToPath(outputDir string) error {
+	nvdDir := filepath.Join(outputDir, vulndump.NVDDirName)
+	if err := os.MkdirAll(nvdDir, 0755); err != nil {
+		return errors.Wrapf(err, "creating subdir for %s", vulndump.NVDDirName)
+	}
 	endYear := time.Now().Year()
 	for year := 2002; year <= endYear; year++ {
-		if err := downloadFeedForYear(outputDir, year); err != nil {
+		if err := downloadFeedForYear(nvdDir, year); err != nil {
 			return err
 		}
 	}

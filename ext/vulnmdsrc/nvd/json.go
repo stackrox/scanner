@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 )
 
 type nvd struct {
@@ -79,6 +80,7 @@ type nvdBaseMetricV3 struct {
 
 type nvdCVSSv3 struct {
 	Score              float64 `json:"baseScore"`
+	Version            string  `json:"version"`
 	AttackVector       string  `json:"attackVector"`
 	AttackComplexity   string  `json:"attackComplexity"`
 	PrivilegesRequired string  `json:"privilegesRequired"`
@@ -118,20 +120,20 @@ func (n *nvdEntry) Summary() string {
 	return ""
 }
 
-func (n *nvdEntry) Metadata() *Metadata {
+func (n *nvdEntry) Metadata() *types.Metadata {
 	if n.Impact.BaseMetricV2.CVSSv2.String() == "" {
 		return nil
 	}
-	metadata := &Metadata{
+	metadata := &types.Metadata{
 		PublishedDateTime:    n.PublishedDateTime,
 		LastModifiedDateTime: n.LastModifiedDateTime,
-		CVSSv2: NVDmetadataCVSSv2{
+		CVSSv2: types.MetadataCVSSv2{
 			Vectors:             n.Impact.BaseMetricV2.CVSSv2.String(),
 			Score:               n.Impact.BaseMetricV2.CVSSv2.Score,
 			ExploitabilityScore: n.Impact.BaseMetricV2.ExploitabilityScore,
 			ImpactScore:         n.Impact.BaseMetricV2.ImpactScore,
 		},
-		CVSSv3: NVDmetadataCVSSv3{
+		CVSSv3: types.MetadataCVSSv3{
 			Vectors:             n.Impact.BaseMetricV3.CVSSv3.String(),
 			Score:               n.Impact.BaseMetricV3.CVSSv3.Score,
 			ExploitabilityScore: n.Impact.BaseMetricV3.ExploitabilityScore,
@@ -171,7 +173,7 @@ func (n *nvdCVSSv3) String() string {
 	str = strings.TrimSuffix(str, "/")
 
 	if len(str) > 0 {
-		return fmt.Sprintf("CVSS:3.0/%s", str)
+		return fmt.Sprintf("CVSS:%s/%s", n.Version, str)
 	}
 	return str
 }

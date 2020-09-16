@@ -284,7 +284,7 @@ proto-generated-srcs: $(PROTO_GENERATED_SRCS)
 .PHONY: go-easyjson-srcs
 go-easyjson-srcs: $(EASYJSON_BIN)
 	@echo "+ $@"
-	@easyjson -pkg pkg/nvdloader
+	@easyjson -pkg pkg/vulnloader/nvdloader
 
 clean-proto-generated-srcs:
 	@echo "+ $@"
