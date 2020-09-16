@@ -1,11 +1,11 @@
 package dotnetcoreruntime
 
 import (
-	"github.com/sirupsen/logrus"
 	"os"
 	"regexp"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/analyzer/internal/common"
 	"github.com/stackrox/scanner/pkg/component"
@@ -48,14 +48,14 @@ func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component,
 func parseMetadata(filePath string, _ []byte) *component.Component {
 	// Based on dotNetCorePattern, we know we will find the version in the second to last index (the last will be blank).
 	dirs := strings.Split(filePath, "/")
-	name := dirs[len(dirs) - 3]
-	version := dirs[len(dirs) - 2]
+	name := dirs[len(dirs)-3]
+	version := dirs[len(dirs)-2]
 	// TODO: Just return this.
 	c := &component.Component{
 		Location:   filePath,
 		SourceType: component.DotNetCoreRuntimeSourceType,
-		Name: name,
-		Version: version,
+		Name:       name,
+		Version:    version,
 	}
 	logrus.Info(*c)
 	return c

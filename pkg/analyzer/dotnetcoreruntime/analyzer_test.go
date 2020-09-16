@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type mockFileInfo struct {}
+type mockFileInfo struct{}
 
 func (f *mockFileInfo) Name() string {
 	return ""

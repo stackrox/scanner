@@ -1,12 +1,13 @@
 package dotnetcoreruntime
 
 import (
+	"strings"
+
 	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/attributes/common"
 	"github.com/stackrox/scanner/pkg/component"
-	"strings"
 )
 
 var (
