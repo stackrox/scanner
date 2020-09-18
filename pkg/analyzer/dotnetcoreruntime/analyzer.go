@@ -1,12 +1,13 @@
 package dotnetcoreruntime
 
 import (
+	"os"
+	"regexp"
+
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/analyzer/internal/common"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/tarutil"
-	"os"
-	"regexp"
 )
 
 var (
