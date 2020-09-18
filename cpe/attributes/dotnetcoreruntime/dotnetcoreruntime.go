@@ -10,6 +10,9 @@ import (
 )
 
 var (
+	// The CPE product names were derived via a search through the NVD CPE database for
+	// .NET Core runtime-related products https://nvd.nist.gov/products/cpe/search
+	// and observing the CPEs for known related CVEs.
 	nameToCPEProducts = map[string][]string{
 		"Microsoft.NETCore.App": {
 			".net_core",
@@ -23,10 +26,9 @@ var (
 func GetDotNetCoreRuntimeAttributes(c *component.Component) []*wfn.Attributes {
 	vendorSet := set.NewStringSet("microsoft")
 
-	names := nameToCPEProducts[c.Name]
-	nameSet := set.NewStringSet(names...)
-	for _, name := range names {
-		nameSet.Add(escapePeriod(name))
+	nameSet := set.NewStringSet()
+	for _, name := range nameToCPEProducts[c.Name] {
+		nameSet.AddAll(name, escapePeriod(name))
 	}
 
 	// The CPEs only seem to look at the major and minor versions of the semantic version.
