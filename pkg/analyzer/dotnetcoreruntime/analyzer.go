@@ -26,7 +26,7 @@ var (
 	// in the semantic versioning scheme.
 	//
 	// TODO: Consider Microsoft.AspNetCore.All?
-	dotNetCorePattern = regexp.MustCompile(`^.*/dotnet/shared/(Microsoft\.(AspNet|NET)Core\.App)/([0-9]+\.[0-9]+\.[0-9]+)/$`)
+	dotNetCorePattern = regexp.MustCompile(`^.*/dotnet/shared/(Microsoft\.(?:AspNet|NET)Core\.App)/([0-9]+\.[0-9]+\.[0-9]+)/$`)
 )
 
 type analyzerImpl struct{}
@@ -48,14 +48,14 @@ func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component,
 // directory path.
 // This function assumes filePath matches `dotNetCorePattern`.
 func parseMetadata(filePath string, _ []byte) *component.Component {
-	// This should be a slice of length 4.
-	// [<Full match>, Microsoft.(AspNet|NET)Core.App, (AspNet|Net), <Semantic version>]
+	// This should be a slice of length 3.
+	// [<Full match> Microsoft.(AspNet|NET)Core.App <Semantic version>]
 	match := dotNetCorePattern.FindStringSubmatch(filePath)
 	return &component.Component{
 		Location:   filePath,
 		SourceType: component.DotNetCoreRuntimeSourceType,
 		Name:       match[1],
-		Version:    match[3],
+		Version:    match[2],
 	}
 }
 
