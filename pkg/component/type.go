@@ -11,6 +11,7 @@ const (
 	JavaSourceType
 	NPMSourceType
 	PythonSourceType
+	DotNetCoreRuntimeSourceType
 
 	SentinelEndSourceType
 )

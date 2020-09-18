@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"github.com/stackrox/scanner/pkg/analyzer"
+	"github.com/stackrox/scanner/pkg/analyzer/dotnetcoreruntime"
 	"github.com/stackrox/scanner/pkg/analyzer/gem"
 	"github.com/stackrox/scanner/pkg/analyzer/java"
 	"github.com/stackrox/scanner/pkg/analyzer/npm"
@@ -10,6 +11,7 @@ import (
 
 var (
 	analyzers = []analyzer.Analyzer{
+		dotnetcoreruntime.Analyzer(),
 		gem.Analyzer(),
 		java.Analyzer(),
 		npm.Analyzer(),

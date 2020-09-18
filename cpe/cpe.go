@@ -8,6 +8,7 @@ import (
 	"github.com/facebookincubator/nvdtools/wfn"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/cpe/attributes/dotnetcoreruntime"
 	"github.com/stackrox/scanner/cpe/attributes/java"
 	"github.com/stackrox/scanner/cpe/attributes/node"
 	"github.com/stackrox/scanner/cpe/attributes/python"
@@ -20,10 +21,11 @@ import (
 )
 
 var attributeGetter = map[component.SourceType]func(c *component.Component) []*wfn.Attributes{
-	component.PythonSourceType: python.GetPythonAttributes,
-	component.JavaSourceType:   java.GetJavaAttributes,
-	component.GemSourceType:    ruby.GetRubyAttributes,
-	component.NPMSourceType:    node.GetNodeAttributes,
+	component.PythonSourceType:            python.GetPythonAttributes,
+	component.JavaSourceType:              java.GetJavaAttributes,
+	component.GemSourceType:               ruby.GetRubyAttributes,
+	component.NPMSourceType:               node.GetNodeAttributes,
+	component.DotNetCoreRuntimeSourceType: dotnetcoreruntime.GetDotNetCoreRuntimeAttributes,
 }
 
 type nameVersion struct {
@@ -31,8 +33,9 @@ type nameVersion struct {
 }
 
 func getNameVersionFromCPE(attr *wfn.Attributes) nameVersion {
+	tmpName := strings.ReplaceAll(attr.Product, `\-`, "-")
 	return nameVersion{
-		name:    strings.ReplaceAll(attr.Product, `\-`, "-"),
+		name:    strings.ReplaceAll(tmpName, `\.`, "."),
 		version: strings.ReplaceAll(attr.Version, `\.`, "."),
 	}
 }

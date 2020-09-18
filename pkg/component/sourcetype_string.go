@@ -13,12 +13,13 @@ func _() {
 	_ = x[JavaSourceType-2]
 	_ = x[NPMSourceType-3]
 	_ = x[PythonSourceType-4]
-	_ = x[SentinelEndSourceType-5]
+	_ = x[DotNetCoreRuntimeSourceType-5]
+	_ = x[SentinelEndSourceType-6]
 }
 
-const _SourceType_name = "UnsetSourceTypeGemSourceTypeJavaSourceTypeNPMSourceTypePythonSourceTypeSentinelEndSourceType"
+const _SourceType_name = "UnsetSourceTypeGemSourceTypeJavaSourceTypeNPMSourceTypePythonSourceTypeDotNetCoreRuntimeSourceTypeSentinelEndSourceType"
 
-var _SourceType_index = [...]uint8{0, 15, 28, 42, 55, 71, 92}
+var _SourceType_index = [...]uint8{0, 15, 28, 42, 55, 71, 98, 119}
 
 func (i SourceType) String() string {
 	if i < 0 || i >= SourceType(len(_SourceType_index)-1) {

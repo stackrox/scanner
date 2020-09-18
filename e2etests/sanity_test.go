@@ -13,6 +13,7 @@ import (
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
+	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -94,7 +95,7 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password,
 			}
 			matching.Vulnerabilities = nil
 			feature.Vulnerabilities = nil
-			assert.Equal(t, matching, feature)
+			assert.Equal(t, feature, matching)
 		})
 	}
 }
@@ -401,6 +402,114 @@ func TestImageSanity(t *testing.T) {
 									},
 									"LastModifiedDateTime": "2019-03-21T23:29Z",
 									"PublishedDateTime":    "2017-06-09T16:29Z",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			image:    "mcr.microsoft.com/dotnet/core/runtime:3.1",
+			registry: "https://mcr.microsoft.com",
+			source:   "NVD",
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          ".net_core",
+					Version:       "3.1",
+					VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
+					Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.8/",
+					AddedBy:       "sha256:6de7a0eb259829ec99159c372a28634edce28ecef9f72d235a809b813a6ec9f8",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:        "CVE-2020-0605",
+							Description: "A remote code execution vulnerability exists in .NET software when the software fails to check the source markup of a file.An attacker who successfully exploited the vulnerability could run arbitrary code in the context of the current user, aka '.NET Framework Remote Code Execution Vulnerability'. This CVE ID is unique from CVE-2020-0606.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-0605",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         10.0,
+										"Score":               9.3,
+										"Vectors":             "AV:N/AC:M/Au:N/C:C/I:C/A:C",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.8,
+										"ImpactScore":         5.9,
+										"Score":               8.8,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-01-21T21:22:00Z",
+									"PublishedDateTime":    "2020-01-14T23:15:00Z",
+								},
+							},
+						},
+						{
+							Name:        "CVE-2020-0606",
+							Description: "A remote code execution vulnerability exists in .NET software when the software fails to check the source markup of a file.An attacker who successfully exploited the vulnerability could run arbitrary code in the context of the current user, aka '.NET Framework Remote Code Execution Vulnerability'. This CVE ID is unique from CVE-2020-0605.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-0606",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         10.0,
+										"Score":               9.3,
+										"Vectors":             "AV:N/AC:M/Au:N/C:C/I:C/A:C",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.8,
+										"ImpactScore":         5.9,
+										"Score":               8.8,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-01-17T03:03:00Z",
+									"PublishedDateTime":    "2020-01-14T23:15:00Z",
+								},
+							},
+						},
+						{
+							Name:        "CVE-2020-1108",
+							Description: "A denial of service vulnerability exists when .NET Core or .NET Framework improperly handles web requests, aka '.NET Core & .NET Framework Denial of Service Vulnerability'.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1108",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+										"Score":               5.0,
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"LastModifiedDateTime": "2020-06-05T19:53:00Z",
+									"PublishedDateTime":    "2020-05-21T23:15:00Z",
+								},
+							},
+						},
+						{
+							Name:        "CVE-2020-1147",
+							Description: "A remote code execution vulnerability exists in .NET Framework, Microsoft SharePoint, and Visual Studio when the software fails to check the source markup of XML file input, aka '.NET Framework, SharePoint Server, and Visual Studio Remote Code Execution Vulnerability'.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1147",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         5.9,
+										"Score":               7.8,
+										"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-08-20T15:15Z",
+									"PublishedDateTime":    "2020-07-14T23:15Z",
 								},
 							},
 						},

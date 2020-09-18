@@ -63,11 +63,12 @@ message GetLanguageLevelComponentsRequest {
 }
 
 enum SourceType {
-    UNSET_SOURCE_TYPE  = 0;
-    JAVA               = 1;
-    PYTHON             = 2;
-    NPM                = 3;
-    GEM                = 4;
+    UNSET_SOURCE_TYPE = 0;
+    JAVA              = 1;
+    PYTHON            = 2;
+    NPM               = 3;
+    GEM               = 4;
+    DOTNETCORERUNTIME = 5;
 }
 
 message LanguageLevelComponent {
