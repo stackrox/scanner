@@ -115,6 +115,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			// Put the file directly
 			data[filename] = d
 		}
+		if hdr.Typeflag == tar.TypeDir {
+			data[filename] = nil
+		}
 	}
 
 	return data, nil
