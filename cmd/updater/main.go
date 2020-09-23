@@ -7,6 +7,7 @@ import (
 	"github.com/stackrox/scanner/cmd/updater/diffdumps"
 	"github.com/stackrox/scanner/cmd/updater/generatedump"
 	"github.com/stackrox/scanner/cmd/updater/loaddump"
+	"github.com/stackrox/scanner/cmd/updater/printstats"
 
 	// Registrations.
 	_ "github.com/stackrox/scanner/database/pgsql"
@@ -23,6 +24,7 @@ func main() {
 		diffdumps.Command(),
 		generatedump.Command(),
 		loaddump.Command(),
+		printstats.Command(),
 	)
 
 	if err := c.Execute(); err != nil {
