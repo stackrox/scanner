@@ -2,6 +2,7 @@ package printstats
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -29,7 +30,15 @@ func Command() *cobra.Command {
 			for _, vuln := range vulns {
 				vulnsByNS[vuln.Namespace.Name]++
 			}
-			fmt.Printf("Vuln counts by namespace: %v\n", vulnsByNS)
+			fmt.Print("Vuln counts by namespace:\n")
+			keys := make([]string, 0, len(vulnsByNS))
+			for key := range vulnsByNS {
+				keys = append(keys, key)
+			}
+			sort.Strings(keys)
+			for _, k := range keys {
+				fmt.Printf("%s\t%d\n", k, vulnsByNS[k])
+			}
 			return nil
 		},
 	}
