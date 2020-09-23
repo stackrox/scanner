@@ -25,6 +25,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
@@ -165,17 +166,16 @@ func (u *updater) Clean() {
 }
 
 const (
-	maxRetries = 5
+	maxRetries          = 5
+	sleepBetweenRetries = time.Minute
 )
 
 func (u *updater) pullRepositoryWithRetries() (string, error) {
-	var err error
-	for i := 0; i < maxRetries; i++ {
+	for try := 1; ; try++ {
 		// This ensures we clone from scratch into a new temp directory.
 		u.repositoryLocalPath = ""
 
-		var commit string
-		commit, err = u.pullRepository()
+		commit, err := u.pullRepository()
 		if err == nil {
 			return commit, nil
 		}
@@ -184,8 +184,12 @@ func (u *updater) pullRepositoryWithRetries() (string, error) {
 				log.WithError(err).Warnf("Ubuntu: Failed to remove local git repo path: %q", u.repositoryLocalPath)
 			}
 		}
+		if try >= maxRetries {
+			return "", err
+		}
+		log.WithError(err).WithField("try", try).Warn("Failed to pull ubuntu updater, will retry...")
+		time.Sleep(sleepBetweenRetries)
 	}
-	return "", err
 }
 
 func (u *updater) pullRepository() (commit string, err error) {
