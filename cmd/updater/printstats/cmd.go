@@ -39,6 +39,7 @@ func Command() *cobra.Command {
 			for _, k := range keys {
 				fmt.Printf("%s\t%d\n", k, vulnsByNS[k])
 			}
+			fmt.Printf("Total vulns: %d", len(vulns))
 			return nil
 		},
 	}
