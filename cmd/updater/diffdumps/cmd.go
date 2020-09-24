@@ -16,33 +16,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/cmd/updater/common"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/nvdloader"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
-
-func validateAndOpenDump(zipPath string) (*zip.ReadCloser, error) {
-	if filepath.Ext(zipPath) != ".zip" {
-		return nil, errors.Errorf("invalid dump %q; expected zip file", zipPath)
-	}
-	zipR, err := zip.OpenReader(zipPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "opening ZIP")
-	}
-	return zipR, nil
-}
-
-func validateAndGetManifest(zipR *zip.ReadCloser) (*vulndump.Manifest, error) {
-	manifest, err := vulndump.LoadManifestFromDump(zipR)
-	if err != nil {
-		return nil, err
-	}
-	if !manifest.Since.IsZero() {
-		return nil, errors.New("invalid dump: only diff genesis dumps, NOT diff-ed dumps!")
-	}
-	return manifest, nil
-}
 
 func generateNVDDiff(outputDir string, baseLastModifiedTime time.Time, headF *zip.File) error {
 	reader, err := headF.Open()
@@ -231,23 +210,14 @@ func Command() *cobra.Command {
 				return errors.Wrap(err, "parsing passed config")
 			}
 		}
-		baseZipR, err := validateAndOpenDump(baseDumpFile)
+		baseZipR, baseManifest, err := common.OpenGenesisDumpAndExtractManifest(baseDumpFile)
 		if err != nil {
 			return errors.Wrap(err, "loading base dump")
 		}
 		defer utils.IgnoreError(baseZipR.Close)
-		headZipR, err := validateAndOpenDump(headDumpFile)
+		headZipR, headManifest, err := common.OpenGenesisDumpAndExtractManifest(headDumpFile)
 		if err != nil {
 			return errors.Wrap(err, "loading head dump")
-		}
-		defer utils.IgnoreError(headZipR.Close)
-		baseManifest, err := validateAndGetManifest(baseZipR)
-		if err != nil {
-			return errors.Wrap(err, "loading manifest from base dump")
-		}
-		headManifest, err := validateAndGetManifest(headZipR)
-		if err != nil {
-			return errors.Wrap(err, "loading manifest from head dump")
 		}
 
 		// Intentionally return an error even in the equal case, they are only going to be equal if two dumps are literally
