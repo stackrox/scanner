@@ -452,6 +452,11 @@ jobs:
             ./bin/updater generate-dump --out-file /tmp/genesis-dump/dump.zip
             ls -lrt /tmp/genesis-dump
 
+      - run:
+          name: Print some stats
+          command: |
+            ./bin/updater print-stats /tmp/genesis-dump/dump.zip
+
       - store_artifacts:
           path: /tmp/genesis-dump/dump.zip
           destination: genesis-dump.zip
