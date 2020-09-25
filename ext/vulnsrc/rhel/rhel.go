@@ -247,19 +247,20 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 
 func (u *updater) Clean() {}
 
-func parseRHSA(ovalReader io.Reader, url string, parsedRHSAIDs set.IntSet) (vulnerabilities []database.Vulnerability, err error) {
+func parseRHSA(ovalReader io.Reader, url string, parsedRHSAIDs set.IntSet) ([]database.Vulnerability, error) {
 	// Decode the XML.
 	var ov oval
-	err = xml.NewDecoder(ovalReader).Decode(&ov)
+	err := xml.NewDecoder(ovalReader).Decode(&ov)
 	if err != nil {
 		log.WithError(err).Error("could not decode RHEL's XML")
 		err = commonerr.ErrCouldNotParse
-		return
+		return nil, err
 	}
 
 	// Iterate over the definitions and collect any vulnerabilities that affect
 	// at least one package.
 	log.Infof("RHEL: Number of definitions for %s - %d", url, len(ov.Definitions))
+	vulnerabilities := make([]database.Vulnerability, 0)
 	for _, definition := range ov.Definitions {
 		cveRegexMatch := cveIDRegexp.FindStringSubmatch(definition.ID)
 		if len(cveRegexMatch) >= 2 && len(definition.References) > 0 {
@@ -336,7 +337,7 @@ func parseRHSA(ovalReader io.Reader, url string, parsedRHSAIDs set.IntSet) (vuln
 		}
 	}
 
-	return
+	return vulnerabilities, nil
 }
 
 func getCriterions(node criteria) [][]criterion {
