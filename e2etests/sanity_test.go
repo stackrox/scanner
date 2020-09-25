@@ -69,7 +69,7 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password,
 				fmt.Printf("Matching: %s\n", matchingBytes)
 				fmt.Printf("Feature: %s\n", featureVulnsBytes)
 			}
-			require.Equal(t, len(matching.Vulnerabilities), len(feature.Vulnerabilities))
+			require.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
 			for i, matchingVuln := range matching.Vulnerabilities {
 				expectedVuln := feature.Vulnerabilities[i]
 				if expectedVuln.Metadata == nil {
