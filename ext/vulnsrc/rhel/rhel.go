@@ -288,7 +288,7 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulne
 				fallthrough
 			case strings.HasPrefix(definition.ID, "oval:com.redhat.rhea:def"):
 				fallthrough
-			case strings.HasPrefix(definition.ID, "oval:com.redhat.unaffected"):
+			case strings.HasPrefix(definition.ID, "oval:com.redhat.unaffected:def"):
 				continue
 			default:
 				return nil, errors.Errorf("invalid ID: %s", definition.ID)
