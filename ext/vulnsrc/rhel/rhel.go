@@ -263,9 +263,9 @@ func parseRHSA(ovalReader io.Reader, url string, parsedRHSAIDs set.IntSet) (vuln
 	for _, definition := range ov.Definitions {
 		cveRegexMatch := cveIDRegexp.FindStringSubmatch(definition.ID)
 		if len(cveRegexMatch) >= 2 && len(definition.References) > 0 {
+			log.Infof("RHEL: CVE found for %s - %s", url, definition.Title)
 			pkgs := toFeatureVersions(definition.Criteria)
 			if len(pkgs) == 0 {
-				log.Infof("RHEL: No packages found for %s - %s", url, definition.Title)
 				continue
 			}
 
@@ -276,6 +276,9 @@ func parseRHSA(ovalReader io.Reader, url string, parsedRHSAIDs set.IntSet) (vuln
 				Severity:    database.UnknownSeverity,
 				Description: description(definition),
 			}
+
+			log.Infof("RHEL: Vuln created for %s - %s", url, cveVuln.Name)
+
 			cveVuln.FixedIn = append(cveVuln.FixedIn, pkgs...)
 			vulnerabilities = append(vulnerabilities, cveVuln)
 			continue
