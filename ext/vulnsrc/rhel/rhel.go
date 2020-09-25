@@ -164,11 +164,11 @@ func init() {
 	vulnsrc.RegisterUpdater("rhel", &updater{})
 }
 
-func parseBzip(reader io.ReadCloser, coveredIDs set.IntSet) (resp []database.Vulnerability, err error) {
+func parseBzip(reader io.ReadCloser, url string, coveredIDs set.IntSet) (resp []database.Vulnerability, err error) {
 	defer utils.IgnoreError(reader.Close)
 
 	decompressingReader := bzip2.NewReader(reader)
-	return parseRHSA(decompressingReader, coveredIDs)
+	return parseRHSA(decompressingReader, url, coveredIDs)
 }
 
 func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
@@ -188,7 +188,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 			return finalResp, commonerr.ErrCouldNotDownload
 		}
 		previouslyCovered := len(coveredIDs)
-		vulns, err := parseBzip(rhsaResp.Body, coveredIDs)
+		vulns, err := parseBzip(rhsaResp.Body, url, coveredIDs)
 		if err != nil {
 			log.WithError(err).Errorf("could not prase RHEL's OVAL file from %s", url)
 			return finalResp, commonerr.ErrCouldNotParse
@@ -232,7 +232,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 			log.WithError(err).Error("could not download RHEL's update list")
 			return finalResp, commonerr.ErrCouldNotDownload
 		}
-		currentVulns, err := parseRHSA(r.Body, coveredIDs)
+		currentVulns, err := parseRHSA(r.Body, rhsaURL, coveredIDs)
 		_ = r.Body.Close()
 		if err != nil {
 			return finalResp, err
@@ -247,7 +247,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 
 func (u *updater) Clean() {}
 
-func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) (vulnerabilities []database.Vulnerability, err error) {
+func parseRHSA(ovalReader io.Reader, url string, parsedRHSAIDs set.IntSet) (vulnerabilities []database.Vulnerability, err error) {
 	// Decode the XML.
 	var ov oval
 	err = xml.NewDecoder(ovalReader).Decode(&ov)
@@ -259,11 +259,11 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) (vulnerabilities 
 
 	// Iterate over the definitions and collect any vulnerabilities that affect
 	// at least one package.
-	log.Infof("RHEL: Number of definitions %d", len(ov.Definitions))
+	log.Infof("RHEL: Number of definitions for %s - %d", url, len(ov.Definitions))
 	for _, definition := range ov.Definitions {
 		cveRegexMatch := cveIDRegexp.FindStringSubmatch(definition.ID)
 		if len(cveRegexMatch) >= 2 && len(definition.References) > 0 {
-			log.Infof("RHEL: CVE found - %s", definition.Title)
+			log.Infof("RHEL: CVE found for %s - %s", url, definition.Title)
 			pkgs := toFeatureVersions(definition.Criteria)
 			if len(pkgs) == 0 {
 				continue
