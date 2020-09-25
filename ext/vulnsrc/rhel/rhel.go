@@ -259,9 +259,11 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) (vulnerabilities 
 
 	// Iterate over the definitions and collect any vulnerabilities that affect
 	// at least one package.
+	log.Infof("RHEL: Number of definitions %d", len(ov.Definitions))
 	for _, definition := range ov.Definitions {
 		cveRegexMatch := cveIDRegexp.FindStringSubmatch(definition.ID)
 		if len(cveRegexMatch) >= 2 && len(definition.References) > 0 {
+			log.Infof("RHEL: CVE found - %s", definition.Title)
 			pkgs := toFeatureVersions(definition.Criteria)
 			if len(pkgs) == 0 {
 				continue
