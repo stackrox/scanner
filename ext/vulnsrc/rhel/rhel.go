@@ -164,7 +164,7 @@ func init() {
 	vulnsrc.RegisterUpdater("rhel", &updater{})
 }
 
-func parseBzip(reader io.ReadCloser, coveredIDs set.IntSet) (resp []database.Vulnerability, err error) {
+func parseBzip(reader io.ReadCloser, coveredIDs set.IntSet) ([]database.Vulnerability, error) {
 	defer utils.IgnoreError(reader.Close)
 
 	decompressingReader := bzip2.NewReader(reader)
@@ -223,7 +223,6 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 			remainingRHSAURLs = append(remainingRHSAURLs, regexMatch[0])
 		}
 	}
-
 	const printEvery = 100
 	log.WithField("count", len(remainingRHSAURLs)).Info("RHEL: got remaining RHSAs to fetch")
 	for i, rhsaURL := range remainingRHSAURLs {
@@ -247,16 +246,17 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 
 func (u *updater) Clean() {}
 
-func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) (vulnerabilities []database.Vulnerability, err error) {
+func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulnerability, error) {
 	// Decode the XML.
 	var ov oval
-	err = xml.NewDecoder(ovalReader).Decode(&ov)
+	err := xml.NewDecoder(ovalReader).Decode(&ov)
 	if err != nil {
 		log.WithError(err).Error("could not decode RHEL's XML")
 		err = commonerr.ErrCouldNotParse
-		return
+		return nil, err
 	}
 
+	var vulnerabilities []database.Vulnerability
 	// Iterate over the definitions and collect any vulnerabilities that affect
 	// at least one package.
 	for _, definition := range ov.Definitions {
@@ -283,10 +283,16 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) (vulnerabilities 
 		// Not an RHSA, some other kind of RHEL ID
 		if len(regexMatch) < 2 {
 			// Make sure we don't miss anything.
-			if !(strings.HasPrefix(definition.ID, "oval:com.redhat.rhba:def") || strings.HasPrefix(definition.ID, "oval:com.redhat.rhea:def")) {
-				return nil, errors.Wrapf(err, "invalid ID: %s", definition.ID)
+			switch {
+			case strings.HasPrefix(definition.ID, "oval:com.redhat.rhba:def"):
+				fallthrough
+			case strings.HasPrefix(definition.ID, "oval:com.redhat.rhea:def"):
+				fallthrough
+			case strings.HasPrefix(definition.ID, "oval:com.redhat.unaffected"):
+				continue
+			default:
+				return nil, errors.Errorf("invalid ID: %s", definition.ID)
 			}
-			continue
 		}
 		rhsaNo, err := strconv.Atoi(regexMatch[1])
 		if err != nil {
@@ -331,7 +337,7 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) (vulnerabilities 
 		}
 	}
 
-	return
+	return vulnerabilities, nil
 }
 
 func getCriterions(node criteria) [][]criterion {
