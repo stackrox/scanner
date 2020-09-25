@@ -17,7 +17,7 @@ var (
 	extensionRegex = regexp.MustCompile(`\.(RELEASE|GA|SEC.*)$`)
 
 	// rt stands for runtime and is in Java generally
-	// docker and mesos are explicitly blacklisted as the packages don't have any keywords
+	// docker and mesos are explicitly blocklisted as the packages don't have any keywords
 	// and typically standalone
 	blocklistedPkgs = []string{"rt", "docker", "mesos"}
 
@@ -120,8 +120,8 @@ func GetJavaAttributes(c *component.Component) []*wfn.Attributes {
 	if vendorSet.Cardinality() != 0 && !predisposed(c) {
 		common.AddMutatedNameKeys(c, nameSet)
 	}
-	for _, blacklisted := range blocklistedPkgs {
-		nameSet.Remove(blacklisted)
+	for _, blocklisted := range blocklistedPkgs {
+		nameSet.Remove(blocklisted)
 	}
 
 	return common.GenerateAttributesFromSets(vendorSet, nameSet, versionSet, "")
