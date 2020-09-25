@@ -164,7 +164,7 @@ func init() {
 	vulnsrc.RegisterUpdater("rhel", &updater{})
 }
 
-func parseBzip(reader io.ReadCloser, url string, coveredIDs set.IntSet) (resp []database.Vulnerability, err error) {
+func parseBzip(reader io.ReadCloser, url string, coveredIDs set.IntSet) ([]database.Vulnerability, error) {
 	defer utils.IgnoreError(reader.Close)
 
 	decompressingReader := bzip2.NewReader(reader)
