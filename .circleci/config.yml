@@ -469,7 +469,7 @@ jobs:
             # Unzip the diff
             diff_file=$(cat image/scanner/dump/genesis_manifests.json | jq -r .knownGenesisDumps[-1].diffLocation)
             gsutil cp "${diff_file}" .
-            unzip -d old-genesis-diff "${diff_file}"
+            unzip -d old-genesis-diff "$(basename "${diff_file}")"
 
             # Unzip new genesis
             unzip -d new-genesis /tmp/genesis-dump/dump.zip
