@@ -58,12 +58,12 @@ func ensureDiffs(oldGenesis, oldGenesisDiff, newGenesis string) error {
 	if len(oldGenesisMap) > len(newGenesisDumpMap) {
 		for namespace := range oldGenesisMap {
 			if _, ok := newGenesisDumpMap[namespace]; !ok {
-				log.Errorf("Found namespace %s in old dump, but not new dump")
+				log.Errorf("Found namespace %s in old dump, but not new dump", namespace)
 			}
 		}
 		for namespace := range newGenesisDumpMap {
 			if _, ok := oldGenesisMap[namespace]; !ok {
-				log.Errorf("Found namespace %s in new dump, but not in old dump")
+				log.Errorf("Found namespace %s in new dump, but not in old dump", namespace)
 			}
 		}
 		return errors.New("old dump has more namespaces than new dump")
