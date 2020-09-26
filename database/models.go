@@ -21,66 +21,66 @@ import (
 
 type Model struct {
 	// ID is only meant to be used by database implementations and should never be used for anything else.
-	ID int
+	ID int `json:",omitempty"`
 }
 
 type Layer struct {
-	Model
+	Model `json:",omitempty"`
 
-	Name          string
-	EngineVersion int
-	Parent        *Layer
-	Namespace     *Namespace
-	Features      []FeatureVersion
+	Name          string           `json:",omitempty"`
+	EngineVersion int              `json:",omitempty"`
+	Parent        *Layer           `json:",omitempty"`
+	Namespace     *Namespace       `json:",omitempty"`
+	Features      []FeatureVersion `json:",omitempty"`
 }
 
 type Namespace struct {
-	Model
+	Model `json:",omitempty"`
 
-	Name          string
-	VersionFormat string
+	Name          string `json:",omitempty"`
+	VersionFormat string `json:",omitempty"`
 }
 
 type Feature struct {
-	Model
+	Model `json:",omitempty"`
 
-	Name       string
-	Namespace  Namespace
-	SourceType string
-	Location   string
+	Name       string    `json:",omitempty"`
+	Namespace  Namespace `json:",omitempty"`
+	SourceType string    `json:",omitempty"`
+	Location   string    `json:",omitempty"`
 }
 
 type FeatureVersion struct {
-	Model
+	Model `json:",omitempty"`
 
-	Feature    Feature
-	Version    string
-	AffectedBy []Vulnerability
+	Feature    Feature         `json:",omitempty"`
+	Version    string          `json:",omitempty"`
+	AffectedBy []Vulnerability `json:",omitempty"`
 
 	// For output purposes. Only make sense when the feature version is in the context of an image.
-	AddedBy Layer
+	AddedBy Layer `json:",omitempty"`
 }
 
 type Vulnerability struct {
-	Model
+	Model `json:",omitempty"`
 
-	Name      string
-	Namespace Namespace
+	Name      string    `json:",omitempty"`
+	Namespace Namespace `json:",omitempty"`
 
-	Description string
-	Link        string
-	Severity    Severity
+	Description string   `json:",omitempty"`
+	Link        string   `json:",omitempty"`
+	Severity    Severity `json:",omitempty"`
 
-	Metadata MetadataMap
+	Metadata MetadataMap `json:",omitempty"`
 
-	FixedIn                        []FeatureVersion
-	LayersIntroducingVulnerability []Layer
+	FixedIn                        []FeatureVersion `json:",omitempty"`
+	LayersIntroducingVulnerability []Layer          `json:",omitempty"`
 
 	// For output purposes. Only make sense when the vulnerability
 	// is already about a specific Feature/FeatureVersion.
 	FixedBy string `json:",omitempty"`
 
-	SubCVEs []string
+	SubCVEs []string `json:",omitempty"`
 }
 
 type MetadataMap map[string]interface{}

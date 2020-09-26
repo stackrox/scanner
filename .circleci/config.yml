@@ -457,6 +457,24 @@ jobs:
           command: |
             ./bin/updater print-stats /tmp/genesis-dump/dump.zip
 
+      - run:
+          name: Validate dump did not remove vulns
+          command: |
+            # Pull down the latest dump and its diff
+            genesis_zip=$(cat image/scanner/dump/genesis_manifests.json | jq -r .knownGenesisDumps[-1].dumpLocationInGS)
+            gsutil cp "${genesis_zip}" .
+            unzip -d old-genesis "${genesis_zip}"
+
+            # Unzip the diff
+            diff_file=$(cat image/scanner/dump/genesis_manifests.json | jq -r .knownGenesisDumps[-1].diffLocation)
+            gsutil cp "${diff_file}" .
+            unzip -d old-genesis-diff "${diff_file}"
+
+            # Unzip new genesis
+            unzip -d new-genesis /tmp/genesis-dump/dump.zip
+
+            ./bin/updater ensure-diffs --old-genesis=old-genesis --old-genesis-diff=old-genesis-diff --new-genesis=new-genesis
+
       - store_artifacts:
           path: /tmp/genesis-dump/dump.zip
           destination: genesis-dump.zip

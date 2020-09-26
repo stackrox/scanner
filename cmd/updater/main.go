@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stackrox/scanner/cmd/updater/diffdumps"
+	"github.com/stackrox/scanner/cmd/updater/ensurediffs"
 	"github.com/stackrox/scanner/cmd/updater/generatedump"
 	"github.com/stackrox/scanner/cmd/updater/loaddump"
 	"github.com/stackrox/scanner/cmd/updater/printstats"
@@ -22,6 +23,7 @@ func main() {
 
 	c.AddCommand(
 		diffdumps.Command(),
+		ensurediffs.Command(),
 		generatedump.Command(),
 		loaddump.Command(),
 		printstats.Command(),
