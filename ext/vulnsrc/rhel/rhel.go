@@ -68,7 +68,7 @@ var (
 	}
 
 	cveIDRegexp    = regexp.MustCompile(`^oval:com\.redhat\.cve:def:(\d+)$`)
-	rhsaIDRegexp   = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
+	rhsaIDRegexp   = regexp.MustCompile(`^oval:com\.redhat\.(rhsa|rhea|rhba):def:(\d+)$`)
 	rhsaFileRegexp = regexp.MustCompile(`com.redhat.rhsa-(\d+).xml`)
 )
 
@@ -164,7 +164,7 @@ func init() {
 	vulnsrc.RegisterUpdater("rhel", &updater{})
 }
 
-func parseBzip(reader io.ReadCloser, coveredIDs set.IntSet) ([]database.Vulnerability, error) {
+func parseBzip(reader io.ReadCloser, coveredIDs set.StringSet) ([]database.Vulnerability, error) {
 	defer utils.IgnoreError(reader.Close)
 
 	decompressingReader := bzip2.NewReader(reader)
@@ -180,17 +180,18 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 	// We then iterate over the list of other files, and fetch all the RHSAs that weren't included in this one.
 
 	var finalResp vulnsrc.UpdateResponse
-	coveredIDs := set.NewIntSet()
+	coveredIDs := set.NewStringSet()
 	for _, url := range bulkRHSAXMLBZ2URLs {
 		rhsaResp, err := getWithRetriesAndBackoff(url)
 		if err != nil {
 			log.WithError(err).Errorf("could not download RHEL's OVAL file from %s", url)
 			return finalResp, commonerr.ErrCouldNotDownload
 		}
+
 		previouslyCovered := len(coveredIDs)
 		vulns, err := parseBzip(rhsaResp.Body, coveredIDs)
 		if err != nil {
-			log.WithError(err).Errorf("could not prase RHEL's OVAL file from %s", url)
+			log.WithError(err).Errorf("could not parse RHEL's OVAL file from %s", url)
 			return finalResp, commonerr.ErrCouldNotParse
 		}
 		log.Infof("RHEL: done fetching OVAL file %s. Got %d vulns (%d RHSAs)", url, len(vulns), coveredIDs.Cardinality()-previouslyCovered)
@@ -219,7 +220,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 		if err != nil {
 			return finalResp, errors.Wrapf(err, "invalid RHSA file name: %s. Bad regex?", regexMatch[0])
 		}
-		if rhsaNo > firstRHEL5RHSA && !coveredIDs.Contains(rhsaNo) {
+		if rhsaNo > firstRHEL5RHSA && !coveredIDs.Contains(fmt.Sprintf("rhsa-%d", rhsaNo)) {
 			remainingRHSAURLs = append(remainingRHSAURLs, regexMatch[0])
 		}
 	}
@@ -246,7 +247,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 
 func (u *updater) Clean() {}
 
-func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulnerability, error) {
+func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.StringSet) ([]database.Vulnerability, error) {
 	// Decode the XML.
 	var ov oval
 	err := xml.NewDecoder(ovalReader).Decode(&ov)
@@ -281,30 +282,26 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulne
 
 		regexMatch := rhsaIDRegexp.FindStringSubmatch(definition.ID)
 		// Not an RHSA, some other kind of RHEL ID
-		if len(regexMatch) < 2 {
+		if len(regexMatch) < 3 {
 			// Make sure we don't miss anything.
 			switch {
-			case strings.HasPrefix(definition.ID, "oval:com.redhat.rhba:def"):
-				fallthrough
-			case strings.HasPrefix(definition.ID, "oval:com.redhat.rhea:def"):
-				fallthrough
 			case strings.HasPrefix(definition.ID, "oval:com.redhat.unaffected:def"):
 				continue
 			default:
 				return nil, errors.Errorf("invalid ID: %s", definition.ID)
 			}
 		}
-		rhsaNo, err := strconv.Atoi(regexMatch[1])
+		rhelNo, err := strconv.Atoi(regexMatch[2])
 		if err != nil {
 			return nil, errors.Wrapf(err, "invalid RHSA id format: %s", definition.ID)
 		}
-		if rhsaNo < firstRHEL5RHSA {
+		if rhelNo < firstRHEL5RHSA {
 			continue
 		}
 		// If we have already parsed this RHSA, then don't parse it again
 		// This can happen because we parse the giant file of RHSAs and then individual files
 		// for each Release (e.g. RHEL6, RHEL7, RHEL8)
-		if !parsedRHSAIDs.Add(rhsaNo) {
+		if !parsedRHSAIDs.Add(fmt.Sprintf("%s-%s", regexMatch[1], regexMatch[2])) {
 			continue
 		}
 		pkgs := toFeatureVersions(definition.Criteria)
