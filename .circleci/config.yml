@@ -438,6 +438,7 @@ jobs:
       - checkout
       - check-label-to-run:
           label: generate-dumps-on-pr
+      - setup-gcp
       - run:
           name: Build updater, and persist to workspace
           command: |
