@@ -48,7 +48,7 @@ func downloadFeedForYear(outputDir string, year int) error {
 		return errors.Wrapf(err, "couldn't read resp body for year %d", year)
 	}
 
-	// Strip out tables and newlines for size savings
+	// Strip out tabs and newlines for size savings
 	var jsonMap map[string]interface{}
 	if err := json.NewDecoder(gr).Decode(&jsonMap); err != nil {
 		return errors.Wrapf(err, "could not decode resp body for year %d", year)
