@@ -33,11 +33,11 @@ RUN groupadd -g 70 postgres && \
     dnf install -y \
         ca-certificates libicu systemd-sysv postgres-libs.rpm \
         postgres-server.rpm postgres.rpm glibc-locale-source glibc-langpack-en && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf && \
     rpm -e --nodeps curl && \
     # (Optional) Remove line below to keep package managment utilities
     rpm -e --nodeps rpm rpm-build-libs rpm-libs python3-rpm yum $(rpm -qa *dnf*) && \
-    dnf clean all && \
-    rm -rf /var/cache/dnf && \
     rm postgres-libs.rpm postgres-server.rpm postgres.rpm && \
     rm RPM-GPG-KEY-PGDG-12 && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
