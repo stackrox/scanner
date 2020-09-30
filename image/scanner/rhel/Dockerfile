@@ -31,7 +31,7 @@ RUN tar -zxf /bundle.tar.gz ./genesis_manifests.json && \
     # by the script `save-dir-contents` during the image build. The directory
     # contents are then restored by the script `restore-all-dir-contents`
     # during the container start.
-    chown -R 4000:4000 /etc/pki /etc/ssl && save-dir-contents /etc/pki/ca-trust /etc/ssl && \
+    chown -R 4000:4000 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl && \
     chmod +rx /scanner
 
 ENTRYPOINT ["/entrypoint.sh"]
