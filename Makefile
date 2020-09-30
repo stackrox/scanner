@@ -198,11 +198,11 @@ scanner-image: scanner-build-dockerized
 
 .PHONY: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 $(CURDIR)/image/scanner/rhel/bundle.tar.gz: build
-	$(CURDIR)/image/scanner/rhel/create-bundle.sh $(CURDIR)/image/scanner $@
+	$(CURDIR)/image/scanner/rhel/create-bundle.sh $(CURDIR)/image/scanner $(CURDIR)/image/scanner/rhel
 
 .PHONY: $(CURDIR)/image/db/rhel/bundle.tar.gz
 $(CURDIR)/image/db/rhel/bundle.tar.gz:
-	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $@
+	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $(CURDIR)/image/db/rhel
 
 .PHONY: scanner-image-rhel
 scanner-image-rhel: scanner-rhel-build-dockerized $(CURDIR)/image/scanner/rhel/bundle.tar.gz
