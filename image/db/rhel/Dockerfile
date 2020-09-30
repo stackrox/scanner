@@ -38,7 +38,7 @@ RUN groupadd -g 70 postgres && \
     rpm -e --nodeps curl && \
     rm postgres-libs.rpm postgres-server.rpm postgres.rpm && \
     rm RPM-GPG-KEY-PGDG-12 && \
-    # (Optional) Remove line below to keep package managment utilities
+    # (Optional) Remove line below to keep package management utilities
     rpm -e --nodeps rpm rpm-build-libs rpm-libs python3-rpm subscription-manager python3-subscription-manager-rhsm yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \ 
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
