@@ -36,10 +36,10 @@ RUN groupadd -g 70 postgres && \
     dnf clean all && \
     rm -rf /var/cache/dnf && \
     rpm -e --nodeps curl && \
-    # (Optional) Remove line below to keep package managment utilities
-    rpm -e --nodeps rpm rpm-build-libs rpm-libs python3-rpm yum $(rpm -qa *dnf*) && \
     rm postgres-libs.rpm postgres-server.rpm postgres.rpm && \
     rm RPM-GPG-KEY-PGDG-12 && \
+    # (Optional) Remove line below to keep package managment utilities
+    rpm -e --nodeps rpm rpm-build-libs rpm-libs python3-rpm subscription-manager python3-subscription-manager-rhsm yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \ 
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh

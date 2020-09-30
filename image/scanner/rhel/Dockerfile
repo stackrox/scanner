@@ -25,6 +25,8 @@ RUN tar -zxf /bundle.tar.gz ./genesis_manifests.json && \
     dnf install -y ca-certificates xz && \
     dnf clean all && \
     rm -rf /var/cache/dnf && \
+    # (Optional) Remove line below to keep package managment utilities
+    rpm -e subscription-manager yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \
     chown -R 4000:4000 "${NVD_DEFINITIONS_DIR}" && \
     chown -R 4000:4000 /tmp && \
     # The contents of paths mounted as emptyDir volumes in Kubernetes are saved
