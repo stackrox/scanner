@@ -9,12 +9,16 @@ die() {
 }
 
 INPUT_ROOT="$1"
-OUTPUT_BUNDLE="$2"
+OUTPUT_DIR="$2"
 
-[[ -n "$INPUT_ROOT" && -n "$OUTPUT_BUNDLE" ]] \
-    || die "Usage: $0 <input-root> <output-bundle>"
+[[ -n "$INPUT_ROOT" && -n "$OUTPUT_DIR" ]] \
+    || die "Usage: $0 <input-root-dir> <output-dir>"
 [[ -d "$INPUT_ROOT" ]] \
     || die "Input root directory doesn't exist or is not a directory."
+[[ -d "$OUTPUT_DIR" ]] \
+    || die "Output directory doesn't exist or is not a directory."
+
+OUTPUT_BUNDLE="${OUTPUT_DIR}/bundle.tar.gz"
 
 # Create tmp directory with stackrox directory structure
 bundle_root="$(mktemp -d)"
@@ -43,7 +47,6 @@ rm -rf "${build_dir}"
 # Dockerfile.
 
 cp -p "${INPUT_ROOT}/dump/definitions.sql.gz" "${bundle_root}/docker-entrypoint-initdb.d/"
-cp -p "${INPUT_ROOT}/rhel/docker-entrypoint.sh" "${bundle_root}/usr/local/bin/"
 cp -p "${INPUT_ROOT}"/*.conf "${bundle_root}/etc/"
 
 # Get postgres RPMs directly

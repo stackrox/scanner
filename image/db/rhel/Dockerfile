@@ -4,50 +4,45 @@ ARG BASE_TAG=8.2
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
-ENV PG_MAJOR 12
-ENV PATH $PATH:/usr/pgsql-$PG_MAJOR/bin/
-ENV PGDATA /var/lib/postgresql/data
-ENV POSTGRES_PASSWORD_FILE=/run/secrets/stackrox.io/secrets/password
+LABEL name="scanner-db-rhel" \
+      vendor="StackRox" \
+      maintainer="support@stackrox.com" \
+      summary="Image scanner database for the StackRox Kubernetes Security Platform" \
+      description="This image supports image scanning in the StackRox Kubernetes Security Platform."
 
-RUN groupadd -g 70 postgres
-RUN adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh
+ENV PG_MAJOR=12
+ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
+    PGDATA="/var/lib/postgresql/data" \
+    POSTGRES_PASSWORD_FILE="/run/secrets/stackrox.io/secrets/password"
 
-ADD bundle.tar.gz /
+COPY signatures/RPM-GPG-KEY-PGDG-12 /
+COPY scripts/docker-entrypoint.sh /usr/local/bin/
+COPY bundle.tar.gz /
 
-RUN yum update -y --nogpgcheck --disableplugin=subscription-manager && \
-  yum install -y --nogpgcheck --disableplugin=subscription-manager \
-    ca-certificates \
-    libicu \
-    systemd-sysv \
-    postgres-libs.rpm \
-    postgres-server.rpm \
-    postgres.rpm \
-    # glibc-locale-source and glibc-langpack-en added in the UBI8 upgrade because they're no longer in the base image
-    glibc-locale-source \
-    glibc-langpack-en && \
-  rm postgres-libs.rpm postgres-server.rpm postgres.rpm \
-  ;
-
-RUN rpm -e --nodeps \
-  rpm \
-  rpm-build-libs \
-  rpm-libs \
-  python3-rpm \
-  subscription-manager \
-  python3-subscription-manager-rhsm \
-  yum \
-  # Addded in UBI8 upgrade, need to remove it because it depends on dnf
-  $(rpm -qa *hawkey*) \
-  # Added in UBI8 upgrade, need to remove it so we don't violate our "no package manager" policy
-  $(rpm -qa *dnf*) \
-  # Added in UBI8 upgrade, need to remove it so we don't violate our "no curl" policy
-  curl \
-  ;
-
-RUN localedef -f UTF-8 -i en_US en_US.UTF-8
-
-RUN chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
-  chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN groupadd -g 70 postgres && \
+    adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
+    tar -zxf /bundle.tar.gz ./postgres.rpm && \
+    tar -zxf /bundle.tar.gz ./postgres-libs.rpm && \
+    tar -zxf /bundle.tar.gz ./postgres-server.rpm && \
+    tar -zxf /bundle.tar.gz ./etc/postgresql.conf && \
+    tar -zxf /bundle.tar.gz ./etc/pg_hba.conf && \
+    tar -zxf /bundle.tar.gz ./docker-entrypoint-initdb.d/definitions.sql.gz && \
+    rm -f /bundle.tar.gz && \
+    rpm --import RPM-GPG-KEY-PGDG-12 && \
+    dnf upgrade -y && \
+    dnf install -y \
+        ca-certificates libicu systemd-sysv postgres-libs.rpm \
+        postgres-server.rpm postgres.rpm glibc-locale-source glibc-langpack-en && \
+    rpm -e --nodeps curl && \
+    # (Optional) Remove line below to keep package managment utilities
+    rpm -e --nodeps rpm rpm-build-libs rpm-libs python3-rpm yum $(rpm -qa *dnf*) && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf && \
+    rm postgres-libs.rpm postgres-server.rpm postgres.rpm && \
+    rm RPM-GPG-KEY-PGDG-12 && \
+    localedef -f UTF-8 -i en_US en_US.UTF-8 && \
+    chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
+    chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
