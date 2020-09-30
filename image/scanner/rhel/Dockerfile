@@ -18,7 +18,7 @@ COPY scripts /
 COPY bundle.tar.gz /
 
 RUN tar -zxf /bundle.tar.gz ./genesis_manifests.json && \
-    tar -zxf /bundle.tar.gz "./${NVD_DEFINITIONS_DIR}/" && \
+    tar -zxf /bundle.tar.gz ".${NVD_DEFINITIONS_DIR}/" && \
     tar -zxf /bundle.tar.gz ./scanner && \
     rm -f /bundle.tar.gz && \
     dnf upgrade -y && \
