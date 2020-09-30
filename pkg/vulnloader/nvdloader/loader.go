@@ -2,8 +2,8 @@ package nvdloader
 
 import (
 	"compress/gzip"
+	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -58,14 +58,21 @@ func downloadFeedForYear(outputDir string, year int) error {
 	if err != nil {
 		return errors.Wrapf(err, "couldn't read resp body for year %d", year)
 	}
+
+	// Strip out tabs and newlines for size savings
+	var jsonMap map[string]interface{}
+	if err := json.NewDecoder(gr).Decode(&jsonMap); err != nil {
+		return errors.Wrapf(err, "could not decode resp body for year %d", year)
+	}
+
 	outF, err := os.Create(filepath.Join(outputDir, fmt.Sprintf("%d.json", year)))
 	if err != nil {
 		return errors.Wrap(err, "failed to create file")
 	}
 	defer utils.IgnoreError(outF.Close)
-	_, err = io.Copy(outF, gr)
-	if err != nil {
-		return errors.Wrap(err, "copying resp body to file")
+
+	if err := json.NewEncoder(outF).Encode(&jsonMap); err != nil {
+		return errors.Wrapf(err, "could not encode json map for year %d", year)
 	}
 	return nil
 }
