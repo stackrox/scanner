@@ -541,6 +541,7 @@ jobs:
 
   create-diff-dumps:
     <<: *defaults
+    resource_class: large
     steps:
       - checkout
       - check-label-to-run:
