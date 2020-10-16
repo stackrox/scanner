@@ -33,9 +33,9 @@ RUN groupadd -g 70 postgres && \
     dnf install -y \
         ca-certificates libicu systemd-sysv postgres-libs.rpm \
         postgres-server.rpm postgres.rpm glibc-locale-source glibc-langpack-en && \
+    rpm -e --nodeps curl && \
     dnf clean all && \
     rm -rf /var/cache/dnf && \
-    rpm -e --nodeps curl && \
     rm postgres-libs.rpm postgres-server.rpm postgres.rpm && \
     rm RPM-GPG-KEY-PGDG-12 && \
     # (Optional) Remove line below to keep package management utilities
