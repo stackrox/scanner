@@ -52,6 +52,36 @@ func TestGetAttributes(t *testing.T) {
 					Product: "struts2_showcase",
 					Version: `1\.3\.12`,
 				},
+			},
+		},
+		{
+			comp: &component.Component{
+				Name:            "struts2-all",
+				Version:         "1.3.12",
+				SourceType:      component.JavaSourceType,
+				JavaPkgMetadata: &component.JavaPkgMetadata{},
+			},
+			expectedAttributes: []*wfn.Attributes{
+				{
+					Vendor:  "apache",
+					Product: "struts2\\-all",
+					Version: "1.3.12",
+				},
+				{
+					Vendor:  "apache",
+					Product: "struts2\\-all",
+					Version: "1\\.3\\.12",
+				},
+				{
+					Vendor:  "apache",
+					Product: "struts2_all",
+					Version: "1.3.12",
+				},
+				{
+					Vendor:  "apache",
+					Product: "struts2_all",
+					Version: "1\\.3\\.12",
+				},
 				{
 					Vendor:  "apache",
 					Product: "struts2",

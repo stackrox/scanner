@@ -107,9 +107,6 @@ func GetJavaAttributes(c *component.Component) []*wfn.Attributes {
 	// Post filtering
 	if mutableNames(c) {
 		common.AddMutatedNameKeys(c, nameSet)
-	} else {
-		// we can always trim the numerics off something like struts2
-		common.AddNameWithoutDigits(c, nameSet)
 	}
 	for _, blocklisted := range blocklistedPkgs {
 		nameSet.Remove(blocklisted)
