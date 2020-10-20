@@ -33,10 +33,10 @@ var (
 func mutableNames(c *component.Component) bool {
 	for _, keyword := range mutatableIndicators {
 		if strings.Contains(c.Name, keyword) {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 func ignored(c *component.Component) bool {
