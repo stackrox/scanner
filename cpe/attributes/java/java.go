@@ -10,7 +10,6 @@ import (
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/attributes/common"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/stringhelpers"
 )
 
 var (
@@ -21,35 +20,23 @@ var (
 	// and typically standalone
 	blocklistedPkgs = []string{"rt", "docker", "mesos"}
 
-	// predisposedKeywords are the keywords that are likely to be used to specify
-	// a version of a product that is not the core product. jira-plugin should not be resolved as jira for example
-	// postgres-client is not postgres
-	predisposedKeywords = []string{
-		"plugin",
-		"client",
-		"java",
-		"integration",
-		"jdbc",
-		"annotations",
-		"spec",
-		"jsr181",
-		"docker",
-		"mesos",
-		"jms",
-	}
-
 	ignoredPkgs = []string{
 		"jdbc",
 	}
+
+	mutatableIndicators = []string {
+		"all",
+		"core",
+	}
 )
 
-func predisposed(c *component.Component) bool {
-	for _, keyword := range predisposedKeywords {
-		if stringhelpers.AnyContain([]string{c.Name, c.Location}, keyword) {
-			return true
+func mutableNames(c *component.Component) bool {
+	for _, keyword := range mutatableIndicators {
+		if strings.Contains(c.Name, keyword) {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func ignored(c *component.Component) bool {
@@ -117,7 +104,7 @@ func GetJavaAttributes(c *component.Component) []*wfn.Attributes {
 	}
 
 	// Post filtering
-	if vendorSet.Cardinality() != 0 && !predisposed(c) {
+	if mutableNames(c) {
 		common.AddMutatedNameKeys(c, nameSet)
 	}
 	for _, blocklisted := range blocklistedPkgs {
