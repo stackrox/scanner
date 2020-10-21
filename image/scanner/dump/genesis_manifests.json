@@ -45,6 +45,11 @@
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20200930210213.zip",
       "timestamp": "2020-09-30T21:02:13.294367007Z",
       "diffLocation": "gs://definitions.stackrox.io/393a3dce-2a0e-4645-b0b6-2835270eb93c/diff.zip"
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20201021030334.zip",
+      "timestamp": "2020-10-21T03:03:34.095060606Z",
+      "diffLocation": "gs://definitions.stackrox.io/8d6951e9-52af-4840-9e0b-c9d7a5191a7d/diff.zip"
     }
   ]
 }
