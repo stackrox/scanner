@@ -28,6 +28,7 @@ var (
 		"all",
 		"core",
 		"fatjar",
+		"scala-library",
 	}
 )
 
