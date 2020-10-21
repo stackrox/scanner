@@ -31,9 +31,9 @@ var (
 	}
 )
 
-func mutableNames(c *component.Component) bool {
+func isMutableName(name string) bool {
 	for _, keyword := range mutableIndicators {
-		if strings.Contains(c.Name, keyword) {
+		if strings.Contains(name, keyword) {
 			return true
 		}
 	}
@@ -105,7 +105,7 @@ func GetJavaAttributes(c *component.Component) []*wfn.Attributes {
 	}
 
 	// Post filtering
-	if mutableNames(c) {
+	if isMutableName(c.Name) {
 		common.AddMutatedNameKeys(c, nameSet)
 	}
 	for _, blocklisted := range blocklistedPkgs {
