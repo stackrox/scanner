@@ -29,12 +29,9 @@ func GenerateNameKeys(c *component.Component) set.StringSet {
 	)
 }
 
-func AddNameWithoutDigits(c *component.Component, nameSet set.StringSet) {
-	nameSet.Add(strings.TrimRight(numRegex.ReplaceAllString(c.Name, ""), "-_"))
-}
-
 func AddMutatedNameKeys(c *component.Component, nameSet set.StringSet) {
-	AddNameWithoutDigits(c, nameSet)
+	nameSet.Add(strings.TrimRight(numRegex.ReplaceAllString(c.Name, ""), "-_"))
+
 	for name := range nameSet {
 		if idx := strings.Index(name, "-"); idx != -1 {
 			nameSet.Add(name[:idx])
