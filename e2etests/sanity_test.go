@@ -416,7 +416,7 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          ".net_core",
-					Version:       "3.1",
+					Version:       "3.1.9",
 					VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
 					Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.9/",
 					AddedBy:       "sha256:fd068c4127c7da68d25815b3711b675e514a0f3aabd2a71d574919d6fd174281",

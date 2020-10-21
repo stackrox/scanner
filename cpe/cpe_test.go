@@ -74,6 +74,64 @@ func TestGetAttributes(t *testing.T) {
 				},
 			},
 		},
+		{
+			comp: &component.Component{
+				Name:       "Microsoft.AspNetCore.App",
+				Version:    "3.1.9",
+				SourceType: component.DotNetCoreRuntimeSourceType,
+			},
+			expectedAttributes: []*wfn.Attributes{
+				{
+					Vendor:  "microsoft",
+					Product: "asp.net_core",
+					Version: "3.1",
+				},
+				{
+					Vendor:  "microsoft",
+					Product: "asp.net_core",
+					Version: "3\\.1",
+				},
+				{
+					Vendor:  "microsoft",
+					Product: "asp\\.net_core",
+					Version: "3.1",
+				},
+				{
+					Vendor:  "microsoft",
+					Product: "asp\\.net_core",
+					Version: "3\\.1",
+				},
+			},
+		},
+		{
+			comp: &component.Component{
+				Name:       "Microsoft.NETCore.App",
+				Version:    "3.1.8",
+				SourceType: component.DotNetCoreRuntimeSourceType,
+			},
+			expectedAttributes: []*wfn.Attributes{
+				{
+					Vendor:  "microsoft",
+					Product: ".net_core",
+					Version: "3.1",
+				},
+				{
+					Vendor:  "microsoft",
+					Product: ".net_core",
+					Version: "3\\.1",
+				},
+				{
+					Vendor:  "microsoft",
+					Product: "\\.net_core",
+					Version: "3.1",
+				},
+				{
+					Vendor:  "microsoft",
+					Product: "\\.net_core",
+					Version: "3\\.1",
+				},
+			},
+		},
 	}
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("%s-%s", c.comp.Name, c.comp.Version), func(t *testing.T) {

@@ -32,11 +32,15 @@ type nameVersion struct {
 	name, version string
 }
 
-func getNameVersionFromCPE(attr *wfn.Attributes) nameVersion {
+func getNameVersionFromCPE(attr *wfn.Attributes, versionOverride string) nameVersion {
+	version := versionOverride
+	if version == "" {
+		version = strings.ReplaceAll(attr.Version, `\.`, ".")
+	}
 	tmpName := strings.ReplaceAll(attr.Product, `\-`, "-")
 	return nameVersion{
 		name:    strings.ReplaceAll(tmpName, `\.`, "."),
-		version: strings.ReplaceAll(attr.Version, `\.`, "."),
+		version: version,
 	}
 }
 
@@ -52,7 +56,7 @@ func getFeaturesFromMatchResults(layer string, matchResults []match.Result) []da
 			continue
 		}
 		cpe := m.CPE
-		nameVersion := getNameVersionFromCPE(cpe.Attributes)
+		nameVersion := getNameVersionFromCPE(cpe.Attributes, m.VersionOverride)
 
 		vulnSet, ok := featuresToVulns[nameVersion]
 		if !ok {
@@ -143,6 +147,15 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 			}
 		}
 
+		// DotNetCoreRuntime CVEs in NVD are attributed to Major.Minor version
+		// instead of the full Major.Minor.Patch version.
+		// Because of this, we want to make sure to return the full version
+		// for this source type.
+		var versionOverride string
+		if c.SourceType == component.DotNetCoreRuntimeSourceType {
+			versionOverride = c.Version
+		}
+
 		vulns, err := cache.GetVulnsForProducts(products.AsSlice())
 		if err != nil {
 			log.Errorf("error getting vulns for products: %v", err)
@@ -151,10 +164,11 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 		for _, v := range vulns {
 			if matchesWithFixed := v.MatchWithFixedIn(attributes, false); len(matchesWithFixed) > 0 {
 				result := match.Result{
-					CVE:       v,
-					CPE:       getMostSpecificCPE(matchesWithFixed),
-					Component: c,
-					Vuln:      nvdtoolscache.NewVulnerability(v.(*nvd.Vuln).CVEItem),
+					CVE:             v,
+					CPE:             getMostSpecificCPE(matchesWithFixed),
+					VersionOverride: versionOverride,
+					Component:       c,
+					Vuln:            nvdtoolscache.NewVulnerability(v.(*nvd.Vuln).CVEItem),
 				}
 
 				validator, ok := validation.Validators[c.SourceType]
