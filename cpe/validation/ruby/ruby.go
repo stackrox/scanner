@@ -12,8 +12,21 @@ import (
 	"github.com/stackrox/scanner/pkg/stringhelpers"
 )
 
+type pairs struct {
+	vendor, product string
+}
+
 var (
-	knownRubyPkgs = set.NewFrozenStringSet("webrick", "sprockets", "sinatra", "foreman", "devise")
+	knownRubyPkgs = set.NewFrozenStringSet("webrick", "sprockets", "sinatra", "devise")
+
+	// The CVEs related to theforeman:foreman should not be evaluated at this point. It is generally installed
+	// via a package manager and any issues should be reflected as part of OS vulns
+	disallowedPackages = []pairs{
+		{
+			vendor:  "theforeman",
+			product: "foreman",
+		},
+	}
 
 	knownKeywords = []string{
 		"ruby",
@@ -40,6 +53,12 @@ func (v validator) ValidateResult(result match.Result) bool {
 	if knownRubyPkgs.Contains(result.CPE.Product) {
 		return true
 	}
+	for _, disallowedPair := range disallowedPackages {
+		if result.CPE.Vendor == disallowedPair.vendor && result.CPE.Product == disallowedPair.product {
+			return false
+		}
+	}
+
 	// Check if the vuln matches Ruby in the targetSW
 	for _, a := range result.CVE.Config() {
 		for _, k := range knownKeywords {
