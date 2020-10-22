@@ -34,7 +34,7 @@ var (
 
 func isMutableName(name string) bool {
 	for _, keyword := range mutableIndicators {
-		if strings.Contains(name, keyword) {
+		if strings.Contains(name, "-"+keyword) || strings.Contains(name, keyword+"-") {
 			return true
 		}
 	}
