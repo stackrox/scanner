@@ -1,7 +1,6 @@
 package cpe
 
 import (
-	"github.com/stackrox/rox/pkg/stringutils"
 	"sort"
 	"strings"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/facebookincubator/nvdtools/wfn"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/cpe/attributes/dotnetcoreruntime"
 	"github.com/stackrox/scanner/cpe/attributes/java"
 	"github.com/stackrox/scanner/cpe/attributes/node"
