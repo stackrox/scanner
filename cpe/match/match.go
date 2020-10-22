@@ -8,8 +8,9 @@ import (
 )
 
 type Result struct {
-	CVE       cvefeed.Vuln
-	CPE       wfn.AttributesWithFixedIn
-	Component *component.Component
-	Vuln      *database.Vulnerability
+	CVE             cvefeed.Vuln
+	CPE             wfn.AttributesWithFixedIn
+	VersionOverride string
+	Component       *component.Component
+	Vuln            *database.Vulnerability
 }

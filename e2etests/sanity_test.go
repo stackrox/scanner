@@ -410,13 +410,13 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "mcr.microsoft.com/dotnet/core/runtime:3.1",
+			image:    "mcr.microsoft.com/dotnet/core/runtime:3.1@sha256:3245eb783183ef900946536e3a087e873381f5d45543fe69ac8e3310ef89fb7b",
 			registry: "https://mcr.microsoft.com",
 			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          ".net_core",
-					Version:       "3.1",
+					Version:       "3.1.9",
 					VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
 					Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.9/",
 					AddedBy:       "sha256:fd068c4127c7da68d25815b3711b675e514a0f3aabd2a71d574919d6fd174281",
