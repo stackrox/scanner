@@ -1,6 +1,7 @@
 package cpe
 
 import (
+	"github.com/stackrox/rox/pkg/stringutils"
 	"sort"
 	"strings"
 
@@ -33,14 +34,10 @@ type nameVersion struct {
 }
 
 func getNameVersionFromCPE(attr *wfn.Attributes, versionOverride string) nameVersion {
-	version := versionOverride
-	if version == "" {
-		version = strings.ReplaceAll(attr.Version, `\.`, ".")
-	}
 	tmpName := strings.ReplaceAll(attr.Product, `\-`, "-")
 	return nameVersion{
 		name:    strings.ReplaceAll(tmpName, `\.`, "."),
-		version: version,
+		version: stringutils.OrDefault(versionOverride, strings.ReplaceAll(attr.Version, `\.`, ".")),
 	}
 }
 
