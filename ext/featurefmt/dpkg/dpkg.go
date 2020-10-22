@@ -17,6 +17,7 @@ package dpkg
 
 import (
 	"bufio"
+	"bytes"
 	"regexp"
 	"strings"
 
@@ -40,20 +41,11 @@ func init() {
 	featurefmt.RegisterLister("dpkg", &lister{})
 }
 
-func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
-	f, hasFile := files["var/lib/dpkg/status"]
-	if !hasFile {
-		return []database.FeatureVersion{}, nil
-	}
-
-	// Create a map to store packages and ensure their uniqueness
-	packagesMap := make(map[string]database.FeatureVersion)
-	removedPackagesMap := set.NewStringSet()
-
+func (l lister) parseComponent(file []byte, packagesMap map[string]database.FeatureVersion, removedPackagesMap set.StringSet) {
 	var pkg database.FeatureVersion
 	var currentPkgIsRemoved bool
 	var err error
-	scanner := bufio.NewScanner(strings.NewReader(string(f)))
+	scanner := bufio.NewScanner(bytes.NewReader(file))
 	for scanner.Scan() {
 		line := scanner.Text()
 
@@ -72,7 +64,6 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 			for i, n := range srcCapture {
 				md[dpkgSrcCaptureRegexpNames[i]] = strings.TrimSpace(n)
-
 			}
 
 			pkg.Feature.Name = md["name"]
@@ -86,9 +77,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 				} else {
 					pkg.Version = version
-
 				}
-
 			}
 		} else if strings.HasPrefix(line, "Version: ") && pkg.Version == "" {
 			// Version line
@@ -121,6 +110,21 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			}
 			pkg = database.FeatureVersion{}
 			currentPkgIsRemoved = false
+		}
+	}
+}
+
+func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
+	// Create a map to store packages and ensure their uniqueness
+	packagesMap := make(map[string]database.FeatureVersion)
+	removedPackagesMap := set.NewStringSet()
+	if f, hasFile := files["var/lib/dpkg/status"]; hasFile {
+		l.parseComponent(f, packagesMap, removedPackagesMap)
+	}
+
+	for filename, file := range files {
+		if strings.HasPrefix(filename, "var/lib/dpkg/status.d") {
+			l.parseComponent(file, packagesMap, removedPackagesMap)
 		}
 	}
 

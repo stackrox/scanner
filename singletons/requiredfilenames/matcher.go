@@ -1,6 +1,8 @@
 package requiredfilenames
 
 import (
+	"os"
+	"strings"
 	"sync"
 
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -14,6 +16,12 @@ var (
 	once     sync.Once
 )
 
+type dpkgSubPathMatcher struct{}
+
+func (d *dpkgSubPathMatcher) Match(fullPath string, fileInfo os.FileInfo) bool {
+	return strings.HasPrefix(fullPath, "var/lib/dpkg/status.d")
+}
+
 // SingletonMatcher returns the singleton matcher instance to use.
 func SingletonMatcher() matcher.Matcher {
 	once.Do(func() {
@@ -22,8 +30,9 @@ func SingletonMatcher() matcher.Matcher {
 
 		allAnalyzers := analyzers.Analyzers()
 
-		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+1)
+		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+2)
 		allMatchers = append(allMatchers, clairMatcher)
+		allMatchers = append(allMatchers, &dpkgSubPathMatcher{})
 		for _, a := range allAnalyzers {
 			allMatchers = append(allMatchers, a)
 		}
