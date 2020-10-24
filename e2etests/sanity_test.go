@@ -410,67 +410,22 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "mcr.microsoft.com/dotnet/core/runtime:3.1@sha256:3245eb783183ef900946536e3a087e873381f5d45543fe69ac8e3310ef89fb7b",
+			image:    "mcr.microsoft.com/dotnet/core/runtime:3.1.2",
 			registry: "https://mcr.microsoft.com",
 			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
-					Name:          ".net_core",
-					Version:       "3.1.9",
+					Name:          "microsoft.netcore.app",
+					Version:       "3.1.2",
 					VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
-					Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.9/",
-					AddedBy:       "sha256:fd068c4127c7da68d25815b3711b675e514a0f3aabd2a71d574919d6fd174281",
+					Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/",
+					AddedBy:       "sha256:b48f8e1b0b06887c382543e23275911a388c1010e3436dc9b708ef29885bb594",
 					Vulnerabilities: []v1.Vulnerability{
-						{
-							Name:        "CVE-2020-0605",
-							Description: "A remote code execution vulnerability exists in .NET software when the software fails to check the source markup of a file.An attacker who successfully exploited the vulnerability could run arbitrary code in the context of the current user, aka '.NET Framework Remote Code Execution Vulnerability'. This CVE ID is unique from CVE-2020-0606.",
-							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-0605",
-							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
-									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 8.6,
-										"ImpactScore":         10.0,
-										"Score":               9.3,
-										"Vectors":             "AV:N/AC:M/Au:N/C:C/I:C/A:C",
-									},
-									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 2.8,
-										"ImpactScore":         5.9,
-										"Score":               8.8,
-										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
-									},
-									"LastModifiedDateTime": "2020-01-21T21:22:00Z",
-									"PublishedDateTime":    "2020-01-14T23:15:00Z",
-								},
-							},
-						},
-						{
-							Name:        "CVE-2020-0606",
-							Description: "A remote code execution vulnerability exists in .NET software when the software fails to check the source markup of a file.An attacker who successfully exploited the vulnerability could run arbitrary code in the context of the current user, aka '.NET Framework Remote Code Execution Vulnerability'. This CVE ID is unique from CVE-2020-0605.",
-							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-0606",
-							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
-									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 8.6,
-										"ImpactScore":         10.0,
-										"Score":               9.3,
-										"Vectors":             "AV:N/AC:M/Au:N/C:C/I:C/A:C",
-									},
-									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 2.8,
-										"ImpactScore":         5.9,
-										"Score":               8.8,
-										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
-									},
-									"LastModifiedDateTime": "2020-01-17T03:03:00Z",
-									"PublishedDateTime":    "2020-01-14T23:15:00Z",
-								},
-							},
-						},
 						{
 							Name:        "CVE-2020-1108",
 							Description: "A denial of service vulnerability exists when .NET Core or .NET Framework improperly handles web requests, aka '.NET Core & .NET Framework Denial of Service Vulnerability'.",
 							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1108",
+							FixedBy:     "3.1.5",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
@@ -494,6 +449,7 @@ func TestImageSanity(t *testing.T) {
 							Name:        "CVE-2020-1147",
 							Description: "A remote code execution vulnerability exists in .NET Framework, Microsoft SharePoint, and Visual Studio when the software fails to check the source markup of XML file input, aka '.NET Framework, SharePoint Server, and Visual Studio Remote Code Execution Vulnerability'.",
 							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1147",
+							FixedBy:     "3.1.6",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
