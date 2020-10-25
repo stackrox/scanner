@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: {{ .Values.appName }}-db
   namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.appName }}-db
 spec:
   ports:
   - name: tcp-db

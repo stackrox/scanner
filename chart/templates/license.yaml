@@ -3,6 +3,8 @@ kind: Secret
 metadata:
   name: scanner-license
   namespace: {{ .Values.namespace }}
+  labels:
+    {{ .Values.appName }}
 type: Opaque
 data:
   license.lic: {{ .Files.Get "dev-license.lic" | b64enc }}

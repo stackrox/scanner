@@ -5,6 +5,8 @@ metadata:
   namespace: {{ .Values.namespace }}
   labels:
     app: {{ .Values.appName }}
+  annotations:
+    kube-linter.io/ignore/no-read-only-root-fs: "Some of the component extractors write temp files."
 spec:
   replicas: 1
   minReadySeconds: 15

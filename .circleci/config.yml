@@ -432,6 +432,15 @@ jobs:
           name: Run style checks on test code
           command: make -C qa-tests style
 
+      - run:
+          name: Run KubeLinter
+          command: |
+            KUBE_LINTER_VERSION="v0.1.0"
+            curl -L https://github.com/stackrox/kube-linter/releases/download/0.1.0/kube-linter-linux.zip -o /tmp/kube-linter-linux.zip
+            unzip /tmp/kube-linter-linux.zip -d .
+            ./kube-linter version
+            ./kube-linter lint .
+
   generate-genesis-dump:
     <<: *defaults
     steps:
