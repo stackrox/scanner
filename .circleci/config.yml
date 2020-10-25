@@ -439,7 +439,7 @@ jobs:
             curl -L https://github.com/stackrox/kube-linter/releases/download/0.1.0/kube-linter-linux.zip -o /tmp/kube-linter-linux.zip
             unzip /tmp/kube-linter-linux.zip -d .
             ./kube-linter version
-            ./kube-linter lint .
+            ./kube-linter lint . --config .kube-linter-config.yaml
 
   generate-genesis-dump:
     <<: *defaults
