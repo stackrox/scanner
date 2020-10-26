@@ -1,0 +1,14 @@
+Package: netbase
+Version: 5.6
+Architecture: all
+Maintainer: Marco d'Itri <md@linux.it>
+Installed-Size: 44
+Section: admin
+Priority: important
+Multi-Arch: foreign
+Description: Basic TCP/IP networking system
+ This package provides the necessary infrastructure for basic TCP/IP based
+ networking.
+ .
+ In particular, it supplies tables of common name-to-number mappings in
+ /etc/services, /etc/rpc, and /etc/protocols.

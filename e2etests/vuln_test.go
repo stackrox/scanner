@@ -5,6 +5,7 @@ package e2etests
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stackrox/rox/pkg/sliceutils"
@@ -32,7 +33,15 @@ type singleTestCase struct {
 func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewScanServiceClient(conn)
-	scanResp := scanDockerIOStackRoxImage(client, testCase.image, t)
+	var scanResp *v1.ScanImageResponse
+	if strings.HasPrefix(testCase.image, "docker.io") {
+		scanResp = scanDockerIOStackRoxImage(client, testCase.image, t)
+	} else if strings.HasPrefix(testCase.image, "gcr.io") {
+		scanResp = scanGCRImage(client, testCase.image, t)
+	} else {
+		fmt.Printf("no scan method for image: %v\n", testCase.image)
+		t.FailNow()
+	}
 	scan, err := client.GetScan(context.Background(), &v1.GetScanRequest{
 		ImageSpec: scanResp.GetImage(),
 	})
