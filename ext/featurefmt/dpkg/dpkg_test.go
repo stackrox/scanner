@@ -41,7 +41,7 @@ func TestDpkgFeatureDetection(t *testing.T) {
 					Version: "5.1.1-12ubuntu1", // The version comes from the "Source:" line
 				},
 				{
-					Feature: database.Feature{Name: "base"},
+					Feature: database.Feature{Name: "base-files"},
 					Version: "10.3+deb10u6",
 				},
 				{
