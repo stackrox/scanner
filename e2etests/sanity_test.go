@@ -517,6 +517,47 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			image:    "gcr.io/distroless/base@sha256:8d58596f5181f95d908d7f8318f8e27bc394164491bd0aa53c2f284480fd8f8b",
+			registry: "https://gcr.io",
+			source:   "NVD",
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "glibc",
+					NamespaceName: "debian:9",
+					VersionFormat: "dpkg",
+					Version:       "2.24-11+deb9u4",
+					AddedBy:       "sha256:5c7fe08dec514a5105d43dfcae1a5a45be002bcd3251dd178ced702aecfb7531",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2019-1010022",
+							NamespaceName: "debian:9",
+							Description:   "GNU Libc current is affected by: Mitigation bypass. The impact is: Attacker may bypass stack guard protection. The component is: nptl. The attack vector is: Exploit stack buffer overflow vulnerability and use this bypass vulnerability to bypass stack guard.",
+							Link:          "https://security-tracker.debian.org/tracker/CVE-2019-1010022",
+							Severity:      "High",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10,
+										"ImpactScore":         6.4,
+										"Score":               7.5,
+										"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         5.9,
+										"Score":               9.8,
+										"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2019-07-18T15:44:00Z",
+									"PublishedDateTime":    "2019-07-15T04:15:00Z",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			verifyImageHasExpectedFeatures(cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
