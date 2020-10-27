@@ -114,6 +114,7 @@ func (a *appender) Append(name string, subCVEs []string, appendFunc types.Append
 	if enricher, ok := a.metadata[name]; ok {
 		appendFunc(AppenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
 
+		// TODO remove once we remove support for scanners < 2.5.0
 		// We broke backwards compatibility by using the "Red Hat" key in the metadata field
 		// this is so that older Centrals looking for "NVD" only will still get valid scores
 		appendFunc(nvd.AppenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
@@ -122,6 +123,7 @@ func (a *appender) Append(name string, subCVEs []string, appendFunc types.Append
 	if redhatMetadata := a.getHighestCVSSMetadata(subCVEs); redhatMetadata != nil {
 		appendFunc(AppenderName, &metadataEnricher{metadata: redhatMetadata}, cvss.SeverityFromCVSS(redhatMetadata))
 
+		// TODO remove once we remove support for scanners < 2.5.0
 		// We broke backwards compatibility by using the "Red Hat" key in the metadata field
 		// this is so that older Centrals looking for "NVD" only will still get valid scores
 		appendFunc(nvd.AppenderName, &metadataEnricher{metadata: redhatMetadata}, cvss.SeverityFromCVSS(redhatMetadata))
