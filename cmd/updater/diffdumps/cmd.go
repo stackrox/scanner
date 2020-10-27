@@ -117,14 +117,14 @@ func sortFeatureVersionSlice(slice []database.FeatureVersion) {
 	})
 }
 
-func vulnsAreEqual(v1, v2 database.Vulnerability) bool {
+func vulnsAreEqual(v1, v2 *database.Vulnerability) bool {
 	sortFeatureVersionSlice(v1.FixedIn)
 	sortFeatureVersionSlice(v2.FixedIn)
 	return reflect.DeepEqual(v1, v2)
 }
 
-func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnerability {
-	var filtered []database.Vulnerability
+func filterFixableCentOSVulns(vulns []*database.Vulnerability) []*database.Vulnerability {
+	var filtered []*database.Vulnerability
 	for _, vuln := range vulns {
 		if !strings.HasPrefix(vuln.Namespace.Name, "centos") {
 			filtered = append(filtered, vuln)
@@ -144,7 +144,7 @@ func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnera
 	return filtered
 }
 
-func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, cfg config) error {
+func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, baseManifest *vulndump.Manifest, headZipR *zip.ReadCloser, cfg config) error {
 	baseVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
 	if err != nil {
 		return errors.Wrap(err, "loading OS vulns from base dump")
@@ -154,9 +154,10 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 		return errors.Wrap(err, "loading OS vulns from head dump")
 	}
 
-	baseVulnsMap := make(map[clairVulnUniqueKey]database.Vulnerability, len(baseVulns))
-	for _, vuln := range baseVulns {
-		key := keyFromVuln(&vuln)
+	baseVulnsMap := make(map[clairVulnUniqueKey]*database.Vulnerability, len(baseVulns))
+	for i := range baseVulns {
+		vuln := &baseVulns[i]
+		key := keyFromVuln(vuln)
 		if _, ok := baseVulnsMap[key]; ok {
 			// Should really never happen, but being defensive.
 			return errors.Errorf("UNEXPECTED: got multiple vulns for key: %v", key)
@@ -164,13 +165,32 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 		baseVulnsMap[key] = vuln
 	}
 
-	var filtered []database.Vulnerability
-	for _, headVuln := range headVulns {
-		key := keyFromVuln(&headVuln)
+	d := time.Date(2020, 9, 29, 0, 0, 0, 0, time.UTC)
+
+	// This commit https://github.com/stackrox/scanner/commit/fe393b26f092d9b295820dc6283e4c3d784c872b
+	// broke backwards compatibility between RHEL format and Central so we need to rewrite the Red Hat metadata
+	// into the NVD key
+	rewriteMetadata := baseManifest.Until.Before(d)
+	if rewriteMetadata {
+		log.Infof("Found base manifest: %+v to be before rhel cutoff", baseManifest)
+	}
+
+	var filtered []*database.Vulnerability
+	for i := range headVulns {
+		headVuln := &headVulns[i]
+		// Rewrite base if needed
+		if rewriteMetadata && strings.HasPrefix(headVuln.Namespace.Name, "centos") {
+			if val, ok := headVuln.Metadata["Red Hat"]; ok {
+				headVuln.Metadata["NVD"] = val
+			}
+			log.Infof("Rewriting vuln to include NVD data: %v", headVuln.Name)
+		}
+
+		key := keyFromVuln(headVuln)
 		matchingBaseVuln, found := baseVulnsMap[key]
 		// If the vuln was in the base, and equal to what was in the base,
 		// skip it. Else, add.
-		if !(found && vulnsAreEqual(matchingBaseVuln, headVuln)) {
+		if !found || !vulnsAreEqual(matchingBaseVuln, headVuln) {
 			filtered = append(filtered, headVuln)
 		}
 	}
@@ -241,7 +261,7 @@ func Command() *cobra.Command {
 		log.Info("Done generating NVD diff.")
 
 		log.Info("Generating OS vulns diff...")
-		if err := generateOSVulnsDiff(stagingDir, baseZipR, headZipR, cfg); err != nil {
+		if err := generateOSVulnsDiff(stagingDir, baseZipR, baseManifest, headZipR, cfg); err != nil {
 			return errors.Wrap(err, "creating OS vulns diff")
 		}
 		log.Info("Generated OS vulns diff")
