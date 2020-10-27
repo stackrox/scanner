@@ -168,22 +168,22 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, baseManifes
 	d := time.Date(2020, 9, 29, 0, 0, 0, 0, time.UTC)
 
 	// This commit https://github.com/stackrox/scanner/commit/fe393b26f092d9b295820dc6283e4c3d784c872b
-	// broke backwards compatibility between RHEL format and Central so we need to rewrite the Red Hat metadata
-	// into the NVD key
-	rewriteMetadata := baseManifest.Until.Before(d)
-	if rewriteMetadata {
-		log.Infof("Found base manifest: %+v to be before rhel cutoff", baseManifest)
+	// broke backwards compatibility between RHEL format and Central so we need to remove the NVD data
+	// if the Red Hat field exists
+	removeNVDMetadataIfCentos := baseManifest.Until.After(d)
+	if removeNVDMetadataIfCentos {
+		log.Infof("Found base manifest: %+v to be after rhel cutoff", baseManifest)
 	}
 
 	var filtered []*database.Vulnerability
 	for i := range headVulns {
 		headVuln := &headVulns[i]
 		// Rewrite base if needed
-		if rewriteMetadata && strings.HasPrefix(headVuln.Namespace.Name, "centos") {
-			if val, ok := headVuln.Metadata["Red Hat"]; ok {
-				headVuln.Metadata["NVD"] = val
+		if removeNVDMetadataIfCentos && strings.HasPrefix(headVuln.Namespace.Name, "centos") {
+			if _, ok := headVuln.Metadata["Red Hat"]; ok {
+				delete(headVuln.Metadata, "NVD")
+				log.Infof("Rewriting vuln to exclude NVD data: %v", headVuln.Name)
 			}
-			log.Infof("Rewriting vuln to include NVD data: %v", headVuln.Name)
 		}
 
 		key := keyFromVuln(headVuln)

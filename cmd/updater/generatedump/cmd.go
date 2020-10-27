@@ -96,7 +96,7 @@ func Command() *cobra.Command {
 }
 
 // fetch get data from the registered fetchers, in parallel.
-func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.Vulnerability, err error) {
+func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []*database.Vulnerability, err error) {
 	errSig := concurrency.NewErrorSignal()
 
 	// Fetch updates in parallel.
@@ -147,7 +147,7 @@ func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.V
 }
 
 // Add metadata to the specified vulnerabilities using the NVD metadata fetcher.
-func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]database.Vulnerability, error) {
+func addMetadata(vulnerabilities []*database.Vulnerability, dumpDir string) ([]*database.Vulnerability, error) {
 	log.Info("adding metadata to vulnerabilities")
 
 	defer purgeCaches()
@@ -158,10 +158,11 @@ func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]da
 	}
 
 	for i := range vulnerabilities {
-		vuln := &vulnerabilities[i]
-		appender := vulnmdsrc.AppenderForVuln(vuln)
-		if err := appender.Append(vuln.Name, vuln.SubCVEs, appendFuncForVuln(vuln)); err != nil {
-			return nil, errors.Wrapf(err, "Failed to append metadata for vuln %s", vuln.Name)
+		vuln := vulnerabilities[i]
+		for _, appender := range vulnmdsrc.AppendersForVuln(vuln) {
+			if err := appender.Append(vuln.Name, vuln.SubCVEs, appendFuncForVuln(vuln)); err != nil {
+				return nil, errors.Wrapf(err, "Failed to append metadata for vuln %s", vuln.Name)
+			}
 		}
 	}
 
@@ -202,7 +203,7 @@ func appendFuncForVuln(v *database.Vulnerability) types.AppendFunc {
 // It helps simplifying the fetchers that share the same metadata about a
 // Vulnerability regardless of their actual namespace (ie. same vulnerability
 // information for every version of a distro).
-func doVulnerabilitiesNamespacing(nonNamespacedVulns []database.Vulnerability) []database.Vulnerability {
+func doVulnerabilitiesNamespacing(nonNamespacedVulns []database.Vulnerability) []*database.Vulnerability {
 	namespacedVulnsMap := make(map[string]*database.Vulnerability)
 
 	for _, nonNamespacedVuln := range nonNamespacedVulns {
@@ -224,9 +225,9 @@ func doVulnerabilitiesNamespacing(nonNamespacedVulns []database.Vulnerability) [
 	}
 
 	// Convert map into a slice.
-	response := make([]database.Vulnerability, 0, len(namespacedVulnsMap))
+	response := make([]*database.Vulnerability, 0, len(namespacedVulnsMap))
 	for _, vulnerability := range namespacedVulnsMap {
-		response = append(response, *vulnerability)
+		response = append(response, vulnerability)
 	}
 
 	return response

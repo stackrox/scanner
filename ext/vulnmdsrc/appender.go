@@ -17,11 +17,14 @@ func Appenders() []types.Appender {
 	}
 }
 
-// AppenderForVuln returns the appropriate Appender based on the given vulnerability.
-func AppenderForVuln(vuln *database.Vulnerability) types.Appender {
+// AppendersForVuln returns the appropriate Appenders based on the given vulnerability.
+func AppendersForVuln(vuln *database.Vulnerability) []types.Appender {
 	if strings.HasPrefix(vuln.Namespace.Name, "centos") {
-		return redhat.SingletonAppender()
+		return []types.Appender{
+			redhat.SingletonAppender(),
+			nvd.SingletonAppender(),
+		}
 	}
 
-	return nvd.SingletonAppender()
+	return []types.Appender{nvd.SingletonAppender()}
 }
