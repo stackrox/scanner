@@ -18,6 +18,8 @@ import (
 const (
 	// AppenderName represents the name of this appender.
 	AppenderName string = "Red Hat"
+
+	nvdAppenderName string = "NVD"
 )
 
 type appender struct {
@@ -112,10 +114,12 @@ func (a *appender) getHighestCVSSMetadata(cves []string) *types.Metadata {
 func (a *appender) Append(name string, subCVEs []string, appendFunc types.AppendFunc) error {
 	if enricher, ok := a.metadata[name]; ok {
 		appendFunc(AppenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
+		appendFunc(nvdAppenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
 		return nil
 	}
 	if redhatMetadata := a.getHighestCVSSMetadata(subCVEs); redhatMetadata != nil {
 		appendFunc(AppenderName, &metadataEnricher{metadata: redhatMetadata}, cvss.SeverityFromCVSS(redhatMetadata))
+		appendFunc(nvdAppenderName, &metadataEnricher{metadata: redhatMetadata}, cvss.SeverityFromCVSS(redhatMetadata))
 	}
 	return nil
 }
