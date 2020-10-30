@@ -30,7 +30,7 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 
 	_, err := git.PlainClone(outputDir, true, &git.CloneOptions{
 		URL:           k8sCVEsRepository,
-		ReferenceName: "ross-init-cves",
+		ReferenceName: "refs/heads/ross-init-cves",
 		SingleBranch:  true,
 	})
 
