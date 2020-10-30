@@ -20,7 +20,7 @@ type feedWrapper schema.NVDCVEFeedJSON10
 func LoadJSONFileFromReader(r io.Reader) (*schema.NVDCVEFeedJSON10, error) {
 	var feed feedWrapper
 	if err := easyjson.UnmarshalFromReader(r, &feed); err != nil {
-		return nil, errors.Wrap(err, "unmarsaling JSON from reader")
+		return nil, errors.Wrap(err, "unmarshaling JSON from reader")
 	}
 	return (*schema.NVDCVEFeedJSON10)(&feed), nil
 }

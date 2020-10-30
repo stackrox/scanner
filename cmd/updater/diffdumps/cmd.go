@@ -20,8 +20,74 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/vulndump"
+	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
 	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 )
+
+func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
+	reader, err := headF.Open()
+	if err != nil {
+		return errors.Wrap(err, "opening file")
+	}
+	defer utils.IgnoreError(reader.Close)
+	k8sDump, err := k8sloader.LoadYAMLFileFromReader(reader)
+	if err != nil {
+		return errors.Wrap(err, "reading Kubernetes dump")
+	}
+
+	var baseK8sDump *k8sloader.KubernetesCVEFeedYAML
+	if baseF != nil {
+		reader, err := headF.Open()
+		if err != nil {
+			return errors.Wrap(err, "opening file")
+		}
+		defer utils.IgnoreError(reader.Close)
+		baseK8sDump, err = k8sloader.LoadYAMLFileFromReader(reader)
+		if err != nil {
+			return errors.Wrap(err, "reading base Kubernetes dump")
+		}
+	}
+
+	var k8sDiff k8sloader.KubernetesCVEFeedYAML
+	if !reflect.DeepEqual(baseK8sDump, k8sDump) {
+		k8sDiff = *k8sDump
+	}
+
+	outF, err := os.Create(filepath.Join(outputDir, filepath.Base(headF.Name)))
+	if err != nil {
+		return errors.Wrap(err, "creating output file")
+	}
+	defer utils.IgnoreError(outF.Close)
+
+	if err := k8sloader.WriteYAMLFileToWriter(&k8sDiff, outF); err != nil {
+		return errors.Wrap(err, "writing dump to writer")
+	}
+	return nil
+}
+
+func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
+	k8sSubDir := filepath.Join(outputDir, vulndump.K8sDirName)
+	if err := os.MkdirAll(k8sSubDir, 0755); err != nil {
+		return errors.Wrap(err, "creating subdir for Kubernetes")
+	}
+
+	baseFiles := make(map[string]*zip.File)
+	for _, baseF := range baseZipR.File {
+		baseFiles[baseF.Name] = baseF
+	}
+
+	for _, headF := range headZipR.File {
+		name := headF.Name
+		// Only look at YAML files in the k8s/ folder.
+		if filepath.Dir(name) != vulndump.K8sDirName || filepath.Ext(name) != ".yaml" {
+			continue
+		}
+		if err := generateK8sDiff(k8sSubDir, baseFiles[name], headF); err != nil {
+			return errors.Wrapf(err, "generating Kubernetes diff for file %q", headF.Name)
+		}
+	}
+	return nil
+}
 
 func generateNVDDiff(outputDir string, baseLastModifiedTime time.Time, headF *zip.File) error {
 	reader, err := headF.Open()
@@ -234,11 +300,18 @@ func Command() *cobra.Command {
 		defer func() {
 			_ = os.RemoveAll(stagingDir)
 		}()
+
+		log.Info("Generating Kubernetes diff...")
+		if err := generateK8sDiffs(stagingDir, baseZipR, headZipR); err != nil {
+			return errors.Wrap(err, "creating Kubernetes diff")
+		}
+		log.Info("Done generating Kubernetes diff")
+
 		log.Info("Generating NVD diff...")
 		if err := generateNVDDiffs(stagingDir, baseManifest.Until, headZipR); err != nil {
 			return errors.Wrap(err, "creating NVD diff")
 		}
-		log.Info("Done generating NVD diff.")
+		log.Info("Done generating NVD diff")
 
 		log.Info("Generating OS vulns diff...")
 		if err := generateOSVulnsDiff(stagingDir, baseZipR, headZipR, cfg); err != nil {
