@@ -22,7 +22,7 @@ type loader struct{}
 
 // DownloadFeedsToPath downloads the Kubernetes feeds to the given path.
 func (l *loader) DownloadFeedsToPath(outputDir string) error {
-	tmpK8sDir := filepath.Join(outputDir, vulndump.K8sDirName + "-tmp")
+	tmpK8sDir := filepath.Join(outputDir, vulndump.K8sDirName+"-tmp")
 	if err := os.MkdirAll(tmpK8sDir, 0755); err != nil {
 		return errors.Wrapf(err, "creating subdir for %s", tmpK8sDir)
 	}
