@@ -29,9 +29,9 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 	}
 
 	_, err := git.PlainClone(outputDir, true, &git.CloneOptions{
-		URL: k8sCVEsRepository,
+		URL:           k8sCVEsRepository,
 		ReferenceName: "ross-init-cves",
-		SingleBranch: true,
+		SingleBranch:  true,
 	})
 
 	_ = filepath.Walk(k8sDir, func(path string, info os.FileInfo, err error) error {
