@@ -22,12 +22,12 @@ type loader struct{}
 
 // DownloadFeedsToPath downloads the Kubernetes feeds to the given path.
 func (l *loader) DownloadFeedsToPath(outputDir string) error {
-	k8sDir := filepath.Join(outputDir, vulndump.K8sDirName)
-	if err := os.MkdirAll(k8sDir, 0755); err != nil {
-		return errors.Wrapf(err, "creating subdir for %s", vulndump.K8sDirName)
+	tmpK8sDir := filepath.Join(outputDir, vulndump.K8sDirName + "-tmp")
+	if err := os.MkdirAll(tmpK8sDir, 0755); err != nil {
+		return errors.Wrapf(err, "creating subdir for %s", tmpK8sDir)
 	}
 
-	_, err := git.PlainClone(k8sDir, false, &git.CloneOptions{
+	_, err := git.PlainClone(tmpK8sDir, false, &git.CloneOptions{
 		URL:           k8sCVEsRepository,
 		ReferenceName: "refs/heads/ross-init-cves",
 		SingleBranch:  true,
@@ -36,5 +36,5 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 		return err
 	}
 
-	return os.Rename(filepath.Join(k8sDir, "cves"), filepath.Join(k8sDir, "k8s"))
+	return os.Rename(filepath.Join(tmpK8sDir, "cves"), filepath.Join(outputDir, vulndump.K8sDirName))
 }

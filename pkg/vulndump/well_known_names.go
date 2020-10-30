@@ -12,7 +12,6 @@ const (
 	NVDDirName       = "nvd"
 	RedHatDirName    = "redhat"
 	K8sDirName       = "k8s"
-	K8sCVEsDirName   = "k8s/k8s"
 )
 
 // Manifest is used to JSON marshal/unmarshal the manifest.json file.
