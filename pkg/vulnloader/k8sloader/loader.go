@@ -1,7 +1,6 @@
 package k8sloader
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -32,11 +31,6 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 		URL:           k8sCVEsRepository,
 		ReferenceName: "refs/heads/ross-init-cves",
 		SingleBranch:  true,
-	})
-
-	_ = filepath.Walk(k8sDir, func(path string, info os.FileInfo, err error) error {
-		fmt.Println(path)
-		return nil
 	})
 
 	return err
