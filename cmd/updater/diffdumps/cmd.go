@@ -37,7 +37,7 @@ func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
 
 	var baseK8sDump *k8sloader.KubernetesCVEFeedYAML
 	if baseF != nil {
-		reader, err := headF.Open()
+		reader, err := baseF.Open()
 		if err != nil {
 			return errors.Wrap(err, "opening file")
 		}
@@ -50,6 +50,7 @@ func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
 
 	var k8sDiff k8sloader.KubernetesCVEFeedYAML
 	if !reflect.DeepEqual(baseK8sDump, k8sDump) {
+		log.Infof("Kubernetes CVE file %q is in the diff", headF.Name)
 		k8sDiff = *k8sDump
 	}
 
