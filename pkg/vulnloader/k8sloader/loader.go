@@ -32,6 +32,9 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 		ReferenceName: "refs/heads/ross-init-cves",
 		SingleBranch:  true,
 	})
+	if err != nil {
+		return err
+	}
 
-	return err
+	return os.Rename(filepath.Join(k8sDir, "cves"), filepath.Join(k8sDir, "k8s"))
 }
