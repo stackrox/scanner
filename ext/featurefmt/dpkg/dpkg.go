@@ -30,6 +30,11 @@ import (
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
+const (
+	statusFile = "var/lib/dpkg/status"
+	statusDir  = "var/lib/dpkg/status.d"
+)
+
 var (
 	dpkgSrcCaptureRegexp      = regexp.MustCompile(`Source: (?P<name>[^\s]*)( \((?P<version>.*)\))?`)
 	dpkgSrcCaptureRegexpNames = dpkgSrcCaptureRegexp.SubexpNames()
@@ -41,7 +46,7 @@ func init() {
 	featurefmt.RegisterLister("dpkg", &lister{})
 }
 
-func (l lister) parseComponent(file []byte, packagesMap map[string]database.FeatureVersion, removedPackagesMap set.StringSet) {
+func (l lister) parseComponent(file []byte, packagesMap map[string]database.FeatureVersion, removedPackages set.StringSet) {
 	var pkg database.FeatureVersion
 	var currentPkgIsRemoved bool
 	var err error
@@ -106,7 +111,7 @@ func (l lister) parseComponent(file []byte, packagesMap map[string]database.Feat
 			if !currentPkgIsRemoved {
 				packagesMap[key] = pkg
 			} else {
-				removedPackagesMap.Add(key)
+				removedPackages.Add(key)
 			}
 			pkg = database.FeatureVersion{}
 			currentPkgIsRemoved = false
@@ -117,14 +122,17 @@ func (l lister) parseComponent(file []byte, packagesMap map[string]database.Feat
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
 	packagesMap := make(map[string]database.FeatureVersion)
-	removedPackagesMap := set.NewStringSet()
-	if f, hasFile := files["var/lib/dpkg/status"]; hasFile {
-		l.parseComponent(f, packagesMap, removedPackagesMap)
+	removedPackages := set.NewStringSet()
+	// For general images using dpkg.
+	if f, hasFile := files[statusFile]; hasFile {
+		l.parseComponent(f, packagesMap, removedPackages)
 	}
 
 	for filename, file := range files {
-		if strings.HasPrefix(filename, "var/lib/dpkg/status.d") {
-			l.parseComponent(file, packagesMap, removedPackagesMap)
+		// For distroless images, which are based on Debian, but also useful for
+		// all images using dpkg.
+		if strings.HasPrefix(filename, statusDir) {
+			l.parseComponent(file, packagesMap, removedPackages)
 		}
 	}
 
@@ -132,7 +140,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	packages := make([]database.FeatureVersion, 0, len(packagesMap))
 	for key, pkg := range packagesMap {
 		// Ignore packages that were removed
-		if removedPackagesMap.Contains(key) {
+		if removedPackages.Contains(key) {
 			continue
 		}
 		packages = append(packages, pkg)
