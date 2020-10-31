@@ -89,3 +89,12 @@ func scanDockerIOStackRoxImage(client v1.ScanServiceClient, imageName string, t 
 		},
 	}, t)
 }
+
+func scanGCRImage(client v1.ScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
+	return scanImage(client, &v1.ScanImageRequest{
+		Image: imageName,
+		Registry: &v1.ScanImageRequest_RegistryData{
+			Url: "https://gcr.io",
+		},
+	}, t)
+}

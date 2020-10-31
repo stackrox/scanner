@@ -40,9 +40,19 @@ func TestDpkgFeatureDetection(t *testing.T) {
 					Feature: database.Feature{Name: "gcc-5"},
 					Version: "5.1.1-12ubuntu1", // The version comes from the "Source:" line
 				},
+				{
+					Feature: database.Feature{Name: "base-files"},
+					Version: "10.3+deb10u6",
+				},
+				{
+					Feature: database.Feature{Name: "netbase"},
+					Version: "5.6",
+				},
 			},
 			Files: tarutil.FilesMap{
-				"var/lib/dpkg/status": featurefmt.LoadFileForTest("dpkg/testdata/status"),
+				"var/lib/dpkg/status":           featurefmt.LoadFileForTest("dpkg/testdata/status"),
+				"var/lib/dpkg/status.d/base":    featurefmt.LoadFileForTest("dpkg/testdata/statusd-base"),
+				"var/lib/dpkg/status.d/netbase": featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase"),
 			},
 		},
 	}
