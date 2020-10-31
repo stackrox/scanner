@@ -12,6 +12,7 @@ import (
 
 const (
 	k8sCVEsRepository = "git@github.com:stackrox/k8s-cves.git"
+	k8sCVEsRefName    = "refs/heads/main"
 )
 
 func init() {
@@ -29,7 +30,7 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 
 	_, err := git.PlainClone(tmpK8sDir, false, &git.CloneOptions{
 		URL:           k8sCVEsRepository,
-		ReferenceName: "refs/heads/ross-init-cves",
+		ReferenceName: k8sCVEsRefName,
 		SingleBranch:  true,
 	})
 	if err != nil {
