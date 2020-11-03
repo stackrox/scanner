@@ -10,11 +10,11 @@ import (
 )
 
 func LoadYAMLFileFromReader(r io.Reader) (*validation.CVESchema, error) {
-	var schema validation.CVESchema
 	contents, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "reading YAML contents")
 	}
+	var schema validation.CVESchema
 	if err := yaml.Unmarshal(contents, &schema); err != nil {
 		return nil, errors.Wrap(err, "unmarshalling YAML from reader")
 	}
