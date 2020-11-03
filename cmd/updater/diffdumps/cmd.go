@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/cmd/updater/common"
 	"github.com/stackrox/scanner/database"
@@ -35,7 +36,7 @@ func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
 		return errors.Wrap(err, "reading Kubernetes dump")
 	}
 
-	var baseK8sDump *k8sloader.KubernetesCVEFeedYAML
+	var baseK8sDump *validation.CVESchema
 	if baseF != nil {
 		reader, err := baseF.Open()
 		if err != nil {
@@ -48,7 +49,7 @@ func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
 		}
 	}
 
-	var k8sDiff k8sloader.KubernetesCVEFeedYAML
+	var k8sDiff validation.CVESchema
 	if !reflect.DeepEqual(baseK8sDump, k8sDump) {
 		log.Infof("Kubernetes CVE file %q is in the diff", headF.Name)
 		k8sDiff = *k8sDump

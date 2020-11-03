@@ -20,7 +20,7 @@ type feedWrapper schema.NVDCVEFeedJSON10
 func LoadJSONFileFromReader(r io.Reader) (*schema.NVDCVEFeedJSON10, error) {
 	var feed feedWrapper
 	if err := easyjson.UnmarshalFromReader(r, &feed); err != nil {
-		return nil, errors.Wrap(err, "unmarshaling JSON from reader")
+		return nil, errors.Wrap(err, "unmarshalling JSON from reader")
 	}
 	return (*schema.NVDCVEFeedJSON10)(&feed), nil
 }
@@ -30,7 +30,7 @@ func LoadJSONFileFromReader(r io.Reader) (*schema.NVDCVEFeedJSON10, error) {
 func WriteJSONFileToWriter(contents *schema.NVDCVEFeedJSON10, w io.Writer) error {
 	_, err := easyjson.MarshalToWriter((*feedWrapper)(contents), w)
 	if err != nil {
-		return errors.Wrap(err, "marshaling JSON into writer")
+		return errors.Wrap(err, "marshalling JSON into writer")
 	}
 	return nil
 }
@@ -39,16 +39,16 @@ func WriteJSONFileToWriter(contents *schema.NVDCVEFeedJSON10, w io.Writer) error
 func MarshalNVDFeedCVEItem(item *schema.NVDCVEFeedJSON10DefCVEItem) ([]byte, error) {
 	bytes, err := easyjson.Marshal((*itemWrapper)(item))
 	if err != nil {
-		return nil, errors.Wrap(err, "marshaling CVE item as JSON")
+		return nil, errors.Wrap(err, "marshalling CVE item as JSON")
 	}
 	return bytes, nil
 }
 
-// UnmarshalNVDFeedCVEItem unmarshals the given bytes into the NVD CVE item struct using easyjson.
+// UnmarshalNVDFeedCVEItem unmarshalls the given bytes into the NVD CVE item struct using easyjson.
 func UnmarshalNVDFeedCVEItem(bytes []byte) (*schema.NVDCVEFeedJSON10DefCVEItem, error) {
 	var item itemWrapper
 	if err := easyjson.Unmarshal(bytes, &item); err != nil {
-		return nil, errors.Wrap(err, "unmarshaling CVE item")
+		return nil, errors.Wrap(err, "unmarshalling CVE item")
 	}
 	return (*schema.NVDCVEFeedJSON10DefCVEItem)(&item), nil
 }
@@ -57,16 +57,16 @@ func UnmarshalNVDFeedCVEItem(bytes []byte) (*schema.NVDCVEFeedJSON10DefCVEItem, 
 func MarshalStringSlice(strs []string) ([]byte, error) {
 	bytes, err := json.Marshal(strs)
 	if err != nil {
-		return nil, errors.Wrap(err, "marshaling string slice as JSON")
+		return nil, errors.Wrap(err, "marshalling string slice as JSON")
 	}
 	return bytes, nil
 }
 
-// UnmarshalStringSlice unmarshals the given bytes into a string slice.
+// UnmarshalStringSlice unmarshalls the given bytes into a string slice.
 func UnmarshalStringSlice(bytes []byte) ([]string, error) {
 	var strSlice []string
 	if err := json.Unmarshal(bytes, &strSlice); err != nil {
-		return nil, errors.Wrap(err, "unmarshaling string slice")
+		return nil, errors.Wrap(err, "unmarshalling string slice")
 	}
 	return strSlice, nil
 }

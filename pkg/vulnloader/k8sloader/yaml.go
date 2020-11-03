@@ -6,24 +6,25 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"github.com/stackrox/k8s-cves/pkg/validation"
 )
 
-func LoadYAMLFileFromReader(r io.Reader) (*KubernetesCVEFeedYAML, error) {
-	var feed KubernetesCVEFeedYAML
+func LoadYAMLFileFromReader(r io.Reader) (*validation.CVESchema, error) {
+	var schema validation.CVESchema
 	contents, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "reading YAML contents")
 	}
-	if err := yaml.Unmarshal(contents, &feed); err != nil {
-		return nil, errors.Wrap(err, "unmarshaling YAML from reader")
+	if err := yaml.Unmarshal(contents, &schema); err != nil {
+		return nil, errors.Wrap(err, "unmarshalling YAML from reader")
 	}
-	return &feed, nil
+	return &schema, nil
 }
 
-func WriteYAMLFileToWriter(contents *KubernetesCVEFeedYAML, w io.Writer) error {
+func WriteYAMLFileToWriter(contents *validation.CVESchema, w io.Writer) error {
 	contentBytes, err := yaml.Marshal(contents)
 	if err != nil {
-		return errors.Wrap(err, "marshaling YAML into bytes")
+		return errors.Wrap(err, "marshalling YAML into bytes")
 	}
 	_, err = w.Write(contentBytes)
 	if err != nil {
