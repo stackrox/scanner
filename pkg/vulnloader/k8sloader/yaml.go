@@ -16,7 +16,7 @@ func LoadYAMLFileFromReader(r io.Reader) (*validation.CVESchema, error) {
 	}
 	var schema validation.CVESchema
 	if err := yaml.Unmarshal(contents, &schema); err != nil {
-		return nil, errors.Wrap(err, "unmarshalling YAML from reader")
+		return nil, errors.Wrap(err, "unmarshaling YAML from reader")
 	}
 	return &schema, nil
 }
@@ -24,7 +24,7 @@ func LoadYAMLFileFromReader(r io.Reader) (*validation.CVESchema, error) {
 func WriteYAMLFileToWriter(contents *validation.CVESchema, w io.Writer) error {
 	contentBytes, err := yaml.Marshal(contents)
 	if err != nil {
-		return errors.Wrap(err, "marshalling YAML into bytes")
+		return errors.Wrap(err, "marshaling YAML into bytes")
 	}
 	_, err = w.Write(contentBytes)
 	if err != nil {
