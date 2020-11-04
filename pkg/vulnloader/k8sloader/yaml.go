@@ -9,6 +9,8 @@ import (
 	"github.com/stackrox/k8s-cves/pkg/validation"
 )
 
+// LoadYAMLFileFromReader loads the Kubernetes CVE feed from the given io.Reader.
+// It does NOT close the reader; that is the caller's responsibility.
 func LoadYAMLFileFromReader(r io.Reader) (*validation.CVESchema, error) {
 	contents, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -21,6 +23,8 @@ func LoadYAMLFileFromReader(r io.Reader) (*validation.CVESchema, error) {
 	return &schema, nil
 }
 
+// WriteYAMLFileToWriter marshals the given Kubernetes CVE file as YAML and writes it to the given io.Writer.
+// The writer is NOT closed; that is the caller's responsibility.
 func WriteYAMLFileToWriter(contents *validation.CVESchema, w io.Writer) error {
 	contentBytes, err := yaml.Marshal(contents)
 	if err != nil {
