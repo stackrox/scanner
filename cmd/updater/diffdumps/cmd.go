@@ -75,7 +75,17 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 
 	baseFiles := make(map[string]*zip.File)
 	for _, baseF := range baseZipR.File {
-		baseFiles[baseF.Name] = baseF
+		name := baseF.Name
+		if filepath.Dir(name) == vulndump.K8sDirName && filepath.Ext(name) == ".yaml" {
+			baseFiles[name] = baseF
+		}
+	}
+
+	if len(baseFiles) == 0 {
+		// Do not perform a diff if the k8s/ directory does not exist.
+		// This is to prevent scanners in the wild from getting this data
+		// before they can even use it.
+		return nil
 	}
 
 	for _, headF := range headZipR.File {
