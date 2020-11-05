@@ -85,6 +85,7 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 		// Do not perform a diff if the k8s/ directory does not exist.
 		// This is to prevent scanners in the wild from getting this data
 		// before they can even use it.
+		// Only Scanners that have k8s CVEs in its preloaded genesis dump will be able to use this data.
 		return nil
 	}
 
