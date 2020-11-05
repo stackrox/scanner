@@ -10,6 +10,7 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 	"github.com/stackrox/scanner/pkg/wellknowndirnames"
 	"go.etcd.io/bbolt"
@@ -25,7 +26,7 @@ var (
 )
 
 func newWithDB(db *bbolt.DB) Cache {
-	return &cacheImpl{DB: db}
+	return &cacheImpl{DB: db, dir: vulndump.NVDDirName}
 }
 
 func initializeDB(db *bbolt.DB) error {
@@ -54,8 +55,13 @@ func New() (Cache, error) {
 type cacheImpl struct {
 	*bbolt.DB
 
+	dir             string
 	updateLock      sync.Mutex
 	lastUpdatedTime time.Time
+}
+
+func (c *cacheImpl) Dir() string {
+	return c.dir
 }
 
 func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSON10DefCVEItem) error {

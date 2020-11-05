@@ -13,10 +13,12 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/concurrency"
+	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/fileutils"
 	"github.com/stackrox/rox/pkg/timeutil"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/cache"
 	"github.com/stackrox/scanner/pkg/wellknownkeys"
 	"github.com/stackrox/scanner/pkg/ziputil"
 )
@@ -29,12 +31,6 @@ var (
 
 	updateLockName = "update"
 )
-
-type NVDCache interface {
-	LoadFromDirectory(nvdDefinitionsDir string) error
-	GetLastUpdate() time.Time
-	SetLastUpdate(t time.Time)
-}
 
 func validateAndLoadManifest(f io.ReadCloser) (*Manifest, error) {
 	defer utils.IgnoreError(f.Close)
@@ -190,18 +186,21 @@ func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore
 	return nil
 }
 
-func loadNVDUpdater(cache NVDCache, manifest *Manifest, zipPath, scratchDir string) error {
+// This loads application-level vulnerabilities.
+// At the moment, this consists of vulnerabilities from NVD and K8s.
+func loadApplicationUpdater(cache cache.Cache, manifest *Manifest, zipPath, scratchDir string) error {
 	if cache != nil {
 		updateTime := cache.GetLastUpdate()
 		if !updateTime.IsZero() && !manifest.Until.After(updateTime) {
 			return nil
 		}
-		if err := archiver.DefaultZip.Extract(zipPath, NVDDirName, scratchDir); err != nil {
-			log.WithError(err).Error("Failed to extract NVD dump from ZIP")
+		targetDir := cache.Dir()
+		if err := archiver.DefaultZip.Extract(zipPath, targetDir, scratchDir); err != nil {
+			log.WithError(err).Errorf("Failed to extract %s dump from ZIP", targetDir)
 			return err
 		}
-		if err := cache.LoadFromDirectory(filepath.Join(scratchDir, "nvd")); err != nil {
-			return errors.Wrap(err, "couldn't update in mem NVD copy")
+		if err := cache.LoadFromDirectory(filepath.Join(scratchDir, targetDir)); err != nil {
+			return errors.Wrapf(err, "couldn't update in mem %s copy", targetDir)
 		}
 		cache.SetLastUpdate(manifest.Until)
 	}
@@ -212,7 +211,7 @@ func loadNVDUpdater(cache NVDCache, manifest *Manifest, zipPath, scratchDir stri
 // Check the well_known_names.go file for the manifest of the ZIP file.
 // The caller is responsible for providing a path to a scratchDir, which MUST be an empty, but existing, directory.
 // This function will delete the directory before returning.
-func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore, updateInterval time.Duration, instanceName string, cache NVDCache) error {
+func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore, updateInterval time.Duration, instanceName string, caches []cache.Cache) error {
 	log.Infof("Attempting to update from vuln dump at %q", zipPath)
 	if !fileutils.DirExistsAndIsEmpty(scratchDir) {
 		return errors.Errorf("scratchDir %q invalid: must be an empty directory", scratchDir)
@@ -231,12 +230,6 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	if err != nil {
 		return errors.Wrap(err, "opening zip file")
 	}
-	var zipFileClosed bool
-	defer func() {
-		if !zipFileClosed {
-			_ = zipR.Close()
-		}
-	}()
 
 	log.Info("Loading manifest...")
 	manifest, err := LoadManifestFromDump(zipR)
@@ -254,13 +247,16 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	// Explicitly close the zip file because the
 	// archiver.Extract function below calls zip.Open again.
 	_ = zipR.Close()
-	zipFileClosed = true
 
-	if cache != nil {
-		if err := loadNVDUpdater(cache, manifest, zipPath, scratchDir); err != nil {
-			return errors.Wrap(err, "error loading into inmem cache")
+	errorList := errorhelpers.NewErrorList("loading application-level caches")
+	for _, appCache := range caches {
+		if err := loadApplicationUpdater(appCache, manifest, zipPath, scratchDir); err != nil {
+			errorList.AddError(errors.Wrapf(err, "error loading into inmem cache %q", appCache.Dir()))
 		}
+		// Explicitly close the zip file because the
+		// archiver.Extract function calls zip.Open.
+		_ = zipR.Close()
 	}
 
-	return nil
+	return errorList.ToError()
 }

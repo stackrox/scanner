@@ -15,6 +15,7 @@ import (
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/cache"
 	"github.com/stackrox/scanner/pkg/mtls"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/wellknowndirnames"
@@ -44,8 +45,9 @@ type Updater struct {
 	downloadURL        string
 	fetchIsFromCentral bool
 
-	db         database.Datastore
-	cpeDBCache vulndump.NVDCache
+	db database.Datastore
+	// Slice of application-level caches. This includes CPE data from NVD, and Kubernetes data.
+	caches []cache.Cache
 
 	stopSig *concurrency.Signal
 }
@@ -92,8 +94,8 @@ func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, fetchIsFrom
 type updateMode int
 
 const (
-	updateNVDCacheAndPostgres updateMode = iota
-	updateNVDCacheOnly
+	updateApplicationCachesAndPostgres updateMode = iota
+	updateApplicationCachesOnly
 )
 
 func (u *Updater) doUpdate(mode updateMode) error {
@@ -118,13 +120,13 @@ func (u *Updater) doUpdate(mode updateMode) error {
 	}
 
 	var db database.Datastore
-	if mode == updateNVDCacheAndPostgres {
+	if mode == updateApplicationCachesAndPostgres {
 		db = u.db
 	}
-	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, db, u.interval, podName, u.cpeDBCache); err != nil {
+	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, db, u.interval, podName, u.caches); err != nil {
 		return errors.Wrap(err, "updating from vuln dump")
 	}
-	if mode == updateNVDCacheAndPostgres {
+	if mode == updateApplicationCachesAndPostgres {
 		u.lastUpdatedTime = startTime
 	}
 	log.Info("Update cycle completed successfully!")
@@ -132,7 +134,7 @@ func (u *Updater) doUpdate(mode updateMode) error {
 }
 
 func (u *Updater) doUpdateAndLogError() {
-	if err := u.doUpdate(updateNVDCacheAndPostgres); err != nil {
+	if err := u.doUpdate(updateApplicationCachesAndPostgres); err != nil {
 		log.WithError(err).Error("Updater failed")
 	}
 }
@@ -174,7 +176,7 @@ func (u *Updater) Stop() {
 }
 
 // New returns a new updater instance, and starts running the update daemon.
-func New(config Config, centralEndpoint string, db database.Datastore, cpeDBUpdater vulndump.NVDCache) (*Updater, error) {
+func New(config Config, centralEndpoint string, db database.Datastore, caches ...cache.Cache) (*Updater, error) {
 	downloadURL, isCentral, err := getRelevantDownloadURL(config, centralEndpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting relevant download URL")
@@ -206,7 +208,7 @@ func New(config Config, centralEndpoint string, db database.Datastore, cpeDBUpda
 		interval:           config.Interval,
 		downloadURL:        downloadURL,
 		db:                 db,
-		cpeDBCache:         cpeDBUpdater,
+		caches:             caches,
 		stopSig:            &stopSig,
 		lastUpdatedTime:    lastUpdatedTime,
 	}
@@ -214,7 +216,7 @@ func New(config Config, centralEndpoint string, db database.Datastore, cpeDBUpda
 }
 
 func (u *Updater) UpdateNVDCacheOnly() {
-	if err := u.doUpdate(updateNVDCacheOnly); err != nil {
+	if err := u.doUpdate(updateApplicationCachesOnly); err != nil {
 		log.WithError(err).Error("Updater failed")
 	}
 }
