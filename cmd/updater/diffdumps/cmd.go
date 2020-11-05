@@ -86,6 +86,7 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 		// This is to prevent scanners in the wild from getting this data
 		// before they can even use it.
 		// Only Scanners that have k8s CVEs in its preloaded genesis dump will be able to use this data.
+		log.Info("Skipping Kubernetes diff, as base genesis dump does not have any relevant files.")
 		return nil
 	}
 
