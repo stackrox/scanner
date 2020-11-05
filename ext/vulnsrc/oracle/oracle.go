@@ -402,7 +402,7 @@ func toFeatureVersions(title string, criteria criteria) []database.FeatureVersio
 			featureVersionParameters[featureVersion.Feature.Namespace.Name+":"+featureVersion.Feature.Name] = featureVersion
 		} else {
 			log.WithFields(map[string]interface{}{
-				"title": title,
+				"title":      title,
 				"criterions": fmt.Sprintf("%v", criterions),
 			}).Warning("could not determine a valid package from criterions")
 		}
