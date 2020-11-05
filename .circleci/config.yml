@@ -244,12 +244,15 @@ commands:
               echo "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
               gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
               gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
+              gsutil cp gs://stackrox-scanner-ci-vuln-dump/k8s-definitions.zip /tmp/k8s-definitions.zip
             else
               cp /tmp/postgres/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
               zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/nvd-definitions.zip
+              zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/k8s-definitions.zip
             fi
 
             unzip -d image/scanner/dump /tmp/nvd-definitions.zip
+            unzip -d image/scanner/dump /tmp/k8s-definitions.zip
 
       - run:
           name: Build images
@@ -514,7 +517,7 @@ jobs:
             echo "On master or tag, uploading pg dump result to GCS"
             gsutil cp /tmp/postgres/pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
 
-  upload-nvd-dump-for-embedding-into-image:
+  upload-dumps-for-embedding-into-image:
     <<: *defaults
     steps:
       - checkout
@@ -526,9 +529,10 @@ jobs:
           at: /tmp
 
       - run:
-          name: Generate NVD dump
+          name: Generate dumps
           command: |
             zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out nvd-definitions.zip
+            zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out k8s-definitions.zip
 
       - run:
           name: Upload to Google Storage
@@ -538,6 +542,7 @@ jobs:
               cmd+=(echo "Would do")
             fi
             "${cmd[@]}" gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+            "${cmd[@]}" gsutil cp k8s-definitions.zip gs://stackrox-scanner-ci-vuln-dump
 
   create-diff-dumps:
     <<: *defaults
@@ -838,7 +843,7 @@ workflows:
           <<: *runOnAllTagsWithDockerIOPullCtx
           requires:
             - generate-genesis-dump
-      - upload-nvd-dump-for-embedding-into-image:
+      - upload-dumps-for-embedding-into-image:
           <<: *runOnAllTagsWithDockerIOPullCtx
           requires:
             - generate-genesis-dump
@@ -855,13 +860,13 @@ workflows:
           context: docker-io-and-stackrox-io-push
           requires:
             - create-postgres-dump-from-genesis-dump
-            - upload-nvd-dump-for-embedding-into-image
+            - upload-dumps-for-embedding-into-image
       - build-rhel:
           <<: *runOnAllTags
           context: docker-io-and-stackrox-io-push
           requires:
             - create-postgres-dump-from-genesis-dump
-            - upload-nvd-dump-for-embedding-into-image
+            - upload-dumps-for-embedding-into-image
       - provision-cluster:
           <<: *runOnAllTagsWithDockerIOPullCtx
       - e2e-tests:
@@ -882,7 +887,7 @@ workflows:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - generate-genesis-dump
-    - upload-nvd-dump-for-embedding-into-image:
+    - upload-dumps-for-embedding-into-image:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - generate-genesis-dump
@@ -899,13 +904,13 @@ workflows:
         context: docker-io-and-stackrox-io-push
         requires:
           - create-postgres-dump-from-genesis-dump
-          - upload-nvd-dump-for-embedding-into-image
+          - upload-dumps-for-embedding-into-image
     - build-rhel:
         <<: *runOnAllTags
         context: docker-io-and-stackrox-io-push
         requires:
           - create-postgres-dump-from-genesis-dump
-          - upload-nvd-dump-for-embedding-into-image
+          - upload-dumps-for-embedding-into-image
     - provision-cluster:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - provision-cluster-rhel:

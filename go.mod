@@ -9,7 +9,9 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker-credential-helpers v0.6.3
-	github.com/facebookincubator/nvdtools v0.1.4-0.20191024132624-1cb041402875
+	github.com/facebookincubator/nvdtools v0.1.4
+	github.com/ghodss/yaml v1.0.0
+	github.com/go-git/go-git/v5 v5.2.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.2
 	github.com/gorilla/mux v1.7.4
@@ -29,6 +31,7 @@ require (
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
+	github.com/stackrox/k8s-cves v0.0.0-20201103195320-1a2d7755d13b
 	github.com/stackrox/rox v0.0.0-20200902200840-183e12662c50
 	github.com/stretchr/testify v1.6.1
 	go.etcd.io/bbolt v1.3.5

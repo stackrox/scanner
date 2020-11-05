@@ -15,13 +15,93 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/cmd/updater/common"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/vulndump"
+	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
 	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 )
+
+func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
+	reader, err := headF.Open()
+	if err != nil {
+		return errors.Wrap(err, "opening file")
+	}
+	defer utils.IgnoreError(reader.Close)
+	k8sDump, err := k8sloader.LoadYAMLFileFromReader(reader)
+	if err != nil {
+		return errors.Wrap(err, "reading Kubernetes dump")
+	}
+
+	var baseK8sDump *validation.CVESchema
+	if baseF != nil {
+		reader, err := baseF.Open()
+		if err != nil {
+			return errors.Wrap(err, "opening file")
+		}
+		defer utils.IgnoreError(reader.Close)
+		baseK8sDump, err = k8sloader.LoadYAMLFileFromReader(reader)
+		if err != nil {
+			return errors.Wrap(err, "reading base Kubernetes dump")
+		}
+	}
+
+	var k8sDiff validation.CVESchema
+	if !reflect.DeepEqual(baseK8sDump, k8sDump) {
+		log.Infof("Kubernetes CVE file %q is in the diff", headF.Name)
+		k8sDiff = *k8sDump
+	}
+
+	outF, err := os.Create(filepath.Join(outputDir, filepath.Base(headF.Name)))
+	if err != nil {
+		return errors.Wrap(err, "creating output file")
+	}
+	defer utils.IgnoreError(outF.Close)
+
+	if err := k8sloader.WriteYAMLFileToWriter(&k8sDiff, outF); err != nil {
+		return errors.Wrap(err, "writing dump to writer")
+	}
+	return nil
+}
+
+func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
+	k8sSubDir := filepath.Join(outputDir, vulndump.K8sDirName)
+	if err := os.MkdirAll(k8sSubDir, 0755); err != nil {
+		return errors.Wrap(err, "creating subdir for Kubernetes")
+	}
+
+	baseFiles := make(map[string]*zip.File)
+	for _, baseF := range baseZipR.File {
+		name := baseF.Name
+		if filepath.Dir(name) == vulndump.K8sDirName && filepath.Ext(name) == ".yaml" {
+			baseFiles[name] = baseF
+		}
+	}
+
+	if len(baseFiles) == 0 {
+		// Do not perform a diff if the k8s/ directory does not exist.
+		// This is to prevent scanners in the wild from getting this data
+		// before they can even use it.
+		// Only Scanners that have k8s CVEs in its preloaded genesis dump will be able to use this data.
+		log.Info("Skipping Kubernetes diff, as base genesis dump does not have any relevant files.")
+		return nil
+	}
+
+	for _, headF := range headZipR.File {
+		name := headF.Name
+		// Only look at YAML files in the k8s/ folder.
+		if filepath.Dir(name) != vulndump.K8sDirName || filepath.Ext(name) != ".yaml" {
+			continue
+		}
+		if err := generateK8sDiff(k8sSubDir, baseFiles[name], headF); err != nil {
+			return errors.Wrapf(err, "generating Kubernetes diff for file %q", headF.Name)
+		}
+	}
+	return nil
+}
 
 func generateNVDDiff(outputDir string, baseLastModifiedTime time.Time, headF *zip.File) error {
 	reader, err := headF.Open()
@@ -234,11 +314,18 @@ func Command() *cobra.Command {
 		defer func() {
 			_ = os.RemoveAll(stagingDir)
 		}()
+
+		log.Info("Generating Kubernetes diff...")
+		if err := generateK8sDiffs(stagingDir, baseZipR, headZipR); err != nil {
+			return errors.Wrap(err, "creating Kubernetes diff")
+		}
+		log.Info("Done generating Kubernetes diff")
+
 		log.Info("Generating NVD diff...")
 		if err := generateNVDDiffs(stagingDir, baseManifest.Until, headZipR); err != nil {
 			return errors.Wrap(err, "creating NVD diff")
 		}
-		log.Info("Done generating NVD diff.")
+		log.Info("Done generating NVD diff")
 
 		log.Info("Generating OS vulns diff...")
 		if err := generateOSVulnsDiff(stagingDir, baseZipR, headZipR, cfg); err != nil {

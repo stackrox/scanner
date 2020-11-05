@@ -274,7 +274,7 @@ func parseELSA(ovalReader io.Reader) (vulnerabilities []database.Vulnerability, 
 	// Iterate over the definitions and collect any vulnerabilities that affect
 	// at least one package.
 	for _, definition := range ov.Definitions {
-		pkgs := toFeatureVersions(definition.Criteria)
+		pkgs := toFeatureVersions(definition.Title, definition.Criteria)
 		if len(pkgs) > 0 {
 			vulnerability := database.Vulnerability{
 				Name:        name(definition),
@@ -361,7 +361,7 @@ func getPossibilities(node criteria) [][]criterion {
 	return possibilities
 }
 
-func toFeatureVersions(criteria criteria) []database.FeatureVersion {
+func toFeatureVersions(title string, criteria criteria) []database.FeatureVersion {
 	// There are duplicates in Oracle .xml files.
 	// This map is for deduplication.
 	featureVersionParameters := make(map[string]database.FeatureVersion)
@@ -401,7 +401,10 @@ func toFeatureVersions(criteria criteria) []database.FeatureVersion {
 		if featureVersion.Feature.Namespace.Name != "" && featureVersion.Feature.Name != "" && featureVersion.Version != "" {
 			featureVersionParameters[featureVersion.Feature.Namespace.Name+":"+featureVersion.Feature.Name] = featureVersion
 		} else {
-			log.WithField("criterions", fmt.Sprintf("%v", criterions)).Warning("could not determine a valid package from criterions")
+			log.WithFields(map[string]interface{}{
+				"title":      title,
+				"criterions": fmt.Sprintf("%v", criterions),
+			}).Warning("could not determine a valid package from criterions")
 		}
 	}
 

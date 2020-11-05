@@ -11,6 +11,7 @@ const (
 	OSVulnsFileName  = "os_vulns.json"
 	NVDDirName       = "nvd"
 	RedHatDirName    = "redhat"
+	K8sDirName       = "k8s"
 )
 
 // Manifest is used to JSON marshal/unmarshal the manifest.json file.

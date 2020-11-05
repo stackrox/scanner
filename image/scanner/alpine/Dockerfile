@@ -13,6 +13,10 @@ ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 RUN mkdir -p "${NVD_DEFINITIONS_DIR}"
 COPY ./dump/nvd/*.json "${NVD_DEFINITIONS_DIR}/"
 
+ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
+RUN mkdir -p "${K8S_DEFINITIONS_DIR}"
+COPY ./dump/k8s/*.yaml "${K8S_DEFINITIONS_DIR}/"
+
 COPY ./dump/genesis_manifests.json /
 COPY ./scripts/* /
 

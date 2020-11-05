@@ -2,6 +2,7 @@
 # Creates a tgz bundle of all binary artifacts needed for scanner-rhel
 
 NVD_DEFINITIONS_DIR="/nvd_definitions"
+K8S_DEFINITIONS_DIR="/k8s_definitions"
 
 set -euo pipefail
 
@@ -25,6 +26,7 @@ OUTPUT_BUNDLE="${OUTPUT_DIR}/bundle.tar.gz"
 # Create tmp directory with stackrox directory structure
 bundle_root="$(mktemp -d)"
 mkdir -p "${bundle_root}/${NVD_DEFINITIONS_DIR}"
+mkdir -p "${bundle_root}/${K8S_DEFINITIONS_DIR}"
 chmod -R 755 "${bundle_root}"
 
 # =============================================================================
@@ -44,6 +46,7 @@ cp "${INPUT_ROOT}/scripts/save-dir-contents"           "${OUTPUT_DIR}/scripts"
 cp -p "${INPUT_ROOT}/bin/scanner" "${bundle_root}/"
 cp -p "${INPUT_ROOT}/dump/genesis_manifests.json" "${bundle_root}/"
 cp -p "${INPUT_ROOT}/dump/nvd/"*.json "${bundle_root}/${NVD_DEFINITIONS_DIR}"
+cp -p "${INPUT_ROOT}/dump/k8s/"*.yaml "${bundle_root}/${K8S_DEFINITIONS_DIR}"
 
 # =============================================================================
 

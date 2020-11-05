@@ -16,6 +16,7 @@ func WriteZip(inputDir, outFile string) error {
 	zipArchive := archiver.NewZip()
 	zipArchive.CompressionLevel = flate.BestCompression
 	return zipArchive.Archive([]string{
+		filepath.Join(inputDir, K8sDirName),
 		filepath.Join(inputDir, ManifestFileName),
 		filepath.Join(inputDir, NVDDirName),
 		filepath.Join(inputDir, OSVulnsFileName),
