@@ -16,7 +16,7 @@ func TestCache(t *testing.T) {
 	assert.Equal(t, 6.3, vuln.CVSS.NVD.ScoreV3)
 	assert.Equal(t, `CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N`, vuln.CVSS.NVD.VectorV3)
 
-	require.Nil(t, cache.GetVulnForCVE(`CVE-2020-1235`))
+	require.Nil(t, cache.GetVulnForCVE(`CVE-2020-1236`))
 
 	// Update cache.
 	require.NoError(t, cache.LoadFromDirectory("./testdata/after"))
@@ -26,5 +26,5 @@ func TestCache(t *testing.T) {
 	assert.Equal(t, 7.7, vuln.CVSS.NVD.ScoreV3)
 	assert.Equal(t, `CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N`, vuln.CVSS.NVD.VectorV3)
 
-	assert.NotNil(t, cache.GetVulnForCVE(`CVE-2020-1235`))
+	assert.NotNil(t, cache.GetVulnForCVE(`CVE-2020-1236`))
 }
