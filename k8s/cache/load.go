@@ -1,14 +1,14 @@
 package cache
 
 import (
-	"github.com/stackrox/rox/pkg/utils"
-	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
 )
 
 func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
@@ -55,6 +55,8 @@ func (c *cacheImpl) handleYAMLFile(path string) (bool, error) {
 		return false, nil
 	}
 
+	c.cacheRWLock.Lock()
+	defer c.cacheRWLock.Unlock()
 	c.cache[cveData.CVE] = cveData
 
 	return true, nil
