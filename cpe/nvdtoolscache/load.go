@@ -33,7 +33,7 @@ func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 		}
 		totalVulns += numVulns
 	}
-	log.Infof("Total vulns: %d", totalVulns)
+	log.Infof("Total vulns in %q: %d", definitionsDir, totalVulns)
 
 	utils.Must(c.sync())
 	return nil

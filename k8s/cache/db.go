@@ -1,15 +1,18 @@
 package cache
 
 import (
-	"github.com/stackrox/scanner/pkg/vulndump"
 	"sync"
 	"time"
 
 	"github.com/stackrox/k8s-cves/pkg/validation"
+	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
 type cacheImpl struct {
-	cache map[string]validation.CVESchema
+	// The expectation is that the number of Kubernetes vulns is rather low (100 or fewer).
+	// Because of this, we just store the vulns in memory instead of in BoltDB.
+	// Consider switching to BoltDB if this gets absurdly large (on the scale of NVD).
+	cache map[string]*validation.CVESchema
 
 	dir             string
 	updateLock      sync.Mutex
@@ -18,17 +21,13 @@ type cacheImpl struct {
 
 func New() Cache {
 	return &cacheImpl{
-		cache: make(map[string]validation.CVESchema),
+		cache: make(map[string]*validation.CVESchema),
 		dir:   vulndump.K8sDirName,
 	}
 }
 
 func (c *cacheImpl) Dir() string {
 	return c.dir
-}
-
-func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
-	return nil
 }
 
 func (c *cacheImpl) GetLastUpdate() time.Time {
