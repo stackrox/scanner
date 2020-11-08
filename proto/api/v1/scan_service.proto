@@ -100,6 +100,47 @@ message GetScanResponse {
     Image image       = 2;
 }
 
+message GetVulnerabilitiesRequest {
+    repeated ComponentRequest components = 1;
+}
+
+message ComponentRequest {
+    oneof component_request {
+        NVDComponentRequest nvd_component = 1;
+        KubernetesComponentRequest k8s_component = 2;
+    }
+}
+
+message NVDComponentRequest {
+    string vendor  = 1;
+    string product = 2;
+}
+
+message KubernetesComponentRequest {
+    KubernetesComponent component = 1;
+
+    enum KubernetesComponent {
+        UNSET                   = 0;
+        CLIENT_GO               = 1;
+        KUBE_AGGREGATOR         = 2;
+        KUBE_APISERVER          = 3;
+        KUBE_CONTROLLER_MANAGER = 4;
+        KUBE_DNS                = 5;
+        KUBE_PROXY              = 6;
+        KUBE_SCHEDULER          = 7;
+        KUBECTL                 = 8;
+        KUBELET                 = 9;
+    }
+}
+
+message GetVulnerabilitiesResponse {
+    map<string, VulnerabilityList> vulnerabilities_by_component = 1;
+}
+
+message VulnerabilityList {
+    repeated Vulnerability vulnerabilities = 1;
+}
+
 // ScanService APIs can be used to scan images.
 service ScanService {
     rpc ScanImage (ScanImageRequest) returns (ScanImageResponse) {
@@ -118,6 +159,12 @@ service ScanService {
     rpc GetLanguageLevelComponents(GetLanguageLevelComponentsRequest) returns (GetLanguageLevelComponentsResponse) {
         option (google.api.http) = {
             get: "/v1/images/languagecomponents"
+        };
+    }
+
+    rpc GetVulnerabilities(GetVulnerabilitiesRequest) returns (GetVulnerabilitiesResponse) {
+        option (google.api.http) = {
+            get: "/v1/images/vulnerabilities"
         };
     }
 }
