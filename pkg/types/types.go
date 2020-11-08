@@ -1,4 +1,4 @@
-package nvdtoolscache
+package types
 
 import (
 	"fmt"

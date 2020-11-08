@@ -19,6 +19,7 @@ import (
 	"github.com/stackrox/scanner/cpe/validation"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/types"
 )
 
 var attributeGetter = map[component.SourceType]func(c *component.Component) []*wfn.Attributes{
@@ -165,7 +166,7 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 					CPE:             getMostSpecificCPE(matchesWithFixed),
 					VersionOverride: versionOverride,
 					Component:       c,
-					Vuln:            nvdtoolscache.NewVulnerability(v.(*nvd.Vuln).CVEItem),
+					Vuln:            types.NewVulnerability(v.(*nvd.Vuln).CVEItem),
 				}
 
 				validator, ok := validation.Validators[c.SourceType]

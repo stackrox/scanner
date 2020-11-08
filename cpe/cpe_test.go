@@ -9,9 +9,9 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/stackrox/scanner/cpe/match"
-	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -188,7 +188,7 @@ func newDatabaseVuln(id string) database.Vulnerability {
 		Link:     fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", id),
 		Severity: "",
 		Metadata: map[string]interface{}{
-			"NVD": &nvdtoolscache.Metadata{},
+			"NVD": &types.Metadata{},
 		},
 	}
 }
@@ -331,7 +331,7 @@ func TestGetFeaturesMapFromMatchResults(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			for i := range c.matches {
 				c.matches[i].Component = newComponent()
-				c.matches[i].Vuln = nvdtoolscache.NewVulnerability(c.matches[i].CVE.(*nvd.Vuln).CVEItem)
+				c.matches[i].Vuln = types.NewVulnerability(c.matches[i].CVE.(*nvd.Vuln).CVEItem)
 			}
 			features := getFeaturesFromMatchResults("", c.matches)
 			assert.ElementsMatch(t, c.features, features)
