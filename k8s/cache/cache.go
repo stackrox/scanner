@@ -2,11 +2,12 @@ package cache
 
 import (
 	"github.com/stackrox/k8s-cves/pkg/validation"
+	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/cache"
 )
 
 type Cache interface {
-	GetVulnForCVE(cve string) *validation.CVESchema
+	GetVulnsByComponent(component v1.KubernetesComponentRequest_KubernetesComponent) []*validation.CVESchema
 
 	cache.Cache
 }

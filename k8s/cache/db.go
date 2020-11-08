@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stackrox/k8s-cves/pkg/validation"
+	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
@@ -13,7 +14,9 @@ type cacheImpl struct {
 	// The expectation is that the number of Kubernetes vulns is rather low (100 or fewer).
 	// Because of this, we just store the vulns in memory instead of in BoltDB.
 	// Consider switching to BoltDB if this gets absurdly large (on the scale of NVD).
-	cache map[string]*validation.CVESchema
+	cache map[v1.KubernetesComponentRequest_KubernetesComponent]map[string]*validation.CVESchema
+	// Vulns that are not associated with a particular component.
+	unsetVulns []*validation.CVESchema
 
 	dir             string
 	timeRWLock      sync.RWMutex
@@ -22,7 +25,7 @@ type cacheImpl struct {
 
 func New() Cache {
 	return &cacheImpl{
-		cache: make(map[string]*validation.CVESchema),
+		cache: make(map[v1.KubernetesComponentRequest_KubernetesComponent]map[string]*validation.CVESchema),
 		dir:   vulndump.K8sDirName,
 	}
 }
@@ -45,9 +48,14 @@ func (c *cacheImpl) SetLastUpdate(t time.Time) {
 	c.lastUpdatedTime = t
 }
 
-func (c *cacheImpl) GetVulnForCVE(cve string) *validation.CVESchema {
+func (c *cacheImpl) GetVulnsByComponent(component v1.KubernetesComponentRequest_KubernetesComponent) []*validation.CVESchema {
 	c.cacheRWLock.RLock()
 	defer c.cacheRWLock.RUnlock()
 
-	return c.cache[cve]
+	var vulns []*validation.CVESchema
+	for _, cveVulns := range c.cache[component] {
+		vulns = append(vulns, cveVulns)
+	}
+
+	return vulns
 }

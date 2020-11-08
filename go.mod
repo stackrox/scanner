@@ -19,6 +19,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.11.4-0.20191004150533-c677e419aa5c
 	github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible
+	github.com/hashicorp/go-version v1.2.1
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/lib/pq v1.7.0
@@ -31,7 +32,7 @@ require (
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
-	github.com/stackrox/k8s-cves v0.0.0-20201103195320-1a2d7755d13b
+	github.com/stackrox/k8s-cves v0.0.0-20201108201937-92bcef5ac375
 	github.com/stackrox/rox v0.0.0-20200902200840-183e12662c50
 	github.com/stretchr/testify v1.6.1
 	go.etcd.io/bbolt v1.3.5

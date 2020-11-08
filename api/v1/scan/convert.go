@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/hashicorp/go-version"
+	"github.com/stackrox/k8s-cves/pkg/validation"
+	"github.com/stackrox/rox/pkg/stringutils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
@@ -96,4 +99,46 @@ func convertComponent(c *component.Component) *v1.LanguageLevelComponent {
 		Version:    c.Version,
 		Location:   c.Location,
 	}
+}
+
+func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema) ([]*v1.Vulnerability, error) {
+	vulns := make([]*v1.Vulnerability, 0, len(k8sVulns))
+	for _, v := range k8sVulns {
+		// TODO: fill out metadata
+
+		link := stringutils.OrDefault(v.IssueURL, v.URL)
+		fixedBy, err := closestFixedByVersion(version, v.FixedBy)
+		if err != nil {
+			return nil, err
+		}
+		vulns = append(vulns, &v1.Vulnerability{
+			Name:        v.CVE,
+			Description: v.Description,
+			Link:        link,
+			//Metadata:    metadataBytes,
+			FixedBy: fixedBy,
+		})
+	}
+	return vulns, nil
+}
+
+func closestFixedByVersion(vStr string, versions []string) (string, error) {
+	v, err := version.NewVersion(vStr)
+	if err != nil {
+		return "", err
+	}
+
+	// versions is sorted in increasing order.
+	for _, fixedByVersion := range versions {
+		fixedBy, err := version.NewVersion(fixedByVersion)
+		if err != nil {
+			return "", err
+		}
+
+		if fixedBy.LessThanOrEqual(v) {
+			return fixedByVersion, nil
+		}
+	}
+
+	return "", nil
 }

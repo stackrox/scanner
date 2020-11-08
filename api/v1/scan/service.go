@@ -10,6 +10,7 @@ import (
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
+	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/licenses"
@@ -43,6 +44,31 @@ func (s *serviceImpl) checkLicense() error {
 		return status.Error(codes.Internal, licenses.ErrNoValidLicense.Error())
 	}
 	return nil
+}
+
+func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabilitiesRequest) (*v1.GetVulnerabilitiesResponse, error) {
+	if err := s.checkLicense(); err != nil {
+		return nil, err
+	}
+
+	vulnsByComponent := make(map[string]*v1.VulnerabilityList)
+	k8sCache := k8scache.Singleton()
+	for _, component := range req.Components {
+		switch typ := component.ComponentRequest.(type) {
+		case *v1.ComponentRequest_K8SComponent:
+			vulns := k8sCache.GetVulnsByComponent(typ.K8SComponent.Component)
+		case *v1.ComponentRequest_NvdComponent:
+			// typ.NvdComponent
+		case nil:
+			return nil, status.Error(codes.InvalidArgument, "component request must be set")
+		default:
+			return nil, status.Errorf(codes.InvalidArgument, "component request has unexpected type %T", typ)
+		}
+	}
+
+	return &v1.GetVulnerabilitiesResponse{
+		VulnerabilitiesByComponent: vulnsByComponent,
+	}, nil
 }
 
 func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
