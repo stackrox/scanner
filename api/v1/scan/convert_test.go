@@ -98,6 +98,18 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 						},
 					},
 				},
+				{
+					CVE: "CVE-2020-1236",
+					Description: "test3",
+					URL: "url",
+					CVSS: &validation.CVSSSchema{
+						NVD: &validation.NVDSchema{
+							ScoreV3:  7.7,
+							VectorV3: "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+						},
+					},
+					FixedBy: []string{"0.9.0", "1.0.4", "1.1.3", "2.0.0"},
+				},
 			},
 			expected: []expectedVuln{
 				{
@@ -126,6 +138,20 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ImpactScore: 4.0,
 						},
 					},
+				},
+				{
+					Name: "CVE-2020-1236",
+					Description: "test3",
+					Link: "url",
+					Metadata: &types.Metadata{
+						CVSSv3: types.MetadataCVSSv3{
+							Score: 7.7,
+							Vectors: "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							ExploitabilityScore: 3.1,
+							ImpactScore: 4.0,
+						},
+					},
+					FixedBy: "1.1.3",
 				},
 			},
 		},

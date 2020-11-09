@@ -145,18 +145,17 @@ func closestFixedByVersion(vStr string, versions []string) (string, error) {
 		return "", nil
 	}
 
-	fixedBy := versions[0]
 	// versions is sorted in increasing order.
-	for _, fixedByVersion := range versions[1:] {
+	for _, fixedByVersion := range versions {
 		fixedBy, err := version.NewVersion(fixedByVersion)
 		if err != nil {
 			return "", err
 		}
 
-		if fixedBy.LessThanOrEqual(v) {
+		if v.LessThanOrEqual(fixedBy) {
 			return fixedByVersion, nil
 		}
 	}
 
-	return fixedBy, nil
+	return "", nil
 }
