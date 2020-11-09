@@ -4,7 +4,11 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
+	"github.com/facebookincubator/nvdtools/cvss2"
+	"github.com/facebookincubator/nvdtools/cvss3"
+	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/math"
 )
 
 type Metadata struct {
@@ -78,4 +82,44 @@ func convertMetadata(item *schema.NVDCVEFeedJSON10DefCVEItem) *Metadata {
 		}
 	}
 	return metadata
+}
+
+func ConvertMetadataFromK8s(cve *validation.CVESchema) (*Metadata, error) {
+	m := Metadata{}
+	if nvd := cve.CVSS.NVD; nvd != nil {
+		if nvd.VectorV2 != "" && nvd.ScoreV2 > 0 {
+			v, err := cvss2.VectorFromString(nvd.VectorV2)
+			if err != nil {
+				return nil, err
+			}
+			m.CVSSv2.Score = nvd.ScoreV2
+			m.CVSSv2.Vectors = nvd.VectorV2
+			m.CVSSv2.ExploitabilityScore = math.RoundTo1Decimal(v.ExploitabilityScore())
+			m.CVSSv2.ImpactScore = math.RoundTo1Decimal(v.ImpactScore(false))
+		}
+		if nvd.VectorV3 != "" && nvd.ScoreV3 > 0 {
+			v, err := cvss3.VectorFromString(nvd.VectorV2)
+			if err != nil {
+				return nil, err
+			}
+			m.CVSSv3.Score = nvd.ScoreV3
+			m.CVSSv3.Vectors = nvd.VectorV3
+			m.CVSSv3.ExploitabilityScore = math.RoundTo1Decimal(v.ExploitabilityScore())
+			m.CVSSv3.ImpactScore = math.RoundTo1Decimal(v.ImpactScore())
+		}
+	}
+	if k8s := cve.CVSS.Kubernetes; k8s != nil {
+		if k8s.VectorV3 != "" && k8s.ScoreV3 > 0 {
+			v, err := cvss3.VectorFromString(k8s.VectorV3)
+			if err != nil {
+				return nil, err
+			}
+			m.CVSSv3.Score = k8s.ScoreV3
+			m.CVSSv3.Vectors = k8s.VectorV3
+			m.CVSSv3.ExploitabilityScore = math.RoundTo1Decimal(v.ExploitabilityScore())
+			m.CVSSv3.ImpactScore = math.RoundTo1Decimal(v.ImpactScore())
+		}
+	}
+
+	return &m, nil
 }

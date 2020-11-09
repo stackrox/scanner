@@ -10,6 +10,7 @@ import (
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/types"
 )
 
 var (
@@ -105,6 +106,14 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 	vulns := make([]*v1.Vulnerability, 0, len(k8sVulns))
 	for _, v := range k8sVulns {
 		// TODO: fill out metadata
+		m, err := types.ConvertMetadataFromK8s(v)
+		if err != nil {
+			return nil, err
+		}
+		metadataBytes, err := json.Marshal(m)
+		if err != nil {
+			return nil, err
+		}
 
 		link := stringutils.OrDefault(v.IssueURL, v.URL)
 		fixedBy, err := closestFixedByVersion(version, v.FixedBy)
@@ -115,8 +124,8 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 			Name:        v.CVE,
 			Description: v.Description,
 			Link:        link,
-			//Metadata:    metadataBytes,
-			FixedBy: fixedBy,
+			Metadata:    metadataBytes,
+			FixedBy:     fixedBy,
 		})
 	}
 	return vulns, nil

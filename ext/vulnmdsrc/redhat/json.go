@@ -2,13 +2,13 @@ package redhat
 
 import (
 	"encoding/json"
-	"math"
 	"strconv"
 
 	"github.com/facebookincubator/nvdtools/cvss2"
 	"github.com/facebookincubator/nvdtools/cvss3"
 	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
+	"github.com/stackrox/scanner/pkg/math"
 )
 
 type redhatEntries []redhatEntry
@@ -86,8 +86,8 @@ func (r *redhatEntry) Metadata() *types.Metadata {
 		metadata.CVSSv2 = types.MetadataCVSSv2{
 			Vectors:             r.CVSSv2Vector,
 			Score:               *score,
-			ExploitabilityScore: roundTo1Decimal(v.ExploitabilityScore()),
-			ImpactScore:         roundTo1Decimal(v.ImpactScore(false)),
+			ExploitabilityScore: math.RoundTo1Decimal(v.ExploitabilityScore()),
+			ImpactScore:         math.RoundTo1Decimal(v.ImpactScore(false)),
 		}
 	}
 
@@ -104,8 +104,8 @@ func (r *redhatEntry) Metadata() *types.Metadata {
 		metadata.CVSSv3 = types.MetadataCVSSv3{
 			Vectors:             r.CVSSv3Vector,
 			Score:               *score,
-			ExploitabilityScore: roundTo1Decimal(v.ExploitabilityScore()),
-			ImpactScore:         roundTo1Decimal(v.ImpactScore()),
+			ExploitabilityScore: math.RoundTo1Decimal(v.ExploitabilityScore()),
+			ImpactScore:         math.RoundTo1Decimal(v.ImpactScore()),
 		}
 	}
 
@@ -114,9 +114,4 @@ func (r *redhatEntry) Metadata() *types.Metadata {
 
 func (r *redhatEntry) Name() string {
 	return r.CVE
-}
-
-// Used for CVSSv2 and CVSSv3 subscores.
-func roundTo1Decimal(x float64) float64 {
-	return math.Round(x*10) / 10
 }
