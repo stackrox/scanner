@@ -56,8 +56,21 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 	for _, component := range req.Components {
 		switch typ := component.ComponentRequest.(type) {
 		case *v1.ComponentRequest_K8SComponent:
-			vulns := k8sCache.GetVulnsByComponent(typ.K8SComponent.Component)
+			c := typ.K8SComponent.Component
+			version := typ.K8SComponent.Version
+			if _, exists := vulnsByComponent[c.String()]; exists {
+				continue
+			}
+			vulns := k8sCache.GetVulnsByComponent(c, version)
+			converted, err := convertK8sVulnerabilities(version, vulns)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
+			}
+			vulnsByComponent[c.String()] = &v1.VulnerabilityList{
+				Vulnerabilities: converted,
+			}
 		case *v1.ComponentRequest_NvdComponent:
+			// TODO
 			// typ.NvdComponent
 		case nil:
 			return nil, status.Error(codes.InvalidArgument, "component request must be set")

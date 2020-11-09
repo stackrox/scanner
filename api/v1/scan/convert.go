@@ -105,7 +105,6 @@ func convertComponent(c *component.Component) *v1.LanguageLevelComponent {
 func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema) ([]*v1.Vulnerability, error) {
 	vulns := make([]*v1.Vulnerability, 0, len(k8sVulns))
 	for _, v := range k8sVulns {
-		// TODO: fill out metadata
 		m, err := types.ConvertMetadataFromK8s(v)
 		if err != nil {
 			return nil, err
@@ -116,6 +115,10 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 		}
 
 		link := stringutils.OrDefault(v.IssueURL, v.URL)
+		// Assumes the data is sound.
+		// That is, we assume the vuln is only unfixable if FixedBy is empty.
+		// Also, it is not possible for all FixedBy versions are less than the given
+		// version (otherwise, the version would not be affected).
 		fixedBy, err := closestFixedByVersion(version, v.FixedBy)
 		if err != nil {
 			return nil, err
@@ -131,14 +134,20 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 	return vulns, nil
 }
 
+// Returns the first version in versions that is less than or equal to the given version.
 func closestFixedByVersion(vStr string, versions []string) (string, error) {
 	v, err := version.NewVersion(vStr)
 	if err != nil {
 		return "", err
 	}
 
+	if len(versions) == 0 {
+		return "", nil
+	}
+
+	fixedBy := versions[0]
 	// versions is sorted in increasing order.
-	for _, fixedByVersion := range versions {
+	for _, fixedByVersion := range versions[1:] {
 		fixedBy, err := version.NewVersion(fixedByVersion)
 		if err != nil {
 			return "", err
@@ -149,5 +158,5 @@ func closestFixedByVersion(vStr string, versions []string) (string, error) {
 		}
 	}
 
-	return "", nil
+	return fixedBy, nil
 }

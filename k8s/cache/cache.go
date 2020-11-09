@@ -7,7 +7,7 @@ import (
 )
 
 type Cache interface {
-	GetVulnsByComponent(component v1.KubernetesComponentRequest_KubernetesComponent) []*validation.CVESchema
+	GetVulnsByComponent(component v1.KubernetesComponentRequest_KubernetesComponent, version string) []*validation.CVESchema
 
 	cache.Cache
 }

@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/go-version"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/vulndump"
@@ -48,14 +49,36 @@ func (c *cacheImpl) SetLastUpdate(t time.Time) {
 	c.lastUpdatedTime = t
 }
 
-func (c *cacheImpl) GetVulnsByComponent(component v1.KubernetesComponentRequest_KubernetesComponent) []*validation.CVESchema {
+func (c *cacheImpl) GetVulnsByComponent(component v1.KubernetesComponentRequest_KubernetesComponent, v string) []*validation.CVESchema {
 	c.cacheRWLock.RLock()
 	defer c.cacheRWLock.RUnlock()
 
 	var vulns []*validation.CVESchema
-	for _, cveVulns := range c.cache[component] {
-		vulns = append(vulns, cveVulns)
+	for _, vuln := range c.cache[component] {
+		if isAffected(v, vuln.Affected) {
+			// Only return vulnerabilities relevant to the given version.
+			vulns = append(vulns, vuln)
+		}
 	}
 
 	return vulns
+}
+
+func isAffected(vStr string, versions []string) bool {
+	v, err := version.NewVersion(vStr)
+	if err != nil {
+		return false
+	}
+
+	for _, affected := range versions {
+		constraint, err := version.NewConstraint(affected)
+		if err != nil {
+			return false
+		}
+		if constraint.Check(v) {
+			return true
+		}
+	}
+
+	return false
 }

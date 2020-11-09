@@ -84,12 +84,17 @@ func convertMetadata(item *schema.NVDCVEFeedJSON10DefCVEItem) *Metadata {
 	return metadata
 }
 
+// ConvertMetadataFromK8s takes the Kubernetes' vulnerability definition,
+// and it returns *Metadata based on the given data.
 func ConvertMetadataFromK8s(cve *validation.CVESchema) (*Metadata, error) {
-	m := Metadata{}
+	var m Metadata
 	if nvd := cve.CVSS.NVD; nvd != nil {
 		if nvd.VectorV2 != "" && nvd.ScoreV2 > 0 {
 			v, err := cvss2.VectorFromString(nvd.VectorV2)
 			if err != nil {
+				return nil, err
+			}
+			if err := v.Validate(); err != nil {
 				return nil, err
 			}
 			m.CVSSv2.Score = nvd.ScoreV2
@@ -98,8 +103,11 @@ func ConvertMetadataFromK8s(cve *validation.CVESchema) (*Metadata, error) {
 			m.CVSSv2.ImpactScore = math.RoundTo1Decimal(v.ImpactScore(false))
 		}
 		if nvd.VectorV3 != "" && nvd.ScoreV3 > 0 {
-			v, err := cvss3.VectorFromString(nvd.VectorV2)
+			v, err := cvss3.VectorFromString(nvd.VectorV3)
 			if err != nil {
+				return nil, err
+			}
+			if err := v.Validate(); err != nil {
 				return nil, err
 			}
 			m.CVSSv3.Score = nvd.ScoreV3

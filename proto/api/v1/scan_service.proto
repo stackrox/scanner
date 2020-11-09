@@ -106,7 +106,7 @@ message GetVulnerabilitiesRequest {
 
 message ComponentRequest {
     oneof component_request {
-        NVDComponentRequest nvd_component = 1;
+        NVDComponentRequest nvd_component        = 1;
         KubernetesComponentRequest k8s_component = 2;
     }
 }
@@ -118,6 +118,7 @@ message NVDComponentRequest {
 
 message KubernetesComponentRequest {
     KubernetesComponent component = 1;
+    string version                = 2;
 
     enum KubernetesComponent {
         UNSET                   = 0;
