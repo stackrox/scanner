@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 	"github.com/stretchr/testify/assert"
@@ -69,8 +68,6 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	resp, err := client.GetVulnerabilities(context.Background(), req)
 	require.NoError(t, err)
 	vulnList := resp.VulnerabilitiesByComponent[v1.KubernetesComponentRequest_KUBELET.String()]
-	logrus.Infof("Returned vulns: %+v", vulnList.Vulnerabilities)
-	logrus.Infof("Desired vuln: %+v", cve201911245)
 	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	assert.Contains(t, vulnList.Vulnerabilities, cve201911245)
 }
