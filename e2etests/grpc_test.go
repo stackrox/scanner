@@ -69,5 +69,5 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	require.NoError(t, err)
 	vulnList := resp.VulnerabilitiesByComponent[v1.KubernetesComponentRequest_KUBELET.String()]
 	assert.NotEmpty(t, vulnList)
-	assert.Contains(t, vulnList, cve201911245)
+	assert.Contains(t, vulnList.Vulnerabilities, cve201911245)
 }
