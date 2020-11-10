@@ -5,6 +5,7 @@ package e2etests
 import (
 	"context"
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/generated/api/v1"
@@ -68,6 +69,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	resp, err := client.GetVulnerabilities(context.Background(), req)
 	require.NoError(t, err)
 	vulnList := resp.VulnerabilitiesByComponent[v1.KubernetesComponentRequest_KUBELET.String()]
+	logrus.Infof("Returned vulnList: %v", vulnList)
 	assert.NotEmpty(t, vulnList)
 	assert.Contains(t, vulnList.Vulnerabilities, cve201911245)
 }
