@@ -5,10 +5,10 @@ package e2etests
 import (
 	"context"
 	"encoding/json"
-	"github.com/stackrox/scanner/pkg/types"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/generated/api/v1"
+	"github.com/stackrox/scanner/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -54,7 +54,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	}
 	mBytes, err := json.Marshal(&m)
 	require.NoError(t, err)
-	cve_2019_11245 := &v1.Vulnerability{
+	cve201911245 := &v1.Vulnerability{
 		Name:        "CVE-2019,11245",
 		Description: "In kubelet v1.13.6 and v1.14.2, containers for pods that do not specify an explicit runAsUser attempt to run as uid 0 (root) on container restart, or if the image was previously pulled to the node. If the pod specified mustRunAsNonRoot: true, the kubelet will refuse to start the container as root. If the pod did not specify mustRunAsNonRoot: true, the kubelet will run the container as uid 0.",
 		Link:        "https://github.com/kubernetes/kubernetes/issues/78308",
@@ -68,5 +68,5 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	require.NoError(t, err)
 	vulnList := resp.VulnerabilitiesByComponent[v1.KubernetesComponentRequest_KUBELET.String()]
 	assert.NotEmpty(t, vulnList)
-	assert.Contains(t, vulnList, cve_2019_11245)
+	assert.Contains(t, vulnList, cve201911245)
 }
