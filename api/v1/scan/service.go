@@ -70,8 +70,7 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 				Vulnerabilities: converted,
 			}
 		case *v1.ComponentRequest_NvdComponent:
-			// TODO
-			// typ.NvdComponent
+			return nil, status.Error(codes.Unimplemented, "NVD Component request is unimplemented at this time")
 		case nil:
 			return nil, status.Error(codes.InvalidArgument, "component request must be set")
 		default:
