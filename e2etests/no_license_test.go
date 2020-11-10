@@ -101,6 +101,9 @@ func TestScannerRejectsLicenseGRPC(t *testing.T) {
 			_, err := scanClient.ScanImage(ctx, &v1.ScanImageRequest{})
 			return err
 		},
+		func(ctx context.Context, scanClient v1.ScanServiceClient) error {
+			_, err := scanClient.GetVulnerabilities(ctx, &v1.GetVulnerabilitiesRequest{})
+		},
 	}
 	assert.Equal(t, len(methods), reflect.ValueOf(scanClient).NumMethod(), "New methods have been added to the scan service, but they are not tested!")
 
