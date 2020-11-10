@@ -29,15 +29,6 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewScanServiceClient(conn)
 
-	req := v1.GetVulnerabilitiesRequest{
-		Components: []*v1.ComponentRequest{
-			&v1.KubernetesComponentRequest{
-				Component: v1.KubernetesComponentRequest_KUBELET,
-				Version:   "1.14.2",
-			},
-		},
-	}
-
 	m := types.Metadata{
 		CVSSv2: types.MetadataCVSSv2{
 			Score:               4.6,
@@ -62,9 +53,17 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		FixedBy:     "1.14.3",
 	}
 
-	resp, err := client.GetVulnerabilities(context.Background(), &v1.GetVulnerabilitiesRequest{
-		Components: req,
-	})
+	req := &v1.GetVulnerabilitiesRequest{
+		Components: []*v1.ComponentRequest{
+			&v1.ComponentRequest_K8SComponent{
+				{
+					Component: v1.KubernetesComponentRequest_KUBELET,
+					Version:   "1.14.2",
+				},
+			},
+		},
+	}
+	resp, err := client.GetVulnerabilities(context.Background(), req)
 	require.NoError(t, err)
 	vulnList := resp.VulnerabilitiesByComponent[v1.KubernetesComponentRequest_KUBELET.String()]
 	assert.NotEmpty(t, vulnList)
