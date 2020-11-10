@@ -113,6 +113,12 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							VectorV3: "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
 						},
 					},
+					Affected: []validation.AffectedSchema{
+						{
+							Range: "< 1.0.0",
+							FixedBy: "1.0.0",
+						},
+					},
 				},
 				{
 					CVE:         "CVE-2020-1236",
