@@ -2,13 +2,13 @@ package types
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/facebookincubator/nvdtools/cvss2"
 	"github.com/facebookincubator/nvdtools/cvss3"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/pkg/math"
 )
 
 type Metadata struct {
@@ -129,8 +129,8 @@ func ConvertCVSSv2(cvss2Vector string) (*MetadataCVSSv2, error) {
 	var m MetadataCVSSv2
 	m.Score = v.Score()
 	m.Vectors = cvss2Vector
-	m.ExploitabilityScore = math.RoundTo1Decimal(v.ExploitabilityScore())
-	m.ImpactScore = math.RoundTo1Decimal(v.ImpactScore(false))
+	m.ExploitabilityScore = roundTo1Decimal(v.ExploitabilityScore())
+	m.ImpactScore = roundTo1Decimal(v.ImpactScore(false))
 	return &m, nil
 }
 
@@ -147,7 +147,12 @@ func ConvertCVSSv3(cvss3Vector string) (*MetadataCVSSv3, error) {
 	var m MetadataCVSSv3
 	m.Score = v.Score()
 	m.Vectors = cvss3Vector
-	m.ExploitabilityScore = math.RoundTo1Decimal(v.ExploitabilityScore())
-	m.ImpactScore = math.RoundTo1Decimal(v.ImpactScore())
+	m.ExploitabilityScore = roundTo1Decimal(v.ExploitabilityScore())
+	m.ImpactScore = roundTo1Decimal(v.ImpactScore())
 	return &m, nil
+}
+
+// roundTo1Decimal returns the given float64 rounded to the nearest tenth place.
+func roundTo1Decimal(x float64) float64 {
+	return math.Round(x*10) / 10
 }
