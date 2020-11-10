@@ -46,7 +46,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	mBytes, err := json.Marshal(&m)
 	require.NoError(t, err)
 	cve201911245 := &v1.Vulnerability{
-		Name:        "CVE-2019,11245",
+		Name:        "CVE-2019-11245",
 		Description: "In kubelet v1.13.6 and v1.14.2, containers for pods that do not specify an explicit runAsUser attempt to run as uid 0 (root) on container restart, or if the image was previously pulled to the node. If the pod specified mustRunAsNonRoot: true, the kubelet will refuse to start the container as root. If the pod did not specify mustRunAsNonRoot: true, the kubelet will run the container as uid 0.",
 		Link:        "https://github.com/kubernetes/kubernetes/issues/78308",
 		Metadata:    mBytes,
