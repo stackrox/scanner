@@ -4,11 +4,8 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/facebookincubator/nvdtools/cvss2"
-	"github.com/facebookincubator/nvdtools/cvss3"
 	"github.com/stackrox/rox/pkg/errorhelpers"
-	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
-	"github.com/stackrox/scanner/pkg/math"
+	"github.com/stackrox/scanner/pkg/types"
 )
 
 type redhatEntries []redhatEntry
@@ -74,39 +71,19 @@ func (r *redhatEntry) Metadata() *types.Metadata {
 	}
 
 	if r.CVSSv2Vector != "" {
-		v, err := cvss2.VectorFromString(r.CVSSv2Vector)
-		if err != nil || v.Validate() != nil {
+		cvssv2, err := types.ConvertCVSSv2(r.CVSSv2Vector)
+		if err != nil {
 			return nil
 		}
-		score := r.CVSSv2.Score()
-		if score == nil {
-			tmpScore := v.BaseScore()
-			score = &tmpScore
-		}
-		metadata.CVSSv2 = types.MetadataCVSSv2{
-			Vectors:             r.CVSSv2Vector,
-			Score:               *score,
-			ExploitabilityScore: math.RoundTo1Decimal(v.ExploitabilityScore()),
-			ImpactScore:         math.RoundTo1Decimal(v.ImpactScore(false)),
-		}
+		metadata.CVSSv2 = *cvssv2
 	}
 
 	if r.CVSSv3Vector != "" {
-		v, err := cvss3.VectorFromString(r.CVSSv3Vector)
-		if err != nil || v.Validate() != nil {
+		cvssv3, err := types.ConvertCVSSv3(r.CVSSv3Vector)
+		if err != nil {
 			return nil
 		}
-		score := r.CVSSv3.Score()
-		if score == nil {
-			tmpScore := v.BaseScore()
-			score = &tmpScore
-		}
-		metadata.CVSSv3 = types.MetadataCVSSv3{
-			Vectors:             r.CVSSv3Vector,
-			Score:               *score,
-			ExploitabilityScore: math.RoundTo1Decimal(v.ExploitabilityScore()),
-			ImpactScore:         math.RoundTo1Decimal(v.ImpactScore()),
-		}
+		metadata.CVSSv3 = *cvssv3
 	}
 
 	return metadata

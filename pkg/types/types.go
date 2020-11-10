@@ -90,44 +90,64 @@ func ConvertMetadataFromK8s(cve *validation.CVESchema) (*Metadata, error) {
 	var m Metadata
 	if nvd := cve.CVSS.NVD; nvd != nil {
 		if nvd.VectorV2 != "" && nvd.ScoreV2 > 0 {
-			v, err := cvss2.VectorFromString(nvd.VectorV2)
+			cvssv2, err := ConvertCVSSv2(nvd.VectorV2)
 			if err != nil {
 				return nil, err
 			}
-			if err := v.Validate(); err != nil {
-				return nil, err
-			}
-			m.CVSSv2.Score = nvd.ScoreV2
-			m.CVSSv2.Vectors = nvd.VectorV2
-			m.CVSSv2.ExploitabilityScore = math.RoundTo1Decimal(v.ExploitabilityScore())
-			m.CVSSv2.ImpactScore = math.RoundTo1Decimal(v.ImpactScore(false))
+			m.CVSSv2 = *cvssv2
 		}
 		if nvd.VectorV3 != "" && nvd.ScoreV3 > 0 {
-			v, err := cvss3.VectorFromString(nvd.VectorV3)
+			cvssv3, err := ConvertCVSSv3(nvd.VectorV3)
 			if err != nil {
 				return nil, err
 			}
-			if err := v.Validate(); err != nil {
-				return nil, err
-			}
-			m.CVSSv3.Score = nvd.ScoreV3
-			m.CVSSv3.Vectors = nvd.VectorV3
-			m.CVSSv3.ExploitabilityScore = math.RoundTo1Decimal(v.ExploitabilityScore())
-			m.CVSSv3.ImpactScore = math.RoundTo1Decimal(v.ImpactScore())
+			m.CVSSv3 = *cvssv3
 		}
 	}
 	if k8s := cve.CVSS.Kubernetes; k8s != nil {
 		if k8s.VectorV3 != "" && k8s.ScoreV3 > 0 {
-			v, err := cvss3.VectorFromString(k8s.VectorV3)
+			cvssv3, err := ConvertCVSSv3(k8s.VectorV3)
 			if err != nil {
 				return nil, err
 			}
-			m.CVSSv3.Score = k8s.ScoreV3
-			m.CVSSv3.Vectors = k8s.VectorV3
-			m.CVSSv3.ExploitabilityScore = math.RoundTo1Decimal(v.ExploitabilityScore())
-			m.CVSSv3.ImpactScore = math.RoundTo1Decimal(v.ImpactScore())
+			m.CVSSv3 = *cvssv3
 		}
 	}
 
+	return &m, nil
+}
+
+// ConvertCVSSv2 converts the given CVSS2 vector into MetadataCVSSv2.
+func ConvertCVSSv2(cvss2Vector string) (*MetadataCVSSv2, error) {
+	v, err := cvss2.VectorFromString(cvss2Vector)
+	if err != nil {
+		return nil, err
+	}
+	if err := v.Validate(); err != nil {
+		return nil, err
+	}
+	var m MetadataCVSSv2
+	m.Score = v.Score()
+	m.Vectors = cvss2Vector
+	m.ExploitabilityScore = math.RoundTo1Decimal(v.ExploitabilityScore())
+	m.ImpactScore = math.RoundTo1Decimal(v.ImpactScore(false))
+	return &m, nil
+}
+
+// ConvertCVSSv3 converts the given CVSS3 vector into MetadataCVSSv3.
+func ConvertCVSSv3(cvss3Vector string) (*MetadataCVSSv3, error) {
+	v, err := cvss3.VectorFromString(cvss3Vector)
+	if err != nil {
+		return nil, err
+	}
+	if err := v.Validate(); err != nil {
+		return nil, err
+	}
+
+	var m MetadataCVSSv3
+	m.Score = v.Score()
+	m.Vectors = cvss3Vector
+	m.ExploitabilityScore = math.RoundTo1Decimal(v.ExploitabilityScore())
+	m.ImpactScore = math.RoundTo1Decimal(v.ImpactScore())
 	return &m, nil
 }

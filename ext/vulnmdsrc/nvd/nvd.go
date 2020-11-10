@@ -29,6 +29,7 @@ import (
 	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/cvss"
+	pkgTypes "github.com/stackrox/scanner/pkg/types"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
@@ -42,7 +43,7 @@ type appender struct {
 }
 
 type metadataEnricher struct {
-	metadata *types.Metadata
+	metadata *pkgTypes.Metadata
 	summary  string
 }
 

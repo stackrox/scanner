@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
+	"github.com/stackrox/scanner/pkg/types"
 	"github.com/stretchr/testify/assert"
 )
 
