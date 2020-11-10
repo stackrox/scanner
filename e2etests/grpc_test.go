@@ -55,10 +55,12 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 
 	req := &v1.GetVulnerabilitiesRequest{
 		Components: []*v1.ComponentRequest{
-			&v1.ComponentRequest_K8SComponent{
-				{
-					Component: v1.KubernetesComponentRequest_KUBELET,
-					Version:   "1.14.2",
+			{
+				ComponentRequest: &v1.ComponentRequest_K8SComponent{
+					K8SComponent: &v1.KubernetesComponentRequest{
+						Component: v1.KubernetesComponentRequest_KUBELET,
+						Version:   "1.14.2",
+					},
 				},
 			},
 		},
