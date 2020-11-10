@@ -1,8 +1,9 @@
 package cpeutils
 
 import (
-	"github.com/facebookincubator/nvdtools/wfn"
 	"strings"
+
+	"github.com/facebookincubator/nvdtools/wfn"
 )
 
 // GetMostSpecificCPE deterministically returns the CPE that is the most specific

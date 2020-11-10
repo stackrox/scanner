@@ -98,10 +98,6 @@ func TestGetVulnsForComponent(t *testing.T) {
 	assert.Equal(t, `CVE-2020-7608`, vuln.CVE.CVEDataMeta.ID)
 	assert.Equal(t, "18.1.1", vuln.FixedIn)
 
-	vuln = mustGetVulnForComponent(t, cache, `yargs`, `yargs\-parser`, `12.0.0`)
-	assert.Equal(t, `CVE-2020-7608`, vuln.CVE.CVEDataMeta.ID)
-	assert.Equal(t, "13.1.2", vuln.FixedIn)
-
 	// Try different product.
 	vuln = mustGetVulnForComponent(t, cache, `apache`, `tomcat`, `7.0.0`)
 	assert.Equal(t, `CVE-2020-1745`, vuln.CVE.CVEDataMeta.ID)
