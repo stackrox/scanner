@@ -19,7 +19,7 @@ type expectedVuln struct {
 }
 
 func TestConvertK8sVulnerabilities(t *testing.T) {
-	testCases := []struct{
+	testCases := []struct {
 		version  string
 		cves     []*validation.CVESchema
 		expected []expectedVuln
@@ -28,9 +28,9 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 			version: "1.0.0",
 			cves: []*validation.CVESchema{
 				{
-					CVE: "CVE-2020-1234",
+					CVE:         "CVE-2020-1234",
 					Description: "test1",
-					IssueURL: "issueUrl",
+					IssueURL:    "issueUrl",
 					CVSS: &validation.CVSSSchema{
 						NVD: &validation.NVDSchema{
 							ScoreV2:  3.5,
@@ -43,27 +43,31 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							VectorV3: "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N",
 						},
 					},
-					FixedBy: []string{"1.0.1"},
-
+					Affected: []validation.AffectedSchema{
+						{
+							Range:   "<= 1.0.0",
+							FixedBy: "1.0.1",
+						},
+					},
 				},
 			},
 			expected: []expectedVuln{
 				{
-					Name: "CVE-2020-1234",
+					Name:        "CVE-2020-1234",
 					Description: "test1",
-					Link: "issueUrl",
+					Link:        "issueUrl",
 					Metadata: &types.Metadata{
 						CVSSv2: types.MetadataCVSSv2{
-							Score: 3.5,
-							Vectors: "AV:N/AC:M/Au:S/C:P/I:N/A:N",
+							Score:               3.5,
+							Vectors:             "AV:N/AC:M/Au:S/C:P/I:N/A:N",
 							ExploitabilityScore: 6.8,
-							ImpactScore: 2.9,
+							ImpactScore:         2.9,
 						},
 						CVSSv3: types.MetadataCVSSv3{
-							Score: 6.3,
-							Vectors: "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							Score:               6.3,
+							Vectors:             "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N",
 							ExploitabilityScore: 1.8,
-							ImpactScore: 4.0,
+							ImpactScore:         4.0,
 						},
 					},
 					FixedBy: "1.0.1",
@@ -74,23 +78,35 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 			version: "1.1.0",
 			cves: []*validation.CVESchema{
 				{
-					CVE: "CVE-2020-1234",
+					CVE:         "CVE-2020-1234",
 					Description: "test2",
-					IssueURL: "issueUrl",
-					URL: "url",
+					IssueURL:    "issueUrl",
+					URL:         "url",
 					CVSS: &validation.CVSSSchema{
 						NVD: &validation.NVDSchema{
 							ScoreV3:  7.7,
 							VectorV3: "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
 						},
 					},
-					FixedBy: []string{"1.1.1", "1.2.0", "2.0.0"},
-
+					Affected: []validation.AffectedSchema{
+						{
+							Range:   "< 1.1.1",
+							FixedBy: "1.1.1",
+						},
+						{
+							Range:   "> 1.1, < 1.2",
+							FixedBy: "1.2.0",
+						},
+						{
+							Range:   "> 2.0, < 2.0.0",
+							FixedBy: "2.0.0",
+						},
+					},
 				},
 				{
-					CVE: "CVE-2020-1235",
+					CVE:         "CVE-2020-1235",
 					Description: "test2",
-					URL: "url",
+					URL:         "url",
 					CVSS: &validation.CVSSSchema{
 						NVD: &validation.NVDSchema{
 							ScoreV3:  7.7,
@@ -99,56 +115,73 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					},
 				},
 				{
-					CVE: "CVE-2020-1236",
+					CVE:         "CVE-2020-1236",
 					Description: "test3",
-					URL: "url",
+					URL:         "url",
 					CVSS: &validation.CVSSSchema{
 						NVD: &validation.NVDSchema{
 							ScoreV3:  7.7,
 							VectorV3: "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
 						},
 					},
-					FixedBy: []string{"0.9.0", "1.0.4", "1.1.3", "2.0.0"},
+					Affected: []validation.AffectedSchema{
+						{
+							Range:   "< 0.9.0",
+							FixedBy: "0.9.0",
+						},
+						{
+							Range:   ">= 1.0, <= 1.0.3",
+							FixedBy: "1.0.4",
+						},
+						{
+							Range:   ">= 1.1, < 1.1.2",
+							FixedBy: "1.1.3",
+						},
+						{
+							Range:   ">= 1.2, < 2.0.0",
+							FixedBy: "2.0.0",
+						},
+					},
 				},
 			},
 			expected: []expectedVuln{
 				{
-					Name: "CVE-2020-1234",
+					Name:        "CVE-2020-1234",
 					Description: "test2",
-					Link: "issueUrl",
+					Link:        "issueUrl",
 					Metadata: &types.Metadata{
 						CVSSv3: types.MetadataCVSSv3{
-							Score: 7.7,
-							Vectors: "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							Score:               7.7,
+							Vectors:             "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
 							ExploitabilityScore: 3.1,
-							ImpactScore: 4.0,
+							ImpactScore:         4.0,
 						},
 					},
 					FixedBy: "1.1.1",
 				},
 				{
-					Name: "CVE-2020-1235",
+					Name:        "CVE-2020-1235",
 					Description: "test2",
-					Link: "url",
+					Link:        "url",
 					Metadata: &types.Metadata{
 						CVSSv3: types.MetadataCVSSv3{
-							Score: 7.7,
-							Vectors: "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							Score:               7.7,
+							Vectors:             "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
 							ExploitabilityScore: 3.1,
-							ImpactScore: 4.0,
+							ImpactScore:         4.0,
 						},
 					},
 				},
 				{
-					Name: "CVE-2020-1236",
+					Name:        "CVE-2020-1236",
 					Description: "test3",
-					Link: "url",
+					Link:        "url",
 					Metadata: &types.Metadata{
 						CVSSv3: types.MetadataCVSSv3{
-							Score: 7.7,
-							Vectors: "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							Score:               7.7,
+							Vectors:             "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
 							ExploitabilityScore: 3.1,
-							ImpactScore: 4.0,
+							ImpactScore:         4.0,
 						},
 					},
 					FixedBy: "1.1.3",

@@ -55,7 +55,7 @@ func (c *cacheImpl) GetVulnsByComponent(component v1.KubernetesComponentRequest_
 
 	var vulns []*validation.CVESchema
 	for _, vuln := range c.cache[component] {
-		if isAffected(v, vuln.Affected) {
+		if isAffected(v, vuln) {
 			// Only return vulnerabilities relevant to the given version.
 			vulns = append(vulns, vuln)
 		}
@@ -64,14 +64,14 @@ func (c *cacheImpl) GetVulnsByComponent(component v1.KubernetesComponentRequest_
 	return vulns
 }
 
-func isAffected(vStr string, versions []string) bool {
+func isAffected(vStr string, vuln *validation.CVESchema) bool {
 	v, err := version.NewVersion(vStr)
 	if err != nil {
 		return false
 	}
 
-	for _, affected := range versions {
-		constraint, err := version.NewConstraint(affected)
+	for _, affected := range vuln.Affected {
+		constraint, err := version.NewConstraint(affected.Range)
 		if err != nil {
 			return false
 		}

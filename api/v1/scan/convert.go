@@ -115,11 +115,7 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 		}
 
 		link := stringutils.OrDefault(v.IssueURL, v.URL)
-		// Assumes the data is sound.
-		// That is, we assume the vuln is only unfixable if FixedBy is empty.
-		// Also, it is not possible for all FixedBy versions are less than the given
-		// version (otherwise, the version would not be affected).
-		fixedBy, err := closestFixedByVersion(version, v.FixedBy)
+		fixedBy, err := getFixedBy(version, v)
 		if err != nil {
 			return nil, err
 		}
@@ -134,26 +130,19 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 	return vulns, nil
 }
 
-// Returns the first version in versions that is less than or equal to the given version.
-func closestFixedByVersion(vStr string, versions []string) (string, error) {
+func getFixedBy(vStr string, vuln *validation.CVESchema) (string, error) {
 	v, err := version.NewVersion(vStr)
 	if err != nil {
 		return "", err
 	}
 
-	if len(versions) == 0 {
-		return "", nil
-	}
-
-	// versions is sorted in increasing order.
-	for _, fixedByVersion := range versions {
-		fixedBy, err := version.NewVersion(fixedByVersion)
+	for _, affected := range vuln.Affected {
+		constraint, err := version.NewConstraint(affected.Range)
 		if err != nil {
 			return "", err
 		}
-
-		if v.LessThanOrEqual(fixedBy) {
-			return fixedByVersion, nil
+		if constraint.Check(v) {
+			return affected.FixedBy, nil
 		}
 	}
 
