@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/stackrox/k8s-cves/pkg/validation"
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -198,6 +200,83 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 
 	for _, testCase := range testCases {
 		vulns, err := convertK8sVulnerabilities(testCase.version, testCase.cves)
+		assert.NoError(t, err)
+		assert.Equal(t, len(testCase.expected), len(vulns))
+		for i, vuln := range vulns {
+			expected := testCase.expected[i]
+			var m types.Metadata
+			err := json.Unmarshal(vuln.Metadata, &m)
+			require.NoError(t, err)
+			assert.Equal(t, expected.Name, vuln.Name)
+			assert.Equal(t, expected.Description, vuln.Description)
+			assert.Equal(t, expected.Link, vuln.Link)
+			assert.Equal(t, expected.Metadata, &m)
+			assert.Equal(t, expected.FixedBy, vuln.FixedBy)
+		}
+	}
+}
+
+func TestConvertNVDVulns(t *testing.T) {
+	testCases := []struct {
+		cveItems []*nvdtoolscache.NVDCVEItemWithFixedIn
+		expected []expectedVuln
+	}{
+		{
+			cveItems: []*nvdtoolscache.NVDCVEItemWithFixedIn{
+				{
+					NVDCVEFeedJSON10DefCVEItem: &schema.NVDCVEFeedJSON10DefCVEItem{
+						CVE: &schema.CVEJSON40{
+							CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+								ID: "CVE-2020-1234",
+							},
+							Description: &schema.CVEJSON40Description{
+								DescriptionData: []*schema.CVEJSON40LangString{
+									{
+										Lang:  "en",
+										Value: "test1",
+									},
+								},
+							},
+						},
+						PublishedDate:    "10",
+						LastModifiedDate: "11",
+						Impact: &schema.NVDCVEFeedJSON10DefImpact{
+							BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+								CVSSV3: &schema.CVSSV30{
+									BaseScore:    7.7,
+									VectorString: "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+								},
+								ExploitabilityScore: 3.1,
+								ImpactScore:         4.0,
+							},
+						},
+					},
+					FixedIn: "1.3.4",
+				},
+			},
+			expected: []expectedVuln{
+				{
+					Name:        "CVE-2020-1234",
+					Description: "test1",
+					Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1234",
+					Metadata: &types.Metadata{
+						PublishedDateTime:    "10",
+						LastModifiedDateTime: "11",
+						CVSSv3: types.MetadataCVSSv3{
+							Score:               7.7,
+							Vectors:             "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							ExploitabilityScore: 3.1,
+							ImpactScore:         4.0,
+						},
+					},
+					FixedBy: "1.3.4",
+				},
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		vulns, err := convertNVDVulns(testCase.cveItems)
 		assert.NoError(t, err)
 		assert.Equal(t, len(testCase.expected), len(vulns))
 		for i, vuln := range vulns {

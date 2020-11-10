@@ -35,15 +35,16 @@ type MetadataCVSSv3 struct {
 func NewVulnerability(cveitem *schema.NVDCVEFeedJSON10DefCVEItem) *database.Vulnerability {
 	return &database.Vulnerability{
 		Name:        cveitem.CVE.CVEDataMeta.ID,
-		Description: convertSummary(cveitem),
+		Description: ConvertNVDSummary(cveitem),
 		Link:        fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", cveitem.CVE.CVEDataMeta.ID),
 		Metadata: map[string]interface{}{
-			"NVD": convertMetadata(cveitem),
+			"NVD": ConvertNVDMetadata(cveitem),
 		},
 	}
 }
 
-func convertSummary(item *schema.NVDCVEFeedJSON10DefCVEItem) string {
+// ConvertNVDSummary retrieves the given NVD CVE item's description.
+func ConvertNVDSummary(item *schema.NVDCVEFeedJSON10DefCVEItem) string {
 	if item == nil || item.CVE == nil || item.CVE.Description == nil {
 		return ""
 	}
@@ -55,7 +56,8 @@ func convertSummary(item *schema.NVDCVEFeedJSON10DefCVEItem) string {
 	return ""
 }
 
-func convertMetadata(item *schema.NVDCVEFeedJSON10DefCVEItem) *Metadata {
+// ConvertNVDMetadata converts the given NVD CVE item into *Metadata.
+func ConvertNVDMetadata(item *schema.NVDCVEFeedJSON10DefCVEItem) *Metadata {
 	if item == nil {
 		return nil
 	}

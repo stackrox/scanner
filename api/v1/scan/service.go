@@ -8,6 +8,7 @@ import (
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
@@ -52,6 +53,7 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 	}
 
 	vulnsByComponent := make(map[string]*v1.VulnerabilityList)
+	nvdCache := nvdtoolscache.Singleton()
 	k8sCache := k8scache.Singleton()
 	for _, component := range req.Components {
 		switch typ := component.ComponentRequest.(type) {
@@ -61,16 +63,38 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 			if _, exists := vulnsByComponent[c.String()]; exists {
 				continue
 			}
+
 			vulns := k8sCache.GetVulnsByComponent(c, version)
 			converted, err := convertK8sVulnerabilities(version, vulns)
 			if err != nil {
 				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
 			}
+
 			vulnsByComponent[c.String()] = &v1.VulnerabilityList{
 				Vulnerabilities: converted,
 			}
 		case *v1.ComponentRequest_NvdComponent:
-			return nil, status.Error(codes.Unimplemented, "NVD Component request is unimplemented at this time")
+			vendor := typ.NvdComponent.Vendor
+			product := typ.NvdComponent.Product
+			version := typ.NvdComponent.Version
+			component := vendor + ":" + product + ":" + version
+			if _, exists := vulnsByComponent[component]; exists {
+				continue
+			}
+
+			nvdVulns, err := nvdCache.GetVulnsForComponent(vendor, product, version)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to get vulns for product %s: %v", typ.NvdComponent.Product, err)
+			}
+
+			vulns, err := convertNVDVulns(nvdVulns)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
+			}
+
+			vulnsByComponent[component] = &v1.VulnerabilityList{
+				Vulnerabilities: vulns,
+			}
 		case nil:
 			return nil, status.Error(codes.InvalidArgument, "component request must be set")
 		default:

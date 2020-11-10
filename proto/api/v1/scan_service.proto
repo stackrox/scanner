@@ -114,6 +114,7 @@ message ComponentRequest {
 message NVDComponentRequest {
     string vendor  = 1;
     string product = 2;
+    string version = 3;
 }
 
 message KubernetesComponentRequest {

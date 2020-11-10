@@ -8,6 +8,7 @@ import (
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/types"
@@ -147,4 +148,24 @@ func getFixedBy(vStr string, vuln *validation.CVESchema) (string, error) {
 	}
 
 	return "", nil
+}
+
+func convertNVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vulnerability, error) {
+	vulns := make([]*v1.Vulnerability, 0, len(nvdVulns))
+	for _, vuln := range nvdVulns {
+		m := types.ConvertNVDMetadata(vuln.NVDCVEFeedJSON10DefCVEItem)
+		mBytes, err := json.Marshal(m)
+		if err != nil {
+			return nil, err
+		}
+		vulns = append(vulns, &v1.Vulnerability{
+			Name:        vuln.CVE.CVEDataMeta.ID,
+			Description: types.ConvertNVDSummary(vuln.NVDCVEFeedJSON10DefCVEItem),
+			Link:        "https://nvd.nist.gov/vuln/detail/" + vuln.CVE.CVEDataMeta.ID,
+			Metadata:    mBytes,
+			FixedBy:     vuln.FixedIn,
+		})
+	}
+
+	return vulns, nil
 }

@@ -2,6 +2,7 @@ package nvdtoolscache
 
 import (
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/cpe/attributes/common"
+	"github.com/stackrox/scanner/pkg/cpeutils"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 	"github.com/stackrox/scanner/pkg/wellknowndirnames"
@@ -151,6 +154,58 @@ func (c *cacheImpl) GetVulnsForProducts(products []string) ([]cvefeed.Vuln, erro
 		return nil
 	})
 	return vulns, err
+}
+
+func (c *cacheImpl) GetVulnsForComponent(vendor, product, version string) ([]*NVDCVEItemWithFixedIn, error) {
+	var cveItems []*schema.NVDCVEFeedJSON10DefCVEItem
+	err := c.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(product))
+		if bucket == nil {
+			return errors.Errorf("unable to fetch bucket for %s", product)
+		}
+		err := bucket.ForEach(func(k, v []byte) error {
+			vuln, err := nvdloader.UnmarshalNVDFeedCVEItem(v)
+			if err != nil {
+				return errors.Wrapf(err, "unmarshaling vuln %s", string(k))
+			}
+			cveItems = append(cveItems, vuln)
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Consider using pre-existing functions.
+	vendorSet := set.NewStringSet(vendor, escapeDash(vendor), escapePeriod(vendor), escapeDash(escapePeriod(vendor)))
+	productSet := set.NewStringSet(product, escapeDash(product), escapePeriod(product), escapeDash(escapePeriod(product)))
+	versionSet := set.NewStringSet(version, escapeDash(version), escapePeriod(version), escapeDash(escapePeriod(version)))
+	attrs := common.GenerateAttributesFromSets(vendorSet, productSet, versionSet, "")
+
+	var vulnsWithFixed []*NVDCVEItemWithFixedIn
+	for _, cveItem := range cveItems {
+		nvdVuln := nvd.ToVuln(cveItem)
+		if matchesWithFixed := nvdVuln.MatchWithFixedIn(attrs, false); len(matchesWithFixed) > 0 {
+			vulnsWithFixed = append(vulnsWithFixed, &NVDCVEItemWithFixedIn{
+				NVDCVEFeedJSON10DefCVEItem: cveItem,
+				FixedIn:                    cpeutils.GetMostSpecificCPE(matchesWithFixed).FixedIn,
+			})
+		}
+	}
+
+	return vulnsWithFixed, nil
+}
+
+func escapePeriod(str string) string {
+	return strings.ReplaceAll(str, ".", `\.`)
+}
+
+func escapeDash(s string) string {
+	return strings.ReplaceAll(s, "-", `\-`)
 }
 
 func (c *cacheImpl) GetLastUpdate() time.Time {
