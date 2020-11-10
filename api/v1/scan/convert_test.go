@@ -115,7 +115,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					},
 					Affected: []validation.AffectedSchema{
 						{
-							Range: "< 1.0.0",
+							Range:   "< 1.0.0",
 							FixedBy: "1.0.0",
 						},
 					},
