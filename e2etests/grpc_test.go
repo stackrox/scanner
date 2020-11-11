@@ -136,8 +136,6 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Link:        "https://nvd.nist.gov/vuln/detail/CVE-2019-16884",
 		Metadata:    mBytes,
 	}
-	logrus.Infof("Vulns: %+v", vulnList.Vulnerabilities)
-	logrus.Infof("Desired vuln: %+v", cve201916884)
 	assert.Contains(t, vulnList.Vulnerabilities, cve201916884)
 
 	// cri-o
@@ -206,6 +204,11 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 
 	// linux kernel
 	vulnList = resp.VulnerabilitiesByComponent["linux:linux_kernel:5.9.1"]
+	keys := make([]string, 0, len(resp.VulnerabilitiesByComponent))
+	for k, _ := range resp.VulnerabilitiesByComponent {
+		keys = append(keys, k)
+	}
+	logrus.Infof("Resp: %+v", keys)
 	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	m = types.Metadata{
 		CVSSv2: types.MetadataCVSSv2{
