@@ -166,8 +166,6 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Metadata:    mBytes,
 		FixedBy:     "1.16.1",
 	}
-	logrus.Infof("Vulns: %+v", vulnList.Vulnerabilities)
-	logrus.Infof("Desired vuln: %+v", cve201914891)
 	assert.Contains(t, vulnList.Vulnerabilities, cve201914891)
 
 	// containerd
@@ -198,16 +196,10 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Metadata:    mBytes,
 		FixedBy:     "1.2.14",
 	}
-	logrus.Infof("Vulns: %+v", vulnList.Vulnerabilities)
-	logrus.Infof("Desired vuln: %+v", cve202015157)
 	assert.Contains(t, vulnList.Vulnerabilities, cve202015157)
 
 	// linux kernel
 	vulnList = resp.VulnerabilitiesByComponent["linux:linux_kernel:5.9.1"]
-	keys := make([]string, 0, len(resp.VulnerabilitiesByComponent))
-	for k, _ := range resp.VulnerabilitiesByComponent {
-		keys = append(keys, k)
-	}
 	logrus.Infof("Resp: %+v", keys)
 	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	m = types.Metadata{
