@@ -61,7 +61,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 			{
 				ComponentRequest: &v1.ComponentRequest_NvdComponent{
 					NvdComponent: &v1.NVDComponentRequest{
-						Vendor:  "linucfoundation",
+						Vendor:  "linuxfoundation",
 						Product: "containerd",
 						Version: "1.2.0",
 					},
