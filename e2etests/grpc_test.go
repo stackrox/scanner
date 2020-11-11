@@ -136,6 +136,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		FixedBy:     "19.03.3",
 	}
 	logrus.Infof("Vulns: %+v", vulnList.Vulnerabilities)
+	logrus.Infof("Desired vuln: %+v", cve201916884)
 	assert.Contains(t, vulnList.Vulnerabilities, cve201916884)
 
 	// cri-o
@@ -165,6 +166,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		FixedBy:     "1.16.1",
 	}
 	logrus.Infof("Vulns: %+v", vulnList.Vulnerabilities)
+	logrus.Infof("Desired vuln: %+v", cve201914891)
 	assert.Contains(t, vulnList.Vulnerabilities, cve201914891)
 
 	// containerd
@@ -188,6 +190,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		FixedBy:     "1.2.14",
 	}
 	logrus.Infof("Vulns: %+v", vulnList.Vulnerabilities)
+	logrus.Infof("Desired vuln: %+v", cve202015157)
 	assert.Contains(t, vulnList.Vulnerabilities, cve202015157)
 
 	// linux kernel
@@ -217,5 +220,6 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		FixedBy:     "",
 	}
 	logrus.Infof("Vulns: %+v", vulnList.Vulnerabilities)
+	logrus.Infof("Desired vuln: %+v", cve202027675)
 	assert.Contains(t, vulnList.Vulnerabilities, cve202027675)
 }
