@@ -159,7 +159,7 @@ func (c *cacheImpl) GetVulnsForProducts(products []string) ([]cvefeed.Vuln, erro
 func (c *cacheImpl) GetVulnsForComponent(vendor, product, version string) ([]*NVDCVEItemWithFixedIn, error) {
 	var cveItems []*schema.NVDCVEFeedJSON10DefCVEItem
 	err := c.View(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket([]byte(product))
+		bucket := tx.Bucket([]byte(escapeDash(escapePeriod(product))))
 		if bucket == nil {
 			return errors.Errorf("unable to fetch bucket for %s", product)
 		}
