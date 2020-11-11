@@ -31,7 +31,7 @@ require (
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
-	github.com/stackrox/k8s-cves v0.0.0-20201103195320-1a2d7755d13b
+	github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab
 	github.com/stackrox/rox v0.0.0-20200902200840-183e12662c50
 	github.com/stretchr/testify v1.6.1
 	go.etcd.io/bbolt v1.3.5
