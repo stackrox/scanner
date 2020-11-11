@@ -96,7 +96,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 			ImpactScore:         3.6,
 		},
 	}
-	mBytes, err := json.Marshal(&m)
+	mBytes, err = json.Marshal(&m)
 	require.NoError(t, err)
 	cve201916884 := &v1.Vulnerability{
 		Name:        "CVE-2019-16884",
