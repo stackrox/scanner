@@ -89,12 +89,12 @@ func TestGetVulnsForComponent(t *testing.T) {
 	cache := newWithDB(db)
 	require.NoError(t, cache.LoadFromDirectory("./testdata/before"))
 
-	vuln := mustGetVulnForComponent(t, cache, `yargs`, `yargs\-parser`, `12.0.0`)
+	vuln := mustGetVulnForComponent(t, cache, `yargs`, `yargs-parser`, `12.0.0`)
 	assert.Equal(t, `CVE-2020-7608`, vuln.CVE.CVEDataMeta.ID)
 	assert.Equal(t, "13.1.2", vuln.FixedIn)
 
 	// Try different version.
-	vuln = mustGetVulnForComponent(t, cache, `yargs`, `yargs\-parser`, `17.0.2`)
+	vuln = mustGetVulnForComponent(t, cache, `yargs`, `yargs-parser`, `17.0.2`)
 	assert.Equal(t, `CVE-2020-7608`, vuln.CVE.CVEDataMeta.ID)
 	assert.Equal(t, "18.1.1", vuln.FixedIn)
 
