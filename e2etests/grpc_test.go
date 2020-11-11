@@ -135,7 +135,6 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Description: "runc through 1.0.0-rc8, as used in Docker through 19.03.2-ce and other products, allows AppArmor restriction bypass because libcontainer/rootfs_linux.go incorrectly checks mount targets, and thus a malicious Docker image can mount over a /proc directory.",
 		Link:        "https://nvd.nist.gov/vuln/detail/CVE-2019-16884",
 		Metadata:    mBytes,
-		FixedBy:     "19.03.3",
 	}
 	logrus.Infof("Vulns: %+v", vulnList.Vulnerabilities)
 	logrus.Infof("Desired vuln: %+v", cve201916884)
@@ -184,6 +183,12 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 			Vectors:             "AV:N/AC:M/Au:N/C:P/I:N/A:N",
 			ExploitabilityScore: 8.6,
 			ImpactScore:         2.9,
+		},
+		CVSSv3: types.MetadataCVSSv3{
+			Score:               6.1,
+			Vectors:             "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:N/A:N",
+			ExploitabilityScore: 1.6,
+			ImpactScore:         4.0,
 		},
 	}
 	mBytes, err = json.Marshal(&m)
