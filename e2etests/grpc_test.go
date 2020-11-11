@@ -29,6 +29,32 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewScanServiceClient(conn)
 
+	req := &v1.GetVulnerabilitiesRequest{
+		Components: []*v1.ComponentRequest{
+			{
+				ComponentRequest: &v1.ComponentRequest_K8SComponent{
+					K8SComponent: &v1.KubernetesComponentRequest{
+						Component: v1.KubernetesComponentRequest_KUBELET,
+						Version:   "1.14.2",
+					},
+				},
+			},
+			{
+				ComponentRequest: &v1.ComponentRequest_NvdComponent{
+					NvdComponent: &v1.NVDComponentRequest{
+						Vendor:  "docker",
+						Product: "docker",
+						Version: "19.03.0",
+					},
+				},
+			},
+		},
+	}
+	resp, err := client.GetVulnerabilities(context.Background(), req)
+	require.NoError(t, err)
+
+	vulnList := resp.VulnerabilitiesByComponent[v1.KubernetesComponentRequest_KUBELET.String()]
+	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	m := types.Metadata{
 		CVSSv2: types.MetadataCVSSv2{
 			Score:               4.6,
@@ -52,22 +78,32 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Metadata:    mBytes,
 		FixedBy:     "1.14.3",
 	}
+	assert.Contains(t, vulnList.Vulnerabilities, cve201911245)
 
-	req := &v1.GetVulnerabilitiesRequest{
-		Components: []*v1.ComponentRequest{
-			{
-				ComponentRequest: &v1.ComponentRequest_K8SComponent{
-					K8SComponent: &v1.KubernetesComponentRequest{
-						Component: v1.KubernetesComponentRequest_KUBELET,
-						Version:   "1.14.2",
-					},
-				},
-			},
+	vulnList = resp.VulnerabilitiesByComponent["docker:docker:19.03.0"]
+	assert.NotEmpty(t, vulnList.Vulnerabilities)
+	m = types.Metadata{
+		CVSSv2: types.MetadataCVSSv2{
+			Score:               5.0,
+			Vectors:             "AV:N/AC:L/Au:N/C:N/I:P/A:N",
+			ExploitabilityScore: 10.0,
+			ImpactScore:         2.9,
+		},
+		CVSSv3: types.MetadataCVSSv3{
+			Score:               7.5,
+			Vectors:             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+			ExploitabilityScore: 3.9,
+			ImpactScore:         3.6,
 		},
 	}
-	resp, err := client.GetVulnerabilities(context.Background(), req)
+	mBytes, err := json.Marshal(&m)
 	require.NoError(t, err)
-	vulnList := resp.VulnerabilitiesByComponent[v1.KubernetesComponentRequest_KUBELET.String()]
-	assert.NotEmpty(t, vulnList.Vulnerabilities)
-	assert.Contains(t, vulnList.Vulnerabilities, cve201911245)
+	cve201916884 := &v1.Vulnerability{
+		Name:        "CVE-2019-16884",
+		Description: "runc through 1.0.0-rc8, as used in Docker through 19.03.2-ce and other products, allows AppArmor restriction bypass because libcontainer/rootfs_linux.go incorrectly checks mount targets, and thus a malicious Docker image can mount over a /proc directory.\n",
+		Link:        "https://nvd.nist.gov/vuln/detail/CVE-2019-16884",
+		Metadata:    mBytes,
+		FixedBy:     "19.03.3",
+	}
+	assert.Contains(t, vulnList.Vulnerabilities, cve201916884)
 }
