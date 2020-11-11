@@ -113,7 +113,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	vulnList = resp.VulnerabilitiesByComponent["docker:docker:19.03.0"]
 	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	m = types.Metadata{
-		PublishedDateTime: "2019-09-25T18:15Z",
+		PublishedDateTime:    "2019-09-25T18:15Z",
 		LastModifiedDateTime: "2019-10-08T03:15Z",
 		CVSSv2: types.MetadataCVSSv2{
 			Score:               5.0,
@@ -145,7 +145,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	vulnList = resp.VulnerabilitiesByComponent["kubernetes:cri-o:1.16.0"]
 	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	m = types.Metadata{
-		PublishedDateTime: "2019-11-25T11:15Z",
+		PublishedDateTime:    "2019-11-25T11:15Z",
 		LastModifiedDateTime: "2020-02-28T18:10Z",
 		CVSSv2: types.MetadataCVSSv2{
 			Score:               6.0,
@@ -177,7 +177,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	vulnList = resp.VulnerabilitiesByComponent["linuxfoundation:containerd:1.2.0"]
 	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	m = types.Metadata{
-		PublishedDateTime: "2020-10-16T17:15Z",
+		PublishedDateTime:    "2020-10-16T17:15Z",
 		LastModifiedDateTime: "2020-10-29T22:06Z",
 		CVSSv2: types.MetadataCVSSv2{
 			Score:               4.3,
