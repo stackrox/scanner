@@ -201,7 +201,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	vulnList = resp.VulnerabilitiesByComponent["linux:linux_kernel:5.9.1"]
 	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	m = types.Metadata{
-		PublishedDateTime: "2020-10-22T21:15Z",
+		PublishedDateTime:    "2020-10-22T21:15Z",
 		LastModifiedDateTime: "2020-11-11T06:15Z",
 		CVSSv2: types.MetadataCVSSv2{
 			Score:               4.7,
