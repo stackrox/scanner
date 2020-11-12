@@ -161,6 +161,7 @@ func fetchLayers(reg types.Registry, image *types.Image) (string, []string, erro
 		// Some registries have no implemented the docker registry API correctly so the fall back here is to just try all the manifest types
 		manifestTypes := []string{registry.MediaTypeManifestList, schema2.MediaTypeManifest, schema1.MediaTypeSignedManifest, schema1.MediaTypeManifest}
 		for _, m := range manifestTypes {
+			logrus.Infof("Handling manifest types: %+v %+v %+v", image.Remote, ref, m)
 			layers, manifestErr := handleManifest(reg, m, image.Remote, ref)
 			if manifestErr != nil {
 				continue
@@ -169,9 +170,11 @@ func fetchLayers(reg types.Registry, image *types.Image) (string, []string, erro
 		}
 		return "", nil, err
 	}
+	logrus.Infof("Handle manifest: %+v %+v %+v", manifestType, image.Remote, digest.String())
 	layers, err := handleManifest(reg, manifestType, image.Remote, digest.String())
 	if err != nil {
 		return "", nil, err
 	}
+	logrus.Infof("Returning: %+v %+v", digest.String(), layers)
 	return digest.String(), layers, nil
 }
