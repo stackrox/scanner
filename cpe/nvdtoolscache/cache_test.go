@@ -106,6 +106,11 @@ func TestGetVulnsForComponent(t *testing.T) {
 	// Try incorrect vendor.
 	assert.True(t, mustNotGetVulnForComponent(t, cache, `notapache`, `tomcat`, `7.0.0`))
 
-	// try out of range version.
+	// Try out of range version.
 	assert.True(t, mustNotGetVulnForComponent(t, cache, `apache`, `tomcat`, `10.0.0`))
+
+	// Linux Kernel
+	vuln = mustGetVulnForComponent(t, cache, `linux`, `linux_kernel`, `5.9.0`)
+	assert.Equal(t, `CVE-2020-27675`, vuln.CVE.CVEDataMeta.ID)
+	assert.Equal(t, "", vuln.FixedIn)
 }

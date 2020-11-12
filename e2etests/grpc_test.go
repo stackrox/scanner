@@ -200,7 +200,6 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 
 	// linux kernel
 	vulnList = resp.VulnerabilitiesByComponent["linux:linux_kernel:5.9.1"]
-	logrus.Infof("Resp: %+v", keys)
 	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	m = types.Metadata{
 		CVSSv2: types.MetadataCVSSv2{
