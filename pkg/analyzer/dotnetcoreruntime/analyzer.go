@@ -88,7 +88,7 @@ func parseMetadata(filePath string) *component.Component {
 func parseDepsFile(fileMap tarutil.FilesMap, file []byte) []*component.Component {
 	var m map[string]interface{}
 	if err := json.Unmarshal(file, &m); err != nil {
-		logrus.Error(err)
+		logrus.Errorf("error unmarshalling deps file: %v", err)
 		return nil
 	}
 
@@ -99,12 +99,12 @@ func parseDepsFile(fileMap tarutil.FilesMap, file []byte) []*component.Component
 		}
 	}
 
-	components := make([]*component.Component, 0)
-	getAllDLLComponentsRecursively(m, dllToLocationMap, &components)
+	var components []*component.Component
+	getAllDLLComponentsRecursive(m, dllToLocationMap, &components)
 	return components
 }
 
-func getAllDLLComponentsRecursively(m map[string]interface{}, dllToLocationMap map[string]string, comps *[]*component.Component) {
+func getAllDLLComponentsRecursive(m map[string]interface{}, dllToLocationMap map[string]string, comps *[]*component.Component) {
 	for k, v := range m {
 		subMap, ok := v.(map[string]interface{})
 		if !ok {
@@ -114,6 +114,9 @@ func getAllDLLComponentsRecursively(m map[string]interface{}, dllToLocationMap m
 			baseName := filepath.Base(k)
 			name := strings.TrimSuffix(baseName, ".dll")
 			versionI := subMap["assemblyVersion"]
+			if versionI == nil {
+				continue
+			}
 			version, ok := versionI.(string)
 			if !ok {
 				continue
@@ -126,7 +129,7 @@ func getAllDLLComponentsRecursively(m map[string]interface{}, dllToLocationMap m
 			})
 			continue
 		}
-		getAllDLLComponentsRecursively(subMap, dllToLocationMap, comps)
+		getAllDLLComponentsRecursive(subMap, dllToLocationMap, comps)
 	}
 }
 

@@ -473,6 +473,280 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			image:    "mcr.microsoft.com/dotnet/core/sdk:3.1.100",
+			registry: "https://mcr.microsoft.com",
+			source:   "NVD",
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "microsoft.aspnetcore.app",
+					VersionFormat: "DotNetCoreRuntimeSourceType",
+					Version:       "3.1.0",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:        "CVE-2020-0602",
+							Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests, aka 'ASP.NET Core Denial of Service Vulnerability'.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-0602",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2020-01-14T23:15Z",
+									"LastModifiedDateTime": "2020-01-17T02:49Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+										"Score":               5.0,
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+										"Score":               7.5,
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+									},
+								},
+							},
+							FixedBy: "3.1.1",
+						},
+						{
+							Name:        "CVE-2020-0603",
+							Description: "A remote code execution vulnerability exists in ASP.NET Core software when the software fails to handle objects in memory.An attacker who successfully exploited the vulnerability could run arbitrary code in the context of the current user, aka 'ASP.NET Core Remote Code Execution Vulnerability'.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-0603",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2020-01-14T23:15Z",
+									"LastModifiedDateTime": "2020-01-17T19:22Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:M/Au:N/C:C/I:C/A:C",
+										"Score":               9.3,
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         10.0,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+										"Score":               8.8,
+										"ExploitabilityScore": 2.8,
+										"ImpactScore":         5.9,
+									},
+								},
+							},
+							FixedBy: "3.1.1",
+						},
+						{
+							Name:        "CVE-2020-1045",
+							Description: "A security feature bypass vulnerability exists in the way Microsoft ASP.NET Core parses encoded cookie names.The ASP.NET Core cookie parser decodes entire cookie strings which could allow a malicious attacker to set a second cookie with the name being percent encoded.The security update addresses the vulnerability by fixing the way the ASP.NET Core cookie parser handles encoded names., aka 'Microsoft ASP.NET Core Security Feature Bypass Vulnerability'.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1045",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2020-09-11T17:15Z",
+									"LastModifiedDateTime": "2020-10-02T03:15Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:P/A:N",
+										"Score":               5.0,
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+										"Score":               7.5,
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+									},
+								},
+							},
+							FixedBy: "3.1.8",
+						},
+						{
+							Name:        "CVE-2020-1161",
+							Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests, aka 'ASP.NET Core Denial of Service Vulnerability'.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1161",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2020-05-21T23:15Z",
+									"LastModifiedDateTime": "2020-05-27T18:54Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+										"Score":               5.0,
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+										"Score":               7.5,
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+									},
+								},
+							},
+							FixedBy: "3.1.4",
+						},
+						{
+							Name:        "CVE-2020-1597",
+							Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests, aka 'ASP.NET Core Denial of Service Vulnerability'.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1597",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2020-08-17T19:15Z",
+									"LastModifiedDateTime": "2020-09-25T20:15Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+										"Score":               5.0,
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+										"Score":               7.5,
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+									},
+								},
+							},
+							FixedBy: "3.1.7",
+						},
+					},
+					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
+					Location: "usr/share/dotnet/shared/Microsoft.AspNetCore.App/3.1.0/",
+				},
+				{
+					Name:          "microsoft.netcore.app",
+					VersionFormat: "DotNetCoreRuntimeSourceType",
+					Version:       "3.1.0",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:        "CVE-2020-0605",
+							Description: "A remote code execution vulnerability exists in .NET software when the software fails to check the source markup of a file.An attacker who successfully exploited the vulnerability could run arbitrary code in the context of the current user, aka '.NET Framework Remote Code Execution Vulnerability'. This CVE ID is unique from CVE-2020-0606.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-0605",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2020-01-14T23:15Z",
+									"LastModifiedDateTime": "2020-01-21T21:22Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:M/Au:N/C:C/I:C/A:C",
+										"Score":               9.3,
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         10.0,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+										"Score":               8.8,
+										"ExploitabilityScore": 2.8,
+										"ImpactScore":         5.9,
+									},
+								},
+							},
+							FixedBy: "3.1.1",
+						},
+						{
+							Name:        "CVE-2020-0606",
+							Description: "A remote code execution vulnerability exists in .NET software when the software fails to check the source markup of a file.An attacker who successfully exploited the vulnerability could run arbitrary code in the context of the current user, aka '.NET Framework Remote Code Execution Vulnerability'. This CVE ID is unique from CVE-2020-0605.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-0606",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2020-01-14T23:15Z",
+									"LastModifiedDateTime": "2020-01-17T03:03Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:M/Au:N/C:C/I:C/A:C",
+										"Score":               9.3,
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         10.0,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+										"Score":               8.8,
+										"ExploitabilityScore": 2.8,
+										"ImpactScore":         5.9,
+									},
+								},
+							},
+							FixedBy: "3.1.1",
+						},
+						{
+							Name:        "CVE-2020-1108",
+							Description: "A denial of service vulnerability exists when .NET Core or .NET Framework improperly handles web requests, aka '.NET Core & .NET Framework Denial of Service Vulnerability'.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1108",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2020-05-21T23:15Z",
+									"LastModifiedDateTime": "2020-06-05T19:53Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+										"Score":               5.0,
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+										"Score":               7.5,
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+									},
+								},
+							},
+							FixedBy: "3.1.5",
+						},
+						{
+							Name:        "CVE-2020-1147",
+							Description: "A remote code execution vulnerability exists in .NET Framework, Microsoft SharePoint, and Visual Studio when the software fails to check the source markup of XML file input, aka '.NET Framework, SharePoint Server, and Visual Studio Remote Code Execution Vulnerability'.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1147",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2020-07-14T23:15Z",
+									"LastModifiedDateTime": "2020-08-20T15:15Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+										"Score":               6.8,
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+										"Score":               7.8,
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         5.9,
+									},
+								},
+							},
+							FixedBy: "3.1.6",
+						},
+					},
+					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
+					Location: "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.0/",
+				},
+				{
+					Name:          "system.security.cryptography.xml",
+					VersionFormat: "DotNetCoreRuntimeSourceType",
+					Version:       "4.0.3.0",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:        "CVE-2018-0765",
+							Description: "A denial of service vulnerability exists when .NET and .NET Core improperly process XML documents, aka \".NET and .NET Core Denial of Service Vulnerability.\" This affects Microsoft .NET Framework 2.0, Microsoft .NET Framework 3.0, Microsoft .NET Framework 4.7.1, Microsoft .NET Framework 4.6/4.6.1/4.6.2/4.7/4.7.1, Microsoft .NET Framework 4.5.2, Microsoft .NET Framework 4.7/4.7.1, Microsoft .NET Framework 4.6, Microsoft .NET Framework 3.5, Microsoft .NET Framework 3.5.1, Microsoft .NET Framework 4.6/4.6.1/4.6.2, Microsoft .NET Framework 4.6.2/4.7/4.7.1, .NET Core 2.0, Microsoft .NET Framework 4.7.2.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2018-0765",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2018-05-09T19:29Z",
+									"LastModifiedDateTime": "2018-06-14T18:01Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+										"Score":               5.0,
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+										"Score":               7.5,
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+									},
+								},
+							},
+							FixedBy: "4.4.2",
+						},
+					},
+					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
+					Location: "usr/share/dotnet/shared/Microsoft.AspNetCore.App/3.1.0/System.Security.Cryptography.Xml.dll",
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			verifyImageHasExpectedFeatures(cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
