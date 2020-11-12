@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 	"github.com/stretchr/testify/assert"
@@ -202,6 +201,8 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	vulnList = resp.VulnerabilitiesByComponent["linux:linux_kernel:5.9.1"]
 	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	m = types.Metadata{
+		PublishedDateTime: "2020-10-22T21:15Z",
+		LastModifiedDateTime: "2020-11-11T06:15Z",
 		CVSSv2: types.MetadataCVSSv2{
 			Score:               4.7,
 			Vectors:             "AV:L/AC:M/Au:N/C:N/I:N/A:C",
@@ -224,7 +225,5 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Metadata:    mBytes,
 		FixedBy:     "",
 	}
-	logrus.Infof("Vulns: %+v", vulnList.Vulnerabilities)
-	logrus.Infof("Desired vuln: %+v", cve202027675)
 	assert.Contains(t, vulnList.Vulnerabilities, cve202027675)
 }
