@@ -474,7 +474,7 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "mcr.microsoft.com/dotnet/core/sdk:3.1.100",
+			image:    "mcr.microsoft.com/dotnet/core/sdk:3.1.100@sha256:091126a93870729f4438ee7ed682ed98639a89acebed40409af90f84302c48dd",
 			registry: "https://mcr.microsoft.com",
 			source:   "NVD",
 			expectedFeatures: []v1.Feature{
