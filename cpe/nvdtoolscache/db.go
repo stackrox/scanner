@@ -163,7 +163,7 @@ func (c *cacheImpl) GetVulnsForComponent(vendor, product, version string) ([]*NV
 		if bucket == nil {
 			return errors.Errorf("unable to fetch bucket for %s", product)
 		}
-		err := bucket.ForEach(func(k, v []byte) error {
+		return bucket.ForEach(func(k, v []byte) error {
 			vuln, err := nvdloader.UnmarshalNVDFeedCVEItem(v)
 			if err != nil {
 				return errors.Wrapf(err, "unmarshaling vuln %s", string(k))
@@ -171,10 +171,6 @@ func (c *cacheImpl) GetVulnsForComponent(vendor, product, version string) ([]*NV
 			cveItems = append(cveItems, vuln)
 			return nil
 		})
-		if err != nil {
-			return err
-		}
-		return nil
 	})
 	if err != nil {
 		return nil, err
