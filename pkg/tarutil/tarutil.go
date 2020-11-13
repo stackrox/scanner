@@ -31,6 +31,7 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/pkg/dotnet"
 	"github.com/stackrox/scanner/pkg/matcher"
 )
 
@@ -97,6 +98,11 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		// File size limit
 		if hdr.Size > maxExtractableFileSize {
 			log.Errorf("Skipping file %q because it was too large (%d bytes)", filename, hdr.Size)
+			continue
+		}
+
+		if dotnet.DLLPattern.MatchString(filename) {
+			data[filename] = nil
 			continue
 		}
 

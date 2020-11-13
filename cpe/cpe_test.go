@@ -113,23 +113,23 @@ func TestGetAttributes(t *testing.T) {
 			expectedAttributes: []*wfn.Attributes{
 				{
 					Vendor:  "microsoft",
-					Product: "asp.net_core",
-					Version: "3.1",
+					Product: "microsoft.aspnetcore.app",
+					Version: "3.1.9",
 				},
 				{
 					Vendor:  "microsoft",
-					Product: "asp.net_core",
-					Version: "3\\.1",
+					Product: "microsoft.aspnetcore.app",
+					Version: "3\\.1\\.9",
 				},
 				{
 					Vendor:  "microsoft",
-					Product: "asp\\.net_core",
-					Version: "3.1",
+					Product: "microsoft\\.aspnetcore\\.app",
+					Version: "3.1.9",
 				},
 				{
 					Vendor:  "microsoft",
-					Product: "asp\\.net_core",
-					Version: "3\\.1",
+					Product: "microsoft\\.aspnetcore\\.app",
+					Version: "3\\.1\\.9",
 				},
 			},
 		},
@@ -142,23 +142,23 @@ func TestGetAttributes(t *testing.T) {
 			expectedAttributes: []*wfn.Attributes{
 				{
 					Vendor:  "microsoft",
-					Product: ".net_core",
-					Version: "3.1",
+					Product: "microsoft.netcore.app",
+					Version: "3.1.8",
 				},
 				{
 					Vendor:  "microsoft",
-					Product: ".net_core",
-					Version: "3\\.1",
+					Product: "microsoft.netcore.app",
+					Version: "3\\.1\\.8",
 				},
 				{
 					Vendor:  "microsoft",
-					Product: "\\.net_core",
-					Version: "3.1",
+					Product: "microsoft\\.netcore\\.app",
+					Version: "3.1.8",
 				},
 				{
 					Vendor:  "microsoft",
-					Product: "\\.net_core",
-					Version: "3\\.1",
+					Product: "microsoft\\.netcore\\.app",
+					Version: "3\\.1\\.8",
 				},
 			},
 		},

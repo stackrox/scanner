@@ -1,6 +1,7 @@
 package dotnetcoreruntime
 
 import (
+	"path/filepath"
 	"strings"
 
 	"github.com/facebookincubator/nvdtools/wfn"
@@ -9,32 +10,22 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 )
 
-var (
-	// The CPE product names were derived via a search through the NVD CPE database for
-	// .NET Core runtime-related products https://nvd.nist.gov/products/cpe/search
-	// and observing the CPEs for known related CVEs.
-	nameToCPEProducts = map[string][]string{
-		"Microsoft.NETCore.App": {
-			".net_core",
-		},
-		"Microsoft.AspNetCore.App": {
-			"asp.net_core",
-		},
-	}
-)
-
 func GetDotNetCoreRuntimeAttributes(c *component.Component) []*wfn.Attributes {
 	vendorSet := set.NewStringSet("microsoft")
 
-	nameSet := set.NewStringSet()
-	for _, name := range nameToCPEProducts[c.Name] {
-		nameSet.AddAll(name, escapePeriod(name))
+	nameSet := set.NewStringSet(c.Name, escapePeriod(c.Name))
+	versionSet := set.NewStringSet()
+	if filepath.Ext(c.Location) == ".dll" {
+		// If the file is a DLL, then the version strings are of the format 4.0.0.0
+		// but the vulnerabilities only describe in the style of 4.0.0
+		version := c.Version
+		if lastIdx := strings.LastIndex(c.Version, "."); lastIdx != -1 {
+			version = version[:lastIdx]
+		}
+		versionSet.AddAll(version, escapePeriod(version))
+	} else {
+		versionSet.AddAll(c.Version, escapePeriod(c.Version))
 	}
-
-	// The CPEs only seem to look at the major and minor versions of the semantic version.
-	majorMinorVersion := c.Version[:strings.LastIndex(c.Version, ".")]
-	versionSet := set.NewStringSet(majorMinorVersion, escapePeriod(majorMinorVersion))
-
 	return common.GenerateAttributesFromSets(vendorSet, nameSet, versionSet, "")
 }
 
