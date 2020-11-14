@@ -12,15 +12,18 @@ import (
 )
 
 // WriteZip takes the given files and creates the vuln dump zip.
-func WriteZip(inputDir, outFile string) error {
+func WriteZip(inputDir, outFile string, ignoreKubernetesVulns bool) error {
 	zipArchive := archiver.NewZip()
 	zipArchive.CompressionLevel = flate.BestCompression
-	return zipArchive.Archive([]string{
-		filepath.Join(inputDir, K8sDirName),
+	sources := []string{
 		filepath.Join(inputDir, ManifestFileName),
 		filepath.Join(inputDir, NVDDirName),
 		filepath.Join(inputDir, OSVulnsFileName),
-	}, outFile)
+	}
+	if !ignoreKubernetesVulns {
+		sources = append(sources, filepath.Join(inputDir, K8sDirName))
+	}
+	return zipArchive.Archive(sources, outFile)
 }
 
 func writeJSONObjectToFile(filePath string, object interface{}) error {

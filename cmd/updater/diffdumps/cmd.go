@@ -338,7 +338,7 @@ func Command() *cobra.Command {
 		}
 
 		log.Info("Zipping up the dump...")
-		err = vulndump.WriteZip(stagingDir, outFile)
+		err = vulndump.WriteZip(stagingDir, outFile, cfg.IgnoreKubernetesVulns)
 		if err != nil {
 			return errors.Wrap(err, "writing final zip")
 		}
