@@ -81,15 +81,6 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 		}
 	}
 
-	if len(baseFiles) == 0 {
-		// Do not perform a diff if the k8s/ directory does not exist.
-		// This is to prevent scanners in the wild from getting this data
-		// before they can even use it.
-		// Only Scanners that have k8s CVEs in its preloaded genesis dump will be able to use this data.
-		log.Info("Skipping Kubernetes diff, as base genesis dump does not have any relevant files.")
-		return nil
-	}
-
 	for _, headF := range headZipR.File {
 		name := headF.Name
 		// Only look at YAML files in the k8s/ folder.
@@ -269,6 +260,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 
 type config struct {
 	SkipFixableCentOSVulns bool `json:"skipFixableCentOSVulns"`
+	IgnoreKubernetesVulns  bool `json:"ignoreKubernetesVulns"`
 }
 
 func Command() *cobra.Command {
@@ -315,11 +307,15 @@ func Command() *cobra.Command {
 			_ = os.RemoveAll(stagingDir)
 		}()
 
-		log.Info("Generating Kubernetes diff...")
-		if err := generateK8sDiffs(stagingDir, baseZipR, headZipR); err != nil {
-			return errors.Wrap(err, "creating Kubernetes diff")
+		if cfg.IgnoreKubernetesVulns {
+			log.Info("Skipping Kubernetes diff")
+		} else {
+			log.Info("Generating Kubernetes diff...")
+			if err := generateK8sDiffs(stagingDir, baseZipR, headZipR); err != nil {
+				return errors.Wrap(err, "creating Kubernetes diff")
+			}
+			log.Info("Done generating Kubernetes diff")
 		}
-		log.Info("Done generating Kubernetes diff")
 
 		log.Info("Generating NVD diff...")
 		if err := generateNVDDiffs(stagingDir, baseManifest.Until, headZipR); err != nil {
