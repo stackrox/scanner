@@ -74,7 +74,10 @@
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20201111010246.zip",
       "timestamp": "2020-11-11T01:02:46.31209102Z",
-      "diffLocation": "gs://definitions.stackrox.io/474f36bb-3ba5-40b8-bc56-3dcc4f2a3c0c/diff.zip"
+      "diffLocation": "gs://definitions.stackrox.io/474f36bb-3ba5-40b8-bc56-3dcc4f2a3c0c/diff.zip",
+      "config": {
+        "ignoreKubernetesVulns": true
+      }
     }
   ]
 }
