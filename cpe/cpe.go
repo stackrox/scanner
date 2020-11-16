@@ -124,8 +124,8 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 			}
 		}
 
-		// DotNetCoreRuntime CVEs in NVD are attributed to Major.Minor version
-		// instead of the full Major.Minor.Patch version.
+		// DotNetCoreRuntime CVEs for the DLLs are of type 4.0.0, but the
+		// versions are 4.0.0.0
 		// Because of this, we want to make sure to return the full version
 		// for this source type.
 		var versionOverride string
