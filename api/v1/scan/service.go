@@ -76,10 +76,10 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 			vulnsByComponent[component] = &v1.VulnerabilityList{
 				Vulnerabilities: converted,
 			}
-		case *v1.ComponentRequest_NvdComponent:
-			vendor := typ.NvdComponent.Vendor
-			product := typ.NvdComponent.Product
-			version := typ.NvdComponent.Version
+		case *v1.ComponentRequest_AppComponent:
+			vendor := typ.AppComponent.Vendor
+			product := typ.AppComponent.Product
+			version := typ.AppComponent.Version
 			component := vendor + ":" + product + ":" + version
 			if _, exists := vulnsByComponent[component]; exists {
 				continue
@@ -87,7 +87,7 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 
 			nvdVulns, err := s.nvdCache.GetVulnsForComponent(vendor, product, version)
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to get vulns for product %s: %v", typ.NvdComponent.Product, err)
+				return nil, status.Errorf(codes.Internal, "failed to get vulns for product %s: %v", typ.AppComponent.Product, err)
 			}
 
 			vulns, err := convertNVDVulns(nvdVulns)

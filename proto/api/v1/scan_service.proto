@@ -106,12 +106,12 @@ message GetVulnerabilitiesRequest {
 
 message ComponentRequest {
     oneof component_request {
-        NVDComponentRequest nvd_component        = 1;
-        KubernetesComponentRequest k8s_component = 2;
+        ApplicationComponentRequest app_component = 1;
+        KubernetesComponentRequest  k8s_component = 2;
     }
 }
 
-message NVDComponentRequest {
+message ApplicationComponentRequest {
     string vendor  = 1;
     string product = 2;
     string version = 3;
