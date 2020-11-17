@@ -2,6 +2,7 @@ package scan
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/sirupsen/logrus"
@@ -62,7 +63,7 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 		case *v1.ComponentRequest_K8SComponent:
 			c := typ.K8SComponent.Component
 			version := typ.K8SComponent.Version
-			component := c.String() + ":" + version
+			component := fmt.Sprintf("%s:%s", c.String(), version)
 			if _, exists := vulnsByComponent[component]; exists {
 				continue
 			}
@@ -80,7 +81,7 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 			vendor := typ.AppComponent.Vendor
 			product := typ.AppComponent.Product
 			version := typ.AppComponent.Version
-			component := vendor + ":" + product + ":" + version
+			component := fmt.Sprintf("%s:%s:%s", vendor, product, version)
 			if _, exists := vulnsByComponent[component]; exists {
 				continue
 			}
