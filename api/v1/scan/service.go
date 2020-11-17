@@ -28,16 +28,20 @@ type Service interface {
 }
 
 // NewService returns the service for scanning
-func NewService(licenseManager licenses.Manager, db database.Datastore) Service {
+func NewService(licenseManager licenses.Manager, db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8scache.Cache) Service {
 	return &serviceImpl{
 		licenseManager: licenseManager,
 		db:             db,
+		nvdCache:       nvdCache,
+		k8sCache:       k8sCache,
 	}
 }
 
 type serviceImpl struct {
 	licenseManager licenses.Manager
 	db             database.Datastore
+	nvdCache       nvdtoolscache.Cache
+	k8sCache       k8scache.Cache
 }
 
 func (s *serviceImpl) checkLicense() error {
@@ -53,24 +57,23 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 	}
 
 	vulnsByComponent := make(map[string]*v1.VulnerabilityList)
-	nvdCache := nvdtoolscache.Singleton()
-	k8sCache := k8scache.Singleton()
-	for _, component := range req.Components {
-		switch typ := component.ComponentRequest.(type) {
+	for _, component := range req.GetComponents() {
+		switch typ := component.GetComponentRequest().(type) {
 		case *v1.ComponentRequest_K8SComponent:
 			c := typ.K8SComponent.Component
 			version := typ.K8SComponent.Version
-			if _, exists := vulnsByComponent[c.String()]; exists {
+			component := c.String() + ":" + version
+			if _, exists := vulnsByComponent[component]; exists {
 				continue
 			}
 
-			vulns := k8sCache.GetVulnsByComponent(c, version)
+			vulns := s.k8sCache.GetVulnsByComponent(c, version)
 			converted, err := convertK8sVulnerabilities(version, vulns)
 			if err != nil {
 				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
 			}
 
-			vulnsByComponent[c.String()] = &v1.VulnerabilityList{
+			vulnsByComponent[component] = &v1.VulnerabilityList{
 				Vulnerabilities: converted,
 			}
 		case *v1.ComponentRequest_NvdComponent:
@@ -82,7 +85,7 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 				continue
 			}
 
-			nvdVulns, err := nvdCache.GetVulnsForComponent(vendor, product, version)
+			nvdVulns, err := s.nvdCache.GetVulnsForComponent(vendor, product, version)
 			if err != nil {
 				return nil, status.Errorf(codes.Internal, "failed to get vulns for product %s: %v", typ.NvdComponent.Product, err)
 			}

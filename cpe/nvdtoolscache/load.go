@@ -44,7 +44,7 @@ func cpeIsApplicationOrLinuxKernel(cpe string) bool {
 	if len(spl) < 6 {
 		return false
 	}
-	return spl[2] == "a" || spl[2] == "o" && spl[3] == "linux" && spl[4] == "linux_kernel"
+	return spl[2] == "a" || (spl[2] == "o" && spl[3] == "linux" && spl[4] == "linux_kernel")
 }
 
 func isNodeValid(node *schema.NVDCVEFeedJSON10DefNode) bool {
