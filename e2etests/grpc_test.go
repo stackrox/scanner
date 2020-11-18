@@ -5,6 +5,7 @@ package e2etests
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/generated/api/v1"
@@ -81,7 +82,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	require.NoError(t, err)
 
 	// kubelet
-	vulnList := resp.VulnerabilitiesByComponent[v1.KubernetesComponentRequest_KUBELET.String()]
+	vulnList := resp.VulnerabilitiesByComponent[fmt.Sprintf("%s:%s", v1.KubernetesComponentRequest_KUBELET.String(), "1.14.2")]
 	assert.NotEmpty(t, vulnList.Vulnerabilities)
 	m := types.Metadata{
 		CVSSv2: types.MetadataCVSSv2{

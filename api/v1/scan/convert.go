@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
@@ -108,7 +109,8 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 	for _, v := range k8sVulns {
 		m, err := types.ConvertMetadataFromK8s(v)
 		if err != nil {
-			return nil, err
+			log.Errorf("Unable to convert metadata for %s: %v", v.CVE, err)
+			continue
 		}
 		metadataBytes, err := json.Marshal(m)
 		if err != nil {
@@ -118,7 +120,8 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 		link := stringutils.OrDefault(v.IssueURL, v.URL)
 		fixedBy, err := getFixedBy(version, v)
 		if err != nil {
-			return nil, err
+			log.Errorf("Unable to get FixedBy for %s: %v", v.CVE, err)
+			continue
 		}
 		vulns = append(vulns, &v1.Vulnerability{
 			Name:        v.CVE,

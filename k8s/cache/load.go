@@ -57,13 +57,13 @@ func (c *cacheImpl) handleYAMLFile(path string) (bool, error) {
 		return false, nil
 	}
 
-	k8sComponents := make([]v1.KubernetesComponentRequest_KubernetesComponent, len(cveData.Components))
-	for i, component := range cveData.Components {
+	k8sComponents := make([]v1.KubernetesComponentRequest_KubernetesComponent, 0, len(cveData.Components))
+	for _, component := range cveData.Components {
 		k8sComponent, err := toComponent(component)
 		if err != nil {
 			return false, errors.Wrapf(err, "reading components in YAML file at path %q", path)
 		}
-		k8sComponents[i] = k8sComponent
+		k8sComponents = append(k8sComponents, k8sComponent)
 	}
 
 	c.cacheRWLock.Lock()
