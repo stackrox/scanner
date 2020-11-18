@@ -196,6 +196,57 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 				},
 			},
 		},
+		{
+			// Potential kubeProxyVersion or kubeletVersion.
+			version: "v1.11.0+d4cacc0",
+			cves: []*validation.CVESchema{
+				{
+					CVE:         "CVE-2020-1234",
+					Description: "test1",
+					IssueURL:    "issueUrl",
+					CVSS: &validation.CVSSSchema{
+						NVD: &validation.NVDSchema{
+							ScoreV2:  3.5,
+							VectorV2: "AV:N/AC:M/Au:S/C:P/I:N/A:N",
+							ScoreV3:  7.7,
+							VectorV3: "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+						},
+						Kubernetes: &validation.KubernetesSchema{
+							ScoreV3:  6.3,
+							VectorV3: "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N",
+						},
+					},
+					Affected: []validation.AffectedSchema{
+						{
+							Range:   "<= v1.12.0",
+							FixedBy: "v1.12.1+d4cacc0",
+						},
+					},
+				},
+			},
+			expected: []expectedVuln{
+				{
+					Name:        "CVE-2020-1234",
+					Description: "test1",
+					Link:        "issueUrl",
+					Metadata: &types.Metadata{
+						CVSSv2: types.MetadataCVSSv2{
+							Score:               3.5,
+							Vectors:             "AV:N/AC:M/Au:S/C:P/I:N/A:N",
+							ExploitabilityScore: 6.8,
+							ImpactScore:         2.9,
+						},
+						CVSSv3: types.MetadataCVSSv3{
+							Score:               6.3,
+							Vectors:             "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							ExploitabilityScore: 1.8,
+							ImpactScore:         4.0,
+						},
+					},
+					FixedBy: "v1.12.1+d4cacc0",
+				},
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
