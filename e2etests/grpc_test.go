@@ -41,8 +41,8 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 				},
 			},
 			{
-				ComponentRequest: &v1.ComponentRequest_NvdComponent{
-					NvdComponent: &v1.NVDComponentRequest{
+				ComponentRequest: &v1.ComponentRequest_AppComponent{
+					AppComponent: &v1.ApplicationComponentRequest{
 						Vendor:  "docker",
 						Product: "docker",
 						Version: "19.03.0",
@@ -50,8 +50,8 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 				},
 			},
 			{
-				ComponentRequest: &v1.ComponentRequest_NvdComponent{
-					NvdComponent: &v1.NVDComponentRequest{
+				ComponentRequest: &v1.ComponentRequest_AppComponent{
+					AppComponent: &v1.ApplicationComponentRequest{
 						Vendor:  "kubernetes",
 						Product: "cri-o",
 						Version: "1.16.0",
@@ -59,8 +59,8 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 				},
 			},
 			{
-				ComponentRequest: &v1.ComponentRequest_NvdComponent{
-					NvdComponent: &v1.NVDComponentRequest{
+				ComponentRequest: &v1.ComponentRequest_AppComponent{
+					AppComponent: &v1.ApplicationComponentRequest{
 						Vendor:  "linuxfoundation",
 						Product: "containerd",
 						Version: "1.2.0",
@@ -68,8 +68,8 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 				},
 			},
 			{
-				ComponentRequest: &v1.ComponentRequest_NvdComponent{
-					NvdComponent: &v1.NVDComponentRequest{
+				ComponentRequest: &v1.ComponentRequest_AppComponent{
+					AppComponent: &v1.ApplicationComponentRequest{
 						Vendor:  "linux",
 						Product: "linux_kernel",
 						Version: "5.9.1",
