@@ -56,8 +56,10 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 		return nil, err
 	}
 
-	k8sVulns := make(map[v1.Component_K8SComponent]*v1.ComponentWithVulns)
-	appVulns := make(map[v1.Component_AppComponent]*v1.ComponentWithVulns)
+	resp := make([]*v1.ComponentWithVulns, 0, len(req.GetComponents()))
+
+	k8sVulns := make(map[v1.Component_K8SComponent]bool)
+	appVulns := make(map[v1.Component_AppComponent]bool)
 	for _, component := range req.GetComponents() {
 		switch typ := component.GetComponent().(type) {
 		case *v1.Component_K8SComponent:
@@ -80,12 +82,13 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
 			}
 
-			k8sVulns[component] = &v1.ComponentWithVulns{
+			k8sVulns[component] = true
+			resp = append(resp, &v1.ComponentWithVulns{
 				Component: &v1.Component{
 					Component: &component,
 				},
 				Vulnerabilities: converted,
-			}
+			})
 		case *v1.Component_AppComponent:
 			vendor := typ.AppComponent.Vendor
 			product := typ.AppComponent.Product
@@ -112,25 +115,18 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
 			}
 
-			appVulns[component] = &v1.ComponentWithVulns{
+			appVulns[component] = true
+			resp = append(resp, &v1.ComponentWithVulns{
 				Component: &v1.Component{
 					Component: &component,
 				},
 				Vulnerabilities: vulns,
-			}
+			})
 		case nil:
 			return nil, status.Error(codes.InvalidArgument, "component request must be set")
 		default:
 			return nil, status.Errorf(codes.InvalidArgument, "component request has unexpected type %T", typ)
 		}
-	}
-
-	resp := make([]*v1.ComponentWithVulns, 0, len(k8sVulns)+len(appVulns))
-	for _, v := range k8sVulns {
-		resp = append(resp, v)
-	}
-	for _, v := range appVulns {
-		resp = append(resp, v)
 	}
 
 	return &v1.GetVulnerabilitiesResponse{
