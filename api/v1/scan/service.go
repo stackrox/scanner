@@ -2,7 +2,6 @@ package scan
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/sirupsen/logrus"
@@ -57,14 +56,21 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 		return nil, err
 	}
 
-	vulnsByComponent := make(map[string]*v1.VulnerabilityList)
+	k8sVulns := make(map[v1.Component_K8SComponent]*v1.ComponentWithVulns)
+	appVulns := make(map[v1.Component_AppComponent]*v1.ComponentWithVulns)
 	for _, component := range req.GetComponents() {
-		switch typ := component.GetComponentRequest().(type) {
-		case *v1.ComponentRequest_K8SComponent:
+		switch typ := component.GetComponent().(type) {
+		case *v1.Component_K8SComponent:
 			c := typ.K8SComponent.Component
 			version := typ.K8SComponent.Version
-			component := fmt.Sprintf("%s:%s", c.String(), version)
-			if _, exists := vulnsByComponent[component]; exists {
+
+			component := v1.Component_K8SComponent{
+				K8SComponent: &v1.KubernetesComponent{
+					Component: c,
+					Version:   version,
+				},
+			}
+			if _, exists := k8sVulns[component]; exists {
 				continue
 			}
 
@@ -74,15 +80,25 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
 			}
 
-			vulnsByComponent[component] = &v1.VulnerabilityList{
+			k8sVulns[component] = &v1.ComponentWithVulns{
+				Component: &v1.Component{
+					Component: &component,
+				},
 				Vulnerabilities: converted,
 			}
-		case *v1.ComponentRequest_AppComponent:
+		case *v1.Component_AppComponent:
 			vendor := typ.AppComponent.Vendor
 			product := typ.AppComponent.Product
 			version := typ.AppComponent.Version
-			component := fmt.Sprintf("%s:%s:%s", vendor, product, version)
-			if _, exists := vulnsByComponent[component]; exists {
+
+			component := v1.Component_AppComponent{
+				AppComponent: &v1.ApplicationComponent{
+					Vendor:  vendor,
+					Product: product,
+					Version: version,
+				},
+			}
+			if _, exists := appVulns[component]; exists {
 				continue
 			}
 
@@ -96,7 +112,10 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
 			}
 
-			vulnsByComponent[component] = &v1.VulnerabilityList{
+			appVulns[component] = &v1.ComponentWithVulns{
+				Component: &v1.Component{
+					Component: &component,
+				},
 				Vulnerabilities: vulns,
 			}
 		case nil:
@@ -106,8 +125,16 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 		}
 	}
 
+	resp := make([]*v1.ComponentWithVulns, 0, len(k8sVulns)+len(appVulns))
+	for _, v := range k8sVulns {
+		resp = append(resp, v)
+	}
+	for _, v := range appVulns {
+		resp = append(resp, v)
+	}
+
 	return &v1.GetVulnerabilitiesResponse{
-		VulnerabilitiesByComponent: vulnsByComponent,
+		VulnerabilitiesByComponent: resp,
 	}, nil
 }
 

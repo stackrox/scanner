@@ -13,6 +13,20 @@ import (
 	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
 )
 
+var (
+	strComponentToV1 = map[string]v1.KubernetesComponent_KubernetesComponent{
+		"client-go":               v1.KubernetesComponent_CLIENT_GO,
+		"kube-aggregator":         v1.KubernetesComponent_KUBE_AGGREGATOR,
+		"kube-apiserver":          v1.KubernetesComponent_KUBE_APISERVER,
+		"kube-controller-manager": v1.KubernetesComponent_KUBE_CONTROLLER_MANAGER,
+		"kube-dns":                v1.KubernetesComponent_KUBE_DNS,
+		"kube-proxy":              v1.KubernetesComponent_KUBE_PROXY,
+		"kube-scheduler":          v1.KubernetesComponent_KUBE_SCHEDULER,
+		"kubectl":                 v1.KubernetesComponent_KUBECTL,
+		"kubelet":                 v1.KubernetesComponent_KUBELET,
+	}
+)
+
 func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 	log.WithField("dir", definitionsDir).Info("Loading definitions directory")
 
@@ -57,11 +71,11 @@ func (c *cacheImpl) handleYAMLFile(path string) (bool, error) {
 		return false, nil
 	}
 
-	k8sComponents := make([]v1.KubernetesComponentRequest_KubernetesComponent, 0, len(cveData.Components))
+	k8sComponents := make([]v1.KubernetesComponent_KubernetesComponent, 0, len(cveData.Components))
 	for _, component := range cveData.Components {
-		k8sComponent, err := toComponent(component)
-		if err != nil {
-			return false, errors.Wrapf(err, "reading components in YAML file at path %q", path)
+		k8sComponent, exists := strComponentToV1[component]
+		if !exists {
+			return false, errors.Errorf("Read invalid component (%s) while reading components in YAML file at path %q", component, path)
 		}
 		k8sComponents = append(k8sComponents, k8sComponent)
 	}
@@ -80,29 +94,4 @@ func (c *cacheImpl) handleYAMLFile(path string) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func toComponent(component string) (v1.KubernetesComponentRequest_KubernetesComponent, error) {
-	switch component {
-	case "client-go":
-		return v1.KubernetesComponentRequest_CLIENT_GO, nil
-	case "kube-aggregator":
-		return v1.KubernetesComponentRequest_KUBE_AGGREGATOR, nil
-	case "kube-apiserver":
-		return v1.KubernetesComponentRequest_KUBE_APISERVER, nil
-	case "kube-controller-manager":
-		return v1.KubernetesComponentRequest_KUBE_CONTROLLER_MANAGER, nil
-	case "kube-dns":
-		return v1.KubernetesComponentRequest_KUBE_DNS, nil
-	case "kube-proxy":
-		return v1.KubernetesComponentRequest_KUBE_PROXY, nil
-	case "kube-scheduler":
-		return v1.KubernetesComponentRequest_KUBE_SCHEDULER, nil
-	case "kubectl":
-		return v1.KubernetesComponentRequest_KUBECTL, nil
-	case "kubelet":
-		return v1.KubernetesComponentRequest_KUBELET, nil
-	default:
-		return v1.KubernetesComponentRequest_UNSET, errors.Errorf("Invalid component %q", component)
-	}
 }

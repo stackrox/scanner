@@ -5,7 +5,6 @@ package e2etests
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/generated/api/v1"
@@ -30,60 +29,57 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewScanServiceClient(conn)
 
+	kubelet := v1.Component_K8SComponent{
+		K8SComponent: &v1.KubernetesComponent{
+			Component: v1.KubernetesComponent_KUBELET,
+			Version:   "1.14.2",
+		},
+	}
+	docker := v1.Component_AppComponent{
+		AppComponent: &v1.ApplicationComponent{
+			Vendor:  "docker",
+			Product: "docker",
+			Version: "19.03.0",
+		},
+	}
+	crio := v1.Component_AppComponent{
+		AppComponent: &v1.ApplicationComponent{
+			Vendor:  "kubernetes",
+			Product: "cri-o",
+			Version: "1.16.0",
+		},
+	}
+	containerd := v1.Component_AppComponent{
+		AppComponent: &v1.ApplicationComponent{
+			Vendor:  "linuxfoundation",
+			Product: "containerd",
+			Version: "1.2.0",
+		},
+	}
+	linux := v1.Component_AppComponent{
+		AppComponent: &v1.ApplicationComponent{
+			Vendor:  "linux",
+			Product: "linux_kernel",
+			Version: "5.9.1",
+		},
+	}
 	req := &v1.GetVulnerabilitiesRequest{
-		Components: []*v1.ComponentRequest{
-			{
-				ComponentRequest: &v1.ComponentRequest_K8SComponent{
-					K8SComponent: &v1.KubernetesComponentRequest{
-						Component: v1.KubernetesComponentRequest_KUBELET,
-						Version:   "1.14.2",
-					},
-				},
-			},
-			{
-				ComponentRequest: &v1.ComponentRequest_AppComponent{
-					AppComponent: &v1.ApplicationComponentRequest{
-						Vendor:  "docker",
-						Product: "docker",
-						Version: "19.03.0",
-					},
-				},
-			},
-			{
-				ComponentRequest: &v1.ComponentRequest_AppComponent{
-					AppComponent: &v1.ApplicationComponentRequest{
-						Vendor:  "kubernetes",
-						Product: "cri-o",
-						Version: "1.16.0",
-					},
-				},
-			},
-			{
-				ComponentRequest: &v1.ComponentRequest_AppComponent{
-					AppComponent: &v1.ApplicationComponentRequest{
-						Vendor:  "linuxfoundation",
-						Product: "containerd",
-						Version: "1.2.0",
-					},
-				},
-			},
-			{
-				ComponentRequest: &v1.ComponentRequest_AppComponent{
-					AppComponent: &v1.ApplicationComponentRequest{
-						Vendor:  "linux",
-						Product: "linux_kernel",
-						Version: "5.9.1",
-					},
-				},
-			},
+		Components: []*v1.Component{
+			{Component: &kubelet},
+			{Component: &docker},
+			{Component: &crio},
+			{Component: &containerd},
+			{Component: &linux},
 		},
 	}
 	resp, err := client.GetVulnerabilities(context.Background(), req)
 	require.NoError(t, err)
+	require.Equal(t, 5, len(resp.VulnerabilitiesByComponent))
 
 	// kubelet
-	vulnList := resp.VulnerabilitiesByComponent[fmt.Sprintf("%s:%s", v1.KubernetesComponentRequest_KUBELET.String(), "1.14.2")]
-	assert.NotEmpty(t, vulnList.Vulnerabilities)
+	vuln := resp.VulnerabilitiesByComponent[0]
+	assert.Equal(t, &kubelet, vuln.Component.Component)
+	assert.NotEmpty(t, vuln.Vulnerabilities)
 	m := types.Metadata{
 		CVSSv2: types.MetadataCVSSv2{
 			Score:               4.6,
@@ -107,11 +103,12 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Metadata:    mBytes,
 		FixedBy:     "1.14.3",
 	}
-	assert.Contains(t, vulnList.Vulnerabilities, cve201911245)
+	assert.Contains(t, vuln.Vulnerabilities, cve201911245)
 
 	// docker
-	vulnList = resp.VulnerabilitiesByComponent["docker:docker:19.03.0"]
-	assert.NotEmpty(t, vulnList.Vulnerabilities)
+	vuln = resp.VulnerabilitiesByComponent[1]
+	assert.Equal(t, &docker, vuln.Component.Component)
+	assert.NotEmpty(t, vuln.Vulnerabilities)
 	m = types.Metadata{
 		PublishedDateTime:    "2019-09-25T18:15Z",
 		LastModifiedDateTime: "2019-10-08T03:15Z",
@@ -136,11 +133,12 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Link:        "https://nvd.nist.gov/vuln/detail/CVE-2019-16884",
 		Metadata:    mBytes,
 	}
-	assert.Contains(t, vulnList.Vulnerabilities, cve201916884)
+	assert.Contains(t, vuln.Vulnerabilities, cve201916884)
 
 	// cri-o
-	vulnList = resp.VulnerabilitiesByComponent["kubernetes:cri-o:1.16.0"]
-	assert.NotEmpty(t, vulnList.Vulnerabilities)
+	vuln = resp.VulnerabilitiesByComponent[2]
+	assert.Equal(t, &crio, vuln.Component.Component)
+	assert.NotEmpty(t, vuln.Vulnerabilities)
 	m = types.Metadata{
 		PublishedDateTime:    "2019-11-25T11:15Z",
 		LastModifiedDateTime: "2020-02-28T18:10Z",
@@ -166,11 +164,12 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Metadata:    mBytes,
 		FixedBy:     "1.16.1",
 	}
-	assert.Contains(t, vulnList.Vulnerabilities, cve201914891)
+	assert.Contains(t, vuln.Vulnerabilities, cve201914891)
 
 	// containerd
-	vulnList = resp.VulnerabilitiesByComponent["linuxfoundation:containerd:1.2.0"]
-	assert.NotEmpty(t, vulnList.Vulnerabilities)
+	vuln = resp.VulnerabilitiesByComponent[3]
+	assert.Equal(t, &containerd, vuln.Component.Component)
+	assert.NotEmpty(t, vuln.Vulnerabilities)
 	m = types.Metadata{
 		PublishedDateTime:    "2020-10-16T17:15Z",
 		LastModifiedDateTime: "2020-10-29T22:06Z",
@@ -196,11 +195,12 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Metadata:    mBytes,
 		FixedBy:     "1.2.14",
 	}
-	assert.Contains(t, vulnList.Vulnerabilities, cve202015157)
+	assert.Contains(t, vuln.Vulnerabilities, cve202015157)
 
 	// linux kernel
-	vulnList = resp.VulnerabilitiesByComponent["linux:linux_kernel:5.9.1"]
-	assert.NotEmpty(t, vulnList.Vulnerabilities)
+	vuln = resp.VulnerabilitiesByComponent[4]
+	assert.Equal(t, &linux, vuln.Component.Component)
+	assert.NotEmpty(t, vuln.Vulnerabilities)
 	m = types.Metadata{
 		PublishedDateTime:    "2020-10-22T21:15Z",
 		LastModifiedDateTime: "2020-11-11T06:15Z",
@@ -226,5 +226,5 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Metadata:    mBytes,
 		FixedBy:     "",
 	}
-	assert.Contains(t, vulnList.Vulnerabilities, cve202027675)
+	assert.Contains(t, vuln.Vulnerabilities, cve202027675)
 }
