@@ -33,25 +33,25 @@ func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 		}
 		totalVulns += numVulns
 	}
-	log.Infof("Total vulns: %d", totalVulns)
+	log.Infof("Total vulns in %q: %d", definitionsDir, totalVulns)
 
 	utils.Must(c.sync())
 	return nil
 }
 
-func cpeIsApplication(cpe string) bool {
-	spl := strings.SplitN(cpe, ":", 4)
-	if len(spl) < 4 {
+func cpeIsApplicationOrLinuxKernel(cpe string) bool {
+	spl := strings.SplitN(cpe, ":", 6)
+	if len(spl) < 6 {
 		return false
 	}
-	return spl[2] == "a"
+	return spl[2] == "a" || (spl[2] == "o" && spl[3] == "linux" && spl[4] == "linux_kernel")
 }
 
 func isNodeValid(node *schema.NVDCVEFeedJSON10DefNode) bool {
 	if len(node.CPEMatch) != 0 {
 		filteredCPEs := node.CPEMatch[:0]
 		for _, cpe := range node.CPEMatch {
-			if cpeIsApplication(cpe.Cpe23Uri) {
+			if cpeIsApplicationOrLinuxKernel(cpe.Cpe23Uri) {
 				filteredCPEs = append(filteredCPEs, cpe)
 			}
 		}

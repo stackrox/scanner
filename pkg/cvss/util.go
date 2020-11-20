@@ -2,7 +2,7 @@ package cvss
 
 import (
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
+	"github.com/stackrox/scanner/pkg/types"
 )
 
 // SeverityFromCVSS converts the CVSS Score (0.0 - 10.0) into a

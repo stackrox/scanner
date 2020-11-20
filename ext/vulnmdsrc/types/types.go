@@ -4,27 +4,6 @@ import (
 	"github.com/stackrox/scanner/database"
 )
 
-type Metadata struct {
-	PublishedDateTime    string
-	LastModifiedDateTime string
-	CVSSv2               MetadataCVSSv2
-	CVSSv3               MetadataCVSSv3
-}
-
-type MetadataCVSSv2 struct {
-	Vectors             string
-	Score               float64
-	ExploitabilityScore float64
-	ImpactScore         float64
-}
-
-type MetadataCVSSv3 struct {
-	Vectors             string
-	Score               float64
-	ExploitabilityScore float64
-	ImpactScore         float64
-}
-
 type MetadataEnricher interface {
 	Metadata() interface{}
 	Summary() string

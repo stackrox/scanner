@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
+	"github.com/stackrox/scanner/pkg/types"
 )
 
 type nvd struct {

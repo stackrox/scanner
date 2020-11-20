@@ -37,6 +37,7 @@ import (
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
+	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/formatter"
 	"github.com/stackrox/scanner/pkg/licenses"
@@ -101,7 +102,7 @@ func Boot(config *Config) {
 		log.WithError(err).Fatal("Failed to initialize license manager")
 	}
 
-	// Open database and initialize vuln cache in parallel, prior to making the API available.
+	// Open database and initialize vuln caches in parallel, prior to making the API available.
 	var wg sync.WaitGroup
 
 	var db database.Datastore
@@ -115,18 +116,25 @@ func Boot(config *Config) {
 		}
 	}()
 
-	var vulncache nvdtoolscache.Cache
+	var nvdVulnCache nvdtoolscache.Cache
 	wg.Add(1)
 	go func() {
 		defer wg.Add(-1)
-		vulncache = nvdtoolscache.Singleton()
+		nvdVulnCache = nvdtoolscache.Singleton()
 	}()
 
-	// Initialize the vulnerability cache prior to making the API available
+	var k8sVulnCache k8scache.Cache
+	wg.Add(1)
+	go func() {
+		defer wg.Add(-1)
+		k8sVulnCache = k8scache.Singleton()
+	}()
+
+	// Initialize the vulnerability caches prior to making the API available
 	wg.Wait()
 	defer db.Close()
 
-	u, err := updater.New(config.Updater, config.CentralEndpoint, db, vulncache)
+	u, err := updater.New(config.Updater, config.CentralEndpoint, db, nvdVulnCache, k8sVulnCache)
 	if err != nil {
 		log.WithError(err).Fatal("Failed to initialize updater")
 	}
@@ -144,7 +152,7 @@ func Boot(config *Config) {
 
 	grpcAPI.Register(
 		ping.NewService(),
-		scan.NewService(manager, db),
+		scan.NewService(manager, db, nvdVulnCache, k8sVulnCache),
 	)
 
 	go grpcAPI.Start()

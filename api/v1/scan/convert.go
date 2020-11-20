@@ -4,9 +4,15 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/hashicorp/go-version"
+	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/k8s-cves/pkg/validation"
+	"github.com/stackrox/rox/pkg/stringutils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/types"
 )
 
 var (
@@ -96,4 +102,73 @@ func convertComponent(c *component.Component) *v1.LanguageLevelComponent {
 		Version:    c.Version,
 		Location:   c.Location,
 	}
+}
+
+func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema) ([]*v1.Vulnerability, error) {
+	vulns := make([]*v1.Vulnerability, 0, len(k8sVulns))
+	for _, v := range k8sVulns {
+		m, err := types.ConvertMetadataFromK8s(v)
+		if err != nil {
+			log.Errorf("Unable to convert metadata for %s: %v", v.CVE, err)
+			continue
+		}
+		metadataBytes, err := json.Marshal(m)
+		if err != nil {
+			return nil, err
+		}
+
+		link := stringutils.OrDefault(v.IssueURL, v.URL)
+		fixedBy, err := getFixedBy(version, v)
+		if err != nil {
+			log.Errorf("Unable to get FixedBy for %s: %v", v.CVE, err)
+			continue
+		}
+		vulns = append(vulns, &v1.Vulnerability{
+			Name:        v.CVE,
+			Description: v.Description,
+			Link:        link,
+			Metadata:    metadataBytes,
+			FixedBy:     fixedBy,
+		})
+	}
+	return vulns, nil
+}
+
+func getFixedBy(vStr string, vuln *validation.CVESchema) (string, error) {
+	v, err := version.NewVersion(vStr)
+	if err != nil {
+		return "", err
+	}
+
+	for _, affected := range vuln.Affected {
+		constraint, err := version.NewConstraint(affected.Range)
+		if err != nil {
+			return "", err
+		}
+		if constraint.Check(v) {
+			return affected.FixedBy, nil
+		}
+	}
+
+	return "", nil
+}
+
+func convertNVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vulnerability, error) {
+	vulns := make([]*v1.Vulnerability, 0, len(nvdVulns))
+	for _, vuln := range nvdVulns {
+		m := types.ConvertNVDMetadata(vuln.NVDCVEFeedJSON10DefCVEItem)
+		mBytes, err := json.Marshal(m)
+		if err != nil {
+			return nil, err
+		}
+		vulns = append(vulns, &v1.Vulnerability{
+			Name:        vuln.CVE.CVEDataMeta.ID,
+			Description: types.ConvertNVDSummary(vuln.NVDCVEFeedJSON10DefCVEItem),
+			Link:        "https://nvd.nist.gov/vuln/detail/" + vuln.CVE.CVEDataMeta.ID,
+			Metadata:    mBytes,
+			FixedBy:     vuln.FixedIn,
+		})
+	}
+
+	return vulns, nil
 }

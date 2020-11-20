@@ -13,6 +13,7 @@ import (
 	"github.com/stackrox/scanner/ext/vulnmdsrc/nvd"
 	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 	"github.com/stackrox/scanner/pkg/cvss"
+	pkgTypes "github.com/stackrox/scanner/pkg/types"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
@@ -26,7 +27,7 @@ type appender struct {
 }
 
 type metadataEnricher struct {
-	metadata *types.Metadata
+	metadata *pkgTypes.Metadata
 	summary  string
 }
 
@@ -91,9 +92,9 @@ func (a *appender) parseDataFeed(r io.Reader) error {
 	return nil
 }
 
-func (a *appender) getHighestCVSSMetadata(cves []string) *types.Metadata {
+func (a *appender) getHighestCVSSMetadata(cves []string) *pkgTypes.Metadata {
 	var maxScore float64
-	var maxMetadata *types.Metadata
+	var maxMetadata *pkgTypes.Metadata
 	for _, cve := range cves {
 		if enricher, ok := a.metadata[cve]; ok {
 			redhatMetadata := enricher.metadata

@@ -8,8 +8,10 @@ import (
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/api/v1"
+	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/licenses"
@@ -26,16 +28,20 @@ type Service interface {
 }
 
 // NewService returns the service for scanning
-func NewService(licenseManager licenses.Manager, db database.Datastore) Service {
+func NewService(licenseManager licenses.Manager, db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8scache.Cache) Service {
 	return &serviceImpl{
 		licenseManager: licenseManager,
 		db:             db,
+		nvdCache:       nvdCache,
+		k8sCache:       k8sCache,
 	}
 }
 
 type serviceImpl struct {
 	licenseManager licenses.Manager
 	db             database.Datastore
+	nvdCache       nvdtoolscache.Cache
+	k8sCache       k8scache.Cache
 }
 
 func (s *serviceImpl) checkLicense() error {
@@ -43,6 +49,89 @@ func (s *serviceImpl) checkLicense() error {
 		return status.Error(codes.Internal, licenses.ErrNoValidLicense.Error())
 	}
 	return nil
+}
+
+func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabilitiesRequest) (*v1.GetVulnerabilitiesResponse, error) {
+	if err := s.checkLicense(); err != nil {
+		return nil, err
+	}
+
+	resp := make([]*v1.ComponentWithVulns, 0, len(req.GetComponents()))
+
+	k8sVulns := make(map[v1.Component_K8SComponent]bool)
+	appVulns := make(map[v1.Component_AppComponent]bool)
+	for _, component := range req.GetComponents() {
+		switch typ := component.GetComponent().(type) {
+		case *v1.Component_K8SComponent:
+			c := typ.K8SComponent.Component
+			version := typ.K8SComponent.Version
+
+			component := v1.Component_K8SComponent{
+				K8SComponent: &v1.KubernetesComponent{
+					Component: c,
+					Version:   version,
+				},
+			}
+			if _, exists := k8sVulns[component]; exists {
+				continue
+			}
+
+			vulns := s.k8sCache.GetVulnsByComponent(c, version)
+			converted, err := convertK8sVulnerabilities(version, vulns)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
+			}
+
+			k8sVulns[component] = true
+			resp = append(resp, &v1.ComponentWithVulns{
+				Component: &v1.Component{
+					Component: &component,
+				},
+				Vulnerabilities: converted,
+			})
+		case *v1.Component_AppComponent:
+			vendor := typ.AppComponent.Vendor
+			product := typ.AppComponent.Product
+			version := typ.AppComponent.Version
+
+			component := v1.Component_AppComponent{
+				AppComponent: &v1.ApplicationComponent{
+					Vendor:  vendor,
+					Product: product,
+					Version: version,
+				},
+			}
+			if _, exists := appVulns[component]; exists {
+				continue
+			}
+
+			nvdVulns, err := s.nvdCache.GetVulnsForComponent(vendor, product, version)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to get vulns for product %s: %v", typ.AppComponent.Product, err)
+			}
+
+			vulns, err := convertNVDVulns(nvdVulns)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
+			}
+
+			appVulns[component] = true
+			resp = append(resp, &v1.ComponentWithVulns{
+				Component: &v1.Component{
+					Component: &component,
+				},
+				Vulnerabilities: vulns,
+			})
+		case nil:
+			return nil, status.Error(codes.InvalidArgument, "component request must be set")
+		default:
+			return nil, status.Errorf(codes.InvalidArgument, "component request has unexpected type %T", typ)
+		}
+	}
+
+	return &v1.GetVulnerabilitiesResponse{
+		VulnerabilitiesByComponent: resp,
+	}, nil
 }
 
 func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
