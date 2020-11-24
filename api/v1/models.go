@@ -88,7 +88,7 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 			if _, ok := languageFeatureMap[location]; !ok {
 				languageFeatureMap[location] = make(map[languageFeatureKey]struct{})
 			}
-			languageFeatureMap[fv.Feature.Location][featureKey] = struct{}{}
+			languageFeatureMap[location][featureKey] = struct{}{}
 			features = append(features, fv)
 		}
 	}
