@@ -12,7 +12,7 @@ import (
 
 func TestRedHatParser(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
-	path := filepath.Join(filepath.Dir(filename))
+	path := filepath.Dir(filename)
 
 	dataFilePath := filepath.Join(path, "/testdata/redhat_test.json")
 	testData, err := os.Open(dataFilePath)

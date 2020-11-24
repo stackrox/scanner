@@ -21,7 +21,7 @@ import (
 
 var (
 	// BoltPath is a temporary path for the boltDB and is expected to be backed by
-	// an empty dir. Exported for localdev to be able to set it.
+	// an empty dir. Exported for localdev and tests to be able to set it.
 	// TODO: Make this injectable instead.
 	BoltPath = filepath.Join(wellknowndirnames.WriteableDir, "temp.db")
 

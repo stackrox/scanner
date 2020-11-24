@@ -2,13 +2,21 @@ package v1
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
+	// Register the CPE validators.
+	_ "github.com/stackrox/scanner/cpe/validation/all"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDedupeVersionMatcher(t *testing.T) {
@@ -164,4 +172,78 @@ func TestNotesUnavailableCVEs(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsUnavailable)
+}
+
+type mockDatastore struct {
+	database.MockDatastore
+	layers map[string][]*component.LayerToComponents
+}
+
+func newMockDatastore() *mockDatastore {
+	return &mockDatastore{
+		layers: make(map[string][]*component.LayerToComponents),
+	}
+}
+
+func TestAddLanguageVulns(t *testing.T) {
+	prevVal := os.Getenv("NVD_DEFINITIONS_DIR")
+	defer require.NoError(t, os.Setenv("NVD_DEFINITIONS_DIR", prevVal))
+	prevBoltPath := nvdtoolscache.BoltPath
+	defer func() {
+		nvdtoolscache.BoltPath = prevBoltPath
+	}()
+
+	_, filename, _, _ := runtime.Caller(0)
+	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
+	require.NoError(t, os.Setenv("NVD_DEFINITIONS_DIR", defsDir))
+
+	dir, err := ioutil.TempDir("", "bolt")
+	require.NoError(t, err)
+	defer func() {
+		_ = os.RemoveAll(dir)
+	}()
+	nvdtoolscache.BoltPath = filepath.Join(dir, "temp.db")
+
+	db := newMockDatastore()
+	db.layers["layer2"] = []*component.LayerToComponents{
+		{
+			Layer: "layer1",
+			Components: []*component.Component{
+				{
+					SourceType: component.DotNetCoreRuntimeSourceType,
+					Name:       "microsoft.dotnetcore.app",
+					Version:    "3.1.2",
+					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/",
+				},
+			},
+		},
+		{
+			Layer: "layer2",
+			Components: []*component.Component{
+				{
+					SourceType: component.DotNetCoreRuntimeSourceType,
+					Name:       "microsoft.dotnetcore.app",
+					Version:    "3.2.0",
+					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/",
+				},
+			},
+			Removed: []string{"usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/"},
+		},
+	}
+	db.FctGetLayerLanguageComponents = func(layer string) ([]*component.LayerToComponents, error) {
+		return db.layers[layer], nil
+	}
+
+	layer := &Layer{
+		Name: "layer2",
+	}
+	addLanguageVulns(db, layer)
+	assert.Equal(t, 1, len(layer.Features))
+	feature := layer.Features[0]
+	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
+	assert.Equal(t, "3.2.0", feature.Version)
+	assert.Equal(t, "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/", feature.Location)
+	assert.Equal(t, 1, len(feature.Vulnerabilities))
+	vuln := feature.Vulnerabilities[0]
+	assert.Equal(t, "CVE-2020-123123123", vuln.Name)
 }
