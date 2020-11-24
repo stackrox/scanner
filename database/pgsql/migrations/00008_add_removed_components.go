@@ -7,7 +7,7 @@ func init() {
 		ID: 8,
 		Up: migrate.Queries([]string{
 			`ALTER TABLE LanguageLayer
-		ADD COLUMN removed_components text[] NOT NULL;`,
+		ADD COLUMN removed_components text[];`,
 		}),
 	})
 }
