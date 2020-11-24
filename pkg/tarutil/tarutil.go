@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os/exec"
@@ -94,6 +95,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		if !filenameMatcher.Match(filename, hdr.FileInfo()) {
 			continue
 		}
+
+		fmt.Printf("File: %s\n", filename)
 
 		// File size limit
 		if hdr.Size > maxExtractableFileSize {

@@ -60,7 +60,7 @@ func TestProcessWithDistUpgrade(t *testing.T) {
 		return database.Layer{}, commonerr.ErrNotFound
 	}
 
-	datastore.FctInsertLayerComponents = func(l string, c []*component.Component) error {
+	datastore.FctInsertLayerComponents = func(l string, c []*component.Component, r []string) error {
 		return nil
 	}
 

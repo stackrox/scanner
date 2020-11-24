@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
@@ -49,27 +50,45 @@ type Layer struct {
 	Features         []Feature         `json:"Features,omitempty"`
 }
 
-type languageFeatureKey struct {
-	name, version, location string
-}
-
 func getLanguageData(db database.Datastore, layerName string) ([]database.FeatureVersion, error) {
 	layersToComponents, err := db.GetLayerLanguageComponents(layerName)
 	if err != nil {
 		return nil, err
 	}
 
-	languageFeatureMap := make(map[languageFeatureKey]struct{})
+	type languageFeatureKey struct {
+		name, version string
+	}
+	languageFeatureMap := make(map[string]map[languageFeatureKey]struct{})
 	var features []database.FeatureVersion
 	for _, layerToComponents := range layersToComponents {
+		if len(layerToComponents.Removed) > 0 {
+			// Remove features deleted in this layer that existed in lower layers.
+			removedComponents := set.NewFrozenStringSet(layerToComponents.Removed...)
+			filtered := features[:0]
+			for _, feature := range features {
+				if removedComponents.Contains(feature.Feature.Location) {
+					delete(languageFeatureMap, feature.Feature.Location)
+					continue
+				}
+
+				filtered = append(filtered, feature)
+			}
+			features = filtered
+		}
+
 		newFeatures := cpe.CheckForVulnerabilities(layerToComponents.Layer, layerToComponents.Components)
 		for _, fv := range newFeatures {
-			featureKey := languageFeatureKey{name: fv.Feature.Name, version: fv.Version, location: fv.Feature.Location}
-			if _, ok := languageFeatureMap[featureKey]; ok {
+			featureKey := languageFeatureKey{name: fv.Feature.Name, version: fv.Version}
+			location := fv.Feature.Location
+			if _, ok := languageFeatureMap[location][featureKey]; ok {
 				// Exact feature already exists at this location so this is probably a file modification and therefore dedupe
 				continue
 			}
-			languageFeatureMap[featureKey] = struct{}{}
+			if _, ok := languageFeatureMap[location]; !ok {
+				languageFeatureMap[location] = make(map[languageFeatureKey]struct{})
+			}
+			languageFeatureMap[fv.Feature.Location][featureKey] = struct{}{}
 			features = append(features, fv)
 		}
 	}

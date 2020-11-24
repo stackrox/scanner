@@ -40,7 +40,7 @@ type MockDatastore struct {
 	FctFindLock                   func(name string) (string, time.Time, error)
 	FctPing                       func() bool
 	FctClose                      func()
-	FctInsertLayerComponents      func(l string, c []*component.Component) error
+	FctInsertLayerComponents      func(l string, c []*component.Component, r []string) error
 	FctGetLayerLanguageComponents func(layer string) ([]*component.Component, error)
 }
 
@@ -170,9 +170,9 @@ func (mds *MockDatastore) AddImage(layer string, digest, name string) error {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) InsertLayerComponents(l string, c []*component.Component) error {
+func (mds *MockDatastore) InsertLayerComponents(l string, c []*component.Component, r []string) error {
 	if mds.FctInsertLayerComponents != nil {
-		return mds.FctInsertLayerComponents(l, c)
+		return mds.FctInsertLayerComponents(l, c, r)
 	}
 	panic("required mock function not implemented")
 }
