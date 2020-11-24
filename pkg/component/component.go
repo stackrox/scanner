@@ -8,7 +8,6 @@ type Component struct {
 
 	Name    string
 	Version string
-	Deleted bool
 
 	SourceType SourceType
 

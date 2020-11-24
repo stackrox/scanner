@@ -185,18 +185,15 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
 	}
 	if len(allComponents) > 0 {
-		comps := make([]string, 0, len(allComponents))
-		for _, comp := range allComponents {
-			comps = append(comps, fmt.Sprintf("%v - %s - %t", comp.SourceType, comp.Location, comp.Deleted))
-		}
-		log.WithFields(log.Fields{logLayerName: name, "components": comps}).Info("detected components")
+		log.WithFields(log.Fields{logLayerName: name, "component count": len(allComponents)}).Debug("detected components")
 	}
 
 	var removedComponents []string
 	for filePath := range files {
-		if strings.HasPrefix(filepath.Base(filePath), whiteout.Prefix) {
+		base := filepath.Base(filePath)
+		if strings.HasPrefix(base, whiteout.Prefix) {
 			// We assume we only have Linux containers, so the path separator will be `/`.
-			removed := fmt.Sprintf("%s/%s", filepath.Dir(filePath), filepath.Base(filePath)[len(whiteout.Prefix):])
+			removed := fmt.Sprintf("%s/%s", filepath.Dir(filePath), base[len(whiteout.Prefix):])
 			removedComponents = append(removedComponents, removed)
 		}
 	}

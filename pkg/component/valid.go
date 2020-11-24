@@ -9,7 +9,7 @@ import (
 // this function.
 // Downstream subsystems can rely on this being the case.
 func Valid(c *Component) bool {
-	return (c.Deleted || stringutils.AllNotEmpty(c.Name, c.Version)) && c.SourceType != UnsetSourceType
+	return stringutils.AllNotEmpty(c.Name, c.Version) && c.SourceType != UnsetSourceType
 }
 
 // FilterToOnlyValid filters the given slice of components to only
