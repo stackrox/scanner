@@ -87,7 +87,7 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 			location := c.Location
 
 			if c.SourceType == component.JavaSourceType {
-				matches := java.SubArchiveLocationRegexp.FindStringSubmatch(c.Location)
+				matches := java.SubArchiveLocationRegexp.FindStringSubmatch(location)
 				if len(matches) == 2 {
 					// Sub-archives in Java are only known by the outermost archive's location.
 					// For example, zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar:guava
