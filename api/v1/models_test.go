@@ -205,6 +205,7 @@ func TestAddLanguageVulns(t *testing.T) {
 	nvdtoolscache.BoltPath = filepath.Join(dir, "temp.db")
 
 	db := newMockDatastore()
+	// 2 layers. First layer's features are deleted in the 2nd layer. 2nd layer adds a new feature.
 	db.layers["layer2"] = []*component.LayerToComponents{
 		{
 			Layer: "layer1",
@@ -230,6 +231,7 @@ func TestAddLanguageVulns(t *testing.T) {
 			Removed: []string{"usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/"},
 		},
 	}
+	// 2 layers. First layer's features are removed in the second. All features from teh same file.
 	layer4 := []*component.LayerToComponents{
 		{
 			Layer: "layer3",
@@ -260,6 +262,31 @@ func TestAddLanguageVulns(t *testing.T) {
 	}
 	db.layers["layer3"] = layer4[:1]
 	db.layers["layer4"] = layer4
+	// 2 layers. 2nd layer symbolizes a chown or touch to the file. AddedBy should be the first layer.
+	db.layers["layer6"] = []*component.LayerToComponents{
+		{
+			Layer: "layer5",
+			Components: []*component.Component{
+				{
+					SourceType: component.DotNetCoreRuntimeSourceType,
+					Name:       "microsoft.dotnetcore.app",
+					Version:    "3.2.0",
+					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/",
+				},
+			},
+		},
+		{
+			Layer: "layer6",
+			Components: []*component.Component{
+				{
+					SourceType: component.DotNetCoreRuntimeSourceType,
+					Name:       "microsoft.dotnetcore.app",
+					Version:    "3.2.0",
+					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/",
+				},
+			},
+		},
+	}
 	db.FctGetLayerLanguageComponents = func(layer string) ([]*component.LayerToComponents, error) {
 		return db.layers[layer], nil
 	}
@@ -274,6 +301,7 @@ func TestAddLanguageVulns(t *testing.T) {
 	assert.Equal(t, "3.2.0", feature.Version)
 	assert.Equal(t, "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/", feature.Location)
 	assert.Equal(t, 1, len(feature.Vulnerabilities))
+	assert.Equal(t, "layer2", feature.AddedBy)
 	vuln := feature.Vulnerabilities[0]
 	assert.Equal(t, "CVE-2020-123123123", vuln.Name)
 
@@ -281,19 +309,22 @@ func TestAddLanguageVulns(t *testing.T) {
 		Name: "layer3",
 	}
 	addLanguageVulns(db, layer)
-	assert.Equal(t, 2, len(layer.Features))
-	zk := layer.Features[0]
-	assert.Equal(t, "zookeeper", zk.Name)
-	assert.Equal(t, "3.4.13", zk.Version)
-	assert.Equal(t, 1, len(zk.Vulnerabilities))
-	guava := layer.Features[1]
-	assert.Equal(t, "guava", guava.Name)
-	assert.Equal(t, "18.0", guava.Version)
-	assert.Equal(t, 1, len(guava.Vulnerabilities))
+	assert.Len(t, layer.Features, 2)
 
 	layer = &Layer{
 		Name: "layer4",
 	}
 	addLanguageVulns(db, layer)
-	assert.Equal(t, 0, len(layer.Features))
+	assert.Empty(t, layer.Features)
+
+	layer = &Layer{
+		Name: "layer6",
+	}
+	addLanguageVulns(db, layer)
+	assert.Len(t, layer.Features, 1)
+	feature = layer.Features[0]
+	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
+	assert.Equal(t, "3.2.0", feature.Version)
+	assert.Equal(t, "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/", feature.Location)
+	assert.Equal(t, "layer5", feature.AddedBy)
 }

@@ -102,7 +102,6 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 			}
 		}
 
-
 		newFeatures := cpe.CheckForVulnerabilities(layerToComponents.Layer, components)
 		for _, fv := range newFeatures {
 			location := fv.Feature.Location
@@ -117,11 +116,6 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 					// Use the higher layer's.
 					continue
 				}
-
-				// The changes between this layer and the higher layer do not affect the vulnerabilities.
-				// We will track this layer's (the lower layer) version of the feature because the vulnerabilities
-				// were introduced in this layer (or below).
-				featureValue.layer = layerToComponents.Layer
 			}
 
 			features = append(features, fv)
