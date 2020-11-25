@@ -231,7 +231,7 @@ func TestAddLanguageVulns(t *testing.T) {
 			Removed: []string{"usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/"},
 		},
 	}
-	// 2 layers. First layer's features are removed in the second. All features from teh same file.
+	// 2 layers. First layer's features are removed in the second. All features from the same file.
 	layer4 := []*component.LayerToComponents{
 		{
 			Layer: "layer3",
