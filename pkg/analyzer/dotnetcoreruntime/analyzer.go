@@ -121,11 +121,15 @@ func getAllDLLComponentsRecursive(m map[string]interface{}, dllToLocationMap map
 			if !ok {
 				continue
 			}
+			location, ok := dllToLocationMap[baseName]
+			if !ok {
+				continue
+			}
 			*comps = append(*comps, &component.Component{
 				Name:       strings.ToLower(name),
 				Version:    version,
 				SourceType: component.DotNetCoreRuntimeSourceType,
-				Location:   dllToLocationMap[baseName],
+				Location:   location,
 			})
 			continue
 		}
