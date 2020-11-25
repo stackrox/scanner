@@ -230,6 +230,36 @@ func TestAddLanguageVulns(t *testing.T) {
 			Removed: []string{"usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/"},
 		},
 	}
+	layer4 := []*component.LayerToComponents{
+		{
+			Layer: "layer3",
+			Components: []*component.Component{
+				{
+					SourceType:      component.JavaSourceType,
+					Name:            "zookeeper",
+					Version:         "3.4.13",
+					Location:        "zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar",
+					JavaPkgMetadata: &component.JavaPkgMetadata{},
+				},
+				{
+					SourceType: component.JavaSourceType,
+					Name:       "guava",
+					Version:    "18.0",
+					Location:   "zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar:guava",
+					JavaPkgMetadata: &component.JavaPkgMetadata{
+						Origins: []string{"google"},
+					},
+				},
+			},
+		},
+		{
+			Layer:      "layer4",
+			Components: []*component.Component{},
+			Removed:    []string{"zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar"},
+		},
+	}
+	db.layers["layer3"] = layer4[:1]
+	db.layers["layer4"] = layer4
 	db.FctGetLayerLanguageComponents = func(layer string) ([]*component.LayerToComponents, error) {
 		return db.layers[layer], nil
 	}
@@ -246,4 +276,24 @@ func TestAddLanguageVulns(t *testing.T) {
 	assert.Equal(t, 1, len(feature.Vulnerabilities))
 	vuln := feature.Vulnerabilities[0]
 	assert.Equal(t, "CVE-2020-123123123", vuln.Name)
+
+	layer = &Layer{
+		Name: "layer3",
+	}
+	addLanguageVulns(db, layer)
+	assert.Equal(t, 2, len(layer.Features))
+	zk := layer.Features[0]
+	assert.Equal(t, "zookeeper", zk.Name)
+	assert.Equal(t, "3.4.13", zk.Version)
+	assert.Equal(t, 1, len(zk.Vulnerabilities))
+	guava := layer.Features[1]
+	assert.Equal(t, "guava", guava.Name)
+	assert.Equal(t, "18.0", guava.Version)
+	assert.Equal(t, 1, len(guava.Vulnerabilities))
+
+	layer = &Layer{
+		Name: "layer4",
+	}
+	addLanguageVulns(db, layer)
+	assert.Equal(t, 0, len(layer.Features))
 }
