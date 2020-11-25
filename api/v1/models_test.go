@@ -295,12 +295,12 @@ func TestAddLanguageVulns(t *testing.T) {
 		Name: "layer2",
 	}
 	addLanguageVulns(db, layer)
-	assert.Equal(t, 1, len(layer.Features))
+	assert.Len(t, layer.Features, 1)
 	feature := layer.Features[0]
 	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
 	assert.Equal(t, "3.2.0", feature.Version)
 	assert.Equal(t, "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/", feature.Location)
-	assert.Equal(t, 1, len(feature.Vulnerabilities))
+	assert.Len(t, feature.Vulnerabilities, 1)
 	assert.Equal(t, "layer2", feature.AddedBy)
 	vuln := feature.Vulnerabilities[0]
 	assert.Equal(t, "CVE-2020-123123123", vuln.Name)
