@@ -2,19 +2,22 @@ package matcher
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/stackrox/scanner/pkg/whiteout"
 )
 
 type Matcher interface {
 	Match(fullPath string, fileInfo os.FileInfo) bool
 }
 
-type whitelistMatcher struct {
-	whitelist []string
+type allowlistMatcher struct {
+	allowlist []string
 }
 
-func (w *whitelistMatcher) Match(fullPath string, _ os.FileInfo) bool {
-	for _, s := range w.whitelist {
+func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo) bool {
+	for _, s := range w.allowlist {
 		if strings.HasPrefix(fullPath, s) {
 			return true
 		}
@@ -22,10 +25,23 @@ func (w *whitelistMatcher) Match(fullPath string, _ os.FileInfo) bool {
 	return false
 }
 
-// NewPrefixWhitelistMatcher returns a matcher that matches all filenames which have any
+// NewPrefixAllowlistMatcher returns a matcher that matches all filenames which have any
 // of the passed paths as a prefix.
-func NewPrefixWhitelistMatcher(whitelist ...string) Matcher {
-	return &whitelistMatcher{whitelist: whitelist}
+func NewPrefixAllowlistMatcher(allowlist ...string) Matcher {
+	return &allowlistMatcher{allowlist: allowlist}
+}
+
+type whiteoutMatcher struct{}
+
+func (w *whiteoutMatcher) Match(fullPath string, _ os.FileInfo) bool {
+	basePath := filepath.Base(fullPath)
+	return strings.HasPrefix(basePath, whiteout.Prefix)
+}
+
+// NewWhiteoutMatcher returns a matcher that matches all whiteout files
+// (ie files which have been deleted).
+func NewWhiteoutMatcher() Matcher {
+	return &whiteoutMatcher{}
 }
 
 type orMatcher struct {

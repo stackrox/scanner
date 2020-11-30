@@ -19,7 +19,6 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
@@ -74,7 +73,7 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 		name, version, layer string
 	}
 	languageFeatureMap := make(map[string]languageFeatureValue)
-	removedLanguageComponentLocations := set.NewStringSet()
+	var removedLanguageComponentLocations []string
 	var features []database.FeatureVersion
 
 	// Loop from highest layer to lowest.
@@ -97,7 +96,14 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 				}
 			}
 
-			if !removedLanguageComponentLocations.Contains(location) {
+			include := true
+			for _, removedLocation := range removedLanguageComponentLocations {
+				if strings.HasPrefix(location, removedLocation) {
+					include = false
+					break
+				}
+			}
+			if include {
 				components = append(components, c)
 			}
 		}
@@ -122,7 +128,7 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 			languageFeatureMap[location] = featureValue
 		}
 
-		removedLanguageComponentLocations.AddAll(layerToComponents.Removed...)
+		removedLanguageComponentLocations = append(removedLanguageComponentLocations, layerToComponents.Removed...)
 	}
 
 	// We want to output the features in layer-order, so we must reverse the feature slice.
