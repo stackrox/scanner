@@ -757,6 +757,7 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
+			// Deletes directory containing jackson-databind:2.6.6.
 			image:    "stackrox/sandbox:scannerremovejar",
 			registry: "https://registry-1.docker.io",
 			source:   "NVD",
@@ -796,9 +797,34 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 			unexpectedFeatures: []v1.Feature{
-				Name:          "jackson-databind",
-				VersionFormat: "JavaSourceType",
-				Version:       "2.9.10.4",
+				{
+					Name:          "jackson-databind",
+					VersionFormat: "JavaSourceType",
+					Version:       "2.9.10.4",
+				},
+			},
+		},
+		{
+			// Deletes fatjar containing zookeeper and guava, and deletes standalone jar containing netty.
+			image:    "stackrox/sandbox:zookeeper-fatjar-remove",
+			registry: "https://registry-1.docker.io",
+			source:   "NVD",
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:          "zookeeper",
+					VersionFormat: "JavaSourceType",
+					Version:       "3.4.13",
+				},
+				{
+					Name:          "guava",
+					VersionFormat: "JavaSourceType",
+					Version:       "18.0",
+				},
+				{
+					Name:          "netty",
+					VersionFormat: "JavaSourceType",
+					Version:       "3.10.6.final",
+				},
 			},
 		},
 	} {
