@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1.Feature, allowNotFound bool) v1.Feature {
+func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1.Feature, allowNotFound bool) *v1.Feature {
 	candidateIdx := -1
 	for i, f := range featureList {
 		if f.Name == featureToFind.Name && f.Version == featureToFind.Version {
@@ -99,7 +99,7 @@ func verifyImageHasExpectedFeaturesOnly(t *testing.T, client *client.Clairify, u
 			}
 			matching.Vulnerabilities = nil
 			feature.Vulnerabilities = nil
-			assert.Equal(t, feature, matching)
+			assert.Equal(t, feature, *matching)
 		})
 	}
 
