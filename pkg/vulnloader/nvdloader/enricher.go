@@ -48,6 +48,7 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 
 		iter, err := r.Log(&git.LogOptions{
 			FileName: &path,
+			Order:    git.LogOrderCommitterTime,
 		})
 		if err != nil {
 			return nil, errors.Wrapf(err, "running git log for file: %v", path)
