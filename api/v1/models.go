@@ -17,6 +17,7 @@ package v1
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
@@ -82,6 +83,7 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 
 		// Ignore components which were removed in higher layers.
 		components := layerToComponents.Components[:0]
+		startTime := time.Now()
 		for _, c := range layerToComponents.Components {
 			location := c.Location
 
@@ -107,6 +109,7 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 				components = append(components, c)
 			}
 		}
+		log.Infof("Time taken to evaluate if vulns were removed: %d milliseconds", time.Since(startTime).Milliseconds())
 
 		newFeatures := cpe.CheckForVulnerabilities(layerToComponents.Layer, components)
 		for _, fv := range newFeatures {
@@ -128,6 +131,12 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 			languageFeatureMap[location] = featureValue
 		}
 
+		s := 0
+		for _, rm := range layerToComponents.Removed {
+			s += len(rm)
+		}
+
+		log.Infof("%d removed files. Filename size: %d bytes", len(layerToComponents.Removed), s)
 		removedLanguageComponentLocations = append(removedLanguageComponentLocations, layerToComponents.Removed...)
 	}
 
