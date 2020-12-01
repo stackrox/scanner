@@ -29,6 +29,19 @@ func Fetch() (map[string]*types.FileFormat, error) {
 		return nil, errors.Wrap(err, "getting git worktree")
 	}
 
+	// REMOVE BEFORE MERGE
+	err = r.Fetch(&git.FetchOptions{
+		RefSpecs: []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = w.Checkout(&git.CheckoutOptions{
+		Branch: "refs/heads/cgorman-fix-cve",
+		Force:  true,
+	})
+
 	files, err := w.Filesystem.ReadDir("cves")
 	if err != nil {
 		return nil, errors.Wrap(err, "reading cve dir")
