@@ -16,6 +16,8 @@ package v1
 
 import (
 	"fmt"
+	"strings"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/cpe"
@@ -25,7 +27,6 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
-	"strings"
 )
 
 // These are possible package prefixes or suffixes. Package managers sometimes annotate
