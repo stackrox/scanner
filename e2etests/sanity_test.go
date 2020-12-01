@@ -30,7 +30,7 @@ func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1
 		return nil
 	}
 	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list", featureToFind)
-	return featureList[candidateIdx]
+	return &featureList[candidateIdx]
 }
 
 func verifyImageHasExpectedFeaturesOnly(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, expectedFeatures, unexpectedFeatures []v1.Feature) {
