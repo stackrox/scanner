@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func getMatchingFeature(featureList []v1.Feature, featureToFind v1.Feature, t *testing.T) v1.Feature {
+func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1.Feature, allowNotFound bool) v1.Feature {
 	candidateIdx := -1
 	for i, f := range featureList {
 		if f.Name == featureToFind.Name && f.Version == featureToFind.Version {
@@ -26,10 +26,14 @@ func getMatchingFeature(featureList []v1.Feature, featureToFind v1.Feature, t *t
 			candidateIdx = i
 		}
 	}
+	if allowNotFound && candidateIdx == -1 {
+		return nil
+	}
 	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list", featureToFind)
 	return featureList[candidateIdx]
 }
-func verifyImageHasExpectedFeatures(client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, expectedFeatures []v1.Feature, t *testing.T) {
+
+func verifyImageHasExpectedFeaturesOnly(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, expectedFeatures, unexpectedFeatures []v1.Feature) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
@@ -56,7 +60,7 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password,
 
 	for _, feature := range expectedFeatures {
 		t.Run(fmt.Sprintf("%s/%s", feature.Name, feature.Version), func(t *testing.T) {
-			matching := getMatchingFeature(env.Layer.Features, feature, t)
+			matching := getMatchingFeature(t, env.Layer.Features, feature, false)
 			if matching.Vulnerabilities != nil {
 				sort.Slice(matching.Vulnerabilities, func(i, j int) bool {
 					return matching.Vulnerabilities[i].Name < matching.Vulnerabilities[j].Name
@@ -98,6 +102,10 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password,
 			assert.Equal(t, feature, matching)
 		})
 	}
+
+	for _, feature := range unexpectedFeatures {
+		assert.Nil(t, getMatchingFeature(t, env.Layer.Features, feature, true))
+	}
 }
 
 func TestImageSanity(t *testing.T) {
@@ -109,6 +117,7 @@ func TestImageSanity(t *testing.T) {
 		username, password string
 		source             string
 		expectedFeatures   []v1.Feature
+		unexpectedFeatures []v1.Feature
 	}{
 		{
 			image:    "docker.io/library/nginx:1.10",
@@ -747,9 +756,54 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			image:    "stackrox/sandbox:scannerremovejar",
+			registry: "https://registry-1.docker.io",
+			source:   "NVD",
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "jackson-databind",
+					VersionFormat: "JavaSourceType",
+					Version:       "2.9.10.4",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:        "CVE-2020-24616",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.6 mishandles the interaction between serialization gadgets and typing, related to br.com.anteros.dbcp.AnterosDBCPDataSource (aka Anteros-DBCP).",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-24616",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"PublishedDateTime":    "2020-08-25T18:15Z",
+									"LastModifiedDateTime": "2020-09-04T14:59Z",
+									"CVSSv2": map[string]interface{}{
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+										"Score":               6.8,
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+									},
+									"CVSSv3": map[string]interface{}{
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+										"Score":               8.1,
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+									},
+								},
+							},
+							FixedBy: "2.9.10.6",
+						},
+					},
+					AddedBy:  "sha256:e7356cc1567dd7b8ece39f10687967e18a308244ba5c84162c2185fdbfe64afc",
+					Location: "jars/jackson-databind-2.9.10.4.jar",
+				},
+			},
+			unexpectedFeatures: []v1.Feature{
+				Name:          "jackson-databind",
+				VersionFormat: "JavaSourceType",
+				Version:       "2.9.10.4",
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			verifyImageHasExpectedFeatures(cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
+			verifyImageHasExpectedFeaturesOnly(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, testCase.unexpectedFeatures)
 		})
 	}
 }
