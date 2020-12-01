@@ -3,7 +3,7 @@ package cache
 import (
 	"testing"
 
-	v1 "github.com/stackrox/scanner/generated/api/v1"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
