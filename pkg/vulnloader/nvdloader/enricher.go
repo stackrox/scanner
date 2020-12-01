@@ -19,7 +19,7 @@ const (
 
 type FileFormatWrapper struct {
 	LastUpdated string
-	*types.FileFormat
+	types.FileFormat
 }
 
 func Fetch() (map[string]*FileFormatWrapper, error) {
@@ -56,6 +56,9 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, "getting the latest commit for file: %v", path)
 		}
+		if c == nil || c.Committer.When.IsZero() {
+			return nil, errors.Errorf("latest found commit for %v is nil or does not have valid time", path)
+		}
 
 		file, err := w.Filesystem.Open(path)
 		if err != nil {
@@ -71,7 +74,7 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 		}
 		resultMap[ff.ID] = &FileFormatWrapper{
 			LastUpdated: c.Committer.When.Format(vulndb.TimeLayout),
-			FileFormat:  &ff,
+			FileFormat:  ff,
 		}
 	}
 	return resultMap, nil
