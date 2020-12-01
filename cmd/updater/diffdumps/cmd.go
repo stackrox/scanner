@@ -113,7 +113,6 @@ func generateNVDDiff(outputDir string, baseLastModifiedTime time.Time, headF *zi
 			return errors.Wrapf(err, "invalid item %+v; couldn't parse modifiedDate", item)
 		}
 		if modifiedDate.After(baseLastModifiedTime) {
-			log.Infof("Updated CVE: %v - %s", item.CVE.CVEDataMeta.ID, modifiedDate)
 			filtered = append(filtered, item)
 		}
 	}

@@ -54,7 +54,7 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 		}
 		c, err := iter.Next()
 		if err != nil {
-			return nil, errors.Wrapf(err, "getting the lastest commit for file: %v", path)
+			return nil, errors.Wrapf(err, "getting the latest commit for file: %v", path)
 		}
 
 		file, err := w.Filesystem.Open(path)
