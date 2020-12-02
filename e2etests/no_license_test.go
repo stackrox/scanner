@@ -15,7 +15,7 @@ import (
 	"time"
 
 	v1 "github.com/stackrox/scanner/generated/api/v1"
-	sharedv1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	sharedV1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -87,23 +87,23 @@ func TestScannerRejectsLicenseGRPC(t *testing.T) {
 	_, err := pingClient.Ping(ctx, &v1.Empty{})
 	require.NoError(t, err)
 
-	scanClient := sharedv1.NewScanServiceClient(conn)
+	scanClient := sharedV1.NewScanServiceClient(conn)
 
-	methods := []func(ctx context.Context, scanClient sharedv1.ScanServiceClient) error{
-		func(ctx context.Context, scanClient sharedv1.ScanServiceClient) error {
-			_, err := scanClient.GetLanguageLevelComponents(ctx, &sharedv1.GetLanguageLevelComponentsRequest{})
+	methods := []func(ctx context.Context, scanClient sharedV1.ScanServiceClient) error{
+		func(ctx context.Context, scanClient sharedV1.ScanServiceClient) error {
+			_, err := scanClient.GetLanguageLevelComponents(ctx, &sharedV1.GetLanguageLevelComponentsRequest{})
 			return err
 		},
-		func(ctx context.Context, scanClient sharedv1.ScanServiceClient) error {
-			_, err := scanClient.GetScan(ctx, &sharedv1.GetScanRequest{})
+		func(ctx context.Context, scanClient sharedV1.ScanServiceClient) error {
+			_, err := scanClient.GetScan(ctx, &sharedV1.GetScanRequest{})
 			return err
 		},
-		func(ctx context.Context, scanClient sharedv1.ScanServiceClient) error {
-			_, err := scanClient.ScanImage(ctx, &sharedv1.ScanImageRequest{})
+		func(ctx context.Context, scanClient sharedV1.ScanServiceClient) error {
+			_, err := scanClient.ScanImage(ctx, &sharedV1.ScanImageRequest{})
 			return err
 		},
-		func(ctx context.Context, scanClient sharedv1.ScanServiceClient) error {
-			_, err := scanClient.GetVulnerabilities(ctx, &sharedv1.GetVulnerabilitiesRequest{})
+		func(ctx context.Context, scanClient sharedV1.ScanServiceClient) error {
+			_, err := scanClient.GetVulnerabilities(ctx, &sharedV1.GetVulnerabilitiesRequest{})
 			return err
 		},
 	}
