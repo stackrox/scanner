@@ -191,10 +191,12 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	var removedFiles []string
 	for filePath := range files {
 		base := filepath.Base(filePath)
-		if base == ".wh..wh..opq" {
+		if base == whiteout.OpaqueDirectory {
+			// The entire directory does not exist in lower layers.
 			removedFiles = append(removedFiles, filepath.Dir(filePath))
 		} else if strings.HasPrefix(base, whiteout.Prefix) {
 			removed := base[len(whiteout.Prefix):]
+			// Only prepend filepath.Dir if the directory is not `./`.
 			if filePath != base {
 				// We assume we only have Linux containers, so the path separator will be `/`.
 				removed = fmt.Sprintf("%s/%s", filepath.Dir(filePath), removed)
