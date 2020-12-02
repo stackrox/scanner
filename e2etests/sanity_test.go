@@ -758,7 +758,7 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// Deletes directory containing jackson-databind:2.6.6.
-			image:    "stackrox/sandbox:scannerremovejar",
+			image:    "docker.io/stackrox/sandbox:scannerremovejar",
 			registry: "https://registry-1.docker.io",
 			source:   "NVD",
 			expectedFeatures: []v1.Feature{
@@ -806,7 +806,7 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// Deletes fatjar containing zookeeper and guava, and deletes standalone jar containing netty.
-			image:    "stackrox/sandbox:zookeeper-fatjar-remove",
+			image:    "docker.io/stackrox/sandbox:zookeeper-fatjar-remove",
 			registry: "https://registry-1.docker.io",
 			source:   "NVD",
 			unexpectedFeatures: []v1.Feature{
