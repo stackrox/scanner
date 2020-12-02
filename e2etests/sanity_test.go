@@ -727,6 +727,8 @@ func TestImageSanity(t *testing.T) {
 			// Deletes directory containing jackson-databind:2.6.6.
 			image:    "docker.io/stackrox/sandbox:scannerremovejar",
 			registry: "https://registry-1.docker.io",
+			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
