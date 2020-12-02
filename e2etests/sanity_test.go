@@ -9,7 +9,6 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
@@ -40,11 +39,6 @@ func verifyImageHasExpectedFeaturesOnly(t *testing.T, client *client.Clairify, u
 	env, err := client.RetrieveImageDataBySHA(img.SHA, true, true)
 	require.NoError(t, err)
 	require.Nil(t, env.Error)
-
-	// Useful when writing things out at first.
-	if len(expectedFeatures) == 0 {
-		t.Fatal(spew.Sdump(env.Layer.Features))
-	}
 
 	// Filter out vulnerabilities with no metadata
 	for idx, feature := range env.Layer.Features {
@@ -881,7 +875,7 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "2.9.10.6",
 						},
 					},
-					AddedBy:  "sha256:e7356cc1567dd7b8ece39f10687967e18a308244ba5c84162c2185fdbfe64afc",
+					AddedBy:  "sha256:36e8e9714b9a509fae9e515ff16237928c3d809f5ae228b14d2f7d7605c02623",
 					Location: "jars/jackson-databind-2.9.10.4.jar",
 				},
 			},
