@@ -23,7 +23,6 @@ import (
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
-	"github.com/stackrox/scanner/pkg/analyzer/java"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
@@ -83,22 +82,9 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 		// Ignore components which were removed in higher layers.
 		components := layerToComponents.Components[:0]
 		for _, c := range layerToComponents.Components {
-			location := c.Location
-
-			if c.SourceType == component.JavaSourceType {
-				matches := java.SubArchiveLocationRegexp.FindStringSubmatch(location)
-				if len(matches) == 2 {
-					// Sub-archives in Java are only known by the outermost archive's location.
-					// For example, zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar:guava
-					// is not a real location in the filesystem. However, the Guava archive is actually inside
-					// zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar, which is known.
-					location = matches[1]
-				}
-			}
-
 			include := true
 			for _, removedLocation := range removedLanguageComponentLocations {
-				if strings.HasPrefix(location, removedLocation) {
+				if strings.HasPrefix(c.Location, removedLocation) {
 					include = false
 					break
 				}

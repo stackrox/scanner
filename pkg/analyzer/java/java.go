@@ -16,8 +16,6 @@ import (
 var (
 	javaRegexp = regexp.MustCompile(`^.*\.([jwe]ar|[jh]pi)$`)
 
-	SubArchiveLocationRegexp = regexp.MustCompile(`^(.*\.(?:[jwe]ar|[jh]pi)):.*$`)
-
 	filteredJavaComponents = []string{
 		"annotation",
 		"spec",

@@ -288,6 +288,24 @@ func TestAddLanguageVulns(t *testing.T) {
 			},
 		},
 	}
+	// Simplified version of real image seen in the wild.
+	db.layers["layer8"] = []*component.LayerToComponents{
+		{
+			Layer: "layer7",
+			Components: []*component.Component{
+				{
+					SourceType: component.NPMSourceType,
+					Name:       "websocket-extensions",
+					Version:    "0.1.3",
+					Location:   "usr/local/share/.cache/yarn/v4/npm-websocket-extensions-0.1.3-5d2ff22977003ec687a4b87073dfbbac146ccf29/node_modules/websocket-extensions/package.json",
+				},
+			},
+		},
+		{
+			Layer:   "layer8",
+			Removed: []string{"usr/local/share/.cache/yarn"},
+		},
+	}
 	db.FctGetLayerLanguageComponents = func(layer string) ([]*component.LayerToComponents, error) {
 		return db.layers[layer], nil
 	}
@@ -328,4 +346,10 @@ func TestAddLanguageVulns(t *testing.T) {
 	assert.Equal(t, "3.2.0", feature.Version)
 	assert.Equal(t, "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/", feature.Location)
 	assert.Equal(t, "layer5", feature.AddedBy)
+
+	layer = &Layer{
+		Name: "layer8",
+	}
+	addLanguageVulns(db, layer)
+	assert.Empty(t, layer.Features)
 }
