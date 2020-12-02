@@ -9,14 +9,15 @@ import (
 	"testing"
 
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
-	// Register the CPE validators.
-	_ "github.com/stackrox/scanner/cpe/validation/all"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	// Register the CPE validators.
+	_ "github.com/stackrox/scanner/cpe/validation/all"
 )
 
 func TestDedupeVersionMatcher(t *testing.T) {
