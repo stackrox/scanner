@@ -74,8 +74,7 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 		return nil, nil
 	}
 
-	fileNameWithExtension := locationSoFar[strings.LastIndex(locationSoFar, "/")+1:]
-	fileName := strings.TrimSuffix(fileNameWithExtension, filepath.Ext(fileNameWithExtension))
+	fileName := strings.TrimSuffix(filepath.Base(locationSoFar), filepath.Ext(locationSoFar))
 
 	topLevelComponent := newJavaComponent(locationSoFar)
 	topLevelComponent.Name = fileName

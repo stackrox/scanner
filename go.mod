@@ -23,7 +23,7 @@ require (
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/heroku/docker-registry-client v0.0.0
-	github.com/lib/pq v1.7.0
+	github.com/lib/pq v1.8.0
 	github.com/mailru/easyjson v0.7.6
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/opencontainers/go-digest v1.0.0

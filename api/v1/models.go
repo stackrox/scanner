@@ -49,31 +49,88 @@ type Layer struct {
 	Features         []Feature         `json:"Features,omitempty"`
 }
 
-type languageFeatureKey struct {
-	name, version, location string
-}
-
+// getLanguageData returns all application (language) features in the given layer.
+// This data includes features which were introduced in lower (parent) layers.
+// Since an image is based on a layered-filesystem, this function recognizes when files/locations
+// have been removed, and does not return features from files from lower (parent) levels which have been deleted
+// in higher (child) levels.
+//
+// A returned feature's AddedBy is the first (parent) layer that introduced the feature. For example,
+// if a file was modified between layers in a way that the features it describes are untouched
+// (ex: chown, touch), then the higher layer's features from that file are unused.
+//
+// A known issue is if a file defines multiple features, and the file is modified between layers in a way
+// that does affect the features it describes (adds, updates, or removes features), which is currently only a
+// concern for the Java source type. However, this event is unlikely, which is why it is not considered at this time.
 func getLanguageData(db database.Datastore, layerName string) ([]database.FeatureVersion, error) {
 	layersToComponents, err := db.GetLayerLanguageComponents(layerName)
 	if err != nil {
 		return nil, err
 	}
 
-	languageFeatureMap := make(map[languageFeatureKey]struct{})
+	type languageFeatureValue struct {
+		name, version, layer string
+	}
+	languageFeatureMap := make(map[string]languageFeatureValue)
+	var removedLanguageComponentLocations []string
 	var features []database.FeatureVersion
-	for _, layerToComponents := range layersToComponents {
-		newFeatures := cpe.CheckForVulnerabilities(layerToComponents.Layer, layerToComponents.Components)
-		for _, fv := range newFeatures {
-			featureKey := languageFeatureKey{name: fv.Feature.Name, version: fv.Version, location: fv.Feature.Location}
-			if _, ok := languageFeatureMap[featureKey]; ok {
-				// Exact feature already exists at this location so this is probably a file modification and therefore dedupe
-				continue
+
+	// Loop from highest layer to lowest.
+	for i := len(layersToComponents) - 1; i >= 0; i-- {
+		layerToComponents := layersToComponents[i]
+
+		// Ignore components which were removed in higher layers.
+		components := layerToComponents.Components[:0]
+		for _, c := range layerToComponents.Components {
+			include := true
+			for _, removedLocation := range removedLanguageComponentLocations {
+				if strings.HasPrefix(c.Location, removedLocation) {
+					include = false
+					break
+				}
 			}
-			languageFeatureMap[featureKey] = struct{}{}
+			if include {
+				components = append(components, c)
+			}
+		}
+
+		newFeatures := cpe.CheckForVulnerabilities(layerToComponents.Layer, components)
+		for _, fv := range newFeatures {
+			location := fv.Feature.Location
+			featureValue := languageFeatureValue{
+				name:    fv.Feature.Name,
+				version: fv.Version,
+				layer:   layerToComponents.Layer,
+			}
+			if existing, ok := languageFeatureMap[location]; ok {
+				if featureValue.name != existing.name || featureValue.version != existing.version {
+					// The contents at this location have changed between layers.
+					// Use the higher layer's.
+					continue
+				}
+			}
+
 			features = append(features, fv)
+			languageFeatureMap[location] = featureValue
+		}
+
+		removedLanguageComponentLocations = append(removedLanguageComponentLocations, layerToComponents.Removed...)
+	}
+
+	// We want to output the features in layer-order, so we must reverse the feature slice.
+	// At the same time, we want to be sure to remove any repeat features that were not filtered previously
+	// (this would be due us detecting a feature was introduced into the image at a lower level than originally thought).
+	filtered := make([]database.FeatureVersion, 0, len(features))
+	for i := len(features) - 1; i >= 0; i-- {
+		feature := features[i]
+
+		featureValue := languageFeatureMap[feature.Feature.Location]
+		if feature.AddedBy.Name == featureValue.layer {
+			filtered = append(filtered, feature)
 		}
 	}
-	return features, nil
+
+	return filtered, nil
 }
 
 func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability {

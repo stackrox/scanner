@@ -45,7 +45,7 @@ func TestExtract(t *testing.T) {
 		assert.Nil(t, err)
 		defer f.Close()
 
-		data, err := ExtractFiles(f, matcher.NewPrefixWhitelistMatcher("test/"))
+		data, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test/"))
 		assert.Nil(t, err)
 
 		if c, n := data["test/test.txt"]; !n {
@@ -65,7 +65,7 @@ func TestExtractUncompressedData(t *testing.T) {
 		assert.Nil(t, err)
 		defer f.Close()
 
-		_, err = ExtractFiles(bytes.NewReader([]byte("that string does not represent a tar or tar-gzip file")), matcher.NewPrefixWhitelistMatcher())
+		_, err = ExtractFiles(bytes.NewReader([]byte("that string does not represent a tar or tar-gzip file")), matcher.NewPrefixAllowlistMatcher())
 		assert.Error(t, err, "Extracting uncompressed data should return an error")
 	}
 }
@@ -74,13 +74,13 @@ func TestMaxExtractableFileSize(t *testing.T) {
 	f, err := os.Open(testfilepath("utils_test.tar.gz"))
 	assert.Nil(t, err)
 	defer utils.IgnoreError(f.Close)
-	contents, err := ExtractFiles(f, matcher.NewPrefixWhitelistMatcher("test_big.txt"))
+	contents, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test_big.txt"))
 	assert.NoError(t, err)
 	// test_big.txt is of size 57 bytes.
 	assert.Contains(t, contents, "test_big.txt")
 
 	SetMaxExtractableFileSize(50)
-	contents, err = ExtractFiles(f, matcher.NewPrefixWhitelistMatcher("test_big.txt"))
+	contents, err = ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test_big.txt"))
 	assert.NoError(t, err)
 	assert.Empty(t, contents)
 }

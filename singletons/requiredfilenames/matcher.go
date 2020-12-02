@@ -18,12 +18,13 @@ var (
 func SingletonMatcher() matcher.Matcher {
 	once.Do(func() {
 		allFileNames := append(featurefmt.RequiredFilenames(), featurens.RequiredFilenames()...)
-		clairMatcher := matcher.NewPrefixWhitelistMatcher(allFileNames...)
+		clairMatcher := matcher.NewPrefixAllowlistMatcher(allFileNames...)
+		whiteoutMatcher := matcher.NewWhiteoutMatcher()
 
 		allAnalyzers := analyzers.Analyzers()
 
-		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+1)
-		allMatchers = append(allMatchers, clairMatcher)
+		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+2)
+		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
 		for _, a := range allAnalyzers {
 			allMatchers = append(allMatchers, a)
 		}

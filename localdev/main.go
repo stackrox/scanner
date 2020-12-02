@@ -109,14 +109,17 @@ func analyzeLocalImage(path string) {
 			break
 		}
 	}
+	fmt.Println(namespace)
 	var total time.Duration
 	for _, l := range config.Layers {
 		layerTarReader := ioutil.NopCloser(bytes.NewBuffer(filemap[l]))
-		_, _, languageComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace})
+		_, _, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace})
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
+
+		fmt.Printf("Removed components: %v\n", removedComponents)
 
 		languageComponents = filterComponentsByName(languageComponents, "")
 

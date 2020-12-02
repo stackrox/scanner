@@ -15,8 +15,11 @@
 package clair
 
 import (
+	"fmt"
 	"io"
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
@@ -28,6 +31,7 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 	featureFlags "github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/whiteout"
 	"github.com/stackrox/scanner/singletons/analyzers"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
 )
@@ -116,7 +120,8 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 
 	// Analyze the content.
 	var languageComponents []*component.Component
-	layer.Namespace, layer.Features, languageComponents, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
+	var removedFiles []string
+	layer.Namespace, layer.Features, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
 	if err != nil {
 		return err
 	}
@@ -128,7 +133,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 		return err
 	}
 
-	return datastore.InsertLayerComponents(layer.Name, languageComponents)
+	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedFiles)
 }
 
 // ProcessLayer detects the Namespace of a layer, the features it adds/removes,
@@ -147,7 +152,8 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 
 	// Analyze the content.
 	var languageComponents []*component.Component
-	layer.Namespace, layer.Features, languageComponents, err = detectContent(imageFormat, name, path, headers, layer.Parent)
+	var removedComponents []string
+	layer.Namespace, layer.Features, languageComponents, removedComponents, err = detectContent(imageFormat, name, path, headers, layer.Parent)
 	if err != nil {
 		return err
 	}
@@ -156,35 +162,56 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 		return err
 	}
 
-	return datastore.InsertLayerComponents(layer.Name, languageComponents)
+	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedComponents)
 }
 
-func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
-	namespace = DetectNamespace(name, files, parent)
+func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, []*component.Component, []string, error) {
+	namespace := DetectNamespace(name, files, parent)
 
 	// Detect features.
-	featureVersions, err = detectFeatureVersions(name, files, namespace, parent)
+	featureVersions, err := detectFeatureVersions(name, files, namespace, parent)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	if len(featureVersions) > 0 {
 		log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
 	}
 
 	if !featureFlags.LanguageVulns.Enabled() {
-		return namespace, featureVersions, nil, err
+		return namespace, featureVersions, nil, nil, err
 	}
 	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())
 	if err != nil {
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
 	}
-	return namespace, featureVersions, allComponents, err
+	if len(allComponents) > 0 {
+		log.WithFields(log.Fields{logLayerName: name, "component count": len(allComponents)}).Debug("detected components")
+	}
+
+	var removedFiles []string
+	for filePath := range files {
+		base := filepath.Base(filePath)
+		if base == whiteout.OpaqueDirectory {
+			// The entire directory does not exist in lower layers.
+			removedFiles = append(removedFiles, filepath.Dir(filePath))
+		} else if strings.HasPrefix(base, whiteout.Prefix) {
+			removed := base[len(whiteout.Prefix):]
+			// Only prepend filepath.Dir if the directory is not `./`.
+			if filePath != base {
+				// We assume we only have Linux containers, so the path separator will be `/`.
+				removed = fmt.Sprintf("%s/%s", filepath.Dir(filePath), removed)
+			}
+			removedFiles = append(removedFiles, removed)
+		}
+	}
+
+	return namespace, featureVersions, allComponents, removedFiles, err
 }
 
-func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
+func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, []*component.Component, []string, error) {
 	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.SingletonMatcher())
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	return detectFromFiles(files, name, parent)
@@ -192,11 +219,11 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 
 // detectContent downloads a layer's archive and extracts its Namespace and
 // Features.
-func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (namespace *database.Namespace, featureVersions []database.FeatureVersion, languageComponents []*component.Component, err error) {
+func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, []*component.Component, []string, error) {
 	files, err := imagefmt.Extract(imageFormat, path, headers, requiredfilenames.SingletonMatcher())
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{logLayerName: name, "path": cleanURL(path)}).Error("failed to extract data from path")
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	return detectFromFiles(files, name, parent)

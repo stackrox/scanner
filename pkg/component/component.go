@@ -22,6 +22,7 @@ type Component struct {
 type LayerToComponents struct {
 	Layer      string
 	Components []*Component
+	Removed    []string
 }
 
 // JavaPkgMetadata contains additional metadata that Java-based components have.

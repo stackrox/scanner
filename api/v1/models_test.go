@@ -2,13 +2,22 @@ package v1
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	// Register the CPE validators.
+	_ "github.com/stackrox/scanner/cpe/validation/all"
 )
 
 func TestDedupeVersionMatcher(t *testing.T) {
@@ -164,4 +173,183 @@ func TestNotesUnavailableCVEs(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsUnavailable)
+}
+
+type mockDatastore struct {
+	database.MockDatastore
+	layers map[string][]*component.LayerToComponents
+}
+
+func newMockDatastore() *mockDatastore {
+	return &mockDatastore{
+		layers: make(map[string][]*component.LayerToComponents),
+	}
+}
+
+func TestAddLanguageVulns(t *testing.T) {
+	prevVal := os.Getenv("NVD_DEFINITIONS_DIR")
+	defer require.NoError(t, os.Setenv("NVD_DEFINITIONS_DIR", prevVal))
+	prevBoltPath := nvdtoolscache.BoltPath
+	defer func() {
+		nvdtoolscache.BoltPath = prevBoltPath
+	}()
+
+	_, filename, _, _ := runtime.Caller(0)
+	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
+	require.NoError(t, os.Setenv("NVD_DEFINITIONS_DIR", defsDir))
+
+	dir, err := ioutil.TempDir("", "bolt")
+	require.NoError(t, err)
+	defer func() {
+		_ = os.RemoveAll(dir)
+	}()
+	nvdtoolscache.BoltPath = filepath.Join(dir, "temp.db")
+
+	db := newMockDatastore()
+	// 2 layers. First layer's features are deleted in the 2nd layer. 2nd layer adds a new feature.
+	db.layers["layer2"] = []*component.LayerToComponents{
+		{
+			Layer: "layer1",
+			Components: []*component.Component{
+				{
+					SourceType: component.DotNetCoreRuntimeSourceType,
+					Name:       "microsoft.dotnetcore.app",
+					Version:    "3.1.2",
+					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/",
+				},
+			},
+		},
+		{
+			Layer: "layer2",
+			Components: []*component.Component{
+				{
+					SourceType: component.DotNetCoreRuntimeSourceType,
+					Name:       "microsoft.dotnetcore.app",
+					Version:    "3.2.0",
+					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/",
+				},
+			},
+			Removed: []string{"usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/"},
+		},
+	}
+	// 2 layers. First layer's features are removed in the second. All features from the same file.
+	layer4 := []*component.LayerToComponents{
+		{
+			Layer: "layer3",
+			Components: []*component.Component{
+				{
+					SourceType:      component.JavaSourceType,
+					Name:            "zookeeper",
+					Version:         "3.4.13",
+					Location:        "zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar",
+					JavaPkgMetadata: &component.JavaPkgMetadata{},
+				},
+				{
+					SourceType: component.JavaSourceType,
+					Name:       "guava",
+					Version:    "18.0",
+					Location:   "zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar:guava",
+					JavaPkgMetadata: &component.JavaPkgMetadata{
+						Origins: []string{"google"},
+					},
+				},
+			},
+		},
+		{
+			Layer:      "layer4",
+			Components: []*component.Component{},
+			Removed:    []string{"zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar"},
+		},
+	}
+	db.layers["layer3"] = layer4[:1]
+	db.layers["layer4"] = layer4
+	// 2 layers. 2nd layer symbolizes a chown or touch to the file. AddedBy should be the first layer.
+	db.layers["layer6"] = []*component.LayerToComponents{
+		{
+			Layer: "layer5",
+			Components: []*component.Component{
+				{
+					SourceType: component.DotNetCoreRuntimeSourceType,
+					Name:       "microsoft.dotnetcore.app",
+					Version:    "3.2.0",
+					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/",
+				},
+			},
+		},
+		{
+			Layer: "layer6",
+			Components: []*component.Component{
+				{
+					SourceType: component.DotNetCoreRuntimeSourceType,
+					Name:       "microsoft.dotnetcore.app",
+					Version:    "3.2.0",
+					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/",
+				},
+			},
+		},
+	}
+	// Simplified version of real image seen in the wild.
+	db.layers["layer8"] = []*component.LayerToComponents{
+		{
+			Layer: "layer7",
+			Components: []*component.Component{
+				{
+					SourceType: component.NPMSourceType,
+					Name:       "websocket-extensions",
+					Version:    "0.1.3",
+					Location:   "usr/local/share/.cache/yarn/v4/npm-websocket-extensions-0.1.3-5d2ff22977003ec687a4b87073dfbbac146ccf29/node_modules/websocket-extensions/package.json",
+				},
+			},
+		},
+		{
+			Layer:   "layer8",
+			Removed: []string{"usr/local/share/.cache/yarn"},
+		},
+	}
+	db.FctGetLayerLanguageComponents = func(layer string) ([]*component.LayerToComponents, error) {
+		return db.layers[layer], nil
+	}
+
+	layer := &Layer{
+		Name: "layer2",
+	}
+	addLanguageVulns(db, layer)
+	assert.Len(t, layer.Features, 1)
+	feature := layer.Features[0]
+	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
+	assert.Equal(t, "3.2.0", feature.Version)
+	assert.Equal(t, "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/", feature.Location)
+	assert.Len(t, feature.Vulnerabilities, 1)
+	assert.Equal(t, "layer2", feature.AddedBy)
+	vuln := feature.Vulnerabilities[0]
+	assert.Equal(t, "CVE-2020-123123123", vuln.Name)
+
+	layer = &Layer{
+		Name: "layer3",
+	}
+	addLanguageVulns(db, layer)
+	assert.Len(t, layer.Features, 2)
+
+	layer = &Layer{
+		Name: "layer4",
+	}
+	addLanguageVulns(db, layer)
+	assert.Empty(t, layer.Features)
+
+	layer = &Layer{
+		Name: "layer6",
+	}
+	addLanguageVulns(db, layer)
+	assert.Len(t, layer.Features, 1)
+	feature = layer.Features[0]
+	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
+	assert.Equal(t, "3.2.0", feature.Version)
+	assert.Equal(t, "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/", feature.Location)
+	assert.Equal(t, "layer5", feature.AddedBy)
+
+	layer = &Layer{
+		Name: "layer8",
+	}
+	addLanguageVulns(db, layer)
+	assert.Empty(t, layer.Features)
 }

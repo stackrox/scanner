@@ -107,7 +107,7 @@ const (
 			FROM Layer l, layer_tree lt
 			WHERE l.id = lt.parent_id
 		)
-		SELECT ll.layer_name, ll.component_data
+		SELECT ll.layer_name, ll.component_data, ll.removed_components
 		FROM LanguageLayer ll
 		JOIN (
 			SELECT row_number() over (ORDER BY depth DESC), id, name FROM layer_tree

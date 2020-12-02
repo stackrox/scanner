@@ -9,7 +9,6 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
@@ -18,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func getMatchingFeature(featureList []v1.Feature, featureToFind v1.Feature, t *testing.T) v1.Feature {
+func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1.Feature, allowNotFound bool) *v1.Feature {
 	candidateIdx := -1
 	for i, f := range featureList {
 		if f.Name == featureToFind.Name && f.Version == featureToFind.Version {
@@ -26,21 +25,20 @@ func getMatchingFeature(featureList []v1.Feature, featureToFind v1.Feature, t *t
 			candidateIdx = i
 		}
 	}
+	if allowNotFound && candidateIdx == -1 {
+		return nil
+	}
 	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list", featureToFind)
-	return featureList[candidateIdx]
+	return &featureList[candidateIdx]
 }
-func verifyImageHasExpectedFeatures(client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, expectedFeatures []v1.Feature, t *testing.T) {
+
+func verifyImageHasExpectedFeaturesOnly(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, expectedFeatures, unexpectedFeatures []v1.Feature) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
 	env, err := client.RetrieveImageDataBySHA(img.SHA, true, true)
 	require.NoError(t, err)
 	require.Nil(t, env.Error)
-
-	// Useful when writing things out at first.
-	if len(expectedFeatures) == 0 {
-		t.Fatal(spew.Sdump(env.Layer.Features))
-	}
 
 	// Filter out vulnerabilities with no metadata
 	for idx, feature := range env.Layer.Features {
@@ -56,7 +54,7 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password,
 
 	for _, feature := range expectedFeatures {
 		t.Run(fmt.Sprintf("%s/%s", feature.Name, feature.Version), func(t *testing.T) {
-			matching := getMatchingFeature(env.Layer.Features, feature, t)
+			matching := getMatchingFeature(t, env.Layer.Features, feature, false)
 			if matching.Vulnerabilities != nil {
 				sort.Slice(matching.Vulnerabilities, func(i, j int) bool {
 					return matching.Vulnerabilities[i].Name < matching.Vulnerabilities[j].Name
@@ -95,8 +93,12 @@ func verifyImageHasExpectedFeatures(client *client.Clairify, username, password,
 			}
 			matching.Vulnerabilities = nil
 			feature.Vulnerabilities = nil
-			assert.Equal(t, feature, matching)
+			assert.Equal(t, feature, *matching)
 		})
+	}
+
+	for _, feature := range unexpectedFeatures {
+		assert.Nil(t, getMatchingFeature(t, env.Layer.Features, feature, true))
 	}
 }
 
@@ -109,6 +111,7 @@ func TestImageSanity(t *testing.T) {
 		username, password string
 		source             string
 		expectedFeatures   []v1.Feature
+		unexpectedFeatures []v1.Feature
 	}{
 		{
 			image:    "docker.io/library/nginx:1.10",
@@ -714,9 +717,204 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			// Deletes directory containing jackson-databind:2.6.6.
+			image:    "docker.io/stackrox/sandbox:scannerremovejar",
+			registry: "https://registry-1.docker.io",
+			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:   "NVD",
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "jackson-databind",
+					VersionFormat: "JavaSourceType",
+					Version:       "2.9.10.4",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:        "CVE-2020-14060",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.5 mishandles the interaction between serialization gadgets and typing, related to oadd.org.apache.xalan.lib.sql.JNDIConnectionPool (aka apache/drill).",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-14060",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"LastModifiedDateTime": "2020-10-20T22:15Z",
+									"PublishedDateTime":    "2020-06-14T21:15Z",
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+								},
+							},
+							FixedBy: "2.9.10.5",
+						},
+						{
+							Name:        "CVE-2020-14061",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.5 mishandles the interaction between serialization gadgets and typing, related to oracle.jms.AQjmsQueueConnectionFactory, oracle.jms.AQjmsXATopicConnectionFactory, oracle.jms.AQjmsTopicConnectionFactory, oracle.jms.AQjmsXAQueueConnectionFactory, and oracle.jms.AQjmsXAConnectionFactory (aka weblogic/oracle-aqjms).",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-14061",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-10-20T22:15Z",
+									"PublishedDateTime":    "2020-06-14T20:15Z",
+								},
+							},
+							FixedBy: "2.9.10.5",
+						},
+						{
+							Name:        "CVE-2020-14062",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.5 mishandles the interaction between serialization gadgets and typing, related to com.sun.org.apache.xalan.internal.lib.sql.JNDIConnectionPool (aka xalan2).",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-14062",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-10-20T22:15Z",
+									"PublishedDateTime":    "2020-06-14T20:15Z",
+								},
+							},
+							FixedBy: "2.9.10.5",
+						},
+						{
+							Name:        "CVE-2020-14195",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.5 mishandles the interaction between serialization gadgets and typing, related to org.jsecurity.realm.jndi.JndiRealmFactory (aka org.jsecurity).",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-14195",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-10-20T22:15Z",
+									"PublishedDateTime":    "2020-06-16T16:15Z",
+								},
+							},
+							FixedBy: "2.9.10.5",
+						},
+						{
+							Name:        "CVE-2020-24616",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.6 mishandles the interaction between serialization gadgets and typing, related to br.com.anteros.dbcp.AnterosDBCPDataSource (aka Anteros-DBCP).",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-24616",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-09-04T14:59Z",
+									"PublishedDateTime":    "2020-08-25T18:15Z",
+								},
+							},
+							FixedBy: "2.9.10.6",
+						},
+						{
+							Name:        "CVE-2020-24750",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.6 mishandles the interaction between serialization gadgets and typing, related to com.pastdev.httpcomponents.configuration.JndiConfiguration.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-24750",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-10-09T12:15Z",
+									"PublishedDateTime":    "2020-09-17T19:15Z",
+								},
+							},
+							FixedBy: "2.9.10.6",
+						},
+					},
+					AddedBy:  "sha256:36e8e9714b9a509fae9e515ff16237928c3d809f5ae228b14d2f7d7605c02623",
+					Location: "jars/jackson-databind-2.9.10.4.jar",
+				},
+			},
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:          "jackson-databind",
+					VersionFormat: "JavaSourceType",
+					Version:       "2.6.6",
+				},
+			},
+		},
+		{
+			// Deletes fatjar containing zookeeper and guava, and deletes standalone jar containing netty.
+			image:    "docker.io/stackrox/sandbox:zookeeper-fatjar-remove",
+			registry: "https://registry-1.docker.io",
+			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:   "NVD",
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:          "zookeeper",
+					VersionFormat: "JavaSourceType",
+					Version:       "3.4.13",
+				},
+				{
+					Name:          "guava",
+					VersionFormat: "JavaSourceType",
+					Version:       "18.0",
+				},
+				{
+					Name:          "netty",
+					VersionFormat: "JavaSourceType",
+					Version:       "3.10.6.final",
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			verifyImageHasExpectedFeatures(cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, t)
+			verifyImageHasExpectedFeaturesOnly(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, testCase.unexpectedFeatures)
 		})
 	}
 }
