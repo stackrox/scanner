@@ -120,8 +120,8 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 
 	// Analyze the content.
 	var languageComponents []*component.Component
-	var removedComponents []string
-	layer.Namespace, layer.Features, languageComponents, removedComponents, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
+	var removedFiles []string
+	layer.Namespace, layer.Features, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 		return err
 	}
 
-	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedComponents)
+	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedFiles)
 }
 
 // ProcessLayer detects the Namespace of a layer, the features it adds/removes,
@@ -188,7 +188,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		log.WithFields(log.Fields{logLayerName: name, "component count": len(allComponents)}).Debug("detected components")
 	}
 
-	var removedComponents []string
+	var removedFiles []string
 	for filePath := range files {
 		base := filepath.Base(filePath)
 		if strings.HasPrefix(base, whiteout.Prefix) {
@@ -197,11 +197,11 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 				// We assume we only have Linux containers, so the path separator will be `/`.
 				removed = fmt.Sprintf("%s/%s", filepath.Dir(filePath), removed)
 			}
-			removedComponents = append(removedComponents, removed)
+			removedFiles = append(removedFiles, removed)
 		}
 	}
 
-	return namespace, featureVersions, allComponents, removedComponents, err
+	return namespace, featureVersions, allComponents, removedFiles, err
 }
 
 func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, []*component.Component, []string, error) {
