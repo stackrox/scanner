@@ -737,25 +737,145 @@ func TestImageSanity(t *testing.T) {
 					Version:       "2.9.10.4",
 					Vulnerabilities: []v1.Vulnerability{
 						{
+							Name:        "CVE-2020-14060",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.5 mishandles the interaction between serialization gadgets and typing, related to oadd.org.apache.xalan.lib.sql.JNDIConnectionPool (aka apache/drill).",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-14060",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"LastModifiedDateTime": "2020-10-20T22:15Z",
+									"PublishedDateTime":    "2020-06-14T21:15Z",
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+								},
+							},
+							FixedBy: "2.9.10.5",
+						},
+						{
+							Name:        "CVE-2020-14061",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.5 mishandles the interaction between serialization gadgets and typing, related to oracle.jms.AQjmsQueueConnectionFactory, oracle.jms.AQjmsXATopicConnectionFactory, oracle.jms.AQjmsTopicConnectionFactory, oracle.jms.AQjmsXAQueueConnectionFactory, and oracle.jms.AQjmsXAConnectionFactory (aka weblogic/oracle-aqjms).",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-14061",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-10-20T22:15Z",
+									"PublishedDateTime":    "2020-06-14T20:15Z",
+								},
+							},
+							FixedBy: "2.9.10.5",
+						},
+						{
+							Name:        "CVE-2020-14062",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.5 mishandles the interaction between serialization gadgets and typing, related to com.sun.org.apache.xalan.internal.lib.sql.JNDIConnectionPool (aka xalan2).",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-14062",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-10-20T22:15Z",
+									"PublishedDateTime":    "2020-06-14T20:15Z",
+								},
+							},
+							FixedBy: "2.9.10.5",
+						},
+						{
+							Name:        "CVE-2020-14195",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.5 mishandles the interaction between serialization gadgets and typing, related to org.jsecurity.realm.jndi.JndiRealmFactory (aka org.jsecurity).",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-14195",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-10-20T22:15Z",
+									"PublishedDateTime":    "2020-06-16T16:15Z",
+								},
+							},
+							FixedBy: "2.9.10.5",
+						},
+						{
 							Name:        "CVE-2020-24616",
 							Description: "FasterXML jackson-databind 2.x before 2.9.10.6 mishandles the interaction between serialization gadgets and typing, related to br.com.anteros.dbcp.AnterosDBCPDataSource (aka Anteros-DBCP).",
 							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-24616",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
-									"PublishedDateTime":    "2020-08-25T18:15Z",
-									"LastModifiedDateTime": "2020-09-04T14:59Z",
 									"CVSSv2": map[string]interface{}{
-										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
-										"Score":               6.8,
 										"ExploitabilityScore": 8.6,
 										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
 									},
 									"CVSSv3": map[string]interface{}{
-										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-										"Score":               8.1,
 										"ExploitabilityScore": 2.2,
 										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 									},
+									"LastModifiedDateTime": "2020-09-04T14:59Z",
+									"PublishedDateTime":    "2020-08-25T18:15Z",
+								},
+							},
+							FixedBy: "2.9.10.6",
+						},
+						{
+							Name:        "CVE-2020-24750",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.6 mishandles the interaction between serialization gadgets and typing, related to com.pastdev.httpcomponents.configuration.JndiConfiguration.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-24750",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-10-09T12:15Z",
+									"PublishedDateTime":    "2020-09-17T19:15Z",
 								},
 							},
 							FixedBy: "2.9.10.6",
@@ -769,7 +889,7 @@ func TestImageSanity(t *testing.T) {
 				{
 					Name:          "jackson-databind",
 					VersionFormat: "JavaSourceType",
-					Version:       "2.9.10.4",
+					Version:       "2.6.6",
 				},
 			},
 		},
@@ -777,6 +897,8 @@ func TestImageSanity(t *testing.T) {
 			// Deletes fatjar containing zookeeper and guava, and deletes standalone jar containing netty.
 			image:    "docker.io/stackrox/sandbox:zookeeper-fatjar-remove",
 			registry: "https://registry-1.docker.io",
+			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:   "NVD",
 			unexpectedFeatures: []v1.Feature{
 				{
