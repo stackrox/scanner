@@ -227,14 +227,14 @@ db-image-rhel: $(CURDIR)/image/db/rhel/bundle.tar.gz
 deploy: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
-	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG,updateInterval=2m --output-dir rendered-chart
+	helm template scanner chart/ --set tag=$(TAG),logLevel=DEBUG,updateInterval=2m --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
 .PHONY: deploy-dockerhub
 deploy-dockerhub: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
-	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG,updateInterval=2m,scannerImage=stackrox/scanner,scannerDBImage=stackrox/scanner-db --output-dir rendered-chart
+	helm template scanner chart/ --set tag=$(TAG),logLevel=DEBUG,updateInterval=2m,scannerImage=stackrox/scanner,scannerDBImage=stackrox/scanner-db --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
 
@@ -242,7 +242,7 @@ deploy-dockerhub: clean-helm-rendered
 deploy-rhel: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
-	helm template chart/ --name scanner --set tag=$(TAG),logLevel=DEBUG,updateInterval=2m,scannerImage="us.gcr.io/stackrox-ci/scanner-rhel",scannerDBImage="us.gcr.io/stackrox-ci/scanner-db-rhel" --output-dir rendered-chart
+	helm template scanner chart/ --set tag=$(TAG),logLevel=DEBUG,updateInterval=2m,scannerImage="us.gcr.io/stackrox-ci/scanner-rhel",scannerDBImage="us.gcr.io/stackrox-ci/scanner-db-rhel" --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
 ###########
