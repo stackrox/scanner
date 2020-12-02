@@ -191,7 +191,9 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	var removedFiles []string
 	for filePath := range files {
 		base := filepath.Base(filePath)
-		if strings.HasPrefix(base, whiteout.Prefix) {
+		if base == ".wh..wh..opq" {
+			removedFiles = append(removedFiles, filepath.Dir(filePath))
+		} else if strings.HasPrefix(base, whiteout.Prefix) {
 			removed := base[len(whiteout.Prefix):]
 			if filePath != base {
 				// We assume we only have Linux containers, so the path separator will be `/`.
