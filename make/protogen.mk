@@ -48,7 +48,7 @@ $(PROTOC_GEN_GO_BIN):
 	@rm -rf $(GOPATH)/src/github.com/gogo/protobuf
 	mkdir -p $(GOPATH)/src/github.com/gogo
 	git clone https://github.com/connorgorman/protobuf.git $(GOPATH)/src/github.com/gogo/protobuf
-	cd $(GOPATH)/src/github.com/gogo/protobuf && git reset --hard 1.3.1-rox && cd -
+	cd $(GOPATH)/src/github.com/gogo/protobuf && git checkout 1.3.1-rox && cd -
 	GO111MODULE=off go install github.com/gogo/protobuf/protoc-gen-gofast/...
 
 GOGO_M_STR := Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types
