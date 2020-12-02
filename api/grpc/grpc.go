@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/NYTimes/gziphandler"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/mtls"
@@ -23,7 +23,7 @@ const (
 )
 
 func init() {
-	grpc_prometheus.EnableHandlingTimeHistogram()
+	grpcprometheus.EnableHandlingTimeHistogram()
 }
 
 // NewAPI creates a new gRPC API instantiation
@@ -57,7 +57,7 @@ func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
 func (a *apiImpl) Start() {
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(
-			grpc_middleware.ChainUnaryServer(a.unaryInterceptors()...),
+			grpcmiddleware.ChainUnaryServer(a.unaryInterceptors()...),
 		),
 	)
 	for _, serv := range a.apiServices {
@@ -128,7 +128,7 @@ func (a *apiImpl) Register(services ...APIService) {
 
 func (a *apiImpl) unaryInterceptors() []grpc.UnaryServerInterceptor {
 	return []grpc.UnaryServerInterceptor{
-		grpc_prometheus.UnaryServerInterceptor,
+		grpcprometheus.UnaryServerInterceptor,
 	}
 }
 

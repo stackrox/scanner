@@ -1,5 +1,0 @@
-ext/featurefmt/rpm/testdata/Packages
-image/dump/cves_10222019.tar.gz
-go.sum
-pkg/vulnloader/nvdloader/nvdloader_easyjson.go
-

@@ -10,7 +10,7 @@ import (
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
-	v1 "github.com/stackrox/scanner/generated/api/v1"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/types"
 )

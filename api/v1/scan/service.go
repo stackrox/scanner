@@ -10,7 +10,7 @@ import (
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
-	v1 "github.com/stackrox/scanner/generated/api/v1"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"

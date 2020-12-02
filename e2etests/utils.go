@@ -11,7 +11,7 @@ import (
 
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/rox/pkg/urlfmt"
-	v1 "github.com/stackrox/scanner/generated/api/v1"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
