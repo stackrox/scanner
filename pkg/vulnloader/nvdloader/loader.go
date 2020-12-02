@@ -11,7 +11,6 @@ import (
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/pkg/errors"
-	"github.com/stackrox/dotnet-scraper/types"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/vulndump"
@@ -54,7 +53,7 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 	return nil
 }
 
-func downloadFeedForYear(enrichmentMap map[string]*types.FileFormat, outputDir string, year int) error {
+func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir string, year int) error {
 	url := jsonFeedURLForYear(year)
 	resp, err := client.Get(url)
 	if err != nil {
@@ -80,6 +79,7 @@ func downloadFeedForYear(enrichmentMap map[string]*types.FileFormat, outputDir s
 				CPEMatch: enrichedEntry.AffectedPackages,
 				Operator: "OR",
 			})
+			item.LastModifiedDate = enrichedEntry.LastUpdated
 		}
 	}
 

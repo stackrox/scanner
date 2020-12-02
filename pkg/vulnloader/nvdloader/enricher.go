@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/facebookincubator/nvdtools/vulndb"
 	"github.com/ghodss/yaml"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
@@ -16,7 +17,12 @@ const (
 	nvdEnricherRepo = "git@github.com:stackrox/dotnet-scraper.git"
 )
 
-func Fetch() (map[string]*types.FileFormat, error) {
+type FileFormatWrapper struct {
+	LastUpdated string
+	types.FileFormat
+}
+
+func Fetch() (map[string]*FileFormatWrapper, error) {
 	r, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: nvdEnricherRepo,
 	})
@@ -33,12 +39,28 @@ func Fetch() (map[string]*types.FileFormat, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "reading cve dir")
 	}
-	resultMap := make(map[string]*types.FileFormat)
+	resultMap := make(map[string]*FileFormatWrapper)
 	for _, file := range files {
 		if filepath.Ext(file.Name()) != ".yaml" {
 			continue
 		}
 		path := filepath.Join("cves", file.Name())
+
+		iter, err := r.Log(&git.LogOptions{
+			FileName: &path,
+			Order:    git.LogOrderCommitterTime,
+		})
+		if err != nil {
+			return nil, errors.Wrapf(err, "running git log for file: %v", path)
+		}
+		c, err := iter.Next()
+		if err != nil {
+			return nil, errors.Wrapf(err, "getting the latest commit for file: %v", path)
+		}
+		if c == nil || c.Committer.When.IsZero() {
+			return nil, errors.Errorf("latest found commit for %v is nil or does not have valid time", path)
+		}
+
 		file, err := w.Filesystem.Open(path)
 		if err != nil {
 			return nil, errors.Wrapf(err, "opening file: %v", path)
@@ -51,7 +73,10 @@ func Fetch() (map[string]*types.FileFormat, error) {
 		if err := yaml.Unmarshal(data, &ff); err != nil {
 			return nil, errors.Wrapf(err, "unmarshalling file: %v", path)
 		}
-		resultMap[ff.ID] = &ff
+		resultMap[ff.ID] = &FileFormatWrapper{
+			LastUpdated: c.Committer.When.Format(vulndb.TimeLayout),
+			FileFormat:  ff,
+		}
 	}
 	return resultMap, nil
 }
