@@ -1705,15 +1705,15 @@ var fileDescriptor_6ae66a2889f8d924 = []byte{
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConnInterface
+var _ grpc.ClientConn
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion6
+const _ = grpc.SupportPackageIsVersion4
 
 // ScanServiceClient is the client API for ScanService service.
 //
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConnInterface.NewStream.
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ScanServiceClient interface {
 	ScanImage(ctx context.Context, in *ScanImageRequest, opts ...grpc.CallOption) (*ScanImageResponse, error)
 	GetScan(ctx context.Context, in *GetScanRequest, opts ...grpc.CallOption) (*GetScanResponse, error)
@@ -1722,10 +1722,10 @@ type ScanServiceClient interface {
 }
 
 type scanServiceClient struct {
-	cc grpc.ClientConnInterface
+	cc *grpc.ClientConn
 }
 
-func NewScanServiceClient(cc grpc.ClientConnInterface) ScanServiceClient {
+func NewScanServiceClient(cc *grpc.ClientConn) ScanServiceClient {
 	return &scanServiceClient{cc}
 }
 

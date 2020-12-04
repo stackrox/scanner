@@ -34,6 +34,7 @@ import (
 	"github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/ping"
 	"github.com/stackrox/scanner/api/v1/scan"
+	"github.com/stackrox/scanner/api/v1/vulndefs"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
@@ -153,6 +154,7 @@ func Boot(config *Config) {
 	grpcAPI.Register(
 		ping.NewService(),
 		scan.NewService(manager, db, nvdVulnCache, k8sVulnCache),
+		vulndefs.NewService(manager, db),
 	)
 
 	go grpcAPI.Start()

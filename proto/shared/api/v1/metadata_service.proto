@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "v1";
+
+option java_package = "io.stackrox.proto.api.v1";
+
+import "api/v1/empty.proto";
+import "google/protobuf/timestamp.proto";
+import weak "google/api/annotations.proto";
+
+package v1;
+
+message VulnDefsMetadata {
+    google.protobuf.Timestamp last_updated_time = 1;
+}
+
+service VulnDefsService {
+    rpc GetVulnDefsMetadata(Empty) returns (VulnDefsMetadata) {
+        option (google.api.http) = {
+            get: "/v1/vulndefs/metadata"
+        };
+    }
+}

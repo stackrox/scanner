@@ -155,7 +155,8 @@ func (u *Updater) runForever() {
 	}
 }
 
-func getLastUpdatedTime(db database.Datastore) (time.Time, error) {
+// GetLastUpdatedTime returns the time when vulnerability definitions was last updated.
+func GetLastUpdatedTime(db database.Datastore) (time.Time, error) {
 	val, err := db.GetKeyValue(wellknownkeys.VulnUpdateTimestampKey)
 	if err != nil {
 		return time.Time{}, errors.Wrap(err, "getting last updated time from DB")
@@ -196,7 +197,7 @@ func New(config Config, centralEndpoint string, db database.Datastore, caches ..
 		}
 	}
 
-	lastUpdatedTime, err := getLastUpdatedTime(db)
+	lastUpdatedTime, err := GetLastUpdatedTime(db)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting last updated time from DB")
 	}
