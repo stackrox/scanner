@@ -4,9 +4,9 @@ option go_package = "v1";
 
 option java_package = "io.stackrox.proto.api.v1";
 
-import "api/v1/empty.proto";
-import "google/protobuf/timestamp.proto";
 import weak "google/api/annotations.proto";
+import "shared/api/v1/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 package v1;
 

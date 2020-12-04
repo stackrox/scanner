@@ -7,7 +7,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/database"
-	proto "github.com/stackrox/scanner/generated/api/v1"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/updater"
@@ -45,7 +44,7 @@ func (s *serviceImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 	return v1.RegisterVulnDefsServiceHandler(ctx, mux, conn)
 }
 
-func (s *serviceImpl) GetVulnDefsMetadata(context.Context, *proto.Empty) (*v1.VulnDefsMetadata, error) {
+func (s *serviceImpl) GetVulnDefsMetadata(context.Context, *v1.Empty) (*v1.VulnDefsMetadata, error) {
 	if !s.licenseManager.ValidLicenseExists() {
 		return nil, status.Error(codes.Internal, licenses.ErrNoValidLicense.Error())
 	}

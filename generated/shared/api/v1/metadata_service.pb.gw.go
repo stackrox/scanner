@@ -9,7 +9,6 @@ It translates gRPC into RESTful JSON APIs.
 package v1
 
 import (
-	"api/v1"
 	"context"
 	"io"
 	"net/http"
@@ -33,7 +32,7 @@ var _ = utilities.NewDoubleArray
 var _ = descriptor.ForMessage
 
 func request_VulnDefsService_GetVulnDefsMetadata_0(ctx context.Context, marshaler runtime.Marshaler, client VulnDefsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.Empty
+	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetVulnDefsMetadata(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -42,7 +41,7 @@ func request_VulnDefsService_GetVulnDefsMetadata_0(ctx context.Context, marshale
 }
 
 func local_request_VulnDefsService_GetVulnDefsMetadata_0(ctx context.Context, marshaler runtime.Marshaler, server VulnDefsServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.Empty
+	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetVulnDefsMetadata(ctx, &protoReq)
