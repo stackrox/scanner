@@ -712,39 +712,6 @@ func TestImageSanity(t *testing.T) {
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
 					Location: "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.0/",
 				},
-				{
-					Name:          "system.security.cryptography.xml",
-					VersionFormat: "DotNetCoreRuntimeSourceType",
-					Version:       "4.0.3.0",
-					Vulnerabilities: []v1.Vulnerability{
-						{
-							Name:        "CVE-2018-0765",
-							Description: "A denial of service vulnerability exists when .NET and .NET Core improperly process XML documents, aka \".NET and .NET Core Denial of Service Vulnerability.\" This affects Microsoft .NET Framework 2.0, Microsoft .NET Framework 3.0, Microsoft .NET Framework 4.7.1, Microsoft .NET Framework 4.6/4.6.1/4.6.2/4.7/4.7.1, Microsoft .NET Framework 4.5.2, Microsoft .NET Framework 4.7/4.7.1, Microsoft .NET Framework 4.6, Microsoft .NET Framework 3.5, Microsoft .NET Framework 3.5.1, Microsoft .NET Framework 4.6/4.6.1/4.6.2, Microsoft .NET Framework 4.6.2/4.7/4.7.1, .NET Core 2.0, Microsoft .NET Framework 4.7.2.",
-							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2018-0765",
-							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
-									"PublishedDateTime":    "2018-05-09T19:29Z",
-									"LastModifiedDateTime": "2018-06-14T18:01Z",
-									"CVSSv2": map[string]interface{}{
-										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
-										"Score":               5.0,
-										"ExploitabilityScore": 10.0,
-										"ImpactScore":         2.9,
-									},
-									"CVSSv3": map[string]interface{}{
-										"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-										"Score":               7.5,
-										"ExploitabilityScore": 3.9,
-										"ImpactScore":         3.6,
-									},
-								},
-							},
-							FixedBy: "4.4.2",
-						},
-					},
-					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
-					Location: "usr/share/dotnet/shared/Microsoft.AspNetCore.App/3.1.0/System.Security.Cryptography.Xml.dll",
-				},
 			},
 		},
 	} {
