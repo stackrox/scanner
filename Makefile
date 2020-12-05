@@ -294,7 +294,7 @@ clean-proto-generated-srcs:
 ## Clean ##
 ###########
 .PHONY: clean
-clean: clean-image clean-helm-rendered
+clean: clean-image clean-helm-rendered clean-proto-generated-srcs
 	@echo "+ $@"
 
 .PHONY: clean-image
