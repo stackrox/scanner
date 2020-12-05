@@ -6,6 +6,8 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 RUN apk update && \
     apk --no-cache add \
             ca-certificates xz \
+        && apk add --no-cache --upgrade \
+            musl \
         && apk --repository "http://nl.alpinelinux.org/alpine/3.11/community" --no-cache add rpm \
         && apk --purge del apk-tools;
 
