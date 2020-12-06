@@ -14,12 +14,19 @@ import (
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/httputil"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/mtls"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 
 const (
 	localEndpoint = "127.0.0.1:8444"
+)
+
+var (
+	skipPeerValidation = features.SkipPeerValidation.Enabled()
 )
 
 func init() {
@@ -150,6 +157,12 @@ func (a *apiImpl) muxer(localConn *grpc.ClientConn) http.Handler {
 
 func httpGrpcRouter(grpcServer *grpc.Server, httpHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !skipPeerValidation {
+			if err := mtls.VerifyCentralCertificate(r.TLS.PeerCertificates); err != nil {
+				httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
+				return
+			}
+		}
 		if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
 			grpcServer.ServeHTTP(w, r)
 		} else {

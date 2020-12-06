@@ -20,10 +20,15 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/mtls"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"google.golang.org/grpc/codes"
+)
+
+var (
+	skipPeerValidation = features.SkipPeerValidation.Enabled()
 )
 
 // Server is the HTTP server for Clairify.
@@ -211,18 +216,31 @@ func (s *Server) Ping(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("{}"))
 }
 
-func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc) http.HandlerFunc {
+func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc, verifyClient bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !s.licenseManager.ValidLicenseExists() {
 			httputil.WriteGRPCStyleError(w, codes.Internal, licenses.ErrNoValidLicense)
 			return
 		}
+
+		if verifyClient && !skipPeerValidation {
+			if r.TLS == nil {
+				httputil.WriteGRPCStyleError(w, codes.InvalidArgument, errors.New("no tls connection state"))
+				return
+			}
+
+			if err := mtls.VerifyCentralCertificate(r.TLS.PeerCertificates); err != nil {
+				httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
+				return
+			}
+		}
+
 		f(w, r)
 	}
 }
 
-func (s *Server) handleFuncRouter(r *mux.Router, path string, handlerFunc http.HandlerFunc, method string) {
-	r.HandleFunc(path, s.wrapHandlerFuncWithLicenseCheck(handlerFunc)).Methods(method)
+func (s *Server) handleFuncRouterWithLicenseAndVerifyClient(r *mux.Router, path string, handlerFunc http.HandlerFunc, verifyClient bool, method string) {
+	r.HandleFunc(path, s.wrapHandlerFuncWithLicenseCheck(handlerFunc, verifyClient)).Methods(method)
 }
 
 // Start starts the server listening.
@@ -232,11 +250,13 @@ func (s *Server) Start() error {
 	apiRoots := []string{"clairify", "scanner"}
 
 	for _, root := range apiRoots {
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/ping", root), s.Ping, http.MethodGet)
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA, http.MethodGet)
-		s.handleFuncRouter(r, fmt.Sprintf("/%s/image", root), s.ScanImage, http.MethodPost)
+		// Do not verify client cert for ping endpoint. This will be used by the readiness probe
+		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/ping", root), s.Ping, false, http.MethodGet)
 
-		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.wrapHandlerFuncWithLicenseCheck(s.GetResultsByImage)).Methods(http.MethodGet)
+		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA, true, http.MethodGet)
+		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/image", root), s.ScanImage, true, http.MethodPost)
+
+		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.wrapHandlerFuncWithLicenseCheck(s.GetResultsByImage, true)).Methods(http.MethodGet)
 	}
 
 	var tlsConfig *tls.Config

@@ -5,16 +5,17 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
+	"github.com/stackrox/scanner/pkg/httputil"
 )
 
 // Export these timeouts so that the caller can adjust them as necessary
@@ -74,6 +75,10 @@ func (c *Clairify) sendRequest(request *http.Request, timeout time.Duration) ([]
 	if err != nil {
 		return nil, err
 	}
+	if !httputil.Status2xx(response) {
+		return nil, errors.Errorf("Expected status code 2XX. Received %d. Body: %v", response.StatusCode, string(data))
+	}
+
 	var envelope errorEnvelope
 	if err := json.Unmarshal(data, &envelope); err != nil {
 		return nil, err
