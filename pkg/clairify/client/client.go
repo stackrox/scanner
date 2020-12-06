@@ -28,7 +28,6 @@ var (
 type Clairify struct {
 	client   *http.Client
 	endpoint string
-	insecure bool
 }
 
 type errorEnvelope struct {
@@ -46,16 +45,14 @@ func New(endpoint string, insecure bool) *Clairify {
 	return &Clairify{
 		client:   httpClient,
 		endpoint: endpoint,
-		insecure: insecure,
 	}
 }
 
 // NewWithClient returns a new Clairify client instance based on the passed HTTP client
-func NewWithClient(endpoint string, insecure bool, client *http.Client) *Clairify {
+func NewWithClient(endpoint string, client *http.Client) *Clairify {
 	return &Clairify{
 		client:   client,
 		endpoint: endpoint,
-		insecure: insecure,
 	}
 }
 
