@@ -1,7 +1,7 @@
 FROM postgres:12.0-alpine
 
 # Upgrade libxslt to fix CVE-2019-18197
-RUN apk upgrade --no-cache libxslt && apk del apk-tools
+RUN apk upgrade --no-cache libxslt # && apk del apk-tools
 
 COPY ./*.conf /etc/
 

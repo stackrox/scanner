@@ -7,7 +7,8 @@ RUN apk update && \
     apk --no-cache add \
             ca-certificates xz \
         && apk --repository "http://nl.alpinelinux.org/alpine/3.11/community" --no-cache add rpm \
-        && apk --purge del apk-tools;
+        # && apk --purge del apk-tools
+        ;
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 RUN mkdir -p "${NVD_DEFINITIONS_DIR}"

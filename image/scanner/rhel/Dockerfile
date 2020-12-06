@@ -25,10 +25,10 @@ RUN tar -zxf /bundle.tar.gz ./genesis_manifests.json && \
     rm -f /bundle.tar.gz && \
     dnf upgrade -y && \
     dnf install -y ca-certificates xz && \
-    dnf clean all && \
-    rm -rf /var/cache/dnf && \
+    # dnf clean all && \
+    # rm -rf /var/cache/dnf && \
     # (Optional) Remove line below to keep package management utilities
-    rpm -e subscription-manager yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \
+    # rpm -e subscription-manager yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \
     chown -R 4000:4000 "${NVD_DEFINITIONS_DIR}" && \
     chown -R 4000:4000 "${K8S_DEFINITIONS_DIR}" && \
     chown -R 4000:4000 /tmp && \

@@ -286,6 +286,7 @@ commands:
             docker tag "${gcr_db_image}" "${dockerhub_db_image}"
             docker push "${dockerhub_db_image}"
 
+            exit 0
             if [[ -n "$CIRCLE_TAG" ]]; then
                 docker login -u "$STACKROX_IO_PUSH_USERNAME" -p "$STACKROX_IO_PUSH_PASSWORD" stackrox.io
 
@@ -637,9 +638,9 @@ jobs:
             zip scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
             du -skh scanner-vuln-updates.zip
             cmd=()
-            if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
+            #if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
               cmd+=(echo "Would do")
-            fi
+            #fi
             "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 
   build:
@@ -657,6 +658,8 @@ jobs:
       - run:
           name: Check if tagged
           command: |
+            circleci step halt
+            exit 0
             if [[ -z "$CIRCLE_TAG" ]]; then
                 circleci step halt
                 exit 0
