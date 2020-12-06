@@ -8,7 +8,7 @@ import weak "google/api/annotations.proto";
 import "shared/api/v1/empty.proto";
 import "google/protobuf/timestamp.proto";
 
-package v1;
+package scannerV1;
 
 message VulnDefsMetadata {
     google.protobuf.Timestamp last_updated_time = 1;
