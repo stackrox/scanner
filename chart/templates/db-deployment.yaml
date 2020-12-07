@@ -66,7 +66,7 @@ spec:
           emptyDir: {}
         - name: scanner-db-tls-volume
           secret:
-            secretName: scanner-tls
+            secretName: scanner-db-tls
             defaultMode: 0640
             items:
             - key: cert.pem
