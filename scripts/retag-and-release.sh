@@ -13,22 +13,19 @@ tag="$1"
 repos=( "scanner" "scanner-db" )
 exts=( "" "-rhel")
 
-for repo in "${repos[@]}"; do
-  for ext in "${exts[@]}"; do
-    echo docker pull "stackrox/${repo}${ext}:${tag}"
-    echo docker tag "stackrox/${repo}${ext}:${tag}" "stackrox.io/${repo}${ext}:${tag}"
-    echo docker push "stackrox.io/${repo}${ext}:${tag}"
-    echo
+function retag() {
+  for repo in "${repos[@]}"; do
+    for ext in "${exts[@]}"; do
+      $1 docker pull "stackrox/${repo}${ext}:${tag}"
+      $1 docker tag "stackrox/${repo}${ext}:${tag}" "stackrox.io/${repo}${ext}:${tag}"
+      $1 docker push "stackrox.io/${repo}${ext}:${tag}"
+      echo
+    done
   done
-done
+}
 
-read -p "About to run the above. Hit any key to continue and ctrl-c to stop:" VAR
+retag echo
 
-for repo in "${repos[@]}"; do
-  for ext in "${exts[@]}"; do
-    docker pull "stackrox/${repo}${ext}:${tag}"
-    docker tag "stackrox/${repo}${ext}:${tag}" "stackrox.io/${repo}${ext}:${tag}"
-    docker push "stackrox.io/${repo}${ext}:${tag}"
-  done
-done
+read -p "Please check the above commands and ensure CloudFlare caching is disabled. Hit any key to continue or Ctrl-C to stop:" VAR
 
+retag
