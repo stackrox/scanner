@@ -170,7 +170,7 @@ func (a *apiImpl) muxer(localConn *grpc.ClientConn) http.Handler {
 func httpGrpcRouter(grpcServer *grpc.Server, httpHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !skipPeerValidation {
-			if err := mtls.VerifyCentralCertificate(r.TLS.PeerCertificates); err != nil {
+			if err := mtls.VerifyCentralCertificate(r); err != nil {
 				httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
 				return
 			}
