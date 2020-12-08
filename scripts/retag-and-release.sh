@@ -26,6 +26,6 @@ function retag() {
 
 retag echo
 
-read -p "Please check the above commands and ensure CloudFlare caching is disabled. Hit any key to continue or Ctrl-C to stop:" VAR
+read -p "Please check the above commands and ensure CloudFlare caching is disabled. Hit Enter to continue or Ctrl-C to stop:"
 
 retag
