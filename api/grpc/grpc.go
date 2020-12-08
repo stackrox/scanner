@@ -16,9 +16,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil"
 	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/mtls"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -34,9 +36,10 @@ func init() {
 }
 
 // NewAPI creates a new gRPC API instantiation
-func NewAPI(config Config) API {
+func NewAPI(config Config, licenseManager licenses.Manager) API {
 	return &apiImpl{
-		config: config,
+		config:         config,
+		licenseManager: licenseManager,
 	}
 }
 
@@ -59,6 +62,17 @@ func (a *apiImpl) listenOnLocalEndpoint(server *grpc.Server) error {
 
 func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
 	return grpc.Dial(localEndpoint, grpc.WithInsecure())
+}
+
+func (a *apiImpl) licenseCheckUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	// Ping should not be subject to license check
+	if info.FullMethod == "/scannerV1.PingService/Ping" {
+		return handler(ctx, req)
+	}
+	if !a.licenseManager.ValidLicenseExists() {
+		return nil, status.Error(codes.Internal, licenses.ErrNoValidLicense.Error())
+	}
+	return handler(ctx, req)
 }
 
 func (a *apiImpl) Start() {
@@ -119,8 +133,9 @@ type API interface {
 }
 
 type apiImpl struct {
-	apiServices []APIService
-	config      Config
+	apiServices    []APIService
+	licenseManager licenses.Manager
+	config         Config
 }
 
 // A Config configures the server.
@@ -135,6 +150,7 @@ func (a *apiImpl) Register(services ...APIService) {
 
 func (a *apiImpl) unaryInterceptors() []grpc.UnaryServerInterceptor {
 	return []grpc.UnaryServerInterceptor{
+		a.licenseCheckUnaryInterceptor,
 		grpcprometheus.UnaryServerInterceptor,
 	}
 }

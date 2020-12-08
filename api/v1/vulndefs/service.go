@@ -8,7 +8,6 @@ import (
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
-	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/updater"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -22,16 +21,14 @@ type Service interface {
 }
 
 // NewService returns the service for vulnerability definitions.
-func NewService(licenseManager licenses.Manager, db database.Datastore) Service {
+func NewService(db database.Datastore) Service {
 	return &serviceImpl{
-		licenseManager: licenseManager,
-		db:             db,
+		db: db,
 	}
 }
 
 type serviceImpl struct {
-	licenseManager licenses.Manager
-	db             database.Datastore
+	db database.Datastore
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.
@@ -45,10 +42,6 @@ func (s *serviceImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 }
 
 func (s *serviceImpl) GetVulnDefsMetadata(context.Context, *v1.Empty) (*v1.VulnDefsMetadata, error) {
-	if !s.licenseManager.ValidLicenseExists() {
-		return nil, status.Error(codes.Internal, licenses.ErrNoValidLicense.Error())
-	}
-
 	t, err := updater.GetLastUpdatedTime(s.db)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to obtain vulnerability definitions update timestamp: %v", err)

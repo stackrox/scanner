@@ -149,12 +149,12 @@ func Boot(config *Config) {
 	grpcAPI := grpc.NewAPI(grpc.Config{
 		Port:         config.API.GRPCPort,
 		CustomRoutes: debugRoutes,
-	})
+	}, manager)
 
 	grpcAPI.Register(
 		ping.NewService(),
-		scan.NewService(manager, db, nvdVulnCache, k8sVulnCache),
-		vulndefs.NewService(manager, db),
+		scan.NewService(db, nvdVulnCache, k8sVulnCache),
+		vulndefs.NewService(db),
 	)
 
 	go grpcAPI.Start()
