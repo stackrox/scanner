@@ -16,11 +16,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil"
 	"github.com/stackrox/scanner/pkg/features"
-	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/mtls"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -36,10 +34,9 @@ func init() {
 }
 
 // NewAPI creates a new gRPC API instantiation
-func NewAPI(config Config, licenseManager licenses.Manager) API {
+func NewAPI(config Config) API {
 	return &apiImpl{
-		config:         config,
-		licenseManager: licenseManager,
+		config: config,
 	}
 }
 
@@ -122,9 +119,8 @@ type API interface {
 }
 
 type apiImpl struct {
-	apiServices    []APIService
-	licenseManager licenses.Manager
-	config         Config
+	apiServices []APIService
+	config      Config
 }
 
 // A Config configures the server.
@@ -137,16 +133,8 @@ func (a *apiImpl) Register(services ...APIService) {
 	a.apiServices = append(a.apiServices, services...)
 }
 
-func (a *apiImpl) licenseInterceptor(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	if !a.licenseManager.ValidLicenseExists() {
-		return nil, status.Error(codes.Internal, licenses.ErrNoValidLicense.Error())
-	}
-	return handler(ctx, req)
-}
-
 func (a *apiImpl) unaryInterceptors() []grpc.UnaryServerInterceptor {
 	return []grpc.UnaryServerInterceptor{
-		a.licenseInterceptor,
 		grpcprometheus.UnaryServerInterceptor,
 	}
 }

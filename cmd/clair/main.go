@@ -149,7 +149,7 @@ func Boot(config *Config) {
 	grpcAPI := grpc.NewAPI(grpc.Config{
 		Port:         config.API.GRPCPort,
 		CustomRoutes: debugRoutes,
-	}, manager)
+	})
 
 	grpcAPI.Register(
 		ping.NewService(),
