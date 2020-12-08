@@ -45,10 +45,6 @@ func (s *serviceImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.S
 }
 
 func (s *serviceImpl) GetVulnDefsMetadata(context.Context, *v1.Empty) (*v1.VulnDefsMetadata, error) {
-	if !s.licenseManager.ValidLicenseExists() {
-		return nil, status.Error(codes.Internal, licenses.ErrNoValidLicense.Error())
-	}
-
 	t, err := updater.GetLastUpdatedTime(s.db)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to obtain vulnerability definitions update timestamp: %v", err)

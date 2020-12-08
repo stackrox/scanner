@@ -44,18 +44,7 @@ type serviceImpl struct {
 	k8sCache       k8scache.Cache
 }
 
-func (s *serviceImpl) checkLicense() error {
-	if !s.licenseManager.ValidLicenseExists() {
-		return status.Error(codes.Internal, licenses.ErrNoValidLicense.Error())
-	}
-	return nil
-}
-
 func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabilitiesRequest) (*v1.GetVulnerabilitiesResponse, error) {
-	if err := s.checkLicense(); err != nil {
-		return nil, err
-	}
-
 	resp := make([]*v1.ComponentWithVulns, 0, len(req.GetComponents()))
 
 	k8sVulns := make(map[v1.Component_K8SComponent]bool)
@@ -135,10 +124,6 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 }
 
 func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
-	if err := s.checkLicense(); err != nil {
-		return nil, err
-	}
-
 	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec())
 	if err != nil {
 		return nil, err
@@ -153,10 +138,6 @@ func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.Ge
 }
 
 func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (*v1.ScanImageResponse, error) {
-	if err := s.checkLicense(); err != nil {
-		return nil, err
-	}
-
 	image, err := types.GenerateImageFromString(req.GetImage())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "could not parse image %q", req.GetImage())
@@ -232,10 +213,6 @@ func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec) (string, 
 }
 
 func (s *serviceImpl) GetScan(ctx context.Context, req *v1.GetScanRequest) (*v1.GetScanResponse, error) {
-	if err := s.checkLicense(); err != nil {
-		return nil, err
-	}
-
 	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec())
 	if err != nil {
 		return nil, err
