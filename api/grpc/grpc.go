@@ -66,7 +66,7 @@ func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
 
 func (a *apiImpl) licenseCheckUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	// Ping should not be subject to license check
-	if info.FullMethod == "/v1.PingService/Ping" {
+	if info.FullMethod == "/scannerV1.PingService/Ping" {
 		return handler(ctx, req)
 	}
 	if !a.licenseManager.ValidLicenseExists() {
