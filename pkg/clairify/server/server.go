@@ -224,7 +224,7 @@ func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc, verifyClien
 		}
 
 		if verifyClient && !skipPeerValidation {
-			if err := mtls.VerifyCentralCertificate(r); err != nil {
+			if err := mtls.VerifyCentralPeerCertificate(r); err != nil {
 				httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
 				return
 			}

@@ -10,9 +10,9 @@ const (
 	centralCN = "CENTRAL_SERVICE: Central"
 )
 
-// VerifyCentralCertificate verifies one of the peer certificates contains the central.stackrox hostname
+// VerifyCentralPeerCertificate verifies that the peer certificate has the Central Common Name
 // The CA should have already been verified via tls.VerifyClientCertIfGiven
-func VerifyCentralCertificate(r *http.Request) error {
+func VerifyCentralPeerCertificate(r *http.Request) error {
 	if r.TLS == nil {
 		return errors.New("no tls connection state")
 	}
