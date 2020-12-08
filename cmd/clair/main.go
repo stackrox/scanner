@@ -146,20 +146,22 @@ func Boot(config *Config) {
 	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db, manager)
 	go api.RunClairify(serv)
 
-	grpcAPI := grpc.NewAPI(grpc.Config{
-		Port:         config.API.GRPCPort,
-		CustomRoutes: debugRoutes,
-	}, manager)
+	for _, port := range []int{config.API.HTTPSPort, config.API.GRPCPort} {
+		grpcAPI := grpc.NewAPI(grpc.Config{
+			Port:         port,
+			CustomRoutes: debugRoutes,
+		})
 
-	grpcAPI.Register(
-		ping.NewService(),
-		scan.NewService(db, nvdVulnCache, k8sVulnCache),
-		vulndefs.NewService(db),
-	)
+		grpcAPI.Register(
+			ping.NewService(),
+			scan.NewService(manager, db, nvdVulnCache, k8sVulnCache),
+			vulndefs.NewService(manager, db),
+		)
 
-	go grpcAPI.Start()
+		go grpcAPI.Start()
 
-	go u.RunForever()
+		go u.RunForever()
+	}
 
 	// Wait for interruption and shutdown gracefully.
 	waitForSignals(os.Interrupt, unix.SIGTERM)
