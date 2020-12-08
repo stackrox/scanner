@@ -25,6 +25,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: ROX_SKIP_PEER_VALIDATION
+            value: "true"
           resources:
             limits:
               cpu: 2
