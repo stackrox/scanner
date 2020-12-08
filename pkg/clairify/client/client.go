@@ -76,7 +76,7 @@ func (c *Clairify) sendRequest(request *http.Request, timeout time.Duration) ([]
 		return nil, err
 	}
 	if !httputil.Status2xx(response) {
-		return nil, errors.Errorf("Expected status code 2XX. Received %d. Body: %v", response.StatusCode, string(data))
+		return nil, errors.Errorf("Expected status code 2XX. Received %s. Body: %s", response.Status, data)
 	}
 
 	var envelope errorEnvelope

@@ -2,9 +2,12 @@ package mtls
 
 import (
 	"crypto/x509"
-	"strings"
 
 	"github.com/pkg/errors"
+)
+
+const (
+	centralCN = "CENTRAL_SERVICE: Central"
 )
 
 // VerifyCentralCertificate verifies one of the peer certificates contains the central.stackrox hostname
@@ -13,14 +16,8 @@ func VerifyCentralCertificate(peerCerts []*x509.Certificate) error {
 	if len(peerCerts) == 0 {
 		return errors.New("no peer certificates found")
 	}
-	var invalidDNSNames []string
-	for _, peer := range peerCerts {
-		for _, dnsName := range peer.DNSNames {
-			if dnsName == centralHostname {
-				return nil
-			}
-			invalidDNSNames = append(invalidDNSNames, dnsName)
-		}
+	if peerCN := peerCerts[0].Subject.CommonName; peerCN != centralCN {
+		return errors.Errorf("peer certificate common name %q does not match expected common name: %s", peerCN, centralCN)
 	}
-	return errors.Errorf("did not find %v in DNS Names from peer certificates: %s", centralHostname, strings.Join(invalidDNSNames, ", "))
+	return nil
 }
