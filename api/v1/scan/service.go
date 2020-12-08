@@ -14,7 +14,6 @@ import (
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
-	"github.com/stackrox/scanner/pkg/licenses"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -28,20 +27,18 @@ type Service interface {
 }
 
 // NewService returns the service for scanning
-func NewService(licenseManager licenses.Manager, db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8scache.Cache) Service {
+func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8scache.Cache) Service {
 	return &serviceImpl{
-		licenseManager: licenseManager,
-		db:             db,
-		nvdCache:       nvdCache,
-		k8sCache:       k8sCache,
+		db:       db,
+		nvdCache: nvdCache,
+		k8sCache: k8sCache,
 	}
 }
 
 type serviceImpl struct {
-	licenseManager licenses.Manager
-	db             database.Datastore
-	nvdCache       nvdtoolscache.Cache
-	k8sCache       k8scache.Cache
+	db       database.Datastore
+	nvdCache nvdtoolscache.Cache
+	k8sCache k8scache.Cache
 }
 
 func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabilitiesRequest) (*v1.GetVulnerabilitiesResponse, error) {
