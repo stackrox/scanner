@@ -54,3 +54,10 @@ const GetImageResponse = `
 	}
 }
 `
+
+// GetVulnDefsMetadata is includes last time vuln defs was updated.
+const GetVulnDefsMetadata = `
+{
+	"lastUpdatedTime": "2020-12-08T19:05:20.491528869Z"
+}
+`
