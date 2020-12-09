@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	trackerGitURL = "https://git.launchpad.net/ubuntu-cve-tracker"
+	trackerGitURL = "git://git.launchpad.net/ubuntu-cve-tracker"
 	updaterFlag   = "ubuntuUpdater"
 	cveURL        = "http://people.ubuntu.com/~ubuntu-security/cve/%s"
 )
