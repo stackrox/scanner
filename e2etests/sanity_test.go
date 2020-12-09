@@ -881,9 +881,9 @@ func TestImageSanity(t *testing.T) {
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 10,
+										"ExploitabilityScore": 10.0,
 										"ImpactScore":         2.9,
-										"Score":               5,
+										"Score":               5.0,
 										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:P/A:N",
 									},
 									"CVSSv3": map[string]interface{}{
