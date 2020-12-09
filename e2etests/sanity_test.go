@@ -875,9 +875,9 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "2.9.10.6",
 						},
 						{
-							Name: "CVE-2020-25649",
+							Name:        "CVE-2020-25649",
 							Description: "A flaw was found in FasterXML Jackson Databind, where it did not have entity expansion secured properly. This flaw allows vulnerability to XML external entity (XXE) attacks. The highest threat from this vulnerability is data integrity.",
-							Link: "https://nvd.nist.gov/vuln/detail/CVE-2020-25649",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-25649",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
