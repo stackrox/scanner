@@ -14,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	v1 "github.com/stackrox/scanner/api/v1"
+	protoV1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/httputil"
 )
@@ -176,4 +177,24 @@ func (c *Clairify) RetrieveImageDataByName(image *types.Image, features, vulnera
 		return nil, err
 	}
 	return &layerEnvelope, err
+}
+
+// GetVulnDefsMetadata contacts Clairify to fetch vulnerability definitions metadata.
+func (c *Clairify) GetVulnDefsMetadata() (*protoV1.VulnDefsMetadata, error) {
+	url := fmt.Sprintf("%s/scanner/vulndefs/metadata", c.endpoint)
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := c.sendRequest(request, GetTimeout)
+	if err != nil {
+		return nil, err
+	}
+
+	var vulnDefsInfo protoV1.VulnDefsMetadata
+	if err := json.Unmarshal(data, &vulnDefsInfo); err != nil {
+		return nil, err
+	}
+	return &vulnDefsInfo, err
 }

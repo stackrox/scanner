@@ -12,18 +12,21 @@ import (
 	"strings"
 	"time"
 
+	protoTypes "github.com/gogo/protobuf/types"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/database"
+	protoV1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/mtls"
 	server "github.com/stackrox/scanner/pkg/scan"
+	"github.com/stackrox/scanner/pkg/updater"
 	"google.golang.org/grpc/codes"
 )
 
@@ -216,6 +219,32 @@ func (s *Server) Ping(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("{}"))
 }
 
+// GetVulnDefsMetadata returns vulnerability definitions information.
+func (s *Server) GetVulnDefsMetadata(w http.ResponseWriter, _ *http.Request) {
+	t, err := updater.GetLastUpdatedTime(s.storage)
+	if err != nil {
+		clairErrorString(w, http.StatusInternalServerError, "failed to obtain vulnerability definitions update timestamp: %v", err)
+		return
+	}
+
+	ts, err := protoTypes.TimestampProto(t)
+	if err != nil {
+		clairErrorString(w, http.StatusInternalServerError, "failed to obtain vulnerability definitions update timestamp: %v", err)
+		return
+	}
+
+	vulnDefsInfo := &protoV1.VulnDefsMetadata{
+		LastUpdatedTime: ts,
+	}
+
+	data, err := json.Marshal(vulnDefsInfo)
+	if err != nil {
+		clairError(w, http.StatusInternalServerError, err)
+		return
+	}
+	w.Write(data)
+}
+
 func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc, verifyClient bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !s.licenseManager.ValidLicenseExists() {
@@ -250,6 +279,7 @@ func (s *Server) Start() error {
 
 		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA, true, http.MethodGet)
 		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/image", root), s.ScanImage, true, http.MethodPost)
+		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/vulndefs/metadata", root), s.GetVulnDefsMetadata, true, http.MethodGet)
 
 		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.wrapHandlerFuncWithLicenseCheck(s.GetResultsByImage, true)).Methods(http.MethodGet)
 	}

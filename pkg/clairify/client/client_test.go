@@ -48,6 +48,9 @@ func (suite *ClientTestSuite) SetupSuite() {
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte(fixtures.GetImageResponse))
 	})
+	masterRouter.HandleFunc("/scanner/vulndefs/metadata", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(fixtures.GetVulnDefsMetadata))
+	})
 
 	suite.server = httptest.NewServer(masterRouter)
 	suite.client = New(suite.server.URL, true)
@@ -99,4 +102,10 @@ func (suite *ClientTestSuite) TestRetrieveImageDataByName() {
 
 	_, err = suite.client.RetrieveImageDataBySHA("badsha", true, true)
 	suite.Error(err)
+}
+
+func (suite *ClientTestSuite) TestGetVulnDefsMetadata() {
+	info, err := suite.client.GetVulnDefsMetadata()
+	suite.NoError(err)
+	suite.NotNil(info)
 }
