@@ -896,7 +896,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-12-03T17:15Z",
 								},
 							},
-							FixedBy: "2.11.0",
+							FixedBy: "2.9.10.7",
 						},
 					},
 					AddedBy:  "sha256:36e8e9714b9a509fae9e515ff16237928c3d809f5ae228b14d2f7d7605c02623",
