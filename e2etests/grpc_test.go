@@ -203,7 +203,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 	assert.NotEmpty(t, vuln.Vulnerabilities)
 	m = types.Metadata{
 		PublishedDateTime:    "2020-10-22T21:15Z",
-		LastModifiedDateTime: "2020-11-11T06:15Z",
+		LastModifiedDateTime: "2020-12-11T00:15Z",
 		CVSSv2: types.MetadataCVSSv2{
 			Score:               4.7,
 			Vectors:             "AV:L/AC:M/Au:N/C:N/I:N/A:C",
