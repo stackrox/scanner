@@ -13,27 +13,14 @@ type FeatureFlag interface {
 	Enabled() bool
 }
 
-var (
-	// Flags contains all defined FeatureFlags by name.
-	Flags = make(map[string]FeatureFlag)
-)
-
-func registerFeature(name, envVar string, defaultValue bool, opts ...FeatureFlagOption) FeatureFlag {
+func registerFeature(name, envVar string, defaultValue bool) FeatureFlag {
 	if !strings.HasPrefix(envVar, "ROX_") {
 		panic(fmt.Sprintf("invalid env var: %s, must start with ROX_", envVar))
 	}
 
-	var appliedOpts options
-	for _, opt := range opts {
-		opt.apply(&appliedOpts)
-	}
-
-	f := &feature{
+	return &feature{
 		name:         name,
 		envVar:       envVar,
 		defaultValue: defaultValue,
-		options:      appliedOpts,
 	}
-	Flags[f.Name()] = f
-	return f
 }
