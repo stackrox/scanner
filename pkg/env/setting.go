@@ -2,14 +2,15 @@ package env
 
 import (
 	"fmt"
-	"github.com/stackrox/rox/pkg/set"
 	"os"
 	"strings"
+
+	"github.com/stackrox/rox/pkg/set"
 )
 
 // A Setting is a runtime configuration set using an environment variable.
 type Setting interface {
-	EnvVar()  string
+	EnvVar() string
 	Value() string
 }
 
