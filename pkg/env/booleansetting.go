@@ -4,12 +4,12 @@ import (
 	"strconv"
 )
 
+// BooleanSetting represents an environment variable which should be parsed into a boolean
 type BooleanSetting interface {
 	Setting
 	Enabled() bool
 }
 
-// booleanSetting represents an environment variable which should be parsed into a boolean
 type booleanSetting struct {
 	Setting
 }
