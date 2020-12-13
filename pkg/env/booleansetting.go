@@ -20,8 +20,8 @@ func (s *booleanSetting) Enabled() bool {
 	return v && err == nil
 }
 
-// registerBooleanSetting globally registers and returns a new boolean setting.
-func registerBooleanSetting(envVar string, defaul bool, opts ...SettingOption) BooleanSetting {
+// RegisterBooleanSetting globally registers and returns a new boolean setting.
+func RegisterBooleanSetting(envVar string, defaul bool, opts ...SettingOption) BooleanSetting {
 	return &booleanSetting{
 		Setting: registerSetting(envVar, append(opts, WithDefault(strconv.FormatBool(defaul)))...),
 	}
