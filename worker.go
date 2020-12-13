@@ -16,6 +16,7 @@ package clair
 
 import (
 	"fmt"
+	"github.com/stackrox/scanner/pkg/env"
 	"io"
 	"path/filepath"
 	"regexp"
@@ -177,7 +178,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
 	}
 
-	if !featureFlags.LanguageVulns.Enabled() {
+	if !env.LanguageVulns.Enabled() {
 		return namespace, featureVersions, nil, nil, err
 	}
 	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())

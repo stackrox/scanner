@@ -16,7 +16,7 @@ type booleanSetting struct {
 
 // Enabled returns the bool object represented by the environment variable
 func (s *booleanSetting) Enabled() bool {
-	v, err := strconv.ParseBool(s.Setting.Setting())
+	v, err := strconv.ParseBool(s.Value())
 	return v && err == nil
 }
 

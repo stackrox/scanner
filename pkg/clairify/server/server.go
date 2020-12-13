@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/stackrox/scanner/pkg/env"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -22,7 +23,6 @@ import (
 	protoV1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/mtls"
 	server "github.com/stackrox/scanner/pkg/scan"
@@ -31,7 +31,7 @@ import (
 )
 
 var (
-	skipPeerValidation = features.SkipPeerValidation.Enabled()
+	skipPeerValidation = env.SkipPeerValidation.Enabled()
 )
 
 // Server is the HTTP server for Clairify.

@@ -10,7 +10,7 @@ import (
 // A Setting is a runtime configuration set using an environment variable.
 type Setting interface {
 	EnvVar()  string
-	Setting() string
+	Value() string
 }
 
 type settingOptions struct {
@@ -76,7 +76,7 @@ func (s *setting) EnvVar() string {
 	return s.envVar
 }
 
-func (s *setting) Setting() string {
+func (s *setting) Value() string {
 	val := os.Getenv(s.envVar)
 	if val == "" && s.settingOptions.allowWithoutRox {
 		// Remove ROX_ prefix.

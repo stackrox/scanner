@@ -16,6 +16,7 @@ package v1
 
 import (
 	"fmt"
+	"github.com/stackrox/scanner/pkg/env"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -24,7 +25,6 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
@@ -246,7 +246,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		notes = append(notes, OSCVEsUnavailable)
 	}
 
-	if !features.LanguageVulns.Enabled() {
+	if !env.LanguageVulns.Enabled() {
 		notes = append(notes, LanguageCVEsUnavailable)
 	}
 
@@ -264,7 +264,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 			}
 			layer.Features = append(layer.Features, feature)
 		}
-		if features.LanguageVulns.Enabled() {
+		if env.LanguageVulns.Enabled() {
 			addLanguageVulns(db, &layer)
 		}
 	}
