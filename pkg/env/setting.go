@@ -35,7 +35,7 @@ func (f settingOptionFn) apply(so *settingOptions) {
 }
 
 var (
-	// settings is the set which tracks all environment variables, and ensures uniqueness.
+	// settings is the set which tracks all environment variables and ensures uniqueness.
 	settings = set.NewStringSet()
 )
 
