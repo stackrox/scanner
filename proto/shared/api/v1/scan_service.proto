@@ -21,12 +21,28 @@ message Feature {
     string                 location        = 6;
 }
 
+// Next tag: 7
 message Vulnerability {
-    string name        = 1;
-    string description = 2;
-    string link        = 3;
-    bytes  metadata    = 4;
-    string fixed_by    = 5;
+    string   name        = 1;
+    string   description = 2;
+    string   link        = 3;
+    bytes    metadata    = 4 [deprecated=true];
+    Metadata metadata_v2 = 6;
+    string   fixed_by    = 5;
+}
+
+message Metadata {
+    string       published_date_time     = 1;
+    string       last_modified_date_time = 2;
+    CVSSMetadata cvss_v2                 = 3;
+    CVSSMetadata cvss_v3                 = 4;
+}
+
+message CVSSMetadata {
+    string vector               = 1;
+    float  score                = 2;
+    float  exploitability_score = 3;
+    float  impact_score         = 4;
 }
 
 message ScanImageRequest {

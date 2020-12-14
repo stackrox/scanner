@@ -112,10 +112,6 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 			log.Errorf("Unable to convert metadata for %s: %v", v.CVE, err)
 			continue
 		}
-		metadataBytes, err := json.Marshal(m)
-		if err != nil {
-			return nil, err
-		}
 
 		link := stringutils.OrDefault(v.IssueURL, v.URL)
 		fixedBy, err := getFixedBy(version, v)
@@ -127,7 +123,7 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 			Name:        v.CVE,
 			Description: v.Description,
 			Link:        link,
-			Metadata:    metadataBytes,
+			MetadataV2:  convertMetadata(m),
 			FixedBy:     fixedBy,
 		})
 	}
@@ -157,18 +153,35 @@ func convertNVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vul
 	vulns := make([]*v1.Vulnerability, 0, len(nvdVulns))
 	for _, vuln := range nvdVulns {
 		m := types.ConvertNVDMetadata(vuln.NVDCVEFeedJSON10DefCVEItem)
-		mBytes, err := json.Marshal(m)
-		if err != nil {
-			return nil, err
-		}
 		vulns = append(vulns, &v1.Vulnerability{
 			Name:        vuln.CVE.CVEDataMeta.ID,
 			Description: types.ConvertNVDSummary(vuln.NVDCVEFeedJSON10DefCVEItem),
 			Link:        "https://nvd.nist.gov/vuln/detail/" + vuln.CVE.CVEDataMeta.ID,
-			Metadata:    mBytes,
+			MetadataV2:  convertMetadata(m),
 			FixedBy:     vuln.FixedIn,
 		})
 	}
 
 	return vulns, nil
+}
+
+func convertMetadata(m *types.Metadata) *v1.Metadata {
+	cvss2 := m.CVSSv2
+	cvss3 := m.CVSSv3
+	return &v1.Metadata{
+		PublishedDateTime:    m.PublishedDateTime,
+		LastModifiedDateTime: m.LastModifiedDateTime,
+		CvssV2: &v1.CVSSMetadata{
+			Vector:              cvss2.Vectors,
+			Score:               float32(cvss2.Score),
+			ExploitabilityScore: float32(cvss2.ExploitabilityScore),
+			ImpactScore:         float32(cvss2.ImpactScore),
+		},
+		CvssV3: &v1.CVSSMetadata{
+			Vector:              cvss3.Vectors,
+			Score:               float32(cvss3.Score),
+			ExploitabilityScore: float32(cvss3.ExploitabilityScore),
+			ImpactScore:         float32(cvss3.ImpactScore),
+		},
+	}
 }
