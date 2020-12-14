@@ -2,8 +2,7 @@
 package features
 
 import (
-	"fmt"
-	"strings"
+	"github.com/stackrox/scanner/pkg/env"
 )
 
 // A FeatureFlag is a product behavior that can be enabled or disabled using an environment variable.
@@ -13,27 +12,18 @@ type FeatureFlag interface {
 	Enabled() bool
 }
 
-var (
-	// Flags contains all defined FeatureFlags by name.
-	Flags = make(map[string]FeatureFlag)
-)
+type feature struct {
+	env.BooleanSetting
+	name string
+}
 
-func registerFeature(name, envVar string, defaultValue bool, opts ...FeatureFlagOption) FeatureFlag {
-	if !strings.HasPrefix(envVar, "ROX_") {
-		panic(fmt.Sprintf("invalid env var: %s, must start with ROX_", envVar))
-	}
+func (f *feature) Name() string {
+	return f.name
+}
 
-	var appliedOpts options
-	for _, opt := range opts {
-		opt.apply(&appliedOpts)
+func registerFeature(name, envVar string, defaul bool) FeatureFlag {
+	return &feature{
+		name:           name,
+		BooleanSetting: env.RegisterBooleanSetting(envVar, defaul),
 	}
-
-	f := &feature{
-		name:         name,
-		envVar:       envVar,
-		defaultValue: defaultValue,
-		options:      appliedOpts,
-	}
-	Flags[f.Name()] = f
-	return f
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -122,7 +122,7 @@ func TestShouldDedupeLanguageFeature(t *testing.T) {
 
 func TestNotesNoLanguageVulns(t *testing.T) {
 	envIsolator := testutils.NewEnvIsolator(t)
-	envIsolator.Setenv(features.LanguageVulns.EnvVar(), "false")
+	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
 	dbLayer := database.Layer{

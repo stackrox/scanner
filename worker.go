@@ -29,6 +29,7 @@ import (
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/env"
 	featureFlags "github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/whiteout"
@@ -177,7 +178,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
 	}
 
-	if !featureFlags.LanguageVulns.Enabled() {
+	if !env.LanguageVulns.Enabled() {
 		return namespace, featureVersions, nil, nil, err
 	}
 	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())

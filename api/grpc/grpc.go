@@ -15,7 +15,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil"
-	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/mtls"
 	"google.golang.org/grpc"
@@ -28,7 +28,7 @@ const (
 )
 
 var (
-	skipPeerValidation = features.SkipPeerValidation.Enabled()
+	skipPeerValidation = env.SkipPeerValidation.Enabled()
 )
 
 func init() {
