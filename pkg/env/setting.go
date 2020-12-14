@@ -15,7 +15,7 @@ type Setting interface {
 }
 
 type settingOptions struct {
-	defaultValue    string
+	defaul          string
 	allowWithoutRox bool
 }
 
@@ -43,7 +43,7 @@ var (
 // WithDefault sets the default value for a newly created setting.
 func WithDefault(value string) SettingOption {
 	return settingOptionFn(func(so *settingOptions) {
-		so.defaultValue = value
+		so.defaul = value
 	})
 }
 
@@ -86,5 +86,5 @@ func (s *setting) Value() string {
 	if val != "" {
 		return val
 	}
-	return s.defaultValue
+	return s.defaul
 }
