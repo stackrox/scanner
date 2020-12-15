@@ -166,22 +166,28 @@ func convertNVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vul
 }
 
 func convertMetadata(m *types.Metadata) *v1.Metadata {
-	cvss2 := m.CVSSv2
-	cvss3 := m.CVSSv3
-	return &v1.Metadata{
+	metadata := &v1.Metadata{
 		PublishedDateTime:    m.PublishedDateTime,
 		LastModifiedDateTime: m.LastModifiedDateTime,
-		CvssV2: &v1.CVSSMetadata{
-			Vector:              cvss2.Vectors,
-			Score:               float32(cvss2.Score),
-			ExploitabilityScore: float32(cvss2.ExploitabilityScore),
-			ImpactScore:         float32(cvss2.ImpactScore),
-		},
-		CvssV3: &v1.CVSSMetadata{
-			Vector:              cvss3.Vectors,
-			Score:               float32(cvss3.Score),
-			ExploitabilityScore: float32(cvss3.ExploitabilityScore),
-			ImpactScore:         float32(cvss3.ImpactScore),
-		},
 	}
+	if m.CVSSv2.Vectors != "" {
+		cvssV2 := m.CVSSv2
+		metadata.CvssV2 = &v1.CVSSMetadata{
+			Vector:              cvssV2.Vectors,
+			Score:               float32(cvssV2.Score),
+			ExploitabilityScore: float32(cvssV2.ExploitabilityScore),
+			ImpactScore:         float32(cvssV2.ImpactScore),
+		}
+	}
+	if m.CVSSv3.Vectors != "" {
+		cvssV3 := m.CVSSv3
+		metadata.CvssV3 = &v1.CVSSMetadata{
+			Vector:              cvssV3.Vectors,
+			Score:               float32(cvssV3.Score),
+			ExploitabilityScore: float32(cvssV3.ExploitabilityScore),
+			ImpactScore:         float32(cvssV3.ImpactScore),
+		}
+	}
+
+	return metadata
 }

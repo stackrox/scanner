@@ -1,30 +1,20 @@
 package scan
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
-	"github.com/stackrox/scanner/pkg/types"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
-
-type expectedVuln struct {
-	Name        string
-	Description string
-	Link        string
-	Metadata    *types.Metadata
-	FixedBy     string
-}
 
 func TestConvertK8sVulnerabilities(t *testing.T) {
 	testCases := []struct {
 		version  string
 		cves     []*validation.CVESchema
-		expected []expectedVuln
+		expected []*v1.Vulnerability
 	}{
 		{
 			version: "1.0.0",
@@ -53,21 +43,21 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					},
 				},
 			},
-			expected: []expectedVuln{
+			expected: []*v1.Vulnerability{
 				{
 					Name:        "CVE-2020-1234",
 					Description: "test1",
 					Link:        "issueUrl",
-					Metadata: &types.Metadata{
-						CVSSv2: types.MetadataCVSSv2{
+					MetadataV2: &v1.Metadata{
+						CvssV2: &v1.CVSSMetadata{
 							Score:               3.5,
-							Vectors:             "AV:N/AC:M/Au:S/C:P/I:N/A:N",
+							Vector:              "AV:N/AC:M/Au:S/C:P/I:N/A:N",
 							ExploitabilityScore: 6.8,
 							ImpactScore:         2.9,
 						},
-						CVSSv3: types.MetadataCVSSv3{
+						CvssV3: &v1.CVSSMetadata{
 							Score:               6.3,
-							Vectors:             "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							Vector:              "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N",
 							ExploitabilityScore: 1.8,
 							ImpactScore:         4.0,
 						},
@@ -152,15 +142,15 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					},
 				},
 			},
-			expected: []expectedVuln{
+			expected: []*v1.Vulnerability{
 				{
 					Name:        "CVE-2020-1234",
 					Description: "test2",
 					Link:        "issueUrl",
-					Metadata: &types.Metadata{
-						CVSSv3: types.MetadataCVSSv3{
+					MetadataV2: &v1.Metadata{
+						CvssV3: &v1.CVSSMetadata{
 							Score:               7.7,
-							Vectors:             "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							Vector:              "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
 							ExploitabilityScore: 3.1,
 							ImpactScore:         4.0,
 						},
@@ -171,10 +161,10 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					Name:        "CVE-2020-1235",
 					Description: "test2",
 					Link:        "url",
-					Metadata: &types.Metadata{
-						CVSSv3: types.MetadataCVSSv3{
+					MetadataV2: &v1.Metadata{
+						CvssV3: &v1.CVSSMetadata{
 							Score:               7.7,
-							Vectors:             "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							Vector:              "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
 							ExploitabilityScore: 3.1,
 							ImpactScore:         4.0,
 						},
@@ -184,10 +174,10 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					Name:        "CVE-2020-1236",
 					Description: "test3",
 					Link:        "url",
-					Metadata: &types.Metadata{
-						CVSSv3: types.MetadataCVSSv3{
+					MetadataV2: &v1.Metadata{
+						CvssV3: &v1.CVSSMetadata{
 							Score:               7.7,
-							Vectors:             "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							Vector:              "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
 							ExploitabilityScore: 3.1,
 							ImpactScore:         4.0,
 						},
@@ -224,21 +214,21 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					},
 				},
 			},
-			expected: []expectedVuln{
+			expected: []*v1.Vulnerability{
 				{
 					Name:        "CVE-2020-1234",
 					Description: "test1",
 					Link:        "issueUrl",
-					Metadata: &types.Metadata{
-						CVSSv2: types.MetadataCVSSv2{
+					MetadataV2: &v1.Metadata{
+						CvssV2: &v1.CVSSMetadata{
 							Score:               3.5,
-							Vectors:             "AV:N/AC:M/Au:S/C:P/I:N/A:N",
+							Vector:              "AV:N/AC:M/Au:S/C:P/I:N/A:N",
 							ExploitabilityScore: 6.8,
 							ImpactScore:         2.9,
 						},
-						CVSSv3: types.MetadataCVSSv3{
+						CvssV3: &v1.CVSSMetadata{
 							Score:               6.3,
-							Vectors:             "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							Vector:              "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N",
 							ExploitabilityScore: 1.8,
 							ImpactScore:         4.0,
 						},
@@ -252,25 +242,15 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 	for _, testCase := range testCases {
 		vulns, err := convertK8sVulnerabilities(testCase.version, testCase.cves)
 		assert.NoError(t, err)
-		assert.Equal(t, len(testCase.expected), len(vulns))
-		for i, vuln := range vulns {
-			expected := testCase.expected[i]
-			var m types.Metadata
-			err := json.Unmarshal(vuln.Metadata, &m)
-			require.NoError(t, err)
-			assert.Equal(t, expected.Name, vuln.Name)
-			assert.Equal(t, expected.Description, vuln.Description)
-			assert.Equal(t, expected.Link, vuln.Link)
-			assert.Equal(t, expected.Metadata, &m)
-			assert.Equal(t, expected.FixedBy, vuln.FixedBy)
-		}
+		assert.Len(t, testCase.expected, len(vulns))
+		assert.ElementsMatch(t, testCase.expected, vulns)
 	}
 }
 
 func TestConvertNVDVulns(t *testing.T) {
 	testCases := []struct {
 		cveItems []*nvdtoolscache.NVDCVEItemWithFixedIn
-		expected []expectedVuln
+		expected []*v1.Vulnerability
 	}{
 		{
 			cveItems: []*nvdtoolscache.NVDCVEItemWithFixedIn{
@@ -305,17 +285,17 @@ func TestConvertNVDVulns(t *testing.T) {
 					FixedIn: "1.3.4",
 				},
 			},
-			expected: []expectedVuln{
+			expected: []*v1.Vulnerability{
 				{
 					Name:        "CVE-2020-1234",
 					Description: "test1",
 					Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1234",
-					Metadata: &types.Metadata{
+					MetadataV2: &v1.Metadata{
 						PublishedDateTime:    "10",
 						LastModifiedDateTime: "11",
-						CVSSv3: types.MetadataCVSSv3{
+						CvssV3: &v1.CVSSMetadata{
 							Score:               7.7,
-							Vectors:             "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
+							Vector:              "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N",
 							ExploitabilityScore: 3.1,
 							ImpactScore:         4.0,
 						},
@@ -329,17 +309,7 @@ func TestConvertNVDVulns(t *testing.T) {
 	for _, testCase := range testCases {
 		vulns, err := convertNVDVulns(testCase.cveItems)
 		assert.NoError(t, err)
-		assert.Equal(t, len(testCase.expected), len(vulns))
-		for i, vuln := range vulns {
-			expected := testCase.expected[i]
-			var m types.Metadata
-			err := json.Unmarshal(vuln.Metadata, &m)
-			require.NoError(t, err)
-			assert.Equal(t, expected.Name, vuln.Name)
-			assert.Equal(t, expected.Description, vuln.Description)
-			assert.Equal(t, expected.Link, vuln.Link)
-			assert.Equal(t, expected.Metadata, &m)
-			assert.Equal(t, expected.FixedBy, vuln.FixedBy)
-		}
+		assert.Len(t, testCase.expected, len(vulns))
+		assert.Equal(t, testCase.expected, vulns)
 	}
 }
