@@ -41,16 +41,28 @@ var (
 func convertVulnerabilities(apiVulns []apiV1.Vulnerability) ([]*v1.Vulnerability, error) {
 	vulns := make([]*v1.Vulnerability, 0, len(apiVulns))
 	for _, v := range apiVulns {
-		metadataBytes, err := json.Marshal(v.Metadata)
+		var metadataBytes interface{}
+		if metadata, exists := v.Metadata["NVD"]; exists {
+			metadataBytes = metadata
+		} else if metadata, exists := v.Metadata["Red Hat"]; exists {
+			metadataBytes = metadata
+		}
+
+		d, err := json.Marshal(&metadataBytes)
 		if err != nil {
-			return nil, err
+			continue
+		}
+
+		var m types.Metadata
+		if json.Unmarshal(d, &m) != nil {
+			continue
 		}
 
 		vulns = append(vulns, &v1.Vulnerability{
 			Name:        v.Name,
 			Description: v.Description,
 			Link:        v.Link,
-			Metadata:    metadataBytes,
+			MetadataV2:  convertMetadata(&m),
 			FixedBy:     v.FixedBy,
 		})
 	}
@@ -112,10 +124,6 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 			log.Errorf("Unable to convert metadata for %s: %v", v.CVE, err)
 			continue
 		}
-		metadataBytes, err := json.Marshal(m)
-		if err != nil {
-			return nil, err
-		}
 
 		link := stringutils.OrDefault(v.IssueURL, v.URL)
 		fixedBy, err := getFixedBy(version, v)
@@ -127,7 +135,7 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 			Name:        v.CVE,
 			Description: v.Description,
 			Link:        link,
-			Metadata:    metadataBytes,
+			MetadataV2:  convertMetadata(m),
 			FixedBy:     fixedBy,
 		})
 	}
@@ -157,18 +165,41 @@ func convertNVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vul
 	vulns := make([]*v1.Vulnerability, 0, len(nvdVulns))
 	for _, vuln := range nvdVulns {
 		m := types.ConvertNVDMetadata(vuln.NVDCVEFeedJSON10DefCVEItem)
-		mBytes, err := json.Marshal(m)
-		if err != nil {
-			return nil, err
-		}
 		vulns = append(vulns, &v1.Vulnerability{
 			Name:        vuln.CVE.CVEDataMeta.ID,
 			Description: types.ConvertNVDSummary(vuln.NVDCVEFeedJSON10DefCVEItem),
 			Link:        "https://nvd.nist.gov/vuln/detail/" + vuln.CVE.CVEDataMeta.ID,
-			Metadata:    mBytes,
+			MetadataV2:  convertMetadata(m),
 			FixedBy:     vuln.FixedIn,
 		})
 	}
 
 	return vulns, nil
+}
+
+func convertMetadata(m *types.Metadata) *v1.Metadata {
+	metadata := &v1.Metadata{
+		PublishedDateTime:    m.PublishedDateTime,
+		LastModifiedDateTime: m.LastModifiedDateTime,
+	}
+	if m.CVSSv2.Vectors != "" {
+		cvssV2 := m.CVSSv2
+		metadata.CvssV2 = &v1.CVSSMetadata{
+			Vector:              cvssV2.Vectors,
+			Score:               float32(cvssV2.Score),
+			ExploitabilityScore: float32(cvssV2.ExploitabilityScore),
+			ImpactScore:         float32(cvssV2.ImpactScore),
+		}
+	}
+	if m.CVSSv3.Vectors != "" {
+		cvssV3 := m.CVSSv3
+		metadata.CvssV3 = &v1.CVSSMetadata{
+			Vector:              cvssV3.Vectors,
+			Score:               float32(cvssV3.Score),
+			ExploitabilityScore: float32(cvssV3.ExploitabilityScore),
+			ImpactScore:         float32(cvssV3.ImpactScore),
+		}
+	}
+
+	return metadata
 }
