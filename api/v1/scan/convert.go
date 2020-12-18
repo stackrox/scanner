@@ -41,16 +41,28 @@ var (
 func convertVulnerabilities(apiVulns []apiV1.Vulnerability) ([]*v1.Vulnerability, error) {
 	vulns := make([]*v1.Vulnerability, 0, len(apiVulns))
 	for _, v := range apiVulns {
-		metadataBytes, err := json.Marshal(v.Metadata)
+		var metadataBytes interface{}
+		if metadata, exists := v.Metadata["NVD"]; exists {
+			metadataBytes = metadata
+		} else if metadata, exists := v.Metadata["Red Hat"]; exists {
+			metadataBytes = metadata
+		}
+
+		d, err := json.Marshal(&metadataBytes)
 		if err != nil {
-			return nil, err
+			continue
+		}
+
+		var m types.Metadata
+		if json.Unmarshal(d, &m) != nil {
+			continue
 		}
 
 		vulns = append(vulns, &v1.Vulnerability{
 			Name:        v.Name,
 			Description: v.Description,
 			Link:        v.Link,
-			Metadata:    metadataBytes,
+			MetadataV2:  convertMetadata(&m),
 			FixedBy:     v.FixedBy,
 		})
 	}
