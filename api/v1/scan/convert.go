@@ -177,9 +177,9 @@ func convertNVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vul
 	return vulns, nil
 }
 
-// convertVersion converts the given version into a semantic version x.y.z.
+// truncateVersion converts the given version into a semantic version x.y.z.
 // Returns empty string ""
-func convertVersion(v string) (string, error) {
+func truncateVersion(v string) (string, error) {
 	vs := semverPattern.FindStringSubmatch(v)
 	if len(vs) == 2 {
 		return vs[1], nil
