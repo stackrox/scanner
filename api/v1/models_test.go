@@ -11,7 +11,7 @@ import (
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -122,7 +122,7 @@ func TestShouldDedupeLanguageFeature(t *testing.T) {
 
 func TestNotesNoLanguageVulns(t *testing.T) {
 	envIsolator := testutils.NewEnvIsolator(t)
-	envIsolator.Setenv(features.LanguageVulns.EnvVar(), "false")
+	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
 	dbLayer := database.Layer{
@@ -187,16 +187,17 @@ func newMockDatastore() *mockDatastore {
 }
 
 func TestAddLanguageVulns(t *testing.T) {
-	prevVal := os.Getenv("NVD_DEFINITIONS_DIR")
-	defer require.NoError(t, os.Setenv("NVD_DEFINITIONS_DIR", prevVal))
+	envIsolator := testutils.NewEnvIsolator(t)
+	defer envIsolator.RestoreAll()
+
+	_, filename, _, _ := runtime.Caller(0)
+	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
+	envIsolator.Setenv("NVD_DEFINITIONS_DIR", defsDir)
+
 	prevBoltPath := nvdtoolscache.BoltPath
 	defer func() {
 		nvdtoolscache.BoltPath = prevBoltPath
 	}()
-
-	_, filename, _, _ := runtime.Caller(0)
-	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	require.NoError(t, os.Setenv("NVD_DEFINITIONS_DIR", defsDir))
 
 	dir, err := ioutil.TempDir("", "bolt")
 	require.NoError(t, err)
