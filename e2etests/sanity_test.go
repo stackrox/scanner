@@ -899,9 +899,6 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "2.9.10.7",
 						},
 
-
-
-
 						{
 							Name:        "CVE-2020-35490",
 							Description: "FasterXML jackson-databind 2.x before 2.9.10.8 mishandles the interaction between serialization gadgets and typing, related to org.apache.commons.dbcp2.datasources.PerUserPoolDataSource.",
