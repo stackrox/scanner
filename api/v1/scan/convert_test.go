@@ -390,7 +390,7 @@ func TestConvertVersion(t *testing.T) {
 			expected: "4.14.203",
 		},
 	} {
-		actual, err := convertVersion(testCase.version)
+		actual, err := truncateVersion(testCase.version)
 		assert.NoError(t, err)
 		assert.Equal(t, testCase.expected, actual)
 	}
