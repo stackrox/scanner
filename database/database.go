@@ -178,4 +178,6 @@ type Datastore interface {
 	InsertLayerComponents(l string, c []*component.Component, r []string) error
 
 	GetLayerLanguageComponents(layer string) ([]*component.LayerToComponents, error)
+
+	GetVulnerabilitiesForFeatureVersion(featureVersions FeatureVersion) ([]Vulnerability, error)
 }

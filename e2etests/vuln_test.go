@@ -32,7 +32,7 @@ type singleTestCase struct {
 
 func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	conn := connectToScanner(t)
-	client := v1.NewScanServiceClient(conn)
+	client := v1.NewImageScanServiceClient(conn)
 	var scanResp *v1.ScanImageResponse
 	if strings.HasPrefix(testCase.image, "docker.io") {
 		scanResp = scanDockerIOStackRoxImage(client, testCase.image, t)
@@ -42,7 +42,7 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 		fmt.Printf("no scan method for image: %v\n", testCase.image)
 		t.FailNow()
 	}
-	scan, err := client.GetScan(context.Background(), &v1.GetScanRequest{
+	scan, err := client.GetImageScan(context.Background(), &v1.GetImageScanRequest{
 		ImageSpec: scanResp.GetImage(),
 	})
 	require.NoError(t, err)

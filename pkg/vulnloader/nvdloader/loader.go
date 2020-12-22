@@ -45,7 +45,7 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 		return errors.Wrapf(err, "creating subdir for %s", vulndump.NVDDirName)
 	}
 	endYear := time.Now().Year()
-	for year := 2002; year <= endYear; year++ {
+	for year := 2012; year <= endYear; year++ {
 		if err := downloadFeedForYear(enrichmentMap, nvdDir, year); err != nil {
 			return err
 		}

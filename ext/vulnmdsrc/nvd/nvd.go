@@ -109,11 +109,34 @@ func (a *appender) parseDataFeed(r io.Reader) error {
 	return nil
 }
 
-func (a *appender) Append(name string, _ []string, appendFunc types.AppendFunc) error {
+func (a *appender) getHighestCVSSMetadata(cves []string) *pkgTypes.Metadata {
+	var maxScore float64
+	var maxMetadata *pkgTypes.Metadata
+	for _, cve := range cves {
+		if enricher, ok := a.metadata[cve]; ok {
+			metadata := enricher.metadata
+			if metadata.CVSSv3.Score != 0 && metadata.CVSSv3.Score > maxScore {
+				maxScore = metadata.CVSSv3.Score
+				maxMetadata = metadata
+			} else if metadata.CVSSv2.Score > maxScore {
+				maxScore = metadata.CVSSv2.Score
+				maxMetadata = metadata
+			}
+		}
+	}
+
+	return maxMetadata
+}
+
+func (a *appender) Append(name string, subCVEs []string, appendFunc types.AppendFunc) error {
 	if enricher, ok := a.metadata[name]; ok {
 		appendFunc(AppenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
-		return nil
 	}
+
+	if metadata := a.getHighestCVSSMetadata(subCVEs); metadata != nil {
+		appendFunc(AppenderName, &metadataEnricher{metadata: metadata}, cvss.SeverityFromCVSS(metadata))
+	}
+
 	return nil
 }
 

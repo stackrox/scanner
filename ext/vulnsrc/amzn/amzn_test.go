@@ -61,6 +61,12 @@ func TestAmazonLinux1(t *testing.T) {
 	assert.Equal(t, expectedDescription0, vulnerabilities[0].Description)
 	assert.Equal(t, 11, len(vulnerabilities[0].FixedIn))
 
+	assert.Equal(t, "CVE-2011-3192", vulnerabilities[1].Name)
+	assert.Equal(t, "https://nvd.nist.gov/vuln/detail/CVE-2011-3192", vulnerabilities[1].Link)
+	assert.Equal(t, database.UnknownSeverity, vulnerabilities[1].Severity)
+	assert.Equal(t, expectedDescription0, vulnerabilities[1].Description)
+	assert.Equal(t, 11, len(vulnerabilities[1].FixedIn))
+
 	expectedFeatureVersions0 := []database.FeatureVersion{
 		{
 			Feature: database.Feature{
@@ -86,13 +92,20 @@ func TestAmazonLinux1(t *testing.T) {
 
 	for _, expectedFeatureVersion := range expectedFeatureVersions0 {
 		assert.Contains(t, vulnerabilities[0].FixedIn, expectedFeatureVersion)
+		assert.Contains(t, vulnerabilities[1].FixedIn, expectedFeatureVersion)
 	}
 
-	assert.Equal(t, "ALAS-2011-2", vulnerabilities[1].Name)
-	assert.Equal(t, "https://alas.aws.amazon.com/ALAS-2011-2.html", vulnerabilities[1].Link)
-	assert.Equal(t, database.HighSeverity, vulnerabilities[1].Severity)
-	assert.Equal(t, expectedDescription1, vulnerabilities[1].Description)
-	assert.Equal(t, 8, len(vulnerabilities[1].FixedIn))
+	assert.Equal(t, "ALAS-2011-2", vulnerabilities[2].Name)
+	assert.Equal(t, "https://alas.aws.amazon.com/ALAS-2011-2.html", vulnerabilities[2].Link)
+	assert.Equal(t, database.HighSeverity, vulnerabilities[2].Severity)
+	assert.Equal(t, expectedDescription1, vulnerabilities[2].Description)
+	assert.Equal(t, 8, len(vulnerabilities[2].FixedIn))
+
+	assert.Equal(t, "CVE-2011-3208", vulnerabilities[3].Name)
+	assert.Equal(t, "https://nvd.nist.gov/vuln/detail/CVE-2011-3208", vulnerabilities[3].Link)
+	assert.Equal(t, database.UnknownSeverity, vulnerabilities[3].Severity)
+	assert.Equal(t, expectedDescription1, vulnerabilities[3].Description)
+	assert.Equal(t, 8, len(vulnerabilities[3].FixedIn))
 
 	expectedFeatureVersions1 := []database.FeatureVersion{
 		{
@@ -118,7 +131,8 @@ func TestAmazonLinux1(t *testing.T) {
 	}
 
 	for _, expectedFeatureVersion := range expectedFeatureVersions1 {
-		assert.Contains(t, vulnerabilities[1].FixedIn, expectedFeatureVersion)
+		assert.Contains(t, vulnerabilities[2].FixedIn, expectedFeatureVersion)
+		assert.Contains(t, vulnerabilities[3].FixedIn, expectedFeatureVersion)
 	}
 }
 
@@ -154,6 +168,12 @@ func TestAmazonLinux2(t *testing.T) {
 	assert.Equal(t, expectedDescription0, vulnerabilities[0].Description)
 	assert.Equal(t, 13, len(vulnerabilities[0].FixedIn))
 
+	assert.Equal(t, "CVE-2017-5754", vulnerabilities[1].Name)
+	assert.Equal(t, "https://nvd.nist.gov/vuln/detail/CVE-2017-5754", vulnerabilities[1].Link)
+	assert.Equal(t, database.UnknownSeverity, vulnerabilities[1].Severity)
+	assert.Equal(t, expectedDescription0, vulnerabilities[1].Description)
+	assert.Equal(t, 13, len(vulnerabilities[1].FixedIn))
+
 	expectedFeatureVersions0 := []database.FeatureVersion{
 		{
 			Feature: database.Feature{
@@ -179,13 +199,20 @@ func TestAmazonLinux2(t *testing.T) {
 
 	for _, expectedFeatureVersion := range expectedFeatureVersions0 {
 		assert.Contains(t, vulnerabilities[0].FixedIn, expectedFeatureVersion)
+		assert.Contains(t, vulnerabilities[1].FixedIn, expectedFeatureVersion)
 	}
 
-	assert.Equal(t, "ALAS2-2018-942", vulnerabilities[1].Name)
-	assert.Equal(t, "https://alas.aws.amazon.com/AL2/ALAS-2018-942.html", vulnerabilities[1].Link)
-	assert.Equal(t, database.HighSeverity, vulnerabilities[1].Severity)
-	assert.Equal(t, expectedDescription1, vulnerabilities[1].Description)
-	assert.Equal(t, 5, len(vulnerabilities[1].FixedIn))
+	assert.Equal(t, "ALAS2-2018-942", vulnerabilities[2].Name)
+	assert.Equal(t, "https://alas.aws.amazon.com/AL2/ALAS-2018-942.html", vulnerabilities[2].Link)
+	assert.Equal(t, database.HighSeverity, vulnerabilities[2].Severity)
+	assert.Equal(t, expectedDescription1, vulnerabilities[2].Description)
+	assert.Equal(t, 5, len(vulnerabilities[2].FixedIn))
+
+	assert.Equal(t, "CVE-2017-5715", vulnerabilities[3].Name)
+	assert.Equal(t, "https://nvd.nist.gov/vuln/detail/CVE-2017-5715", vulnerabilities[3].Link)
+	assert.Equal(t, database.UnknownSeverity, vulnerabilities[3].Severity)
+	assert.Equal(t, expectedDescription1, vulnerabilities[3].Description)
+	assert.Equal(t, 5, len(vulnerabilities[3].FixedIn))
 
 	expectedFeatureVersions1 := []database.FeatureVersion{
 		{
@@ -211,6 +238,7 @@ func TestAmazonLinux2(t *testing.T) {
 	}
 
 	for _, expectedFeatureVersion := range expectedFeatureVersions1 {
-		assert.Contains(t, vulnerabilities[1].FixedIn, expectedFeatureVersion)
+		assert.Contains(t, vulnerabilities[2].FixedIn, expectedFeatureVersion)
+		assert.Contains(t, vulnerabilities[3].FixedIn, expectedFeatureVersion)
 	}
 }

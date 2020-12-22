@@ -32,8 +32,9 @@ import (
 	"github.com/stackrox/rox/pkg/sync"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/api/grpc"
+	"github.com/stackrox/scanner/api/v1/imagescan"
+	"github.com/stackrox/scanner/api/v1/nodescan"
 	"github.com/stackrox/scanner/api/v1/ping"
-	"github.com/stackrox/scanner/api/v1/scan"
 	"github.com/stackrox/scanner/api/v1/vulndefs"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
@@ -59,6 +60,7 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
+	_ "github.com/stackrox/scanner/ext/kernelparser/all"
 
 	// Register validators
 	_ "github.com/stackrox/scanner/cpe/validation/all"
@@ -153,7 +155,8 @@ func Boot(config *Config) {
 
 	grpcAPI.Register(
 		ping.NewService(),
-		scan.NewService(db, nvdVulnCache, k8sVulnCache),
+		imagescan.NewService(db, nvdVulnCache),
+		nodescan.NewService(db, nvdVulnCache, k8sVulnCache),
 		vulndefs.NewService(db),
 	)
 
