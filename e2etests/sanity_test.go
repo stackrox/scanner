@@ -898,6 +898,58 @@ func TestImageSanity(t *testing.T) {
 							},
 							FixedBy: "2.9.10.7",
 						},
+
+
+
+
+						{
+							Name:        "CVE-2020-35490",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.8 mishandles the interaction between serialization gadgets and typing, related to org.apache.commons.dbcp2.datasources.PerUserPoolDataSource.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-35490",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-12-18T19:32Z",
+									"PublishedDateTime":    "2020-12-17T19:15Z",
+								},
+							},
+							FixedBy: "2.9.10.8",
+						},
+						{
+							Name:        "CVE-2020-35491",
+							Description: "FasterXML jackson-databind 2.x before 2.9.10.8 mishandles the interaction between serialization gadgets and typing, related to org.apache.commons.dbcp2.datasources.SharedPoolDataSource.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-35491",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2020-12-18T19:27Z",
+									"PublishedDateTime":    "2020-12-17T19:15Z",
+								},
+							},
+							FixedBy: "2.9.10.8",
+						},
 					},
 					AddedBy:  "sha256:36e8e9714b9a509fae9e515ff16237928c3d809f5ae228b14d2f7d7605c02623",
 					Location: "jars/jackson-databind-2.9.10.4.jar",
