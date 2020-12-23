@@ -58,4 +58,8 @@ replace (
 	github.com/mattn/goveralls => github.com/viswajithiii/goveralls v0.0.3-0.20190917224517-4dd02c532775
 	github.com/nilslice/protolock => github.com/viswajithiii/protolock v0.10.1-0.20190117180626-43bb8a9ba4e8
 	go.uber.org/zap => github.com/stackrox/zap v1.15.1-0.20200720133746-810fd602fd0f
+
+	// Due to github.com/stackrox/rox dependency.
+	// BE SURE TO KEEP THIS UP-TO-DATE.
+	k8s.io/client-go => k8s.io/client-go v0.19.2
 )
