@@ -193,7 +193,7 @@ func TestGRPCGetVulnerabilities(t *testing.T) {
 		Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-27675",
 		MetadataV2: &v1.Metadata{
 			PublishedDateTime:    "2020-10-22T21:15Z",
-			LastModifiedDateTime: "2020-12-18T14:15Z",
+			LastModifiedDateTime: "2020-12-11T00:15Z",
 			CvssV2: &v1.CVSSMetadata{
 				Score:               4.7,
 				Vector:              "AV:L/AC:M/Au:N/C:N/I:N/A:C",
