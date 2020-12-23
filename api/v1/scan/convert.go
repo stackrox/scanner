@@ -2,9 +2,11 @@ package scan
 
 import (
 	"encoding/json"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/go-version"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/stringutils"
@@ -36,6 +38,8 @@ var (
 		}
 		return m
 	}()
+
+	semverPattern = regexp.MustCompile(`(?:v)?([0-9]+.[0-9]+.[0-9]+)(?:[-+]?.*)`)
 )
 
 func convertVulnerabilities(apiVulns []apiV1.Vulnerability) ([]*v1.Vulnerability, error) {
@@ -202,4 +206,14 @@ func convertMetadata(m *types.Metadata) *v1.Metadata {
 	}
 
 	return metadata
+}
+
+// truncateVersion converts the given version into a semantic version x.y.z.
+// Returns empty string ""
+func truncateVersion(v string) (string, error) {
+	vs := semverPattern.FindStringSubmatch(v)
+	if len(vs) == 2 {
+		return vs[1], nil
+	}
+	return "", errors.Errorf("unsupported version: %s", v)
 }

@@ -50,7 +50,11 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 		switch typ := component.GetComponent().(type) {
 		case *v1.Component_K8SComponent:
 			c := typ.K8SComponent.Component
-			version := typ.K8SComponent.Version
+			version, err := truncateVersion(typ.K8SComponent.Version)
+			if err != nil {
+				logrus.Warnf("Unable to convert version of %s - %v. Skipping...", c.String(), err)
+				continue
+			}
 
 			component := v1.Component_K8SComponent{
 				K8SComponent: &v1.KubernetesComponent{
@@ -78,7 +82,11 @@ func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabi
 		case *v1.Component_AppComponent:
 			vendor := typ.AppComponent.Vendor
 			product := typ.AppComponent.Product
-			version := typ.AppComponent.Version
+			version, err := truncateVersion(typ.AppComponent.Version)
+			if err != nil {
+				logrus.Warnf("Unable to convert version of %s:%s - %v. Skipping...", vendor, product, err)
+				continue
+			}
 
 			component := v1.Component_AppComponent{
 				AppComponent: &v1.ApplicationComponent{
