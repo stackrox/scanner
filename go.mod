@@ -3,7 +3,7 @@ module github.com/stackrox/scanner
 go 1.13
 
 require (
-	cloud.google.com/go/storage v1.10.0
+	cloud.google.com/go/storage v1.12.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/davecgh/go-spew v1.1.1
@@ -14,7 +14,7 @@ require (
 	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/gogo/protobuf v1.3.1
-	github.com/golang/protobuf v1.4.2
+	github.com/golang/protobuf v1.4.3
 	github.com/gorilla/mux v1.7.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -31,20 +31,20 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
-	github.com/sirupsen/logrus v1.6.0
-	github.com/spf13/cobra v1.0.0
+	github.com/sirupsen/logrus v1.7.0
+	github.com/spf13/cobra v1.1.1
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
 	github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab
-	github.com/stackrox/rox v0.0.0-20200902200840-183e12662c50
+	github.com/stackrox/rox v0.0.0-20201222223839-042406f3664c
 	github.com/stretchr/testify v1.6.1
 	go.etcd.io/bbolt v1.3.5
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
-	golang.org/x/sys v0.0.0-20200803210538-64077c9b5642
-	golang.org/x/tools v0.0.0-20200804011535-6c149bb5ef0d
-	google.golang.org/api v0.30.0
-	google.golang.org/grpc v1.31.0
+	golang.org/x/sys v0.0.0-20201101102859-da207088b7d1
+	golang.org/x/tools v0.0.0-20201019175715-b894a3290fff
+	google.golang.org/api v0.33.0
+	google.golang.org/grpc v1.33.0
 	gopkg.in/yaml.v2 v2.3.0
-	honnef.co/go/tools v0.0.1-2020.1.5
+	honnef.co/go/tools v0.0.1-2020.1.6
 )
 
 replace (
@@ -58,4 +58,8 @@ replace (
 	github.com/mattn/goveralls => github.com/viswajithiii/goveralls v0.0.3-0.20190917224517-4dd02c532775
 	github.com/nilslice/protolock => github.com/viswajithiii/protolock v0.10.1-0.20190117180626-43bb8a9ba4e8
 	go.uber.org/zap => github.com/stackrox/zap v1.15.1-0.20200720133746-810fd602fd0f
+
+	// Due to github.com/stackrox/rox dependency.
+	// BE SURE TO KEEP THIS UP-TO-DATE.
+	k8s.io/client-go => k8s.io/client-go v0.19.2
 )
