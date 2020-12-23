@@ -1111,6 +1111,7 @@ github.com/stackrox/docker-registry-client v0.0.0-20181115184320-3d98b2b79d1b/go
 github.com/stackrox/docker-registry-client v0.0.0-20181115184320-3d98b2b79d1b/go.mod h1:ftVRYPg9kyRYpu5y5rE+8c8P6KtAitUy57PlHhMraL8=
 github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd h1:vEjp7Q66zd4W72//Uk3uyVN50Mh/nFLbN9pb7CVK7mE=
 github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd/go.mod h1:HILeV3i/EyJz844GcrC3+oU7oZONhjfujaIYBMJ/bZE=
+github.com/stackrox/external-network-pusher v0.0.0-20201201000949-ec60e0486e7a h1:zYOqcElGWFXP9gYvkR98dQZLuQhuXsA4gihb2VxFZ3k=
 github.com/stackrox/external-network-pusher v0.0.0-20201201000949-ec60e0486e7a/go.mod h1:faUw9vx/mA7ql41Ftlst5MYar2DT3nnS6oK94lbaW0g=
 github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab h1:77xJmm1YkqbgrQzHI3C4MyPckWL+PYRLWakQRC6Mzj8=
 github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab/go.mod h1:EBskgGC5Gzt/r8ToNsuD6tYMcf+AWY0ubaFSRy5/3QM=
