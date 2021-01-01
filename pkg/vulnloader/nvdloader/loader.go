@@ -59,6 +59,11 @@ func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir 
 	if err != nil {
 		return errors.Wrapf(err, "failed to download feed for year %d", year)
 	}
+	// This is because the file for the new year may not exist immediately
+	if resp.StatusCode == http.StatusNotFound && year == time.Now().Year() {
+		return nil
+	}
+
 	defer utils.IgnoreError(resp.Body.Close)
 	// Un-gzip it.
 	gr, err := gzip.NewReader(resp.Body)
