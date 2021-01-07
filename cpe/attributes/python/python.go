@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	blacklistedPkgs = []string{"python", "docker"}
+	// Core packages like python and pip are installed via package manager
+	blocklistedPkgs = []string{"python", "docker", "pip"}
 
 	// predisposedKeywords are the keywords that are likely to be used to specify
 	// a version of a product that is not the core product. jira-plugin should not be resolved as jira for example
@@ -80,8 +81,8 @@ func GetPythonAttributes(c *component.Component) []*wfn.Attributes {
 	if vendorSet.Cardinality() != 0 && !predisposed(c) {
 		common.AddMutatedNameKeys(c, nameSet)
 	}
-	for _, blacklisted := range blacklistedPkgs {
-		nameSet.Remove(blacklisted)
+	for _, blocklisted := range blocklistedPkgs {
+		nameSet.Remove(blocklisted)
 	}
 
 	if python.Homepage != "" {
