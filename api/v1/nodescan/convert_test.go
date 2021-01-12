@@ -290,6 +290,18 @@ func TestConvertVersion(t *testing.T) {
 			version:  "4.14.203-156.332.amzn2.x86_64",
 			expected: "4.14.203",
 		},
+		{
+			version:  "5.4.83-flatcar",
+			expected: "5.4.83",
+		},
+		{
+			version:  "5.4.0-5-cloud-amd64",
+			expected: "5.4.0",
+		},
+		{
+			version:  "4.19.123-coreos",
+			expected: "4.19.123",
+		},
 	} {
 		actual, err := truncateVersion(testCase.version)
 		assert.NoError(t, err)
