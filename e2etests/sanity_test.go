@@ -32,7 +32,30 @@ func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1
 	return &featureList[candidateIdx]
 }
 
-func verifyImageHasExpectedFeaturesOnly(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, expectedFeatures, unexpectedFeatures []v1.Feature) {
+func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulnerability) {
+	if expectedVuln.Metadata == nil {
+		assert.Nil(t, matchingVuln.Metadata, "Expected no metadata for %s but got some", expectedVuln.Name)
+	} else {
+		for _, keys := range [][]string{
+			{source, "CVSSv2", "ExploitabilityScore"},
+			{source, "CVSSv2", "Score"},
+			{source, "CVSSv2", "ImpactScore"},
+			{source, "CVSSv2", "Vectors"},
+			{source, "CVSSv3", "ExploitabilityScore"},
+			{source, "CVSSv3", "Score"},
+			{source, "CVSSv3", "ImpactScore"},
+			{source, "CVSSv3", "Vectors"},
+		} {
+			assert.NotNil(t, deepGet(expectedVuln.Metadata, keys...), "Value for nil for %+v", keys)
+			assert.Equal(t, deepGet(expectedVuln.Metadata, keys...), deepGet(matchingVuln.Metadata, keys...), "Failed for %+v", keys)
+		}
+	}
+	expectedVuln.Metadata = nil
+	matchingVuln.Metadata = nil
+	assert.Equal(t, expectedVuln, matchingVuln)
+}
+
+func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, checkContainsOnly bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
@@ -61,39 +84,31 @@ func verifyImageHasExpectedFeaturesOnly(t *testing.T, client *client.Clairify, u
 				})
 			}
 
-			if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
-				matchingBytes, _ := json.MarshalIndent(matching.Vulnerabilities, "", "  ")
-				featureVulnsBytes, _ := json.MarshalIndent(feature.Vulnerabilities, "", "  ")
-				fmt.Printf("Matching: %s\n", matchingBytes)
-				fmt.Printf("Feature: %s\n", featureVulnsBytes)
-			}
-			require.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
-			for i, matchingVuln := range matching.Vulnerabilities {
-				expectedVuln := feature.Vulnerabilities[i]
-				if expectedVuln.Metadata == nil {
-					assert.Nil(t, matchingVuln.Metadata, "Expected no metadata for %s but got some", expectedVuln.Name)
-				} else {
-					for _, keys := range [][]string{
-						{source, "CVSSv2", "ExploitabilityScore"},
-						{source, "CVSSv2", "Score"},
-						{source, "CVSSv2", "ImpactScore"},
-						{source, "CVSSv2", "Vectors"},
-						{source, "CVSSv3", "ExploitabilityScore"},
-						{source, "CVSSv3", "Score"},
-						{source, "CVSSv3", "ImpactScore"},
-						{source, "CVSSv3", "Vectors"},
-					} {
-						assert.NotNil(t, deepGet(expectedVuln.Metadata, keys...), "Value for nil for %+v", keys)
-						assert.Equal(t, deepGet(expectedVuln.Metadata, keys...), deepGet(matchingVuln.Metadata, keys...), "Failed for %+v", keys)
-					}
+			if !checkContainsOnly {
+				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
+					matchingBytes, _ := json.MarshalIndent(matching.Vulnerabilities, "", "  ")
+					featureVulnsBytes, _ := json.MarshalIndent(feature.Vulnerabilities, "", "  ")
+					fmt.Printf("Matching: %s\n", matchingBytes)
+					fmt.Printf("Feature: %s\n", featureVulnsBytes)
 				}
-				expectedVuln.Metadata = nil
-				matchingVuln.Metadata = nil
-				assert.Equal(t, expectedVuln, matchingVuln)
+				require.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
+				for i, matchingVuln := range matching.Vulnerabilities {
+					expectedVuln := feature.Vulnerabilities[i]
+					checkMatch(t, source, expectedVuln, matchingVuln)
+				}
+			} else {
+				for _, expectedVuln := range feature.Vulnerabilities {
+					var foundMatch bool
+					for _, matchingVuln := range matching.Vulnerabilities {
+						if expectedVuln.Name != matchingVuln.Name {
+							continue
+						}
+						foundMatch = true
+						checkMatch(t, source, expectedVuln, matchingVuln)
+					}
+					assert.True(t, foundMatch)
+				}
 			}
-			matching.Vulnerabilities = nil
-			feature.Vulnerabilities = nil
-			assert.Equal(t, feature, *matching)
 		})
 	}
 
@@ -112,6 +127,7 @@ func TestImageSanity(t *testing.T) {
 		source             string
 		expectedFeatures   []v1.Feature
 		unexpectedFeatures []v1.Feature
+		checkContainsOnly  bool
 	}{
 		{
 			image:    "docker.io/library/nginx:1.10",
@@ -719,11 +735,12 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// Deletes directory containing jackson-databind:2.6.6.
-			image:    "docker.io/stackrox/sandbox:scannerremovejar",
-			registry: "https://registry-1.docker.io",
-			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-			source:   "NVD",
+			image:             "docker.io/stackrox/sandbox:scannerremovejar",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "NVD",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "jackson-databind",
@@ -987,7 +1004,7 @@ func TestImageSanity(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			verifyImageHasExpectedFeaturesOnly(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.expectedFeatures, testCase.unexpectedFeatures)
+			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
 		})
 	}
 }
