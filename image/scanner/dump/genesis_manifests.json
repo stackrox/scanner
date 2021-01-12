@@ -86,6 +86,11 @@
       "config": {
         "ignoreKubernetesVulns": true
       }
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210112210506.zip",
+      "timestamp": "2021-01-12T21:05:06.509624306Z",
+      "diffLocation": "gs://definitions.stackrox.io/1ef1caff-3e20-461c-a4d6-33f175f3ee24/diff.zip"
     }
   ]
 }
