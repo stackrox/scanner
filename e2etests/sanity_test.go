@@ -96,9 +96,6 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 					expectedVuln := feature.Vulnerabilities[i]
 					checkMatch(t, source, expectedVuln, matchingVuln)
 				}
-				matching.Vulnerabilities = nil
-				feature.Vulnerabilities = nil
-				assert.Equal(t, feature, *matching)
 			} else {
 				for _, expectedVuln := range feature.Vulnerabilities {
 					var foundMatch bool
