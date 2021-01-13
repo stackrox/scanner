@@ -919,30 +919,54 @@ func TestImageSanity(t *testing.T) {
 							},
 							FixedBy: "3.1.12",
 						},
-					},
-					{
-						Name:        "CVE-2021-26701",
-						Description: ".NET Core Remote Code Execution Vulnerability This CVE ID is unique from CVE-2021-24112.",
-						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-26701",
-						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 10.0,
-									"ImpactScore":         6.4,
-									"Score":               7.5,
-									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+						{
+							Name:        "CVE-2021-26701",
+							Description: ".NET Core Remote Code Execution Vulnerability This CVE ID is unique from CVE-2021-24112.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-26701",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         6.4,
+										"Score":               7.5,
+										"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         5.9,
+										"Score":               9.8,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2021-03-10T20:28Z",
+									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         5.9,
-									"Score":               9.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
-								"LastModifiedDateTime": "2021-03-12T13:25Z",
-								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
+							FixedBy: "3.1.13",
 						},
-						FixedBy: "3.1.13",
+						{
+							Name:        "CVE-2021-26701",
+							Description: ".NET Core Remote Code Execution Vulnerability This CVE ID is unique from CVE-2021-24112.",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-26701",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         6.4,
+										"Score":               7.5,
+										"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         5.9,
+										"Score":               9.8,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2021-03-12T13:25Z",
+									"PublishedDateTime":    "2021-02-25T23:15Z",
+								},
+							},
+							FixedBy: "3.1.13",
+						},
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
 					Location: "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.0/",
