@@ -32,14 +32,14 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 	for _, v := range k8sVulns {
 		m, err := types.ConvertMetadataFromK8s(v)
 		if err != nil {
-			log.Errorf("Unable to convert metadata for %s: %v", v.CVE, err)
+			log.Errorf("unable to convert metadata for %s: %v", v.CVE, err)
 			continue
 		}
 
 		link := stringutils.OrDefault(v.IssueURL, v.URL)
 		fixedBy, err := getFixedBy(version, v)
 		if err != nil {
-			log.Errorf("Unable to get FixedBy for %s: %v", v.CVE, err)
+			log.Errorf("unable to get fixedBy for %s: %v", v.CVE, err)
 			continue
 		}
 		vulns = append(vulns, &v1.Vulnerability{

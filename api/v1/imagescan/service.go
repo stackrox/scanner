@@ -121,7 +121,6 @@ func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec) (string, 
 	if err != nil {
 		return "", err
 	}
-
 	if !exists {
 		return "", status.Errorf(codes.NotFound, "image with reference %q not found", argument)
 	}

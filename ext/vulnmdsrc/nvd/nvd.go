@@ -133,6 +133,7 @@ func (a *appender) Append(name string, subCVEs []string, appendFunc types.Append
 		appendFunc(AppenderName, enricher, cvss.SeverityFromCVSS(enricher.metadata))
 	}
 
+	// This retrieves the highest CVSS to score things like ALAS2, which are not enriched with data from NVD
 	if metadata := a.getHighestCVSSMetadata(subCVEs); metadata != nil {
 		appendFunc(AppenderName, &metadataEnricher{metadata: metadata}, cvss.SeverityFromCVSS(metadata))
 	}

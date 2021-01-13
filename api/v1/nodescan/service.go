@@ -161,7 +161,6 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 	case "docker":
 		return s.getNVDVulns("docker", "docker", containerRuntime.GetVersion())
 	case "crio", "cri-o":
-		log.Infof("Checking for %v %v %v", "kubernetes", "cri-o", containerRuntime.GetVersion())
 		return s.getNVDVulns("kubernetes", "cri-o", containerRuntime.GetVersion())
 	case "containerd", "runc":
 		return s.getNVDVulns("linuxfoundation", containerRuntime.GetName(), containerRuntime.GetVersion())
