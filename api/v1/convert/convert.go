@@ -5,10 +5,12 @@ import (
 
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	"github.com/stackrox/scanner/pkg/nvd"
 	"github.com/stackrox/scanner/pkg/types"
 )
 
-func convertMetadata(m *types.Metadata) *v1.Metadata {
+// Metadata converts from types.Metadata to v1.Metadata
+func Metadata(m *types.Metadata) *v1.Metadata {
 	metadata := &v1.Metadata{
 		PublishedDateTime:    m.PublishedDateTime,
 		LastModifiedDateTime: m.LastModifiedDateTime,
@@ -53,7 +55,7 @@ func MetadataMap(metadataMap map[string]interface{}) (*v1.Metadata, error) {
 	if err := json.Unmarshal(d, &m); err != nil {
 		return nil, err
 	}
-	return convertMetadata(&m), err
+	return Metadata(&m), err
 }
 
 // NVDVulns converts the NVD vuln structure into the API Vulnerability
@@ -64,8 +66,8 @@ func NVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vulnerabil
 		vulns = append(vulns, &v1.Vulnerability{
 			Name:        vuln.CVE.CVEDataMeta.ID,
 			Description: types.ConvertNVDSummary(vuln.NVDCVEFeedJSON10DefCVEItem),
-			Link:        "https://nvd.nist.gov/vuln/detail/" + vuln.CVE.CVEDataMeta.ID,
-			MetadataV2:  convertMetadata(m),
+			Link:        nvd.Link(vuln.CVE.CVEDataMeta.ID),
+			MetadataV2:  Metadata(m),
 			FixedBy:     vuln.FixedIn,
 		})
 	}

@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/scanner/api/v1/convert"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 )
@@ -24,33 +25,6 @@ func truncateVersion(v string) (string, error) {
 		return vs[1], nil
 	}
 	return "", errors.Errorf("unsupported version: %s", v)
-}
-
-func convertMetadata(m *types.Metadata) *v1.Metadata {
-	metadata := &v1.Metadata{
-		PublishedDateTime:    m.PublishedDateTime,
-		LastModifiedDateTime: m.LastModifiedDateTime,
-	}
-	if m.CVSSv2.Vectors != "" {
-		cvssV2 := m.CVSSv2
-		metadata.CvssV2 = &v1.CVSSMetadata{
-			Vector:              cvssV2.Vectors,
-			Score:               float32(cvssV2.Score),
-			ExploitabilityScore: float32(cvssV2.ExploitabilityScore),
-			ImpactScore:         float32(cvssV2.ImpactScore),
-		}
-	}
-	if m.CVSSv3.Vectors != "" {
-		cvssV3 := m.CVSSv3
-		metadata.CvssV3 = &v1.CVSSMetadata{
-			Vector:              cvssV3.Vectors,
-			Score:               float32(cvssV3.Score),
-			ExploitabilityScore: float32(cvssV3.ExploitabilityScore),
-			ImpactScore:         float32(cvssV3.ImpactScore),
-		}
-	}
-
-	return metadata
 }
 
 func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema) ([]*v1.Vulnerability, error) {
@@ -72,7 +46,7 @@ func convertK8sVulnerabilities(version string, k8sVulns []*validation.CVESchema)
 			Name:        v.CVE,
 			Description: v.Description,
 			Link:        link,
-			MetadataV2:  convertMetadata(m),
+			MetadataV2:  convert.Metadata(m),
 			FixedBy:     fixedBy,
 		})
 	}

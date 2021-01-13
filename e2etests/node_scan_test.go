@@ -23,7 +23,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 		{
 			request: &v1.GetNodeVulnerabilitiesRequest{
 				OsImage:          "Ubuntu 20.04.1 LTS",
-				KernelVersion:    "5.9.1-1050",
+				KernelVersion:    "5.4.0-51",
 				KubeletVersion:   "1.14.2",
 				KubeproxyVersion: "1.14.2",
 				Runtime: &v1.GetNodeVulnerabilitiesRequest_ContainerRuntime{
@@ -53,7 +53,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 								ImpactScore:         3.6,
 							},
 						},
-						FixedBy: "",
+						FixedBy: "5.4.0-59.65",
 					},
 				},
 				KubeletVulnerabilities: []*v1.Vulnerability{
@@ -225,11 +225,12 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		// Ubuntu
 		{
 			osImage:       "Ubuntu 20.04.1 LTS",
-			kernelVersion: "5.9.1-1050",
+			kernelVersion: "5.4.0-51",
 
 			expectedCVEs: []expectedCVE{
 				{
-					id: "CVE-2020-27675",
+					id:      "CVE-2020-27675",
+					fixedBy: "5.4.0-59.65",
 				},
 			},
 		},
@@ -239,7 +240,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 
 			expectedCVEs: []expectedCVE{
 				{
-					id: "CVE-2020-27675",
+					id:      "CVE-2020-27675",
+					fixedBy: "4.15.0-1091.104~16.04.1",
 				},
 				{
 					id:      "CVE-2019-2182",
@@ -249,11 +251,12 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		},
 		{
 			osImage:       "Ubuntu 16.04.7 LTS",
-			kernelVersion: "4.15.0-1050-aws",
+			kernelVersion: "4.2.0-1119-aws",
 
 			expectedCVEs: []expectedCVE{
 				{
-					id: "CVE-2020-27675",
+					id:      "CVE-2020-27675",
+					fixedBy: "4.4.0-1119.133",
 				},
 			},
 			unexpectedCVEs: []string{
@@ -266,7 +269,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 
 			expectedCVEs: []expectedCVE{
 				{
-					id: "CVE-2020-27675",
+					id:      "CVE-2020-27675",
+					fixedBy: "4.15.0-1091.96",
 				},
 				{
 					// AWS Flavor on 18.04 is vulnerable and should have a different fixed by
@@ -383,10 +387,6 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				KernelVersion: c.kernelVersion,
 			})
 			require.NoError(t, err)
-
-			for _, v := range resp.GetKernelVulnerabilities() {
-				fmt.Println(v.Name)
-			}
 
 			if len(resp.GetKernelVulnerabilities()) < len(c.expectedCVEs) {
 				assert.FailNowf(t, "mismatch between number of kernel vulns found", "expected vulns: %d vs %d", len(resp.GetKernelVulnerabilities()), len(c.expectedCVEs))

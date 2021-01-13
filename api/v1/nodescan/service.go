@@ -48,6 +48,10 @@ func filterInvalidVulns(vulns []*v1.Vulnerability) []*v1.Vulnerability {
 		if v.GetMetadataV2().GetCvssV2() == nil && v.GetMetadataV2().GetCvssV3() == nil {
 			continue
 		}
+		// This will make filter out vulns that are older than 2012, but include 2012 and on
+		if v.Name < "CVE-2012" {
+			continue
+		}
 		filteredVulns = append(filteredVulns, v)
 	}
 	return filteredVulns
