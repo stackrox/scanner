@@ -49,7 +49,7 @@ func filterInvalidVulns(vulns []*v1.Vulnerability) []*v1.Vulnerability {
 			continue
 		}
 		// This will make filter out vulns that are of form CVE- and older than 2012
-		if strings.HasPrefix(v.Name,"CVE-") && v.Name < "CVE-2012" {
+		if strings.HasPrefix(v.Name, "CVE-") && v.Name < "CVE-2012" {
 			continue
 		}
 		filteredVulns = append(filteredVulns, v)
