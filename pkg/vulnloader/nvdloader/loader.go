@@ -7,10 +7,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/vulndump"
@@ -53,7 +56,15 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 	return nil
 }
 
-func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir string, year int) error {
+func getYearFromCVE(cve string) string {
+	spl := strings.Split(cve, "-")
+	if len(spl) < 3 {
+		return ""
+	}
+	return spl[1]
+}
+
+func downloadFeedForYear(enrichmentMap map[string]*CVEDefinitionWrapper, outputDir string, year int) error {
 	url := jsonFeedURLForYear(year)
 	resp, err := client.Get(url)
 	if err != nil {
@@ -80,7 +91,49 @@ func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir 
 				Operator: "OR",
 			})
 			item.LastModifiedDate = enrichedEntry.LastUpdated
+			if item.Impact == nil {
+				item.Impact = enrichedEntry.Impact
+			} else if item.Impact.BaseMetricV2 == nil && item.Impact.BaseMetricV3 == nil && enrichedEntry.Impact != nil {
+				item.Impact = enrichedEntry.Impact
+			}
+			delete(enrichmentMap, item.CVE.CVEDataMeta.ID)
 		}
+	}
+
+	yearStr := strconv.Itoa(year)
+	for id, enrichedEntry := range enrichmentMap {
+		if getYearFromCVE(id) != yearStr {
+			continue
+		}
+
+		log.Infof("Entry in enrichment map did not exist in NVD file %v: %v", year, id)
+		nvdCVE := &schema.NVDCVEFeedJSON10DefCVEItem{
+			CVE: &schema.CVEJSON40{
+				CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+					ID: id,
+				},
+				Description: &schema.CVEJSON40Description{
+					DescriptionData: []*schema.CVEJSON40LangString{
+						{
+							Lang:  "en",
+							Value: enrichedEntry.Description,
+						},
+					},
+				},
+			},
+			Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+				Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+					{
+						CPEMatch: enrichedEntry.AffectedPackages,
+						Operator: "OR",
+					},
+				},
+			},
+			Impact:           enrichedEntry.Impact,
+			LastModifiedDate: enrichedEntry.LastUpdated,
+			PublishedDate:    enrichedEntry.LastUpdated,
+		}
+		dump.CVEItems = append(dump.CVEItems, nvdCVE)
 	}
 
 	outF, err := os.Create(filepath.Join(outputDir, fmt.Sprintf("%d.json", year)))

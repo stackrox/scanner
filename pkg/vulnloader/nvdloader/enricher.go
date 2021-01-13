@@ -17,12 +17,12 @@ const (
 	nvdEnricherRepo = "git@github.com:stackrox/dotnet-scraper.git"
 )
 
-type FileFormatWrapper struct {
+type CVEDefinitionWrapper struct {
 	LastUpdated string
-	types.FileFormat
+	types.CVEDefinition
 }
 
-func Fetch() (map[string]*FileFormatWrapper, error) {
+func Fetch() (map[string]*CVEDefinitionWrapper, error) {
 	r, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: nvdEnricherRepo,
 	})
@@ -39,7 +39,7 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "reading cve dir")
 	}
-	resultMap := make(map[string]*FileFormatWrapper)
+	resultMap := make(map[string]*CVEDefinitionWrapper)
 	for _, file := range files {
 		if filepath.Ext(file.Name()) != ".yaml" {
 			continue
@@ -69,13 +69,13 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, "reading file: %v", path)
 		}
-		var ff types.FileFormat
-		if err := yaml.Unmarshal(data, &ff); err != nil {
+		var cve types.CVEDefinition
+		if err := yaml.Unmarshal(data, &cve); err != nil {
 			return nil, errors.Wrapf(err, "unmarshalling file: %v", path)
 		}
-		resultMap[ff.ID] = &FileFormatWrapper{
-			LastUpdated: c.Committer.When.Format(vulndb.TimeLayout),
-			FileFormat:  ff,
+		resultMap[cve.ID] = &CVEDefinitionWrapper{
+			LastUpdated:   c.Committer.When.Format(vulndb.TimeLayout),
+			CVEDefinition: cve,
 		}
 	}
 	return resultMap, nil

@@ -33,7 +33,7 @@ require (
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.1.1
-	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
+	github.com/stackrox/dotnet-scraper v0.0.0-20210113205651-0c5de4c82ca6
 	github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab
 	github.com/stackrox/rox v0.0.0-20201222223839-042406f3664c
 	github.com/stretchr/testify v1.6.1
