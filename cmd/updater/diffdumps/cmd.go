@@ -194,6 +194,28 @@ func vulnsAreEqual(v1, v2 database.Vulnerability) bool {
 	return reflect.DeepEqual(v1, v2)
 }
 
+func filterUbuntuLinuxKernelVulns(vulns []database.Vulnerability) []database.Vulnerability {
+	var filtered []database.Vulnerability
+	for _, vuln := range vulns {
+		if !strings.HasPrefix(vuln.Namespace.Name, "ubuntu") {
+			filtered = append(filtered, vuln)
+			continue
+		}
+		var newFixedIn []database.FeatureVersion
+		for _, fixedIn := range vuln.FixedIn {
+			if strings.HasPrefix(fixedIn.Feature.Name, "linux") {
+				continue
+			}
+			newFixedIn = append(newFixedIn, fixedIn)
+		}
+		if len(newFixedIn) > 0 {
+			vuln.FixedIn = newFixedIn
+			filtered = append(filtered, vuln)
+		}
+	}
+	return filtered
+}
+
 func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnerability {
 	var filtered []database.Vulnerability
 	for _, vuln := range vulns {
@@ -251,6 +273,11 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 		filtered = filterFixableCentOSVulns(filtered)
 		log.Infof("Skipping fixable centOS vulns: filtered out %d", countBefore-len(filtered))
 	}
+	if cfg.SkipUbuntuLinuxKernelVulns {
+		countBefore := len(filtered)
+		filtered = filterUbuntuLinuxKernelVulns(filtered)
+		log.Infof("Skipping ubuntu linux kernel vulns: filtered out %d", countBefore-len(filtered))
+	}
 	log.Infof("Diffed OS vulns; base had %d, head had %d, and the diff has %d", len(baseVulns), len(headVulns), len(filtered))
 	if err := vulndump.WriteOSVulns(outputDir, filtered); err != nil {
 		return err
@@ -259,8 +286,9 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 }
 
 type config struct {
-	SkipFixableCentOSVulns bool `json:"skipFixableCentOSVulns"`
-	IgnoreKubernetesVulns  bool `json:"ignoreKubernetesVulns"`
+	SkipFixableCentOSVulns     bool `json:"skipFixableCentOSVulns"`
+	IgnoreKubernetesVulns      bool `json:"ignoreKubernetesVulns"`
+	SkipUbuntuLinuxKernelVulns bool `json:"skipUbuntuLinuxKernelVulns"`
 }
 
 func Command() *cobra.Command {

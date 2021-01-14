@@ -11,7 +11,8 @@
       "diffLocation": "gs://definitions.stackrox.io/e799c68a-671f-44db-9682-f24248cd0ffe/diff.zip",
       "config": {
         "skipFixableCentOSVulns": true,
-        "ignoreKubernetesVulns": true
+        "ignoreKubernetesVulns": true,
+        "skipUbuntuLinuxKernelVulns": true
       }
     },
     {
@@ -20,7 +21,8 @@
       "diffLocation": "gs://definitions.stackrox.io/41e42aec-33ca-4e40-b628-78b4e16977f0/diff.zip",
       "config": {
         "skipFixableCentOSVulns": true,
-        "ignoreKubernetesVulns": true
+        "ignoreKubernetesVulns": true,
+        "skipUbuntuLinuxKernelVulns": true
       }
     },
     {
@@ -28,7 +30,8 @@
       "timestamp": "2020-06-25T19:01:54.401201424Z",
       "diffLocation": "gs://definitions.stackrox.io/56f04dff-7fac-43d5-b042-b17813929c14/diff.zip",
       "config": {
-        "ignoreKubernetesVulns": true
+        "ignoreKubernetesVulns": true,
+        "skipUbuntuLinuxKernelVulns": true
       }
     },
     {
@@ -36,7 +39,8 @@
       "timestamp": "2020-07-27T16:02:43.672982488Z",
       "diffLocation": "gs://definitions.stackrox.io/843a826a-2599-4761-a68e-3498749c7b8f/diff.zip",
       "config": {
-        "ignoreKubernetesVulns": true
+        "ignoreKubernetesVulns": true,
+        "skipUbuntuLinuxKernelVulns": true
       }
     },
     {
@@ -44,7 +48,8 @@
       "timestamp": "2020-08-15T22:02:24.082625061Z",
       "diffLocation": "gs://definitions.stackrox.io/e500a8ae-fed1-4e21-b482-3680f093d4db/diff.zip",
       "config": {
-        "ignoreKubernetesVulns": true
+        "ignoreKubernetesVulns": true,
+        "skipUbuntuLinuxKernelVulns": true
       }
     },
     {
@@ -52,7 +57,8 @@
       "timestamp": "2020-09-08T17:02:45.481154658Z",
       "diffLocation": "gs://definitions.stackrox.io/0133c2cf-8abe-4d79-9250-9b64b5b3e43e/diff.zip",
       "config": {
-        "ignoreKubernetesVulns": true
+        "ignoreKubernetesVulns": true,
+        "skipUbuntuLinuxKernelVulns": true
       }
     },
     {
@@ -60,7 +66,8 @@
       "timestamp": "2020-09-30T21:02:13.294367007Z",
       "diffLocation": "gs://definitions.stackrox.io/393a3dce-2a0e-4645-b0b6-2835270eb93c/diff.zip",
       "config": {
-        "ignoreKubernetesVulns": true
+        "ignoreKubernetesVulns": true,
+        "skipUbuntuLinuxKernelVulns": true
       }
     },
     {
@@ -68,7 +75,8 @@
       "timestamp": "2020-10-21T03:03:34.095060606Z",
       "diffLocation": "gs://definitions.stackrox.io/8d6951e9-52af-4840-9e0b-c9d7a5191a7d/diff.zip",
       "config": {
-        "ignoreKubernetesVulns": true
+        "ignoreKubernetesVulns": true,
+        "skipUbuntuLinuxKernelVulns": true
       }
     },
     {
@@ -76,7 +84,8 @@
       "timestamp": "2020-11-11T01:02:46.31209102Z",
       "diffLocation": "gs://definitions.stackrox.io/474f36bb-3ba5-40b8-bc56-3dcc4f2a3c0c/diff.zip",
       "config": {
-        "ignoreKubernetesVulns": true
+        "ignoreKubernetesVulns": true,
+        "skipUbuntuLinuxKernelVulns": true
       }
     },
     {
@@ -84,13 +93,17 @@
       "timestamp": "2020-12-09T18:05:47.702069511Z",
       "diffLocation": "gs://definitions.stackrox.io/8838c700-8743-4bc6-8e25-fafdf867cadc/diff.zip",
       "config": {
-        "ignoreKubernetesVulns": true
+        "ignoreKubernetesVulns": true,
+        "skipUbuntuLinuxKernelVulns": true
       }
     },
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210112210506.zip",
       "timestamp": "2021-01-12T21:05:06.509624306Z",
-      "diffLocation": "gs://definitions.stackrox.io/1ef1caff-3e20-461c-a4d6-33f175f3ee24/diff.zip"
+      "diffLocation": "gs://definitions.stackrox.io/1ef1caff-3e20-461c-a4d6-33f175f3ee24/diff.zip",
+      "config": {
+        "skipUbuntuLinuxKernelVulns": true
+      }
     }
   ]
 }
