@@ -13,7 +13,7 @@ message GetNodeVulnerabilitiesRequest {
     string             os_image           = 1;
     string             kernel_version     = 2;
     string             kubelet_version    = 3;
-    string             kubeproxy_version = 4;
+    string             kubeproxy_version  = 4;
     message ContainerRuntime {
         string name    = 1;
         string version = 2;

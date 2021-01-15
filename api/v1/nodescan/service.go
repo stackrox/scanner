@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
@@ -65,12 +66,12 @@ func (s *serviceImpl) getNVDVulns(vendor, product, version string) ([]*v1.Vulner
 	}
 	nvdVulns, err := s.nvdCache.GetVulnsForComponent(vendor, product, version)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to get vulns for %v:%v:%v: %v. Skipping...", vendor, product, version, err)
+		return nil, errors.Wrapf(err, "failed to get vulns for %s:%s:%s. Skipping...", vendor, product, version)
 	}
 
 	vulns, err := convert.NVDVulns(nvdVulns)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
+		return nil, errors.Wrapf(err, "failed to convert vulnerabilities")
 	}
 	return filterInvalidVulns(vulns), nil
 }
@@ -91,48 +92,53 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 		}
 		break
 	}
-	if match != nil {
-		fv := database.FeatureVersion{
-			Feature: database.Feature{
-				Name: match.FeatureName,
-				Namespace: database.Namespace{
-					Name:          match.Namespace,
-					VersionFormat: match.Format,
-				},
-			},
-			Version: match.Version,
-		}
 
-		databaseVulns, err := s.db.GetVulnerabilitiesForFeatureVersion(fv)
-		if err != nil {
-			return nil, err
-		}
-
-		vulns := make([]*v1.Vulnerability, 0, len(databaseVulns))
-		for _, affected := range databaseVulns {
-			metadata, err := convert.MetadataMap(affected.Metadata)
-			if err != nil {
-				log.Errorf("error converting metadata: %v", err)
-			}
-
-			vuln := &v1.Vulnerability{
-				Name:        affected.Name,
-				Description: affected.Description,
-				Link:        affected.Link,
-				MetadataV2:  metadata,
-			}
-			if affected.FixedBy != versionfmt.MaxVersion {
-				vuln.FixedBy = affected.FixedBy
-			}
-			vulns = append(vulns, vuln)
-		}
-		sort.Slice(vulns, func(i, j int) bool {
-			return vulns[i].Name < vulns[j].Name
-		})
-		return filterInvalidVulns(vulns), nil
+	if match == nil {
+		// Did not find relevant OS-specific kernel parser.
+		// Defaulting to general kernel vulns from NVD.
+		return s.getNVDVulns("linux", "linux_kernel", req.GetKernelVersion())
 	}
 
-	return s.getNVDVulns("linux", "linux_kernel", req.GetKernelVersion())
+	fv := database.FeatureVersion{
+		Feature: database.Feature{
+			Name: match.FeatureName,
+			Namespace: database.Namespace{
+				Name:          match.Namespace,
+				VersionFormat: match.Format,
+			},
+		},
+		Version: match.Version,
+	}
+
+	databaseVulns, err := s.db.GetVulnerabilitiesForFeatureVersion(fv)
+	if err != nil {
+		return nil, err
+	}
+
+	vulns := make([]*v1.Vulnerability, 0, len(databaseVulns))
+	for _, affected := range databaseVulns {
+		metadata, err := convert.MetadataMap(affected.Metadata)
+		if err != nil {
+			log.Warnf("error converting metadata: %v. Skipping...", err)
+			continue
+		}
+
+		vuln := &v1.Vulnerability{
+			Name:        affected.Name,
+			Description: affected.Description,
+			Link:        affected.Link,
+			MetadataV2:  metadata,
+		}
+		if affected.FixedBy != versionfmt.MaxVersion {
+			vuln.FixedBy = affected.FixedBy
+		}
+		vulns = append(vulns, vuln)
+	}
+	sort.Slice(vulns, func(i, j int) bool {
+		return vulns[i].Name < vulns[j].Name
+	})
+
+	return filterInvalidVulns(vulns), nil
 }
 
 func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerability, error) {
@@ -148,7 +154,7 @@ func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerabili
 	vulns := s.k8sCache.GetVulnsByComponent(name, version)
 	converted, err := convertK8sVulnerabilities(version, vulns)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
+		return nil, errors.Wrap(err, "failed to convert vulnerabilities")
 	}
 	return filterInvalidVulns(converted), nil
 }
@@ -170,7 +176,7 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 	return nil, nil
 }
 
-func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
+func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
 	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) {
 		return nil, status.Error(codes.InvalidArgument, "both os image and kernel version are required")
 	}
@@ -180,23 +186,24 @@ func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNod
 
 	resp.KernelVulnerabilities, err = s.evaluateLinuxKernelVulns(req)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	resp.KubeproxyVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeProxy, req.GetKubeproxyVersion())
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	resp.KubeletVulnerabilities, err = s.getKubernetesVuln(k8scache.Kubelet, req.GetKubeletVersion())
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	resp.RuntimeVulnerabilities, err = s.getRuntimeVulns(req.GetRuntime())
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
+
 	return &resp, nil
 }
 
