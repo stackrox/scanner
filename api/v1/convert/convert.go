@@ -40,9 +40,9 @@ func Metadata(m *types.Metadata) *v1.Metadata {
 // MetadataMap converts the internal map[string]interface{} into the API metadata
 func MetadataMap(metadataMap map[string]interface{}) (*v1.Metadata, error) {
 	var metadataBytes interface{}
-	if metadata, exists := metadataMap["NVD"]; exists {
+	if metadata, exists := metadataMap["Red Hat"]; exists {
 		metadataBytes = metadata
-	} else if metadata, exists := metadataMap["Red Hat"]; exists {
+	} else if metadata, exists := metadataMap["NVD"]; exists {
 		metadataBytes = metadata
 	}
 

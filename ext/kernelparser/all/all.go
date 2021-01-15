@@ -6,4 +6,5 @@ import (
 	_ "github.com/stackrox/scanner/ext/kernelparser/debian"
 	_ "github.com/stackrox/scanner/ext/kernelparser/rhel"
 	_ "github.com/stackrox/scanner/ext/kernelparser/ubuntu"
+	_ "github.com/stackrox/scanner/ext/kernelparser/cos"
 )
