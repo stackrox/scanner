@@ -33,7 +33,7 @@ var (
 	}()
 )
 
-func convertVulnerabilities(apiVulns []apiV1.Vulnerability) ([]*v1.Vulnerability, error) {
+func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability {
 	vulns := make([]*v1.Vulnerability, 0, len(apiVulns))
 	for _, v := range apiVulns {
 		metadata, err := convert.MetadataMap(v.Metadata)
@@ -50,16 +50,13 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) ([]*v1.Vulnerability
 			FixedBy:     v.FixedBy,
 		})
 	}
-	return vulns, nil
+	return vulns
 }
 
 func convertFeatures(apiFeatures []apiV1.Feature) ([]*v1.Feature, error) {
 	features := make([]*v1.Feature, 0, len(apiFeatures))
 	for _, a := range apiFeatures {
-		vulns, err := convertVulnerabilities(a.Vulnerabilities)
-		if err != nil {
-			return nil, err
-		}
+		vulns := convertVulnerabilities(a.Vulnerabilities)
 
 		features = append(features, &v1.Feature{
 			Name:            a.Name,
