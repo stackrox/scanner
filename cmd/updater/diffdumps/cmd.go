@@ -252,11 +252,6 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 	var filtered []database.Vulnerability
 	var linuxKernelVulnsFiltered int
 	for _, headVuln := range headVulns {
-		key := keyFromVuln(&headVuln)
-		matchingBaseVuln, found := baseVulnsMap[key]
-		// If the vuln was in the base, and equal to what was in the base,
-		// skip it. Else, add.
-
 		if cfg.SkipUbuntuLinuxKernelVulns {
 			filterUbuntuLinuxKernelFeatures(&headVuln)
 			if len(headVuln.FixedIn) == 0 {
@@ -265,6 +260,10 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 			}
 		}
 
+		key := keyFromVuln(&headVuln)
+		matchingBaseVuln, found := baseVulnsMap[key]
+		// If the vuln was in the base, and equal to what was in the base,
+		// skip it. Else, add.
 		if !(found && vulnsAreEqual(matchingBaseVuln, headVuln)) {
 			filtered = append(filtered, headVuln)
 		}
