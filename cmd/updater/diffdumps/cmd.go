@@ -194,26 +194,18 @@ func vulnsAreEqual(v1, v2 database.Vulnerability) bool {
 	return reflect.DeepEqual(v1, v2)
 }
 
-func filterUbuntuLinuxKernelVulns(vulns []database.Vulnerability) []database.Vulnerability {
-	var filtered []database.Vulnerability
-	for _, vuln := range vulns {
-		if !strings.HasPrefix(vuln.Namespace.Name, "ubuntu") {
-			filtered = append(filtered, vuln)
+func filterUbuntuLinuxKernelFeatures(vuln *database.Vulnerability) {
+	if !strings.HasPrefix(vuln.Namespace.Name, "ubuntu") {
+		return
+	}
+	var newFixedIn []database.FeatureVersion
+	for _, fixedIn := range vuln.FixedIn {
+		if strings.HasPrefix(fixedIn.Feature.Name, "linux") {
 			continue
 		}
-		var newFixedIn []database.FeatureVersion
-		for _, fixedIn := range vuln.FixedIn {
-			if strings.HasPrefix(fixedIn.Feature.Name, "linux") {
-				continue
-			}
-			newFixedIn = append(newFixedIn, fixedIn)
-		}
-		if len(newFixedIn) > 0 {
-			vuln.FixedIn = newFixedIn
-			filtered = append(filtered, vuln)
-		}
+		newFixedIn = append(newFixedIn, fixedIn)
 	}
-	return filtered
+	vuln.FixedIn = newFixedIn
 }
 
 func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnerability {
@@ -258,14 +250,27 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 	}
 
 	var filtered []database.Vulnerability
+	var linuxKernelVulnsFiltered int
 	for _, headVuln := range headVulns {
 		key := keyFromVuln(&headVuln)
 		matchingBaseVuln, found := baseVulnsMap[key]
 		// If the vuln was in the base, and equal to what was in the base,
 		// skip it. Else, add.
+
+		if cfg.SkipUbuntuLinuxKernelVulns {
+			filterUbuntuLinuxKernelFeatures(&headVuln)
+			if len(headVuln.FixedIn) == 0 {
+				linuxKernelVulnsFiltered++
+				continue
+			}
+		}
+
 		if !(found && vulnsAreEqual(matchingBaseVuln, headVuln)) {
 			filtered = append(filtered, headVuln)
 		}
+	}
+	if cfg.SkipUbuntuLinuxKernelVulns {
+		log.Infof("Skipped %d Ubuntu linux kernel vulns", linuxKernelVulnsFiltered)
 	}
 
 	if cfg.SkipFixableCentOSVulns {
@@ -275,7 +280,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 	}
 	if cfg.SkipUbuntuLinuxKernelVulns {
 		countBefore := len(filtered)
-		filtered = filterUbuntuLinuxKernelVulns(filtered)
+		filtered = filterUbuntuLinuxKernelFeatures(filtered)
 		log.Infof("Skipping ubuntu linux kernel vulns: filtered out %d", countBefore-len(filtered))
 	}
 	log.Infof("Diffed OS vulns; base had %d, head had %d, and the diff has %d", len(baseVulns), len(headVulns), len(filtered))
