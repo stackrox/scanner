@@ -86,23 +86,19 @@ func TestScannerRejectsLicenseGRPC(t *testing.T) {
 	_, err := pingClient.Ping(ctx, &v1.Empty{})
 	require.NoError(t, err)
 
-	scanClient := v1.NewScanServiceClient(conn)
+	scanClient := v1.NewImageScanServiceClient(conn)
 
-	methods := []func(ctx context.Context, scanClient v1.ScanServiceClient) error{
-		func(ctx context.Context, scanClient v1.ScanServiceClient) error {
+	methods := []func(ctx context.Context, scanClient v1.ImageScanServiceClient) error{
+		func(ctx context.Context, scanClient v1.ImageScanServiceClient) error {
 			_, err := scanClient.GetLanguageLevelComponents(ctx, &v1.GetLanguageLevelComponentsRequest{})
 			return err
 		},
-		func(ctx context.Context, scanClient v1.ScanServiceClient) error {
-			_, err := scanClient.GetScan(ctx, &v1.GetScanRequest{})
+		func(ctx context.Context, scanClient v1.ImageScanServiceClient) error {
+			_, err := scanClient.GetImageScan(ctx, &v1.GetImageScanRequest{})
 			return err
 		},
-		func(ctx context.Context, scanClient v1.ScanServiceClient) error {
+		func(ctx context.Context, scanClient v1.ImageScanServiceClient) error {
 			_, err := scanClient.ScanImage(ctx, &v1.ScanImageRequest{})
-			return err
-		},
-		func(ctx context.Context, scanClient v1.ScanServiceClient) error {
-			_, err := scanClient.GetVulnerabilities(ctx, &v1.GetVulnerabilitiesRequest{})
 			return err
 		},
 	}

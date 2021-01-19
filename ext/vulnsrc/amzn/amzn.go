@@ -26,12 +26,14 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/httputil"
+	"github.com/stackrox/scanner/pkg/nvd"
 )
 
 const (
@@ -47,6 +49,10 @@ const (
 	amazonLinux2Namespace     = "amzn:2"
 	amazonLinux2LinkFormat    = "https://alas.aws.amazon.com/AL2/%s.html"
 	defaultUpdaterFlagValue   = ""
+)
+
+var (
+	subCVERegex = regexp.MustCompile(`CVE-\d{4}-\d{4,7}`)
 )
 
 type updater struct {
@@ -245,6 +251,8 @@ func decodeUpdateInfo(updateInfoReader io.Reader) (UpdateInfo, error) {
 func (u *updater) alasListToVulnerabilities(alasList []ALAS) []database.Vulnerability {
 	var vulnerabilities []database.Vulnerability
 	for _, alas := range alasList {
+		subCVEs := set.NewStringSet(subCVERegex.FindStringSubmatch(alas.Description)...)
+
 		featureVersions := u.alasToFeatureVersions(alas)
 		if len(featureVersions) > 0 {
 			vulnerability := database.Vulnerability{
@@ -253,8 +261,19 @@ func (u *updater) alasListToVulnerabilities(alasList []ALAS) []database.Vulnerab
 				Severity:    u.alasToSeverity(alas),
 				Description: u.alasToDescription(alas),
 				FixedIn:     featureVersions,
+				SubCVEs:     subCVEs.AsSlice(),
 			}
 			vulnerabilities = append(vulnerabilities, vulnerability)
+
+			for c := range subCVEs {
+				vulnerabilities = append(vulnerabilities, database.Vulnerability{
+					Name:        c,
+					Link:        nvd.Link(c),
+					Severity:    database.UnknownSeverity,
+					Description: u.alasToDescription(alas),
+					FixedIn:     vulnerability.FixedIn,
+				})
+			}
 		}
 	}
 

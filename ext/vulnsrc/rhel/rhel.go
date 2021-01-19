@@ -53,6 +53,10 @@ const (
 )
 
 var (
+	blocklistedRHSAs = set.NewStringSet(
+		"RHSA-2017:0372", // RHSA-2017:0372 affects kernel-aarch64 and not amd64
+	)
+
 	bulkRHSAXMLBZ2URLs = []string{
 		allRHSAsXMLBZ2,
 		bulkOVALURI + "RHEL6/rhel-6-including-unpatched.oval.xml.bz2",
@@ -266,8 +270,10 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulne
 			if len(pkgs) == 0 {
 				continue
 			}
-
 			ref := definition.References[0]
+			if blocklistedRHSAs.Contains(ref.ID) {
+				continue
+			}
 			cveVuln := database.Vulnerability{
 				Name:        ref.ID,
 				Link:        ref.URI,
@@ -309,8 +315,12 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulne
 		}
 		pkgs := toFeatureVersions(definition.Criteria)
 		if len(pkgs) > 0 {
+			name := name(definition)
+			if blocklistedRHSAs.Contains(name) {
+				continue
+			}
 			rhsaVuln := database.Vulnerability{
-				Name:        name(definition),
+				Name:        name,
 				Link:        link(definition),
 				Severity:    severity(definition),
 				Description: description(definition),

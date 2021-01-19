@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/go-version"
 	"github.com/stackrox/k8s-cves/pkg/validation"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
@@ -15,7 +14,7 @@ type cacheImpl struct {
 	// The expectation is that the number of Kubernetes vulns is rather low (100 or fewer).
 	// Because of this, we just store the vulns in memory instead of in BoltDB.
 	// Consider switching to BoltDB if this gets absurdly large (on the scale of NVD).
-	cache map[v1.KubernetesComponent_KubernetesComponent]map[string]*validation.CVESchema
+	cache map[string]map[string]*validation.CVESchema
 	// Vulns that are not associated with a particular component.
 	unsetVulns []*validation.CVESchema
 
@@ -26,7 +25,7 @@ type cacheImpl struct {
 
 func New() Cache {
 	return &cacheImpl{
-		cache: make(map[v1.KubernetesComponent_KubernetesComponent]map[string]*validation.CVESchema),
+		cache: make(map[string]map[string]*validation.CVESchema),
 		dir:   vulndump.K8sDirName,
 	}
 }
@@ -49,7 +48,7 @@ func (c *cacheImpl) SetLastUpdate(t time.Time) {
 	c.lastUpdatedTime = t
 }
 
-func (c *cacheImpl) GetVulnsByComponent(component v1.KubernetesComponent_KubernetesComponent, v string) []*validation.CVESchema {
+func (c *cacheImpl) GetVulnsByComponent(component, v string) []*validation.CVESchema {
 	c.cacheRWLock.RLock()
 	defer c.cacheRWLock.RUnlock()
 

@@ -23,25 +23,26 @@ import (
 // MockDatastore implements Datastore and enables overriding each available method.
 // The default behavior of each method is to simply panic.
 type MockDatastore struct {
-	FctListNamespaces             func() ([]Namespace, error)
-	FctInsertLayer                func(Layer) error
-	FctFindLayer                  func(name string, withFeatures, withVulnerabilities bool) (Layer, error)
-	FctDeleteLayer                func(name string) error
-	FctListVulnerabilities        func(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
-	FctInsertVulnerabilities      func(vulnerabilities []Vulnerability) error
-	FctFindVulnerability          func(namespaceName, name string) (Vulnerability, error)
-	FctDeleteVulnerability        func(namespaceName, name string) error
-	FctInsertVulnerabilityFixes   func(vulnerabilityNamespace, vulnerabilityName string, fixes []FeatureVersion) error
-	FctDeleteVulnerabilityFix     func(vulnerabilityNamespace, vulnerabilityName, featureName string) error
-	FctInsertKeyValue             func(key, value string) error
-	FctGetKeyValue                func(key string) (string, error)
-	FctLock                       func(name string, owner string, duration time.Duration, renew bool) (bool, time.Time)
-	FctUnlock                     func(name, owner string)
-	FctFindLock                   func(name string) (string, time.Time, error)
-	FctPing                       func() bool
-	FctClose                      func()
-	FctInsertLayerComponents      func(l string, c []*component.Component, r []string) error
-	FctGetLayerLanguageComponents func(layer string) ([]*component.LayerToComponents, error)
+	FctListNamespaces                      func() ([]Namespace, error)
+	FctInsertLayer                         func(Layer) error
+	FctFindLayer                           func(name string, withFeatures, withVulnerabilities bool) (Layer, error)
+	FctDeleteLayer                         func(name string) error
+	FctListVulnerabilities                 func(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
+	FctInsertVulnerabilities               func(vulnerabilities []Vulnerability) error
+	FctFindVulnerability                   func(namespaceName, name string) (Vulnerability, error)
+	FctDeleteVulnerability                 func(namespaceName, name string) error
+	FctInsertVulnerabilityFixes            func(vulnerabilityNamespace, vulnerabilityName string, fixes []FeatureVersion) error
+	FctDeleteVulnerabilityFix              func(vulnerabilityNamespace, vulnerabilityName, featureName string) error
+	FctInsertKeyValue                      func(key, value string) error
+	FctGetKeyValue                         func(key string) (string, error)
+	FctLock                                func(name string, owner string, duration time.Duration, renew bool) (bool, time.Time)
+	FctUnlock                              func(name, owner string)
+	FctFindLock                            func(name string) (string, time.Time, error)
+	FctPing                                func() bool
+	FctClose                               func()
+	FctInsertLayerComponents               func(l string, c []*component.Component, r []string) error
+	FctGetLayerLanguageComponents          func(layer string) ([]*component.LayerToComponents, error)
+	FctGetVulnerabilitiesForFeatureVersion func(featureVersions FeatureVersion) ([]Vulnerability, error)
 }
 
 func (mds *MockDatastore) InsertLayer(layer Layer) error {
@@ -180,6 +181,13 @@ func (mds *MockDatastore) InsertLayerComponents(l string, c []*component.Compone
 func (mds *MockDatastore) GetLayerLanguageComponents(layer string) ([]*component.LayerToComponents, error) {
 	if mds.FctGetLayerLanguageComponents != nil {
 		return mds.FctGetLayerLanguageComponents(layer)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) GetVulnerabilitiesForFeatureVersion(featureVersions FeatureVersion) ([]Vulnerability, error) {
+	if mds.FctGetVulnerabilitiesForFeatureVersion != nil {
+		return mds.FctGetVulnerabilitiesForFeatureVersion(featureVersions)
 	}
 	panic("required mock function not implemented")
 }

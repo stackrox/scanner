@@ -1,4 +1,4 @@
-package scan
+package imagescan
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
-	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	server "github.com/stackrox/scanner/pkg/scan"
@@ -23,109 +22,20 @@ import (
 type Service interface {
 	apiGRPC.APIService
 
-	v1.ScanServiceServer
+	v1.ImageScanServiceServer
 }
 
 // NewService returns the service for scanning
-func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8scache.Cache) Service {
+func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache) Service {
 	return &serviceImpl{
 		db:       db,
 		nvdCache: nvdCache,
-		k8sCache: k8sCache,
 	}
 }
 
 type serviceImpl struct {
 	db       database.Datastore
 	nvdCache nvdtoolscache.Cache
-	k8sCache k8scache.Cache
-}
-
-func (s *serviceImpl) GetVulnerabilities(_ context.Context, req *v1.GetVulnerabilitiesRequest) (*v1.GetVulnerabilitiesResponse, error) {
-	resp := make([]*v1.ComponentWithVulns, 0, len(req.GetComponents()))
-
-	k8sVulns := make(map[v1.Component_K8SComponent]bool)
-	appVulns := make(map[v1.Component_AppComponent]bool)
-	for _, component := range req.GetComponents() {
-		switch typ := component.GetComponent().(type) {
-		case *v1.Component_K8SComponent:
-			c := typ.K8SComponent.Component
-			version, err := truncateVersion(typ.K8SComponent.Version)
-			if err != nil {
-				logrus.Warnf("Unable to convert version of %s - %v. Skipping...", c.String(), err)
-				continue
-			}
-
-			component := v1.Component_K8SComponent{
-				K8SComponent: &v1.KubernetesComponent{
-					Component: c,
-					Version:   version,
-				},
-			}
-			if _, exists := k8sVulns[component]; exists {
-				continue
-			}
-
-			vulns := s.k8sCache.GetVulnsByComponent(c, version)
-			converted, err := convertK8sVulnerabilities(version, vulns)
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
-			}
-
-			k8sVulns[component] = true
-			resp = append(resp, &v1.ComponentWithVulns{
-				Component: &v1.Component{
-					Component: &component,
-				},
-				Vulnerabilities: converted,
-			})
-		case *v1.Component_AppComponent:
-			vendor := typ.AppComponent.Vendor
-			product := typ.AppComponent.Product
-			version, err := truncateVersion(typ.AppComponent.Version)
-			if err != nil {
-				logrus.Warnf("Unable to convert version of %s:%s - %v. Skipping...", vendor, product, err)
-				continue
-			}
-
-			component := v1.Component_AppComponent{
-				AppComponent: &v1.ApplicationComponent{
-					Vendor:  vendor,
-					Product: product,
-					Version: version,
-				},
-			}
-			if _, exists := appVulns[component]; exists {
-				continue
-			}
-
-			nvdVulns, err := s.nvdCache.GetVulnsForComponent(vendor, product, version)
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to get vulns for product %s: %v", typ.AppComponent.Product, err)
-			}
-
-			vulns, err := convertNVDVulns(nvdVulns)
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to convert vulnerabilities: %v", err)
-			}
-
-			appVulns[component] = true
-			resp = append(resp, &v1.ComponentWithVulns{
-				Component: &v1.Component{
-					Component: &component,
-				},
-				Vulnerabilities: vulns,
-			})
-		case nil:
-			return nil, status.Error(codes.InvalidArgument, "component request must be set")
-		default:
-			return nil, status.Errorf(codes.InvalidArgument, "component request has unexpected type %T", typ)
-		}
-	}
-
-	return &v1.GetVulnerabilitiesResponse{
-		VulnerabilitiesByComponent: resp,
-	}, nil
 }
 
 func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
@@ -164,7 +74,7 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 	}, nil
 }
 
-func (s *serviceImpl) getLayer(layerName string) (*v1.GetScanResponse, error) {
+func (s *serviceImpl) getLayer(layerName string) (*v1.GetImageScanResponse, error) {
 	dbLayer, err := s.db.FindLayer(layerName, true, true)
 	if err == commonerr.ErrNotFound {
 		return nil, status.Errorf(codes.NotFound, "Could not find Clair layer %q", layerName)
@@ -183,7 +93,7 @@ func (s *serviceImpl) getLayer(layerName string) (*v1.GetScanResponse, error) {
 		return nil, status.Errorf(codes.Internal, "error converting features: %v", err)
 	}
 
-	return &v1.GetScanResponse{
+	return &v1.GetImageScanResponse{
 		Status: v1.ScanStatus_SUCCEEDED,
 		Image: &v1.Image{
 			Features: features,
@@ -217,7 +127,7 @@ func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec) (string, 
 	return layerName, nil
 }
 
-func (s *serviceImpl) GetScan(ctx context.Context, req *v1.GetScanRequest) (*v1.GetScanResponse, error) {
+func (s *serviceImpl) GetImageScan(ctx context.Context, req *v1.GetImageScanRequest) (*v1.GetImageScanResponse, error) {
 	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec())
 	if err != nil {
 		return nil, err
@@ -227,10 +137,10 @@ func (s *serviceImpl) GetScan(ctx context.Context, req *v1.GetScanRequest) (*v1.
 
 // RegisterServiceServer registers this service with the given gRPC Server.
 func (s *serviceImpl) RegisterServiceServer(grpcServer *grpc.Server) {
-	v1.RegisterScanServiceServer(grpcServer, s)
+	v1.RegisterImageScanServiceServer(grpcServer, s)
 }
 
 // RegisterServiceHandler registers this service with the given gRPC Gateway endpoint.
 func (s *serviceImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return v1.RegisterScanServiceHandler(ctx, mux, conn)
+	return v1.RegisterImageScanServiceHandler(ctx, mux, conn)
 }

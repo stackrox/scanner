@@ -13,9 +13,9 @@ import (
 
 func TestLayersAndLocations(t *testing.T) {
 	conn := connectToScanner(t)
-	client := v1.NewScanServiceClient(conn)
+	client := v1.NewImageScanServiceClient(conn)
 	scanResp := scanPublicDockerHubImage(client, "docker.io/syndesis/syndesis-s2i:latest@sha256:9c3ea4777a61896364445fb13000e84da0d4596f478ff0520d3140a69758b6f2", t)
-	scan, err := client.GetScan(context.Background(), &v1.GetScanRequest{
+	scan, err := client.GetImageScan(context.Background(), &v1.GetImageScanRequest{
 		ImageSpec: scanResp.GetImage(),
 	})
 	require.NoError(t, err)

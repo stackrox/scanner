@@ -323,11 +323,6 @@ func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability
 				md[affectsCaptureRegexpNames[i]] = strings.TrimSpace(n)
 			}
 
-			// Ignore Linux kernels.
-			if strings.HasPrefix(md["package"], "linux") {
-				continue
-			}
-
 			// Only consider the package if its status is needed, active, deferred, not-affected or
 			// released. Ignore DNE (package does not exist), needs-triage, ignored, pending.
 			if md["status"] == "needed" || md["status"] == "active" || md["status"] == "deferred" || md["status"] == "released" || md["status"] == "not-affected" {

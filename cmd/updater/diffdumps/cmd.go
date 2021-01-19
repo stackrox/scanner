@@ -194,6 +194,20 @@ func vulnsAreEqual(v1, v2 database.Vulnerability) bool {
 	return reflect.DeepEqual(v1, v2)
 }
 
+func filterUbuntuLinuxKernelFeatures(vuln *database.Vulnerability) {
+	if !strings.HasPrefix(vuln.Namespace.Name, "ubuntu") {
+		return
+	}
+	var newFixedIn []database.FeatureVersion
+	for _, fixedIn := range vuln.FixedIn {
+		if strings.HasPrefix(fixedIn.Feature.Name, "linux") {
+			continue
+		}
+		newFixedIn = append(newFixedIn, fixedIn)
+	}
+	vuln.FixedIn = newFixedIn
+}
+
 func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnerability {
 	var filtered []database.Vulnerability
 	for _, vuln := range vulns {
@@ -236,7 +250,16 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 	}
 
 	var filtered []database.Vulnerability
+	var linuxKernelVulnsFiltered int
 	for _, headVuln := range headVulns {
+		if cfg.SkipUbuntuLinuxKernelVulns {
+			filterUbuntuLinuxKernelFeatures(&headVuln)
+			if len(headVuln.FixedIn) == 0 {
+				linuxKernelVulnsFiltered++
+				continue
+			}
+		}
+
 		key := keyFromVuln(&headVuln)
 		matchingBaseVuln, found := baseVulnsMap[key]
 		// If the vuln was in the base, and equal to what was in the base,
@@ -244,6 +267,9 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 		if !(found && vulnsAreEqual(matchingBaseVuln, headVuln)) {
 			filtered = append(filtered, headVuln)
 		}
+	}
+	if cfg.SkipUbuntuLinuxKernelVulns {
+		log.Infof("Skipped %d Ubuntu linux kernel vulns", linuxKernelVulnsFiltered)
 	}
 
 	if cfg.SkipFixableCentOSVulns {
@@ -259,8 +285,9 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 }
 
 type config struct {
-	SkipFixableCentOSVulns bool `json:"skipFixableCentOSVulns"`
-	IgnoreKubernetesVulns  bool `json:"ignoreKubernetesVulns"`
+	SkipFixableCentOSVulns     bool `json:"skipFixableCentOSVulns"`
+	IgnoreKubernetesVulns      bool `json:"ignoreKubernetesVulns"`
+	SkipUbuntuLinuxKernelVulns bool `json:"skipUbuntuLinuxKernelVulns"`
 }
 
 func Command() *cobra.Command {

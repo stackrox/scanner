@@ -60,7 +60,7 @@ func connectToScanner(t *testing.T) *grpc.ClientConn {
 	return conn
 }
 
-func scanImage(client v1.ScanServiceClient, req *v1.ScanImageRequest, t *testing.T) *v1.ScanImageResponse {
+func scanImage(client v1.ImageScanServiceClient, req *v1.ScanImageRequest, t *testing.T) *v1.ScanImageResponse {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 	scanImageResp, err := client.ScanImage(ctx, req)
@@ -69,7 +69,7 @@ func scanImage(client v1.ScanServiceClient, req *v1.ScanImageRequest, t *testing
 	return scanImageResp
 }
 
-func scanPublicDockerHubImage(client v1.ScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
+func scanPublicDockerHubImage(client v1.ImageScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
 	return scanImage(client, &v1.ScanImageRequest{
 		Image: imageName,
 		Registry: &v1.ScanImageRequest_RegistryData{
@@ -78,7 +78,7 @@ func scanPublicDockerHubImage(client v1.ScanServiceClient, imageName string, t *
 	}, t)
 }
 
-func scanDockerIOStackRoxImage(client v1.ScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
+func scanDockerIOStackRoxImage(client v1.ImageScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
 	user, pass := mustGetDockerCredentials(t)
 	return scanImage(client, &v1.ScanImageRequest{
 		Image: imageName,
@@ -90,7 +90,7 @@ func scanDockerIOStackRoxImage(client v1.ScanServiceClient, imageName string, t 
 	}, t)
 }
 
-func scanGCRImage(client v1.ScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
+func scanGCRImage(client v1.ImageScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
 	return scanImage(client, &v1.ScanImageRequest{
 		Image: imageName,
 		Registry: &v1.ScanImageRequest_RegistryData{
