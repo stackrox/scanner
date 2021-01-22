@@ -189,8 +189,15 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 	}
 
 	contains := func(t *testing.T, foundVulns, expectedContains []*v1.Vulnerability) {
+		// Prune last modified time
+		for _, v := range foundVulns {
+			v.MetadataV2.LastModifiedDateTime = ""
+		}
 		if expectedContains != nil {
-			assert.Contains(t, foundVulns, expectedContains[0])
+			for _, contains := range expectedContains {
+				contains.MetadataV2.LastModifiedDateTime = ""
+				assert.Contains(t, foundVulns, contains)
+			}
 		}
 	}
 
@@ -375,6 +382,22 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				{
 					id:      "CVE-2020-14381",
 					fixedBy: "5.6",
+				},
+			},
+		},
+		// Garden
+		{
+			osImage:       "Garden Linux 184.0",
+			kernelVersion: "5.4.0-5-cloud-amd64",
+
+			expectedCVEs: []expectedCVE{
+				{
+					id:      "CVE-2020-27675",
+					fixedBy: "5.9.6-1",
+				},
+				{
+					id:      "CVE-2020-14381",
+					fixedBy: "5.5.13-1",
 				},
 			},
 		},
