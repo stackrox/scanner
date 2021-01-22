@@ -918,10 +918,7 @@ func (m *GetNodeVulnerabilitiesRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthNodeScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthNodeScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -1036,10 +1033,7 @@ func (m *GetNodeVulnerabilitiesRequest_ContainerRuntime) Unmarshal(dAtA []byte) 
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthNodeScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthNodeScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -1226,10 +1220,7 @@ func (m *GetNodeVulnerabilitiesResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthNodeScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthNodeScanService
 			}
 			if (iNdEx + skippy) > l {

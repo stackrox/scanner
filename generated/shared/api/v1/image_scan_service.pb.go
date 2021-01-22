@@ -1903,10 +1903,7 @@ func (m *Image) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -2025,10 +2022,7 @@ func (m *ScanImageRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -2195,10 +2189,7 @@ func (m *ScanImageRequest_RegistryData) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -2304,10 +2295,7 @@ func (m *ScanImageResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -2422,10 +2410,7 @@ func (m *ImageSpec) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -2512,10 +2497,7 @@ func (m *GetImageScanRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -2602,10 +2584,7 @@ func (m *GetLanguageLevelComponentsRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -2771,10 +2750,7 @@ func (m *LanguageLevelComponent) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -2859,10 +2835,7 @@ func (m *LanguageLevelComponents) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -3025,7 +2998,7 @@ func (m *GetLanguageLevelComponentsResponse) Unmarshal(dAtA []byte) error {
 					if err != nil {
 						return err
 					}
-					if skippy < 0 {
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
 						return ErrInvalidLengthImageScanService
 					}
 					if (iNdEx + skippy) > postIndex {
@@ -3042,10 +3015,7 @@ func (m *GetLanguageLevelComponentsResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {
@@ -3151,10 +3121,7 @@ func (m *GetImageScanResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthImageScanService
 			}
 			if (iNdEx + skippy) > l {

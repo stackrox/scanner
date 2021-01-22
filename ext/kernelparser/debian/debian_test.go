@@ -36,6 +36,16 @@ func TestParser(t *testing.T) {
 			},
 			valid: true,
 		},
+		{
+			kernelVersion: "5.4.0-5-cloud-amd64",
+			osImage:       "Garden Linux 184.0",
+
+			expected: &kernelparser.ParseMatch{
+				Namespace: "debian:11",
+				Version:   "5.4.0-5-cloud-amd64",
+			},
+			valid: true,
+		},
 	}
 
 	for _, c := range cases {

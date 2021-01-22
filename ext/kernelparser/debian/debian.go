@@ -12,6 +12,8 @@ import (
 const (
 	featureName = "linux"
 	format      = "dpkg"
+
+	gardenLinux = "debian:11"
 )
 
 var (
@@ -23,6 +25,15 @@ func init() {
 }
 
 func parser(kernelVersion, osImage string) (*kernelparser.ParseMatch, bool) {
+	if strings.Contains(osImage, "garden") {
+		return &kernelparser.ParseMatch{
+			Namespace:   gardenLinux,
+			Format:      format,
+			FeatureName: featureName,
+			Version:     kernelVersion,
+		}, true
+	}
+
 	if !strings.Contains(osImage, "debian") {
 		return nil, false
 	}
