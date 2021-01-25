@@ -104,6 +104,11 @@
       "config": {
         "skipUbuntuLinuxKernelVulns": true
       }
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210125230531.zip",
+      "timestamp": "2021-01-25T23:05:31.764433988Z",
+      "diffLocation": "gs://definitions.stackrox.io/55b9538d-0d42-4bbd-b4d4-5d31421e7302/diff.zip"
     }
   ]
 }
