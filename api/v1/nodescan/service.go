@@ -76,7 +76,7 @@ func (s *serviceImpl) getNVDVulns(vendor, product, version string) ([]*v1.Vulner
 	return filterInvalidVulns(vulns), nil
 }
 
-func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesRequest) ([]*v1.Vulnerability, error) {
+func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesRequest) ([]*v1.Vulnerability, string, error) {
 	osImage := strings.ToLower(req.GetOsImage())
 
 	var match *kernelparser.ParseMatch
@@ -88,7 +88,7 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 		}
 		if match == nil {
 			log.Warnf("%s %s matched %s, but no match found", osImage, req.GetKernelVersion(), name)
-			return nil, nil
+			return nil, "", nil
 		}
 		break
 	}
@@ -96,7 +96,8 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 	if match == nil {
 		// Did not find relevant OS-specific kernel parser.
 		// Defaulting to general kernel vulns from NVD.
-		return s.getNVDVulns("linux", "linux_kernel", req.GetKernelVersion())
+		vulns, err := s.getNVDVulns("linux", "linux_kernel", req.GetKernelVersion())
+		return vulns, "kernel", err
 	}
 
 	fv := database.FeatureVersion{
@@ -112,7 +113,7 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 
 	databaseVulns, err := s.db.GetVulnerabilitiesForFeatureVersion(fv)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	vulns := make([]*v1.Vulnerability, 0, len(databaseVulns))
@@ -138,7 +139,7 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 		return vulns[i].Name < vulns[j].Name
 	})
 
-	return filterInvalidVulns(vulns), nil
+	return filterInvalidVulns(vulns), match.FeatureName, nil
 }
 
 func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerability, error) {
@@ -194,7 +195,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	var err error
 	var resp v1.GetNodeVulnerabilitiesResponse
 
-	resp.KernelVulnerabilities, err = s.evaluateLinuxKernelVulns(req)
+	resp.KernelVulnerabilities, resp.KernelComponentName, err = s.evaluateLinuxKernelVulns(req)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

@@ -22,6 +22,7 @@ message GetNodeVulnerabilitiesRequest {
 }
 
 message GetNodeVulnerabilitiesResponse {
+    string   kernel_component_name                   = 5;
     repeated Vulnerability kernel_vulnerabilities    = 1;
     repeated Vulnerability kubelet_vulnerabilities   = 2;
     repeated Vulnerability kubeproxy_vulnerabilities = 3;
