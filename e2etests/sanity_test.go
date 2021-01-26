@@ -488,6 +488,30 @@ func TestImageSanity(t *testing.T) {
 								},
 							},
 						},
+						{
+							Name:        "CVE-2021-1723",
+							Description: "ASP.NET Core and Visual Studio Denial of Service Vulnerability",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-1723",
+							FixedBy:     "3.1.11",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+										"Score":               5.0,
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"LastModifiedDateTime": "2021-01-25T19:54Z",
+									"PublishedDateTime":    "2021-01-12T20:15Z",
+								},
+							},
+						},
 					},
 				},
 			},
@@ -622,6 +646,30 @@ func TestImageSanity(t *testing.T) {
 							},
 							FixedBy: "3.1.7",
 						},
+						{
+							Name:        "CVE-2021-1723",
+							Description: "ASP.NET Core and Visual Studio Denial of Service Vulnerability",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-1723",
+							FixedBy:     "3.1.11",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+										"Score":               5.0,
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"LastModifiedDateTime": "2021-01-25T19:54Z",
+									"PublishedDateTime":    "2021-01-12T20:15Z",
+								},
+							},
+						},
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
 					Location: "usr/share/dotnet/shared/Microsoft.AspNetCore.App/3.1.0/",
@@ -726,6 +774,30 @@ func TestImageSanity(t *testing.T) {
 								},
 							},
 							FixedBy: "3.1.6",
+						},
+						{
+							Name:        "CVE-2021-1723",
+							Description: "ASP.NET Core and Visual Studio Denial of Service Vulnerability",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-1723",
+							FixedBy:     "3.1.11",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+										"Score":               5.0,
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"LastModifiedDateTime": "2021-01-25T19:54Z",
+									"PublishedDateTime":    "2021-01-12T20:15Z",
+								},
+							},
 						},
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
