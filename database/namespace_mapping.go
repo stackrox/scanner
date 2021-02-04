@@ -14,7 +14,9 @@
 
 package database
 
-// DebianReleasesMapping translates Debian code names and class names to version numbers
+// DebianReleasesMapping translates Debian code names and class names to version numbers.
+// If you add a new release here, remember to add it to pkg/wellknownnamespaces/set.go
+// as well.
 var DebianReleasesMapping = map[string]string{
 	// Code names
 	"squeeze":  "6",
@@ -33,7 +35,9 @@ var DebianReleasesMapping = map[string]string{
 	"unstable":     "unstable",
 }
 
-// UbuntuReleasesMapping translates Ubuntu code names to version numbers
+// UbuntuReleasesMapping translates Ubuntu code names to version numbers.
+// If you add a new release here, remember to add it to pkg/wellknownnamespaces/set.go
+// as well.
 var UbuntuReleasesMapping = map[string]string{
 	"precise": "12.04",
 	"quantal": "12.10",
