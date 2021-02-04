@@ -336,6 +336,7 @@ type Feature struct {
 	Vulnerabilities []Vulnerability `json:"Vulnerabilities,omitempty"`
 	AddedBy         string          `json:"AddedBy,omitempty"`
 	Location        string          `json:"Location,omitempty"`
+	LatestFixedIn   string          `json:"LatestFixedIn,omitempty"`
 }
 
 func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {
