@@ -257,11 +257,13 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	}
 
 	if (withFeatures || withVulnerabilities) && dbLayer.Features != nil {
+OUTER:
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion)
+
 			for _, prefix := range kernelPrefixes {
 				if strings.HasPrefix(feature.Name, prefix) {
-					continue
+					continue OUTER
 				}
 			}
 
