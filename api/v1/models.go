@@ -257,7 +257,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	}
 
 	if (withFeatures || withVulnerabilities) && dbLayer.Features != nil {
-OUTER:
+	OUTER:
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion)
 
