@@ -35,11 +35,10 @@ var possiblePythonPrefixesOrSuffixes = []string{
 }
 
 // Linux and kernel packages that are not applicable to images
-var kernelPrefixes = []string {
+var kernelPrefixes = []string{
 	"linux",
 	"kernel",
 }
-
 
 type Error struct {
 	Message string `json:"Message,omitempty"`
