@@ -34,6 +34,13 @@ var possiblePythonPrefixesOrSuffixes = []string{
 	"python", "python2", "python3",
 }
 
+// Linux and kernel packages that are not applicable to images
+var kernelPrefixes = []string {
+	"linux",
+	"kernel",
+}
+
+
 type Error struct {
 	Message string `json:"Message,omitempty"`
 }
@@ -253,6 +260,11 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	if (withFeatures || withVulnerabilities) && dbLayer.Features != nil {
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion)
+			for _, prefix := range kernelPrefixes {
+				if strings.HasPrefix(feature.Name, prefix) {
+					continue
+				}
+			}
 
 			for _, dbVuln := range dbFeatureVersion.AffectedBy {
 				vuln := VulnerabilityFromDatabaseModel(dbVuln)
