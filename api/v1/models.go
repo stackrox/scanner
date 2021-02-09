@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strings"
 
+	nvdtools "github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/cpe"
@@ -26,6 +27,10 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
+)
+
+const (
+	languageVersionFormat = "lanauge"
 )
 
 // These are possible package prefixes or suffixes. Package managers sometimes annotate
@@ -219,7 +224,15 @@ func addLanguageVulns(db database.Datastore, layer *Layer) {
 	for _, dbFeatureVersion := range languageFeatureVersions {
 		feature := featureFromDatabaseModel(dbFeatureVersion)
 
+		var latestFixedBy string
 		for _, dbVuln := range dbFeatureVersion.AffectedBy {
+			vuln := VulnerabilityFromDatabaseModel(dbVuln)
+			if vuln.FixedBy != "" {
+				latestFixedBy, err = getHigherVersion(languageVersionFormat, vuln.FixedBy, latestFixedBy)
+				if err != nil {
+					log.Errorf("comparing feature versions for %s: %v", feature.Name, err)
+				}
+			}
 			feature.Vulnerabilities = append(feature.Vulnerabilities, VulnerabilityFromDatabaseModel(dbVuln))
 		}
 		if !shouldDedupeLanguageFeature(feature, layer.Features) {
@@ -267,14 +280,20 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 				}
 			}
 
+			var latestFixedBy string
 			for _, dbVuln := range dbFeatureVersion.AffectedBy {
 				vuln := VulnerabilityFromDatabaseModel(dbVuln)
-
-				if dbVuln.FixedBy != versionfmt.MaxVersion {
-					vuln.FixedBy = dbVuln.FixedBy
+				if vuln.FixedBy != "" {
+					var err error
+					latestFixedBy, err = getHigherVersion(dbFeatureVersion.Feature.Namespace.VersionFormat, vuln.FixedBy, latestFixedBy)
+					if err != nil {
+						log.Errorf("comparing feature versions for %s: %v", feature.Name, err)
+					}
 				}
 				feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
 			}
+
+			feature.LatestFixedBy = latestFixedBy
 			layer.Features = append(layer.Features, feature)
 		}
 		if env.LanguageVulns.Enabled() {
@@ -283,6 +302,40 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	}
 
 	return layer, notes, nil
+}
+
+// getHigherVersion returns the higher version between a and b.
+// Defaults to b on error.
+func getHigherVersion(format, a, b string) (string, error) {
+	if a == "" && b == "" {
+		return "", nil
+	}
+	if a == "" {
+		return b, nil
+	}
+	if b == "" {
+		return a, nil
+	}
+
+	var cmp int
+	var err error
+	if format == languageVersionFormat {
+		cmp = nvdtools.SmartVerCmp(a, b)
+	} else {
+		cmp, err = versionfmt.Compare(format, a, b)
+	}
+
+	if err != nil {
+		return b, err
+	}
+
+	if cmp < 0 {
+		// a < b, so return b.
+		return b, nil
+	}
+
+	// a >= b, so return a.
+	return a, nil
 }
 
 type Namespace struct {
@@ -336,7 +389,7 @@ type Feature struct {
 	Vulnerabilities []Vulnerability `json:"Vulnerabilities,omitempty"`
 	AddedBy         string          `json:"AddedBy,omitempty"`
 	Location        string          `json:"Location,omitempty"`
-	LatestFixedIn   string          `json:"LatestFixedIn,omitempty"`
+	LatestFixedBy   string          `json:"LatestFixedBy,omitempty"`
 }
 
 func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {
