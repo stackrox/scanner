@@ -249,7 +249,7 @@ func (u *updater) alasListToVulnerabilities(alasList []ALAS) []database.Vulnerab
 	for _, alas := range alasList {
 		subCVEs := set.NewStringSet()
 		for _, ref := range alas.References {
-			if ref.ID != "" {
+			if strings.HasPrefix(ref.ID, "CVE-") {
 				subCVEs.Add(ref.ID)
 			}
 		}
