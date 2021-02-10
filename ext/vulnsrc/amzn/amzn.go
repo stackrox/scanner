@@ -251,7 +251,7 @@ func decodeUpdateInfo(updateInfoReader io.Reader) (UpdateInfo, error) {
 func (u *updater) alasListToVulnerabilities(alasList []ALAS) []database.Vulnerability {
 	var vulnerabilities []database.Vulnerability
 	for _, alas := range alasList {
-		subCVEs := set.NewStringSet(subCVERegex.FindStringSubmatch(alas.Description)...)
+		subCVEs := set.NewStringSet(subCVERegex.FindAllString(alas.Description, -1)...)
 
 		featureVersions := u.alasToFeatureVersions(alas)
 		if len(featureVersions) > 0 {
