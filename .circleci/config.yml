@@ -497,7 +497,7 @@ jobs:
           name: Take a PG dump
           command: |
             mkdir /tmp/postgres
-            pg_dump -format=plain --no-owner --no-acl -U postgres postgres://127.0.0.1:5432 > /tmp/postgres/pg-definitions.sql
+            pg_dump --format=plain --no-owner --no-acl -U postgres postgres://127.0.0.1:5432 > /tmp/postgres/pg-definitions.sql
             gzip --best /tmp/postgres/pg-definitions.sql
 
       - store_artifacts:
