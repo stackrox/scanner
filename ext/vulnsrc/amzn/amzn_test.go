@@ -30,17 +30,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestT(t *testing.T) {
-	amazonLinux2Updater := updater{
-		UpdaterFlag:   amazonLinux2UpdaterFlag,
-		MirrorListURI: amazonLinux2MirrorListURI,
-		Name:          amazonLinux2Name,
-		Namespace:     amazonLinux2Namespace,
-		LinkFormat:    amazonLinux2LinkFormat,
-	}
-	amazonLinux2Updater.Update(nil)
-}
-
 func TestAmazonLinux1(t *testing.T) {
 	amazonLinux1Updater := updater{
 		MirrorListURI: "http://repo.us-west-2.amazonaws.com/2018.03/updates/x86_64/mirror.list",
