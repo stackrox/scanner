@@ -71,7 +71,7 @@ func (s *serviceImpl) getNVDVulns(vendor, product, version string) ([]*v1.Vulner
 
 	vulns, err := convert.NVDVulns(nvdVulns)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to convert vulnerabilities")
+		return nil, errors.Wrap(err, "failed to convert vulnerabilities")
 	}
 	return filterInvalidVulns(vulns), nil
 }
@@ -159,13 +159,23 @@ func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerabili
 	return filterInvalidVulns(converted), nil
 }
 
+func normalizeDocker(version string) string {
+	spl := strings.Split(version, ".")
+	if len(spl) > 2 && len(spl[1]) == 1 {
+		spl[1] = "0" + spl[1]
+	}
+	return strings.Join(spl, ".")
+}
+
 func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitiesRequest_ContainerRuntime) ([]*v1.Vulnerability, error) {
 	if containerRuntime.GetName() == "" || containerRuntime.GetVersion() == "" {
 		return nil, nil
 	}
 	switch containerRuntime.GetName() {
 	case "docker":
-		return s.getNVDVulns("docker", "docker", containerRuntime.GetVersion())
+		// Docker is in the format xx.yy.point. Sometimes, if y is a single digit, then it will not be prefixed correctly with a 0
+		version := normalizeDocker(containerRuntime.GetVersion())
+		return s.getNVDVulns("docker", "docker", version)
 	case "crio", "cri-o":
 		return s.getNVDVulns("kubernetes", "cri-o", containerRuntime.GetVersion())
 	case "containerd", "runc":
