@@ -105,7 +105,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 	}
 
 	// Get the ALASs which were issued/updated since the previous update.
-	var alasList = updateInfo.ALASList
+	var alasList []ALAS
 	for _, alas := range updateInfo.ALASList {
 		if compareTimestamp(alas.Updated.Date, flagValue) > 0 {
 			alasList = append(alasList, alas)
