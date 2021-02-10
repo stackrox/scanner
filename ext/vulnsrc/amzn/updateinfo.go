@@ -21,11 +21,16 @@ type UpdateInfo struct {
 }
 
 type ALAS struct {
-	ID          string    `xml:"id"`
-	Updated     Updated   `xml:"updated"`
-	Severity    string    `xml:"severity"`
-	Description string    `xml:"description"`
-	Packages    []Package `xml:"pkglist>collection>package"`
+	ID          string      `xml:"id"`
+	Updated     Updated     `xml:"updated"`
+	Severity    string      `xml:"severity"`
+	Description string      `xml:"description"`
+	Packages    []Package   `xml:"pkglist>collection>package"`
+	References  []Reference `xml:"references>reference"`
+}
+
+type Reference struct {
+	ID string `xml:"id,attr"`
 }
 
 type Updated struct {
