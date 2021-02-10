@@ -51,10 +51,6 @@ const (
 	defaultUpdaterFlagValue   = ""
 )
 
-var (
-	subCVERegex = regexp.MustCompile(`CVE-\d{4}-\d{4,7}`)
-)
-
 type updater struct {
 	UpdaterFlag   string
 	MirrorListURI string
@@ -109,7 +105,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (vulnsrc.UpdateResponse, e
 	}
 
 	// Get the ALASs which were issued/updated since the previous update.
-	var alasList []ALAS
+	var alasList = updateInfo.ALASList
 	for _, alas := range updateInfo.ALASList {
 		if compareTimestamp(alas.Updated.Date, flagValue) > 0 {
 			alasList = append(alasList, alas)
@@ -249,10 +245,14 @@ func decodeUpdateInfo(updateInfoReader io.Reader) (UpdateInfo, error) {
 }
 
 func (u *updater) alasListToVulnerabilities(alasList []ALAS) []database.Vulnerability {
-	var vulnerabilities []database.Vulnerability
+	vulnMap := make(map[string]*database.Vulnerability)
 	for _, alas := range alasList {
-		subCVEs := set.NewStringSet(subCVERegex.FindAllString(alas.Description, -1)...)
-
+		subCVEs := set.NewStringSet()
+		for _, ref := range alas.References {
+			if ref.ID != "" {
+				subCVEs.Add(ref.ID)
+			}
+		}
 		featureVersions := u.alasToFeatureVersions(alas)
 		if len(featureVersions) > 0 {
 			vulnerability := database.Vulnerability{
@@ -263,20 +263,31 @@ func (u *updater) alasListToVulnerabilities(alasList []ALAS) []database.Vulnerab
 				FixedIn:     featureVersions,
 				SubCVEs:     subCVEs.AsSlice(),
 			}
-			vulnerabilities = append(vulnerabilities, vulnerability)
+			if vuln, ok := vulnMap[vulnerability.Name]; ok {
+				vuln.FixedIn = append(vuln.FixedIn, vulnerability.FixedIn...)
+			} else {
+				vulnMap[vulnerability.Name] = &vulnerability
+			}
 
 			for c := range subCVEs {
-				vulnerabilities = append(vulnerabilities, database.Vulnerability{
-					Name:        c,
-					Link:        nvd.Link(c),
-					Severity:    database.UnknownSeverity,
-					Description: u.alasToDescription(alas),
-					FixedIn:     vulnerability.FixedIn,
-				})
+				if vuln, ok := vulnMap[c]; ok {
+					vuln.FixedIn = append(vuln.FixedIn, vulnerability.FixedIn...)
+				} else {
+					vulnMap[c] = &database.Vulnerability{
+						Name:        c,
+						Link:        nvd.Link(c),
+						Severity:    database.UnknownSeverity,
+						Description: u.alasToDescription(alas),
+						FixedIn:     vulnerability.FixedIn,
+					}
+				}
 			}
 		}
 	}
-
+	vulnerabilities := make([]database.Vulnerability, 0, len(vulnMap))
+	for _, vuln := range vulnMap {
+		vulnerabilities = append(vulnerabilities, *vuln)
+	}
 	return vulnerabilities
 }
 
