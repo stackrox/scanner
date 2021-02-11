@@ -255,30 +255,25 @@ func (u *updater) alasListToVulnerabilities(alasList []ALAS) []database.Vulnerab
 		}
 		featureVersions := u.alasToFeatureVersions(alas)
 		if len(featureVersions) > 0 {
-			vulnerability := database.Vulnerability{
-				Name:        u.alasToName(alas),
+			name := u.alasToName(alas)
+			vulnMap[name] = &database.Vulnerability{
+				Name:        name,
 				Link:        u.alasToLink(alas),
 				Severity:    u.alasToSeverity(alas),
 				Description: u.alasToDescription(alas),
 				FixedIn:     featureVersions,
 				SubCVEs:     subCVEs.AsSlice(),
 			}
-			if vuln, ok := vulnMap[vulnerability.Name]; ok {
-				vuln.FixedIn = append(vuln.FixedIn, vulnerability.FixedIn...)
-			} else {
-				vulnMap[vulnerability.Name] = &vulnerability
-			}
-
 			for c := range subCVEs {
 				if vuln, ok := vulnMap[c]; ok {
-					vuln.FixedIn = append(vuln.FixedIn, vulnerability.FixedIn...)
+					vuln.FixedIn = append(vuln.FixedIn, featureVersions...)
 				} else {
 					vulnMap[c] = &database.Vulnerability{
 						Name:        c,
 						Link:        nvd.Link(c),
 						Severity:    database.UnknownSeverity,
 						Description: u.alasToDescription(alas),
-						FixedIn:     vulnerability.FixedIn,
+						FixedIn:     featureVersions,
 					}
 				}
 			}
