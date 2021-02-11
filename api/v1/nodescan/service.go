@@ -173,7 +173,7 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 	}
 	switch containerRuntime.GetName() {
 	case "docker":
-		// Docker is in the format xx.yy.point. Sometimes, if y is a single digit, then it will not be prefixed correctly with a 0
+		// Docker is in the format xx.yy.z. Sometimes, if y is a single digit, then it will not be prefixed correctly with a 0
 		version := normalizeDocker(containerRuntime.GetVersion())
 		return s.getNVDVulns("docker", "docker", version)
 	case "crio", "cri-o":
