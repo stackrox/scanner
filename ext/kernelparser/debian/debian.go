@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
 )
 
@@ -24,7 +25,7 @@ func init() {
 	kernelparser.RegisterParser("debian", parser)
 }
 
-func parser(kernelVersion, osImage string) (*kernelparser.ParseMatch, bool) {
+func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.ParseMatch, bool) {
 	if strings.Contains(osImage, "garden") {
 		return &kernelparser.ParseMatch{
 			Namespace:   gardenLinux,

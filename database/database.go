@@ -180,4 +180,6 @@ type Datastore interface {
 	GetLayerLanguageComponents(layer string) ([]*component.LayerToComponents, error)
 
 	GetVulnerabilitiesForFeatureVersion(featureVersions FeatureVersion) ([]Vulnerability, error)
+
+	FeatureExists(namespace, feature string) (bool, error)
 }
