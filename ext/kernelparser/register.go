@@ -2,6 +2,8 @@ package kernelparser
 
 import (
 	"fmt"
+
+	"github.com/stackrox/scanner/database"
 )
 
 var (
@@ -15,7 +17,7 @@ type ParseMatch struct {
 	Version     string
 }
 
-type Parser func(kernelVersion, osImage string) (*ParseMatch, bool)
+type Parser func(db database.Datastore, kernelVersion, osImage string) (*ParseMatch, bool)
 
 func RegisterParser(name string, parser Parser) {
 	if _, ok := Parsers[name]; ok {

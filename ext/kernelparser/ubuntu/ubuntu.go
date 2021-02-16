@@ -7,11 +7,13 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
 )
 
 const (
-	format = "dpkg"
+	format         = "dpkg"
+	versionPadding = ".10000"
 )
 
 var (
@@ -22,7 +24,7 @@ func init() {
 	kernelparser.RegisterParser("ubuntu", parser)
 }
 
-func parser(kernelVersion, osImage string) (*kernelparser.ParseMatch, bool) {
+func parser(db database.Datastore, kernelVersion, osImage string) (*kernelparser.ParseMatch, bool) {
 	if !strings.Contains(osImage, "ubuntu") {
 		return nil, false
 	}
@@ -50,20 +52,31 @@ func parser(kernelVersion, osImage string) (*kernelparser.ParseMatch, bool) {
 		}
 	}
 
-	if strings.Contains(featureName, "gke") && matches[0] == "18.04" {
-		kernelSplit := strings.Split(kernelVersion, ".")
+	namespace := fmt.Sprintf("ubuntu:%s", matches[0])
+	kernelSplit := strings.Split(kernelVersion, ".")
 
-		featureName += fmt.Sprintf("-%s.%s", kernelSplit[0], kernelSplit[1])
+	backportedFeature := fmt.Sprintf("%s-%s.%s", featureName, kernelSplit[0], kernelSplit[1])
+	exists, err := db.FeatureExists(namespace, backportedFeature)
+	if err != nil {
+		log.Errorf("error checking if feature exists: %v", err)
+		return nil, false
+	}
+	if exists {
+		featureName = backportedFeature
 	}
 
 	// Until we can get the upload number (which may not matter?), append a large upload number to avoid false positives
 	// https://wiki.ubuntu.com/Kernel/FAQ
-	kernelVersion += ".10000"
+	kernelVersion += versionPadding
 
 	return &kernelparser.ParseMatch{
-		Namespace:   fmt.Sprintf("ubuntu:%s", matches[0]),
+		Namespace:   namespace,
 		Format:      format,
 		FeatureName: featureName,
 		Version:     kernelVersion,
 	}, true
+}
+
+func StripVersionPadding(version string) string {
+	return strings.TrimSuffix(version, versionPadding)
 }

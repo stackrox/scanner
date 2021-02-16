@@ -16,6 +16,7 @@ package pgsql
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -260,4 +261,20 @@ func linkFeatureVersionToVulnerabilities(tx *sql.Tx, featureVersion database.Fea
 	}
 
 	return nil
+}
+
+func (pgSQL *pgSQL) FeatureExists(namespace, feature string) (bool, error) {
+	var namespaceID int
+	if err := pgSQL.QueryRow(searchNamespace, namespace).Scan(&namespaceID); err != nil {
+		return false, handleError("featureExists", err)
+	}
+	if namespaceID == 0 {
+		return false, fmt.Errorf("error finding namespace %q", namespace)
+	}
+	var featureID int
+	err := pgSQL.QueryRow(searchFeature, feature, namespaceID).Scan(&featureID)
+	if err != nil && err != sql.ErrNoRows {
+		return false, handleError("featureExists", err)
+	}
+	return featureID != 0, nil
 }

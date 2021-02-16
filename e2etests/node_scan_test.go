@@ -32,6 +32,10 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 				},
 			},
 			responseContains: &v1.GetNodeVulnerabilitiesResponse{
+				KernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+					Name:    "linux",
+					Version: "5.4.0-51",
+				},
 				KernelVulnerabilities: []*v1.Vulnerability{
 					{
 						Name:        "CVE-2020-27675",
@@ -226,14 +230,19 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		osImage       string
 		kernelVersion string
 
-		expectedCVEs   []expectedCVE
-		unexpectedCVEs []string
+		expectedKernelComponent *v1.GetNodeVulnerabilitiesResponse_KernelComponent
+		expectedCVEs            []expectedCVE
+		unexpectedCVEs          []string
 	}{
 		// Ubuntu
 		{
 			osImage:       "Ubuntu 20.04.1 LTS",
 			kernelVersion: "5.4.0-51",
 
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "linux",
+				Version: "5.4.0-51",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id:      "CVE-2020-27675",
@@ -245,6 +254,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Ubuntu 16.04.7 LTS",
 			kernelVersion: "4.15.0-1050-gcp",
 
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "linux-gcp",
+				Version: "4.15.0-1050",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id:      "CVE-2020-27675",
@@ -260,6 +273,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Ubuntu 16.04.7 LTS",
 			kernelVersion: "4.2.0-1119-aws",
 
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "linux-aws",
+				Version: "4.2.0-1119",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id:      "CVE-2020-27675",
@@ -274,6 +291,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Ubuntu 18.04.5 LTS",
 			kernelVersion: "4.15.0-1050-aws",
 
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "linux-aws",
+				Version: "4.15.0-1050",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id:      "CVE-2020-27675",
@@ -290,6 +311,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Ubuntu 18.04.5 LTS",
 			kernelVersion: "5.3.0-1019-gke",
 
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "linux-gke-5.3",
+				Version: "5.3.0-1019",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id: "CVE-2020-27675",
@@ -306,6 +331,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Debian GNU/Linux 9 (stretch)",
 			kernelVersion: "4.9.0-11-amd64",
 
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "linux",
+				Version: "4.9.0-11-amd64",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id:      "CVE-2020-27675",
@@ -322,6 +351,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "OpenShift Enterprise",
 			kernelVersion: "3.10.0-1127.el7.x86_64",
 
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "kernel",
+				Version: "3.10.0-1127.el7.x86_64",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id: "CVE-2020-14381",
@@ -332,6 +365,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		{
 			osImage:       "Red Hat Enterprise Linux Server 7.8 (Maipo)",
 			kernelVersion: "3.10.0-1127.19.1.el7.x86_64",
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "kernel",
+				Version: "3.10.0-1127.19.1.el7.x86_64",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id: "CVE-2020-14381",
@@ -342,6 +379,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		{
 			osImage:       "CentOS Linux 7 (Core)",
 			kernelVersion: "3.10.0-957.12.2.el7.x86_64",
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "kernel",
+				Version: "3.10.0-957.12.2.el7.x86_64",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id: "CVE-2020-14381",
@@ -352,6 +393,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		{
 			osImage:       "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 			kernelVersion: "4.18.0-193.14.3.el8_2.x86_64",
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "kernel",
+				Version: "4.18.0-193.14.3.el8_2.x86_64",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id:      "CVE-2020-14381",
@@ -364,6 +409,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		{
 			osImage:       "Amazon Linux 2",
 			kernelVersion: "4.14.177-139.253.amzn2.x86_64",
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "kernel",
+				Version: "4.14.177-139.253.amzn2.x86_64",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id:      "ALAS2-2020-1488",
@@ -378,6 +427,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		{
 			osImage:       "Docker Desktop",
 			kernelVersion: "5.4.39-linuxkit",
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "kernel",
+				Version: "5.4.39-linuxkit",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id:      "CVE-2020-14381",
@@ -390,6 +443,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Garden Linux 184.0",
 			kernelVersion: "5.4.0-5-cloud-amd64",
 
+			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+				Name:    "linux",
+				Version: "5.4.0-5-cloud-amd64",
+			},
 			expectedCVEs: []expectedCVE{
 				{
 					id:      "CVE-2020-27675",
@@ -410,6 +467,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				KernelVersion: c.kernelVersion,
 			})
 			require.NoError(t, err)
+
+			assert.Equal(t, c.expectedKernelComponent, resp.KernelComponent)
 
 			if len(resp.GetKernelVulnerabilities()) < len(c.expectedCVEs) {
 				assert.FailNowf(t, "mismatch between number of kernel vulns found", "expected vulns: %d vs %d", len(resp.GetKernelVulnerabilities()), len(c.expectedCVEs))
