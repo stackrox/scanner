@@ -3,6 +3,7 @@ package amzn
 import (
 	"strings"
 
+	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
 )
 
@@ -16,7 +17,7 @@ func init() {
 	kernelparser.RegisterParser("amzn", parser)
 }
 
-func parser(kernelVersion, _ string) (*kernelparser.ParseMatch, bool) {
+func parser(_ database.Datastore, kernelVersion, _ string) (*kernelparser.ParseMatch, bool) {
 	if !strings.Contains(kernelVersion, "amzn2") {
 		return nil, false
 	}

@@ -56,7 +56,7 @@ func TestParser(t *testing.T) {
 				c.expected.FeatureName = featureName
 			}
 
-			match, valid := parser(c.kernelVersion, osImage)
+			match, valid := parser(nil, c.kernelVersion, osImage)
 			assert.Equal(t, c.valid, valid)
 			assert.Equal(t, c.expected, match)
 		})

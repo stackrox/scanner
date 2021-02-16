@@ -22,11 +22,16 @@ message GetNodeVulnerabilitiesRequest {
 }
 
 message GetNodeVulnerabilitiesResponse {
-    string   kernel_component_name                   = 5;
     repeated Vulnerability kernel_vulnerabilities    = 1;
     repeated Vulnerability kubelet_vulnerabilities   = 2;
     repeated Vulnerability kubeproxy_vulnerabilities = 3;
     repeated Vulnerability runtime_vulnerabilities   = 4;
+
+    message KernelComponent {
+        string name    = 1;
+        string version = 2;
+    }
+    KernelComponent       kernel_component           = 5;
 }
 
 // NodeScanService APIs can be used to get vulnerabilities for nodes.
