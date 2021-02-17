@@ -115,7 +115,8 @@ func TestParser(t *testing.T) {
 			mockDatastore.FctFeatureExists = func(_, _ string) (bool, error) {
 				return c.backportExists, nil
 			}
-			match, valid := parser(&mockDatastore, c.kernelVersion, osImage)
+			match, valid, err := parser(&mockDatastore, c.kernelVersion, osImage)
+			assert.NoError(t, err)
 			assert.Equal(t, c.valid, valid)
 			assert.Equal(t, c.expected, match)
 		})

@@ -95,7 +95,11 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 	var match *kernelparser.ParseMatch
 	for name, parser := range kernelparser.Parsers {
 		var ok bool
-		match, ok = parser(s.db, req.GetKernelVersion(), osImage)
+		var err error
+		match, ok, err = parser(s.db, req.GetKernelVersion(), osImage)
+		if err != nil {
+			return nil, nil, err
+		}
 		if !ok {
 			continue
 		}

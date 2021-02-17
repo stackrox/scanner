@@ -17,7 +17,7 @@ type ParseMatch struct {
 	Version     string
 }
 
-type Parser func(db database.Datastore, kernelVersion, osImage string) (*ParseMatch, bool)
+type Parser func(db database.Datastore, kernelVersion, osImage string) (*ParseMatch, bool, error)
 
 func RegisterParser(name string, parser Parser) {
 	if _, ok := Parsers[name]; ok {
