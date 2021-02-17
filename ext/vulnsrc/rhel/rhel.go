@@ -58,10 +58,10 @@ var (
 	)
 
 	bulkRHSAXMLBZ2URLs = []string{
-		allRHSAsXMLBZ2,
 		bulkOVALURI + "RHEL6/rhel-6-including-unpatched.oval.xml.bz2",
 		bulkOVALURI + "RHEL7/rhel-7-including-unpatched.oval.xml.bz2",
 		bulkOVALURI + "RHEL8/rhel-8-including-unpatched.oval.xml.bz2",
+		allRHSAsXMLBZ2,
 	}
 
 	ignoredCriterions = []string{
@@ -170,7 +170,6 @@ func init() {
 
 func parseBzip(reader io.ReadCloser, coveredIDs set.IntSet) ([]database.Vulnerability, error) {
 	defer utils.IgnoreError(reader.Close)
-
 	decompressingReader := bzip2.NewReader(reader)
 	return parseRHSA(decompressingReader, coveredIDs)
 }
@@ -274,10 +273,11 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulne
 			if blocklistedRHSAs.Contains(ref.ID) {
 				continue
 			}
+
 			cveVuln := database.Vulnerability{
 				Name:        ref.ID,
 				Link:        ref.URI,
-				Severity:    database.UnknownSeverity,
+				Severity:    severity(definition.Severity),
 				Description: description(definition),
 			}
 			cveVuln.FixedIn = append(cveVuln.FixedIn, pkgs...)
@@ -319,10 +319,11 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulne
 			if blocklistedRHSAs.Contains(name) {
 				continue
 			}
+			rhsaSeverity := severity(definition.Severity)
 			rhsaVuln := database.Vulnerability{
 				Name:        name,
 				Link:        link(definition),
-				Severity:    severity(definition),
+				Severity:    rhsaSeverity,
 				Description: description(definition),
 			}
 			rhsaVuln.FixedIn = append(rhsaVuln.FixedIn, pkgs...)
@@ -336,12 +337,17 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulne
 
 			// Add all of the CVE based vulns
 			for _, c := range definition.CVEs {
+				sev := severity(c.Impact)
+				if sev == database.UnknownSeverity {
+					sev = rhsaSeverity
+				}
+
 				vulnerabilities = append(vulnerabilities, database.Vulnerability{
 					Name:      c.ID,
 					Namespace: rhsaVuln.Namespace,
 					Link:      c.Href,
 					FixedIn:   rhsaVuln.FixedIn,
-					Severity:  database.UnknownSeverity,
+					Severity:  sev,
 				})
 			}
 		}
@@ -509,18 +515,17 @@ func link(def definition) (link string) {
 	return
 }
 
-func severity(def definition) database.Severity {
-	switch strings.TrimSpace(def.Title[strings.LastIndex(def.Title, "(")+1 : len(def.Title)-1]) {
-	case "Low":
+func severity(severity string) database.Severity {
+	switch strings.ToLower(severity) {
+	case "low":
 		return database.LowSeverity
-	case "Moderate":
-		return database.MediumSeverity
-	case "Important":
-		return database.HighSeverity
-	case "Critical":
+	case "moderate":
+		return database.ModerateSeverity
+	case "important":
+		return database.Important
+	case "critical":
 		return database.CriticalSeverity
 	default:
-		log.Warningf("could not determine vulnerability severity from: %s.", def.Title)
 		return database.UnknownSeverity
 	}
 }

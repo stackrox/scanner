@@ -66,6 +66,9 @@ const (
 	// Defcon1Severity is a Critical problem which has been manually highlighted
 	// by the team. It requires an immediate attention.
 	Defcon1Severity Severity = "Defcon1"
+
+	ModerateSeverity Severity = "Moderate"
+	Important        Severity = "Important"
 )
 
 // Severities lists all known severities, ordered from lowest to highest.
@@ -77,6 +80,8 @@ var Severities = []Severity{
 	HighSeverity,
 	CriticalSeverity,
 	Defcon1Severity,
+	ModerateSeverity,
+	Important,
 }
 
 // NewSeverity attempts to parse a string into a standard Severity value.
