@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
 )
@@ -25,28 +24,26 @@ func init() {
 	kernelparser.RegisterParser("debian", parser)
 }
 
-func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.ParseMatch, bool) {
+func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.ParseMatch, bool, error) {
 	if strings.Contains(osImage, "garden") {
 		return &kernelparser.ParseMatch{
 			Namespace:   gardenLinux,
 			Format:      format,
 			FeatureName: featureName,
 			Version:     kernelVersion,
-		}, true
+		}, true, nil
 	}
 
 	if !strings.Contains(osImage, "debian") {
-		return nil, false
+		return nil, false, nil
 	}
 
 	matches := regex.FindStringSubmatch(osImage)
 	if len(matches) == 0 {
-		log.Infof("could not find Debian version in OS string: %q", osImage)
-		return nil, true
+		return nil, false, fmt.Errorf("could not find Debian version in OS string: %q", osImage)
 	}
 	if len(matches) > 1 {
-		log.Infof("found multiple Debian versions in OS string: %q", osImage)
-		return nil, true
+		return nil, true, fmt.Errorf("found multiple Debian versions in OS string: %q", osImage)
 	}
 
 	return &kernelparser.ParseMatch{
@@ -54,5 +51,5 @@ func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.
 		Format:      format,
 		FeatureName: featureName,
 		Version:     kernelVersion,
-	}, true
+	}, true, nil
 }
