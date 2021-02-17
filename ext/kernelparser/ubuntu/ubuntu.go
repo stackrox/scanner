@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
@@ -34,7 +33,6 @@ func parser(db database.Datastore, kernelVersion, osImage string) (*kernelparser
 		return nil, false, fmt.Errorf("could not find Ubuntu version in OS string: %q", osImage)
 	}
 	if len(matches) > 1 {
-		log.Infof("found multiple Ubuntu versions in OS string: %q", osImage)
 		return nil, false, fmt.Errorf("found multiple Ubuntu versions in OS string: %q", osImage)
 	}
 
