@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	centralOU = "CENTRAL_SERVICE"
+	centralCN = "CENTRAL_SERVICE"
 )
 
-// VerifyCentralPeerCertificate verifies that the peer certificate has the Central Organizational Unit
+// VerifyCentralPeerCertificate verifies that the peer certificate has the Central Common Name
 // The CA should have already been verified via tls.VerifyClientCertIfGiven
 func VerifyCentralPeerCertificate(r *http.Request) error {
 	if r.TLS == nil {
@@ -21,15 +21,8 @@ func VerifyCentralPeerCertificate(r *http.Request) error {
 	if len(peerCerts) == 0 {
 		return errors.New("no peer certificates found")
 	}
-	organizationalUnits := peerCerts[0].Subject.OrganizationalUnit
-	if len(organizationalUnits) == 0 {
-		return errors.New("peer certificate does not contain an OU")
+	if peerCN := peerCerts[0].Subject.CommonName; !strings.HasPrefix(peerCN, centralCN) {
+		return errors.Errorf("peer certificate common name %q does not match expected common name: %s", peerCN, centralCN)
 	}
-
-	for _, ou := range organizationalUnits {
-		if strings.EqualFold(ou, centralOU) {
-			return nil
-		}
-	}
-	return errors.Errorf("peer certificate OUs %+v does not match expected OU: %s", organizationalUnits, centralOU)
+	return nil
 }
