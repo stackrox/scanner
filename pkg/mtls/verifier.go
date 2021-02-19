@@ -31,5 +31,5 @@ func VerifyCentralPeerCertificate(r *http.Request) error {
 			return nil
 		}
 	}
-	return errors.Errorf("peer certificate OUs %+v does not match expected common name: %s", organizationalUnits, centralOU)
+	return errors.Errorf("peer certificate OUs %+v does not match expected OU: %s", organizationalUnits, centralOU)
 }
