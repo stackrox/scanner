@@ -2,12 +2,13 @@ package mtls
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
 const (
-	centralCN = "CENTRAL_SERVICE: Central"
+	centralCN = "CENTRAL_SERVICE: "
 )
 
 // VerifyCentralPeerCertificate verifies that the peer certificate has the Central Common Name
@@ -20,8 +21,8 @@ func VerifyCentralPeerCertificate(r *http.Request) error {
 	if len(peerCerts) == 0 {
 		return errors.New("no peer certificates found")
 	}
-	if peerCN := peerCerts[0].Subject.CommonName; peerCN != centralCN {
-		return errors.Errorf("peer certificate common name %q does not match expected common name: %s", peerCN, centralCN)
+	if peerCN := peerCerts[0].Subject.CommonName; !strings.HasPrefix(peerCN, centralCN) {
+		return errors.Errorf("peer certificate common name %q does not match expected common name prefix: %s", peerCN, centralCN)
 	}
 	return nil
 }
