@@ -198,6 +198,12 @@ func verrevcmp(t1, t2 string) int {
 			}
 
 			if ac != bc {
+				if ac == 0 && strings.HasPrefix(t2, "pre") {
+					return 1
+				}
+				if bc == 0 && strings.HasPrefix(t1, "pre") {
+					return -1
+				}
 				return ac - bc
 			}
 

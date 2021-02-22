@@ -180,6 +180,7 @@ func TestParseAndCompare(t *testing.T) {
 		{"1.4+OOo3.0.0~", LESS, "1.4+OOo3.0.0-4"},           // another tilde check
 		{"2.4.7-1", LESS, "2.4.7-z"},                        // revision comparing
 		{"1.002-1+b2", GREATER, "1.00"},                     // whatever...
+		{"1.2.2-r0", GREATER, "1.2.2_pre2-r0"},              // alpine pre-release
 	}
 
 	var (
