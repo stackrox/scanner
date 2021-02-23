@@ -51,10 +51,6 @@ const (
 	defaultUpdaterFlagValue   = ""
 )
 
-var (
-	subCVERegex = regexp.MustCompile(`CVE-\d{4}-\d{4,7}`)
-)
-
 type updater struct {
 	UpdaterFlag   string
 	MirrorListURI string
@@ -249,34 +245,44 @@ func decodeUpdateInfo(updateInfoReader io.Reader) (UpdateInfo, error) {
 }
 
 func (u *updater) alasListToVulnerabilities(alasList []ALAS) []database.Vulnerability {
-	var vulnerabilities []database.Vulnerability
+	vulnMap := make(map[string]*database.Vulnerability)
 	for _, alas := range alasList {
-		subCVEs := set.NewStringSet(subCVERegex.FindStringSubmatch(alas.Description)...)
-
+		subCVEs := set.NewStringSet()
+		for _, ref := range alas.References {
+			if strings.HasPrefix(ref.ID, "CVE-") {
+				subCVEs.Add(ref.ID)
+			}
+		}
 		featureVersions := u.alasToFeatureVersions(alas)
 		if len(featureVersions) > 0 {
-			vulnerability := database.Vulnerability{
-				Name:        u.alasToName(alas),
+			name := u.alasToName(alas)
+			vulnMap[name] = &database.Vulnerability{
+				Name:        name,
 				Link:        u.alasToLink(alas),
 				Severity:    u.alasToSeverity(alas),
 				Description: u.alasToDescription(alas),
 				FixedIn:     featureVersions,
 				SubCVEs:     subCVEs.AsSlice(),
 			}
-			vulnerabilities = append(vulnerabilities, vulnerability)
-
 			for c := range subCVEs {
-				vulnerabilities = append(vulnerabilities, database.Vulnerability{
-					Name:        c,
-					Link:        nvd.Link(c),
-					Severity:    database.UnknownSeverity,
-					Description: u.alasToDescription(alas),
-					FixedIn:     vulnerability.FixedIn,
-				})
+				if vuln, ok := vulnMap[c]; ok {
+					vuln.FixedIn = append(vuln.FixedIn, featureVersions...)
+				} else {
+					vulnMap[c] = &database.Vulnerability{
+						Name:        c,
+						Link:        nvd.Link(c),
+						Severity:    database.UnknownSeverity,
+						Description: u.alasToDescription(alas),
+						FixedIn:     featureVersions,
+					}
+				}
 			}
 		}
 	}
-
+	vulnerabilities := make([]database.Vulnerability, 0, len(vulnMap))
+	for _, vuln := range vulnMap {
+		vulnerabilities = append(vulnerabilities, *vuln)
+	}
 	return vulnerabilities
 }
 
