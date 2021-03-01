@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/docker/distribution/manifest/ocischema"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/heroku/docker-registry-client/registry"
 	"github.com/opencontainers/go-digest"
+	ociSpec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	clair "github.com/stackrox/scanner"
@@ -104,6 +106,17 @@ func parseV2Layers(manifest *schema2.DeserializedManifest) []string {
 	return layers
 }
 
+func parseOCILayers(manifest *ocischema.DeserializedManifest) []string {
+	var layers []string
+	for _, layer := range manifest.Layers {
+		if isEmptyLayer(layer.Digest.String()) {
+			continue
+		}
+		layers = append(layers, layer.Digest.String())
+	}
+	return layers
+}
+
 func handleManifest(reg types.Registry, manifestType string, remote, ref string) ([]string, error) {
 	switch manifestType {
 	case schema1.MediaTypeManifest:
@@ -127,7 +140,13 @@ func handleManifest(reg types.Registry, manifestType string, remote, ref string)
 		}
 		layers := parseV2Layers(manifest)
 		return layers, nil
-
+	case ociSpec.MediaTypeImageManifest:
+		manifest, err := reg.ManifestOCI(remote, ref)
+		if err != nil {
+			return nil, err
+		}
+		layers := parseOCILayers(manifest)
+		return layers, nil
 	case registry.MediaTypeManifestList:
 		manifestList, err := reg.ManifestList(remote, ref)
 		if err != nil {
@@ -158,7 +177,7 @@ func fetchLayers(reg types.Registry, image *types.Image) (string, []string, erro
 	digest, manifestType, err := reg.ManifestDigest(image.Remote, ref)
 	if err != nil {
 		// Some registries have no implemented the docker registry API correctly so the fall back here is to just try all the manifest types
-		manifestTypes := []string{registry.MediaTypeManifestList, schema2.MediaTypeManifest, schema1.MediaTypeSignedManifest, schema1.MediaTypeManifest}
+		manifestTypes := []string{registry.MediaTypeManifestList, schema2.MediaTypeManifest, ociSpec.MediaTypeImageManifest, schema1.MediaTypeSignedManifest, schema1.MediaTypeManifest}
 		for _, m := range manifestTypes {
 			layers, manifestErr := handleManifest(reg, m, image.Remote, ref)
 			if manifestErr != nil {
