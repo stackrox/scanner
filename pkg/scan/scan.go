@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/docker/distribution/manifest/ocischema"
+	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/heroku/docker-registry-client/registry"
@@ -95,20 +95,9 @@ func parseV1Layers(manifest *schema1.SignedManifest) []string {
 	return layers
 }
 
-func parseV2Layers(manifest *schema2.DeserializedManifest) []string {
+func parseLayers(manifestLayers []distribution.Descriptor) []string {
 	var layers []string
-	for _, layer := range manifest.Layers {
-		if isEmptyLayer(layer.Digest.String()) {
-			continue
-		}
-		layers = append(layers, layer.Digest.String())
-	}
-	return layers
-}
-
-func parseOCILayers(manifest *ocischema.DeserializedManifest) []string {
-	var layers []string
-	for _, layer := range manifest.Layers {
+	for _, layer := range manifestLayers {
 		if isEmptyLayer(layer.Digest.String()) {
 			continue
 		}
@@ -138,15 +127,14 @@ func handleManifest(reg types.Registry, manifestType string, remote, ref string)
 		if err != nil {
 			return nil, err
 		}
-		layers := parseV2Layers(manifest)
+		layers := parseLayers(manifest.Layers)
 		return layers, nil
 	case ociSpec.MediaTypeImageManifest:
 		manifest, err := reg.ManifestOCI(remote, ref)
 		if err != nil {
 			return nil, err
 		}
-		layers := parseOCILayers(manifest)
-		return layers, nil
+		return parseLayers(manifest.Layers), nil
 	case registry.MediaTypeManifestList:
 		manifestList, err := reg.ManifestList(remote, ref)
 		if err != nil {
@@ -158,8 +146,7 @@ func handleManifest(reg types.Registry, manifestType string, remote, ref string)
 				if err != nil {
 					return nil, err
 				}
-				layers := parseV2Layers(manifest)
-				return layers, nil
+				return parseLayers(manifest.Layers), nil
 			}
 		}
 		return nil, errors.New("No corresponding manifest found from manifest list object")
