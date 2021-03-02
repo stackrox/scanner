@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/url"
 
+	"github.com/docker/distribution/manifest/ocischema"
 	manifestV1 "github.com/docker/distribution/manifest/schema1"
 	manifestV2 "github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
@@ -23,6 +24,7 @@ type ClairClient interface {
 // Registry is the Docker Registry Client interface.
 type Registry interface {
 	Manifest(repository, reference string) (*manifestV1.SignedManifest, error)
+	ManifestOCI(repository, reference string) (*ocischema.DeserializedManifest, error)
 	SignedManifest(repository, reference string) (*manifestV1.SignedManifest, error)
 	ManifestV2(repository, reference string) (*manifestV2.DeserializedManifest, error)
 	ManifestList(repository, reference string) (*registry.ManifestList, error)

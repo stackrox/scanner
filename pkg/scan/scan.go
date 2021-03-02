@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/heroku/docker-registry-client/registry"
 	"github.com/opencontainers/go-digest"
+	ociSpec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	clair "github.com/stackrox/scanner"
@@ -93,9 +95,9 @@ func parseV1Layers(manifest *schema1.SignedManifest) []string {
 	return layers
 }
 
-func parseV2Layers(manifest *schema2.DeserializedManifest) []string {
+func parseLayers(manifestLayers []distribution.Descriptor) []string {
 	var layers []string
-	for _, layer := range manifest.Layers {
+	for _, layer := range manifestLayers {
 		if isEmptyLayer(layer.Digest.String()) {
 			continue
 		}
@@ -125,9 +127,14 @@ func handleManifest(reg types.Registry, manifestType string, remote, ref string)
 		if err != nil {
 			return nil, err
 		}
-		layers := parseV2Layers(manifest)
+		layers := parseLayers(manifest.Layers)
 		return layers, nil
-
+	case ociSpec.MediaTypeImageManifest:
+		manifest, err := reg.ManifestOCI(remote, ref)
+		if err != nil {
+			return nil, err
+		}
+		return parseLayers(manifest.Layers), nil
 	case registry.MediaTypeManifestList:
 		manifestList, err := reg.ManifestList(remote, ref)
 		if err != nil {
@@ -139,8 +146,7 @@ func handleManifest(reg types.Registry, manifestType string, remote, ref string)
 				if err != nil {
 					return nil, err
 				}
-				layers := parseV2Layers(manifest)
-				return layers, nil
+				return parseLayers(manifest.Layers), nil
 			}
 		}
 		return nil, errors.New("No corresponding manifest found from manifest list object")
@@ -158,7 +164,7 @@ func fetchLayers(reg types.Registry, image *types.Image) (string, []string, erro
 	digest, manifestType, err := reg.ManifestDigest(image.Remote, ref)
 	if err != nil {
 		// Some registries have no implemented the docker registry API correctly so the fall back here is to just try all the manifest types
-		manifestTypes := []string{registry.MediaTypeManifestList, schema2.MediaTypeManifest, schema1.MediaTypeSignedManifest, schema1.MediaTypeManifest}
+		manifestTypes := []string{registry.MediaTypeManifestList, schema2.MediaTypeManifest, ociSpec.MediaTypeImageManifest, schema1.MediaTypeSignedManifest, schema1.MediaTypeManifest}
 		for _, m := range manifestTypes {
 			layers, manifestErr := handleManifest(reg, m, image.Remote, ref)
 			if manifestErr != nil {

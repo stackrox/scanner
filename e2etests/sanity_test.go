@@ -1170,6 +1170,14 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			// OCI media type manifest.
+			image:    "docker.io/stackrox/sandbox:oci-manifest",
+			registry: "https://registry-1.docker.io",
+			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:   "NVD",
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
