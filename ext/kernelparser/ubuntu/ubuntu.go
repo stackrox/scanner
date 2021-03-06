@@ -53,7 +53,7 @@ func parser(db database.Datastore, kernelVersion, osImage string) (*kernelparser
 	kernelSplit := strings.Split(kernelVersion, ".")
 
 	backportedFeature := fmt.Sprintf("%s-%s.%s", featureName, kernelSplit[0], kernelSplit[1])
-	exists, err := db.FeatureExists(namespace, backportedFeature)
+	exists, err := db.FeatureExists(namespace, "", backportedFeature)
 	if err != nil {
 		return nil, false, fmt.Errorf("error checking if feature exists: %v", err)
 	}

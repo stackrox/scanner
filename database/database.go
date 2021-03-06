@@ -181,5 +181,5 @@ type Datastore interface {
 
 	GetVulnerabilitiesForFeatureVersion(featureVersions FeatureVersion) ([]Vulnerability, error)
 
-	FeatureExists(namespace, feature string) (bool, error)
+	FeatureExists(namespace, realName, feature string) (bool, error)
 }

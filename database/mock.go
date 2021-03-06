@@ -43,7 +43,7 @@ type MockDatastore struct {
 	FctInsertLayerComponents               func(l string, c []*component.Component, r []string) error
 	FctGetLayerLanguageComponents          func(layer string) ([]*component.LayerToComponents, error)
 	FctGetVulnerabilitiesForFeatureVersion func(featureVersions FeatureVersion) ([]Vulnerability, error)
-	FctFeatureExists                       func(namespace, feature string) (bool, error)
+	FctFeatureExists                       func(namespace, realName, feature string) (bool, error)
 }
 
 func (mds *MockDatastore) InsertLayer(layer Layer) error {
@@ -193,9 +193,9 @@ func (mds *MockDatastore) GetVulnerabilitiesForFeatureVersion(featureVersions Fe
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) FeatureExists(namespace, feature string) (bool, error) {
+func (mds *MockDatastore) FeatureExists(namespace, realName, feature string) (bool, error) {
 	if mds.FctFeatureExists != nil {
-		return mds.FctFeatureExists(namespace, feature)
+		return mds.FctFeatureExists(namespace, realName, feature)
 	}
 	panic("required mock function not implemented")
 }

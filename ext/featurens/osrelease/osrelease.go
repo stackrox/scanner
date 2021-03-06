@@ -35,8 +35,8 @@ var (
 	osReleaseOSRegexp      = regexp.MustCompile(`^ID=(.*)`)
 	osReleaseVersionRegexp = regexp.MustCompile(`^VERSION_ID=(.*)`)
 
-	// blacklistFilenames are files that should exclude this detector.
-	blacklistFilenames = []string{
+	// blocklistFilenames are files that should exclude this detector.
+	blocklistFilenames = []string{
 		"etc/oracle-release",
 		"etc/redhat-release",
 		"usr/lib/centos-release",
@@ -52,7 +52,7 @@ func init() {
 func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 	var OS, version string
 
-	for _, filePath := range blacklistFilenames {
+	for _, filePath := range blocklistFilenames {
 		if _, hasFile := files[filePath]; hasFile {
 			return nil
 		}

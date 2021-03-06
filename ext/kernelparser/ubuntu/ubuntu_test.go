@@ -112,7 +112,7 @@ func TestParser(t *testing.T) {
 			}
 
 			var mockDatastore database.MockDatastore
-			mockDatastore.FctFeatureExists = func(_, _ string) (bool, error) {
+			mockDatastore.FctFeatureExists = func(_, _, _ string) (bool, error) {
 				return c.backportExists, nil
 			}
 			match, valid, err := parser(&mockDatastore, c.kernelVersion, osImage)

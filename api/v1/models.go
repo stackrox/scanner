@@ -241,7 +241,11 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 
 	var notes []Note
 	if dbLayer.Namespace != nil {
-		layer.NamespaceName = dbLayer.Namespace.Name
+		if dbLayer.Namespace.RealName != "" {
+			layer.NamespaceName = dbLayer.Namespace.RealName
+		} else {
+			layer.NamespaceName = dbLayer.Namespace.Name
+		}
 
 		if wellknownnamespaces.KnownStaleNamespaces.Contains(layer.NamespaceName) {
 			notes = append(notes, OSCVEsStale)

@@ -23,7 +23,8 @@ func init() {
 		Up: migrate.Queries([]string{
 			`CREATE TABLE IF NOT EXISTS Namespace (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(128) NULL);`,
+        name VARCHAR(128) NULL,
+        real_name VARCHAR(128) NULL);`,
 
 			`CREATE TABLE IF NOT EXISTS Layer (
         id SERIAL PRIMARY KEY,

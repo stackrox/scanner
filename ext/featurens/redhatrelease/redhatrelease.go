@@ -77,6 +77,7 @@ func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 			// TODO(vbatts): this is a hack until https://github.com/coreos/clair/pull/193
 			return &database.Namespace{
 				Name:          "centos" + ":" + r[3],
+				RealName:      "rhel" + ":" + r[3],
 				VersionFormat: rpm.ParserName,
 			}
 		}

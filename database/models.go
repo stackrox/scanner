@@ -37,7 +37,13 @@ type Layer struct {
 type Namespace struct {
 	Model
 
+	// Name is used for vulnerability matching purposes and is
+	// returned when RealName is empty.
 	Name          string
+	// RealName is the original name of the namespace.
+	// This is populated when it differentiates from the name used for
+	// vulnerability matching (ex: Name: centos:8 RealName: rhel:8)
+	RealName      string
 	VersionFormat string
 }
 

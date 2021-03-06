@@ -43,6 +43,7 @@ func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities boo
 		parentName      zero.String
 		nsID            zero.Int
 		nsName          sql.NullString
+		nsRealName      sql.NullString
 		nsVersionFormat sql.NullString
 	)
 
@@ -55,6 +56,7 @@ func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities boo
 		&parentName,
 		&nsID,
 		&nsName,
+		&nsRealName,
 		&nsVersionFormat,
 	)
 	observeQueryTime("FindLayer", "searchLayer", t)
@@ -73,6 +75,7 @@ func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities boo
 		layer.Namespace = &database.Namespace{
 			Model:         database.Model{ID: int(nsID.Int64)},
 			Name:          nsName.String,
+			RealName:      nsRealName.String,
 			VersionFormat: nsVersionFormat.String,
 		}
 	}

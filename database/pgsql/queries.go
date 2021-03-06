@@ -32,14 +32,14 @@ const (
 
 	// namespace.go
 	insertNamespace = `
-		INSERT INTO Namespace(name, version_format)
-		VALUES($1, $2)
-		ON CONFLICT (name)
+		INSERT INTO Namespace(name, real_name, version_format)
+		VALUES($1, $2, $3)
+		ON CONFLICT (name, real_name)
 		DO NOTHING
 		RETURNING id
 	`
 
-	searchNamespace = `SELECT id FROM Namespace WHERE name = $1`
+	searchNamespace = `SELECT id FROM Namespace WHERE name = $1 AND real_name = $2`
 
 	// feature.go
 	insertFeature = `
@@ -73,7 +73,7 @@ const (
 
 	// layer.go
 	searchLayer = `
-		SELECT l.id, l.name, l.engineversion, p.id, p.name, n.id, n.name, n.version_format
+		SELECT l.id, l.name, l.engineversion, p.id, p.name, n.id, n.name, n.real_name, n.version_format
 		FROM Layer l
 			LEFT JOIN Layer p ON l.parent_id = p.id
 			LEFT JOIN Namespace n ON l.namespace_id = n.id

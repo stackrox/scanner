@@ -263,9 +263,9 @@ func linkFeatureVersionToVulnerabilities(tx *sql.Tx, featureVersion database.Fea
 	return nil
 }
 
-func (pgSQL *pgSQL) FeatureExists(namespace, feature string) (bool, error) {
+func (pgSQL *pgSQL) FeatureExists(namespace, realName, feature string) (bool, error) {
 	var namespaceID int
-	if err := pgSQL.QueryRow(searchNamespace, namespace).Scan(&namespaceID); err != nil {
+	if err := pgSQL.QueryRow(searchNamespace, namespace, realName).Scan(&namespaceID); err != nil {
 		return false, handleError("featureExists", err)
 	}
 	if namespaceID == 0 {
