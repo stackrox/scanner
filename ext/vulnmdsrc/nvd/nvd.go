@@ -63,6 +63,7 @@ func newMetadataEnricher(nvd *nvdEntry) *metadataEnricher {
 }
 
 func (a *appender) BuildCache(dumpDir string) error {
+	log.Info("NVD build cache hi")
 	dumpDir = filepath.Join(dumpDir, vulndump.NVDDirName)
 	a.metadata = make(map[string]*metadataEnricher)
 
