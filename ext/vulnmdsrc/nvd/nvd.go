@@ -69,8 +69,11 @@ func (a *appender) BuildCache(dumpDir string) error {
 
 	fileInfos, err := ioutil.ReadDir(dumpDir)
 	if err != nil {
+		log.Error("NVD fail")
 		return errors.Wrap(err, "failed to read dir")
 	}
+
+	log.Info("NVD build cache continuing...")
 
 	for _, fileInfo := range fileInfos {
 		fileName := fileInfo.Name()
