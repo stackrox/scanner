@@ -11,6 +11,7 @@ import (
 
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
+	"github.com/quay/claircore"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/rox/pkg/errorhelpers"
@@ -103,18 +104,30 @@ func LoadManifestFromDump(zipR *zip.ReadCloser) (*Manifest, error) {
 }
 
 // LoadOSVulnsFromDump loads the os vulns file from the dump into an in-memory slice.
-func LoadOSVulnsFromDump(zipR *zip.ReadCloser) ([]database.Vulnerability, error) {
+func LoadOSVulnsFromDump(zipR *zip.ReadCloser) ([]database.Vulnerability, []*claircore.Vulnerability, error) {
 	osVulnsFile, err := ziputil.OpenFileInZip(zipR, OSVulnsFileName)
 	if err != nil {
-		return nil, errors.Wrap(err, "opening OS vulns file")
+		return nil, nil, errors.Wrap(err, "opening OS vulns file")
 	}
 	defer utils.IgnoreError(osVulnsFile.Close)
 
 	var vulns []database.Vulnerability
 	if err := json.NewDecoder(osVulnsFile).Decode(&vulns); err != nil {
-		return nil, errors.Wrap(err, "JSON decoding OS vulns")
+		return nil, nil, errors.Wrap(err, "JSON decoding OS vulns")
 	}
-	return vulns, nil
+
+	rhelVulnsFile, err := ziputil.OpenFileInZip(zipR, RHELVulnsFileName)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "opening RHEL vulns file")
+	}
+	defer utils.IgnoreError(rhelVulnsFile.Close)
+
+	var rhelVulns []*claircore.Vulnerability
+	if err := json.NewDecoder(rhelVulnsFile).Decode(&rhelVulns); err != nil {
+		return nil, nil, errors.Wrap(err, "JSON decoding RHEL vulns")
+	}
+
+	return vulns, rhelVulns, nil
 }
 
 func renew(sig *concurrency.Signal, db database.Datastore, interval time.Duration, expiration time.Time, instanceName string) {
@@ -167,15 +180,16 @@ func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore
 	defer finishedSig.Signal()
 
 	log.Info("Loading OS vulns...")
-	osVulns, err := LoadOSVulnsFromDump(zipR)
+	osVulns, rhelVulns, err := LoadOSVulnsFromDump(zipR)
 	if err != nil {
 		return err
 	}
-	log.Infof("Done loading OS vulns. There are %d vulns to insert into the DB", len(osVulns))
+	log.Infof("Done loading OS vulns. There are %d vulns and %d RHEL vulns to insert into the DB", len(osVulns), len(rhelVulns))
 
 	if err := db.InsertVulnerabilities(osVulns); err != nil {
 		return errors.Wrap(err, "inserting vulns into the DB")
 	}
+
 	log.Info("Done inserting vulns into the DB")
 	marshaledDumpTS, err := manifest.Until.MarshalText()
 	// Really shouldn't happen because we literally just unmarshalled it.

@@ -16,6 +16,7 @@
 package pgsql
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"io/ioutil"
@@ -28,6 +29,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/quay/claircore/libvuln"
 	"github.com/remind101/migrate"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
@@ -84,8 +86,9 @@ type Queryer interface {
 
 type pgSQL struct {
 	*sql.DB
-	cache  *lru.Cache
-	config Config
+	cache   *lru.Cache
+	config  Config
+	libvuln *libvuln.Libvuln
 }
 
 // Close closes the database and destroys if ManageDatabaseLifecycle has been specified in
@@ -209,6 +212,15 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 	//if pg.config.CacheSize > 0 {
 	//	pg.cache, _ = lru.New(pg.config.CacheSize)
 	//}
+
+	pg.libvuln, err = libvuln.New(context.Background(), &libvuln.Opts{
+		MaxConnPool:              1,
+		ConnString:               pgSourceURL, // TODO
+		Migrations:               false,
+		UpdaterSets:              []string{},
+		DisableBackgroundUpdates: true,
+		Client:                   nil,
+	})
 
 	return &pg, nil
 }

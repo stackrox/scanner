@@ -22,7 +22,7 @@ func Command() *cobra.Command {
 				return errors.Wrap(err, "loading dump")
 			}
 			defer utils.IgnoreError(zipR.Close)
-			vulns, err := vulndump.LoadOSVulnsFromDump(zipR)
+			vulns, _, err := vulndump.LoadOSVulnsFromDump(zipR)
 			if err != nil {
 				return errors.Wrap(err, "loading os vulns from dump")
 			}

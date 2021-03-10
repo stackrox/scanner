@@ -13,6 +13,7 @@ import (
 
 	"github.com/facebookincubator/nvdtools/vulndb"
 	"github.com/pkg/errors"
+	"github.com/quay/claircore"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/k8s-cves/pkg/validation"
@@ -162,6 +163,12 @@ func keyFromVuln(v *database.Vulnerability) clairVulnUniqueKey {
 	}
 }
 
+func keyFromRHELVuln(v *claircore.Vulnerability) clairVulnUniqueKey {
+	return clairVulnUniqueKey{
+		name: v.ID,
+	}
+}
+
 type stringPair struct {
 	first  string
 	second string
@@ -191,6 +198,10 @@ func sortFeatureVersionSlice(slice []database.FeatureVersion) {
 func vulnsAreEqual(v1, v2 database.Vulnerability) bool {
 	sortFeatureVersionSlice(v1.FixedIn)
 	sortFeatureVersionSlice(v2.FixedIn)
+	return reflect.DeepEqual(v1, v2)
+}
+
+func rhelVulnsAreEqual(v1, v2 *claircore.Vulnerability) bool {
 	return reflect.DeepEqual(v1, v2)
 }
 
@@ -230,11 +241,11 @@ func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnera
 }
 
 func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, cfg config) error {
-	baseVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
+	baseVulns, baseRHELVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
 	if err != nil {
 		return errors.Wrap(err, "loading OS vulns from base dump")
 	}
-	headVulns, err := vulndump.LoadOSVulnsFromDump(headZipR)
+	headVulns, headRHELVulns, err := vulndump.LoadOSVulnsFromDump(headZipR)
 	if err != nil {
 		return errors.Wrap(err, "loading OS vulns from head dump")
 	}
@@ -277,8 +288,31 @@ func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 		filtered = filterFixableCentOSVulns(filtered)
 		log.Infof("Skipping fixable centOS vulns: filtered out %d", countBefore-len(filtered))
 	}
+
+	baseRHELVulnsMap := make(map[clairVulnUniqueKey]*claircore.Vulnerability, len(baseRHELVulns))
+	for _, vuln := range baseRHELVulns {
+		key := keyFromRHELVuln(vuln)
+		if _, ok := baseRHELVulnsMap[key]; ok {
+			// Should really never happen, but being defensive.
+			return errors.Errorf("UNEXPECTED: got multiple vulns for key: %v", key)
+		}
+		baseRHELVulnsMap[key] = vuln
+	}
+
+	var filteredRHEL []*claircore.Vulnerability
+	for _, headVuln := range headRHELVulns {
+		key := keyFromRHELVuln(headVuln)
+		matchingBaseVuln, found := baseRHELVulnsMap[key]
+		// If the vuln was in the base, and equal to what was in the base,
+		// skip it. Else, add.
+		if !(found && rhelVulnsAreEqual(matchingBaseVuln, headVuln)) {
+			filteredRHEL = append(filteredRHEL, headVuln)
+		}
+	}
+
 	log.Infof("Diffed OS vulns; base had %d, head had %d, and the diff has %d", len(baseVulns), len(headVulns), len(filtered))
-	if err := vulndump.WriteOSVulns(outputDir, filtered); err != nil {
+	log.Infof("Diffed RHEL vulns; base had %d, head had %d, and the diff has %d", len(baseRHELVulns), len(headRHELVulns), len(filteredRHEL))
+	if err := vulndump.WriteOSVulns(outputDir, filtered, filteredRHEL); err != nil {
 		return err
 	}
 	return nil

@@ -17,6 +17,7 @@ package database
 import (
 	"time"
 
+	"github.com/quay/claircore/libvuln"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
@@ -44,6 +45,7 @@ type MockDatastore struct {
 	FctGetLayerLanguageComponents          func(layer string) ([]*component.LayerToComponents, error)
 	FctGetVulnerabilitiesForFeatureVersion func(featureVersions FeatureVersion) ([]Vulnerability, error)
 	FctFeatureExists                       func(namespace, feature string) (bool, error)
+	FctGetLibvuln                          func() *libvuln.Libvuln
 }
 
 func (mds *MockDatastore) InsertLayer(layer Layer) error {
@@ -196,6 +198,13 @@ func (mds *MockDatastore) GetVulnerabilitiesForFeatureVersion(featureVersions Fe
 func (mds *MockDatastore) FeatureExists(namespace, feature string) (bool, error) {
 	if mds.FctFeatureExists != nil {
 		return mds.FctFeatureExists(namespace, feature)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) GetLibvuln() *libvuln.Libvuln {
+	if mds.FctGetLibvuln != nil {
+		return mds.FctGetLibvuln()
 	}
 	panic("required mock function not implemented")
 }

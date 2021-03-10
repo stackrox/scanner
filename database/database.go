@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/quay/claircore/libvuln"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/retry"
 	"github.com/stackrox/scanner/pkg/component"
@@ -182,4 +183,7 @@ type Datastore interface {
 	GetVulnerabilitiesForFeatureVersion(featureVersions FeatureVersion) ([]Vulnerability, error)
 
 	FeatureExists(namespace, feature string) (bool, error)
+
+	// GetLibvuln returns the interface used by ClairCore to interact with vulnerabilities.
+	GetLibvuln() *libvuln.Libvuln
 }

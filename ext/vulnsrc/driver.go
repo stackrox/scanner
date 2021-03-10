@@ -20,6 +20,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/quay/claircore"
 	"github.com/stackrox/scanner/database"
 )
 
@@ -36,10 +37,11 @@ var (
 
 // UpdateResponse represents the sum of results of an update.
 type UpdateResponse struct {
-	FlagName        string
-	FlagValue       string
-	Notes           []string
-	Vulnerabilities []database.Vulnerability
+	FlagName            string
+	FlagValue           string
+	Notes               []string
+	Vulnerabilities     []database.Vulnerability
+	RHELVulnerabilities []*claircore.Vulnerability
 }
 
 type DataStore interface {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
+	"github.com/quay/claircore"
 	"github.com/stackrox/scanner/database"
 )
 
@@ -46,9 +47,12 @@ func WriteManifestFile(outputDir string, m Manifest) error {
 }
 
 // WriteOSVulns creates and writes the OS vulns file to the given output dir.
-func WriteOSVulns(outputDir string, vulns []database.Vulnerability) error {
+func WriteOSVulns(outputDir string, vulns []database.Vulnerability, rhelVulns []*claircore.Vulnerability) error {
 	if err := writeJSONObjectToFile(filepath.Join(outputDir, OSVulnsFileName), vulns); err != nil {
 		return errors.Wrap(err, "writing os vulns file")
+	}
+	if err := writeJSONObjectToFile(filepath.Join(outputDir, RHELVulnsFileName), rhelVulns); err != nil {
+		return errors.Wrap(err, "writing rhel vulns fule")
 	}
 	return nil
 }

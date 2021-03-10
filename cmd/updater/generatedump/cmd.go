@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/quay/claircore"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/stackrox/rox/pkg/concurrency"
@@ -54,14 +55,14 @@ func generateDumpWithAllVulns(outFile string) error {
 	}
 
 	log.Info("Fetching OS vulns...")
-	fetchedVulns, err := fetchVulns(emptyDataStore{}, dumpDir)
+	fetchedVulns, rhelVulns, err := fetchVulns(emptyDataStore{}, dumpDir)
 	if err != nil {
 		return errors.Wrap(err, "fetching vulns")
 	}
 	log.Infof("Finished fetching vulns (total: %d)", len(fetchedVulns))
 
 	log.Info("Writing JSON file for updated vulns...")
-	err = vulndump.WriteOSVulns(dumpDir, fetchedVulns)
+	err = vulndump.WriteOSVulns(dumpDir, fetchedVulns, rhelVulns)
 	if err != nil {
 		return err
 	}
@@ -97,7 +98,7 @@ func Command() *cobra.Command {
 }
 
 // fetch get data from the registered fetchers, in parallel.
-func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.Vulnerability, err error) {
+func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.Vulnerability, rhelVulns []*claircore.Vulnerability, err error) {
 	errSig := concurrency.NewErrorSignal()
 
 	// Fetch updates in parallel.
@@ -131,20 +132,24 @@ func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.V
 	for i := 0; i < len(vulnsrc.Updaters()); i++ {
 		select {
 		case resp := <-responseC:
-			vulns = append(vulns, doVulnerabilitiesNamespacing(resp.Vulnerabilities)...)
+			if resp.RHELVulnerabilities != nil {
+				rhelVulns = append(rhelVulns, resp.RHELVulnerabilities...)
+			} else {
+				vulns = append(vulns, doVulnerabilitiesNamespacing(resp.Vulnerabilities)...)
+			}
 			for _, note := range resp.Notes {
 				log.WithField("note", note).Warn("There was a warning when running the updaters")
 			}
 		case <-errSig.Done():
-			return nil, errSig.Err()
+			return nil, nil, errSig.Err()
 		}
 	}
 
 	vulnsWithMetadata, err := addMetadata(vulns, dumpDir)
 	if err != nil {
-		return nil, errors.Wrap(err, "adding metadata to vulns")
+		return nil, nil, errors.Wrap(err, "adding metadata to vulns")
 	}
-	return vulnsWithMetadata, nil
+	return vulnsWithMetadata, rhelVulns, nil
 }
 
 // Add metadata to the specified vulnerabilities using the NVD metadata fetcher.

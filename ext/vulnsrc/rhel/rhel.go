@@ -17,8 +17,7 @@
 package rhel
 
 import (
-	"bufio"
-	"compress/bzip2"
+	"context"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -29,10 +28,10 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/quay/claircore/rhel"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/set"
-	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
@@ -74,6 +73,8 @@ var (
 	cveIDRegexp    = regexp.MustCompile(`^oval:com\.redhat\.cve:def:(\d+)$`)
 	rhsaIDRegexp   = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
 	rhsaFileRegexp = regexp.MustCompile(`com.redhat.rhsa-(\d+).xml`)
+
+	backgroundCtx = context.Background()
 )
 
 type oval struct {
@@ -168,83 +169,34 @@ func init() {
 	vulnsrc.RegisterUpdater("rhel", &updater{})
 }
 
-func parseBzip(reader io.ReadCloser, coveredIDs set.IntSet) ([]database.Vulnerability, error) {
-	defer utils.IgnoreError(reader.Close)
-
-	decompressingReader := bzip2.NewReader(reader)
-	return parseRHSA(decompressingReader, coveredIDs)
-}
-
 func (u *updater) Update(_ vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
-	log.WithField("package", "RHEL").Info("Start fetching vulnerabilities")
-
-	log.Info("RHEL: fetching bulk OVAL URIs")
-	// RedHat has one giant file with almost all the RHSAs, except some which they don't keep in this for some reason.
-	// We fetch this file first, since it's just one HTTP call.
-	// We then iterate over the list of other files, and fetch all the RHSAs that weren't included in this one.
-
 	var finalResp vulnsrc.UpdateResponse
-	coveredIDs := set.NewIntSet()
-	for _, url := range bulkRHSAXMLBZ2URLs {
-		rhsaResp, err := getWithRetriesAndBackoff(url)
-		if err != nil {
-			log.WithError(err).Errorf("could not download RHEL's OVAL file from %s", url)
-			return finalResp, commonerr.ErrCouldNotDownload
-		}
-		previouslyCovered := len(coveredIDs)
-		vulns, err := parseBzip(rhsaResp.Body, coveredIDs)
-		if err != nil {
-			log.WithError(err).Errorf("could not prase RHEL's OVAL file from %s", url)
-			return finalResp, commonerr.ErrCouldNotParse
-		}
-		log.Infof("RHEL: done fetching OVAL file %s. Got %d vulns (%d RHSAs)", url, len(vulns), coveredIDs.Cardinality()-previouslyCovered)
 
-		finalResp.Vulnerabilities = append(finalResp.Vulnerabilities, vulns...)
+	rf, err := rhel.NewFactory(backgroundCtx, rhel.DefaultManifest)
+	if err != nil {
+		return finalResp, errors.New("could not initialize updater")
 	}
 
-	log.Info("RHEL: Fetching remaining IDs which weren't in the OVAL files")
-	ovalDirectoryResp, err := getWithRetriesAndBackoff(ovalURI)
+	updaters, err := rf.UpdaterSet(backgroundCtx)
 	if err != nil {
-		log.WithError(err).Error("could not fetch RHEL's update list")
 		return finalResp, commonerr.ErrCouldNotDownload
 	}
-	defer utils.IgnoreError(ovalDirectoryResp.Body.Close)
 
-	var remainingRHSAURLs []string
-	scanner := bufio.NewScanner(ovalDirectoryResp.Body)
-	for scanner.Scan() {
-		line := scanner.Text()
-		regexMatch := rhsaFileRegexp.FindStringSubmatch(line)
-		// Not an RHSA
-		if len(regexMatch) != 2 {
-			continue
-		}
-		rhsaNo, err := strconv.Atoi(regexMatch[1])
+	for _, updater := range updaters.Updaters() {
+		reader, _, err := updater.Fetch(backgroundCtx, "")
 		if err != nil {
-			return finalResp, errors.Wrapf(err, "invalid RHSA file name: %s. Bad regex?", regexMatch[0])
-		}
-		if rhsaNo > firstRHEL5RHSA && !coveredIDs.Contains(rhsaNo) {
-			remainingRHSAURLs = append(remainingRHSAURLs, regexMatch[0])
-		}
-	}
-	const printEvery = 100
-	log.WithField("count", len(remainingRHSAURLs)).Info("RHEL: got remaining RHSAs to fetch")
-	for i, rhsaURL := range remainingRHSAURLs {
-		r, err := getWithRetriesAndBackoff(ovalURI + rhsaURL)
-		if err != nil {
-			log.WithError(err).Error("could not download RHEL's update list")
 			return finalResp, commonerr.ErrCouldNotDownload
 		}
-		currentVulns, err := parseRHSA(r.Body, coveredIDs)
-		_ = r.Body.Close()
+		defer reader.Close()
+
+		vulns, err := updater.Parse(backgroundCtx, reader)
 		if err != nil {
-			return finalResp, err
+			return finalResp, commonerr.ErrCouldNotParse
 		}
-		finalResp.Vulnerabilities = append(finalResp.Vulnerabilities, currentVulns...)
-		if (i+1)%printEvery == 0 {
-			log.Infof("Finished collecting %d/%d additional RHSAs", i+1, len(remainingRHSAURLs))
-		}
+
+		finalResp.RHELVulnerabilities = append(finalResp.RHELVulnerabilities, vulns...)
 	}
+
 	return finalResp, nil
 }
 
