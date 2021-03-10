@@ -197,6 +197,12 @@ func (u *updater) Update(_ vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
 		finalResp.RHELVulnerabilities = append(finalResp.RHELVulnerabilities, vulns...)
 	}
 
+	strs := make([]string, len(finalResp.RHELVulnerabilities))
+	for i, vuln := range finalResp.RHELVulnerabilities {
+		strs[i] = vuln.Name
+	}
+	log.Info(strs)
+
 	return finalResp, nil
 }
 
