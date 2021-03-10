@@ -63,7 +63,6 @@ func newMetadataEnricher(nvd *nvdEntry) *metadataEnricher {
 }
 
 func (a *appender) BuildCache(dumpDir string) error {
-	log.Info("NVD build cache hi")
 	dumpDir = filepath.Join(dumpDir, vulndump.NVDDirName)
 	a.metadata = make(map[string]*metadataEnricher)
 
@@ -73,13 +72,12 @@ func (a *appender) BuildCache(dumpDir string) error {
 		return errors.Wrap(err, "failed to read dir")
 	}
 
-	log.Info("NVD build cache continuing...")
-
 	for _, fileInfo := range fileInfos {
 		fileName := fileInfo.Name()
 		if filepath.Ext(fileName) != ".json" {
 			continue
 		}
+		log.Info("NVD " + fileName)
 		f, err := os.Open(filepath.Join(dumpDir, fileName))
 		if err != nil {
 			return errors.Wrapf(err, "could not open NVD data file %s", fileName)
