@@ -83,9 +83,14 @@ func (a *appender) BuildCache(dumpDir string) error {
 			return errors.Wrapf(err, "could not open NVD data file %s", fileName)
 		}
 
+		log.Info("NVD " + fileName)
+
 		if err := a.parseDataFeed(bufio.NewReader(f)); err != nil {
 			return errors.Wrapf(err, "could not parse NVD data file %s", fileName)
 		}
+
+		log.Info("NVD " + fileName)
+
 		_ = f.Close()
 	}
 	log.Infof("Obtained metadata for %d vulns", len(a.metadata))
