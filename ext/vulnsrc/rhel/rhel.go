@@ -201,7 +201,6 @@ func (u *updater) Update(_ vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
 	for i, vuln := range finalResp.RHELVulnerabilities {
 		strs[i] = vuln.Name
 	}
-	log.Info(strs)
 
 	return finalResp, nil
 }

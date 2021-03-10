@@ -59,7 +59,7 @@ func generateDumpWithAllVulns(outFile string) error {
 	if err != nil {
 		return errors.Wrap(err, "fetching vulns")
 	}
-	log.Infof("Finished fetching vulns (total: %d)", len(fetchedVulns))
+	log.Infof("Finished fetching vulns (total: %d)", len(fetchedVulns) + len(rhelVulns))
 
 	log.Info("Writing JSON file for updated vulns...")
 	err = vulndump.WriteOSVulns(dumpDir, fetchedVulns, rhelVulns)
