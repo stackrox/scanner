@@ -3,6 +3,7 @@ package vulndump
 import (
 	"compress/flate"
 	"encoding/json"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 
@@ -29,6 +30,7 @@ func WriteZip(inputDir, outFile string, ignoreKubernetesVulns bool) error {
 
 func writeJSONObjectToFile(filePath string, object interface{}) error {
 	f, err := os.Create(filePath)
+	log.Info("Created " + filePath)
 	if err != nil {
 		return errors.Wrap(err, "creating file")
 	}
@@ -51,6 +53,7 @@ func WriteOSVulns(outputDir string, vulns []database.Vulnerability, rhelVulns []
 	if err := writeJSONObjectToFile(filepath.Join(outputDir, OSVulnsFileName), vulns); err != nil {
 		return errors.Wrap(err, "writing os vulns file")
 	}
+	log.Info("HELLO!")
 	if err := writeJSONObjectToFile(filepath.Join(outputDir, RHELVulnsFileName), rhelVulns); err != nil {
 		return errors.Wrap(err, "writing rhel vulns file")
 	}
