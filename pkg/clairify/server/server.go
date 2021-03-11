@@ -23,7 +23,6 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/env"
-	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/mtls"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"github.com/stackrox/scanner/pkg/updater"
@@ -36,18 +35,16 @@ var (
 
 // Server is the HTTP server for Clairify.
 type Server struct {
-	endpoint       string
-	storage        database.Datastore
-	httpServer     *http.Server
-	licenseManager licenses.Manager
+	endpoint   string
+	storage    database.Datastore
+	httpServer *http.Server
 }
 
 // New returns a new instantiation of the Server.
-func New(serverEndpoint string, db database.Datastore, licenseManager licenses.Manager) *Server {
+func New(serverEndpoint string, db database.Datastore) *Server {
 	return &Server{
-		endpoint:       serverEndpoint,
-		storage:        db,
-		licenseManager: licenseManager,
+		endpoint: serverEndpoint,
+		storage:  db,
 	}
 }
 
@@ -247,11 +244,6 @@ func (s *Server) GetVulnDefsMetadata(w http.ResponseWriter, _ *http.Request) {
 
 func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc, verifyClient bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !s.licenseManager.ValidLicenseExists() {
-			httputil.WriteGRPCStyleError(w, codes.Internal, licenses.ErrNoValidLicense)
-			return
-		}
-
 		if verifyClient && !skipPeerValidation {
 			if err := mtls.VerifyCentralPeerCertificate(r); err != nil {
 				httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
