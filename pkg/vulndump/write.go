@@ -21,6 +21,7 @@ func WriteZip(inputDir, outFile string, ignoreKubernetesVulns bool) error {
 		filepath.Join(inputDir, ManifestFileName),
 		filepath.Join(inputDir, NVDDirName),
 		filepath.Join(inputDir, OSVulnsFileName),
+		filepath.Join(inputDir, RHELVulnsFileName),
 	}
 	if !ignoreKubernetesVulns {
 		sources = append(sources, filepath.Join(inputDir, K8sDirName))
