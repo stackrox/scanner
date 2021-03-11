@@ -443,7 +443,6 @@ jobs:
       - check-label-to-run:
           label: generate-dumps-on-pr
       - run:
-          resource_class: small
           name: Build updater, and persist to workspace
           command: |
             make build-updater
