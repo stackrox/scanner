@@ -13,7 +13,7 @@ import (
 func Appenders() []types.Appender {
 	return []types.Appender{
 		nvd.SingletonAppender(),
-		redhat.SingletonAppender(),
+		//redhat.SingletonAppender(),
 	}
 }
 
