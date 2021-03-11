@@ -242,7 +242,7 @@ func (s *Server) GetVulnDefsMetadata(w http.ResponseWriter, _ *http.Request) {
 	w.Write(data)
 }
 
-func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc, verifyClient bool) http.HandlerFunc {
+func (s *Server) wrapHandlerToVerifyPeerCertificates(f http.HandlerFunc, verifyClient bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if verifyClient && !skipPeerValidation {
 			if err := mtls.VerifyCentralPeerCertificate(r); err != nil {
@@ -256,7 +256,7 @@ func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc, verifyClien
 }
 
 func (s *Server) handleFuncRouterWithLicenseAndVerifyClient(r *mux.Router, path string, handlerFunc http.HandlerFunc, verifyClient bool, method string) {
-	r.HandleFunc(path, s.wrapHandlerFuncWithLicenseCheck(handlerFunc, verifyClient)).Methods(method)
+	r.HandleFunc(path, s.wrapHandlerToVerifyPeerCertificates(handlerFunc, verifyClient)).Methods(method)
 }
 
 // Start starts the server listening.
@@ -273,7 +273,7 @@ func (s *Server) Start() error {
 		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/image", root), s.ScanImage, true, http.MethodPost)
 		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/vulndefs/metadata", root), s.GetVulnDefsMetadata, true, http.MethodGet)
 
-		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.wrapHandlerFuncWithLicenseCheck(s.GetResultsByImage, true)).Methods(http.MethodGet)
+		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.wrapHandlerToVerifyPeerCertificates(s.GetResultsByImage, true)).Methods(http.MethodGet)
 	}
 
 	var tlsConfig *tls.Config
