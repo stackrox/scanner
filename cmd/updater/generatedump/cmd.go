@@ -163,8 +163,6 @@ func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]da
 		}
 	}
 
-	log.Info("Hi")
-
 	for i := range vulnerabilities {
 		vuln := &vulnerabilities[i]
 		appender := vulnmdsrc.AppenderForVuln(vuln)
@@ -172,8 +170,6 @@ func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]da
 			return nil, errors.Wrapf(err, "Failed to append metadata for vuln %s", vuln.Name)
 		}
 	}
-
-	log.Info("Bye")
 
 	return vulnerabilities, nil
 }
