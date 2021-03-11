@@ -52,7 +52,7 @@ func WriteOSVulns(outputDir string, vulns []database.Vulnerability, rhelVulns []
 		return errors.Wrap(err, "writing os vulns file")
 	}
 	if err := writeJSONObjectToFile(filepath.Join(outputDir, RHELVulnsFileName), rhelVulns); err != nil {
-		return errors.Wrap(err, "writing rhel vulns fule")
+		return errors.Wrap(err, "writing rhel vulns file")
 	}
 	return nil
 }

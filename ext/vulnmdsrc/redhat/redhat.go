@@ -47,7 +47,6 @@ func newMetadataEnricher(redhat *redhatEntry) *metadataEnricher {
 }
 
 func (a *appender) BuildCache(dumpDir string) error {
-	log.Info("Red Hat build cache hi")
 	dumpDir = filepath.Join(dumpDir, vulndump.RedHatDirName)
 	a.metadata = make(map[string]*metadataEnricher)
 

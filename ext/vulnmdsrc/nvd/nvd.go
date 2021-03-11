@@ -68,7 +68,6 @@ func (a *appender) BuildCache(dumpDir string) error {
 
 	fileInfos, err := ioutil.ReadDir(dumpDir)
 	if err != nil {
-		log.Error("NVD fail")
 		return errors.Wrap(err, "failed to read dir")
 	}
 
@@ -77,19 +76,15 @@ func (a *appender) BuildCache(dumpDir string) error {
 		if filepath.Ext(fileName) != ".json" {
 			continue
 		}
-		log.Info("NVD " + fileName)
+
 		f, err := os.Open(filepath.Join(dumpDir, fileName))
 		if err != nil {
 			return errors.Wrapf(err, "could not open NVD data file %s", fileName)
 		}
 
-		log.Info("NVD " + fileName)
-
 		if err := a.parseDataFeed(bufio.NewReader(f)); err != nil {
 			return errors.Wrapf(err, "could not parse NVD data file %s", fileName)
 		}
-
-		log.Info("NVD " + fileName)
 
 		_ = f.Close()
 	}
