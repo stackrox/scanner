@@ -51,7 +51,7 @@ func UpdateV2() ([]*database.RHELv2Vulnerability, error) {
 		return nil, err
 	}
 
-	var wg *sync.WaitGroup
+	var wg sync.WaitGroup
 	type response struct {
 		vulns []*database.RHELv2Vulnerability
 		err   error
