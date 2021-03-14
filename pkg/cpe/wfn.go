@@ -2,10 +2,10 @@ package cpe
 
 import (
 	"errors"
-"fmt"
-"strings"
-"unicode"
-"unicode/utf8"
+	"fmt"
+	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 // Attribute is a type for enumerating the valid CPE attributes.
