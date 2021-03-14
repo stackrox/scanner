@@ -12,8 +12,11 @@ type ArchOp uint
 const (
 	opInvalid ArchOp = iota // invalid
 
-	OpEquals       // equals
-	OpNotEquals    // not equals
+	// OpEquals equals
+	OpEquals // equals
+	// OpNotEquals not equals
+	OpNotEquals // not equals
+	// OpPatternMatch pattern match
 	OpPatternMatch // pattern match
 )
 

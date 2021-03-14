@@ -12,11 +12,17 @@ import (
 type Release int
 
 const (
+	// RHEL3 Red Hat Enterprise Linux 3
 	RHEL3 Release = 3
+	// RHEL4 Red Hat Enterprise Linux 4
 	RHEL4 Release = 4
+	// RHEL5 Red Hat Enterprise Linux 5
 	RHEL5 Release = 5
+	// RHEL6 Red Hat Enterprise Linux 6
 	RHEL6 Release = 6
+	// RHEL7 Red Hat Enterprise Linux 7
 	RHEL7 Release = 7
+	// RHEL8 Red Hat Enterprise Linux 8
 	RHEL8 Release = 8
 )
 

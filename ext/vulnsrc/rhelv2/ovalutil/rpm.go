@@ -3,11 +3,11 @@ package ovalutil
 import (
 	"errors"
 	"fmt"
-	"github.com/stackrox/scanner/ext/vulnsrc/rhelv2/archop"
 	"regexp"
 
 	"github.com/quay/goval-parser/oval"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/vulnsrc/rhelv2/archop"
 )
 
 var moduleCommentRegex = regexp.MustCompile(`(Module )(.*)( is enabled)`)

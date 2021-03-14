@@ -1,4 +1,3 @@
-// This is taken from ClairCore.
 package rhelv2
 
 import (

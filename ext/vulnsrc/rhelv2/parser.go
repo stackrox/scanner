@@ -3,13 +3,13 @@ package rhelv2
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/stackrox/scanner/ext/vulnsrc/rhelv2/ovalutil"
-	"github.com/stackrox/scanner/pkg/cpe"
 	"io"
 	"strings"
 
 	"github.com/quay/goval-parser/oval"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/vulnsrc/rhelv2/ovalutil"
+	"github.com/stackrox/scanner/pkg/cpe"
 )
 
 func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
@@ -41,12 +41,12 @@ func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error
 		}
 
 		return &database.RHELv2Vulnerability{
-			Name:               def.Title,
-			Description:        def.Description,
-			Issued:             def.Advisory.Issued.Date,
-			Links:              links(def),
-			Severity:           def.Advisory.Severity,
-			CPEs: cpes,
+			Name:        def.Title,
+			Description: def.Description,
+			Issued:      def.Advisory.Issued.Date,
+			Links:       links(def),
+			Severity:    def.Advisory.Severity,
+			CPEs:        cpes,
 			// each updater is configured to parse a rhel release
 			// specific xml database. we'll use the updater's release
 			// to map the parsed vulnerabilities
@@ -68,11 +68,11 @@ func links(definition oval.Definition) string {
 		ls = append(ls, ref.RefURL)
 	}
 
-		for _, ref := range definition.Advisory.Refs {
-			ls = append(ls, ref.URL)
+	for _, ref := range definition.Advisory.Refs {
+		ls = append(ls, ref.URL)
 	}
-		for _, bug := range definition.Advisory.Bugs {
-			ls = append(ls, bug.URL)
+	for _, bug := range definition.Advisory.Bugs {
+		ls = append(ls, bug.URL)
 	}
 
 	return strings.Join(ls, " ")
