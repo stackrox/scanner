@@ -14,7 +14,7 @@ import (
 //
 // fetch makes GET requests, and will make conditional requests using the
 // passed-in hint.
-func fetch(ctx context.Context, url *url.URL) (io.Reader, error) {
+func fetch(ctx context.Context, url *url.URL) (io.ReadCloser, error) {
 	req := http.Request{
 		Method:     http.MethodGet,
 		URL:        url,
@@ -25,9 +25,6 @@ func fetch(ctx context.Context, url *url.URL) (io.Reader, error) {
 	}
 
 	res, err := client.Do(req.WithContext(ctx))
-	if res != nil {
-		defer res.Body.Close()
-	}
 	if err != nil {
 		return nil, err
 	}
@@ -35,8 +32,24 @@ func fetch(ctx context.Context, url *url.URL) (io.Reader, error) {
 	case http.StatusOK:
 		// break
 	default:
-		return nil, fmt.Errorf("rhel2: fetcher got unexpected HTTP response: %d (%s)", res.StatusCode, res.Status)
+		return nil, fmt.Errorf("rhelv2: fetcher got unexpected HTTP response: %d (%s)", res.StatusCode, res.Status)
 	}
 
-	return bzip2.NewReader(res.Body), nil
+	return newReadCloser(res.Body), nil
+}
+
+type readCloser struct {
+	io.Reader
+	body io.ReadCloser
+}
+
+func newReadCloser(body io.ReadCloser) io.ReadCloser {
+	return &readCloser{
+		Reader: bzip2.NewReader(body),
+		body:   body,
+	}
+}
+
+func (rc *readCloser) Close() error {
+	return rc.body.Close()
 }

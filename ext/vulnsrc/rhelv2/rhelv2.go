@@ -96,6 +96,7 @@ func UpdateV2() ([]*database.RHELv2Vulnerability, error) {
 				respC <- &response{err: err}
 				return
 			}
+			defer r.Close()
 
 			vulns, err := parse(release, r)
 			if err != nil {
