@@ -14,6 +14,7 @@ import (
 	"github.com/stackrox/scanner/ext/vulnmdsrc"
 	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 	"github.com/stackrox/scanner/ext/vulnsrc"
+	"github.com/stackrox/scanner/ext/vulnsrc/rhelv2"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
 
@@ -53,14 +54,27 @@ func generateDumpWithAllVulns(outFile string) error {
 		}
 	}
 
+	log.Info("Fetching RHEL OVAL v2 vulns...")
+	fetchedRHELVulns, err := rhelv2.UpdateV2()
+	if err != nil {
+		return errors.Wrap(err, "fetching rhelv2 vulns")
+	}
+	log.Infof("Finished fetching RHEL OVAL v2 vulns (total: %d)", len(fetchedRHELVulns))
+
 	log.Info("Fetching OS vulns...")
 	fetchedVulns, err := fetchVulns(emptyDataStore{}, dumpDir)
 	if err != nil {
 		return errors.Wrap(err, "fetching vulns")
 	}
-	log.Infof("Finished fetching vulns (total: %d)", len(fetchedVulns))
+	log.Infof("Finished fetching OS vulns (total: %d)", len(fetchedVulns))
 
-	log.Info("Writing JSON file for updated vulns...")
+	log.Info("Writing JSON file for updated RHELv2 vulns...")
+	err = vulndump.WriteRHELv2Vulns(dumpDir, fetchedRHELVulns)
+	if err != nil {
+		return err
+	}
+
+	log.Info("Writing JSON file for updated OS vulns...")
 	err = vulndump.WriteOSVulns(dumpDir, fetchedVulns)
 	if err != nil {
 		return err
