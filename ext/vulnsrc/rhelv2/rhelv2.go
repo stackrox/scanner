@@ -21,7 +21,7 @@ var (
 	u, _ = url.Parse(PulpManifest)
 
 	client = &http.Client{
-		Timeout:   10 * time.Second,
+		Timeout:   20 * time.Second,
 		Transport: proxy.RoundTripper(),
 	}
 )
@@ -91,7 +91,7 @@ func UpdateV2() ([]*database.RHELv2Vulnerability, error) {
 			defer wg.Done()
 
 			u, _ := url.Parse(uri.String())
-			r, err := fetch(context.Background(), u)
+			r, err := fetch(u)
 			if err != nil {
 				respC <- &response{err: err}
 				return

@@ -2,7 +2,6 @@ package rhelv2
 
 import (
 	"compress/bzip2"
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,11 +13,8 @@ import (
 //
 // fetch makes GET requests, and will make conditional requests using the
 // passed-in hint.
-func fetch(ctx context.Context, url *url.URL) (io.ReadCloser, error) {
-	req := http.Request{
-		Header: http.Header{
-			"User-Agent": {"claircore/pkg/ovalutil.Fetcher"},
-		},
+func fetch(url *url.URL) (io.ReadCloser, error) {
+	req := &http.Request{
 		Method:     http.MethodGet,
 		URL:        url,
 		Proto:      "HTTP/1.1",
@@ -27,7 +23,7 @@ func fetch(ctx context.Context, url *url.URL) (io.ReadCloser, error) {
 		Host:       url.Host,
 	}
 
-	res, err := client.Do(req.WithContext(ctx))
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
