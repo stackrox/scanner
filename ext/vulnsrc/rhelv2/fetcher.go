@@ -16,6 +16,9 @@ import (
 // passed-in hint.
 func fetch(ctx context.Context, url *url.URL) (io.ReadCloser, error) {
 	req := http.Request{
+		Header: http.Header{
+			"User-Agent": {"claircore/pkg/ovalutil.Fetcher"},
+		},
 		Method:     http.MethodGet,
 		URL:        url,
 		Proto:      "HTTP/1.1",
