@@ -28,7 +28,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 	for _, def := range root.Definitions.Definitions {
 		// create our prototype vulnerability
 		protoVuln, err := protoVuln(def)
-		if err != nil {
+		if err != nil || protoVuln == nil {
 			continue
 		}
 		// recursively collect criterions for this definition
