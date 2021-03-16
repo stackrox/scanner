@@ -55,11 +55,11 @@ func generateDumpWithAllVulns(outFile string) error {
 	}
 
 	log.Info("Fetching RHEL OVAL v2 vulns...")
-	fetchedRHELVulns, err := rhelv2.UpdateV2()
+	nRHELv2Vulns, err := rhelv2.UpdateV2(dumpDir)
 	if err != nil {
 		return errors.Wrap(err, "fetching rhelv2 vulns")
 	}
-	log.Infof("Finished fetching RHEL OVAL v2 vulns (total: %d)", len(fetchedRHELVulns))
+	log.Infof("Finished fetching RHEL OVAL v2 vulns (total: %d)", nRHELv2Vulns)
 
 	log.Info("Fetching OS vulns...")
 	fetchedVulns, err := fetchVulns(emptyDataStore{}, dumpDir)
@@ -67,12 +67,6 @@ func generateDumpWithAllVulns(outFile string) error {
 		return errors.Wrap(err, "fetching vulns")
 	}
 	log.Infof("Finished fetching OS vulns (total: %d)", len(fetchedVulns))
-
-	log.Info("Writing JSON file for updated RHELv2 vulns...")
-	err = vulndump.WriteRHELv2Vulns(dumpDir, fetchedRHELVulns)
-	if err != nil {
-		return err
-	}
 
 	log.Info("Writing JSON file for updated OS vulns...")
 	err = vulndump.WriteOSVulns(dumpDir, fetchedVulns)

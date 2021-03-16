@@ -143,17 +143,10 @@ type Distribution struct {
 	// possibly including a release code name, and suitable for presentation to the user.
 	// example: "16.04.6 LTS (Xenial Xerus)"
 	Version string `json:"version"`
-	// A lower-case string (no spaces or other characters outside of 0–9, a–z, ".", "_" and "-") identifying the operating system release code name,
-	// excluding any OS name information or release version, and suitable for processing by scripts or usage in generated filenames
-	// example: "xenial"
-	VersionCodeName string `json:"version_code_name"`
 	// A lower-case string (mostly numeric, no spaces or other characters outside of 0–9, a–z, ".", "_" and "-")
 	// identifying the operating system version, excluding any OS name information or release code name,
 	// example: "16.04"
 	VersionID string `json:"version_id"`
-	// A string identifying the OS architecture
-	// example: "x86_64"
-	Arch string `json:"arch"`
 	// Optional common platform enumeration identifier
 	CPE cpe.WFN `json:"cpe"`
 	// A pretty operating system name in a format suitable for presentation to the user.
@@ -175,20 +168,10 @@ type Package struct {
 	// if type is a binary package a source package maybe present which built this binary package.
 	// must be a pointer to support recursive type:
 	Source *Package `json:"source,omitempty"`
-	// the file system path or prefix where this package resides
-	PackageDB string `json:"-"`
-	// a hint on which repository this package was downloaded from
-	RepositoryHint string `json:"-"`
-	// NormalizedVersion is a representation of a version string that's
-	// correctly ordered when compared with other representations from the same
-	// producer.
-	NormalizedVersion Version `json:"normalized_version,omitempty"`
 	// Module and stream which this package is part of
 	Module string `json:"module,omitempty"`
 	// Package architecture
 	Arch string `json:"arch,omitempty"`
-	// CPE name for package
-	CPE cpe.WFN `json:"cpe,omitempty"`
 }
 
 // Version describes a revision of some sort that is ordered correctly within

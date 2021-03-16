@@ -19,7 +19,7 @@ func WriteZip(inputDir, outFile string, ignoreKubernetesVulns bool) error {
 		filepath.Join(inputDir, ManifestFileName),
 		filepath.Join(inputDir, NVDDirName),
 		filepath.Join(inputDir, OSVulnsFileName),
-		filepath.Join(inputDir, RHELv2VulnsFileName),
+		filepath.Join(inputDir, RHELv2DirName),
 	}
 	if !ignoreKubernetesVulns {
 		sources = append(sources, filepath.Join(inputDir, K8sDirName))
@@ -50,14 +50,6 @@ func WriteManifestFile(outputDir string, m Manifest) error {
 func WriteOSVulns(outputDir string, vulns []database.Vulnerability) error {
 	if err := writeJSONObjectToFile(filepath.Join(outputDir, OSVulnsFileName), vulns); err != nil {
 		return errors.Wrap(err, "writing os vulns file")
-	}
-	return nil
-}
-
-// WriteRHELv2Vulns creates and writes the RHELv2 vulns file to the given output dir.
-func WriteRHELv2Vulns(outputDir string, vulns []*database.RHELv2Vulnerability) error {
-	if err := writeJSONObjectToFile(filepath.Join(outputDir, RHELv2VulnsFileName), vulns); err != nil {
-		return errors.Wrap(err, "writing rhelv2 vulns file")
 	}
 	return nil
 }

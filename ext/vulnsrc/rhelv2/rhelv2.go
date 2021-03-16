@@ -2,16 +2,21 @@ package rhelv2
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
-	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
 // PulpManifest is the url for the Red Hat OVAL pulp repository.
@@ -26,34 +31,39 @@ var (
 	}
 )
 
-func UpdateV2() ([]*database.RHELv2Vulnerability, error) {
+func UpdateV2(outputDir string) (int, error) {
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	res, err := client.Do(req)
 	if res != nil {
-		defer res.Body.Close()
+		defer utils.IgnoreError(res.Body.Close)
 	}
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	switch res.StatusCode {
 	case http.StatusOK:
 	default:
-		return nil, fmt.Errorf("rhelv2: unexpected response: %v", res.Status)
+		return 0, errors.Errorf("rhelv2: unexpected response: %v", res.Status)
 	}
 
 	m := Manifest{}
 	if err := m.Load(res.Body); err != nil {
-		return nil, err
+		return 0, err
+	}
+
+	rhelV2Dir := filepath.Join(outputDir, vulndump.RHELv2DirName)
+	if err := os.MkdirAll(rhelV2Dir, 0755); err != nil {
+		return 0, errors.Wrapf(err, "creating subdir for %s", vulndump.RHELv2DirName)
 	}
 
 	var wg sync.WaitGroup
 	type response struct {
-		vulns []*database.RHELv2Vulnerability
+		vulns int
 		err   error
 	}
 	respC := make(chan *response)
@@ -63,7 +73,7 @@ func UpdateV2() ([]*database.RHELv2Vulnerability, error) {
 		name := strings.TrimSuffix(strings.Replace(e.Path, "/", "-", -1), ".oval.xml.bz2")
 		uri, err := u.Parse(e.Path)
 		if err != nil {
-			return nil, err
+			return 0, err
 		}
 		p := uri.Path
 		var release Release
@@ -91,12 +101,17 @@ func UpdateV2() ([]*database.RHELv2Vulnerability, error) {
 			defer wg.Done()
 
 			u, _ := url.Parse(uri.String())
-			r, err := fetch(u)
+			lastModifiedStr, r, err := fetch(u)
 			if err != nil {
 				respC <- &response{err: err}
 				return
 			}
-			defer r.Close()
+			defer utils.IgnoreError(r.Close)
+
+			lastModified, err := time.Parse(time.RFC1123, lastModifiedStr)
+			if err != nil {
+				respC <- &response{err: err}
+			}
 
 			vulns, err := parse(release, r)
 			if err != nil {
@@ -104,7 +119,22 @@ func UpdateV2() ([]*database.RHELv2Vulnerability, error) {
 				return
 			}
 
-			respC <- &response{vulns: vulns}
+			outF, err := os.Create(filepath.Join(rhelV2Dir, fmt.Sprintf("%s.json", name)))
+			if err != nil {
+				respC <- &response{err: errors.Wrapf(err, "failed to create file %s", name)}
+				return
+			}
+			defer utils.IgnoreError(outF.Close)
+
+			if err := json.NewEncoder(outF).Encode(&vulndump.RHELv2{
+				LastModified: lastModified,
+				Vulns:        vulns,
+			}); err != nil {
+				respC <- &response{err: errors.Wrapf(err, "JSON-encoding %s", name)}
+				return
+			}
+
+			respC <- &response{vulns: len(vulns)}
 		}()
 	}
 
@@ -113,14 +143,14 @@ func UpdateV2() ([]*database.RHELv2Vulnerability, error) {
 		close(respC)
 	}()
 
-	var vulns []*database.RHELv2Vulnerability
+	var nRHELv2Vulns int
 	for resp := range respC {
 		if resp.err != nil {
 			errorList.AddError(resp.err)
 			continue
 		}
-		vulns = append(vulns, resp.vulns...)
+		nRHELv2Vulns += resp.vulns
 	}
 
-	return vulns, errorList.ToError()
+	return nRHELv2Vulns, errorList.ToError()
 }

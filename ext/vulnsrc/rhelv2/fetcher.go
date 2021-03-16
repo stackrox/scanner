@@ -13,7 +13,7 @@ import (
 //
 // fetch makes GET requests, and will make conditional requests using the
 // passed-in hint.
-func fetch(url *url.URL) (io.ReadCloser, error) {
+func fetch(url *url.URL) (string, io.ReadCloser, error) {
 	req := &http.Request{
 		Method:     http.MethodGet,
 		URL:        url,
@@ -25,16 +25,16 @@ func fetch(url *url.URL) (io.ReadCloser, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	switch res.StatusCode {
 	case http.StatusOK:
 		// break
 	default:
-		return nil, fmt.Errorf("rhelv2: fetcher got unexpected HTTP response: %d (%s)", res.StatusCode, res.Status)
+		return "", nil, fmt.Errorf("rhelv2: fetcher got unexpected HTTP response: %d (%s)", res.StatusCode, res.Status)
 	}
 
-	return newReadCloser(res.Body), nil
+	return res.Header.Get("last-modified"), newReadCloser(res.Body), nil
 }
 
 type readCloser struct {
