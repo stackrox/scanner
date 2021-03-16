@@ -22,7 +22,6 @@ import (
 
 // PulpManifest is the url for the Red Hat OVAL pulp repository.
 const PulpManifest = `https://www.redhat.com/security/data/oval/v2/PULP_MANIFEST`
-//const PulpManifest = `http://localhost:8000/PULP_MANIFEST`
 
 var (
 	u, _ = url.Parse(PulpManifest)
