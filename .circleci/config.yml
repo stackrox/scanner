@@ -437,7 +437,6 @@ jobs:
 
   generate-genesis-dump:
     <<: *defaults
-    resource_class: xlarge
     steps:
       - checkout
       - check-label-to-run:
