@@ -84,7 +84,7 @@ func generateDumpWithAllVulns(outFile string) error {
 	}
 
 	log.Info("Zipping up the files...")
-	if err := vulndump.WriteZip(dumpDir, outFile, false); err != nil {
+	if err := vulndump.WriteZip(dumpDir, outFile, false, false); err != nil {
 		return errors.Wrap(err, "creating ZIP of the vuln dump")
 	}
 	log.Info("Done writing the zip with the entire vuln dump!")
