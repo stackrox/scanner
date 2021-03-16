@@ -17,10 +17,12 @@ import (
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/vulndump"
+	"go.uber.org/ratelimit"
 )
 
 // PulpManifest is the url for the Red Hat OVAL pulp repository.
 const PulpManifest = `https://www.redhat.com/security/data/oval/v2/PULP_MANIFEST`
+//const PulpManifest = `http://localhost:8000/PULP_MANIFEST`
 
 var (
 	u, _ = url.Parse(PulpManifest)
@@ -29,6 +31,9 @@ var (
 		Timeout:   20 * time.Second,
 		Transport: proxy.RoundTripper(),
 	}
+
+	// Limits to 10 ops/second.
+	rl = ratelimit.New(10)
 )
 
 func UpdateV2(outputDir string) (int, error) {
@@ -37,6 +42,7 @@ func UpdateV2(outputDir string) (int, error) {
 		return 0, err
 	}
 
+	rl.Take()
 	res, err := client.Do(req)
 	if res != nil {
 		defer utils.IgnoreError(res.Body.Close)
@@ -101,6 +107,7 @@ func UpdateV2(outputDir string) (int, error) {
 			defer wg.Done()
 
 			u, _ := url.Parse(uri.String())
+			rl.Take()
 			lastModifiedStr, r, err := fetch(u)
 			if err != nil {
 				respC <- &response{err: err}

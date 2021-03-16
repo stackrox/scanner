@@ -41,6 +41,7 @@ require (
 	github.com/stackrox/rox v0.0.0-20201222223839-042406f3664c
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/bbolt v1.3.5
+	go.uber.org/ratelimit v0.2.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 	golang.org/x/sys v0.0.0-20201101102859-da207088b7d1
 	golang.org/x/tools v0.0.0-20201019175715-b894a3290fff
