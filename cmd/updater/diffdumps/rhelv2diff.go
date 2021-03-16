@@ -5,14 +5,14 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/scanner/database"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
