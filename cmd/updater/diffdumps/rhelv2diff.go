@@ -31,7 +31,7 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 
 	// If the head file is not newer than the base dump, then skip.
 	// Skip this check if the base dump does not even contain RHELv2 files.
-	if !rhelExists && !baseLastModifiedTime.Before(rhelv2.LastModified) {
+	if rhelExists && !baseLastModifiedTime.Before(rhelv2.LastModified) {
 		log.Infof("RHELv2 feed %q not updated since base dump", headF.Name)
 		return nil
 	}
@@ -53,7 +53,7 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 	// Not exactly possible since the base file must be older than the base dump as a whole,
 	// but doesn't hurt to sanity check.
 	// Skip this check if the base dump does not even contain RHELv2 files.
-	if !rhelExists && !rhelv2.LastModified.After(baseRHELv2.LastModified) {
+	if rhelExists && !rhelv2.LastModified.After(baseRHELv2.LastModified) {
 		log.Infof("RHELv2 feed %q not updated since base file", headF.Name)
 		return nil
 	}
@@ -110,11 +110,8 @@ func generateRHELv2VulnsDiff(outputDir string, baseLastModifiedTime time.Time, b
 		}
 	}
 
-	var rhelExists bool
-	// No RHELv2 files in base.
-	if len(baseFiles) > 0 {
-		rhelExists = true
-	}
+	// Let's us know if the base dump had RHELv2 data.
+	rhelExists := len(baseFiles) > 0
 
 	repoToCPEFile := filepath.Join(vulndump.RHELv2DirName, vulndump.RHELv2CPERepoName)
 	for _, headF := range headZipR.File {
