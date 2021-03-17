@@ -23,7 +23,6 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/env"
-	"github.com/stackrox/scanner/pkg/licenses"
 	"github.com/stackrox/scanner/pkg/mtls"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"github.com/stackrox/scanner/pkg/updater"
@@ -36,18 +35,16 @@ var (
 
 // Server is the HTTP server for Clairify.
 type Server struct {
-	endpoint       string
-	storage        database.Datastore
-	httpServer     *http.Server
-	licenseManager licenses.Manager
+	endpoint   string
+	storage    database.Datastore
+	httpServer *http.Server
 }
 
 // New returns a new instantiation of the Server.
-func New(serverEndpoint string, db database.Datastore, licenseManager licenses.Manager) *Server {
+func New(serverEndpoint string, db database.Datastore) *Server {
 	return &Server{
-		endpoint:       serverEndpoint,
-		storage:        db,
-		licenseManager: licenseManager,
+		endpoint: serverEndpoint,
+		storage:  db,
 	}
 }
 
@@ -245,26 +242,20 @@ func (s *Server) GetVulnDefsMetadata(w http.ResponseWriter, _ *http.Request) {
 	w.Write(data)
 }
 
-func (s *Server) wrapHandlerFuncWithLicenseCheck(f http.HandlerFunc, verifyClient bool) http.HandlerFunc {
+func (s *Server) wrapHandlerToVerifyPeerCertificates(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !s.licenseManager.ValidLicenseExists() {
-			httputil.WriteGRPCStyleError(w, codes.Internal, licenses.ErrNoValidLicense)
-			return
-		}
-
-		if verifyClient && !skipPeerValidation {
+		if !skipPeerValidation {
 			if err := mtls.VerifyCentralPeerCertificate(r); err != nil {
 				httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
 				return
 			}
 		}
-
 		f(w, r)
 	}
 }
 
-func (s *Server) handleFuncRouterWithLicenseAndVerifyClient(r *mux.Router, path string, handlerFunc http.HandlerFunc, verifyClient bool, method string) {
-	r.HandleFunc(path, s.wrapHandlerFuncWithLicenseCheck(handlerFunc, verifyClient)).Methods(method)
+func (s *Server) handleFuncRouterAndVerifyClient(r *mux.Router, path string, handlerFunc http.HandlerFunc, method string) {
+	r.HandleFunc(path, s.wrapHandlerToVerifyPeerCertificates(handlerFunc)).Methods(method)
 }
 
 // Start starts the server listening.
@@ -275,13 +266,13 @@ func (s *Server) Start() error {
 
 	for _, root := range apiRoots {
 		// Do not verify client cert for ping endpoint. This will be used by the readiness probe
-		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/ping", root), s.Ping, false, http.MethodGet)
+		r.HandleFunc(fmt.Sprintf("/%s/ping", root), s.Ping).Methods(http.MethodGet)
 
-		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA, true, http.MethodGet)
-		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/image", root), s.ScanImage, true, http.MethodPost)
-		s.handleFuncRouterWithLicenseAndVerifyClient(r, fmt.Sprintf("/%s/vulndefs/metadata", root), s.GetVulnDefsMetadata, true, http.MethodGet)
+		s.handleFuncRouterAndVerifyClient(r, fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA, http.MethodGet)
+		s.handleFuncRouterAndVerifyClient(r, fmt.Sprintf("/%s/image", root), s.ScanImage, http.MethodPost)
+		s.handleFuncRouterAndVerifyClient(r, fmt.Sprintf("/%s/vulndefs/metadata", root), s.GetVulnDefsMetadata, http.MethodGet)
 
-		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.wrapHandlerFuncWithLicenseCheck(s.GetResultsByImage, true)).Methods(http.MethodGet)
+		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.wrapHandlerToVerifyPeerCertificates(s.GetResultsByImage)).Methods(http.MethodGet)
 	}
 
 	var tlsConfig *tls.Config
