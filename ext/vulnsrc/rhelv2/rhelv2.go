@@ -21,7 +21,13 @@ import (
 )
 
 // PulpManifest is the url for the Red Hat OVAL pulp repository.
-const PulpManifest = `https://www.redhat.com/security/data/oval/v2/PULP_MANIFEST`
+const (
+	// PulpManifest is the url for the Red Hat OVAL pulp repository.
+	PulpManifest = `https://www.redhat.com/security/data/oval/v2/PULP_MANIFEST`
+
+	// Repo2CPEMappingURL is default URL with a mapping file provided by Red Hat
+	Repo2CPEMappingURL = "https://www.redhat.com/security/data/metrics/repository-to-cpe.json"
+)
 
 var (
 	u, _ = url.Parse(PulpManifest)
@@ -36,6 +42,10 @@ var (
 )
 
 func UpdateV2(outputDir string) (int, error) {
+	if err := updateRepoToCPE(outputDir); err != nil {
+		return 0, err
+	}
+
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
 	if err != nil {
 		return 0, err
@@ -61,9 +71,9 @@ func UpdateV2(outputDir string) (int, error) {
 		return 0, err
 	}
 
-	rhelV2Dir := filepath.Join(outputDir, vulndump.RHELv2DirName)
+	rhelV2Dir := filepath.Join(outputDir, vulndump.RHELv2DirName, vulndump.RHELv2VulnsSubDirName)
 	if err := os.MkdirAll(rhelV2Dir, 0755); err != nil {
-		return 0, errors.Wrapf(err, "creating subdir for %s", vulndump.RHELv2DirName)
+		return 0, errors.Wrapf(err, "creating subdir for %s", vulndump.RHELv2VulnsSubDirName)
 	}
 
 	var wg sync.WaitGroup
@@ -159,4 +169,43 @@ func UpdateV2(outputDir string) (int, error) {
 	}
 
 	return nRHELv2Vulns, errorList.ToError()
+}
+
+func updateRepoToCPE(outputDir string) error {
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, Repo2CPEMappingURL, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer utils.IgnoreError(resp.Body.Close)
+
+	switch resp.StatusCode {
+	case http.StatusOK:
+		// break
+	default:
+		return errors.Errorf("received status code %q querying mapping url", resp.StatusCode)
+	}
+
+	var mapping vulndump.RHELv2MappingFile
+	err = json.NewDecoder(resp.Body).Decode(&mapping)
+	if err != nil {
+		return errors.Wrap(err, "failed to decode mapping file")
+	}
+
+	rhelV2Dir := filepath.Join(outputDir, vulndump.RHELv2DirName)
+	if err := os.MkdirAll(rhelV2Dir, 0755); err != nil {
+		return errors.Wrapf(err, "creating subdir for %s", vulndump.RHELv2DirName)
+	}
+
+	outF, err := os.Create(filepath.Join(rhelV2Dir, vulndump.RHELv2CPERepoName))
+	if err != nil {
+		return errors.Wrapf(err, "failed to create file %s", vulndump.RHELv2CPERepoName)
+	}
+	defer utils.IgnoreError(outF.Close)
+
+	return json.NewEncoder(outF).Encode(&mapping)
 }
