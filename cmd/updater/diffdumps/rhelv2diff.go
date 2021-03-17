@@ -16,7 +16,7 @@ import (
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
-func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF, headF *zip.File) error {
+func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF, headF *zip.File, rhelExists bool) error {
 	reader, err := headF.Open()
 	if err != nil {
 		return errors.Wrap(err, "opening file")
@@ -29,7 +29,8 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 	}
 
 	// If the head file is not newer than the base dump, then skip.
-	if !baseLastModifiedTime.Before(rhelv2.LastModified) {
+	// Skip this check if the base dump does not even contain RHELv2 files.
+	if !rhelExists && !baseLastModifiedTime.Before(rhelv2.LastModified) {
 		log.Infof("RHELv2 feed %q not updated since base dump", headF.Name)
 		return nil
 	}
@@ -50,7 +51,8 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 	// If the head file is not newer than the base file, then skip.
 	// Not exactly possible since the base file must be older than the base dump as a whole,
 	// but doesn't hurt to sanity check.
-	if !rhelv2.LastModified.After(baseRHELv2.LastModified) {
+	// Skip this check if the base dump does not even contain RHELv2 files.
+	if !rhelExists && !rhelv2.LastModified.After(baseRHELv2.LastModified) {
 		log.Infof("RHELv2 feed %q not updated since base file", headF.Name)
 		return nil
 	}
@@ -106,6 +108,12 @@ func generateRHELv2VulnsDiff(outputDir string, baseLastModifiedTime time.Time, b
 		}
 	}
 
+	var rhelExists bool
+	// No RHELv2 files in base.
+	if len(baseFiles) > 0 {
+		rhelExists = true
+	}
+
 	for _, headF := range headZipR.File {
 		name := headF.Name
 		// Only look at JSON files in the nvd/ folder.
@@ -113,7 +121,7 @@ func generateRHELv2VulnsDiff(outputDir string, baseLastModifiedTime time.Time, b
 			continue
 		}
 
-		if err := generateRHELv2Diff(rhelv2SubDir, baseLastModifiedTime, baseFiles[name], headF); err != nil {
+		if err := generateRHELv2Diff(rhelv2SubDir, baseLastModifiedTime, baseFiles[name], headF, rhelExists); err != nil {
 			return errors.Wrapf(err, "generating RHELv2 diff for file %q", headF.Name)
 		}
 	}
