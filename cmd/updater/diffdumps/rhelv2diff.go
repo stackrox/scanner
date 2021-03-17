@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -95,15 +96,16 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 }
 
 func generateRHELv2VulnsDiff(outputDir string, baseLastModifiedTime time.Time, baseZipR, headZipR *zip.ReadCloser) error {
-	rhelv2SubDir := filepath.Join(outputDir, vulndump.RHELv2DirName)
-	if err := os.MkdirAll(rhelv2SubDir, 0755); err != nil {
+	rhelv2VulnsSubDir := filepath.Join(outputDir, vulndump.RHELv2DirName, vulndump.RHELv2VulnsSubDirName)
+	if err := os.MkdirAll(rhelv2VulnsSubDir, 0755); err != nil {
 		return errors.Wrap(err, "creating subdir for RHEL v2")
 	}
 
+	vulnsDir := filepath.Join(vulndump.RHELv2DirName, vulndump.RHELv2VulnsSubDirName)
 	baseFiles := make(map[string]*zip.File)
 	for _, baseF := range baseZipR.File {
 		name := baseF.Name
-		if filepath.Dir(name) == vulndump.RHELv2DirName && filepath.Ext(name) == ".json" {
+		if filepath.Dir(name) == vulnsDir && filepath.Ext(name) == ".json" {
 			baseFiles[name] = baseF
 		}
 	}
@@ -114,16 +116,45 @@ func generateRHELv2VulnsDiff(outputDir string, baseLastModifiedTime time.Time, b
 		rhelExists = true
 	}
 
+	repoToCPEFile := filepath.Join(vulndump.RHELv2DirName, vulndump.RHELv2CPERepoName)
 	for _, headF := range headZipR.File {
 		name := headF.Name
-		// Only look at JSON files in the nvd/ folder.
-		if filepath.Dir(name) != vulndump.RHELv2DirName || filepath.Ext(name) != ".json" {
+
+		// repo to cpe JSON
+		if name == repoToCPEFile {
+			if err := generateRHELv2RepoToCPE(filepath.Join(outputDir, repoToCPEFile), headF); err != nil {
+				return errors.Wrapf(err, "generating %s", vulndump.RHELv2CPERepoName)
+			}
+		}
+
+		// Only look at JSON files in the vulns/ folder.
+		if filepath.Dir(name) != vulnsDir || filepath.Ext(name) != ".json" {
 			continue
 		}
 
-		if err := generateRHELv2Diff(rhelv2SubDir, baseLastModifiedTime, baseFiles[name], headF, rhelExists); err != nil {
+		if err := generateRHELv2Diff(rhelv2VulnsSubDir, baseLastModifiedTime, baseFiles[name], headF, rhelExists); err != nil {
 			return errors.Wrapf(err, "generating RHELv2 diff for file %q", headF.Name)
 		}
+	}
+
+	return nil
+}
+
+func generateRHELv2RepoToCPE(fileName string, file *zip.File) error {
+	reader, err := file.Open()
+	if err != nil {
+		return errors.Wrap(err, "opening file")
+	}
+	defer utils.IgnoreError(reader.Close)
+
+	outF, err := os.Create(fileName)
+	if err != nil {
+		return errors.Wrap(err, "creating output file")
+	}
+	defer utils.IgnoreError(outF.Close)
+
+	if _, err := io.Copy(outF, reader); err != nil {
+		return errors.Wrap(err, "copying file contents")
 	}
 
 	return nil
