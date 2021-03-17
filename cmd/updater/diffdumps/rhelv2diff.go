@@ -76,7 +76,7 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 		}
 	}
 
-	log.Infof("Diffed RHELv2 file %s; after filtering, %d/%d vulns are in the diff", headF.Name, len(filtered), len(baseRHELv2.Vulns))
+	log.Infof("Diffed RHELv2 file %s; after filtering, %d/%d vulns are in the diff", headF.Name, len(filtered), len(rhelv2.Vulns))
 
 	outF, err := os.Create(filepath.Join(outputDir, filepath.Base(headF.Name)))
 	if err != nil {

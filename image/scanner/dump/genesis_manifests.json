@@ -33,7 +33,8 @@
       "diffLocation": "gs://definitions.stackrox.io/56f04dff-7fac-43d5-b042-b17813929c14/diff.zip",
       "config": {
         "ignoreKubernetesVulns": true,
-        "skipUbuntuLinuxKernelVulns": true
+        "skipUbuntuLinuxKernelVulns": true,
+        "skipRHELv2Vulns": true
       }
     },
     {
@@ -52,7 +53,8 @@
       "diffLocation": "gs://definitions.stackrox.io/e500a8ae-fed1-4e21-b482-3680f093d4db/diff.zip",
       "config": {
         "ignoreKubernetesVulns": true,
-        "skipUbuntuLinuxKernelVulns": true
+        "skipUbuntuLinuxKernelVulns": true,
+        "skipRHELv2Vulns": true
       }
     },
     {
