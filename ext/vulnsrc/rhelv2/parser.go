@@ -44,6 +44,9 @@ func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error
 		}
 
 		var cvss3, cvss2 database.CVSS
+		// For CVEs, there will only be 1 element in this slice.
+		// For RHSAs, RHBAs, etc, there will typically be 1 or more.
+		// As we have done in the past, we will take the maximum score.
 		for _, cve := range def.Advisory.Cves {
 			if cve.Cvss3 != "" {
 				scoreStr, vector := stringutils.Split2(cve.Cvss3, "/")
