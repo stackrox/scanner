@@ -27,19 +27,19 @@ const (
 )
 
 var rhel6Dist = &database.Distribution{
-	VersionID:  "6",
-	DID:        "rhel",
-	CPE:        cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:6"),
+	VersionID: "6",
+	DID:       "rhel",
+	CPE:       cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:6"),
 }
 var rhel7Dist = &database.Distribution{
-	VersionID:  "7",
-	DID:        "rhel",
-	CPE:        cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:7"),
+	VersionID: "7",
+	DID:       "rhel",
+	CPE:       cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:7"),
 }
 var rhel8Dist = &database.Distribution{
-	VersionID:  "8",
-	DID:        "rhel",
-	CPE:        cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:8"),
+	VersionID: "8",
+	DID:       "rhel",
+	CPE:       cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:8"),
 }
 
 func releaseToDist(r Release) *database.Distribution {

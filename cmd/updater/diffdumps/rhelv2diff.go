@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -163,24 +164,28 @@ func generateRHELv2RepoToCPE(fileName string, file *zip.File) error {
 func md5Vuln(v *database.RHELv2Vulnerability) []byte {
 	var b bytes.Buffer
 	b.WriteString(v.Name)
+	if v.Distribution != nil {
+		b.WriteString(v.Distribution.DID)
+		b.WriteString(v.Distribution.VersionID)
+		b.WriteString(v.Distribution.CPE.BindFS())
+	}
 	b.WriteString(v.Description)
 	b.WriteString(v.Issued.String())
 	b.WriteString(v.Links)
 	b.WriteString(v.Severity)
+	b.WriteString(fmt.Sprintf("%.1f", v.CVSSv3.Score))
+	b.WriteString(v.CVSSv3.Vector)
+	b.WriteString(fmt.Sprintf("%.1f", v.CVSSv2.Score))
+	b.WriteString(v.CVSSv2.Vector)
+	for _, cpe := range v.CPEs {
+		b.WriteString(cpe.BindFS())
+	}
 	if v.Package != nil {
 		b.WriteString(v.Package.Name)
 		b.WriteString(v.Package.Version)
+		b.WriteString(v.Package.Kind)
 		b.WriteString(v.Package.Module)
 		b.WriteString(v.Package.Arch)
-		b.WriteString(v.Package.Kind)
-	}
-	if v.Distribution != nil {
-		b.WriteString(v.Distribution.DID)
-		b.WriteString(v.Distribution.Name)
-		b.WriteString(v.Distribution.Version)
-		b.WriteString(v.Distribution.VersionID)
-		b.WriteString(v.Distribution.CPE.BindFS())
-		b.WriteString(v.Distribution.PrettyName)
 	}
 	b.WriteString(v.ArchOperation.String())
 	b.WriteString(v.FixedInVersion)

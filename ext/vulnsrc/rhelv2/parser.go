@@ -3,13 +3,13 @@ package rhelv2
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/stackrox/rox/pkg/stringutils"
 	"io"
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/quay/goval-parser/oval"
+	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/vulnsrc/rhelv2/ovalutil"
 	"github.com/stackrox/scanner/pkg/cpe"
@@ -47,7 +47,7 @@ func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error
 		for _, cve := range def.Advisory.Cves {
 			if cve.Cvss3 != "" {
 				scoreStr, vector := stringutils.Split2(cve.Cvss3, "/")
-				score, err :=  strconv.ParseFloat(scoreStr, 64)
+				score, err := strconv.ParseFloat(scoreStr, 64)
 				if err != nil {
 					return nil, errors.Wrapf(err, "Unable to parse CVSS3 for vuln %s: %s", def.Title, scoreStr)
 				}
@@ -59,7 +59,7 @@ func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error
 
 			if cve.Cvss2 != "" {
 				scoreStr, vector := stringutils.Split2(cve.Cvss2, "/")
-				score, err :=  strconv.ParseFloat(scoreStr, 64)
+				score, err := strconv.ParseFloat(scoreStr, 64)
 				if err != nil {
 					return nil, errors.Wrapf(err, "Unable to parse CVSS2 for vuln %s: %s", def.Title, scoreStr)
 				}
