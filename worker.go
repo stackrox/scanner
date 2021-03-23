@@ -122,7 +122,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 	// Analyze the content.
 	var languageComponents []*component.Component
 	var removedFiles []string
-	layer.Namespace, layer.Features, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
+	layer.Namespace, layer.Distroless, layer.Features, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 	// Analyze the content.
 	var languageComponents []*component.Component
 	var removedComponents []string
-	layer.Namespace, layer.Features, languageComponents, removedComponents, err = detectContent(imageFormat, name, path, headers, layer.Parent)
+	layer.Namespace, layer.Distroless, layer.Features, languageComponents, removedComponents, err = detectContent(imageFormat, name, path, headers, layer.Parent)
 	if err != nil {
 		return err
 	}
@@ -166,20 +166,22 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedComponents)
 }
 
-func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, []*component.Component, []string, error) {
+func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, []*component.Component, []string, error) {
 	namespace := DetectNamespace(name, files, parent)
+
+	distroless := isDistroless(files) || (parent != nil && parent.Distroless)
 
 	// Detect features.
 	featureVersions, err := detectFeatureVersions(name, files, namespace, parent)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, distroless, nil, nil, nil, err
 	}
 	if len(featureVersions) > 0 {
 		log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
 	}
 
 	if !env.LanguageVulns.Enabled() {
-		return namespace, featureVersions, nil, nil, err
+		return namespace, distroless, featureVersions, nil, nil, err
 	}
 	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())
 	if err != nil {
@@ -206,25 +208,30 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		}
 	}
 
-	return namespace, featureVersions, allComponents, removedFiles, err
+	return namespace, distroless, featureVersions, allComponents, removedFiles, err
 }
 
-func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, []*component.Component, []string, error) {
+func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, []*component.Component, []string, error) {
 	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.SingletonMatcher())
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, false, nil, nil, nil, err
 	}
 
 	return detectFromFiles(files, name, parent)
 }
 
+func isDistroless(filesMap tarutil.FilesMap) bool {
+	_, ok := filesMap["var/lib/dpkg/status.d/"]
+	return ok
+}
+
 // detectContent downloads a layer's archive and extracts its Namespace and
 // Features.
-func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, []*component.Component, []string, error) {
+func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, []*component.Component, []string, error) {
 	files, err := imagefmt.Extract(imageFormat, path, headers, requiredfilenames.SingletonMatcher())
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{logLayerName: name, "path": cleanURL(path)}).Error("failed to extract data from path")
-		return nil, nil, nil, nil, err
+		return nil, false, nil, nil, nil, err
 	}
 
 	return detectFromFiles(files, name, parent)

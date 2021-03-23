@@ -31,6 +31,7 @@ type Layer struct {
 	EngineVersion int
 	Parent        *Layer
 	Namespace     *Namespace
+	Distroless    bool
 	Features      []FeatureVersion
 }
 
