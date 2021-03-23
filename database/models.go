@@ -119,10 +119,17 @@ type RHELv2Vulnerability struct {
 	Issued         time.Time     `json:"issued"`
 	Links          string        `json:"links"`
 	Severity       string        `json:"severity"`
+	CVSSv3         CVSS          `json:"cvssv3"`
+	CVSSv2         CVSS          `json:"cvssv2"`
 	CPEs           []cpe.WFN     `json:"cpes"`
 	Package        *Package      `json:"package"`
 	FixedInVersion string        `json:"fixed_in_version"`
 	ArchOperation  archop.ArchOp `json:"arch_op,omitempty"`
+}
+
+type CVSS struct {
+	Score  float64 `json:"score"`
+	Vector string  `json:"vector"`
 }
 
 // Distribution is the accompanying system context of a package. this
@@ -136,23 +143,12 @@ type Distribution struct {
 	// A lower-case string (no spaces or other characters outside of 0–9, a–z, ".", "_" and "-") identifying the operating system, excluding any version information
 	// and suitable for processing by scripts or usage in generated filenames. Example: "DID=fedora" or "DID=debian".
 	DID string `json:"did"`
-	// A string identifying the operating system.
-	// example: "Ubuntu"
-	Name string `json:"name"`
-	// A string identifying the operating system version, excluding any OS name information,
-	// possibly including a release code name, and suitable for presentation to the user.
-	// example: "16.04.6 LTS (Xenial Xerus)"
-	Version string `json:"version"`
 	// A lower-case string (mostly numeric, no spaces or other characters outside of 0–9, a–z, ".", "_" and "-")
 	// identifying the operating system version, excluding any OS name information or release code name,
 	// example: "16.04"
 	VersionID string `json:"version_id"`
 	// Optional common platform enumeration identifier
 	CPE cpe.WFN `json:"cpe"`
-	// A pretty operating system name in a format suitable for presentation to the user.
-	// May or may not contain a release code name or OS version of some kind, as suitable. If not set, defaults to "PRETTY_NAME="Linux"".
-	// example: "PRETTY_NAME="Fedora 17 (Beefy Miracle)"".
-	PrettyName string `json:"pretty_name"`
 }
 
 type Package struct {
@@ -297,4 +293,25 @@ func (r *Range) Contains(v *Version) bool {
 	}
 	// Lower <= v && Upper > v
 	return r.Lower.Compare(v) != 1 && r.Upper.Compare(v) == 1
+}
+
+// Repository is a package repository
+type Repository struct {
+	ID   string  `json:"id,omitempty"`
+	Name string  `json:"name,omitempty"`
+	Key  string  `json:"key,omitempty"`
+	URI  string  `json:"uri,omitempty"`
+	CPE  cpe.WFN `json:"cpe,omitempty"`
+}
+
+// ContentManifest structure is based on file provided by OSBS
+// The struct stores content metadata about the image
+type ContentManifest struct {
+	ContentSets []string         `json:"content_sets"`
+	Metadata    ManifestMetadata `json:"metadata"`
+}
+
+// ManifestMetadata struct holds additional metadata about image
+type ManifestMetadata struct {
+	ImageLayerIndex int `json:"image_layer_index"`
 }

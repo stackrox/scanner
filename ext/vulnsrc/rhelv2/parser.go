@@ -3,7 +3,10 @@ package rhelv2
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/pkg/errors"
+	"github.com/stackrox/rox/pkg/stringutils"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/quay/goval-parser/oval"
@@ -40,12 +43,41 @@ func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error
 			return nil, nil
 		}
 
+		var cvss3, cvss2 database.CVSS
+		for _, cve := range def.Advisory.Cves {
+			if cve.Cvss3 != "" {
+				scoreStr, vector := stringutils.Split2(cve.Cvss3, "/")
+				score, err :=  strconv.ParseFloat(scoreStr, 64)
+				if err != nil {
+					return nil, errors.Wrapf(err, "Unable to parse CVSS3 for vuln %s: %s", def.Title, scoreStr)
+				}
+				if score > cvss3.Score {
+					cvss3.Score = score
+					cvss3.Vector = vector
+				}
+			}
+
+			if cve.Cvss2 != "" {
+				scoreStr, vector := stringutils.Split2(cve.Cvss2, "/")
+				score, err :=  strconv.ParseFloat(scoreStr, 64)
+				if err != nil {
+					return nil, errors.Wrapf(err, "Unable to parse CVSS2 for vuln %s: %s", def.Title, scoreStr)
+				}
+				if score > cvss2.Score {
+					cvss2.Score = score
+					cvss2.Vector = vector
+				}
+			}
+		}
+
 		return &database.RHELv2Vulnerability{
 			Name:        def.Title,
 			Description: def.Description,
 			Issued:      def.Advisory.Issued.Date,
 			Links:       links(def),
 			Severity:    def.Advisory.Severity,
+			CVSSv3:      cvss3,
+			CVSSv2:      cvss2,
 			CPEs:        cpes,
 			// each updater is configured to parse a rhel release
 			// specific xml database. we'll use the updater's release

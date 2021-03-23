@@ -26,63 +26,24 @@ const (
 	RHEL8 Release = 8
 )
 
-var rhel3Dist = &database.Distribution{
-	Name:       "Red Hat Enterprise Linux Server",
-	Version:    "3",
-	VersionID:  "3",
-	DID:        "rhel",
-	PrettyName: "Red Hat Enterprise Linux Server 3",
-	CPE:        cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:3"),
-}
-var rhel4Dist = &database.Distribution{
-	Name:       "Red Hat Enterprise Linux Server",
-	Version:    "4",
-	VersionID:  "4",
-	DID:        "rhel",
-	PrettyName: "Red Hat Enterprise Linux Server 4",
-	CPE:        cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:4"),
-}
-var rhel5Dist = &database.Distribution{
-	Name:       "Red Hat Enterprise Linux Server",
-	Version:    "5",
-	VersionID:  "5",
-	DID:        "rhel",
-	PrettyName: "Red Hat Enterprise Linux Server 5",
-	CPE:        cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:5"),
-}
 var rhel6Dist = &database.Distribution{
-	Name:       "Red Hat Enterprise Linux Server",
-	Version:    "6",
 	VersionID:  "6",
 	DID:        "rhel",
-	PrettyName: "Red Hat Enterprise Linux Server 6",
 	CPE:        cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:6"),
 }
 var rhel7Dist = &database.Distribution{
-	Name:       "Red Hat Enterprise Linux Server",
-	Version:    "7",
 	VersionID:  "7",
 	DID:        "rhel",
-	PrettyName: "Red Hat Enterprise Linux Server 7",
 	CPE:        cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:7"),
 }
 var rhel8Dist = &database.Distribution{
-	Name:       "Red Hat Enterprise Linux Server",
-	Version:    "8",
 	VersionID:  "8",
 	DID:        "rhel",
-	PrettyName: "Red Hat Enterprise Linux Server 8",
 	CPE:        cpe.MustUnbind("cpe:/o:redhat:enterprise_linux:8"),
 }
 
 func releaseToDist(r Release) *database.Distribution {
 	switch r {
-	case RHEL3:
-		return rhel3Dist
-	case RHEL4:
-		return rhel4Dist
-	case RHEL5:
-		return rhel5Dist
 	case RHEL6:
 		return rhel6Dist
 	case RHEL7:
