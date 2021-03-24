@@ -6,7 +6,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"io/ioutil"
+	"path/filepath"
 	"sync/atomic"
+)
+
+const (
+	fileName = "repository-to-cpe.json"
 )
 
 // MappingFile is a data struct for mapping file between repositories and CPEs
@@ -30,7 +35,8 @@ func NewMapping() *Mapping {
 	return m
 }
 
-func (m *Mapping) Load(path string) error {
+func (m *Mapping) Load(dir string) error {
+	path := filepath.Join(dir, fileName)
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return errors.Wrapf(err, "reading mapping file at %s", path)
