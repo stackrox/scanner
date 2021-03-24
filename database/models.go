@@ -16,6 +16,7 @@ package database
 
 import (
 	"bytes"
+	"crypto/md5"
 	"database/sql/driver"
 	"encoding/json"
 	"strconv"
@@ -119,17 +120,45 @@ type RHELv2Vulnerability struct {
 	Issued         time.Time     `json:"issued"`
 	Links          string        `json:"links"`
 	Severity       string        `json:"severity"`
-	CVSSv3         CVSS          `json:"cvssv3"`
-	CVSSv2         CVSS          `json:"cvssv2"`
+	CVSSv3         string        `json:"cvssv3"`
+	CVSSv2         string        `json:"cvssv2"`
 	CPEs           []cpe.WFN     `json:"cpes"`
 	Package        *Package      `json:"package"`
 	FixedInVersion string        `json:"fixed_in_version"`
 	ArchOperation  archop.ArchOp `json:"arch_op,omitempty"`
 }
 
-type CVSS struct {
-	Score  float64 `json:"score"`
-	Vector string  `json:"vector"`
+// MD5Vuln creates an md5 hash from the members of the passed-in Vulnerability,
+// giving us a stable, context-free identifier for this revision of the
+// Vulnerability.
+func MD5Vuln(v *RHELv2Vulnerability) []byte {
+	var b bytes.Buffer
+	b.WriteString(v.Name)
+	if v.Distribution != nil {
+		b.WriteString(v.Distribution.DID)
+		b.WriteString(v.Distribution.VersionID)
+		b.WriteString(v.Distribution.CPE.BindFS())
+	}
+	b.WriteString(v.Description)
+	b.WriteString(v.Issued.String())
+	b.WriteString(v.Links)
+	b.WriteString(v.Severity)
+	b.WriteString(v.CVSSv3)
+	b.WriteString(v.CVSSv2)
+	for _, cpe := range v.CPEs {
+		b.WriteString(cpe.BindFS())
+	}
+	if v.Package != nil {
+		b.WriteString(v.Package.Name)
+		b.WriteString(v.Package.Version)
+		b.WriteString(v.Package.Kind)
+		b.WriteString(v.Package.Module)
+		b.WriteString(v.Package.Arch)
+	}
+	b.WriteString(v.ArchOperation.String())
+	b.WriteString(v.FixedInVersion)
+	s := md5.Sum(b.Bytes())
+	return s[:]
 }
 
 // Distribution is the accompanying system context of a package. this
@@ -161,7 +190,7 @@ type Package struct {
 	Version string `json:"version"`
 	// type of package. currently expectations are binary or source
 	Kind string `json:"kind,omitempty"`
-	// if type is a binary package a source package maybe present which built this binary package.
+	// if type is a binary package a source package, which built this binary package, may be present.
 	// must be a pointer to support recursive type:
 	Source *Package `json:"source,omitempty"`
 	// Module and stream which this package is part of
@@ -169,6 +198,13 @@ type Package struct {
 	// Package architecture
 	Arch string `json:"arch,omitempty"`
 }
+
+const (
+	// BINARY represents a package binary.
+	BINARY = "binary"
+	// SOURCE represents a source package.
+	SOURCE = "source"
+)
 
 // Version describes a revision of some sort that is ordered correctly within
 // its "Kind".

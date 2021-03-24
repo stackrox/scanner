@@ -43,7 +43,10 @@ func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error
 			return nil, nil
 		}
 
-		var cvss3, cvss2 database.CVSS
+		var cvss3, cvss2 struct {
+			score  float64
+			vector string
+		}
 		// For CVEs, there will only be 1 element in this slice.
 		// For RHSAs, RHBAs, etc, there will typically be 1 or more.
 		// As we have done in the past, we will take the maximum score.
@@ -54,9 +57,9 @@ func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error
 				if err != nil {
 					return nil, errors.Wrapf(err, "Unable to parse CVSS3 for vuln %s: %s", def.Title, scoreStr)
 				}
-				if score > cvss3.Score {
-					cvss3.Score = score
-					cvss3.Vector = vector
+				if score > cvss3.score {
+					cvss3.score = score
+					cvss3.vector = vector
 				}
 			}
 
@@ -66,9 +69,9 @@ func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error
 				if err != nil {
 					return nil, errors.Wrapf(err, "Unable to parse CVSS2 for vuln %s: %s", def.Title, scoreStr)
 				}
-				if score > cvss2.Score {
-					cvss2.Score = score
-					cvss2.Vector = vector
+				if score > cvss2.score {
+					cvss2.score = score
+					cvss2.vector = vector
 				}
 			}
 		}
@@ -79,8 +82,8 @@ func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error
 			Issued:      def.Advisory.Issued.Date,
 			Links:       links(def),
 			Severity:    def.Advisory.Severity,
-			CVSSv3:      cvss3,
-			CVSSv2:      cvss2,
+			CVSSv3:      fmt.Sprintf("%.1f/%s", cvss3.score, cvss3.vector),
+			CVSSv2:      fmt.Sprintf("%.1f/%s", cvss2.score, cvss2.vector),
 			CPEs:        cpes,
 			// each updater is configured to parse a rhel release
 			// specific xml database. we'll use the updater's release
@@ -97,7 +100,7 @@ func parse(release Release, r io.Reader) ([]*database.RHELv2Vulnerability, error
 
 // links joins all the links in the cve definition into a single string.
 func links(definition oval.Definition) string {
-	ls := []string{}
+	var ls []string
 
 	for _, ref := range definition.References {
 		ls = append(ls, ref.RefURL)

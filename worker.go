@@ -169,6 +169,16 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, []*component.Component, []string, error) {
 	namespace := DetectNamespace(name, files, parent)
 
+	if namespace != nil && strings.HasPrefix(namespace.Name, "rhel") {
+		// This is a RHEL-based image that must be scanned in a certified manner.
+		// Use the RHELv2 scanner instead.
+		//packages, cpes, err := rhelv2.ListFeatures(files)
+		//if err != nil {
+		//	return nil, nil, nil, nil, err
+		//}
+		// TODO
+	}
+
 	// Detect features.
 	featureVersions, err := detectFeatureVersions(name, files, namespace, parent)
 	if err != nil {

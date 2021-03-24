@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurefmt/rhelv2"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -94,6 +95,7 @@ func RequiredFilenames() (files []string) {
 	for _, lister := range listers {
 		files = append(files, lister.RequiredFilenames()...)
 	}
+	files = append(files, rhelv2.RequiredFilenames()...)
 
 	return
 }
