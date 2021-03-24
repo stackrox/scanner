@@ -3,6 +3,7 @@ package diffdumps
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/md5"
 	"encoding/json"
 	"io"
 	"os"
@@ -71,7 +72,7 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 		matchingBaseVuln, found := baseVulnsMap[headVuln.Name]
 		// If the vuln was not in the base, or not equal to what was in the base,
 		// add it. Else, skip.
-		if !found || !bytes.Equal(database.MD5Vuln(matchingBaseVuln), database.MD5Vuln(headVuln)) {
+		if !found || !bytes.Equal(md5Vuln(matchingBaseVuln), md5Vuln(headVuln)) {
 			filtered = append(filtered, headVuln)
 		}
 	}
@@ -154,4 +155,37 @@ func generateRHELv2RepoToCPE(fileName string, file *zip.File) error {
 	}
 
 	return nil
+}
+
+// md5Vuln creates an md5 hash from the members of the passed-in Vulnerability,
+// giving us a stable, context-free identifier for this revision of the
+// Vulnerability.
+func md5Vuln(v *database.RHELv2Vulnerability) []byte {
+	var b bytes.Buffer
+	b.WriteString(v.Name)
+	if v.Distribution != nil {
+		b.WriteString(v.Distribution.DID)
+		b.WriteString(v.Distribution.VersionID)
+		b.WriteString(v.Distribution.CPE.BindFS())
+	}
+	b.WriteString(v.Description)
+	b.WriteString(v.Issued.String())
+	b.WriteString(v.Links)
+	b.WriteString(v.Severity)
+	b.WriteString(v.CVSSv3)
+	b.WriteString(v.CVSSv2)
+	for _, cpe := range v.CPEs {
+		b.WriteString(cpe.BindFS())
+	}
+	if v.Package != nil {
+		b.WriteString(v.Package.Name)
+		b.WriteString(v.Package.Version)
+		b.WriteString(v.Package.Kind)
+		b.WriteString(v.Package.Module)
+		b.WriteString(v.Package.Arch)
+	}
+	b.WriteString(v.ArchOperation.String())
+	b.WriteString(v.FixedInVersion)
+	s := md5.Sum(b.Bytes())
+	return s[:]
 }

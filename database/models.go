@@ -16,7 +16,6 @@ package database
 
 import (
 	"bytes"
-	"crypto/md5"
 	"database/sql/driver"
 	"encoding/json"
 	"strconv"
@@ -128,39 +127,6 @@ type RHELv2Vulnerability struct {
 	ArchOperation  archop.ArchOp `json:"arch_op,omitempty"`
 }
 
-// MD5Vuln creates an md5 hash from the members of the passed-in Vulnerability,
-// giving us a stable, context-free identifier for this revision of the
-// Vulnerability.
-func MD5Vuln(v *RHELv2Vulnerability) []byte {
-	var b bytes.Buffer
-	b.WriteString(v.Name)
-	if v.Distribution != nil {
-		b.WriteString(v.Distribution.DID)
-		b.WriteString(v.Distribution.VersionID)
-		b.WriteString(v.Distribution.CPE.BindFS())
-	}
-	b.WriteString(v.Description)
-	b.WriteString(v.Issued.String())
-	b.WriteString(v.Links)
-	b.WriteString(v.Severity)
-	b.WriteString(v.CVSSv3)
-	b.WriteString(v.CVSSv2)
-	for _, cpe := range v.CPEs {
-		b.WriteString(cpe.BindFS())
-	}
-	if v.Package != nil {
-		b.WriteString(v.Package.Name)
-		b.WriteString(v.Package.Version)
-		b.WriteString(v.Package.Kind)
-		b.WriteString(v.Package.Module)
-		b.WriteString(v.Package.Arch)
-	}
-	b.WriteString(v.ArchOperation.String())
-	b.WriteString(v.FixedInVersion)
-	s := md5.Sum(b.Bytes())
-	return s[:]
-}
-
 // Distribution is the accompanying system context of a package. this
 // information aides in CVE detection.
 //
@@ -168,7 +134,7 @@ func MD5Vuln(v *RHELv2Vulnerability) []byte {
 type Distribution struct {
 	// unique ID of this distribution. this will be created as discovered by the library
 	// and used for persistence and hash map indexes.
-	ID string `json:"id"`
+	ID string `json:"id,omitempty"`
 	// A lower-case string (no spaces or other characters outside of 0–9, a–z, ".", "_" and "-") identifying the operating system, excluding any version information
 	// and suitable for processing by scripts or usage in generated filenames. Example: "DID=fedora" or "DID=debian".
 	DID string `json:"did"`
@@ -183,7 +149,7 @@ type Distribution struct {
 type Package struct {
 	// unique ID of this package. this will be created as discovered by the library
 	// and used for persistence and hash map indexes
-	ID string `json:"id"`
+	ID string `json:"id,omitempty"`
 	// the name of the package
 	Name string `json:"name"`
 	// the version of the package
