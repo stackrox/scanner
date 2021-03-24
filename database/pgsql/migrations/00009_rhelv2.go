@@ -29,9 +29,6 @@ func init() {
 		END;
 		$$ LANGUAGE plpgsql;
 		-- Vuln is a write-once table of vulnerabilities.
-		--
-		-- Updaters should attempt to insert vulnerabilities and on success or
-		-- collision, insert a row into ou_vuln.
 		CREATE TABLE IF NOT EXISTS vuln (
 			id               BIGSERIAL PRIMARY KEY,
 			hash             BYTEA NOT NULL,
