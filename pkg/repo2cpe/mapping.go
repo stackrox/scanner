@@ -2,12 +2,13 @@ package repo2cpe
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/set"
 	"io/ioutil"
 	"path/filepath"
 	"sync/atomic"
+
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 )
 
 const (

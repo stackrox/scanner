@@ -59,8 +59,7 @@ func init() {
 		-- change query speeds when generating vulnerability reports.
 		CREATE INDEX vuln_lookup_idx on vuln (package_name, dist_id,
 											  dist_version_id, package_module,
-											  cpe, dist_arch,
-											  dist_cpe);`,
+											  cpe, dist_cpe);`,
 		}),
 	})
 }

@@ -18,11 +18,11 @@ import (
 // There's XML output, but it's all jacked up.
 const (
 	queryFmt = `%{name}\n` +
-	`%{evr}\n` +
-	`%{sourcerpm}\n` +
-	`%{RPMTAG_MODULARITYLABEL}\n` +
-	`%{ARCH}\n` +
-	`.\n`
+		`%{evr}\n` +
+		`%{sourcerpm}\n` +
+		`%{RPMTAG_MODULARITYLABEL}\n` +
+		`%{ARCH}\n` +
+		`.\n`
 
 	delim = "\n.\n"
 
@@ -201,8 +201,6 @@ func getCPEsUsingEmbeddedContentSets(files tarutil.FilesMap) ([]string, error) {
 	if err := json.Unmarshal(contents, &contentManifest); err != nil {
 		return nil, err
 	}
-
-
 
 	// TODO: Read repository-to-cpe.json file upon update, and create a global in-memory object representing it.
 	// Use that object to atomically get
