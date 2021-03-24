@@ -219,7 +219,8 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 		return err
 	}
 
-	files, err := ioutil.ReadDir(targetDir)
+	vulnDir := filepath.Join(destDir, RHELv2VulnsSubDirName)
+	files, err := ioutil.ReadDir(vulnDir)
 	if err != nil {
 		return errors.Wrap(err, "reading scratch dir for RHELv2")
 	}
@@ -229,18 +230,18 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 			continue
 		}
 
-		f, err := os.Open(filepath.Join(targetDir, file.Name()))
+		f, err := os.Open(filepath.Join(vulnDir, file.Name()))
 		if err != nil {
 			return errors.Wrapf(err, "opening file at %q", file.Name())
 		}
 		defer utils.IgnoreError(f.Close)
 
-		var vulns []*database.RHELv2Vulnerability
+		var vulns RHELv2
 		if err := json.NewDecoder(f).Decode(&vulns); err != nil {
 			return errors.Wrapf(err, "decoding %q JSON from reader", file.Name())
 		}
 
-		if err := db.InsertRHELv2Vulnerabilities(vulns); err != nil {
+		if err := db.InsertRHELv2Vulnerabilities(vulns.Vulns); err != nil {
 			return errors.Wrap(err, "inserting RHELv2 vulns into the DB")
 		}
 	}
@@ -308,14 +309,14 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 			return errors.Wrap(err, "error beginning vuln loading")
 		}
 
-		if err := loadOSVulns(zipR, db); err != nil {
-			utils.IgnoreError(end)
-			return errors.Wrap(err, "error loading OS vulns")
-		}
-
 		if err := loadRHELv2Vulns(db, zipPath, scratchDir, repoToCPE); err != nil {
 			utils.IgnoreError(end)
 			return errors.Wrap(err, "error loading RHEL vulns")
+		}
+
+		if err := loadOSVulns(zipR, db); err != nil {
+			utils.IgnoreError(end)
+			return errors.Wrap(err, "error loading OS vulns")
 		}
 
 		if err := end(); err != nil {
