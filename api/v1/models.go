@@ -29,6 +29,10 @@ import (
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
+const (
+	notFixable = "Not Fixable"
+)
+
 // These are possible package prefixes or suffixes. Package managers sometimes annotate
 // the packages with these e.g. urllib-python
 var possiblePythonPrefixesOrSuffixes = []string{
@@ -155,13 +159,13 @@ func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability
 	return vuln
 }
 
-func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) Feature {
+func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) *Feature {
 	version := dbFeatureVersion.Version
 	if version == versionfmt.MaxVersion {
 		version = "None"
 	}
 
-	return Feature{
+	return &Feature{
 		Name:          dbFeatureVersion.Feature.Name,
 		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
 		VersionFormat: stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
@@ -219,25 +223,9 @@ func addLanguageVulns(db database.Datastore, layer *Layer) {
 	var languageFeatures []Feature
 	for _, dbFeatureVersion := range languageFeatureVersions {
 		feature := featureFromDatabaseModel(dbFeatureVersion)
-
-		var allVulnsFixedBy string
-		for _, dbVuln := range dbFeatureVersion.AffectedBy {
-			vuln := VulnerabilityFromDatabaseModel(dbVuln)
-			feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
-
-			if vuln.FixedBy == "" {
-				continue
-			}
-
-			allVulnsFixedBy, err = versionfmt.GetHigherVersion(rpm.ParserName, vuln.FixedBy, allVulnsFixedBy)
-			if err != nil {
-				log.Errorf("comparing feature versions for %s: %v", feature.Name, err)
-			}
-		}
-
-		if !shouldDedupeLanguageFeature(feature, layer.Features) {
-			feature.FixedBy = allVulnsFixedBy
-			languageFeatures = append(languageFeatures, feature)
+		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
+			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, true)
+			languageFeatures = append(languageFeatures, *feature)
 		}
 	}
 	layer.Features = append(layer.Features, languageFeatures...)
@@ -281,24 +269,8 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 				}
 			}
 
-			var allVulnsFixedBy string
-			for _, dbVuln := range dbFeatureVersion.AffectedBy {
-				vuln := VulnerabilityFromDatabaseModel(dbVuln)
-				feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
-
-				if vuln.FixedBy == "" {
-					continue
-				}
-
-				var err error
-				allVulnsFixedBy, err = versionfmt.GetHigherVersion(dbFeatureVersion.Feature.Namespace.VersionFormat, vuln.FixedBy, allVulnsFixedBy)
-				if err != nil {
-					log.Errorf("comparing feature versions for %s: %v", feature.Name, err)
-				}
-			}
-
-			feature.FixedBy = allVulnsFixedBy
-			layer.Features = append(layer.Features, feature)
+			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, false)
+			layer.Features = append(layer.Features, *feature)
 		}
 		if env.LanguageVulns.Enabled() {
 			addLanguageVulns(db, &layer)
@@ -306,6 +278,37 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	}
 
 	return layer, notes, nil
+}
+
+func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, languageVulns bool) {
+	versionFormat := feature.VersionFormat
+	// For language vulns, we use rpm parser since it tries to do the right thing.
+	if languageVulns {
+		versionFormat = rpm.ParserName
+	}
+
+	allVulnsFixedBy := feature.FixedBy
+	for _, dbVuln := range dbVulns {
+		vuln := VulnerabilityFromDatabaseModel(dbVuln)
+		feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
+
+		// If at least one vulnerability is not fixable, then we mark it the component as not fixable.
+		if vuln.FixedBy == "" {
+			allVulnsFixedBy = notFixable
+			continue
+		}
+
+		if allVulnsFixedBy == notFixable {
+			continue
+		}
+
+		var err error
+		allVulnsFixedBy, err = versionfmt.GetHigherVersion(versionFormat, vuln.FixedBy, allVulnsFixedBy)
+		if err != nil {
+			log.Errorf("comparing feature versions for %s: %v", feature.Name, err)
+		}
+	}
+	feature.FixedBy = allVulnsFixedBy
 }
 
 type Namespace struct {
