@@ -33,7 +33,6 @@ func init() {
 			id               BIGSERIAL PRIMARY KEY,
 			hash             BYTEA NOT NULL,
 			name             TEXT,
-			description      TEXT,
 			issued           timestamptz,
 			links            TEXT,
 			severity         TEXT,
@@ -56,7 +55,16 @@ func init() {
 		-- change query speeds when generating vulnerability reports.
 		CREATE INDEX vuln_lookup_idx on vuln (package_name, dist_id,
 											  dist_version_id, package_module,
-											  cpe, dist_cpe);`,
+											  cpe, dist_cpe);
+
+		-- Description may be rather large.
+		-- It'd be best to save just one version of the description per vulnerability
+		-- to save space.
+		CREATE TABLE IF NOT EXISTS vuln_description (
+			name        TEXT,
+			description TEXT,
+			PRIMARY KEY (name, description)
+		);`,
 		}),
 	})
 }
