@@ -59,12 +59,15 @@ func init() {
 
 		-- Description may be rather large.
 		-- It'd be best to save just one version of the description per vulnerability
-		-- to save space.
+		-- to save space. Hashing here as descriptions may be larger than BTree indexes allow.
 		CREATE TABLE IF NOT EXISTS vuln_description (
+			id          BIGSERIAL PRIMARY KEY,
+			hash        BYTEA NOT NULL,
 			name        TEXT,
 			description TEXT,
-			PRIMARY KEY (name, description)
-		);`,
+			UNIQUE (hash)
+		);
+		CREATE INDEX vuln_description_lookup_idx on vuln_description (name);`,
 		}),
 	})
 }
