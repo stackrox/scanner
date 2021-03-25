@@ -110,7 +110,6 @@ func newVersion(str string) (version, error) {
 			return version{}, errors.New("invalid character in revision")
 		}
 	}
-
 	return v, nil
 }
 

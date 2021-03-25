@@ -140,9 +140,9 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 			{
 				Version: "7.35.0-1ubuntu2.20",
 				Feature: database.Feature{
-					Name:       "curl",
-					Namespace:  database.Namespace{
-						Name: "ubuntu:14.04",
+					Name: "curl",
+					Namespace: database.Namespace{
+						Name:          "ubuntu:14.04",
 						VersionFormat: "dpkg",
 					},
 				},
@@ -164,7 +164,7 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	}
 	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, true, true)
 	assert.NoError(t, err)
-	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].LatestFixedBy)
+	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].FixedBy)
 }
 
 func TestLatestCentOSFeatureVersion(t *testing.T) {
@@ -184,9 +184,9 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 			{
 				Version: "3.26.0-6.el8",
 				Feature: database.Feature{
-					Name:       "sqlite-libs",
-					Namespace:  database.Namespace{
-						Name: "centos:8",
+					Name: "sqlite-libs",
+					Namespace: database.Namespace{
+						Name:          "centos:8",
 						VersionFormat: "rpm",
 					},
 				},
@@ -203,11 +203,11 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 						FixedBy: "0:3.26.0-11.el8",
 					},
 					{
-						Name: "CVE-2021-1234",
+						Name:    "CVE-2021-1234",
 						FixedBy: "",
 					},
 					{
-						Name: "CVE-2021-1235",
+						Name:    "CVE-2021-1235",
 						FixedBy: "0:3.27.1-12.el8",
 					},
 					{
@@ -220,7 +220,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	}
 	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, true, true)
 	assert.NoError(t, err)
-	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].LatestFixedBy)
+	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
 }
 
 func TestLatestLanguageFeatureVersion(t *testing.T) {
@@ -243,16 +243,17 @@ func TestLatestLanguageFeatureVersion(t *testing.T) {
 	}()
 	nvdtoolscache.BoltPath = filepath.Join(dir, "temp.db")
 
+	// Language feature not deduped.
 	db := newMockDatastore()
 	db.layers["layer"] = []*component.LayerToComponents{
 		{
 			Layer: "layer",
 			Components: []*component.Component{
 				{
-					SourceType: component.JavaSourceType,
-					Name:       "struts",
-					Version:    "2.3.12",
-					Location:   "usr/local/tomcat/webapps/ROOT.war:WEB-INF/lib/struts2-core2.3.12.jar",
+					SourceType:      component.JavaSourceType,
+					Name:            "struts",
+					Version:         "2.3.12",
+					Location:        "usr/local/tomcat/webapps/ROOT.war:WEB-INF/lib/struts2-core2.3.12.jar",
 					JavaPkgMetadata: &component.JavaPkgMetadata{},
 				},
 			},
@@ -263,7 +264,12 @@ func TestLatestLanguageFeatureVersion(t *testing.T) {
 	}
 
 	addLanguageVulns(db, dbLayer)
-	assert.Equal(t, "0:3.27.1-12.el8", dbLayer.Features[0].LatestFixedBy)
+	for _, v := range dbLayer.Features {
+		for _, cve := range v.Vulnerabilities {
+			fmt.Println(cve.FixedBy)
+		}
+	}
+	assert.Equal(t, "2.3.29", dbLayer.Features[0].FixedBy)
 }
 
 func TestNotesNoLanguageVulns(t *testing.T) {

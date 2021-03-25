@@ -110,3 +110,25 @@ func Compare(format, versionA, versionB string) (int, error) {
 
 	return versionParser.Compare(versionA, versionB)
 }
+
+// GetHigherVersion returns the higher version between a and b.
+// Defaults to b on error.
+func GetHigherVersion(format, a, b string) (string, error) {
+	if a == "" && b == "" {
+		return "", nil
+	}
+	if a == "" {
+		return b, nil
+	}
+	if b == "" {
+		return a, nil
+	}
+
+	cmp, err := Compare(format, a, b)
+	if err != nil || cmp < 0 { // a < b, so return b.
+		return b, err
+	}
+
+	// a >= b, so return a.
+	return a, nil
+}

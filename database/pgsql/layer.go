@@ -203,11 +203,11 @@ func loadAffectedBy(tx *sql.Tx, featureVersions []database.FeatureVersion) error
 	defer rows.Close()
 
 	vulnerabilities := make(map[int][]database.Vulnerability, len(featureVersions))
-	var featureversionID int
+	var featureVersionID int
 	for rows.Next() {
 		var vulnerability database.Vulnerability
 		err := rows.Scan(
-			&featureversionID,
+			&featureVersionID,
 			&vulnerability.ID,
 			&vulnerability.Name,
 			&vulnerability.Description,
@@ -221,7 +221,7 @@ func loadAffectedBy(tx *sql.Tx, featureVersions []database.FeatureVersion) error
 		if err != nil {
 			return handleError("searchFeatureVersionVulnerability.Scan()", err)
 		}
-		vulnerabilities[featureversionID] = append(vulnerabilities[featureversionID], vulnerability)
+		vulnerabilities[featureVersionID] = append(vulnerabilities[featureVersionID], vulnerability)
 	}
 	if err = rows.Err(); err != nil {
 		return handleError("searchFeatureVersionVulnerability.Rows()", err)

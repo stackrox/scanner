@@ -184,3 +184,47 @@ func TestParseAndCompare(t *testing.T) {
 		assert.Equal(t, -c.expected, cmp, "%s vs. %s, = %d, expected %d", c.v2, c.v1, cmp, -c.expected)
 	}
 }
+
+// Following test cases are copied from https://github.com/facebookincubator/nvdtools/blob/master/cvefeed/nvd/smartvercmp_test.go
+func TestLangVulnCompare(t *testing.T) {
+	cases := []struct {
+		v1, v2 string
+		ret    int
+	}{
+		{"5", "8", LESS},
+		{"15", "3", GREATER},
+		{"4a", "4c", LESS},
+		{"1.0", "1.0", EQUAL},
+		{"1.0.1", "1.0", GREATER},
+		{"1.0.14", "1.0.4", GREATER},
+		{"95SE", "98SP1", LESS},
+		{"16.0.0", "3.2.7", GREATER},
+		{"10.23", "10.21", GREATER},
+		{"64.0", "3.6.24", GREATER},
+		{"5-1.15.2", "5-1.16", LESS},
+		{"5-appl_1.16.1", "5-1.0.1", LESS},
+		{"5-1.16", "5_1.0.6", LESS}, // SmartCompare treats 5-1.16 > 5_1.0.6.
+		{"5-6", "5-16", LESS},
+		{"5-a1", "5a1", LESS},
+		{"5-a1", "5.a1", LESS}, // SmartCompare treats them equal.
+		{"1.4", "1.02", GREATER},
+		{"5.0", "08.0", LESS},
+		{"10.0", "1.0", GREATER},
+		{"0.14.1", "0.14.1+dfsg1-4", LESS},
+	}
+
+	var (
+		p   parser
+		cmp int
+		err error
+	)
+	for _, c := range cases {
+		cmp, err = p.Compare(c.v1, c.v2)
+		assert.Nil(t, err)
+		assert.Equal(t, c.ret, cmp, "%s vs. %s, = %d, expected %d", c.v1, c.v2, cmp, c.ret)
+
+		cmp, err = p.Compare(c.v2, c.v1)
+		assert.Nil(t, err)
+		assert.Equal(t, -c.ret, cmp, "%s vs. %s, = %d, expected %d", c.v2, c.v1, cmp, -c.ret)
+	}
+}
