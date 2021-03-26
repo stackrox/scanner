@@ -1,10 +1,18 @@
 package rhelv2
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"io"
+	"io/ioutil"
+	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 
@@ -34,84 +42,83 @@ var (
 	contentManifestPattern = regexp.MustCompile(`^root/buildinfo/content_manifests/.*\.json`)
 )
 
+// ListFeatures returns the features found from the given files.
+// returns a slice of packages found via rpm and a slice of CPEs found in
+// /root/buildinfo/content_manifests.
 func ListFeatures(files tarutil.FilesMap) ([]*database.Package, []string, error) {
-	//CPEs, err := getCPEsUsingEmbeddedContentSets(files)
-	//if err != nil {
-	//	return nil, nil, err
-	//}
-	//
-	//
-	//
-	//f, hasFile := files[packages]
-	//if !hasFile {
-	//	return nil, nil, nil
-	//}
-	//
-	//// Write the required "Packages" file to disk
-	//tmpDir, err := ioutil.TempDir(os.TempDir(), "rpm")
-	//if err != nil {
-	//	log.WithError(err).Error("could not create temporary folder for RPM detection")
-	//	return nil, nil, commonerr.ErrFilesystem
-	//}
-	//defer func() {
-	//	_ = os.RemoveAll(tmpDir)
-	//}()
-	//
-	//err = ioutil.WriteFile(tmpDir+"/Packages", f, 0700)
-	//if err != nil {
-	//	log.WithError(err).Error("could not create temporary file for RPM detection")
-	//	return nil, nil, commonerr.ErrFilesystem
-	//}
-	//
-	//cmd := exec.Command("rpm",
-	//	`--dbpath`, tmpDir,
-	//	`--query`, `--all`, `--queryformat`, queryFmt)
-	//r, err := cmd.StdoutPipe()
-	//if err != nil {
-	//	return nil, nil, err
-	//}
-	//
-	//var errbuf bytes.Buffer
-	//cmd.Stderr = &errbuf
-	//
-	//if err := cmd.Start(); err != nil {
-	//	_ = r.Close()
-	//	return nil, nil, err
-	//}
-	//
-	//var pkgs []*database.Package
-	//
-	//// Use a closure to defer the Close call.
-	//if err := func() error {
-	//	defer utils.IgnoreError(r.Close)
-	//
-	//	srcs := make(map[string]*database.Package)
-	//	s := bufio.NewScanner(r)
-	//	s.Split(querySplit)
-	//
-	//	for s.Scan() {
-	//		p, err := parsePackage(srcs, bytes.NewBuffer(s.Bytes()))
-	//		if err != nil {
-	//			return err
-	//		}
-	//		pkgs = append(pkgs, p)
-	//	}
-	//
-	//	return s.Err()
-	//}(); err != nil {
-	//	if errbuf.Len() != 0 {
-	//		log.Warnf("Error executing RPM command: %s", errbuf.String())
-	//	}
-	//	return nil, nil, errors.Errorf("rpm: error reading rpm output: %v", err)
-	//}
-	//
-	//if err := cmd.Wait(); err != nil {
-	//	return nil, nil, err
-	//}
-	//
-	//// TODO:
-	//return pkgs, nil, nil
-	return nil, nil, nil
+	cpes, err := getCPEsUsingEmbeddedContentSets(files)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	f, hasFile := files[packages]
+	if !hasFile {
+		return nil, nil, nil
+	}
+
+	// Write the required "Packages" file to disk
+	tmpDir, err := ioutil.TempDir(os.TempDir(), "rpm")
+	if err != nil {
+		log.WithError(err).Error("could not create temporary folder for RPM detection")
+		return nil, nil, commonerr.ErrFilesystem
+	}
+	defer func() {
+		_ = os.RemoveAll(tmpDir)
+	}()
+
+	err = ioutil.WriteFile(tmpDir+"/Packages", f, 0700)
+	if err != nil {
+		log.WithError(err).Error("could not create temporary file for RPM detection")
+		return nil, nil, commonerr.ErrFilesystem
+	}
+
+	cmd := exec.Command("rpm",
+		`--dbpath`, tmpDir,
+		`--query`, `--all`, `--queryformat`, queryFmt)
+	r, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var errbuf bytes.Buffer
+	cmd.Stderr = &errbuf
+
+	if err := cmd.Start(); err != nil {
+		_ = r.Close()
+		return nil, nil, err
+	}
+
+	var pkgs []*database.Package
+
+	// Use a closure to defer the Close call.
+	if err := func() error {
+		defer utils.IgnoreError(r.Close)
+
+		srcs := make(map[string]*database.Package)
+		s := bufio.NewScanner(r)
+		s.Split(querySplit)
+
+		for s.Scan() {
+			p, err := parsePackage(srcs, bytes.NewBuffer(s.Bytes()))
+			if err != nil {
+				return err
+			}
+			pkgs = append(pkgs, p)
+		}
+
+		return s.Err()
+	}(); err != nil {
+		if errbuf.Len() != 0 {
+			log.Warnf("Error executing RPM command: %s", errbuf.String())
+		}
+		return nil, nil, errors.Errorf("rpm: error reading rpm output: %v", err)
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return nil, nil, err
+	}
+
+	return pkgs, cpes, nil
 }
 
 func querySplit(data []byte, atEOF bool) (advance int, token []byte, err error) {
@@ -202,10 +209,7 @@ func getCPEsUsingEmbeddedContentSets(files tarutil.FilesMap) ([]string, error) {
 		return nil, err
 	}
 
-	// TODO: Read repository-to-cpe.json file upon update, and create a global in-memory object representing it.
-	// Use that object to atomically get
-
-	return nil, nil
+	return repo2cpe.Singleton().Get(contentManifest.ContentSets)
 }
 
 func findContentManifestFile(files tarutil.FilesMap) []byte {
@@ -214,6 +218,7 @@ func findContentManifestFile(files tarutil.FilesMap) []byte {
 			continue
 		}
 
+		// Return the first one found, as there should only be one per layer.
 		return contents
 	}
 
