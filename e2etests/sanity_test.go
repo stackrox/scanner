@@ -564,15 +564,15 @@ func TestImageSanity(t *testing.T) {
 							Name:        "CVE-2021-26701",
 							Description: ".NET Core Remote Code Execution Vulnerability This CVE ID is unique from CVE-2021-24112.",
 							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-26701",
-							Metadata: {
-								"NVD": {
-									"CVSSv2": {
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
 										"ExploitabilityScore": 10,
 										"ImpactScore":         6.4,
 										"Score":               7.5,
 										"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 									},
-									"CVSSv3": {
+									"CVSSv3": map[string]interface{}{
 										"ExploitabilityScore": 3.9,
 										"ImpactScore":         5.9,
 										"Score":               9.8,
