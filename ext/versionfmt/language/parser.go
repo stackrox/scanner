@@ -5,9 +5,8 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 )
 
-// ParserName is the name by which the dpkg parser is registered.
+// ParserName is the name by which the language parser is registered.
 const ParserName = "language"
-
 
 type parser struct{}
 

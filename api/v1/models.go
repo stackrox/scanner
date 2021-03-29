@@ -287,11 +287,12 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 			continue
 		}
 
-		var err error
-		allVulnsFixedBy, err = versionfmt.GetHigherVersion(versionFormat, vuln.FixedBy, allVulnsFixedBy)
+		higherVersion, err := versionfmt.GetHigherVersion(versionFormat, vuln.FixedBy, allVulnsFixedBy)
 		if err != nil {
 			log.Errorf("comparing feature versions for %s: %v", feature.Name, err)
+			continue
 		}
+		allVulnsFixedBy = higherVersion
 	}
 	feature.FixedBy = allVulnsFixedBy
 }

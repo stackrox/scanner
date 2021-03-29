@@ -20,6 +20,7 @@ import (
 	_ "github.com/stackrox/scanner/cpe/validation/all"
 	// Register the version format parsers.
 	_ "github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	_ "github.com/stackrox/scanner/ext/versionfmt/language"
 	_ "github.com/stackrox/scanner/ext/versionfmt/rpm"
 )
 
