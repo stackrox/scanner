@@ -379,6 +379,7 @@ func diffFeatures(childFeatures, parentFeatures []database.FeatureVersion, distr
 			added = append(added, childFV)
 		}
 	}
+	// Need to check for distroless because there isn't a single COW package database
 	if !distroless {
 		for key, parentFV := range parentMap {
 			if _, ok := childMap[key]; !ok {
