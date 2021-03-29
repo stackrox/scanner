@@ -52,7 +52,7 @@ require (
 replace (
 	github.com/blevesearch/bleve => github.com/stackrox/bleve v0.0.0-20190918030150-5ebdc2278ffe
 	github.com/dgraph-io/badger => github.com/stackrox/badger v1.6.1-0.20191025195058-f2b50b9f079c
-	github.com/facebookincubator/nvdtools => github.com/stackrox/nvdtools v0.0.0-20210204073915-147cae5d54d2
+	github.com/facebookincubator/nvdtools => github.com/stackrox/nvdtools v0.0.0-20210326191554-5daeb6395b56
 	github.com/fullsailor/pkcs7 => github.com/misberner/pkcs7 v0.0.0-20190417093538-a48bf0f78dea
 	github.com/go-resty/resty => gopkg.in/resty.v1 v1.11.0
 	github.com/gogo/protobuf => github.com/connorgorman/protobuf v1.2.2-0.20210115205927-b892c1b298f7

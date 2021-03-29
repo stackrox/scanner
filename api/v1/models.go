@@ -23,14 +23,10 @@ import (
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
-	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	"github.com/stackrox/scanner/ext/versionfmt/language"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
-)
-
-const (
-	notFixable = "Not Fixable"
 )
 
 // These are possible package prefixes or suffixes. Package managers sometimes annotate
@@ -224,7 +220,7 @@ func addLanguageVulns(db database.Datastore, layer *Layer) {
 	for _, dbFeatureVersion := range languageFeatureVersions {
 		feature := featureFromDatabaseModel(dbFeatureVersion)
 		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
-			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, true)
+			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
 			languageFeatures = append(languageFeatures, *feature)
 		}
 	}
@@ -269,7 +265,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 				}
 			}
 
-			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, false)
+			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, dbFeatureVersion.Feature.Namespace.VersionFormat)
 			layer.Features = append(layer.Features, *feature)
 		}
 		if env.LanguageVulns.Enabled() {
@@ -280,13 +276,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	return layer, notes, nil
 }
 
-func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, languageVulns bool) {
-	versionFormat := feature.VersionFormat
-	// For language vulns, we use rpm parser since it tries to do the right thing.
-	if languageVulns {
-		versionFormat = rpm.ParserName
-	}
-
+func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, versionFormat string) {
 	allVulnsFixedBy := feature.FixedBy
 	for _, dbVuln := range dbVulns {
 		vuln := VulnerabilityFromDatabaseModel(dbVuln)
@@ -294,11 +284,6 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 
 		// If at least one vulnerability is not fixable, then we mark it the component as not fixable.
 		if vuln.FixedBy == "" {
-			allVulnsFixedBy = notFixable
-			continue
-		}
-
-		if allVulnsFixedBy == notFixable {
 			continue
 		}
 

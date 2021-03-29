@@ -1,0 +1,24 @@
+package language
+
+import (
+	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
+	"github.com/stackrox/scanner/ext/versionfmt"
+)
+
+// ParserName is the name by which the dpkg parser is registered.
+const ParserName = "language"
+
+
+type parser struct{}
+
+func (p parser) Valid(v string) bool {
+	panic("required function not implemented")
+}
+
+func (p parser) Compare(a, b string) (int, error) {
+	return nvd.SmartVerCmp(a, b), nil
+}
+
+func init() {
+	versionfmt.RegisterParser(ParserName, parser{})
+}
