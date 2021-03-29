@@ -18,6 +18,10 @@ import (
 
 	// Register the CPE validators.
 	_ "github.com/stackrox/scanner/cpe/validation/all"
+	// Register the version format parsers.
+	_ "github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	_ "github.com/stackrox/scanner/ext/versionfmt/language"
+	_ "github.com/stackrox/scanner/ext/versionfmt/rpm"
 )
 
 func TestDedupeVersionMatcher(t *testing.T) {
@@ -120,6 +124,149 @@ func TestShouldDedupeLanguageFeature(t *testing.T) {
 	}
 }
 
+func TestLatestUbuntuFeatureVersion(t *testing.T) {
+	envIsolator := testutils.NewEnvIsolator(t)
+	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
+	defer envIsolator.RestoreAll()
+
+	dbLayer := database.Layer{
+		Name:          "example",
+		EngineVersion: 0,
+		Parent:        nil,
+		Namespace: &database.Namespace{
+			Name:          "ubuntu:14.04",
+			VersionFormat: "dpkg",
+		},
+		Features: []database.FeatureVersion{
+			{
+				Version: "7.35.0-1ubuntu2.20",
+				Feature: database.Feature{
+					Name: "curl",
+					Namespace: database.Namespace{
+						Name:          "ubuntu:14.04",
+						VersionFormat: "dpkg",
+					},
+				},
+				AddedBy: database.Layer{
+					Name: "example",
+				},
+				AffectedBy: []database.Vulnerability{
+					{
+						Name:    "CVE-2019-5482",
+						FixedBy: "7.35.0-1ubuntu2.20+esm3",
+					},
+					{
+						Name:    "CVE-2019-5436",
+						FixedBy: "7.35.0-1ubuntu2.20+esm2",
+					},
+				},
+			},
+		},
+	}
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, true, true)
+	assert.NoError(t, err)
+	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].FixedBy)
+}
+
+func TestLatestCentOSFeatureVersion(t *testing.T) {
+	envIsolator := testutils.NewEnvIsolator(t)
+	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
+	defer envIsolator.RestoreAll()
+
+	dbLayer := database.Layer{
+		Name:          "example",
+		EngineVersion: 0,
+		Parent:        nil,
+		Namespace: &database.Namespace{
+			Name:          "centos:8",
+			VersionFormat: "rpm",
+		},
+		Features: []database.FeatureVersion{
+			{
+				Version: "3.26.0-6.el8",
+				Feature: database.Feature{
+					Name: "sqlite-libs",
+					Namespace: database.Namespace{
+						Name:          "centos:8",
+						VersionFormat: "rpm",
+					},
+				},
+				AddedBy: database.Layer{
+					Name: "example",
+				},
+				AffectedBy: []database.Vulnerability{
+					{
+						Name:    "CVE-2020-15358",
+						FixedBy: "",
+					},
+					{
+						Name:    "CVE-2020-13632",
+						FixedBy: "0:3.26.0-11.el8",
+					},
+					{
+						Name:    "CVE-2021-1234",
+						FixedBy: "",
+					},
+					{
+						Name:    "CVE-2021-1235",
+						FixedBy: "0:3.27.1-12.el8",
+					},
+					{
+						Name:    "CVE-2020-13630",
+						FixedBy: "0:3.26.0-11.el8",
+					},
+				},
+			},
+		},
+	}
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, true, true)
+	assert.NoError(t, err)
+	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
+}
+
+func TestLatestLanguageFeatureVersion(t *testing.T) {
+	envIsolator := testutils.NewEnvIsolator(t)
+	defer envIsolator.RestoreAll()
+
+	_, filename, _, _ := runtime.Caller(0)
+	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
+	envIsolator.Setenv("NVD_DEFINITIONS_DIR", defsDir)
+
+	prevBoltPath := nvdtoolscache.BoltPath
+	defer func() {
+		nvdtoolscache.BoltPath = prevBoltPath
+	}()
+
+	dir, err := ioutil.TempDir("", "bolt")
+	require.NoError(t, err)
+	defer func() {
+		_ = os.RemoveAll(dir)
+	}()
+	nvdtoolscache.BoltPath = filepath.Join(dir, "temp.db")
+
+	db := newMockDatastore()
+	db.layers["layer"] = []*component.LayerToComponents{
+		{
+			Layer: "layer",
+			Components: []*component.Component{
+				{
+					SourceType:      component.JavaSourceType,
+					Name:            "struts",
+					Version:         "2.3.12",
+					Location:        "usr/local/tomcat/webapps/ROOT.war:WEB-INF/lib/struts2-core2.3.12.jar",
+					JavaPkgMetadata: &component.JavaPkgMetadata{},
+				},
+			},
+		},
+	}
+	dbLayer := &Layer{
+		Name: "layer",
+	}
+
+	addLanguageVulns(db, dbLayer)
+	assert.Equal(t, "2.3.29", dbLayer.Features[0].FixedBy)
+}
+
 func TestNotesNoLanguageVulns(t *testing.T) {
 	envIsolator := testutils.NewEnvIsolator(t)
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
@@ -181,9 +328,13 @@ type mockDatastore struct {
 }
 
 func newMockDatastore() *mockDatastore {
-	return &mockDatastore{
+	db := &mockDatastore{
 		layers: make(map[string][]*component.LayerToComponents),
 	}
+	db.FctGetLayerLanguageComponents = func(layer string) ([]*component.LayerToComponents, error) {
+		return db.layers[layer], nil
+	}
+	return db
 }
 
 func TestAddLanguageVulns(t *testing.T) {
@@ -306,9 +457,6 @@ func TestAddLanguageVulns(t *testing.T) {
 			Layer:   "layer8",
 			Removed: []string{"usr/local/share/.cache/yarn"},
 		},
-	}
-	db.FctGetLayerLanguageComponents = func(layer string) ([]*component.LayerToComponents, error) {
-		return db.layers[layer], nil
 	}
 
 	layer := &Layer{

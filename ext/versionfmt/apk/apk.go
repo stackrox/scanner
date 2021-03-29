@@ -8,7 +8,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 )
 
-// ParserName is the name by which the dpkg parser is registered.
+// ParserName is the name by which the apk parser is registered.
 const ParserName = "apk"
 
 type parser struct{}

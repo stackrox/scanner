@@ -23,6 +23,7 @@ import (
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
+	"github.com/stackrox/scanner/ext/versionfmt/language"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
@@ -154,13 +155,13 @@ func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability
 	return vuln
 }
 
-func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) Feature {
+func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) *Feature {
 	version := dbFeatureVersion.Version
 	if version == versionfmt.MaxVersion {
 		version = "None"
 	}
 
-	return Feature{
+	return &Feature{
 		Name:          dbFeatureVersion.Feature.Name,
 		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
 		VersionFormat: stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
@@ -218,12 +219,9 @@ func addLanguageVulns(db database.Datastore, layer *Layer) {
 	var languageFeatures []Feature
 	for _, dbFeatureVersion := range languageFeatureVersions {
 		feature := featureFromDatabaseModel(dbFeatureVersion)
-
-		for _, dbVuln := range dbFeatureVersion.AffectedBy {
-			feature.Vulnerabilities = append(feature.Vulnerabilities, VulnerabilityFromDatabaseModel(dbVuln))
-		}
-		if !shouldDedupeLanguageFeature(feature, layer.Features) {
-			languageFeatures = append(languageFeatures, feature)
+		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
+			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
+			languageFeatures = append(languageFeatures, *feature)
 		}
 	}
 	layer.Features = append(layer.Features, languageFeatures...)
@@ -267,15 +265,8 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 				}
 			}
 
-			for _, dbVuln := range dbFeatureVersion.AffectedBy {
-				vuln := VulnerabilityFromDatabaseModel(dbVuln)
-
-				if dbVuln.FixedBy != versionfmt.MaxVersion {
-					vuln.FixedBy = dbVuln.FixedBy
-				}
-				feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
-			}
-			layer.Features = append(layer.Features, feature)
+			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, dbFeatureVersion.Feature.Namespace.VersionFormat)
+			layer.Features = append(layer.Features, *feature)
 		}
 		if env.LanguageVulns.Enabled() {
 			addLanguageVulns(db, &layer)
@@ -283,6 +274,27 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	}
 
 	return layer, notes, nil
+}
+
+func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, versionFormat string) {
+	allVulnsFixedBy := feature.FixedBy
+	for _, dbVuln := range dbVulns {
+		vuln := VulnerabilityFromDatabaseModel(dbVuln)
+		feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
+
+		// If at least one vulnerability is not fixable, then we mark it the component as not fixable.
+		if vuln.FixedBy == "" {
+			continue
+		}
+
+		higherVersion, err := versionfmt.GetHigherVersion(versionFormat, vuln.FixedBy, allVulnsFixedBy)
+		if err != nil {
+			log.Errorf("comparing feature versions for %s: %v", feature.Name, err)
+			continue
+		}
+		allVulnsFixedBy = higherVersion
+	}
+	feature.FixedBy = allVulnsFixedBy
 }
 
 type Namespace struct {
@@ -336,6 +348,7 @@ type Feature struct {
 	Vulnerabilities []Vulnerability `json:"Vulnerabilities,omitempty"`
 	AddedBy         string          `json:"AddedBy,omitempty"`
 	Location        string          `json:"Location,omitempty"`
+	FixedBy         string          `json:"FixedBy,omitempty"`
 }
 
 func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {
