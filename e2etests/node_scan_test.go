@@ -173,9 +173,9 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 							PublishedDateTime:    "2020-10-16T17:15Z",
 							LastModifiedDateTime: "2020-10-29T22:06Z",
 							CvssV2: &v1.CVSSMetadata{
-								Score:               4.3,
-								Vector:              "AV:N/AC:M/Au:N/C:P/I:N/A:N",
-								ExploitabilityScore: 8.6,
+								Score:               2.6,
+								Vector:              "AV:N/AC:H/Au:N/C:P/I:N/A:N",
+								ExploitabilityScore: 4.9,
 								ImpactScore:         2.9,
 							},
 							CvssV3: &v1.CVSSMetadata{
