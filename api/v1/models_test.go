@@ -173,6 +173,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
+	// Not fixable
 	dbLayer := database.Layer{
 		Name:          "example",
 		EngineVersion: 0,
@@ -220,6 +221,49 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 		},
 	}
 	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, true, true)
+	assert.NoError(t, err)
+	assert.Equal(t, "", layer.Features[0].FixedBy)
+
+	// Fixable
+	dbLayer = database.Layer{
+		Name:          "example",
+		EngineVersion: 0,
+		Parent:        nil,
+		Namespace: &database.Namespace{
+			Name:          "centos:8",
+			VersionFormat: "rpm",
+		},
+		Features: []database.FeatureVersion{
+			{
+				Version: "3.26.0-6.el8",
+				Feature: database.Feature{
+					Name: "sqlite-libs",
+					Namespace: database.Namespace{
+						Name:          "centos:8",
+						VersionFormat: "rpm",
+					},
+				},
+				AddedBy: database.Layer{
+					Name: "example",
+				},
+				AffectedBy: []database.Vulnerability{
+					{
+						Name:    "CVE-2020-13632",
+						FixedBy: "0:3.26.0-11.el8",
+					},
+					{
+						Name:    "CVE-2021-1235",
+						FixedBy: "0:3.27.1-12.el8",
+					},
+					{
+						Name:    "CVE-2020-13630",
+						FixedBy: "0:3.26.0-11.el8",
+					},
+				},
+			},
+		},
+	}
+	layer, _, err = LayerFromDatabaseModel(nil, dbLayer, true, true)
 	assert.NoError(t, err)
 	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
 }

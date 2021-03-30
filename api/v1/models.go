@@ -278,12 +278,18 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 
 func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, versionFormat string) {
 	allVulnsFixedBy := feature.FixedBy
+	var atLeastOneUnfixable bool
 	for _, dbVuln := range dbVulns {
 		vuln := VulnerabilityFromDatabaseModel(dbVuln)
 		feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
 
 		// If at least one vulnerability is not fixable, then we mark it the component as not fixable.
 		if vuln.FixedBy == "" {
+			atLeastOneUnfixable = true
+			continue
+		}
+
+		if atLeastOneUnfixable {
 			continue
 		}
 
@@ -294,7 +300,10 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 		}
 		allVulnsFixedBy = higherVersion
 	}
-	feature.FixedBy = allVulnsFixedBy
+
+	if !atLeastOneUnfixable {
+		feature.FixedBy = allVulnsFixedBy
+	}
 }
 
 type Namespace struct {
