@@ -25,6 +25,7 @@ import (
 type MockDatastore struct {
 	FctListNamespaces                      func() ([]Namespace, error)
 	FctInsertLayer                         func(Layer) error
+	FctInsertRHELv2Layer                   func(*RHELv2Layer) error
 	FctFindLayer                           func(name string, withFeatures, withVulnerabilities bool) (Layer, error)
 	FctDeleteLayer                         func(name string) error
 	FctListVulnerabilities                 func(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
@@ -50,6 +51,13 @@ type MockDatastore struct {
 func (mds *MockDatastore) InsertLayer(layer Layer) error {
 	if mds.FctInsertLayer != nil {
 		return mds.FctInsertLayer(layer)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) InsertRHELv2Layer(layer *RHELv2Layer) error {
+	if mds.FctInsertRHELv2Layer != nil {
+		return mds.FctInsertRHELv2Layer(layer)
 	}
 	panic("required mock function not implemented")
 }

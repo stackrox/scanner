@@ -16,6 +16,7 @@ package clair
 
 import (
 	"fmt"
+	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/ext/featurefmt/rhelv2"
 	"io"
 	"path/filepath"
@@ -121,7 +122,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 	}
 
 	// Analyze the content.
-	var rhelv2Components *rhelv2features
+	var rhelv2Components *database.RHELv2Components
 	var languageComponents []*component.Component
 	var removedFiles []string
 	layer.Namespace, layer.Features, rhelv2Components, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
@@ -129,7 +130,27 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 		return err
 	}
 
-	log.Info(rhelv2Components)
+	if rhelv2Components != nil {
+		name, version := stringutils.Split2(rhelv2Components.Namespace, ":")
+		var parentHash string
+		if layer.Parent != nil && layer.Parent.Name != "" {
+			parentHash = layer.Parent.Name
+		}
+		rhelv2Layer := &database.RHELv2Layer{
+			Hash: layer.Name,
+			Dist: &database.Distribution{
+				DID:       name,
+				VersionID: version,
+			},
+			Pkgs: rhelv2Components.Packages,
+			CPEs: rhelv2Components.CPEs,
+			ParentHash: parentHash,
+		}
+
+		if err := datastore.InsertRHELv2Layer(rhelv2Layer); err != nil {
+			return err
+		}
+	}
 
 	if err := datastore.InsertLayer(layer); err != nil {
 		if err == commonerr.ErrNoNeedToInsert {
@@ -170,16 +191,11 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedComponents)
 }
 
-type rhelv2features struct {
-	packages []*database.Package
-	cpes     []string
-}
-
-func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, *rhelv2features, []*component.Component, []string, error) {
+func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
 	namespace := DetectNamespace(name, files, parent)
 
 	var featureVersions []database.FeatureVersion
-	var rhelfeatures *rhelv2features
+	var rhelfeatures *database.RHELv2Components
 
 	if namespace != nil && strings.HasPrefix(namespace.Name, "rhel") {
 		// This is a RHEL-based image that must be scanned in a certified manner.
@@ -188,9 +204,10 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		if err != nil {
 			return nil, nil, nil, nil, nil, err
 		}
-		rhelfeatures = &rhelv2features{
-			packages: packages,
-			cpes:     cpes,
+		rhelfeatures = &database.RHELv2Components{
+			Namespace: namespace.Name,
+			Packages: packages,
+			CPEs:     cpes,
 		}
 		log.WithFields(log.Fields{logLayerName: name, "rhel package count": len(packages), "rhel cpe count": len(cpes)}).Debug("detected rhelv2 features")
 	} else {
@@ -236,7 +253,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	return namespace, featureVersions, rhelfeatures, allComponents, removedFiles, err
 }
 
-func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, *rhelv2features, []*component.Component, []string, error) {
+func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
 	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.SingletonMatcher())
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
@@ -247,7 +264,7 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 
 // detectContent downloads a layer's archive and extracts its Namespace and
 // Features.
-func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, *rhelv2features, []*component.Component, []string, error) {
+func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
 	files, err := imagefmt.Extract(imageFormat, path, headers, requiredfilenames.SingletonMatcher())
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{logLayerName: name, "path": cleanURL(path)}).Error("failed to extract data from path")

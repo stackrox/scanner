@@ -256,7 +256,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		notes = append(notes, LanguageCVEsUnavailable)
 	}
 
-	if (withFeatures || withVulnerabilities) && dbLayer.Features != nil {
+	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || strings.HasPrefix(layer.NamespaceName, "rhel")) {
 	OUTER:
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion)
@@ -277,12 +277,117 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 			}
 			layer.Features = append(layer.Features, feature)
 		}
+		if strings.HasPrefix(layer.NamespaceName, "rhel") {
+			if err := addRHELv2Vulns(db, &layer); err != nil {
+				return layer, notes, err
+			}
+		}
 		if env.LanguageVulns.Enabled() {
 			addLanguageVulns(db, &layer)
 		}
 	}
 
 	return layer, notes, nil
+}
+
+func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
+	layers, err := db.GetRHELv2Layers(layer.Name)
+	if err != nil {
+		return err
+	}
+
+	shareCPEs(layers)
+
+	type environment struct {
+		introducedIn string
+		did          string
+		cpes         []string
+	}
+
+	packages := make(map[string]*database.Package)
+	envs := make(map[string]*environment)
+
+	for _, layer := range layers {
+		for _, pkg := range layer.Pkgs {
+			if _, ok := packages[pkg.ID]; !ok {
+				env := &environment{
+					introducedIn: layer.Hash,
+					did:          "rhel",
+					cpes:         layer.CPEs,
+				}
+				packages[pkg.ID] = pkg
+				envs[pkg.ID] = env
+			}
+		}
+	}
+
+	for i := len(layers) - 1; i >= 0; i-- {
+		if len(layers[i].Pkgs) != 0 {
+			// Found the latest version of `var/lib/rpm/Packages`
+			// This has the final version of all the packages in this image.
+			finalPkgs := make(map[string]struct{})
+			for _, pkg := range layers[i].Pkgs {
+				finalPkgs[pkg.ID] = struct{}{}
+			}
+
+			for pkgID := range packages {
+				// Remove packages that were in lower layers, but not at the highest.
+				if _, found := finalPkgs[pkgID]; !found {
+					delete(packages, pkgID)
+					delete(envs, pkgID)
+				}
+			}
+		}
+	}
+
+	var records []*database.RHELv2Record
+
+	for pkgID, pkg := range packages {
+		env := envs[pkgID]
+		if len(env.cpes) == 0 {
+			records = append(records, &database.RHELv2Record{
+				Pkg:  pkg,
+				Dist: layer.NamespaceName,
+			})
+		}
+
+		for _, cpe := range env.cpes {
+			records = append(records, &database.RHELv2Record{
+				Pkg:  pkg,
+				Dist: layer.NamespaceName,
+				CPE: cpe,
+			})
+		}
+	}
+
+	db.Get
+}
+
+// shareRepos takes repository definition and share it with other layers
+// where repositories are missing
+func shareCPEs(layers []*database.RHELv2Layer) {
+	// User's layers build on top of Red Hat images doesn't have a repository definition.
+	// We need to share CPE repo definition to all layer where CPEs are missing
+	// This only applies to Red Hat images
+	var previousCPEs []string
+	for i := 0; i < len(layers); i++ {
+		if len(layers[i].CPEs) != 0 {
+			previousCPEs = layers[i].CPEs
+		} else {
+			layers[i].CPEs = append(layers[i].CPEs, previousCPEs...)
+		}
+	}
+	// Tha same thing has to be done in reverse
+	// example:
+	//   Red Hat's base images doesn't have repository definition
+	//   We need to get them from layer[i+1]
+	for i := len(layers) - 1; i >= 0; i-- {
+		if len(layers[i].CPEs) != 0 {
+			previousCPEs = layers[i].CPEs
+		} else {
+			layers[i].CPEs = append(layers[i].CPEs, previousCPEs...)
+		}
+	}
 }
 
 type Namespace struct {

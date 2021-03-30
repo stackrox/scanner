@@ -6,7 +6,18 @@ func init() {
 	RegisterMigration(migrate.Migration{
 		ID: 10,
 		Up: migrate.Queries([]string{
-			`--- Package
+			`--- RHELv2 Layer
+    	--- an identity table consisting of a content addressable layer hash
+    	CREATE TABLE IF NOT EXISTS rhelv2_layer (
+			id          BIGSERIAL PRIMARY KEY,
+        	hash        TEXT,
+			parent_hash TEXT NOT NULL DEFAULT '',
+			dist        TEXT,
+			cpes        TEXT[],
+			UNIQUE (hash)
+    	);
+
+		--- Package
 		--- a unique package discovered by a scanner
 		CREATE TABLE IF NOT EXISTS package (
 			id      BIGSERIAL PRIMARY KEY,
@@ -18,15 +29,15 @@ func init() {
 		);
 		CREATE UNIQUE INDEX IF NOT EXISTS package_unique_idx ON package (name, version, kind, module, arch);
 
-		--- RHELv2 Layer
-    	--- an identity table consisting of a content addressable layer hash
-    	CREATE TABLE IF NOT EXISTS rhelv2_layer (
-			id   BIGSERIAL PRIMARY KEY,
-        	hash TEXT,
-			dist TEXT,
-			
-			UNIQUE (hash)
-    	);`,
+		--- PackageScanArtifact
+    	--- A relation linking discovered packages with the layer hash it was found
+		CREATE TABLE IF NOT EXISTS package_scanartifact (
+			layer_id   BIGINT REFERENCES rhelv2_layer(id),
+			package_id BIGINT REFERENCES package(id),
+			source_id  BIGINT REFERENCES package(id),
+			PRIMARY KEY (layer_id, package_id, source_id)
+		);
+		CREATE INDEX IF NOT EXISTS package_scanartifact_lookup_idx ON package_scanartifact (layer_id);`,
 		}),
 	})
 }

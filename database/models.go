@@ -143,6 +143,27 @@ type Distribution struct {
 	CPE cpe.WFN `json:"cpe"`
 }
 
+type RHELv2Layer struct {
+	ID   string
+	Hash string
+	Dist *Distribution
+	Pkgs []*Package
+	CPEs []string
+	ParentHash string
+}
+
+type RHELv2Record struct {
+	Pkg  *Package
+	Dist string
+	CPE  string
+}
+
+type RHELv2Components struct {
+	Namespace string
+	Packages  []*Package
+	CPEs      []string
+}
+
 type Package struct {
 	// unique ID of this package. this will be created as discovered by the library
 	// and used for persistence and hash map indexes
@@ -160,6 +181,10 @@ type Package struct {
 	Module string `json:"module,omitempty"`
 	// Package architecture
 	Arch string `json:"arch,omitempty"`
+}
+
+func (p *Package) String() string {
+	return p.Name + ":" + p.Version
 }
 
 const (

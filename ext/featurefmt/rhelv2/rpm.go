@@ -53,7 +53,7 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.Package, []string, error)
 
 	f, hasFile := files[packages]
 	if !hasFile {
-		return nil, nil, nil
+		return nil, cpes, nil
 	}
 
 	// Write the required "Packages" file to disk
@@ -199,7 +199,7 @@ func getCPEsUsingEmbeddedContentSets(files tarutil.FilesMap) ([]string, error) {
 	// Get CPEs using embedded content-set files.
 	// The files is be stored in /root/buildinfo/content_manifests/ and will need to
 	// be translated using mapping file provided by Red Hat's PST team.
-	contents := findContentManifestFile(files)
+	contents := getContentManifestFileContents(files)
 	if contents == nil {
 		return nil, nil
 	}
@@ -212,7 +212,7 @@ func getCPEsUsingEmbeddedContentSets(files tarutil.FilesMap) ([]string, error) {
 	return repo2cpe.Singleton().Get(contentManifest.ContentSets)
 }
 
-func findContentManifestFile(files tarutil.FilesMap) []byte {
+func getContentManifestFileContents(files tarutil.FilesMap) []byte {
 	for file, contents := range files {
 		if !contentManifestPattern.MatchString(file) {
 			continue

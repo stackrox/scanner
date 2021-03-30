@@ -110,6 +110,8 @@ type Datastore interface {
 	// shouldn't return an error.
 	InsertLayer(Layer) error
 
+	InsertRHELv2Layer(*RHELv2Layer) error
+
 	// FindLayer retrieves a Layer from the database.
 	//
 	// When `withFeatures` is true, the Features field should be filled.
@@ -117,6 +119,8 @@ type Datastore interface {
 	// and their AffectedBy fields should contain every vulnerabilities that
 	// affect them.
 	FindLayer(name string, withFeatures, withVulnerabilities bool) (Layer, error)
+
+	GetRHELv2Layers(layer string) ([]*RHELv2Layer, error)
 
 	// InsertVulnerabilities stores the given Vulnerabilities in the database,
 	// updating them if necessary.
