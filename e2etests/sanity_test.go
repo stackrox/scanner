@@ -91,6 +91,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 					fmt.Printf("Matching: %s\n", matchingBytes)
 					fmt.Printf("Feature: %s\n", featureVulnsBytes)
 				}
+
 				require.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
 				for i, matchingVuln := range matching.Vulnerabilities {
 					expectedVuln := feature.Vulnerabilities[i]
@@ -938,30 +939,6 @@ func TestImageSanity(t *testing.T) {
 										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 									},
 									"LastModifiedDateTime": "2021-03-10T20:28Z",
-									"PublishedDateTime":    "2021-02-25T23:15Z",
-								},
-							},
-							FixedBy: "3.1.13",
-						},
-						{
-							Name:        "CVE-2021-26701",
-							Description: ".NET Core Remote Code Execution Vulnerability This CVE ID is unique from CVE-2021-24112.",
-							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-26701",
-							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
-									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 10.0,
-										"ImpactScore":         6.4,
-										"Score":               7.5,
-										"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
-									},
-									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 3.9,
-										"ImpactScore":         5.9,
-										"Score":               9.8,
-										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
-									},
-									"LastModifiedDateTime": "2021-03-12T13:25Z",
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
