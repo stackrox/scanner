@@ -73,7 +73,7 @@ const (
 
 	// layer.go
 	searchLayer = `
-		SELECT l.id, l.name, l.engineversion, p.id, p.name, n.id, n.name, n.version_format
+		SELECT l.id, l.name, l.engineversion, l.distroless, p.id, p.name, n.id, n.name, n.version_format
 		FROM Layer l
 			LEFT JOIN Layer p ON l.parent_id = p.id
 			LEFT JOIN Namespace n ON l.namespace_id = n.id
@@ -125,13 +125,13 @@ const (
 						AND v.deleted_at IS NULL`
 
 	insertLayer = `
-		INSERT INTO Layer(name, engineversion, parent_id, namespace_id, created_at)
-		VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP)
+		INSERT INTO Layer(name, engineversion, parent_id, namespace_id, distroless, created_at)
+		VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
 		ON CONFLICT DO NOTHING
 		RETURNING id
 	`
 
-	updateLayer = `UPDATE LAYER SET engineversion = $2, namespace_id = $3 WHERE id = $1`
+	updateLayer = `UPDATE LAYER SET engineversion = $2, namespace_id = $3, distroless = $4 WHERE id = $1`
 
 	removeLayerDiffFeatureVersion = `
 		DELETE FROM Layer_diff_FeatureVersion
