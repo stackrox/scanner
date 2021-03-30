@@ -1,7 +1,6 @@
+e2etests/sanity_test.go
 ext/featurefmt/rpm/testdata/Packages
 generated/shared/api/v1/image_scan_service.pb.go
 go.sum
 image/dump/cves_10222019.tar.gz
 pkg/vulnloader/nvdloader/nvdloader_easyjson.go
-e2etests/sanity_test.go
-

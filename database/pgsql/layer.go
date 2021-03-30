@@ -17,7 +17,6 @@ package pgsql
 import (
 	"database/sql"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/guregu/null/zero"
@@ -51,6 +50,7 @@ func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities boo
 		&layer.ID,
 		&layer.Name,
 		&layer.EngineVersion,
+		&layer.Distroless,
 		&parentID,
 		&parentName,
 		&nsID,
@@ -305,7 +305,7 @@ func (pgSQL *pgSQL) insertLayerTx(layer *database.Layer, namespaceID, parentID z
 
 	if layer.ID == 0 {
 		// Insert a new layer.
-		err = tx.QueryRow(insertLayer, layer.Name, layer.EngineVersion, parentID, namespaceID).
+		err = tx.QueryRow(insertLayer, layer.Name, layer.EngineVersion, parentID, namespaceID, layer.Distroless).
 			Scan(&layer.ID)
 		if err != nil {
 			tx.Rollback()
@@ -319,7 +319,7 @@ func (pgSQL *pgSQL) insertLayerTx(layer *database.Layer, namespaceID, parentID z
 		}
 	} else {
 		// Update an existing layer.
-		_, err = tx.Exec(updateLayer, layer.ID, layer.EngineVersion, namespaceID)
+		_, err = tx.Exec(updateLayer, layer.ID, layer.EngineVersion, namespaceID, layer.Distroless)
 		if err != nil {
 			tx.Rollback()
 			return handleError("updateLayer", err)
@@ -351,6 +351,45 @@ func (pgSQL *pgSQL) insertLayerTx(layer *database.Layer, namespaceID, parentID z
 	return nil
 }
 
+type key struct {
+	namespace, name, version string
+}
+
+func fvToKey(fv database.FeatureVersion) key {
+	return key{
+		namespace: fv.Feature.Namespace.Name,
+		name:      fv.Feature.Name,
+		version:   fv.Version,
+	}
+}
+
+func diffFeatures(childFeatures, parentFeatures []database.FeatureVersion, distroless bool) (added, deleted []database.FeatureVersion) {
+	childMap := make(map[key]database.FeatureVersion)
+	for _, fv := range childFeatures {
+		childMap[fvToKey(fv)] = fv
+	}
+
+	parentMap := make(map[key]database.FeatureVersion)
+	for _, fv := range parentFeatures {
+		parentMap[fvToKey(fv)] = fv
+	}
+
+	for key, childFV := range childMap {
+		if _, ok := parentMap[key]; !ok {
+			added = append(added, childFV)
+		}
+	}
+	// Need to check for distroless because there isn't a single COW package database
+	if !distroless {
+		for key, parentFV := range parentMap {
+			if _, ok := childMap[key]; !ok {
+				deleted = append(deleted, parentFV)
+			}
+		}
+	}
+	return added, deleted
+}
+
 func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer *database.Layer) error {
 	// add and del are the FeatureVersion diff we should insert.
 	var add []database.FeatureVersion
@@ -362,21 +401,8 @@ func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer *database.Layer)
 	} else if layer.Parent != nil {
 		// There is a parent, we need to diff the Features with it.
 
-		// Build name:version structures.
-		layerFeaturesMapNV, layerFeaturesNV := createNV(layer.Features)
-		parentLayerFeaturesMapNV, parentLayerFeaturesNV := createNV(layer.Parent.Features)
-
 		// Calculate the added and deleted FeatureVersions name:version.
-		addNV := compareStringLists(layerFeaturesNV, parentLayerFeaturesNV)
-		delNV := compareStringLists(parentLayerFeaturesNV, layerFeaturesNV)
-
-		// Fill the structures containing the added and deleted FeatureVersions.
-		for _, nv := range addNV {
-			add = append(add, *layerFeaturesMapNV[nv])
-		}
-		for _, nv := range delNV {
-			del = append(del, *parentLayerFeaturesMapNV[nv])
-		}
+		add, del = diffFeatures(layer.Features, layer.Parent.Features, layer.Distroless)
 	}
 
 	// Insert FeatureVersions in the database.
@@ -409,18 +435,4 @@ func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer *database.Layer)
 	}
 
 	return nil
-}
-
-func createNV(features []database.FeatureVersion) (map[string]*database.FeatureVersion, []string) {
-	mapNV := make(map[string]*database.FeatureVersion)
-	sliceNV := make([]string, 0, len(features))
-
-	for i := 0; i < len(features); i++ {
-		fv := &features[i]
-		nv := strings.Join([]string{fv.Feature.Namespace.Name, fv.Feature.Name, fv.Version}, ":")
-		mapNV[nv] = fv
-		sliceNV = append(sliceNV, nv)
-	}
-
-	return mapNV, sliceNV
 }
