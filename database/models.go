@@ -133,7 +133,7 @@ type Package struct {
 	// the name of the package
 	Name string `json:"name"`
 	// the version of the package
-	Version string `json:"version"`
+	Version string `json:"version,omitempty"`
 	// Module and stream which this package is part of
 	Module string `json:"module,omitempty"`
 	// Package architecture
