@@ -12,7 +12,7 @@ import (
 )
 
 // WriteZip takes the given files and creates the vuln dump zip.
-func WriteZip(inputDir, outFile string, ignoreKubernetesVulns bool) error {
+func WriteZip(inputDir, outFile string, ignoreKubernetesVulns, ignoreRHELv2Vulns bool) error {
 	zipArchive := archiver.NewZip()
 	zipArchive.CompressionLevel = flate.BestCompression
 	sources := []string{
@@ -22,6 +22,9 @@ func WriteZip(inputDir, outFile string, ignoreKubernetesVulns bool) error {
 	}
 	if !ignoreKubernetesVulns {
 		sources = append(sources, filepath.Join(inputDir, K8sDirName))
+	}
+	if !ignoreRHELv2Vulns {
+		sources = append(sources, filepath.Join(inputDir, RHELv2DirName))
 	}
 	return zipArchive.Archive(sources, outFile)
 }

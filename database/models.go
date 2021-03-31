@@ -17,11 +17,14 @@ package database
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"time"
+
+	"github.com/stackrox/scanner/pkg/rhelv2/archop"
 )
 
 type Model struct {
 	// ID is only meant to be used by database implementations and should never be used for anything else.
-	ID int
+	ID int `json:"id,omitempty"`
 }
 
 type Layer struct {
@@ -102,4 +105,53 @@ func (mm *MetadataMap) Scan(value interface{}) error {
 func (mm *MetadataMap) Value() (driver.Value, error) {
 	json, err := json.Marshal(*mm)
 	return string(json), err
+}
+
+// TODO: the following is adapted form claircore
+
+type RHELv2Vulnerability struct {
+	Model
+
+	Name           string        `json:"name"`
+	Description    string        `json:"description"`
+	Issued         time.Time     `json:"issued"`
+	Updated        time.Time     `json:"updated"`
+	Links          string        `json:"links"`
+	Severity       string        `json:"severity"`
+	CVSSv3         string        `json:"cvssv3"`
+	CVSSv2         string        `json:"cvssv2"`
+	CPEs           []string      `json:"cpes"`
+	Package        *Package      `json:"package"`
+	FixedInVersion string        `json:"fixed_in_version"`
+	ArchOperation  archop.ArchOp `json:"arch_op,omitempty"`
+}
+
+type Package struct {
+	// unique ID of this package. this will be created as discovered by the library
+	// and used for persistence and hash map indexes
+	ID string `json:"id,omitempty"`
+	// the name of the package
+	Name string `json:"name"`
+	// the version of the package
+	Version string `json:"version"`
+	// Module and stream which this package is part of
+	Module string `json:"module,omitempty"`
+	// Package architecture
+	Arch string `json:"arch,omitempty"`
+}
+
+func (p *Package) String() string {
+	return p.Name + ":" + p.Version
+}
+
+// ContentManifest structure is based on file provided by OSBS
+// The struct stores content metadata about the image
+type ContentManifest struct {
+	ContentSets []string         `json:"content_sets"`
+	Metadata    ManifestMetadata `json:"metadata"`
+}
+
+// ManifestMetadata struct holds additional metadata about image
+type ManifestMetadata struct {
+	ImageLayerIndex int `json:"image_layer_index"`
 }

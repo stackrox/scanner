@@ -32,6 +32,7 @@ require (
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
+	github.com/quay/goval-parser v0.8.6
 	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
 	github.com/sirupsen/logrus v1.8.0
 	github.com/spf13/cobra v1.1.1
@@ -40,6 +41,7 @@ require (
 	github.com/stackrox/rox v0.0.0-20201222223839-042406f3664c
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/bbolt v1.3.5
+	go.uber.org/ratelimit v0.2.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 	golang.org/x/sys v0.0.0-20201101102859-da207088b7d1
 	golang.org/x/tools v0.0.0-20201019175715-b894a3290fff

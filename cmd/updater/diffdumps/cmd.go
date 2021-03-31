@@ -229,7 +229,7 @@ func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnera
 	return filtered
 }
 
-func generateOSVulnsDiff(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, cfg config) error {
+func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, cfg config) error {
 	baseVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
 	if err != nil {
 		return errors.Wrap(err, "loading OS vulns from base dump")
@@ -288,6 +288,7 @@ type config struct {
 	SkipFixableCentOSVulns     bool `json:"skipFixableCentOSVulns"`
 	IgnoreKubernetesVulns      bool `json:"ignoreKubernetesVulns"`
 	SkipUbuntuLinuxKernelVulns bool `json:"skipUbuntuLinuxKernelVulns"`
+	SkipRHELv2Vulns            bool `json:"skipRHELv2Vulns"`
 }
 
 func Command() *cobra.Command {
@@ -356,6 +357,16 @@ func Command() *cobra.Command {
 		}
 		log.Info("Generated OS vulns diff")
 
+		if cfg.SkipRHELv2Vulns {
+			log.Info("Skipping RHELv2 diff")
+		} else {
+			log.Info("Generating RHELv2 vulns diff")
+			if err := generateRHELv2VulnsDiff(stagingDir, baseManifest.Until, baseZipR, headZipR); err != nil {
+				return errors.Wrap(err, "creating RHELv2 vlns diff")
+			}
+			log.Info("Generated RHELv2 vulns diff")
+		}
+
 		err = vulndump.WriteManifestFile(stagingDir, vulndump.Manifest{
 			Since: baseManifest.Until,
 			Until: headManifest.Until,
@@ -365,7 +376,7 @@ func Command() *cobra.Command {
 		}
 
 		log.Info("Zipping up the dump...")
-		err = vulndump.WriteZip(stagingDir, outFile, cfg.IgnoreKubernetesVulns)
+		err = vulndump.WriteZip(stagingDir, outFile, cfg.IgnoreKubernetesVulns, cfg.SkipRHELv2Vulns)
 		if err != nil {
 			return errors.Wrap(err, "writing final zip")
 		}

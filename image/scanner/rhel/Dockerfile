@@ -12,6 +12,7 @@ LABEL name="scanner-rhel" \
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
+ENV REPO_TO_CPE_DIR="/repo2cpe"
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -21,6 +22,7 @@ COPY bundle.tar.gz /
 RUN tar -zxf /bundle.tar.gz ./genesis_manifests.json && \
     tar -zxf /bundle.tar.gz ".${NVD_DEFINITIONS_DIR}/" && \
     tar -zxf /bundle.tar.gz ".${K8S_DEFINITIONS_DIR}/" && \
+    tar -zxf /bundle.tar.gz ".${REPO_TO_CPE_DIR}/" && \
     tar -zxf /bundle.tar.gz ./scanner && \
     rm -f /bundle.tar.gz && \
     dnf upgrade -y && \
@@ -31,6 +33,7 @@ RUN tar -zxf /bundle.tar.gz ./genesis_manifests.json && \
     rpm -e subscription-manager yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \
     chown -R 4000:4000 "${NVD_DEFINITIONS_DIR}" && \
     chown -R 4000:4000 "${K8S_DEFINITIONS_DIR}" && \
+    chown -R 4000:4000 "${REPO_TO_CPE_DIR}" && \
     chown -R 4000:4000 /tmp && \
     # The contents of paths mounted as emptyDir volumes in Kubernetes are saved
     # by the script `save-dir-contents` during the image build. The directory

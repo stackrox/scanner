@@ -139,6 +139,10 @@ type Datastore interface {
 	// createNotification equals to true.
 	InsertVulnerabilities(vulnerabilities []Vulnerability) error
 
+	// InsertRHELv2Vulnerabilities stores the given RHELv2 vulnerabilities into
+	// the database.
+	InsertRHELv2Vulnerabilities(vulnerabilities []*RHELv2Vulnerability) error
+
 	// InsertKeyValue stores or updates a simple key/value pair in the database.
 	InsertKeyValue(key, value string) error
 

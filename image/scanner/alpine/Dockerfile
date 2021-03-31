@@ -20,6 +20,10 @@ ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 RUN mkdir -p "${K8S_DEFINITIONS_DIR}"
 COPY ./dump/k8s/*.yaml "${K8S_DEFINITIONS_DIR}/"
 
+ENV REPO_TO_CPE_DIR="/repo2cpe"
+RUN mkdir -p "${REPO_TO_CPE_DIR}"
+COPY ./dump/rhelv2/repository-to-cpe.json "${REPO_TO_CPE_DIR}/"
+
 COPY ./dump/genesis_manifests.json /
 COPY ./scripts/* /
 
