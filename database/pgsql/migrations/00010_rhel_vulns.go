@@ -2,9 +2,10 @@ package migrations
 
 import "github.com/remind101/migrate"
 
+// TODO: The following is adapted from claircore.
 func init() {
 	RegisterMigration(migrate.Migration{
-		ID: 9,
+		ID: 10,
 		Up: migrate.Queries([]string{
 			`-- Needed for uuid generation in-database.
 		-- The inline function makes for a nicer error message.
