@@ -8,11 +8,10 @@ import (
 	"net/url"
 )
 
-// fetch fetches the resource as specified by Fetcher.URL and
-// Fetcher.Compression, using the client provided as Fetcher.Client.
+// fetch fetches the resource as specified by the given URL,
+// using the client provided in this package.
 //
-// fetch makes GET requests, and will make conditional requests using the
-// passed-in hint.
+// fetch makes GET requests.
 func fetch(url *url.URL) (string, io.ReadCloser, error) {
 	req := &http.Request{
 		Method:     http.MethodGet,

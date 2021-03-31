@@ -186,6 +186,7 @@ func updateRepoToCPE(outputDir string) error {
 		return errors.Errorf("received status code %q querying mapping url", resp.StatusCode)
 	}
 
+	// We could just copy the contents over, but this acts a sanity check to ensure it is in the form we expect.
 	var mapping repo2cpe.RHELv2MappingFile
 	err = json.NewDecoder(resp.Body).Decode(&mapping)
 	if err != nil {

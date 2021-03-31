@@ -118,8 +118,8 @@ type RHELv2Vulnerability struct {
 	Updated        time.Time     `json:"updated"`
 	Links          string        `json:"links"`
 	Severity       string        `json:"severity"`
-	CVSSv3         string        `json:"cvssv3"`
-	CVSSv2         string        `json:"cvssv2"`
+	CVSSv3         string        `json:"cvssv3,omitempty"`
+	CVSSv2         string        `json:"cvssv2,omitempty"`
 	CPEs           []string      `json:"cpes"`
 	Package        *Package      `json:"package"`
 	FixedInVersion string        `json:"fixed_in_version"`

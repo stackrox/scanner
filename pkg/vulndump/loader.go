@@ -208,17 +208,20 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 		}
 	}
 
+	// scratch directory for RHELv2 contents.
 	destDir := filepath.Join(scratchDir, RHELv2DirName)
 	if err := os.MkdirAll(destDir, 0755); err != nil {
 		return errors.Wrap(err, "couldn't make scratch dir for RHELv2 vulns")
 	}
 
+	// RHELv2 contents inside ZIP file.
 	targetDir := filepath.Join(RHELv2DirName, RHELv2VulnsSubDirName)
 	if err := archiver.DefaultZip.Extract(zipPath, targetDir, destDir); err != nil {
 		log.WithError(err).Errorf("Failed to extract %s dump from ZIP", targetDir)
 		return err
 	}
 
+	// Extracted RHELv2 vulns directory.
 	vulnDir := filepath.Join(destDir, RHELv2VulnsSubDirName)
 	files, err := ioutil.ReadDir(vulnDir)
 	if err != nil {

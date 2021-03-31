@@ -77,14 +77,22 @@ func parse(r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			}
 		}
 
+		var cvss3Str, cvss2Str string
+		if cvss3.score > 0 && cvss3.vector != "" {
+			cvss2Str = fmt.Sprintf("%.1f/%s", cvss3.score, cvss3.vector)
+		}
+		if cvss2.score > 0 && cvss2.vector != "" {
+			cvss2Str = fmt.Sprintf("%.1f/%s", cvss2.score, cvss2.vector)
+		}
+
 		return &database.RHELv2Vulnerability{
 			Name:        def.Title,
 			Description: def.Description,
 			Issued:      def.Advisory.Issued.Date,
 			Links:       links(def),
 			Severity:    def.Advisory.Severity,
-			CVSSv3:      fmt.Sprintf("%.1f/%s", cvss3.score, cvss3.vector),
-			CVSSv2:      fmt.Sprintf("%.1f/%s", cvss2.score, cvss2.vector),
+			CVSSv3:      cvss3Str,
+			CVSSv2:      cvss2Str,
 			CPEs:        cpes,
 		}, nil
 	}
