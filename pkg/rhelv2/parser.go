@@ -85,6 +85,7 @@ func parse(r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			cvss2Str = fmt.Sprintf("%.1f/%s", cvss2.score, cvss2.vector)
 		}
 
+		// TODO: should convert Name to just CVE/RHSA
 		return &database.RHELv2Vulnerability{
 			Name:        def.Title,
 			Description: def.Description,
