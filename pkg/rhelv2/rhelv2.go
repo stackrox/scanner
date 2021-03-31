@@ -16,6 +16,7 @@ import (
 	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"go.uber.org/ratelimit"
 )
@@ -185,7 +186,7 @@ func updateRepoToCPE(outputDir string) error {
 		return errors.Errorf("received status code %q querying mapping url", resp.StatusCode)
 	}
 
-	var mapping vulndump.RHELv2MappingFile
+	var mapping repo2cpe.RHELv2MappingFile
 	err = json.NewDecoder(resp.Body).Decode(&mapping)
 	if err != nil {
 		return errors.Wrap(err, "failed to decode mapping file")

@@ -9,12 +9,21 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
-	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
 const (
 	fileName = "repository-to-cpe.json"
 )
+
+// RHELv2MappingFile is a data struct for mapping file between repositories and CPEs
+type RHELv2MappingFile struct {
+	Data map[string]RHELv2Repo `json:"data"`
+}
+
+// RHELv2Repo structure holds information about CPEs for given repo
+type RHELv2Repo struct {
+	CPEs []string `json:"cpes"`
+}
 
 type Mapping struct {
 	mapping atomic.Value
@@ -22,7 +31,7 @@ type Mapping struct {
 
 func NewMapping() *Mapping {
 	m := new(Mapping)
-	m.mapping.Store((*vulndump.RHELv2MappingFile)(nil))
+	m.mapping.Store((*RHELv2MappingFile)(nil))
 
 	return m
 }
@@ -34,7 +43,7 @@ func (m *Mapping) Load(dir string) error {
 		return errors.Wrapf(err, "reading mapping file at %s", path)
 	}
 
-	var mappingFile vulndump.RHELv2MappingFile
+	var mappingFile RHELv2MappingFile
 	if err := json.Unmarshal(bytes, &mappingFile); err != nil {
 		return errors.Wrapf(err, "unmarshalling mapping file at %s", path)
 	}
@@ -49,7 +58,7 @@ func (m *Mapping) Get(repos []string) ([]string, error) {
 		return []string{}, nil
 	}
 
-	mapping := m.mapping.Load().(*vulndump.RHELv2MappingFile)
+	mapping := m.mapping.Load().(*RHELv2MappingFile)
 	if mapping == nil {
 		return []string{}, nil
 	}

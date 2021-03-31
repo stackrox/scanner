@@ -1,7 +1,6 @@
 package generatedump
 
 import (
-	"github.com/stackrox/scanner/pkg/rhelv2"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -15,6 +14,7 @@ import (
 	"github.com/stackrox/scanner/ext/vulnmdsrc"
 	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 	"github.com/stackrox/scanner/ext/vulnsrc"
+	"github.com/stackrox/scanner/pkg/rhelv2"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
 

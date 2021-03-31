@@ -123,7 +123,8 @@ func (u *Updater) doUpdate(mode updateMode) error {
 	if mode == updateApplicationCachesAndPostgres {
 		db = u.db
 	}
-	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, db, u.interval, podName, u.caches); err != nil {
+	// TODO: replace nil with actual value.
+	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, db, u.interval, podName, u.caches, nil); err != nil {
 		return errors.Wrap(err, "updating from vuln dump")
 	}
 	if mode == updateApplicationCachesAndPostgres {

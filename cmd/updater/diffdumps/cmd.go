@@ -362,7 +362,7 @@ func Command() *cobra.Command {
 		} else {
 			log.Info("Generating RHELv2 vulns diff")
 			if err := generateRHELv2VulnsDiff(stagingDir, baseManifest.Until, baseZipR, headZipR); err != nil {
-				return errors.Wrap(err, "creating RHELv2 vlns diff")
+				return errors.Wrap(err, "creating RHELv2 vulns diff")
 			}
 			log.Info("Generated RHELv2 vulns diff")
 		}

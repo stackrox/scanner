@@ -30,13 +30,3 @@ type RHELv2 struct {
 	LastModified time.Time                       `json:"last_modified"`
 	Vulns        []*database.RHELv2Vulnerability `json:"vulns"`
 }
-
-// RHELv2MappingFile is a data struct for mapping file between repositories and CPEs
-type RHELv2MappingFile struct {
-	Data map[string]RHELv2Repo `json:"data"`
-}
-
-// RHELv2Repo structure holds information about CPEs for given repo
-type RHELv2Repo struct {
-	CPEs []string `json:"cpes"`
-}

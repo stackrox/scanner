@@ -17,13 +17,13 @@ var moduleCommentRegex = regexp.MustCompile(`(Module )(.*)( is enabled)`)
 //
 // This allows the caller to use oval.Definition fields and closure syntax when
 // defining how a vulnerability should be parsed
-type ProtoVulnFunc func(def oval.Definition) (*database.RHELVulnerability, error)
+type ProtoVulnFunc func(def oval.Definition) (*database.RHELv2Vulnerability, error)
 
 // RPMDefsToVulns iterates over the definitions in an oval root and assumes RPMInfo objects and states.
 //
-// Each Criterion encountered with an EVR string will be translated into a database.RHELVulnerability
-func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELVulnerability, error) {
-	vulns := make([]*database.RHELVulnerability, 0, 10000)
+// Each Criterion encountered with an EVR string will be translated into a database.RHELv2Vulnerability
+func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv2Vulnerability, error) {
+	vulns := make([]*database.RHELv2Vulnerability, 0, 10000)
 	cris := []*oval.Criterion{}
 	for _, def := range root.Definitions.Definitions {
 		// create our prototype vulnerability

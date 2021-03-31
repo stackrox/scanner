@@ -3,7 +3,6 @@ package rhelv2
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/stackrox/scanner/pkg/cpe"
 	"io"
 	"strconv"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"github.com/quay/goval-parser/oval"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/cpe"
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
 )
 
