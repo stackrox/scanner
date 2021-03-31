@@ -292,6 +292,10 @@ func TestDistrolessVulnImages(t *testing.T) {
 			image: "gcr.io/distroless/java-debian10@sha256:6fa3088bb0b2df2419dda9808cdf90d706ff190cff17c2a68397ac7765b3098f",
 			expectedFeatures: []feature{
 				{"openjdk-11", "11.0.9+11-1~deb10u1", []expectedVuln{}},
+				{"openssl", "1.1.1d-0+deb10u3", []expectedVuln{
+					{name: "CVE-2020-1971"},
+					{name: "CVE-2021-23841"},
+				}},
 			},
 		},
 		{
