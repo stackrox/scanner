@@ -17,6 +17,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/cache"
 	"github.com/stackrox/scanner/pkg/mtls"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/wellknowndirnames"
 	"github.com/stackrox/scanner/pkg/wellknownkeys"
@@ -48,6 +49,8 @@ type Updater struct {
 	db database.Datastore
 	// Slice of application-level caches. This includes CPE data from NVD, and Kubernetes data.
 	caches []cache.Cache
+	// RHELv2 repository-to-cpe.json file.
+	repoToCPE *repo2cpe.Mapping
 
 	stopSig *concurrency.Signal
 }
@@ -123,8 +126,7 @@ func (u *Updater) doUpdate(mode updateMode) error {
 	if mode == updateApplicationCachesAndPostgres {
 		db = u.db
 	}
-	// TODO: replace nil with actual value.
-	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, db, u.interval, podName, u.caches, nil); err != nil {
+	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, db, u.interval, podName, u.caches, u.repoToCPE); err != nil {
 		return errors.Wrap(err, "updating from vuln dump")
 	}
 	if mode == updateApplicationCachesAndPostgres {
@@ -178,7 +180,7 @@ func (u *Updater) Stop() {
 }
 
 // New returns a new updater instance, and starts running the update daemon.
-func New(config Config, centralEndpoint string, db database.Datastore, caches ...cache.Cache) (*Updater, error) {
+func New(config Config, centralEndpoint string, db database.Datastore, repoToCPE *repo2cpe.Mapping, caches ...cache.Cache) (*Updater, error) {
 	downloadURL, isCentral, err := getRelevantDownloadURL(config, centralEndpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting relevant download URL")
@@ -211,6 +213,7 @@ func New(config Config, centralEndpoint string, db database.Datastore, caches ..
 		downloadURL:        downloadURL,
 		db:                 db,
 		caches:             caches,
+		repoToCPE:          repoToCPE,
 		stopSig:            &stopSig,
 		lastUpdatedTime:    lastUpdatedTime,
 	}

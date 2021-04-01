@@ -42,6 +42,7 @@ import (
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/formatter"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
 	"golang.org/x/sys/unix"
@@ -125,11 +126,18 @@ func Boot(config *Config) {
 		k8sVulnCache = k8scache.Singleton()
 	}()
 
+	var repoToCPE *repo2cpe.Mapping
+	wg.Add(1)
+	go func() {
+		defer wg.Add(-1)
+		repoToCPE = repo2cpe.Singleton()
+	}()
+
 	// Initialize the vulnerability caches prior to making the API available
 	wg.Wait()
 	defer db.Close()
 
-	u, err := updater.New(config.Updater, config.CentralEndpoint, db, nvdVulnCache, k8sVulnCache)
+	u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdVulnCache, k8sVulnCache)
 	if err != nil {
 		log.WithError(err).Fatal("Failed to initialize updater")
 	}
