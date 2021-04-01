@@ -938,7 +938,7 @@ func TestImageSanity(t *testing.T) {
 										"Score":               9.8,
 										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 									},
-									"LastModifiedDateTime": "2021-03-10T20:28Z",
+									"LastModifiedDateTime": "2021-03-12T13:25Z",
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
