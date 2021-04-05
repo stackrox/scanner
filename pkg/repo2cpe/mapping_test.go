@@ -21,6 +21,7 @@ func TestMapping(t *testing.T) {
 		"3scale-amp-2-rpms-for-rhel-8-x86_64-debug-rpms",
 		"3scale-amp-2-rpms-for-rhel-8-x86_64-rpms",
 		"rhel-8-for-x86_64-baseos-rpms",
+		"fakerepo",
 	}
 	expectedCPEs := []string {
 		"cpe:/a:redhat:3scale_amp:2.10::el8",
