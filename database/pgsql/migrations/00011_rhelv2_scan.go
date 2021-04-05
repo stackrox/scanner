@@ -6,7 +6,7 @@ import "github.com/remind101/migrate"
 
 func init() {
 	RegisterMigration(migrate.Migration{
-		ID: 10,
+		ID: 11,
 		Up: migrate.Queries([]string{
 			`--- RHELv2 Layer
     	--- an identity table consisting of a content addressable layer hash
@@ -35,7 +35,7 @@ func init() {
 		CREATE TABLE IF NOT EXISTS package_scanartifact (
 			layer_id   BIGINT REFERENCES rhelv2_layer(id),
 			package_id BIGINT REFERENCES package(id),
-			PRIMARY KEY (layer_id, package_id, source_id)
+			PRIMARY KEY (layer_id, package_id)
 		);
 		CREATE INDEX IF NOT EXISTS package_scanartifact_lookup_idx ON package_scanartifact (layer_id);`,
 		}),
