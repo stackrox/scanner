@@ -118,6 +118,9 @@ type Datastore interface {
 	// affect them.
 	FindLayer(name string, withFeatures, withVulnerabilities bool) (Layer, error)
 
+	// InsertRHELv2Layer inserts a RHELv2 layer into the database.
+	InsertRHELv2Layer(*RHELv2Layer) error
+
 	// InsertVulnerabilities stores the given Vulnerabilities in the database,
 	// updating them if necessary.
 	//

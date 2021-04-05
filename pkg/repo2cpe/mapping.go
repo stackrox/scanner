@@ -7,6 +7,8 @@ import (
 	"sync/atomic"
 
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 )
 
 const (
@@ -49,4 +51,29 @@ func (m *Mapping) Load(dir string) error {
 	m.mapping.Store(&mappingFile)
 
 	return nil
+}
+
+func (m *Mapping) Get(repos []string) ([]string, error) {
+	if len(repos) == 0 {
+		return []string{}, nil
+	}
+
+	mapping := m.mapping.Load().(*RHELv2MappingFile)
+	if mapping == nil {
+		return []string{}, nil
+	}
+
+	cpes := set.NewStringSet()
+
+	for _, repo := range repos {
+		if repoCPEs, ok := mapping.Data[repo]; ok {
+			for _, cpe := range repoCPEs.CPEs {
+				cpes.Add(cpe)
+			}
+		} else {
+			log.Warnf("Repository %s is not present in the mapping file", repo)
+		}
+	}
+
+	return cpes.AsSlice(), nil
 }
