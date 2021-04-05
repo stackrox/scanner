@@ -120,7 +120,7 @@ func analyzeLocalImage(path string) {
 		}
 
 		if rhelv2Components != nil {
-			fmt.Printf("RHELv2 Components: %s\n", len(rhelv2Components.Packages), rhelv2Components)
+			fmt.Printf("RHELv2 Components (%d): %s\n", len(rhelv2Components.Packages), rhelv2Components)
 		}
 
 		fmt.Printf("Removed components: %v\n", removedComponents)

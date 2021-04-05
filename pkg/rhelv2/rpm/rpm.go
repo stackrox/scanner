@@ -5,10 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/utils"
-	"github.com/stackrox/scanner/pkg/commonerr"
-	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"io"
 	"io/ioutil"
 	"os"
@@ -17,7 +13,11 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 

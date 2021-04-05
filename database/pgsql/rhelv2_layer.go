@@ -2,6 +2,7 @@ package pgsql
 
 import (
 	"database/sql"
+
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 )
