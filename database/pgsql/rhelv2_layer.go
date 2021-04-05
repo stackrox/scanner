@@ -3,6 +3,7 @@ package pgsql
 import (
 	"database/sql"
 
+	"github.com/lib/pq"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 )
@@ -40,7 +41,7 @@ func (pgSQL *pgSQL) insertRHELv2Layer(tx *sql.Tx, layer *database.RHELv2Layer) e
 		`
 	)
 
-	_, err := tx.Exec(insertLayer, layer.Hash, layer.ParentHash, layer.Dist, layer.CPEs)
+	_, err := tx.Exec(insertLayer, layer.Hash, layer.ParentHash, layer.Dist, pq.Array(layer.CPEs))
 	return err
 }
 
