@@ -4,11 +4,12 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 # Scanner requires the following binaries.
 # Upgrade musl for CVE-2020-28928
+# Upgrade busybox for CVE-2021-28831
 RUN apk update && \
     apk --no-cache add \
             ca-certificates xz \
         && apk add --no-cache --upgrade \
-            musl \
+            musl busybox \
         && apk --repository "http://nl.alpinelinux.org/alpine/3.11/community" --no-cache add rpm \
         && apk --purge del apk-tools;
 
