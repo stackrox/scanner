@@ -7,29 +7,7 @@ func init() {
 	RegisterMigration(migrate.Migration{
 		ID: 10,
 		Up: migrate.Queries([]string{
-			`-- Needed for uuid generation in-database.
-		-- The inline function makes for a nicer error message.
-		DO $$
-		DECLARE
-			hint text;
-			detail text;
-			code text;
-		BEGIN
-			EXECUTE 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp"';
-		EXCEPTION WHEN OTHERS THEN
-			-- https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-EXCEPTION-DIAGNOSTICS
-			GET STACKED DIAGNOSTICS
-				code = RETURNED_SQLSTATE,
-				detail = PG_EXCEPTION_DETAIL,
-				hint = PG_EXCEPTION_HINT;
-			RAISE EXCEPTION USING
-				MESSAGE = 'Please load the "uuid-ossp" extension.',
-				ERRCODE = code,
-				DETAIL = detail,
-				HINT = hint;
-		END;
-		$$ LANGUAGE plpgsql;
-		-- Vuln is a write-once table of vulnerabilities.
+			`-- Vuln is a write-once table of vulnerabilities.
 		CREATE TABLE IF NOT EXISTS vuln (
 			id               BIGSERIAL PRIMARY KEY,
 			hash             BYTEA NOT NULL,
