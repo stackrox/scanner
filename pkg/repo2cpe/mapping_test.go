@@ -23,7 +23,7 @@ func TestMapping(t *testing.T) {
 		"rhel-8-for-x86_64-baseos-rpms",
 		"fakerepo",
 	}
-	expectedCPEs := []string {
+	expectedCPEs := []string{
 		"cpe:/a:redhat:3scale_amp:2.10::el8",
 		"cpe:/a:redhat:3scale_amp:2.11::el8",
 		"cpe:/a:redhat:3scale_amp:2.8::el8",
@@ -31,10 +31,8 @@ func TestMapping(t *testing.T) {
 		"cpe:/o:redhat:enterprise_linux:8::baseos",
 	}
 
-
 	m := Singleton()
 	cpes, err := m.Get(repos)
 	assert.NoError(t, err)
-
 	assert.ElementsMatch(t, cpes, expectedCPEs)
 }
