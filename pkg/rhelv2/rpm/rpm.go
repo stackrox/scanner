@@ -120,13 +120,10 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.Package, []string, error)
 
 func querySplit(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	i := bytes.Index(data, []byte(delim))
-	log.Info(i)
 	switch {
 	case len(data) == 0 && atEOF:
-		log.Info("Here")
 		return 0, nil, io.EOF
 	case i == -1 && atEOF:
-		log.Info("There")
 		return 0, nil, errors.New("invalid format")
 	case i == -1 && !atEOF:
 		return 0, nil, nil

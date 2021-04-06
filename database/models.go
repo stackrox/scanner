@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/stackrox/scanner/pkg/rhelv2/archop"
@@ -142,7 +143,7 @@ type Package struct {
 }
 
 func (p *Package) String() string {
-	return p.Name + ":" + p.Version
+	return strings.Join([]string{p.Name, p.Version, p.Module, p.Arch}, ":")
 }
 
 type RHELv2Layer struct {
