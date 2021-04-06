@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -99,7 +99,7 @@ func analyzeLocalImage(path string) {
 	// detect namespace
 	var namespace *database.Namespace
 	for _, l := range config.Layers {
-		layerTarReader := ioutil.NopCloser(bytes.NewBuffer(filemap[l]))
+		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l]))
 		files, err := imagefmt.ExtractFromReader(layerTarReader, "Docker", requiredfilenames.SingletonMatcher())
 		if err != nil {
 			panic(err)
@@ -112,7 +112,7 @@ func analyzeLocalImage(path string) {
 	fmt.Println(namespace)
 	var total time.Duration
 	for _, l := range config.Layers {
-		layerTarReader := ioutil.NopCloser(bytes.NewBuffer(filemap[l]))
+		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l]))
 		_, _, _, rhelv2Components, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace})
 		if err != nil {
 			fmt.Println(err.Error())
@@ -161,7 +161,7 @@ func main() {
 
 	path := "TODO: Absolute path to local image tar.gz files"
 
-	fis, err := ioutil.ReadDir(path)
+	fis, err := os.ReadDir(path)
 	if err != nil {
 		panic(err)
 	}
