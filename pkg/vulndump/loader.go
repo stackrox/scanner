@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -223,7 +222,7 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 
 	// Extracted RHELv2 vulns directory.
 	vulnDir := filepath.Join(destDir, RHELv2VulnsSubDirName)
-	files, err := ioutil.ReadDir(vulnDir)
+	files, err := os.ReadDir(vulnDir)
 	if err != nil {
 		return errors.Wrap(err, "reading scratch dir for RHELv2")
 	}
