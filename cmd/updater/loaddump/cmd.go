@@ -2,7 +2,7 @@ package loaddump
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -39,7 +39,7 @@ func Command() *cobra.Command {
 		log.Info("Successfully opened DB")
 
 		// We don't want to bother with an in-mem update.
-		scratchDir, err := ioutil.TempDir("", "vuln-updater-load-dump")
+		scratchDir, err := os.MkdirTemp("", "vuln-updater-load-dump")
 		if err != nil {
 			return errors.Wrap(err, "creating scratch dir")
 		}

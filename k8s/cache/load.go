@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -22,7 +21,7 @@ const (
 func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 	log.WithField("dir", definitionsDir).Info("Loading definitions directory")
 
-	files, err := ioutil.ReadDir(definitionsDir)
+	files, err := os.ReadDir(definitionsDir)
 	if err != nil {
 		return err
 	}

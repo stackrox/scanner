@@ -1,7 +1,6 @@
 package updater
 
 import (
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -30,7 +29,7 @@ func assertOnFileExistence(t *testing.T, path string, shouldExist bool) {
 
 func TestFetchDumpFromGoogleStorage(t *testing.T) {
 	client := &http.Client{Timeout: 30 * time.Second}
-	tempDir, err := ioutil.TempDir("", "go-fetch-dump-test")
+	tempDir, err := os.MkdirTemp("", "go-fetch-dump-test")
 	require.NoError(t, err)
 	defer func() {
 		require.NoError(t, os.RemoveAll(tempDir))

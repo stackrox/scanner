@@ -9,7 +9,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
-	"io/ioutil"
+	"os"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -78,7 +78,7 @@ func defaultTLSServerConfig(certPool *x509.CertPool, certs []tls.Certificate) *t
 
 // loadCACertDER reads the PEM-decoded bytes of the cert from the local file system.
 func loadCACertDER() ([]byte, error) {
-	b, err := ioutil.ReadFile(caCertFilePath)
+	b, err := os.ReadFile(caCertFilePath)
 	if err != nil {
 		return nil, errors.Wrap(err, "file access")
 	}

@@ -2,7 +2,6 @@ package v1
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -237,7 +236,7 @@ func TestLatestLanguageFeatureVersion(t *testing.T) {
 		nvdtoolscache.BoltPath = prevBoltPath
 	}()
 
-	dir, err := ioutil.TempDir("", "bolt")
+	dir, err := os.MkdirTemp("", "bolt")
 	require.NoError(t, err)
 	defer func() {
 		_ = os.RemoveAll(dir)
@@ -350,7 +349,7 @@ func TestAddLanguageVulns(t *testing.T) {
 		nvdtoolscache.BoltPath = prevBoltPath
 	}()
 
-	dir, err := ioutil.TempDir("", "bolt")
+	dir, err := os.MkdirTemp("", "bolt")
 	require.NoError(t, err)
 	defer func() {
 		_ = os.RemoveAll(dir)

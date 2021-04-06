@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"strings"
@@ -171,7 +171,7 @@ func getAuth(authHeader string) (string, string, error) {
 
 // ScanImage implements pushing an image's layers to Clair.
 func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
