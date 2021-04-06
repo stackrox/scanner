@@ -3,7 +3,6 @@ package diffdumps
 import (
 	"archive/zip"
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -326,7 +325,7 @@ func Command() *cobra.Command {
 		}
 		log.Info("Validated dump files. Proceeding with the diffing...")
 
-		stagingDir, err := ioutil.TempDir("", "vuln-dump-diff")
+		stagingDir, err := os.MkdirTemp("", "vuln-dump-diff")
 		if err != nil {
 			return errors.Wrap(err, "creating temp dir for output")
 		}
