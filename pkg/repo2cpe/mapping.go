@@ -2,7 +2,7 @@ package repo2cpe
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sync/atomic"
 
@@ -29,7 +29,7 @@ type Mapping struct {
 
 func (m *Mapping) Load(dir string) error {
 	path := filepath.Join(dir, fileName)
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return errors.Wrapf(err, "reading mapping file at %s", path)
 	}
