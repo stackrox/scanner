@@ -1,13 +1,13 @@
 package rpm
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
 	"testing"
 
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRPMFeatureDetection(t *testing.T) {
