@@ -1,7 +1,7 @@
 package rpm
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -12,7 +12,7 @@ import (
 
 func TestRPMFeatureDetection(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
-	d, _ := ioutil.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata"))
+	d, _ := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata"))
 
 	_, cpes, err := ListFeatures(tarutil.FilesMap{
 		"var/lib/rpm/Packages": d,
