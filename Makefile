@@ -150,7 +150,7 @@ image: scanner-image db-image
 .PHONY: image-rhel
 image-rhel: scanner-image-rhel db-image-rhel
 
-.PHONY: image-rhel-builder
+.PHONY: image-builder
 scanner-image-builder:
 	@echo "+ $@"
 	docker build -t $(BUILD_IMAGE) -f build/Dockerfile build/
