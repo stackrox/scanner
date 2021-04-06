@@ -8,15 +8,12 @@ import (
 
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRPMFeatureDetection(t *testing.T) {
-	_, filename, _, _ := runtime.Caller(0)
-	d, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/Packages"))
-	require.NoError(t, err)
-
 	sampleExpectedPkgs := []*database.Package{
 		{
 			Name:    "zlib",
@@ -42,11 +39,26 @@ func TestRPMFeatureDetection(t *testing.T) {
 		},
 	}
 
+	expectedCPEs := []string{"cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:enterprise_linux:8::appstream"}
+
+	_, filename, _, _ := runtime.Caller(0)
+	d, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/Packages"))
+	require.NoError(t, err)
+
+	manifest, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/test.json"))
+	require.NoError(t, err)
+
+	envIsolator := testutils.NewEnvIsolator(t)
+	defer envIsolator.RestoreAll()
+	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
+	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
+
 	pkgs, cpes, err := ListFeatures(tarutil.FilesMap{
-		"var/lib/rpm/Packages": d,
+		"var/lib/rpm/Packages":                       d,
+		"root/buildinfo/content_manifests/test.json": manifest,
 	})
 	assert.NoError(t, err)
-	assert.Empty(t, cpes)
+	assert.ElementsMatch(t, cpes, expectedCPEs)
 	assert.Subset(t, pkgs, sampleExpectedPkgs)
 	assert.NotSubset(t, pkgs, unexpectedPkgs)
 }
