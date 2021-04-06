@@ -1,7 +1,7 @@
 package nvdloader
 
 import (
-	"io/ioutil"
+	"io"
 	"path/filepath"
 
 	"github.com/facebookincubator/nvdtools/vulndb"
@@ -65,7 +65,7 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, "opening file: %v", path)
 		}
-		data, err := ioutil.ReadAll(file)
+		data, err := io.ReadAll(file)
 		if err != nil {
 			return nil, errors.Wrapf(err, "reading file: %v", path)
 		}

@@ -2,7 +2,6 @@ package k8sloader
 
 import (
 	"io"
-	"io/ioutil"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -12,7 +11,7 @@ import (
 // LoadYAMLFileFromReader loads the Kubernetes CVE feed from the given io.Reader.
 // It does NOT close the reader; that is the caller's responsibility.
 func LoadYAMLFileFromReader(r io.Reader) (*validation.CVESchema, error) {
-	contents, err := ioutil.ReadAll(r)
+	contents, err := io.ReadAll(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "reading YAML contents")
 	}

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -50,7 +49,7 @@ func (a *appender) BuildCache(dumpDir string) error {
 	dumpDir = filepath.Join(dumpDir, vulndump.RedHatDirName)
 	a.metadata = make(map[string]*metadataEnricher)
 
-	fileInfos, err := ioutil.ReadDir(dumpDir)
+	fileInfos, err := os.ReadDir(dumpDir)
 	if err != nil {
 		return errors.Wrap(err, "failed to read dir")
 	}

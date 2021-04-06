@@ -4,7 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -125,7 +125,7 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 			log.Debugf("error opening java sub archive: %v", err)
 			continue
 		}
-		contents, err := ioutil.ReadAll(reader)
+		contents, err := io.ReadAll(reader)
 		if err != nil {
 			log.Debugf("error reading java sub archive: %v", err)
 			continue

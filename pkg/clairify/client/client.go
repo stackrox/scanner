@@ -6,7 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -72,7 +72,7 @@ func (c *Clairify) sendRequest(request *http.Request, timeout time.Duration) ([]
 	if response.StatusCode == http.StatusNotFound {
 		return nil, ErrorScanNotFound
 	}
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
