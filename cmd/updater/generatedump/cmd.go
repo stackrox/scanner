@@ -1,7 +1,6 @@
 package generatedump
 
 import (
-	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -38,7 +37,7 @@ func generateDumpWithAllVulns(outFile string) error {
 	// We will mark in the dump that the vulns are correct as of this time.
 	// We cannot guarantee that any vuln is more up-to-date than this.
 	startTime := time.Now()
-	dumpDir, err := ioutil.TempDir("", "vuln-updater")
+	dumpDir, err := os.MkdirTemp("", "vuln-updater")
 	if err != nil {
 		return errors.Wrap(err, "failed to create temp dir")
 	}

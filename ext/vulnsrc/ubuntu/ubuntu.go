@@ -20,7 +20,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -195,7 +194,7 @@ func (u *updater) pullRepositoryWithRetries() (string, error) {
 func (u *updater) pullRepository() (commit string, err error) {
 	// If the repository doesn't exist, clone it.
 	if _, pathExists := os.Stat(u.repositoryLocalPath); u.repositoryLocalPath == "" || os.IsNotExist(pathExists) {
-		if u.repositoryLocalPath, err = ioutil.TempDir(os.TempDir(), "ubuntu-cve-tracker"); err != nil {
+		if u.repositoryLocalPath, err = os.MkdirTemp("", "ubuntu-cve-tracker"); err != nil {
 			return "", vulnsrc.ErrFilesystem
 		}
 

@@ -18,7 +18,6 @@ package alpine
 
 import (
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -68,7 +67,7 @@ func (u *updater) processFile(filename string) {
 	}
 	defer file.Close()
 
-	fileContents, err := ioutil.ReadAll(response.Body)
+	fileContents, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.WithField("package", "Alpine").Fatal(err)
 		return
@@ -118,7 +117,7 @@ func (u *updater) getVulnFiles(repoPath, tempDirPrefix string) (commit string, e
 
 	// Set up temporary location for downloads
 	if repoPath == "" {
-		u.repositoryLocalPath, err = ioutil.TempDir(os.TempDir(), tempDirPrefix)
+		u.repositoryLocalPath, err = os.MkdirTemp("", tempDirPrefix)
 		if err != nil {
 			return
 		}
