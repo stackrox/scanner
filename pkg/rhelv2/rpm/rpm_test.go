@@ -39,7 +39,10 @@ func TestRPMFeatureDetection(t *testing.T) {
 		},
 	}
 
-	expectedCPEs := []string{"cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:enterprise_linux:8::appstream"}
+	expectedCPEs := []string{
+		"cpe:/o:redhat:enterprise_linux:8::baseos",
+		"cpe:/a:redhat:enterprise_linux:8::appstream",
+	}
 
 	_, filename, _, _ := runtime.Caller(0)
 	d, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/Packages"))
