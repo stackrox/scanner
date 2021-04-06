@@ -9,15 +9,15 @@ func init() {
 		ID: 11,
 		Up: migrate.Queries([]string{
 			`--- RHELv2 Layer
-    	--- an identity table consisting of a content addressable layer hash
-    	CREATE TABLE IF NOT EXISTS rhelv2_layer (
+		--- an identity table consisting of a content addressable layer hash
+		CREATE TABLE IF NOT EXISTS rhelv2_layer (
 			id          BIGSERIAL PRIMARY KEY,
-        	hash        TEXT,
+	    	hash        TEXT,
 			parent_hash TEXT NOT NULL DEFAULT '',
 			dist        TEXT,
 			cpes        TEXT[],
 			UNIQUE (hash)
-    	);
+		);
 
 		--- Package
 		--- a unique package discovered by a scanner
@@ -31,7 +31,7 @@ func init() {
 		CREATE UNIQUE INDEX IF NOT EXISTS package_unique_idx ON package (name, version, module, arch);
 
 		--- PackageScanArtifact
-    	--- A relation linking discovered packages with the layer hash it was found
+		--- A relation linking discovered packages with the layer hash it was found
 		CREATE TABLE IF NOT EXISTS package_scanartifact (
 			layer_id   BIGINT REFERENCES rhelv2_layer(id),
 			package_id BIGINT REFERENCES package(id),
