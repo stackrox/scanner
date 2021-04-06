@@ -100,6 +100,9 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.Package, []string, error)
 			if err != nil {
 				return err
 			}
+			if p == nil {
+				continue
+			}
 			pkgs = append(pkgs, p)
 		}
 
@@ -150,6 +153,10 @@ func parsePackage(buf *bytes.Buffer) (*database.Package, error) {
 		}
 		switch i {
 		case 0:
+			// This is not a real package. Skip it...
+			if line == "gpg-pubkey" {
+				return nil, nil
+			}
 			p.Name = line
 		case 1:
 			p.Version = line
