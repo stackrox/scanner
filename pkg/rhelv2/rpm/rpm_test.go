@@ -35,10 +35,18 @@ func TestRPMFeatureDetection(t *testing.T) {
 		},
 	}
 
+	unexpectedPkgs := []*database.Package{
+		{
+			Name:    "gpg-pubkey",
+			Version: "d4082792-5b32db75",
+		},
+	}
+
 	pkgs, cpes, err := ListFeatures(tarutil.FilesMap{
 		"var/lib/rpm/Packages": d,
 	})
 	assert.NoError(t, err)
 	assert.Empty(t, cpes)
 	assert.Subset(t, pkgs, sampleExpectedPkgs)
+	assert.NotSubset(t, pkgs, unexpectedPkgs)
 }
