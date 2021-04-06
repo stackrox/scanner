@@ -65,7 +65,7 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.Package, []string, error)
 		_ = os.RemoveAll(tmpDir)
 	}()
 
-	err = ioutil.WriteFile(tmpDir+"/Packages", f, 0700)
+	err = os.WriteFile(tmpDir+"/Packages", f, 0700)
 	if err != nil {
 		log.WithError(err).Error("could not create temporary file for RPM detection")
 		return nil, nil, commonerr.ErrFilesystem
@@ -121,10 +121,13 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.Package, []string, error)
 
 func querySplit(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	i := bytes.Index(data, []byte(delim))
+	log.Info(i)
 	switch {
 	case len(data) == 0 && atEOF:
+		log.Info("Here")
 		return 0, nil, io.EOF
 	case i == -1 && atEOF:
+		log.Info("There")
 		return 0, nil, errors.New("invalid format")
 	case i == -1 && !atEOF:
 		return 0, nil, nil
