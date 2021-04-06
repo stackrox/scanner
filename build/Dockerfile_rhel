@@ -1,6 +1,6 @@
 FROM centos:8
 
-ENV GOLANG_VERSION "1.13.9"
+ENV GOLANG_VERSION "1.16.2"
 
 RUN yum update -y && yum install -y epel-release dnf-plugins-core
 RUN yum -y groupinstall "Development Tools"
