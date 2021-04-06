@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -56,7 +55,7 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.Package, []string, error)
 	}
 
 	// Write the required "Packages" file to disk
-	tmpDir, err := ioutil.TempDir(os.TempDir(), "rpm")
+	tmpDir, err := os.MkdirTemp("", "rpm")
 	if err != nil {
 		log.WithError(err).Error("could not create temporary folder for RPM detection")
 		return nil, nil, commonerr.ErrFilesystem
