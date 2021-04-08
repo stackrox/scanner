@@ -520,9 +520,9 @@ func severity(severity string) database.Severity {
 	case "low":
 		return database.LowSeverity
 	case "moderate":
-		return database.ModerateSeverity
+		return database.MediumSeverity
 	case "important":
-		return database.Important
+		return database.HighSeverity
 	case "critical":
 		return database.CriticalSeverity
 	default:

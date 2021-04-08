@@ -58,7 +58,7 @@ func init() {
 			`CREATE INDEX ON Layer_diff_FeatureVersion (featureversion_id);`,
 			`CREATE INDEX ON Layer_diff_FeatureVersion (featureversion_id, layer_id);`,
 
-			`CREATE TYPE severity AS ENUM ('Unknown', 'Negligible', 'Low', 'Medium', 'High', 'Critical', 'Defcon1', 'Moderate', 'Important');`,
+			`CREATE TYPE severity AS ENUM ('Unknown', 'Negligible', 'Low', 'Medium', 'High', 'Critical', 'Defcon1');`,
 			`CREATE TABLE IF NOT EXISTS Vulnerability (
         id SERIAL PRIMARY KEY,
         namespace_id INT NOT NULL REFERENCES Namespace,
