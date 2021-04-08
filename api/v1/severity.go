@@ -2,17 +2,19 @@ package v1
 
 import "github.com/stackrox/scanner/database"
 
+// Severity is the uniform severity returned through the API
 type Severity string
 
+// Severity settings for vulnerabilities
 const (
-	UnknownSeverity Severity = "Unknown"
-	LowSeverity Severity = "Low"
-	ModerateSeverity Severity = "Moderate"
+	UnknownSeverity   Severity = "Unknown"
+	LowSeverity       Severity = "Low"
+	ModerateSeverity  Severity = "Moderate"
 	ImportantSeverity Severity = "Important"
-	CriticalSeverity Severity = "Critical"
+	CriticalSeverity  Severity = "Critical"
 )
 
-func databaseVulnToSeverity(dbVuln database.Vulnerability) Severity  {
+func databaseVulnToSeverity(dbVuln database.Vulnerability) Severity {
 	switch dbVuln.Severity {
 	case database.UnknownSeverity:
 		return UnknownSeverity
