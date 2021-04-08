@@ -27,13 +27,15 @@ require (
 	github.com/lib/pq v1.8.0
 	github.com/mailru/easyjson v0.7.6
 	github.com/mholt/archiver v3.1.1+incompatible
+	github.com/mitchellh/hashstructure v1.0.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.0.2-0.20190823105129-775207bd45b6
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
+	github.com/quay/claircore v1.0.5
 	github.com/quay/goval-parser v0.8.6
-	github.com/remind101/migrate v0.0.0-20160423010909-d22d647232c2
+	github.com/remind101/migrate v0.0.0-20170729031349-52c1edff7319
 	github.com/sirupsen/logrus v1.8.0
 	github.com/spf13/cobra v1.1.1
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd

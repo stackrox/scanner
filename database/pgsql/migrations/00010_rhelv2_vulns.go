@@ -2,7 +2,10 @@ package migrations
 
 import "github.com/remind101/migrate"
 
-// TODO: The following is adapted from claircore.
+///////////////////////////////////////////////////
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
 func init() {
 	RegisterMigration(migrate.Migration{
 		ID: 10,

@@ -93,7 +93,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 
 			for _, module := range enabledModules {
 				vuln := *protoVuln
-				vuln.Package = &database.Package{
+				vuln.Package = &database.RHELv2Package{
 					Name:   object.Name,
 					Module: module,
 				}

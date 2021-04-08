@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/quay/claircore/pkg/cpe"
 	"github.com/quay/goval-parser/oval"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/pkg/cpe"
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
 )
 
