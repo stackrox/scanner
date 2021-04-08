@@ -24,6 +24,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
+	github.com/knqyf263/go-rpm-version v0.0.0-20170716094938-74609b86c936
 	github.com/lib/pq v1.8.0
 	github.com/mailru/easyjson v0.7.6
 	github.com/mholt/archiver v3.1.1+incompatible

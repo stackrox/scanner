@@ -16,9 +16,14 @@ package v1
 
 import (
 	"fmt"
+	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	"github.com/stackrox/scanner/pkg/types"
+	"strconv"
 	"strings"
 
+	version "github.com/knqyf263/go-rpm-version"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
@@ -254,7 +259,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		notes = append(notes, LanguageCVEsUnavailable)
 	}
 
-	if (withFeatures || withVulnerabilities) && dbLayer.Features != nil {
+	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || strings.HasPrefix(layer.NamespaceName, "rhel")) {
 	OUTER:
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion)
@@ -267,6 +272,11 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, dbFeatureVersion.Feature.Namespace.VersionFormat)
 			layer.Features = append(layer.Features, *feature)
+		}
+		if strings.HasPrefix(layer.NamespaceName, "rhel") {
+			if err := addRHELv2Vulns(db, &layer); err != nil {
+				return layer, notes, err
+			}
 		}
 		if env.LanguageVulns.Enabled() {
 			addLanguageVulns(db, &layer)
@@ -295,6 +305,215 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 		allVulnsFixedBy = higherVersion
 	}
 	feature.FixedBy = allVulnsFixedBy
+}
+
+// TODO: some of this is based on claircore
+
+func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
+	layers, err := db.GetRHELv2Layers(layer.Name)
+	if err != nil {
+		return err
+	}
+
+	shareCPEs(layers)
+
+	// Data about the environment surrounding a particular package.
+	type pkgEnvironment struct {
+		pkg          *database.Package
+		introducedIn string
+		cpes         []string
+	}
+
+	pkgEnvs := make(map[string]*pkgEnvironment)
+
+	// Find all packages that were ever added to the image
+	// labelled with the layer hash that introduced it.
+	for _, layer := range layers {
+		for _, pkg := range layer.Pkgs {
+			if _, ok := pkgEnvs[pkg.ID]; !ok {
+				pkgEnvs[pkg.ID] = &pkgEnvironment{
+					pkg: pkg,
+					introducedIn: layer.Hash,
+					cpes: layer.CPEs,
+				}
+			}
+		}
+	}
+
+	// Look for the packages that still remain in the final image.
+	// Loop from highest layer to base in search of the latest version of
+	// the packages database.
+	for i := len(layers) - 1; i >= 0; i-- {
+		if len(layers[i].Pkgs) != 0 {
+			// Found the latest version of `var/lib/rpm/Packages`
+			// This has the final version of all the packages in this image.
+			finalPkgs := set.NewStringSet()
+			for _, pkg := range layers[i].Pkgs {
+				finalPkgs.Add(pkg.ID)
+			}
+
+			for pkgID := range pkgEnvs {
+				// Remove packages that were in lower layers, but not at the highest.
+				if !finalPkgs.Contains(pkgID) {
+					delete(pkgEnvs, pkgID)
+				}
+			}
+
+			break
+		}
+	}
+
+	// Create a record for each pkgEnvironment for each CPE.
+	var records []*database.RHELv2Record
+
+	for _, pkgEnv := range pkgEnvs {
+		if len(pkgEnv.cpes) == 0 {
+			records = append(records, &database.RHELv2Record{
+				Pkg:  pkgEnv.pkg,
+				Dist: layer.NamespaceName,
+			})
+		}
+
+		for _, cpe := range pkgEnv.cpes {
+			records = append(records, &database.RHELv2Record{
+				Pkg:  pkgEnv.pkg,
+				Dist: layer.NamespaceName,
+				CPE: cpe,
+			})
+		}
+	}
+
+	vulns, err := db.GetRHELv2Vulnerabilities(records)
+	if err != nil {
+		return err
+	}
+
+	// Database query results need more filtering.
+	// Need to ensure:
+	// 1. The package's version is less than the vuln's fixed-in version, if present.
+	// 2. The ArchOperation passes.
+
+	for _, pkgEnv := range pkgEnvs {
+		pkg := pkgEnv.pkg
+
+		// TODO: add FixedBy field as well
+		feature := Feature{
+			Name:            pkg.Name,
+			NamespaceName:   layer.NamespaceName,
+			VersionFormat:   rpm.ParserName,
+			Version:         pkg.Version,
+			AddedBy:         pkgEnv.introducedIn,
+			Location:        "var/lib/rpm/Packages", // TODO: Fill out?
+		}
+
+		pkgVersion := version.NewVersion(pkg.Version)
+		pkgArch := pkg.Arch
+		for _, vuln := range vulns[pkg.ID] {
+			// Assume the vulnerability is not fixed.
+			// In that case, all versions are affected.
+			affectedVersion := true
+			if vuln.FixedInVersion != "" {
+				// The vulnerability is fixed. Determine if this package is affected.
+				vulnVersion := version.NewVersion(vuln.FixedInVersion)
+				affectedVersion = pkgVersion.Compare(vulnVersion) == version.LESS
+			}
+
+			// Compare the package's architecture to the affected architecture.
+			affectedArch := vuln.ArchOperation.Cmp(pkgArch, vuln.Package.Arch)
+
+			if affectedVersion && affectedArch {
+				feature.Vulnerabilities = append(feature.Vulnerabilities, rhelv2ToVulnerability(vuln, feature.NamespaceName))
+			}
+		}
+
+		layer.Features = append(layer.Features, feature)
+	}
+
+	return nil
+}
+
+// shareRepos takes repository definition and share it with other layers
+// where repositories are missing
+func shareCPEs(layers []*database.RHELv2Layer) {
+	// User's layers build on top of Red Hat images doesn't have a repository definition.
+	// We need to share CPE repo definition to all layer where CPEs are missing
+	// This only applies to Red Hat images
+	var previousCPEs []string
+	for i := 0; i < len(layers); i++ {
+		if len(layers[i].CPEs) != 0 {
+			previousCPEs = layers[i].CPEs
+		} else {
+			layers[i].CPEs = append(layers[i].CPEs, previousCPEs...)
+		}
+	}
+	// Tha same thing has to be done in reverse
+	// example:
+	//   Red Hat's base images doesn't have repository definition
+	//   We need to get them from layer[i+1]
+	for i := len(layers) - 1; i >= 0; i-- {
+		if len(layers[i].CPEs) != 0 {
+			previousCPEs = layers[i].CPEs
+		} else {
+			layers[i].CPEs = append(layers[i].CPEs, previousCPEs...)
+		}
+	}
+}
+
+func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string) Vulnerability {
+	var cvss2 types.MetadataCVSSv2
+	if vuln.CVSSv2 != "" {
+		scoreStr, vector := stringutils.Split2(vuln.CVSSv2, "/")
+		score, err := strconv.ParseFloat(scoreStr, 64)
+		if err != nil {
+			log.Errorf("Unable to parse CVSSv2 score from RHEL vulnerability %s: %s", vuln.Name, vuln.CVSSv2)
+		} else {
+			cvss2Ptr, err := types.ConvertCVSSv2(vector)
+			if err != nil {
+				log.Errorf("Unable to parse CVSSv2 vector from RHEL vulnerability %s: %s", vuln.Name, vuln.CVSSv2)
+			} else if score != cvss2Ptr.Score {
+				log.Warnf("Given CVSSv2 score and computed score differ for RHEL vulnerability %s: %f != %f", vuln.Name, score, cvss2Ptr.Score)
+			} else {
+				cvss2 = *cvss2Ptr
+			}
+		}
+	}
+
+	var cvss3 types.MetadataCVSSv3
+	if vuln.CVSSv3 != "" {
+		scoreStr, vector := stringutils.Split2(vuln.CVSSv3, "/")
+		score, err := strconv.ParseFloat(scoreStr, 64)
+		if err != nil {
+			log.Errorf("Unable to parse CVSSv3 score from RHEL vulnerability %s: %s", vuln.Name, vuln.CVSSv3)
+		} else {
+			cvss3Ptr, err := types.ConvertCVSSv3(vector)
+			if err != nil {
+				log.Errorf("Unable to parse CVSSv3 vector from RHEL vulnerability %s: %s", vuln.Name, vuln.CVSSv3)
+			} else if score != cvss3Ptr.Score {
+				log.Warnf("Given CVSSv3 score and computed score differ for RHEL vulnerability %s: %f != %f", vuln.Name, score, cvss3Ptr.Score)
+			} else {
+				cvss3 = *cvss3Ptr
+			}
+		}
+	}
+
+	metadata := map[string]interface{}{
+		"Red Hat": &types.Metadata{
+			PublishedDateTime:    vuln.Issued.String(),
+			LastModifiedDateTime: vuln.Updated.String(),
+			CVSSv2:               cvss2,
+			CVSSv3:               cvss3,
+		},
+	}
+
+	return Vulnerability{
+		Name:          vuln.Name,
+		NamespaceName: namespace, // TODO: Purpose?
+		Description:   vuln.Description,
+		Link:          vuln.Links, // TODO: Just one link?
+		Severity:      vuln.Severity,
+		Metadata:      metadata,
+		FixedBy:       vuln.FixedInVersion, // Empty string if not fixed.
+	}
 }
 
 type Namespace struct {

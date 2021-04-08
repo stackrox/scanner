@@ -181,6 +181,12 @@ func (r *RHELv2Components) String() string {
 	return buf.String()
 }
 
+type RHELv2Record struct {
+	Pkg  *Package
+	Dist string
+	CPE  string
+}
+
 // ContentManifest structure is based on file provided by OSBS
 // The struct stores content metadata about the image
 type ContentManifest struct {

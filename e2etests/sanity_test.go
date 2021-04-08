@@ -297,15 +297,14 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
-		// TODO: Once scanning + vuln matching are in-place, re-enable this test.
-		/*{
+		{
 			image:    "docker.io/anchore/anchore-engine:v0.5.0",
 			registry: "https://registry-1.docker.io",
 			source:   "Red Hat",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "procps-ng",
-					NamespaceName: "centos:7",
+					NamespaceName: "rhel:7",
 					VersionFormat: "rpm",
 					Version:       "3.3.10-26.el7",
 					AddedBy:       "sha256:c8d67acdb2ffaebd638cf55a8fccc63693211060670aa7f0ea1d65b5d2c674dd",
@@ -385,7 +384,7 @@ func TestImageSanity(t *testing.T) {
 					},
 				},
 			},
-		},*/
+		},
 		{
 			image:    "us.gcr.io/stackrox-ci/qa/apache/server:latest",
 			registry: "https://us.gcr.io",

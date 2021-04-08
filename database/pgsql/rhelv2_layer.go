@@ -2,7 +2,6 @@ package pgsql
 
 import (
 	"database/sql"
-
 	"github.com/lib/pq"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
@@ -104,4 +103,113 @@ func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*datab
 	}
 
 	return nil
+}
+
+func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, error) {
+	// Inside the `WITH RECURSIVE`, the base case is the top query, and the
+	// recursive case is the bottom query.
+	// Base: find the layer by hash.
+	// Recursive: find the layer whose hash matches the current layer's parent hash
+	//
+	// This query looks for all the layers in the given layer's hierarchy.
+	const (
+		query = `
+		WITH RECURSIVE layers AS (
+			SELECT id, hash, parent_hash, dist, cpes
+			FROM rhelv2_layer
+			WHERE hash = $1
+			UNION
+				SELECT l.id, l.hash, l.parent_hash, l.dist, l.cpes
+				FROM layers ll, rhelv2_layer l
+				WHERE ll.parent_hash = l.hash
+		)
+		SELECT id, hash, dist, cpes
+		FROM layers;
+		`
+	)
+
+	tx, err := pgSQL.Begin()
+	if err != nil {
+		return nil, handleError("GetRHELv2Layers.Begin()", err)
+	}
+
+	rows, err := tx.Query(query, layerHash)
+	if err != nil {
+		return nil, err
+	}
+	defer utils.IgnoreError(rows.Close)
+
+	var layers []*database.RHELv2Layer
+
+	for rows.Next() {
+		var rhelv2Layer database.RHELv2Layer
+		if err := rows.Scan(&rhelv2Layer.ID, &rhelv2Layer.Hash, &rhelv2Layer.Dist, &rhelv2Layer.CPEs); err != nil {
+			utils.IgnoreError(tx.Rollback)
+			return nil, err
+		}
+
+		layers = append(layers, &rhelv2Layer)
+	}
+	if err := rows.Err(); err != nil {
+		utils.IgnoreError(tx.Rollback)
+		return nil, err
+	}
+
+	for _, layer := range layers {
+		if err := pgSQL.getPackagesByLayer(tx, layer); err != nil {
+			utils.IgnoreError(tx.Rollback)
+			return nil, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		utils.IgnoreError(tx.Rollback)
+		return nil, handleError("GetRHELv2Layers.Commit()", err)
+	}
+
+	return layers, nil
+}
+
+func (pgSQL *pgSQL) getPackagesByLayer(tx *sql.Tx, layer *database.RHELv2Layer) error {
+	const (
+		query = `
+		SELECT
+			package.id,
+			package.name,
+			package.version,
+			package.module,
+			package.arch
+		FROM
+			package_scanartifact
+			LEFT JOIN package ON
+					package_scanartifact.package_id = package.id
+			JOIN rhelv2_layer ON rhelv2_layer.hash = $1
+		WHERE
+			package_scanartifact.layer_id = rhelv2_layer.id;
+		`
+	)
+
+	rows, err := tx.Query(query, layer.Hash)
+	if err != nil {
+		return err
+	}
+	defer utils.IgnoreError(rows.Close)
+
+	for rows.Next() {
+		var pkg database.Package
+		err := rows.Scan(
+			&pkg.ID,
+			&pkg.Name,
+			&pkg.Version,
+			&pkg.Module,
+			&pkg.Arch,
+		)
+		if err != nil {
+			return err
+		}
+
+		layer.Pkgs = append(layer.Pkgs, &pkg)
+	}
+
+	return rows.Err()
 }
