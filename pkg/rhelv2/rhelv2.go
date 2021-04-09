@@ -99,7 +99,7 @@ func UpdateV2(outputDir string) (int, error) {
 			// This in turn causes false CVEs to appear in scanned images. Red Hat Product
 			// Security is working on fixing this situation and the plan is to remove this
 			// exception in the future.
-			if name == "RHEL7-rhelv2-7-alt" {
+			if name == "RHEL7-rhel-7-alt" {
 				continue
 			}
 		default: // skip
