@@ -18,7 +18,7 @@ func init() {
 			name             TEXT,
 			issued           timestamptz,
 			updated          timestamptz,
-			links            TEXT,
+			link             TEXT,
 			severity         TEXT,
 			cvss3            TEXT,
 			cvss2            TEXT,

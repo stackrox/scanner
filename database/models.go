@@ -120,7 +120,7 @@ type RHELv2Vulnerability struct {
 	Description    string         `json:"description"`
 	Issued         time.Time      `json:"issued"`
 	Updated        time.Time      `json:"updated"`
-	Links          string         `json:"links"`
+	Link           string         `json:"link"`
 	Severity       string         `json:"severity"`
 	CVSSv3         string         `json:"cvssv3,omitempty"`
 	CVSSv2         string         `json:"cvssv2,omitempty"`

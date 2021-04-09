@@ -198,7 +198,7 @@ const (
 	insertRHELv2Vuln = `
 		INSERT INTO vuln (
 			hash,
-			name, issued, updated, links,
+			name, issued, updated, link,
 			severity, cvss3, cvss2,
 			package_name, package_module, package_arch,
 			cpe,
