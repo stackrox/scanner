@@ -143,18 +143,16 @@ func renew(sig *concurrency.Signal, db database.Datastore, interval time.Duratio
 
 }
 
-func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) (func() error, error) {
-	noop := func() error {
-		return nil
-	}
-
+// startVulnLoad determines if this scanner should perform a vulnerability update and performs the necessary setup.
+// The returned function should be performed upon update completion.
+func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) (bool, func() error, error) {
 	shouldUpdate, err := determineWhetherToUpdate(db, manifest)
 	if err != nil {
-		return nil, errors.Wrap(err, "determining whether to update")
+		return false, nil, errors.Wrap(err, "determining whether to update")
 	}
 	if !shouldUpdate {
 		log.Info("DB already contains all the vulns in the dump. Nothing to do here!")
-		return noop, nil
+		return false, nil, nil
 	}
 	log.Info("Running the update.")
 
@@ -162,15 +160,15 @@ func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval tim
 	if !gotLock {
 		owner, _, err := db.FindLock(updateLockName)
 		if err != nil {
-			return nil, err
+			return false, nil, err
 		}
 		log.Infof("DB update lock already acquired by %q", owner)
-		return noop, nil
+		return false, nil, nil
 	}
 	finishedSig := concurrency.NewSignal()
 	go renew(&finishedSig, db, updateInterval, expiration, instanceName)
 
-	return func() error {
+	return true, func() error {
 		defer finishedSig.Signal()
 
 		log.Info("Done inserting vulns into the DB")
@@ -307,24 +305,24 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	log.Info("Loaded manifest")
 
 	if db != nil {
-		end, err := startVulnLoad(manifest, db, updateInterval, instanceName)
+		performUpdate, finishFn, err := startVulnLoad(manifest, db, updateInterval, instanceName)
 		if err != nil {
-			utils.IgnoreError(end)
 			return errors.Wrap(err, "error beginning vuln loading")
 		}
+		if performUpdate {
+			if err := loadRHELv2Vulns(db, zipPath, scratchDir, repoToCPE); err != nil {
+				utils.IgnoreError(finishFn)
+				return errors.Wrap(err, "error loading RHEL vulns")
+			}
 
-		if err := loadRHELv2Vulns(db, zipPath, scratchDir, repoToCPE); err != nil {
-			utils.IgnoreError(end)
-			return errors.Wrap(err, "error loading RHEL vulns")
-		}
+			if err := loadOSVulns(zipR, db); err != nil {
+				utils.IgnoreError(finishFn)
+				return errors.Wrap(err, "error loading OS vulns")
+			}
 
-		if err := loadOSVulns(zipR, db); err != nil {
-			utils.IgnoreError(end)
-			return errors.Wrap(err, "error loading OS vulns")
-		}
-
-		if err := end(); err != nil {
-			return errors.Wrap(err, "error ending vuln loading")
+			if err := finishFn(); err != nil {
+				return errors.Wrap(err, "error ending vuln loading")
+			}
 		}
 	}
 
