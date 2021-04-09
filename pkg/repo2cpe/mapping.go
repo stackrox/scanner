@@ -15,7 +15,9 @@ import (
 )
 
 const (
-	fileName = "repository-to-cpe.json"
+	// RHELv2CPERepoName is the name of the JSON file
+	// mapping repositories to CPEs.
+	RHELv2CPERepoName = "repository-to-cpe.json"
 )
 
 // RHELv2MappingFile is a data struct for mapping file between repositories and CPEs
@@ -33,7 +35,7 @@ type Mapping struct {
 }
 
 func (m *Mapping) Load(dir string) error {
-	path := filepath.Join(dir, fileName)
+	path := filepath.Join(dir, RHELv2CPERepoName)
 	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return errors.Wrapf(err, "reading mapping file at %s", path)

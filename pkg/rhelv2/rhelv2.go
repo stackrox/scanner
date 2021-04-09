@@ -195,9 +195,9 @@ func updateRepoToCPE(outputDir string) error {
 		return errors.Wrapf(err, "creating subdir for %s", vulndump.RHELv2DirName)
 	}
 
-	outF, err := os.Create(filepath.Join(rhelV2Dir, vulndump.RHELv2CPERepoName))
+	outF, err := os.Create(filepath.Join(rhelV2Dir, repo2cpe.RHELv2CPERepoName))
 	if err != nil {
-		return errors.Wrapf(err, "failed to create file %s", vulndump.RHELv2CPERepoName)
+		return errors.Wrapf(err, "failed to create file %s", repo2cpe.RHELv2CPERepoName)
 	}
 	defer utils.IgnoreError(outF.Close)
 

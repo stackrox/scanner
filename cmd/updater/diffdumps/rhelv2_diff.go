@@ -13,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
@@ -125,14 +126,14 @@ func generateRHELv2VulnsDiff(outputDir string, baseLastModifiedTime time.Time, b
 	// Let's us know if the base dump had RHELv2 data.
 	rhelExists := len(baseFiles) > 0
 
-	repoToCPEFile := filepath.Join(vulndump.RHELv2DirName, vulndump.RHELv2CPERepoName)
+	repoToCPEFile := filepath.Join(vulndump.RHELv2DirName, repo2cpe.RHELv2CPERepoName)
 	for _, headF := range headZipR.File {
 		name := headF.Name
 
 		// repo to cpe JSON
 		if name == repoToCPEFile {
 			if err := generateRHELv2RepoToCPE(filepath.Join(outputDir, repoToCPEFile), headF); err != nil {
-				return errors.Wrapf(err, "generating %s", vulndump.RHELv2CPERepoName)
+				return errors.Wrapf(err, "generating %s", repo2cpe.RHELv2CPERepoName)
 			}
 		}
 
