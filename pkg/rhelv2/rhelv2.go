@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/quay/claircore/rhel/pulp"
 	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
@@ -60,14 +61,13 @@ func UpdateV2(outputDir string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
-	switch res.StatusCode {
-	case http.StatusOK:
-	default:
+	if res.StatusCode != http.StatusOK {
 		return 0, errors.Errorf("rhelv2: unexpected response: %v", res.Status)
 	}
 
-	m := Manifest{}
+
+	// Declare this way to prevent warnings.
+	m := pulp.Manifest{}
 	if err := m.Load(res.Body); err != nil {
 		return 0, err
 	}
@@ -174,15 +174,13 @@ func updateRepoToCPE(outputDir string) error {
 	}
 
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer utils.IgnoreError(resp.Body.Close)
+	}
 	if err != nil {
 		return err
 	}
-	defer utils.IgnoreError(resp.Body.Close)
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		// break
-	default:
+	if resp.StatusCode != http.StatusOK {
 		return errors.Errorf("received status code %q querying mapping url", resp.StatusCode)
 	}
 

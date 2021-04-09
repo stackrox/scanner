@@ -1,3 +1,7 @@
+///////////////////////////////////////////////////
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
 package ovalutil
 
 import (
@@ -5,9 +9,10 @@ import (
 	"fmt"
 	"regexp"
 
+	archop "github.com/quay/claircore"
+	coreovalutil "github.com/quay/claircore/pkg/ovalutil"
 	"github.com/quay/goval-parser/oval"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/pkg/rhelv2/archop"
 )
 
 var moduleCommentRegex = regexp.MustCompile(`(Module )(.*)( is enabled)`)
@@ -43,7 +48,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 		for _, criterion := range cris {
 			// if test object is not rmpinfo_test the provided test is not
 			// associated with a package. this criterion will be skipped.
-			test, err := TestLookup(root, criterion.TestRef, func(kind string) bool {
+			test, err := coreovalutil.TestLookup(root, criterion.TestRef, func(kind string) bool {
 				return kind == "rpminfo_test"
 			})
 			switch {
@@ -126,7 +131,7 @@ func mapArchOp(op oval.Operation) archop.ArchOp {
 	return archop.ArchOp(0)
 }
 
-// walkCriterion recursively extracts Criterions from a root Crteria node in a depth
+// walkCriterion recursively extracts Criterions from a root Criteria node in a depth
 // first manor.
 //
 // a pointer to a slice header is modified in place when appending
