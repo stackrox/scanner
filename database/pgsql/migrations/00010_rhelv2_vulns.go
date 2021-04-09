@@ -1,11 +1,12 @@
-package migrations
-
-import "github.com/remind101/migrate"
-
 ///////////////////////////////////////////////////
 // Influenced by ClairCore under Apache 2.0 License
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
+
+package migrations
+
+import "github.com/remind101/migrate"
+
 func init() {
 	RegisterMigration(migrate.Migration{
 		ID: 10,
