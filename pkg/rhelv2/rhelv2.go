@@ -124,7 +124,7 @@ func UpdateV2(outputDir string) (int, error) {
 				respC <- &response{err: err}
 			}
 
-			vulns, err := parse(r)
+			vulns, err := parse(uri.String(), r)
 			if err != nil {
 				respC <- &response{err: err}
 				return

@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/quay/claircore/pkg/cpe"
 	"github.com/quay/goval-parser/oval"
+	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
 )
 
-func parse(r io.Reader) ([]*database.RHELv2Vulnerability, error) {
+func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	var root oval.Root
 	if err := xml.NewDecoder(r).Decode(&root); err != nil {
 		return nil, fmt.Errorf("rhelv2: unable to decode OVAL document: %w", err)
@@ -85,12 +85,20 @@ func parse(r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			cvss2Str = fmt.Sprintf("%.1f/%s", cvss2.score, cvss2.vector)
 		}
 
-		// TODO: should convert Name to just CVE/RHSA
+		name := name(def)
+		if name == "" {
+			logrus.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
+		}
+		link := link(def)
+		if link == "" {
+			logrus.Errorf("Unable to determine link for vuln %q in %s", def.Title, uri)
+		}
+
 		return &database.RHELv2Vulnerability{
-			Name:        def.Title,
+			Name:        name,
 			Description: def.Description,
 			Issued:      def.Advisory.Issued.Date,
-			Links:       links(def),
+			Links:       link,
 			Severity:    def.Advisory.Severity,
 			CVSSv3:      cvss3Str,
 			CVSSv2:      cvss2Str,
@@ -104,21 +112,20 @@ func parse(r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	return vulns, nil
 }
 
-// TODO: potentially just one link...
-// links joins all the links in the cve definition into a single string.
-func links(definition oval.Definition) string {
-	var ls []string
-
-	for _, ref := range definition.References {
-		ls = append(ls, ref.RefURL)
+// name gets the CVE/RHSA/RHBA ID from the given title.
+func name(definition oval.Definition) string {
+	if len(definition.References) > 0 {
+		return definition.References[0].RefID
 	}
 
-	for _, ref := range definition.Advisory.Refs {
-		ls = append(ls, ref.URL)
-	}
-	for _, bug := range definition.Advisory.Bugs {
-		ls = append(ls, bug.URL)
+	return ""
+}
+
+// link gets the relevant URL for the vulnerability.
+func link(definition oval.Definition) string {
+	if len(definition.References) > 0 {
+		return definition.References[0].RefURL
 	}
 
-	return strings.Join(ls, " ")
+	return ""
 }
