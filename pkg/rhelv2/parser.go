@@ -26,7 +26,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 		for _, affected := range def.Advisory.AffectedCPEList {
 			// Work around having empty entries. This seems to be some issue
 			// with the tool used to produce the database but only seems to
-			// appear sometimes, like RHSA-2018:3140 in the rhelv2-7-alt database.
+			// appear sometimes, like RHSA-2018:3140 in the rhel-7-alt database.
 			if affected == "" {
 				continue
 			}
@@ -112,7 +112,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	return vulns, nil
 }
 
-// name gets the CVE/RHSA/RHBA ID from the given title.
+// name gets the RHSA/RHBA ID from the given definition.
 func name(definition oval.Definition) string {
 	if len(definition.References) > 0 {
 		return definition.References[0].RefID
