@@ -133,10 +133,10 @@ type RHELv2Vulnerability struct {
 type RHELv2Package struct {
 	Model
 
-	Name string `json:"name"`
+	Name    string `json:"name"`
 	Version string `json:"version,omitempty"`
-	Module string `json:"module,omitempty"`
-	Arch string `json:"arch,omitempty"`
+	Module  string `json:"module,omitempty"`
+	Arch    string `json:"arch,omitempty"`
 }
 
 func (p *RHELv2Package) String() string {

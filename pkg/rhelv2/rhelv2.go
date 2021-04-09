@@ -65,7 +65,6 @@ func UpdateV2(outputDir string) (int, error) {
 		return 0, errors.Errorf("rhelv2: unexpected response: %v", res.Status)
 	}
 
-
 	// Declare this way to prevent warnings.
 	m := pulp.Manifest{}
 	if err := m.Load(res.Body); err != nil {
