@@ -6,9 +6,9 @@
 package ovalutil
 
 import (
-	"fmt"
 	"regexp"
 
+	"github.com/pkg/errors"
 	archop "github.com/quay/claircore"
 	coreovalutil "github.com/quay/claircore/pkg/ovalutil"
 	"github.com/quay/goval-parser/oval"
@@ -156,7 +156,7 @@ func rpmObjectLookup(root *oval.Root, ref string) (*oval.RPMInfoObject, error) {
 		return nil, err
 	}
 	if kind != "rpminfo_object" {
-		return nil, fmt.Errorf("oval: got kind %q: %w", kind, errObjectSkip)
+		return nil, errors.Errorf("oval: got kind %q: skip this object", kind)
 	}
 	return &root.Objects.RPMInfoObjects[index], nil
 }
@@ -167,7 +167,7 @@ func rpmStateLookup(root *oval.Root, ref string) (*oval.RPMInfoState, error) {
 		return nil, err
 	}
 	if kind != "rpminfo_state" {
-		return nil, fmt.Errorf("bad kind: %s", kind)
+		return nil, errors.Errorf("bad kind: %s", kind)
 	}
 	return &root.States.RPMInfoStates[index], nil
 }
