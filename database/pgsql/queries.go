@@ -221,6 +221,35 @@ const (
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
+	insertRHELv2Layer = `
+		INSERT INTO rhelv2_layer (hash, parent_hash, dist, cpes)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (hash) DO NOTHING;`
+
+	insertRHELv2Package = `
+		INSERT INTO rhelv2_package (name, version, module, arch)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (name, version, module, arch) DO NOTHING;`
+
+	insertRHELv2PackageArtifact = `
+		WITH package AS (
+			SELECT id AS package_id
+			FROM rhelv2_package
+			WHERE name = $1
+			  AND version = $2
+			  AND module = $3
+			  AND arch = $4
+		),
+		layer AS (
+			SELECT id AS layer_id
+			FROM rhelv2_layer
+			WHERE rhelv2_layer.hash = $5
+		)
+		INSERT
+		INTO rhelv2_package_scanartifact (layer_id, package_id)
+		VALUES ((SELECT layer_id FROM layer), (SELECT package_id FROM package))
+		ON CONFLICT (layer_id, package_id) DO NOTHING;`
+
 	///////////////////////////////////////////////////
 	// END
 	// Influenced by ClairCore under Apache 2.0 License

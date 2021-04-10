@@ -14,7 +14,7 @@ import (
 )
 
 func TestRPMFeatureDetection(t *testing.T) {
-	sampleExpectedPkgs := []*database.Package{
+	sampleExpectedPkgs := []*database.RHELv2Package{
 		{
 			Name:    "zlib",
 			Version: "1.2.11-16.el8_2",
@@ -32,7 +32,7 @@ func TestRPMFeatureDetection(t *testing.T) {
 		},
 	}
 
-	unexpectedPkgs := []*database.Package{
+	unexpectedPkgs := []*database.RHELv2Package{
 		{
 			Name:    "gpg-pubkey",
 			Version: "d4082792-5b32db75",

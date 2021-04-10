@@ -1,3 +1,8 @@
+///////////////////////////////////////////////////
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
 package rpm
 
 import (
@@ -20,10 +25,8 @@ import (
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
-// TODO: influenced by claircore
-
-// This is the query format we're using to get data out of rpm.
 const (
+	// This is the query format we're using to get data out of rpm.
 	queryFmt = `%{name}\n` +
 		`%{evr}\n` +
 		`%{RPMTAG_MODULARITYLABEL}\n` +
@@ -43,7 +46,7 @@ var (
 // ListFeatures returns the features found from the given files.
 // returns a slice of packages found via rpm and a slice of CPEs found in
 // /root/buildinfo/content_manifests.
-func ListFeatures(files tarutil.FilesMap) ([]*database.Package, []string, error) {
+func ListFeatures(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
 	cpes, err := getCPEsUsingEmbeddedContentSets(files)
 	if err != nil {
 		return nil, nil, err
@@ -86,7 +89,7 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.Package, []string, error)
 		return nil, nil, err
 	}
 
-	var pkgs []*database.Package
+	var pkgs []*database.RHELv2Package
 
 	// Use a closure to defer the Close call.
 	if err := func() error {
@@ -136,8 +139,8 @@ func querySplit(data []byte, atEOF bool) (advance int, token []byte, err error) 
 	return len(tok) + len(delim), tok, nil
 }
 
-func parsePackage(buf *bytes.Buffer) (*database.Package, error) {
-	var p database.Package
+func parsePackage(buf *bytes.Buffer) (*database.RHELv2Package, error) {
+	var p database.RHELv2Package
 	var err error
 	var line string
 
