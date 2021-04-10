@@ -25,7 +25,6 @@ func init() {
 			package_name     TEXT,
 			package_module   TEXT,
 			package_arch     TEXT,
-			package_kind     TEXT,
 			cpe              TEXT,
 			fixed_in_version TEXT,
 			arch_operation   TEXT,
