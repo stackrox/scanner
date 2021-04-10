@@ -6,7 +6,6 @@
 package ovalutil
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 
@@ -30,7 +29,7 @@ type ProtoVulnFunc func(def oval.Definition) (*database.RHELv2Vulnerability, err
 // Each Criterion encountered with an EVR string will be translated into a database.RHELv2Vulnerability
 func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv2Vulnerability, error) {
 	vulns := make([]*database.RHELv2Vulnerability, 0, 10000)
-	cris := []*oval.Criterion{}
+	var cris []*oval.Criterion
 	for _, def := range root.Definitions.Definitions {
 		// create our prototype vulnerability
 		protoVuln, err := protoVuln(def)
@@ -52,11 +51,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			test, err := coreovalutil.TestLookup(root, criterion.TestRef, func(kind string) bool {
 				return kind == "rpminfo_test"
 			})
-			switch {
-			case errors.Is(err, nil):
-			case errors.Is(err, errTestSkip):
-				continue
-			default:
+			if err != nil {
 				continue
 			}
 
@@ -71,12 +66,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 
 			objRef := objRefs[0].ObjectRef
 			object, err := rpmObjectLookup(root, objRef)
-			switch {
-			case errors.Is(err, nil):
-			case errors.Is(err, errObjectSkip):
-				// We only handle rpminfo_objects.
-				continue
-			default:
+			if err != nil {
 				continue
 			}
 
@@ -137,7 +127,7 @@ func mapArchOp(op oval.Operation) archop.ArchOp {
 //
 // a pointer to a slice header is modified in place when appending
 func walkCriterion(node *oval.Criteria, cris *[]*oval.Criterion) {
-	// recursive to leafs
+	// recursive to leaves
 	for _, criteria := range node.Criterias {
 		walkCriterion(&criteria, cris)
 	}
@@ -149,7 +139,7 @@ func walkCriterion(node *oval.Criteria, cris *[]*oval.Criterion) {
 }
 
 func getEnabledModules(cris []*oval.Criterion) []string {
-	enabledModules := []string{}
+	var enabledModules []string
 	for _, criterion := range cris {
 		matches := moduleCommentRegex.FindStringSubmatch(criterion.Comment)
 		if len(matches) > 2 && matches[2] != "" {
