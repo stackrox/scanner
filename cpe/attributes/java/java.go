@@ -30,9 +30,18 @@ var (
 		"fatjar",
 		"scala-library",
 	}
+
+	immutableIndicators = []string{
+		"agent",
+	}
 )
 
 func isMutableName(name string) bool {
+	for _, keyword := range immutableIndicators {
+		if strings.Contains(name, keyword) {
+			return false
+		}
+	}
 	for _, keyword := range mutableIndicators {
 		if strings.Contains(name, "-"+keyword) || strings.Contains(name, keyword+"-") {
 			return true

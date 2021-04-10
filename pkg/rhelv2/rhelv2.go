@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/quay/claircore/rhel/pulp"
 	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
@@ -60,14 +61,12 @@ func UpdateV2(outputDir string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
-	switch res.StatusCode {
-	case http.StatusOK:
-	default:
+	if res.StatusCode != http.StatusOK {
 		return 0, errors.Errorf("rhelv2: unexpected response: %v", res.Status)
 	}
 
-	m := Manifest{}
+	// Declare this way to prevent warnings.
+	m := pulp.Manifest{}
 	if err := m.Load(res.Body); err != nil {
 		return 0, err
 	}
@@ -100,7 +99,7 @@ func UpdateV2(outputDir string) (int, error) {
 			// This in turn causes false CVEs to appear in scanned images. Red Hat Product
 			// Security is working on fixing this situation and the plan is to remove this
 			// exception in the future.
-			if name == "RHEL7-rhelv2-7-alt" {
+			if name == "RHEL7-rhel-7-alt" {
 				continue
 			}
 		default: // skip
@@ -125,7 +124,7 @@ func UpdateV2(outputDir string) (int, error) {
 				respC <- &response{err: err}
 			}
 
-			vulns, err := parse(r)
+			vulns, err := parse(uri.String(), r)
 			if err != nil {
 				respC <- &response{err: err}
 				return
@@ -174,15 +173,13 @@ func updateRepoToCPE(outputDir string) error {
 	}
 
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer utils.IgnoreError(resp.Body.Close)
+	}
 	if err != nil {
 		return err
 	}
-	defer utils.IgnoreError(resp.Body.Close)
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		// break
-	default:
+	if resp.StatusCode != http.StatusOK {
 		return errors.Errorf("received status code %q querying mapping url", resp.StatusCode)
 	}
 
@@ -198,9 +195,9 @@ func updateRepoToCPE(outputDir string) error {
 		return errors.Wrapf(err, "creating subdir for %s", vulndump.RHELv2DirName)
 	}
 
-	outF, err := os.Create(filepath.Join(rhelV2Dir, vulndump.RHELv2CPERepoName))
+	outF, err := os.Create(filepath.Join(rhelV2Dir, repo2cpe.RHELv2CPERepoName))
 	if err != nil {
-		return errors.Wrapf(err, "failed to create file %s", vulndump.RHELv2CPERepoName)
+		return errors.Wrapf(err, "failed to create file %s", repo2cpe.RHELv2CPERepoName)
 	}
 	defer utils.IgnoreError(outF.Close)
 

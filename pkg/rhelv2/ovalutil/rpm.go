@@ -1,13 +1,18 @@
+///////////////////////////////////////////////////
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
 package ovalutil
 
 import (
-	"errors"
-	"fmt"
 	"regexp"
 
+	"github.com/pkg/errors"
+	archop "github.com/quay/claircore"
+	coreovalutil "github.com/quay/claircore/pkg/ovalutil"
 	"github.com/quay/goval-parser/oval"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/pkg/rhelv2/archop"
 )
 
 var moduleCommentRegex = regexp.MustCompile(`(Module )(.*)( is enabled)`)
@@ -24,7 +29,7 @@ type ProtoVulnFunc func(def oval.Definition) (*database.RHELv2Vulnerability, err
 // Each Criterion encountered with an EVR string will be translated into a database.RHELv2Vulnerability
 func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv2Vulnerability, error) {
 	vulns := make([]*database.RHELv2Vulnerability, 0, 10000)
-	cris := []*oval.Criterion{}
+	var cris []*oval.Criterion
 	for _, def := range root.Definitions.Definitions {
 		// create our prototype vulnerability
 		protoVuln, err := protoVuln(def)
@@ -43,14 +48,10 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 		for _, criterion := range cris {
 			// if test object is not rmpinfo_test the provided test is not
 			// associated with a package. this criterion will be skipped.
-			test, err := TestLookup(root, criterion.TestRef, func(kind string) bool {
+			test, err := coreovalutil.TestLookup(root, criterion.TestRef, func(kind string) bool {
 				return kind == "rpminfo_test"
 			})
-			switch {
-			case errors.Is(err, nil):
-			case errors.Is(err, errTestSkip):
-				continue
-			default:
+			if err != nil {
 				continue
 			}
 
@@ -65,12 +66,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 
 			objRef := objRefs[0].ObjectRef
 			object, err := rpmObjectLookup(root, objRef)
-			switch {
-			case errors.Is(err, nil):
-			case errors.Is(err, errObjectSkip):
-				// We only handle rpminfo_objects.
-				continue
-			default:
+			if err != nil {
 				continue
 			}
 
@@ -93,7 +89,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 
 			for _, module := range enabledModules {
 				vuln := *protoVuln
-				vuln.Package = &database.Package{
+				vuln.Package = &database.RHELv2Package{
 					Name:   object.Name,
 					Module: module,
 				}
@@ -126,12 +122,12 @@ func mapArchOp(op oval.Operation) archop.ArchOp {
 	return archop.ArchOp(0)
 }
 
-// walkCriterion recursively extracts Criterions from a root Crteria node in a depth
+// walkCriterion recursively extracts Criterions from a root Criteria node in a depth
 // first manor.
 //
 // a pointer to a slice header is modified in place when appending
 func walkCriterion(node *oval.Criteria, cris *[]*oval.Criterion) {
-	// recursive to leafs
+	// recursive to leaves
 	for _, criteria := range node.Criterias {
 		walkCriterion(&criteria, cris)
 	}
@@ -143,7 +139,7 @@ func walkCriterion(node *oval.Criteria, cris *[]*oval.Criterion) {
 }
 
 func getEnabledModules(cris []*oval.Criterion) []string {
-	enabledModules := []string{}
+	var enabledModules []string
 	for _, criterion := range cris {
 		matches := moduleCommentRegex.FindStringSubmatch(criterion.Comment)
 		if len(matches) > 2 && matches[2] != "" {
@@ -160,7 +156,7 @@ func rpmObjectLookup(root *oval.Root, ref string) (*oval.RPMInfoObject, error) {
 		return nil, err
 	}
 	if kind != "rpminfo_object" {
-		return nil, fmt.Errorf("oval: got kind %q: %w", kind, errObjectSkip)
+		return nil, errors.Errorf("oval: got kind %q: skip this object", kind)
 	}
 	return &root.Objects.RPMInfoObjects[index], nil
 }
@@ -171,7 +167,7 @@ func rpmStateLookup(root *oval.Root, ref string) (*oval.RPMInfoState, error) {
 		return nil, err
 	}
 	if kind != "rpminfo_state" {
-		return nil, fmt.Errorf("bad kind: %s", kind)
+		return nil, errors.Errorf("bad kind: %s", kind)
 	}
 	return &root.States.RPMInfoStates[index], nil
 }
