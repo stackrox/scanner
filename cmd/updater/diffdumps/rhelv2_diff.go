@@ -2,18 +2,18 @@ package diffdumps
 
 import (
 	"archive/zip"
-	"bytes"
-	"crypto/md5"
 	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/mitchellh/hashstructure"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
@@ -70,9 +70,22 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 	var filtered []*database.RHELv2Vulnerability
 	for _, headVuln := range rhel.Vulns {
 		matchingBaseVuln, found := baseVulnsMap[headVuln.Name]
+		matchingHash, err := vulnHash(matchingBaseVuln)
+		if err != nil {
+			log.Warnf("Unable to hash existing vuln %s. Adding from head...", matchingBaseVuln.Name)
+			filtered = append(filtered, headVuln)
+			continue
+		}
+
+		headHash, err := vulnHash(headVuln)
+		if err != nil {
+			log.Warnf("Unable to hash new vuln %s. Skipping head vuln...", headVuln.Name)
+			continue
+		}
+
 		// If the vuln was not in the base, or not equal to what was in the base,
 		// add it. Else, skip.
-		if !found || !bytes.Equal(md5Vuln(matchingBaseVuln), md5Vuln(headVuln)) {
+		if !found || matchingHash != headHash {
 			filtered = append(filtered, headVuln)
 		}
 	}
@@ -113,14 +126,14 @@ func generateRHELv2VulnsDiff(outputDir string, baseLastModifiedTime time.Time, b
 	// Let's us know if the base dump had RHELv2 data.
 	rhelExists := len(baseFiles) > 0
 
-	repoToCPEFile := filepath.Join(vulndump.RHELv2DirName, vulndump.RHELv2CPERepoName)
+	repoToCPEFile := filepath.Join(vulndump.RHELv2DirName, repo2cpe.RHELv2CPERepoName)
 	for _, headF := range headZipR.File {
 		name := headF.Name
 
 		// repo to cpe JSON
 		if name == repoToCPEFile {
 			if err := generateRHELv2RepoToCPE(filepath.Join(outputDir, repoToCPEFile), headF); err != nil {
-				return errors.Wrapf(err, "generating %s", vulndump.RHELv2CPERepoName)
+				return errors.Wrapf(err, "generating %s", repo2cpe.RHELv2CPERepoName)
 			}
 		}
 
@@ -157,29 +170,7 @@ func generateRHELv2RepoToCPE(fileName string, file *zip.File) error {
 	return nil
 }
 
-// md5Vuln creates an md5 hash from the members of the passed-in Vulnerability,
-// giving us a stable, context-free identifier for this revision of the
-// Vulnerability.
-func md5Vuln(v *database.RHELv2Vulnerability) []byte {
-	var b bytes.Buffer
-	b.WriteString(v.Name)
-	b.WriteString(v.Description)
-	b.WriteString(v.Issued.String())
-	b.WriteString(v.Updated.String())
-	b.WriteString(v.Links)
-	b.WriteString(v.Severity)
-	b.WriteString(v.CVSSv3)
-	b.WriteString(v.CVSSv2)
-	for _, cpe := range v.CPEs {
-		b.WriteString(cpe)
-	}
-	if v.Package != nil {
-		b.WriteString(v.Package.Name)
-		b.WriteString(v.Package.Module)
-		b.WriteString(v.Package.Arch)
-	}
-	b.WriteString(v.ArchOperation.String())
-	b.WriteString(v.FixedInVersion)
-	s := md5.Sum(b.Bytes())
-	return s[:]
+// vulnHash creates a hash from the members of the passed-in Vulnerability.
+func vulnHash(v *database.RHELv2Vulnerability) (uint64, error) {
+	return hashstructure.Hash(v, nil)
 }

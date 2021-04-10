@@ -26,10 +26,7 @@ func fetch(url *url.URL) (string, io.ReadCloser, error) {
 	if err != nil {
 		return "", nil, err
 	}
-	switch res.StatusCode {
-	case http.StatusOK:
-		// break
-	default:
+	if res.StatusCode != http.StatusOK {
 		return "", nil, fmt.Errorf("rhelv2: fetcher got unexpected HTTP response: %d (%s)", res.StatusCode, res.Status)
 	}
 
