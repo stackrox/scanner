@@ -58,10 +58,10 @@ var (
 	)
 
 	bulkRHSAXMLBZ2URLs = []string{
+		allRHSAsXMLBZ2,
 		bulkOVALURI + "RHEL6/rhel-6-including-unpatched.oval.xml.bz2",
 		bulkOVALURI + "RHEL7/rhel-7-including-unpatched.oval.xml.bz2",
 		bulkOVALURI + "RHEL8/rhel-8-including-unpatched.oval.xml.bz2",
-		allRHSAsXMLBZ2,
 	}
 
 	ignoredCriterions = []string{
