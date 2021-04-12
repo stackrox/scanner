@@ -56,7 +56,7 @@ func TestRPMFeatureDetection(t *testing.T) {
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
 	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
-	pkgs, cpes, err := ListFeatures(tarutil.FilesMap{
+	pkgs, cpes, err := ListFeaturesTest(tarutil.FilesMap{
 		"var/lib/rpm/Packages":                       d,
 		"root/buildinfo/content_manifests/test.json": manifest,
 	})
