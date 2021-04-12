@@ -76,34 +76,12 @@ func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*datab
 }
 
 func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, error) {
-	// Inside the `WITH RECURSIVE`, the base case is the top query, and the
-	// recursive case is the bottom query.
-	// Base: find the layer by hash.
-	// Recursive: find the layer whose hash matches the current layer's parent hash
-	//
-	// This query looks for all the layers in the given layer's hierarchy.
-	const (
-		query = `
-		WITH RECURSIVE layers AS (
-			SELECT id, hash, parent_hash, dist, cpes
-			FROM rhelv2_layer
-			WHERE hash = $1
-			UNION
-				SELECT l.id, l.hash, l.parent_hash, l.dist, l.cpes
-				FROM layers ll, rhelv2_layer l
-				WHERE ll.parent_hash = l.hash
-		)
-		SELECT id, hash, dist, cpes
-		FROM layers;
-		`
-	)
-
 	tx, err := pgSQL.Begin()
 	if err != nil {
 		return nil, handleError("GetRHELv2Layers.Begin()", err)
 	}
 
-	rows, err := tx.Query(query, layerHash)
+	rows, err := tx.Query(searchRHELv2Layers, layerHash)
 	if err != nil {
 		return nil, err
 	}
@@ -112,11 +90,16 @@ func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, 
 	var layers []*database.RHELv2Layer
 
 	for rows.Next() {
-		var rhelv2Layer database.RHELv2Layer
-		if err := rows.Scan(&rhelv2Layer.ID, &rhelv2Layer.Hash, &rhelv2Layer.Dist, &rhelv2Layer.CPEs); err != nil {
+		var (
+			rhelv2Layer database.RHELv2Layer
+			cpes        []string
+		)
+		if err := rows.Scan(&rhelv2Layer.ID, &rhelv2Layer.Hash, &rhelv2Layer.Dist, pq.Array(&cpes)); err != nil {
 			utils.IgnoreError(tx.Rollback)
 			return nil, err
 		}
+
+		rhelv2Layer.CPEs = cpes
 
 		layers = append(layers, &rhelv2Layer)
 	}
@@ -137,29 +120,17 @@ func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, 
 		return nil, handleError("GetRHELv2Layers.Commit()", err)
 	}
 
+	// layers is in order from highest layer to lowest.
+	// This may be counterintuitive, so reverse it.
+	for left, right := 0, len(layers)-1; left < right; left, right = left+1, right-1 {
+		layers[left], layers[right] = layers[right], layers[left]
+	}
+
 	return layers, nil
 }
 
 func (pgSQL *pgSQL) getPackagesByLayer(tx *sql.Tx, layer *database.RHELv2Layer) error {
-	const (
-		query = `
-		SELECT
-			package.id,
-			package.name,
-			package.version,
-			package.module,
-			package.arch
-		FROM
-			package_scanartifact
-			LEFT JOIN package ON
-					package_scanartifact.package_id = package.id
-			JOIN rhelv2_layer ON rhelv2_layer.hash = $1
-		WHERE
-			package_scanartifact.layer_id = rhelv2_layer.id;
-		`
-	)
-
-	rows, err := tx.Query(query, layer.Hash)
+	rows, err := tx.Query(searchRHELv2Package, layer.Hash)
 	if err != nil {
 		return err
 	}

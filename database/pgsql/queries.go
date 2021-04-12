@@ -236,9 +236,9 @@ const (
 			SELECT id AS package_id
 			FROM rhelv2_package
 			WHERE name = $1
-			  AND version = $2
-			  AND module = $3
-			  AND arch = $4
+				AND version = $2
+				AND module = $3
+				AND arch = $4
 		),
 		layer AS (
 			SELECT id AS layer_id
@@ -249,6 +249,40 @@ const (
 		INTO rhelv2_package_scanartifact (layer_id, package_id)
 		VALUES ((SELECT layer_id FROM layer), (SELECT package_id FROM package))
 		ON CONFLICT (layer_id, package_id) DO NOTHING;`
+
+	// Inside the `WITH RECURSIVE`, the base case is the top query, and the
+	// recursive case is the bottom query.
+	// Base: find the layer by hash.
+	// Recursive: find the layer whose hash matches the current layer's parent hash
+	//
+	// This query looks for all the layers in the given layer's hierarchy.
+	searchRHELv2Layers = `
+		WITH RECURSIVE layers AS (
+			SELECT id, hash, parent_hash, dist, cpes
+			FROM rhelv2_layer
+			WHERE hash = $1
+			UNION
+				SELECT l.id, l.hash, l.parent_hash, l.dist, l.cpes
+				FROM layers ll, rhelv2_layer l
+				WHERE ll.parent_hash = l.hash
+		)
+		SELECT id, hash, dist, cpes
+		FROM layers;`
+
+	searchRHELv2Package = `
+		SELECT
+			rhelv2_package.id,
+			rhelv2_package.name,
+			rhelv2_package.version,
+			rhelv2_package.module,
+			rhelv2_package.arch
+		FROM
+			rhelv2_package_scanartifact
+			LEFT JOIN rhelv2_package ON
+				rhelv2_package_scanartifact.package_id = rhelv2_package.id
+			JOIN rhelv2_layer ON rhelv2_layer.hash = $1
+		WHERE
+			rhelv2_package_scanartifact.layer_id = rhelv2_layer.id;`
 
 	///////////////////////////////////////////////////
 	// END
