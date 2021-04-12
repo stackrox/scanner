@@ -16,8 +16,6 @@ package v1
 
 import (
 	"fmt"
-	"github.com/stackrox/scanner/ext/versionfmt/rpm"
-	"github.com/stackrox/scanner/pkg/types"
 	"strconv"
 	"strings"
 
@@ -29,8 +27,10 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/language"
+	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
+	"github.com/stackrox/scanner/pkg/types"
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
@@ -319,12 +319,12 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 
 	// Data about the environment surrounding a particular package.
 	type pkgEnvironment struct {
-		pkg          *database.Package
+		pkg          *database.RHELv2Package
 		introducedIn string
 		cpes         []string
 	}
 
-	pkgEnvs := make(map[string]*pkgEnvironment)
+	pkgEnvs := make(map[int]*pkgEnvironment)
 
 	// Find all packages that were ever added to the image
 	// labelled with the layer hash that introduced it.
@@ -332,9 +332,9 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 		for _, pkg := range layer.Pkgs {
 			if _, ok := pkgEnvs[pkg.ID]; !ok {
 				pkgEnvs[pkg.ID] = &pkgEnvironment{
-					pkg: pkg,
+					pkg:          pkg,
 					introducedIn: layer.Hash,
-					cpes: layer.CPEs,
+					cpes:         layer.CPEs,
 				}
 			}
 		}
@@ -347,7 +347,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 		if len(layers[i].Pkgs) != 0 {
 			// Found the latest version of `var/lib/rpm/Packages`
 			// This has the final version of all the packages in this image.
-			finalPkgs := set.NewStringSet()
+			finalPkgs := set.NewIntSet()
 			for _, pkg := range layers[i].Pkgs {
 				finalPkgs.Add(pkg.ID)
 			}
@@ -378,7 +378,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 			records = append(records, &database.RHELv2Record{
 				Pkg:  pkgEnv.pkg,
 				Dist: layer.NamespaceName,
-				CPE: cpe,
+				CPE:  cpe,
 			})
 		}
 	}
@@ -398,12 +398,12 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 
 		// TODO: add FixedBy field as well
 		feature := Feature{
-			Name:            pkg.Name,
-			NamespaceName:   layer.NamespaceName,
-			VersionFormat:   rpm.ParserName,
-			Version:         pkg.Version,
-			AddedBy:         pkgEnv.introducedIn,
-			Location:        "var/lib/rpm/Packages", // TODO: Fill out?
+			Name:          pkg.Name,
+			NamespaceName: layer.NamespaceName,
+			VersionFormat: rpm.ParserName,
+			Version:       pkg.Version,
+			AddedBy:       pkgEnv.introducedIn,
+			Location:      "var/lib/rpm/Packages", // TODO: Fill out?
 		}
 
 		pkgVersion := version.NewVersion(pkg.Version)
@@ -509,7 +509,7 @@ func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		Name:          vuln.Name,
 		NamespaceName: namespace, // TODO: Purpose?
 		Description:   vuln.Description,
-		Link:          vuln.Links, // TODO: Just one link?
+		Link:          vuln.Link,
 		Severity:      vuln.Severity,
 		Metadata:      metadata,
 		FixedBy:       vuln.FixedInVersion, // Empty string if not fixed.

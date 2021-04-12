@@ -21,12 +21,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackrox/scanner/pkg/rhelv2/archop"
+	archop "github.com/quay/claircore"
 )
 
 type Model struct {
 	// ID is only meant to be used by database implementations and should never be used for anything else.
-	ID int `json:"id,omitempty"`
+	ID int `json:"id,omitempty" hash:"ignore"`
 }
 
 type Layer struct {
@@ -109,40 +109,39 @@ func (mm *MetadataMap) Value() (driver.Value, error) {
 	return string(json), err
 }
 
-// TODO: the following is adapted form claircore
+///////////////////////////////////////////////////
+// BEGIN
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
 
 type RHELv2Vulnerability struct {
 	Model
 
-	Name           string        `json:"name"`
-	Description    string        `json:"description"`
-	Issued         time.Time     `json:"issued"`
-	Updated        time.Time     `json:"updated"`
-	Links          string        `json:"links"`
-	Severity       string        `json:"severity"`
-	CVSSv3         string        `json:"cvssv3,omitempty"`
-	CVSSv2         string        `json:"cvssv2,omitempty"`
-	CPEs           []string      `json:"cpes"`
-	Package        *Package      `json:"package"`
-	FixedInVersion string        `json:"fixed_in_version"`
-	ArchOperation  archop.ArchOp `json:"arch_op,omitempty"`
+	Name           string         `json:"name"`
+	Description    string         `json:"description"`
+	Issued         time.Time      `json:"issued"`
+	Updated        time.Time      `json:"updated"`
+	Link           string         `json:"link"`
+	Severity       string         `json:"severity"`
+	CVSSv3         string         `json:"cvssv3,omitempty"`
+	CVSSv2         string         `json:"cvssv2,omitempty"`
+	CPEs           []string       `json:"cpes" hash:"set"`
+	Package        *RHELv2Package `json:"package"`
+	FixedInVersion string         `json:"fixed_in_version"`
+	ArchOperation  archop.ArchOp  `json:"arch_op,omitempty"`
 }
 
-type Package struct {
-	// unique ID of this package. this will be created as discovered by the library
-	// and used for persistence and hash map indexes
-	ID string `json:"id,omitempty"`
-	// the name of the package
-	Name string `json:"name"`
-	// the version of the package
+type RHELv2Package struct {
+	Model
+
+	Name    string `json:"name"`
 	Version string `json:"version,omitempty"`
-	// Module and stream which this package is part of
-	Module string `json:"module,omitempty"`
-	// Package architecture
-	Arch string `json:"arch,omitempty"`
+	Module  string `json:"module,omitempty"`
+	Arch    string `json:"arch,omitempty"`
 }
 
-func (p *Package) String() string {
+func (p *RHELv2Package) String() string {
 	return strings.Join([]string{p.Name, p.Version, p.Module, p.Arch}, ":")
 }
 
@@ -151,13 +150,13 @@ type RHELv2Layer struct {
 	Hash       string
 	ParentHash string
 	Dist       string
-	Pkgs       []*Package
+	Pkgs       []*RHELv2Package
 	CPEs       []string
 }
 
 type RHELv2Components struct {
 	Dist     string
-	Packages []*Package
+	Packages []*RHELv2Package
 	CPEs     []string
 }
 
@@ -182,7 +181,7 @@ func (r *RHELv2Components) String() string {
 }
 
 type RHELv2Record struct {
-	Pkg  *Package
+	Pkg  *RHELv2Package
 	Dist string
 	CPE  string
 }
@@ -198,3 +197,9 @@ type ContentManifest struct {
 type ManifestMetadata struct {
 	ImageLayerIndex int `json:"image_layer_index"`
 }
+
+///////////////////////////////////////////////////
+// END
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////

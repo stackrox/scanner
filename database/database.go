@@ -152,7 +152,7 @@ type Datastore interface {
 
 	// GetRHELv2Vulnerabilities retrieves RHELv2 vulnerabilities based on the given records.
 	// The returned value maps package ID to the related vulnerabilities.
-	GetRHELv2Vulnerabilities(records []*RHELv2Record) (map[string][]*RHELv2Vulnerability, error)
+	GetRHELv2Vulnerabilities(records []*RHELv2Record) (map[int][]*RHELv2Vulnerability, error)
 
 	// InsertKeyValue stores or updates a simple key/value pair in the database.
 	InsertKeyValue(key, value string) error

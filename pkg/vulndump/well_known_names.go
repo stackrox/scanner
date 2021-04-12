@@ -13,7 +13,6 @@ const (
 	OSVulnsFileName       = "os_vulns.json"
 	RHELv2DirName         = "rhelv2"
 	RHELv2VulnsSubDirName = "vulns"
-	RHELv2CPERepoName     = "repository-to-cpe.json"
 	NVDDirName            = "nvd"
 	RedHatDirName         = "redhat"
 	K8sDirName            = "k8s"

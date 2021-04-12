@@ -34,7 +34,7 @@ func TestInsertRHELv2Layer(t *testing.T) {
 		Hash:       "sha256:hellothere",
 		ParentHash: "sha256:generalkenobi",
 		Dist:       "rhel:7",
-		Pkgs: []*database.Package{
+		Pkgs: []*database.RHELv2Package{
 			{
 				Name:    "pkg",
 				Version: "v1",
@@ -57,7 +57,7 @@ func TestInsertRHELv2Layer(t *testing.T) {
 	layer = &database.RHELv2Layer{
 		Hash: "sha256:hi",
 		Dist: "rhel:6",
-		Pkgs: []*database.Package{
+		Pkgs: []*database.RHELv2Package{
 			{
 				Name:    "pkg",
 				Version: "v1",

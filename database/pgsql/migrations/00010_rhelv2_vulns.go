@@ -1,8 +1,12 @@
+///////////////////////////////////////////////////
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
 package migrations
 
 import "github.com/remind101/migrate"
 
-// TODO: The following is adapted from claircore.
 func init() {
 	RegisterMigration(migrate.Migration{
 		ID: 10,
@@ -14,14 +18,13 @@ func init() {
 			name             TEXT,
 			issued           timestamptz,
 			updated          timestamptz,
-			links            TEXT,
+			link             TEXT,
 			severity         TEXT,
 			cvss3            TEXT,
 			cvss2            TEXT,
 			package_name     TEXT,
 			package_module   TEXT,
 			package_arch     TEXT,
-			package_kind     TEXT,
 			cpe              TEXT,
 			fixed_in_version TEXT,
 			arch_operation   TEXT,
