@@ -15,7 +15,7 @@ func init() {
 		--- an identity table consisting of a content addressable layer hash
 		CREATE TABLE IF NOT EXISTS rhelv2_layer (
 			id          BIGSERIAL PRIMARY KEY,
-	    	hash        TEXT,
+			hash        TEXT,
 			parent_hash TEXT NOT NULL DEFAULT '',
 			dist        TEXT,
 			cpes        TEXT[],
