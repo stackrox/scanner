@@ -19,9 +19,9 @@ func Singleton() *Mapping {
 		instance = NewMapping()
 
 		if definitionsDir := os.Getenv("REPO_TO_CPE_DIR"); definitionsDir != "" {
-			log.Info("Loading repo-to-cpo map into mem")
+			log.Info("Loading repo-to-cpe map into mem")
 			utils.Must(instance.Load(definitionsDir))
-			log.Info("Done loading repo-to-cpo map into mem")
+			log.Info("Done loading repo-to-cpe map into mem")
 		}
 	})
 	return instance
