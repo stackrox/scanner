@@ -29,7 +29,14 @@ const (
 	// This is the query format we're using to get data out of rpm.
 	queryFmt = `%{name}\n` +
 		`%{evr}\n` +
+		`%{ARCH}\n` +
 		`%{RPMTAG_MODULARITYLABEL}\n` +
+		`.\n`
+
+	// Older versions of rpm do no have the `RPMTAG_MODULARITYLABEL` tag.
+	// Ignore it for testing.
+	queryFmtTest = `%{name}\n` +
+		`%{evr}\n` +
 		`%{ARCH}\n` +
 		`.\n`
 
@@ -47,6 +54,14 @@ var (
 // returns a slice of packages found via rpm and a slice of CPEs found in
 // /root/buildinfo/content_manifests.
 func ListFeatures(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
+	return listFeatures(files, queryFmt)
+}
+
+func ListFeaturesTest(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
+	return listFeatures(files, queryFmtTest)
+}
+
+func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Package, []string, error) {
 	cpes, err := getCPEsUsingEmbeddedContentSets(files)
 	if err != nil {
 		return nil, nil, err
@@ -164,14 +179,14 @@ func parsePackage(buf *bytes.Buffer) (*database.RHELv2Package, error) {
 		case 1:
 			p.Version = line
 		case 2:
+			p.Arch = line
+		case 3:
 			moduleSplit := strings.Split(line, ":")
 			if len(moduleSplit) < 2 {
 				continue
 			}
 			moduleStream := fmt.Sprintf("%s:%s", moduleSplit[0], moduleSplit[1])
 			p.Module = moduleStream
-		case 3:
-			p.Arch = line
 		}
 		switch err {
 		case nil:
