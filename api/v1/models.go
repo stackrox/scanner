@@ -307,7 +307,11 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 	feature.FixedBy = allVulnsFixedBy
 }
 
-// TODO: some of this is based on claircore
+///////////////////////////////////////////////////
+// BEGIN
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
 
 func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 	layers, err := db.GetRHELv2Layers(layer.Name)
@@ -317,71 +321,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 
 	shareCPEs(layers)
 
-	// Data about the environment surrounding a particular package.
-	type pkgEnvironment struct {
-		pkg          *database.RHELv2Package
-		introducedIn string
-		cpes         []string
-	}
-
-	pkgEnvs := make(map[int]*pkgEnvironment)
-
-	// Find all packages that were ever added to the image
-	// labelled with the layer hash that introduced it.
-	for _, layer := range layers {
-		for _, pkg := range layer.Pkgs {
-			if _, ok := pkgEnvs[pkg.ID]; !ok {
-				pkgEnvs[pkg.ID] = &pkgEnvironment{
-					pkg:          pkg,
-					introducedIn: layer.Hash,
-					cpes:         layer.CPEs,
-				}
-			}
-		}
-	}
-
-	// Look for the packages that still remain in the final image.
-	// Loop from highest layer to base in search of the latest version of
-	// the packages database.
-	for i := len(layers) - 1; i >= 0; i-- {
-		if len(layers[i].Pkgs) != 0 {
-			// Found the latest version of `var/lib/rpm/Packages`
-			// This has the final version of all the packages in this image.
-			finalPkgs := set.NewIntSet()
-			for _, pkg := range layers[i].Pkgs {
-				finalPkgs.Add(pkg.ID)
-			}
-
-			for pkgID := range pkgEnvs {
-				// Remove packages that were in lower layers, but not at the highest.
-				if !finalPkgs.Contains(pkgID) {
-					delete(pkgEnvs, pkgID)
-				}
-			}
-
-			break
-		}
-	}
-
-	// Create a record for each pkgEnvironment for each CPE.
-	var records []*database.RHELv2Record
-
-	for _, pkgEnv := range pkgEnvs {
-		if len(pkgEnv.cpes) == 0 {
-			records = append(records, &database.RHELv2Record{
-				Pkg:  pkgEnv.pkg,
-				Dist: layer.NamespaceName,
-			})
-		}
-
-		for _, cpe := range pkgEnv.cpes {
-			records = append(records, &database.RHELv2Record{
-				Pkg:  pkgEnv.pkg,
-				Dist: layer.NamespaceName,
-				CPE:  cpe,
-			})
-		}
-	}
+	pkgEnvs, records := getRHELv2PkgData(layers)
 
 	vulns, err := db.GetRHELv2Vulnerabilities(records)
 	if err != nil {
@@ -394,7 +334,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 	// 2. The ArchOperation passes.
 
 	for _, pkgEnv := range pkgEnvs {
-		pkg := pkgEnv.pkg
+		pkg := pkgEnv.Pkg
 
 		// TODO: add FixedBy field as well
 		feature := Feature{
@@ -402,7 +342,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 			NamespaceName: layer.NamespaceName,
 			VersionFormat: rpm.ParserName,
 			Version:       pkg.Version,
-			AddedBy:       pkgEnv.introducedIn,
+			AddedBy:       pkgEnv.AddedBy,
 			Location:      "var/lib/rpm/Packages", // TODO: Fill out?
 		}
 
@@ -446,6 +386,7 @@ func shareCPEs(layers []*database.RHELv2Layer) {
 			layers[i].CPEs = append(layers[i].CPEs, previousCPEs...)
 		}
 	}
+
 	// Tha same thing has to be done in reverse
 	// example:
 	//   Red Hat's base images doesn't have repository definition
@@ -457,6 +398,69 @@ func shareCPEs(layers []*database.RHELv2Layer) {
 			layers[i].CPEs = append(layers[i].CPEs, previousCPEs...)
 		}
 	}
+}
+
+func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2PackageEnv, []*database.RHELv2Record) {
+	pkgEnvs := make(map[int]*database.RHELv2PackageEnv)
+
+	// Find all packages that were ever added to the image
+	// labelled with the layer hash that introduced it.
+	for _, layer := range layers {
+		for _, pkg := range layer.Pkgs {
+			if _, ok := pkgEnvs[pkg.ID]; !ok {
+				pkgEnvs[pkg.ID] = &database.RHELv2PackageEnv{
+					Pkg:     pkg,
+					AddedBy: layer.Hash,
+					CPEs:    layer.CPEs,
+				}
+			}
+		}
+	}
+
+	// Look for the packages that still remain in the final image.
+	// Loop from highest layer to base in search of the latest version of
+	// the packages database.
+	for i := len(layers) - 1; i >= 0; i-- {
+		if len(layers[i].Pkgs) != 0 {
+			// Found the latest version of `var/lib/rpm/Packages`
+			// This has the final version of all the packages in this image.
+			finalPkgs := set.NewIntSet()
+			for _, pkg := range layers[i].Pkgs {
+				finalPkgs.Add(pkg.ID)
+			}
+
+			for pkgID := range pkgEnvs {
+				// Remove packages that were in lower layers, but not at the highest.
+				if !finalPkgs.Contains(pkgID) {
+					delete(pkgEnvs, pkgID)
+				}
+			}
+
+			break
+		}
+	}
+
+	// Create a record for each pkgEnvironment for each CPE.
+	var records []*database.RHELv2Record
+
+	for _, pkgEnv := range pkgEnvs {
+		if len(pkgEnv.CPEs) == 0 {
+			records = append(records, &database.RHELv2Record{
+				Pkg:  pkgEnv.Pkg,
+			})
+
+			continue
+		}
+
+		for _, cpe := range pkgEnv.CPEs {
+			records = append(records, &database.RHELv2Record{
+				Pkg:  pkgEnv.Pkg,
+				CPE:  cpe,
+			})
+		}
+	}
+
+	return pkgEnvs, records
 }
 
 func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string) Vulnerability {
@@ -515,6 +519,12 @@ func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		FixedBy:       vuln.FixedInVersion, // Empty string if not fixed.
 	}
 }
+
+///////////////////////////////////////////////////
+// END
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
 
 type Namespace struct {
 	Name          string `json:"Name,omitempty"`

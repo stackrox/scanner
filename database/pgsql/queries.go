@@ -284,6 +284,31 @@ const (
 		WHERE
 			rhelv2_package_scanartifact.layer_id = rhelv2_layer.id;`
 
+	searchRHELv2Vulnerabilities = `
+		SELECT
+			vuln.id,
+			vuln.name,
+			vuln_description.description,
+			vuln.links,
+			vuln.issued,
+			vuln.updated,
+			vuln.severity,
+			vuln.cvss3,
+			vuln.cvss2,
+			vuln.package_name,
+			vuln.package_version,
+			vuln.package_arch,
+			vuln.arch_operation,
+			vuln.fixed_in_version
+		FROM
+			vuln
+			LEFT JOIN vuln_description ON
+				vuln.name = vuln_description.name
+		WHERE
+			vuln.package_name = $1
+				AND vuln.package_module = $2
+				AND vuln.cpe = $3;`
+
 	///////////////////////////////////////////////////
 	// END
 	// Influenced by ClairCore under Apache 2.0 License
