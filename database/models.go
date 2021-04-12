@@ -146,7 +146,8 @@ func (p *RHELv2Package) String() string {
 }
 
 type RHELv2Layer struct {
-	ID         string
+	Model
+
 	Hash       string
 	ParentHash string
 	Dist       string
