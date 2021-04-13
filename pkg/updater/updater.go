@@ -123,7 +123,8 @@ func (u *Updater) doUpdate(mode updateMode) error {
 	if mode == updateApplicationCachesAndPostgres {
 		db = u.db
 	}
-	// TODO: replace nil with actual value.
+	// TODO: replace final argument with actual value.
+	// It will be the repoToCPE mapping used for live-updates, once it is implemented.
 	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, db, u.interval, podName, u.caches, nil); err != nil {
 		return errors.Wrap(err, "updating from vuln dump")
 	}

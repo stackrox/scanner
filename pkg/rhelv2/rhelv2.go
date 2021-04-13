@@ -22,17 +22,16 @@ import (
 	"go.uber.org/ratelimit"
 )
 
-// PulpManifest is the url for the Red Hat OVAL pulp repository.
 const (
 	// PulpManifest is the url for the Red Hat OVAL pulp repository.
 	PulpManifest = `https://www.redhat.com/security/data/oval/v2/PULP_MANIFEST`
 
-	// Repo2CPEMappingURL is default URL with a mapping file provided by Red Hat
-	Repo2CPEMappingURL = "https://www.redhat.com/security/data/metrics/repository-to-cpe.json"
+	// Repo2CPEMappingURL is the URL with a mapping file provided by Red Hat.
+	Repo2CPEMappingURL = `https://www.redhat.com/security/data/metrics/repository-to-cpe.json`
 )
 
 var (
-	u, _ = url.Parse(PulpManifest)
+	u *url.URL
 
 	client = &http.Client{
 		Timeout:   20 * time.Second,
@@ -40,29 +39,37 @@ var (
 	}
 
 	// Limits to 10 ops/second.
+	// Red Hat OVAL v2 feed has a rate limit of ~12 requests/second.
 	rl = ratelimit.New(10)
 )
+
+func init() {
+	var err error
+	u, err = url.Parse(PulpManifest)
+	utils.Must(err)
+}
 
 func UpdateV2(outputDir string) (int, error) {
 	if err := updateRepoToCPE(outputDir); err != nil {
 		return 0, err
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
+	ctx, cancelFn := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancelFn()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return 0, err
 	}
 
 	rl.Take()
 	res, err := client.Do(req)
-	if res != nil {
-		defer utils.IgnoreError(res.Body.Close)
-	}
 	if err != nil {
 		return 0, err
 	}
+	defer utils.IgnoreError(res.Body.Close)
+
 	if res.StatusCode != http.StatusOK {
-		return 0, errors.Errorf("rhelv2: unexpected response: %v", res.Status)
+		return 0, errors.Errorf("rhelv2: unexpected response getting manifest: %v", res.Status)
 	}
 
 	// Declare this way to prevent warnings.
@@ -85,6 +92,11 @@ func UpdateV2(outputDir string) (int, error) {
 	errorList := errorhelpers.NewErrorList("rhelv2: updating feeds")
 
 	for _, e := range m {
+		///////////////////////////////////////////////////
+		// BEGIN
+		// Influenced by ClairCore under Apache 2.0 License
+		// https://github.com/quay/claircore
+		///////////////////////////////////////////////////
 		name := strings.TrimSuffix(strings.Replace(e.Path, "/", "-", -1), ".oval.xml.bz2")
 		uri, err := u.Parse(e.Path)
 		if err != nil {
@@ -105,6 +117,11 @@ func UpdateV2(outputDir string) (int, error) {
 		default: // skip
 			continue
 		}
+		///////////////////////////////////////////////////
+		// END
+		// Influenced by ClairCore under Apache 2.0 License
+		// https://github.com/quay/claircore
+		///////////////////////////////////////////////////
 
 		wg.Add(1)
 		go func() {

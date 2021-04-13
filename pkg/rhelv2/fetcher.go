@@ -10,8 +10,6 @@ import (
 
 // fetch fetches the resource as specified by the given URL,
 // using the client provided in this package.
-//
-// fetch makes GET requests.
 func fetch(url *url.URL) (string, io.ReadCloser, error) {
 	req := &http.Request{
 		Method:     http.MethodGet,
