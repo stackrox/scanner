@@ -446,7 +446,7 @@ func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2P
 	for _, pkgEnv := range pkgEnvs {
 		if len(pkgEnv.CPEs) == 0 {
 			records = append(records, &database.RHELv2Record{
-				Pkg:  pkgEnv.Pkg,
+				Pkg: pkgEnv.Pkg,
 			})
 
 			continue
@@ -454,8 +454,8 @@ func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2P
 
 		for _, cpe := range pkgEnv.CPEs {
 			records = append(records, &database.RHELv2Record{
-				Pkg:  pkgEnv.Pkg,
-				CPE:  cpe,
+				Pkg: pkgEnv.Pkg,
+				CPE: cpe,
 			})
 		}
 	}

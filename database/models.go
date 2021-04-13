@@ -191,8 +191,8 @@ type RHELv2PackageEnv struct {
 
 // RHELv2Record is used for querying RHELv2 vulnerabilities from the database.
 type RHELv2Record struct {
-	Pkg  *RHELv2Package
-	CPE  string
+	Pkg *RHELv2Package
+	CPE string
 }
 
 // ContentManifest structure is based on file provided by OSBS
