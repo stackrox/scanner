@@ -12,6 +12,7 @@ import (
 	archop "github.com/quay/claircore"
 	coreovalutil "github.com/quay/claircore/pkg/ovalutil"
 	"github.com/quay/goval-parser/oval"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 )
 
@@ -33,7 +34,11 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 	for _, def := range root.Definitions.Definitions {
 		// create our prototype vulnerability
 		protoVuln, err := protoVuln(def)
-		if err != nil || protoVuln == nil {
+		if err != nil {
+			log.Errorf("Received error when parsing RHELv2 vulnerability: %v", err)
+			return nil, err
+		}
+		if protoVuln == nil {
 			continue
 		}
 		// recursively collect criterions for this definition
