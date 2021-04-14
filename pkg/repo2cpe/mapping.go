@@ -34,6 +34,13 @@ type Mapping struct {
 	mapping atomic.Value
 }
 
+func NewMapping() *Mapping {
+	m := new(Mapping)
+	m.mapping.Store((*RHELv2MappingFile)(nil))
+
+	return m
+}
+
 func (m *Mapping) Load(dir string) error {
 	path := filepath.Join(dir, RHELv2CPERepoName)
 	bytes, err := os.ReadFile(path)
