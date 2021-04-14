@@ -236,15 +236,9 @@ const (
 			SELECT id AS package_id
 			FROM rhelv2_package
 			WHERE name = $1
-<<<<<<< HEAD
 				AND version = $2
 				AND module = $3
 				AND arch = $4
-=======
-			  AND version = $2
-			  AND module = $3
-			  AND arch = $4
->>>>>>> redhat-certification
 		),
 		layer AS (
 			SELECT id AS layer_id
