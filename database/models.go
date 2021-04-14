@@ -17,11 +17,14 @@ package database
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"time"
+
+	archop "github.com/quay/claircore"
 )
 
 type Model struct {
 	// ID is only meant to be used by database implementations and should never be used for anything else.
-	ID int
+	ID int `json:"id,omitempty" hash:"ignore"`
 }
 
 type Layer struct {
@@ -103,3 +106,45 @@ func (mm *MetadataMap) Value() (driver.Value, error) {
 	json, err := json.Marshal(*mm)
 	return string(json), err
 }
+
+///////////////////////////////////////////////////
+// BEGIN
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
+type RHELv2Vulnerability struct {
+	Model
+
+	Name           string         `json:"name"`
+	Description    string         `json:"description"`
+	Issued         time.Time      `json:"issued"`
+	Updated        time.Time      `json:"updated"`
+	Link           string         `json:"link"`
+	Severity       string         `json:"severity"`
+	CVSSv3         string         `json:"cvssv3,omitempty"`
+	CVSSv2         string         `json:"cvssv2,omitempty"`
+	CPEs           []string       `json:"cpes" hash:"set"`
+	Package        *RHELv2Package `json:"package"`
+	FixedInVersion string         `json:"fixed_in_version"`
+	ArchOperation  archop.ArchOp  `json:"arch_op,omitempty"`
+}
+
+type RHELv2Package struct {
+	Model
+
+	Name    string `json:"name"`
+	Version string `json:"version,omitempty"`
+	Module  string `json:"module,omitempty"`
+	Arch    string `json:"arch,omitempty"`
+}
+
+func (p *RHELv2Package) String() string {
+	return p.Name + ":" + p.Version
+}
+
+///////////////////////////////////////////////////
+// END
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
