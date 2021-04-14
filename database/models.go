@@ -15,8 +15,10 @@
 package database
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"encoding/json"
+	"strings"
 	"time"
 
 	archop "github.com/quay/claircore"
@@ -140,7 +142,55 @@ type RHELv2Package struct {
 }
 
 func (p *RHELv2Package) String() string {
-	return p.Name + ":" + p.Version
+	return strings.Join([]string{p.Name, p.Version, p.Module, p.Arch}, ":")
+}
+
+type RHELv2Layer struct {
+	Model
+
+	Hash       string
+	ParentHash string
+	Dist       string
+	Pkgs       []*RHELv2Package
+	CPEs       []string
+}
+
+type RHELv2Components struct {
+	Dist     string
+	Packages []*RHELv2Package
+	CPEs     []string
+}
+
+func (r *RHELv2Components) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(r.Dist)
+	buf.WriteString(" - ")
+	buf.WriteString("[ ")
+	for _, cpe := range r.CPEs {
+		buf.WriteString(cpe)
+		buf.WriteString(" ")
+	}
+	buf.WriteString("]")
+	buf.WriteString("[ ")
+	for _, pkg := range r.Packages {
+		buf.WriteString(pkg.String())
+		buf.WriteString(" ")
+	}
+	buf.WriteString("]")
+
+	return buf.String()
+}
+
+// ContentManifest structure is based on file provided by OSBS
+// The struct stores content metadata about the image
+type ContentManifest struct {
+	ContentSets []string         `json:"content_sets"`
+	Metadata    ManifestMetadata `json:"metadata"`
+}
+
+// ManifestMetadata struct holds additional metadata about image
+type ManifestMetadata struct {
+	ImageLayerIndex int `json:"image_layer_index"`
 }
 
 ///////////////////////////////////////////////////
