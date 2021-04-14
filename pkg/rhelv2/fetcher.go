@@ -2,16 +2,15 @@ package rhelv2
 
 import (
 	"compress/bzip2"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/pkg/errors"
 )
 
 // fetch fetches the resource as specified by the given URL,
 // using the client provided in this package.
-//
-// fetch makes GET requests.
 func fetch(url *url.URL) (string, io.ReadCloser, error) {
 	req := &http.Request{
 		Method:     http.MethodGet,
@@ -27,7 +26,7 @@ func fetch(url *url.URL) (string, io.ReadCloser, error) {
 		return "", nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return "", nil, fmt.Errorf("rhelv2: fetcher got unexpected HTTP response: %d (%s)", res.StatusCode, res.Status)
+		return "", nil, errors.Errorf("rhelv2: fetcher got unexpected HTTP response: %d (%s)", res.StatusCode, res.Status)
 	}
 
 	return res.Header.Get("last-modified"), newReadCloser(res.Body), nil

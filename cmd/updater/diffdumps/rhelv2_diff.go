@@ -70,6 +70,12 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 	var filtered []*database.RHELv2Vulnerability
 	for _, headVuln := range rhel.Vulns {
 		matchingBaseVuln, found := baseVulnsMap[headVuln.Name]
+		// If the vuln was not in the base, add it.
+		if !found {
+			filtered = append(filtered, headVuln)
+			continue
+		}
+
 		matchingHash, err := vulnHash(matchingBaseVuln)
 		if err != nil {
 			log.Warnf("Unable to hash existing vuln %s. Adding from head...", matchingBaseVuln.Name)
@@ -83,9 +89,8 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 			continue
 		}
 
-		// If the vuln was not in the base, or not equal to what was in the base,
-		// add it. Else, skip.
-		if !found || matchingHash != headHash {
+		// If the vuln is not equal to what was in the base, add it. Else, skip.
+		if matchingHash != headHash {
 			filtered = append(filtered, headVuln)
 		}
 	}

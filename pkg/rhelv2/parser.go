@@ -1,3 +1,8 @@
+///////////////////////////////////////////////////
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
 package rhelv2
 
 import (
@@ -9,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/quay/claircore/pkg/cpe"
 	"github.com/quay/goval-parser/oval"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
@@ -87,11 +92,12 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 
 		name := name(def)
 		if name == "" {
-			logrus.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
+			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
 		}
 		link := link(def)
 		if link == "" {
-			logrus.Errorf("Unable to determine link for vuln %q in %s", def.Title, uri)
+			// Log as a warning, as this is not critical, but it is good to know.
+			log.Warnf("Unable to determine link for vuln %q in %s", def.Title, uri)
 		}
 
 		return &database.RHELv2Vulnerability{
