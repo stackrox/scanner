@@ -243,6 +243,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	}
 
 	var notes []Note
+	log.Info(dbLayer.Namespace)
 	if dbLayer.Namespace != nil {
 		layer.NamespaceName = dbLayer.Namespace.Name
 
