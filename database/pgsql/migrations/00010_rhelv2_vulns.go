@@ -30,7 +30,7 @@ func init() {
 			arch_operation   TEXT,
 			UNIQUE (hash)
 		);
-		CREATE INDEX vuln_lookup_idx on vuln (package_name, package_module, cpe);
+		CREATE INDEX IF NOT EXISTS vuln_lookup_idx on vuln (package_name, package_module, cpe);
 
 		-- Description may be rather large.
 		-- It'd be best to save just one version of the description per vulnerability
@@ -42,7 +42,7 @@ func init() {
 			description TEXT,
 			UNIQUE (hash)
 		);
-		CREATE INDEX vuln_description_lookup_idx on vuln_description (name);`,
+		CREATE INDEX IF NOT EXISTS vuln_description_lookup_idx on vuln_description (name);`,
 		}),
 	})
 }
