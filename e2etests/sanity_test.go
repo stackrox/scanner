@@ -297,7 +297,8 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
-		{
+		// TODO: Once scanning + vuln matching are in-place, re-enable this test.
+		/*{
 			image:    "docker.io/anchore/anchore-engine:v0.5.0",
 			registry: "https://registry-1.docker.io",
 			source:   "Red Hat",
@@ -384,7 +385,7 @@ func TestImageSanity(t *testing.T) {
 					},
 				},
 			},
-		},
+		},*/
 		{
 			image:    "us.gcr.io/stackrox-ci/qa/apache/server:latest",
 			registry: "https://us.gcr.io",
