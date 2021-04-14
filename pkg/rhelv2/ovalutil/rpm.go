@@ -35,8 +35,8 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 		// create our prototype vulnerability
 		protoVuln, err := protoVuln(def)
 		if err != nil {
-			log.Warnf("Received error when parsing RHELv2 vulnerability. Skipping...: %v", err)
-			continue
+			log.Errorf("Received error when parsing RHELv2 vulnerability: %v", err)
+			return nil, err
 		}
 		if protoVuln == nil {
 			continue
