@@ -41,7 +41,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/bbolt v1.3.5
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
-	golang.org/x/sys v0.0.0-20201101102859-da207088b7d1
+	golang.org/x/sys v0.0.0-20201112073958-5cba982894dd
 	golang.org/x/tools v0.0.0-20201019175715-b894a3290fff
 	google.golang.org/api v0.33.0
 	google.golang.org/grpc v1.33.0
@@ -63,5 +63,5 @@ replace (
 
 	// Due to github.com/stackrox/rox dependency.
 	// BE SURE TO KEEP THIS UP-TO-DATE.
-	k8s.io/client-go => k8s.io/client-go v0.19.2
+	k8s.io/client-go => k8s.io/client-go v0.20.2
 )
