@@ -199,16 +199,21 @@ func loadOSVulns(zipR *zip.ReadCloser, db database.Datastore) error {
 }
 
 func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCPE *repo2cpe.Mapping) error {
-	if repoToCPE != nil {
-		if err := repoToCPE.Load(filepath.Join(scratchDir, RHELv2DirName)); err != nil {
-			return errors.Wrapf(err, "couldn't update in mem repository-to-cpe.json copy")
-		}
-	}
-
 	// scratch directory for RHELv2 contents.
 	destDir := filepath.Join(scratchDir, RHELv2DirName)
 	if err := os.MkdirAll(destDir, 0755); err != nil {
 		return errors.Wrap(err, "couldn't make scratch dir for RHELv2 vulns")
+	}
+
+	if repoToCPE != nil {
+		targetFile := filepath.Join(RHELv2DirName, repo2cpe.RHELv2CPERepoName)
+		if err := archiver.DefaultZip.Extract(zipPath, targetFile, destDir); err != nil {
+			log.WithError(err).Errorf("Failed to extract %s from ZIP", targetFile)
+			return err
+		}
+		if err := repoToCPE.Load(destDir); err != nil {
+			return errors.Wrapf(err, "couldn't update in mem repository-to-cpe.json copy")
+		}
 	}
 
 	// RHELv2 contents inside ZIP file.
