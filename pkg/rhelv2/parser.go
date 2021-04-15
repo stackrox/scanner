@@ -84,7 +84,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 
 		var cvss3Str, cvss2Str string
 		if cvss3.score > 0 && cvss3.vector != "" {
-			cvss2Str = fmt.Sprintf("%.1f/%s", cvss3.score, cvss3.vector)
+			cvss3Str = fmt.Sprintf("%.1f/%s", cvss3.score, cvss3.vector)
 		}
 		if cvss2.score > 0 && cvss2.vector != "" {
 			cvss2Str = fmt.Sprintf("%.1f/%s", cvss2.score, cvss2.vector)
