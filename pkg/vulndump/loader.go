@@ -206,25 +206,11 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 	}
 
 	if repoToCPE != nil {
-		/* TODO
-		{"Event":"Updater failed","Level":"error","Location":"updater.go:141","Time":"2021-04-15 16:56:27.761773","error":"updating from vuln dump: error loading RHEL vulns: couldn't update in mem repository-to-cpe.json copy: reading mapping file at /var/lib/stackrox/diff-dump-scratch/rhelv2/repository-to-cpe.json: open /var/lib/stackrox/diff-dump-scratch/rhelv2/repository-to-cpe.json: no such file or directory"}
-		*/
 		targetFile := filepath.Join(RHELv2DirName, repo2cpe.RHELv2CPERepoName)
 		if err := archiver.DefaultZip.Extract(zipPath, targetFile, destDir); err != nil {
 			log.WithError(err).Errorf("Failed to extract %s from ZIP", targetFile)
 			return err
 		}
-		//
-		files, err := os.ReadDir(destDir)
-		if err != nil {
-			log.WithError(err).Error("Reading dest dir")
-		} else {
-			log.Info(len(files))
-			for _, file := range files {
-				log.Info(file.Name())
-			}
-		}
-		//
 		if err := repoToCPE.Load(destDir); err != nil {
 			return errors.Wrapf(err, "couldn't update in mem repository-to-cpe.json copy")
 		}
@@ -243,9 +229,6 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 	if err != nil {
 		return errors.Wrap(err, "reading scratch dir for RHELv2")
 	}
-	//
-	log.Info(len(files))
-	//
 	for _, file := range files {
 		if filepath.Ext(file.Name()) != ".json" {
 			continue
