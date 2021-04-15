@@ -127,7 +127,10 @@
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210223210505.zip",
       "timestamp": "2021-02-23T21:05:05.329403942Z",
-      "diffLocation": "gs://definitions.stackrox.io/eac616e1-e072-4cb1-9d63-db680fe73f92/diff.zip"
+      "diffLocation": "gs://definitions.stackrox.io/eac616e1-e072-4cb1-9d63-db680fe73f92/diff.zip",
+      "config": {
+        "skipRHELv2Vulns": true
+      }
     },
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210330190425.zip",
