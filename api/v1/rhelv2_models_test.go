@@ -127,6 +127,7 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Version:       "2",
 			AddedBy:       "layer1",
 			Location:      "var/lib/rpm/Packages",
+			FixedBy:       "4",
 			Vulnerabilities: []Vulnerability{
 				{
 					Name:          "v1",
