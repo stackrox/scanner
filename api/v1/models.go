@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"strings"
 
-	version "github.com/knqyf263/go-rpm-version"
+	rpmVersion "github.com/knqyf263/go-rpm-version"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
@@ -336,7 +336,6 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 	for _, pkgEnv := range pkgEnvs {
 		pkg := pkgEnv.Pkg
 
-		// TODO: add FixedBy field as well
 		feature := Feature{
 			Name:          pkg.Name,
 			NamespaceName: layer.NamespaceName,
@@ -346,16 +345,18 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 			Location:      "var/lib/rpm/Packages", // TODO: Fill out?
 		}
 
-		pkgVersion := version.NewVersion(pkg.Version)
+		pkgVersion := rpmVersion.NewVersion(pkg.Version)
 		pkgArch := pkg.Arch
+		fixedBy := pkgVersion
 		for _, vuln := range vulns[pkg.ID] {
 			// Assume the vulnerability is not fixed.
 			// In that case, all versions are affected.
 			affectedVersion := true
+			var vulnVersion *rpmVersion.Version
 			if vuln.FixedInVersion != "" {
 				// The vulnerability is fixed. Determine if this package is affected.
-				vulnVersion := version.NewVersion(vuln.FixedInVersion)
-				affectedVersion = pkgVersion.Compare(vulnVersion) == version.LESS
+				vulnVersion = rpmVersionPtr(rpmVersion.NewVersion(vuln.FixedInVersion))
+				affectedVersion = pkgVersion.LessThan(*vulnVersion)
 			}
 
 			// Compare the package's architecture to the affected architecture.
@@ -363,7 +364,15 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 
 			if affectedVersion && affectedArch {
 				feature.Vulnerabilities = append(feature.Vulnerabilities, rhelv2ToVulnerability(vuln, feature.NamespaceName))
+
+				if vulnVersion != nil && vulnVersion.GreaterThan(fixedBy) {
+					fixedBy = *vulnVersion
+				}
 			}
+		}
+
+		if fixedBy.GreaterThan(pkgVersion) {
+			feature.FixedBy = fixedBy.String()
 		}
 
 		layer.Features = append(layer.Features, feature)
@@ -372,12 +381,15 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 	return nil
 }
 
+func rpmVersionPtr(ver rpmVersion.Version) *rpmVersion.Version {
+	return &ver
+}
+
 // shareRepos takes repository definition and share it with other layers
 // where repositories are missing
 func shareCPEs(layers []*database.RHELv2Layer) {
 	// User's layers build on top of Red Hat images doesn't have a repository definition.
 	// We need to share CPE repo definition to all layer where CPEs are missing
-	// This only applies to Red Hat images
 	var previousCPEs []string
 	for i := 0; i < len(layers); i++ {
 		if len(layers[i].CPEs) != 0 {
