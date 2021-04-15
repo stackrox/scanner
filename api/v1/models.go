@@ -328,11 +328,6 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 		return err
 	}
 
-	// Database query results need more filtering.
-	// Need to ensure:
-	// 1. The package's version is less than the vuln's fixed-in version, if present.
-	// 2. The ArchOperation passes.
-
 	for _, pkgEnv := range pkgEnvs {
 		pkg := pkgEnv.Pkg
 
@@ -348,6 +343,11 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 		pkgVersion := rpmVersion.NewVersion(pkg.Version)
 		pkgArch := pkg.Arch
 		fixedBy := pkgVersion
+
+		// Database query results need more filtering.
+		// Need to ensure:
+		// 1. The package's version is less than the vuln's fixed-in version, if present.
+		// 2. The ArchOperation passes.
 		for _, vuln := range vulns[pkg.ID] {
 			// Assume the vulnerability is not fixed.
 			// In that case, all versions are affected.
