@@ -2,6 +2,12 @@ ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8/ubi
 ARG BASE_TAG=8.2
 
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
+COPY bundle.tar.gz /
+
+WORKDIR /bundle
+RUN tar -xfz /bundle.tar.gz
+
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
 LABEL name="scanner-db-rhel" \
@@ -17,26 +23,21 @@ ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
 
 COPY signatures/RPM-GPG-KEY-PGDG-12 /
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
-COPY bundle.tar.gz /
+COPY --from=extracted_bundle /bundle/postgres.rpm /bundle/postgres-libs.rpm /bundle/postgres-server.rpm /tmp/
+COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
+COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
 RUN groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
-    tar -zxf /bundle.tar.gz ./postgres.rpm && \
-    tar -zxf /bundle.tar.gz ./postgres-libs.rpm && \
-    tar -zxf /bundle.tar.gz ./postgres-server.rpm && \
-    tar -zxf /bundle.tar.gz ./etc/postgresql.conf && \
-    tar -zxf /bundle.tar.gz ./etc/pg_hba.conf && \
-    tar -zxf /bundle.tar.gz ./docker-entrypoint-initdb.d/definitions.sql.gz && \
-    rm -f /bundle.tar.gz && \
     rpm --import RPM-GPG-KEY-PGDG-12 && \
     dnf upgrade -y && \
     dnf install -y \
-        ca-certificates libicu systemd-sysv postgres-libs.rpm \
-        postgres-server.rpm postgres.rpm glibc-locale-source glibc-langpack-en && \
+        ca-certificates libicu systemd-sysv /tmp/postgres-libs.rpm \
+        /tmp/postgres-server.rpm /tmp/postgres.rpm glibc-locale-source glibc-langpack-en && \
     rpm -e --nodeps curl && \
     dnf clean all && \
     rm -rf /var/cache/dnf && \
-    rm postgres-libs.rpm postgres-server.rpm postgres.rpm && \
+    rm /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm && \
     rm RPM-GPG-KEY-PGDG-12 && \
     # (Optional) Remove line below to keep package management utilities
     rpm -e --nodeps rpm rpm-build-libs rpm-libs python3-rpm subscription-manager python3-subscription-manager-rhsm yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \ 

@@ -2,6 +2,12 @@ ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8/ubi
 ARG BASE_TAG=8.2
 
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
+
+COPY bundle.tar.gz /
+WORKDIR /bundle
+RUN tar -xfz /bundle.tar.gz
+
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
 LABEL name="scanner-rhel" \
@@ -16,14 +22,12 @@ ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 COPY scripts /
-COPY bundle.tar.gz /
 
-RUN tar -zxf /bundle.tar.gz ./genesis_manifests.json && \
-    tar -zxf /bundle.tar.gz ".${NVD_DEFINITIONS_DIR}/" && \
-    tar -zxf /bundle.tar.gz ".${K8S_DEFINITIONS_DIR}/" && \
-    tar -zxf /bundle.tar.gz ./scanner && \
-    rm -f /bundle.tar.gz && \
-    dnf upgrade -y && \
+COPY --from=extracted_bundle /bundle/genesis_manifests.json /bundle/scanner .
+COPY --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
+COPY --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
+
+RUN dnf upgrade -y && \
     dnf install -y ca-certificates xz && \
     dnf clean all && \
     rm -rf /var/cache/dnf && \
