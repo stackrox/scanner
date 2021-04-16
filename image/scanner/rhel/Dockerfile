@@ -23,7 +23,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 COPY scripts /
 
-COPY --from=extracted_bundle /bundle/genesis_manifests.json /bundle/scanner .
+COPY --from=extracted_bundle /bundle/genesis_manifests.json /bundle/scanner ./
 COPY --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
 COPY --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
 
