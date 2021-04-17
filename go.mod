@@ -68,5 +68,5 @@ replace (
 
 	// Due to github.com/stackrox/rox dependency.
 	// BE SURE TO KEEP THIS UP-TO-DATE.
-	k8s.io/client-go => k8s.io/client-go v0.19.2
+	k8s.io/client-go => k8s.io/client-go v0.20.2
 )
