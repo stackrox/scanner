@@ -129,7 +129,7 @@ func ConvertCVSSv2(cvss2Vector string) (*MetadataCVSSv2, error) {
 		return nil, err
 	}
 	var m MetadataCVSSv2
-	m.Score = v.Score()
+	m.Score = v.BaseScore()
 	m.Vectors = cvss2Vector
 	m.ExploitabilityScore = roundTo1Decimal(v.ExploitabilityScore())
 	m.ImpactScore = roundTo1Decimal(v.ImpactScore(false))
@@ -147,7 +147,7 @@ func ConvertCVSSv3(cvss3Vector string) (*MetadataCVSSv3, error) {
 	}
 
 	var m MetadataCVSSv3
-	m.Score = v.Score()
+	m.Score = v.BaseScore()
 	m.Vectors = cvss3Vector
 	m.ExploitabilityScore = roundTo1Decimal(v.ExploitabilityScore())
 	m.ImpactScore = roundTo1Decimal(v.ImpactScore())
