@@ -317,7 +317,6 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
 
-
 // addRHELv2Vulns appends vulnerabilities found during RHELv2 scanning.
 // RHELv2 scanning performs the scanning/analysis needed to be
 // certified as part of Red Hat's Scanner Certification Program.
