@@ -34,7 +34,7 @@ func TestRHELParser(t *testing.T) {
 	// Test parsing testdata/fetcher_rhel_test.1.xml
 	testFile, _ := os.Open(path + "/testdata/fetcher_rhel_test.1.xml")
 	coveredIDs := set.NewIntSet()
-	vulnerabilities, err := parseRHSA(testFile, coveredIDs)
+	vulnerabilities, err := parseRHSA("centos:7", testFile, coveredIDs)
 	if assert.Nil(t, err) && assert.Len(t, vulnerabilities, 1) {
 		assert.Equal(t, "RHSA-2015:1193", vulnerabilities[0].Name)
 		assert.Equal(t, "https://rhn.redhat.com/errata/RHSA-2015-1193.html", vulnerabilities[0].Link)
@@ -82,7 +82,7 @@ func TestRHELParser(t *testing.T) {
 	// Test parsing testdata/fetcher_rhel_test.2.xml
 	testFile, _ = os.Open(path + "/testdata/fetcher_rhel_test.2.xml")
 	coveredIDs = set.NewIntSet()
-	vulnerabilities, err = parseRHSA(testFile, coveredIDs)
+	vulnerabilities, err = parseRHSA("centos:6", testFile, coveredIDs)
 	if assert.Nil(t, err) && assert.Len(t, vulnerabilities, 1) {
 		assert.Equal(t, "RHSA-2015:1207", vulnerabilities[0].Name)
 		assert.Equal(t, "https://rhn.redhat.com/errata/RHSA-2015-1207.html", vulnerabilities[0].Link)
