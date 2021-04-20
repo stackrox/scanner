@@ -40,7 +40,7 @@ import (
 )
 
 const (
-	ovalURI        = "https://www.redhat.com/security/data/oval/"
+	ovalURI     = "https://www.redhat.com/security/data/oval/"
 	bulkOVALURI = ovalURI + "v2/"
 )
 
@@ -62,8 +62,8 @@ var (
 		" ComputeNode is installed",
 	}
 
-	cveIDRegexp    = regexp.MustCompile(`^oval:com\.redhat\.cve:def:(\d+)$`)
-	rhsaIDRegexp   = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
+	cveIDRegexp  = regexp.MustCompile(`^oval:com\.redhat\.cve:def:(\d+)$`)
+	rhsaIDRegexp = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
 )
 
 type oval struct {
