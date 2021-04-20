@@ -63,7 +63,6 @@ var (
 
 	cveIDRegexp    = regexp.MustCompile(`^oval:com\.redhat\.cve:def:(\d+)$`)
 	rhsaIDRegexp   = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
-	rhsaFileRegexp = regexp.MustCompile(`com.redhat.rhsa-(\d+).xml`)
 )
 
 type oval struct {
