@@ -1308,34 +1308,34 @@ func TestImageSanity(t *testing.T) {
 					Location: "var/lib/rpm/Packages",
 					FixedBy:  "2.9.1-4.el8_3.1",
 				},
-			},
-			{
-				Name:          "libsolv",
-				VersionFormat: "rpm",
-				Version:       "0.7.7-1.el8",
-				Vulnerabilities: []v1.Vulnerability{
-					{
-						Name:        "RHSA-2020:4508",
-						Description: "The libsolv packages provide a library for resolving package dependencies using a satisfiability algorithm.\n\nThe following packages have been upgraded to a later upstream version: libsolv (0.7.11). (BZ#1809106)\n\nSecurity Fix(es):\n\n* libsolv: out-of-bounds read in repodata_schema2id in repodata.c (CVE-2019-20387)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.\n\nAdditional Changes:\n\nFor detailed information on changes in this release, see the Red Hat Enterprise Linux 8.3 Release Notes linked from the References section.",
-						Link:        "https://access.redhat.com/errata/RHSA-2020:4508",
-						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         3.6,
-									"Score":               7.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+				{
+					Name:          "libsolv",
+					VersionFormat: "rpm",
+					Version:       "0.7.7-1.el8",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:        "RHSA-2020:4508",
+							Description: "The libsolv packages provide a library for resolving package dependencies using a satisfiability algorithm.\n\nThe following packages have been upgraded to a later upstream version: libsolv (0.7.11). (BZ#1809106)\n\nSecurity Fix(es):\n\n* libsolv: out-of-bounds read in repodata_schema2id in repodata.c (CVE-2019-20387)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.\n\nAdditional Changes:\n\nFor detailed information on changes in this release, see the Red Hat Enterprise Linux 8.3 Release Notes linked from the References section.",
+							Link:        "https://access.redhat.com/errata/RHSA-2020:4508",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"LastModifiedDateTime": "2020-12-18T19:27Z",
+									"PublishedDateTime":    "2020-12-17T19:15Z",
 								},
-								"LastModifiedDateTime": "2020-12-18T19:27Z",
-								"PublishedDateTime":    "2020-12-17T19:15Z",
 							},
+							FixedBy: "0:0.7.11-1.el8",
 						},
-						FixedBy: "0:0.7.11-1.el8",
 					},
+					AddedBy:  "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
+					Location: "var/lib/rpm/Packages",
+					FixedBy:  "0.7.11-1.el8",
 				},
-				AddedBy:  "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
-				Location: "var/lib/rpm/Packages",
-				FixedBy:  "0.7.11-1.el8",
 			},
 		},
 	} {
