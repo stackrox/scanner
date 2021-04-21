@@ -17,15 +17,21 @@ import (
 )
 
 const (
-	CVEDefinition        = "cve"
-	RHBADefinition       = "rhba"
-	RHEADefinition       = "rhea"
-	RHSADefinition       = "rhsa"
+	// CVEDefinition indicates the vulnerability definition is for a CVE.
+	CVEDefinition = "cve"
+	// RHBADefinition indicates the vulnerability definition is for a RHBA.
+	RHBADefinition = "rhba"
+	// RHEADefinition indicates the vulnerability definition is for a RHEA.
+	RHEADefinition = "rhea"
+	// RHSADefinition indicates the vulnerability definition is for a RHSA.
+	RHSADefinition = "rhsa"
+	// UnaffectedDefinition indicates the vulnerability definition is for
+	// a package that is unaffected by the CVE.
 	UnaffectedDefinition = "unaffected"
 )
 
 var (
-	moduleCommentRegex = regexp.MustCompile(`(Module )(.*)( is enabled)`)
+	moduleCommentRegex  = regexp.MustCompile(`(Module )(.*)( is enabled)`)
 	definitionTypeRegex = regexp.MustCompile(`^oval\:com\.redhat\.([a-z]+)\:def\:\d+$`)
 )
 
