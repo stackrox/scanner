@@ -16,7 +16,18 @@ import (
 	"github.com/stackrox/scanner/database"
 )
 
-var moduleCommentRegex = regexp.MustCompile(`(Module )(.*)( is enabled)`)
+const (
+	CVEDefinition        = "cve"
+	RHBADefinition       = "rhba"
+	RHEADefinition       = "rhea"
+	RHSADefinition       = "rhsa"
+	UnaffectedDefinition = "unaffected"
+)
+
+var (
+	moduleCommentRegex = regexp.MustCompile(`(Module )(.*)( is enabled)`)
+	definitionTypeRegex = regexp.MustCompile(`^oval\:com\.redhat\.([a-z]+)\:def\:\d+$`)
+)
 
 // ProtoVulnFunc allows a caller to create a prototype vulnerability that will be
 // copied and further defined for every applicable oval.Criterion discovered.
@@ -175,4 +186,13 @@ func rpmStateLookup(root *oval.Root, ref string) (*oval.RPMInfoState, error) {
 		return nil, errors.Errorf("bad kind: %s", kind)
 	}
 	return &root.States.RPMInfoStates[index], nil
+}
+
+// GetDefinitionType parses an OVAL definition and extracts its type from ID.
+func GetDefinitionType(def oval.Definition) (string, error) {
+	match := definitionTypeRegex.FindStringSubmatch(def.ID)
+	if len(match) != 2 { // we should have match of the whole string and one submatch
+		return "", errors.New("cannot parse definition ID for its type")
+	}
+	return match[1], nil
 }
