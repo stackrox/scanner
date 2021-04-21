@@ -35,8 +35,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 		// Red Hat OVAL v2 data include information about vulnerabilities,
 		// that actually don't affect the package in any way. Storing them
 		// would increase number of records in DB without adding any value.
-		// TODO: Delete second part of the condition when ClairCore does.
-		if defType == ovalutil.UnaffectedDefinition || defType == ovalutil.CVEDefinition {
+		if defType == ovalutil.UnaffectedDefinition {
 			return nil, nil
 		}
 
