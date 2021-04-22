@@ -38,7 +38,6 @@ var (
 		"alpine:v3.13",
 		"amzn:2018.03",
 		"amzn:2",
-		"centos:5", // TODO: EOL 11/2020
 		"centos:6",
 		"centos:7",
 		"centos:8",
