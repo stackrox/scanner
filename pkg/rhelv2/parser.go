@@ -27,7 +27,20 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	}
 
 	protoVuln := func(def oval.Definition) (*database.RHELv2Vulnerability, error) {
+		defType, err := ovalutil.GetDefinitionType(def)
+		if err != nil {
+			return nil, err
+		}
+
+		// Red Hat OVAL v2 data include information about vulnerabilities,
+		// that actually don't affect the package in any way. Storing them
+		// would increase number of records in DB without adding any value.
+		if defType == ovalutil.UnaffectedDefinition {
+			return nil, nil
+		}
+
 		cpes := make([]string, 0, len(def.Advisory.AffectedCPEList))
+
 		for _, affected := range def.Advisory.AffectedCPEList {
 			// Work around having empty entries. This seems to be some issue
 			// with the tool used to produce the database but only seems to
