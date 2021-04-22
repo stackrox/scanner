@@ -29,6 +29,7 @@ var (
 		"core",
 		"fatjar",
 		"scala-library",
+		"common",
 	}
 
 	immutableIndicators = []string{
