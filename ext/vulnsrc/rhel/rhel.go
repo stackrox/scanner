@@ -17,14 +17,12 @@
 package rhel
 
 import (
-	"bufio"
 	"compress/bzip2"
 	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -42,13 +40,7 @@ import (
 )
 
 const (
-	// Before this RHSA, it deals only with RHEL <= 4.
-	firstRHEL5RHSA      = 20070044
-	firstConsideredRHEL = 5
-
-	ovalURI        = "https://www.redhat.com/security/data/oval/"
-	allRHSAsXMLBZ2 = ovalURI + "com.redhat.rhsa-all.xml.bz2"
-
+	ovalURI     = "https://www.redhat.com/security/data/oval/"
 	bulkOVALURI = ovalURI + "v2/"
 )
 
@@ -57,11 +49,10 @@ var (
 		"RHSA-2017:0372", // RHSA-2017:0372 affects kernel-aarch64 and not amd64
 	)
 
-	bulkRHSAXMLBZ2URLs = []string{
-		allRHSAsXMLBZ2,
-		bulkOVALURI + "RHEL6/rhel-6-including-unpatched.oval.xml.bz2",
-		bulkOVALURI + "RHEL7/rhel-7-including-unpatched.oval.xml.bz2",
-		bulkOVALURI + "RHEL8/rhel-8-including-unpatched.oval.xml.bz2",
+	bulkRHSAXMLBZ2URLs = map[string]string{
+		bulkOVALURI + "RHEL6/rhel-6-including-unpatched.oval.xml.bz2": "6",
+		bulkOVALURI + "RHEL7/rhel-7-including-unpatched.oval.xml.bz2": "7",
+		bulkOVALURI + "RHEL8/rhel-8-including-unpatched.oval.xml.bz2": "8",
 	}
 
 	ignoredCriterions = []string{
@@ -71,9 +62,8 @@ var (
 		" ComputeNode is installed",
 	}
 
-	cveIDRegexp    = regexp.MustCompile(`^oval:com\.redhat\.cve:def:(\d+)$`)
-	rhsaIDRegexp   = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
-	rhsaFileRegexp = regexp.MustCompile(`com.redhat.rhsa-(\d+).xml`)
+	cveIDRegexp  = regexp.MustCompile(`^oval:com\.redhat\.cve:def:(\d+)$`)
+	rhsaIDRegexp = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
 )
 
 type oval struct {
@@ -168,31 +158,27 @@ func init() {
 	vulnsrc.RegisterUpdater("rhel", &updater{})
 }
 
-func parseBzip(reader io.ReadCloser, coveredIDs set.IntSet) ([]database.Vulnerability, error) {
+func parseBzip(reader io.ReadCloser, osVersion string) ([]database.Vulnerability, error) {
 	defer utils.IgnoreError(reader.Close)
 
 	decompressingReader := bzip2.NewReader(reader)
-	return parseRHSA(decompressingReader, coveredIDs)
+	return parseRHSA(decompressingReader, osVersion)
 }
 
 func (u *updater) Update(_ vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
 	log.WithField("package", "RHEL").Info("Start fetching vulnerabilities")
 
 	log.Info("RHEL: fetching bulk OVAL URIs")
-	// RedHat has one giant file with almost all the RHSAs, except some which they don't keep in this for some reason.
-	// We fetch this file first, since it's just one HTTP call.
-	// We then iterate over the list of other files, and fetch all the RHSAs that weren't included in this one.
-
 	var finalResp vulnsrc.UpdateResponse
 	coveredIDs := set.NewIntSet()
-	for _, url := range bulkRHSAXMLBZ2URLs {
+	for url, osVersion := range bulkRHSAXMLBZ2URLs {
 		rhsaResp, err := getWithRetriesAndBackoff(url)
 		if err != nil {
 			log.WithError(err).Errorf("could not download RHEL's OVAL file from %s", url)
 			return finalResp, commonerr.ErrCouldNotDownload
 		}
 		previouslyCovered := len(coveredIDs)
-		vulns, err := parseBzip(rhsaResp.Body, coveredIDs)
+		vulns, err := parseBzip(rhsaResp.Body, osVersion)
 		if err != nil {
 			log.WithError(err).Errorf("could not prase RHEL's OVAL file from %s", url)
 			return finalResp, commonerr.ErrCouldNotParse
@@ -202,55 +188,12 @@ func (u *updater) Update(_ vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
 		finalResp.Vulnerabilities = append(finalResp.Vulnerabilities, vulns...)
 	}
 
-	log.Info("RHEL: Fetching remaining IDs which weren't in the OVAL files")
-	ovalDirectoryResp, err := getWithRetriesAndBackoff(ovalURI)
-	if err != nil {
-		log.WithError(err).Error("could not fetch RHEL's update list")
-		return finalResp, commonerr.ErrCouldNotDownload
-	}
-	defer utils.IgnoreError(ovalDirectoryResp.Body.Close)
-
-	var remainingRHSAURLs []string
-	scanner := bufio.NewScanner(ovalDirectoryResp.Body)
-	for scanner.Scan() {
-		line := scanner.Text()
-		regexMatch := rhsaFileRegexp.FindStringSubmatch(line)
-		// Not an RHSA
-		if len(regexMatch) != 2 {
-			continue
-		}
-		rhsaNo, err := strconv.Atoi(regexMatch[1])
-		if err != nil {
-			return finalResp, errors.Wrapf(err, "invalid RHSA file name: %s. Bad regex?", regexMatch[0])
-		}
-		if rhsaNo > firstRHEL5RHSA && !coveredIDs.Contains(rhsaNo) {
-			remainingRHSAURLs = append(remainingRHSAURLs, regexMatch[0])
-		}
-	}
-	const printEvery = 100
-	log.WithField("count", len(remainingRHSAURLs)).Info("RHEL: got remaining RHSAs to fetch")
-	for i, rhsaURL := range remainingRHSAURLs {
-		r, err := getWithRetriesAndBackoff(ovalURI + rhsaURL)
-		if err != nil {
-			log.WithError(err).Error("could not download RHEL's update list")
-			return finalResp, commonerr.ErrCouldNotDownload
-		}
-		currentVulns, err := parseRHSA(r.Body, coveredIDs)
-		_ = r.Body.Close()
-		if err != nil {
-			return finalResp, err
-		}
-		finalResp.Vulnerabilities = append(finalResp.Vulnerabilities, currentVulns...)
-		if (i+1)%printEvery == 0 {
-			log.Infof("Finished collecting %d/%d additional RHSAs", i+1, len(remainingRHSAURLs))
-		}
-	}
 	return finalResp, nil
 }
 
 func (u *updater) Clean() {}
 
-func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulnerability, error) {
+func parseRHSA(ovalReader io.Reader, osVersion string) ([]database.Vulnerability, error) {
 	// Decode the XML.
 	var ov oval
 	err := xml.NewDecoder(ovalReader).Decode(&ov)
@@ -266,7 +209,7 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulne
 	for _, definition := range ov.Definitions {
 		cveRegexMatch := cveIDRegexp.FindStringSubmatch(definition.ID)
 		if len(cveRegexMatch) >= 2 && len(definition.References) > 0 {
-			pkgs := toFeatureVersions(definition.Criteria)
+			pkgs := toFeatureVersions(definition.Criteria, osVersion)
 			if len(pkgs) == 0 {
 				continue
 			}
@@ -300,20 +243,8 @@ func parseRHSA(ovalReader io.Reader, parsedRHSAIDs set.IntSet) ([]database.Vulne
 				return nil, errors.Errorf("invalid ID: %s", definition.ID)
 			}
 		}
-		rhsaNo, err := strconv.Atoi(regexMatch[1])
-		if err != nil {
-			return nil, errors.Wrapf(err, "invalid RHSA id format: %s", definition.ID)
-		}
-		if rhsaNo < firstRHEL5RHSA {
-			continue
-		}
-		// If we have already parsed this RHSA, then don't parse it again
-		// This can happen because we parse the giant file of RHSAs and then individual files
-		// for each Release (e.g. RHEL6, RHEL7, RHEL8)
-		if !parsedRHSAIDs.Add(rhsaNo) {
-			continue
-		}
-		pkgs := toFeatureVersions(definition.Criteria)
+
+		pkgs := toFeatureVersions(definition.Criteria, osVersion)
 		if len(pkgs) > 0 {
 			name := name(definition)
 			if blocklistedRHSAs.Contains(name) {
@@ -421,30 +352,20 @@ func getPossibilities(node criteria) [][]criterion {
 	return possibilities
 }
 
-func toFeatureVersions(criteria criteria) []database.FeatureVersion {
+func toFeatureVersions(criteria criteria, osVersion string) []database.FeatureVersion {
 	// There are duplicates in Red Hat .xml files.
 	// This map is for deduplication.
 	featureVersionParameters := make(map[string]database.FeatureVersion)
 
 	possibilities := getPossibilities(criteria)
 	for _, criterions := range possibilities {
-		var (
-			featureVersion database.FeatureVersion
-			osVersion      int
-			err            error
-		)
+		var featureVersion database.FeatureVersion
 		featureVersion.Version = versionfmt.MaxVersion
 
 		// Attempt to parse package data from trees of criterions.
 		for _, c := range criterions {
 			if strings.Contains(c.Comment, " is installed") {
-				if strings.HasPrefix(c.Comment, "Red Hat Enterprise Linux ") {
-					const prefixLen = len("Red Hat Enterprise Linux ")
-					osVersion, err = strconv.Atoi(strings.TrimSpace(c.Comment[prefixLen : prefixLen+strings.Index(c.Comment[prefixLen:], " ")]))
-					if err != nil {
-						log.WithField("criterion comment", c.Comment).Warning("could not parse Red Hat release version from criterion comment")
-					}
-				} else {
+				if !strings.HasPrefix(c.Comment, "Red Hat Enterprise Linux ") {
 					feature := strings.TrimSuffix(c.Comment, " is installed")
 					featureVersion.Feature.Name = feature
 					featureVersion.Feature.Namespace.VersionFormat = rpm.ParserName
@@ -463,12 +384,7 @@ func toFeatureVersions(criteria criteria) []database.FeatureVersion {
 			}
 		}
 
-		if osVersion >= firstConsideredRHEL {
-			// TODO(vbatts) this is where features need multiple labels ('centos' and 'rhel')
-			featureVersion.Feature.Namespace.Name = "centos" + ":" + strconv.Itoa(osVersion)
-		} else {
-			continue
-		}
+		featureVersion.Feature.Namespace.Name = "centos:" + osVersion
 
 		if featureVersion.Feature.Namespace.Name != "" && featureVersion.Feature.Name != "" {
 			featureVersionParameters[featureVersion.Feature.Namespace.Name+":"+featureVersion.Feature.Name] = featureVersion

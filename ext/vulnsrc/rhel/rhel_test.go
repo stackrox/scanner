@@ -20,7 +20,6 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stretchr/testify/assert"
@@ -33,8 +32,7 @@ func TestRHELParser(t *testing.T) {
 
 	// Test parsing testdata/fetcher_rhel_test.1.xml
 	testFile, _ := os.Open(path + "/testdata/fetcher_rhel_test.1.xml")
-	coveredIDs := set.NewIntSet()
-	vulnerabilities, err := parseRHSA(testFile, coveredIDs)
+	vulnerabilities, err := parseRHSA(testFile, "7")
 	if assert.Nil(t, err) && assert.Len(t, vulnerabilities, 1) {
 		assert.Equal(t, "RHSA-2015:1193", vulnerabilities[0].Name)
 		assert.Equal(t, "https://rhn.redhat.com/errata/RHSA-2015-1193.html", vulnerabilities[0].Link)
@@ -81,8 +79,7 @@ func TestRHELParser(t *testing.T) {
 
 	// Test parsing testdata/fetcher_rhel_test.2.xml
 	testFile, _ = os.Open(path + "/testdata/fetcher_rhel_test.2.xml")
-	coveredIDs = set.NewIntSet()
-	vulnerabilities, err = parseRHSA(testFile, coveredIDs)
+	vulnerabilities, err = parseRHSA(testFile, "6")
 	if assert.Nil(t, err) && assert.Len(t, vulnerabilities, 1) {
 		assert.Equal(t, "RHSA-2015:1207", vulnerabilities[0].Name)
 		assert.Equal(t, "https://rhn.redhat.com/errata/RHSA-2015-1207.html", vulnerabilities[0].Link)
