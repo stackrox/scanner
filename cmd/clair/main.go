@@ -149,7 +149,7 @@ func Boot(config *Config) {
 	grpcAPI.Register(
 		ping.NewService(),
 		imagescan.NewService(db, nvdVulnCache),
-		kubescan.NewService(db, k8sVulnCache),
+		kubescan.NewService(k8sVulnCache),
 		nodescan.NewService(db, nvdVulnCache, k8sVulnCache),
 		vulndefs.NewService(db),
 	)

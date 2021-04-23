@@ -9,7 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/convert"
-	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"google.golang.org/grpc"
@@ -24,15 +23,13 @@ type Service interface {
 }
 
 // NewService returns the service for scanning
-func NewService(db database.Datastore, k8sCache k8scache.Cache) Service {
+func NewService(k8sCache k8scache.Cache) Service {
 	return &serviceImpl{
-		db:       db,
 		k8sCache: k8sCache,
 	}
 }
 
 type serviceImpl struct {
-	db       database.Datastore
 	k8sCache k8scache.Cache
 }
 
@@ -69,6 +66,7 @@ func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerabili
 	return filterInvalidVulns(converted), nil
 }
 
+// GetKubeVulnerabilities returns Kubernetes vulnerabilities for requested Kubernetes version.
 func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeVulnerabilitiesRequest) (*v1.GetKubeVulnerabilitiesResponse, error) {
 	var err error
 	var resp v1.GetKubeVulnerabilitiesResponse
