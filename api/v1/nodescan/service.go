@@ -60,7 +60,7 @@ func filterInvalidVulns(vulns []*v1.Vulnerability) []*v1.Vulnerability {
 }
 
 func (s *serviceImpl) getNVDVulns(vendor, product, version string) ([]*v1.Vulnerability, error) {
-	version, err := truncateVersion(version)
+	version, err := convert.TruncateVersion(version)
 	if err != nil {
 		log.Warnf("unable to truncate version %v for %v:%v: %v. Skipping...", version, vendor, product, err)
 		return nil, nil
@@ -166,14 +166,14 @@ func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerabili
 	if name == "" || version == "" {
 		return nil, nil
 	}
-	version, err := truncateVersion(version)
+	version, err := convert.TruncateVersion(version)
 	if err != nil {
 		log.Warnf("Unable to convert version of %s:%s - %v. Skipping...", name, version, err)
 		return nil, nil
 	}
 
 	vulns := s.k8sCache.GetVulnsByComponent(name, version)
-	converted, err := convertK8sVulnerabilities(version, vulns)
+	converted, err := convert.K8sVulnerabilities(version, vulns)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to convert vulnerabilities")
 	}

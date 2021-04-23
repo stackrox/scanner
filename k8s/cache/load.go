@@ -13,9 +13,13 @@ import (
 
 // These are the names of Kubernetes components we detect on
 const (
-	KubeProxy = "kube-proxy"
-	Kubectl   = "kubectl"
-	Kubelet   = "kubelet"
+	KubeProxy             = "kube-proxy"
+	Kubectl               = "kubectl"
+	Kubelet               = "kubelet"
+	KubeAggregator        = "kube-aggregator"
+	KubeAPIServer         = "kube-apiserver"
+	KubeControllerManager = "kube-controller-manager"
+	KubeScheduler         = "kube-scheduler"
 )
 
 func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
