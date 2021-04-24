@@ -1,6 +1,7 @@
 package gem
 
 import (
+	"github.com/stackrox/scanner/database"
 	"os"
 	"regexp"
 
@@ -24,7 +25,7 @@ func match(fullPath string) bool {
 	return gemSpecRegexp.MatchString(fullPath)
 }
 
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
+func (a analyzerImpl) Analyze(_ *database.Namespace, fileMap tarutil.FilesMap) ([]*component.Component, error) {
 	return common.ExtractComponents(fileMap, match, parseGemSpec), nil
 }
 

@@ -1,6 +1,7 @@
 package python
 
 import (
+	"github.com/stackrox/scanner/database"
 	"os"
 	"strings"
 
@@ -46,7 +47,7 @@ func matchSuffix(fullPath string) bool {
 	return false
 }
 
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
+func (a analyzerImpl) Analyze(_ *database.Namespace, fileMap tarutil.FilesMap) ([]*component.Component, error) {
 	return common.ExtractComponents(fileMap, matchSuffix, parseMetadataFile), nil
 }
 

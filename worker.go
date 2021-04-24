@@ -223,7 +223,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	if !env.LanguageVulns.Enabled() {
 		return namespace, distroless, featureVersions, rhelfeatures, nil, nil, nil
 	}
-	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())
+	allComponents, err := analyzer.Analyze(namespace, files, analyzers.Analyzers())
 	if err != nil {
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
 	}

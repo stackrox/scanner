@@ -1,6 +1,7 @@
 package dotnetcoreruntime
 
 import (
+	"github.com/stackrox/scanner/database"
 	"os"
 	"regexp"
 	"strings"
@@ -38,7 +39,7 @@ func matchRegex(path string) bool {
 	return dotNetCorePattern.MatchString(path)
 }
 
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
+func (a analyzerImpl) Analyze(_ *database.Namespace, fileMap tarutil.FilesMap) ([]*component.Component, error) {
 	var allComponents []*component.Component
 	for filePath := range fileMap {
 		if !matchRegex(filePath) {

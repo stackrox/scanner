@@ -1,6 +1,7 @@
 package npm
 
 import (
+	"github.com/stackrox/scanner/database"
 	"os"
 	"strings"
 
@@ -21,7 +22,7 @@ func match(fullPath string) bool {
 	return (strings.Contains(fullPath, "node_modules") || strings.Contains(fullPath, "nodejs")) && strings.HasSuffix(fullPath, "/package.json")
 }
 
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
+func (a analyzerImpl) Analyze(_ *database.Namespace, fileMap tarutil.FilesMap) ([]*component.Component, error) {
 	return common.ExtractComponents(fileMap, match, parsePackageJSON), nil
 }
 

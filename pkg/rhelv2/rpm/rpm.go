@@ -38,6 +38,7 @@ const (
 	queryFmtTest = `%{name}\n` +
 		`%{evr}\n` +
 		`%{ARCH}\n` +
+		`(none)\n` +
 		`.\n`
 
 	delim = "\n.\n"
@@ -169,6 +170,7 @@ func parsePackage(buf *bytes.Buffer) (*database.RHELv2Package, error) {
 		if line == "" && err == nil {
 			continue
 		}
+
 		switch i {
 		case 0:
 			// This is not a real package. Skip it...
@@ -188,6 +190,7 @@ func parsePackage(buf *bytes.Buffer) (*database.RHELv2Package, error) {
 			moduleStream := fmt.Sprintf("%s:%s", moduleSplit[0], moduleSplit[1])
 			p.Module = moduleStream
 		}
+
 		switch err {
 		case nil:
 		case io.EOF:
