@@ -71,7 +71,7 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 	var err error
 	var resp v1.GetKubeVulnerabilitiesResponse
 
-	resp.AggregatorVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeProxy, req.GetKubernetesVersion())
+	resp.AggregatorVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeAggregator, req.GetKubernetesVersion())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -81,12 +81,12 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	resp.ApiserverVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeControllerManager, req.GetKubernetesVersion())
+	resp.ControllerManagerVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeControllerManager, req.GetKubernetesVersion())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	resp.ApiserverVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeScheduler, req.GetKubernetesVersion())
+	resp.SchedulerVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeScheduler, req.GetKubernetesVersion())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
