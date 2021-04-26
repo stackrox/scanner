@@ -24,7 +24,7 @@ message GetKubeVulnerabilitiesResponse {
 service OrchestratorScanService {
     rpc GetKubeVulnerabilities(GetKubeVulnerabilitiesRequest) returns (GetKubeVulnerabilitiesResponse) {
         option (google.api.http) = {
-            get: "/v1/kube/vulnerabilities"
+            get: "/v1/orchestrator/kube/vulnerabilities"
         };
     }
 }
