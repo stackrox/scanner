@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	v5Manifest "github.com/containers/image/v5/manifest"
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
@@ -52,30 +53,32 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 	if err != nil {
 		return "", err
 	}
-	sha, layer, err := process(storage, image, reg)
+	digest, layer, err := process(storage, image, reg)
 	if err != nil {
-		return sha, err
+		return digest, err
 	}
-	image.SHA = sha
-	return sha, storage.AddImage(layer, image.SHA, image.TaggedName())
+	if image.SHA == "" {
+		image.SHA = digest
+	}
+	return digest, storage.AddImage(layer, image.SHA, image.TaggedName())
 }
 
 func process(storage database.Datastore, image *types.Image, reg types.Registry) (string, string, error) {
 	logrus.Debugf("Processing image %s", image)
-	sha, layers, err := fetchLayers(reg, image)
+	digest, layers, err := fetchLayers(reg, image)
 	if err != nil {
-		return sha, "", err
+		return digest, "", err
 	}
 	if len(layers) == 0 {
-		return sha, "", fmt.Errorf("No layers to process for image %s", image.String())
+		return digest, "", fmt.Errorf("No layers to process for image %s", image.String())
 	}
 
 	logrus.Infof("Found %v layers for image %v", len(layers), image)
 	if err = analyzeLayers(storage, reg, image, layers); err != nil {
 		logrus.Errorf("Failed to analyze image %q: %v", image.String(), err)
-		return sha, "", err
+		return digest, "", err
 	}
-	return sha, layers[len(layers)-1], err
+	return digest, layers[len(layers)-1], err
 }
 
 func isEmptyLayer(layer string) bool {
@@ -106,52 +109,88 @@ func parseLayers(manifestLayers []distribution.Descriptor) []string {
 	return layers
 }
 
-func handleManifest(reg types.Registry, manifestType string, remote, ref string) ([]string, error) {
+type payloadGetter interface {
+	Payload() (string, []byte, error)
+}
+
+func renderDigest(manifest payloadGetter) (digest.Digest, error) {
+	_, canonical, err := manifest.Payload()
+	if err != nil {
+		return "", err
+	}
+	dig, err := v5Manifest.Digest(canonical)
+	if err != nil {
+		return dig, err
+	}
+	return dig, nil
+}
+
+func handleManifest(reg types.Registry, manifestType string, remote, ref string) (digest.Digest, []string, error) {
 	switch manifestType {
 	case schema1.MediaTypeManifest:
 		manifest, err := reg.Manifest(remote, ref)
 		if err != nil {
-			return nil, err
+			return "", nil, err
+		}
+		dig, err := renderDigest(manifest)
+		if err != nil {
+			return "", nil, err
 		}
 		layers := parseV1Layers(manifest)
-		return layers, nil
+		return dig, layers, nil
 	case schema1.MediaTypeSignedManifest:
 		manifest, err := reg.SignedManifest(remote, ref)
 		if err != nil {
-			return nil, err
+			return "", nil, err
+		}
+		dig, err := renderDigest(manifest)
+		if err != nil {
+			return "", nil, err
 		}
 		layers := parseV1Layers(manifest)
-		return layers, nil
+		return dig, layers, nil
 	case schema2.MediaTypeManifest:
 		manifest, err := reg.ManifestV2(remote, ref)
 		if err != nil {
-			return nil, err
+			return "", nil, err
+		}
+		dig, err := renderDigest(manifest)
+		if err != nil {
+			return "", nil, err
 		}
 		layers := parseLayers(manifest.Layers)
-		return layers, nil
+		return dig, layers, nil
 	case ociSpec.MediaTypeImageManifest:
 		manifest, err := reg.ManifestOCI(remote, ref)
 		if err != nil {
-			return nil, err
+			return "", nil, err
 		}
-		return parseLayers(manifest.Layers), nil
+		dig, err := renderDigest(manifest)
+		if err != nil {
+			return "", nil, err
+		}
+		return dig, parseLayers(manifest.Layers), nil
 	case registry.MediaTypeManifestList:
 		manifestList, err := reg.ManifestList(remote, ref)
 		if err != nil {
-			return nil, err
+			return "", nil, err
 		}
 		for _, manifest := range manifestList.Manifests {
 			if manifest.Platform.OS == "linux" && manifest.Platform.Architecture == "amd64" {
 				manifest, err := reg.ManifestV2(remote, manifest.Digest)
 				if err != nil {
-					return nil, err
+					return "", nil, err
 				}
-				return parseLayers(manifest.Layers), nil
+				dig, err := renderDigest(manifest)
+				if err != nil {
+					return "", nil, err
+				}
+				return dig, parseLayers(manifest.Layers), nil
 			}
 		}
-		return nil, errors.New("No corresponding manifest found from manifest list object")
+		return "", nil, errors.New("No corresponding manifest found from manifest list object")
 	default:
-		return nil, fmt.Errorf("Could not parse manifest type %q", manifestType)
+		return "", nil, fmt.Errorf("Could not parse manifest type %q", manifestType)
 	}
 }
 
@@ -166,15 +205,16 @@ func fetchLayers(reg types.Registry, image *types.Image) (string, []string, erro
 		// Some registries have no implemented the docker registry API correctly so the fall back here is to just try all the manifest types
 		manifestTypes := []string{registry.MediaTypeManifestList, schema2.MediaTypeManifest, ociSpec.MediaTypeImageManifest, schema1.MediaTypeSignedManifest, schema1.MediaTypeManifest}
 		for _, m := range manifestTypes {
-			layers, manifestErr := handleManifest(reg, m, image.Remote, ref)
+			digest, layers, manifestErr := handleManifest(reg, m, image.Remote, ref)
 			if manifestErr != nil {
 				continue
 			}
-			return image.String(), layers, nil
+			return digest.String(), layers, nil
 		}
 		return "", nil, err
 	}
-	layers, err := handleManifest(reg, manifestType, image.Remote, digest.String())
+	// No digest is needed from handleManifest because the manifest digest gives us the definitive digest
+	_, layers, err := handleManifest(reg, manifestType, image.Remote, digest.String())
 	if err != nil {
 		return "", nil, err
 	}
