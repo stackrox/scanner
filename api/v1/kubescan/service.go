@@ -2,7 +2,6 @@ package kubescan
 
 import (
 	"context"
-	"strings"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
@@ -19,7 +18,7 @@ import (
 type Service interface {
 	apiGRPC.APIService
 
-	v1.KubeScanServiceServer
+	v1.OrchestratorScanServiceServer
 }
 
 // NewService returns the service for scanning
@@ -37,10 +36,6 @@ func filterInvalidVulns(vulns []*v1.Vulnerability) []*v1.Vulnerability {
 	filteredVulns := make([]*v1.Vulnerability, 0, len(vulns))
 	for _, v := range vulns {
 		if v.GetMetadataV2().GetCvssV2() == nil && v.GetMetadataV2().GetCvssV3() == nil {
-			continue
-		}
-		// This will make filter out vulns that are of form CVE- and older than 2012
-		if strings.HasPrefix(v.Name, "CVE-") && v.Name < "CVE-2012" {
 			continue
 		}
 		filteredVulns = append(filteredVulns, v)
@@ -96,10 +91,10 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 
 // RegisterServiceServer registers this service with the given gRPC Server.
 func (s *serviceImpl) RegisterServiceServer(grpcServer *grpc.Server) {
-	v1.RegisterKubeScanServiceServer(grpcServer, s)
+	v1.RegisterOrchestratorScanServiceServer(grpcServer, s)
 }
 
 // RegisterServiceHandler registers this service with the given gRPC Gateway endpoint.
 func (s *serviceImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return v1.RegisterKubeScanServiceHandler(ctx, mux, conn)
+	return v1.RegisterOrchestratorScanServiceHandler(ctx, mux, conn)
 }

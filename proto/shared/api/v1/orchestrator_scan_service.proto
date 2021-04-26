@@ -14,14 +14,14 @@ message GetKubeVulnerabilitiesRequest {
 }
 
 message GetKubeVulnerabilitiesResponse {
-    repeated Vulnerability aggregator_vulnerabilities    = 1;
-    repeated Vulnerability apiserver_vulnerabilities   = 2;
+    repeated Vulnerability aggregator_vulnerabilities         = 1;
+    repeated Vulnerability apiserver_vulnerabilities          = 2;
     repeated Vulnerability controller_manager_vulnerabilities = 3;
-    repeated Vulnerability scheduler_vulnerabilities   = 4;
+    repeated Vulnerability scheduler_vulnerabilities          = 4;
 }
 
 // KubeScanService APIs can be used to get vulnerabilities for Kubernetes components.
-service KubeScanService {
+service OrchestratorScanService {
     rpc GetKubeVulnerabilities(GetKubeVulnerabilitiesRequest) returns (GetKubeVulnerabilitiesResponse) {
         option (google.api.http) = {
             get: "/v1/kube/vulnerabilities"
