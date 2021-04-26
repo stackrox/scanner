@@ -117,6 +117,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			Name:        name,
 			Description: def.Description,
 			Issued:      def.Advisory.Issued.Date,
+			Updated:     def.Advisory.Updated.Date,
 			Link:        link,
 			Severity:    def.Advisory.Severity,
 			CVSSv3:      cvss3Str,
