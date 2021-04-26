@@ -16,33 +16,35 @@ func init() {
 			id               BIGSERIAL PRIMARY KEY,
 			hash             BYTEA NOT NULL,
 			name             TEXT,
+			description      TEXT,
 			issued           timestamptz,
 			updated          timestamptz,
 			link             TEXT,
 			severity         TEXT,
 			cvss3            TEXT,
 			cvss2            TEXT,
-			package_name     TEXT,
-			package_module   TEXT,
-			package_arch     TEXT,
-			cpe              TEXT,
 			fixed_in_version TEXT,
 			arch_operation   TEXT,
 			UNIQUE (hash)
 		);
-		CREATE INDEX IF NOT EXISTS vuln_lookup_idx on vuln (package_name, package_module, cpe);
+		CREATE INDEX IF NOT EXISTS vuln_lookup_idx on vuln (name);
 
-		-- Description may be rather large.
-		-- It'd be best to save just one version of the description per vulnerability
-		-- to save space. Hashing here as descriptions may be larger than BTree indexes allow.
-		CREATE TABLE IF NOT EXISTS vuln_description (
-			id          BIGSERIAL PRIMARY KEY,
-			hash        BYTEA NOT NULL,
-			name        TEXT,
-			description TEXT,
+		-- VulnPackage
+		-- This table contains all the aspects of a vulnerability used to identify if
+		-- a given package is actually vulnerable (save for arch_operation).
+		-- This table is structured to contain on the field necessary for identifying if a package is vulnerable,
+		-- so be sure to know what you are doing before modifying this table.
+		CREATE TABLE IF NOT EXISTS vuln_package (
+			id               BIGSERIAL PRIMARY KEY,
+			hash             BYTEA NOT NULL,
+			name             TEXT,
+			package_name     TEXT,
+			package_module   TEXT,
+			package_arch     TEXT,
+			cpe              TEXT,
 			UNIQUE (hash)
 		);
-		CREATE INDEX IF NOT EXISTS vuln_description_lookup_idx on vuln_description (name);`,
+		CREATE INDEX IF NOT EXISTS vuln_package_lookup_idx on vuln_package (package_name, package_module, cpe);`,
 		}),
 	})
 }

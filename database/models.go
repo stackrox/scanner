@@ -118,18 +118,18 @@ func (mm *MetadataMap) Value() (driver.Value, error) {
 type RHELv2Vulnerability struct {
 	Model
 
-	Name           string         `json:"name"`
-	Description    string         `json:"description"`
-	Issued         time.Time      `json:"issued"`
-	Updated        time.Time      `json:"updated"`
-	Link           string         `json:"link"`
-	Severity       string         `json:"severity"`
-	CVSSv3         string         `json:"cvssv3,omitempty"`
-	CVSSv2         string         `json:"cvssv2,omitempty"`
-	CPEs           []string       `json:"cpes" hash:"set"`
-	Package        *RHELv2Package `json:"package"`
-	FixedInVersion string         `json:"fixed_in_version"`
-	ArchOperation  archop.ArchOp  `json:"arch_op,omitempty"`
+	Name           string           `json:"name"`
+	Description    string           `json:"description"`
+	Issued         time.Time        `json:"issued"`
+	Updated        time.Time        `json:"updated"`
+	Link           string           `json:"link"`
+	Severity       string           `json:"severity"`
+	CVSSv3         string           `json:"cvssv3,omitempty"`
+	CVSSv2         string           `json:"cvssv2,omitempty"`
+	CPEs           []string         `json:"cpes" hash:"set"`
+	Packages       []*RHELv2Package `json:"package" hash:"set"`
+	FixedInVersion string           `json:"fixed_in_version"`
+	ArchOperation  archop.ArchOp    `json:"arch_op,omitempty"`
 }
 
 type RHELv2Package struct {

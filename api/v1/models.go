@@ -360,7 +360,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 			}
 
 			// Compare the package's architecture to the affected architecture.
-			affectedArch := vuln.ArchOperation.Cmp(pkgArch, vuln.Package.Arch)
+			affectedArch := vuln.ArchOperation.Cmp(pkgArch, vuln.Packages[0].Arch)
 
 			if affectedVersion && affectedArch {
 				feature.Vulnerabilities = append(feature.Vulnerabilities, rhelv2ToVulnerability(vuln, feature.NamespaceName))

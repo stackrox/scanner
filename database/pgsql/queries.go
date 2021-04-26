@@ -198,33 +198,78 @@ const (
 	insertRHELv2Vuln = `
 		INSERT INTO vuln (
 			hash,
-			name, issued, updated, link,
+			name, description, issued, updated, link,
 			severity, cvss3, cvss2,
-			package_name, package_module, package_arch,
-			cpe,
 			fixed_in_version, arch_operation
 		) VALUES (
 			$1,
-			$2, $3, $4, $5,
-			$6, $7, $8,
-			$9, $10, $11,
-			$12,
-			$13, $14
+			$2, $3, $4, $5, $6,
+			$7, $8, $9,
+			$10, $11
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
-	insertRHELv2VulnDescription = `
-		INSERT INTO vuln_description (
-			hash, name, description
+	insertRHELv2VulnPackage = `
+		INSERT INTO vuln_package (
+			hash,
+			name,
+			package_name, package_module, package_arch,
+			cpe
 		) VALUES (
-			$1, $2, $3
+			$1,
+			$2,
+			$3, $4, $5,
+			$6
 		)
 		ON CONFLICT (hash) DO NOTHING;`
+
+	searchRHELv2Vulnerabilities = `
+		SELECT
+			vuln_package.id,
+			vuln_package.name,
+			vuln.description,
+			vuln.link,
+			vuln.issued,
+			vuln.updated,
+			vuln.severity,
+			vuln.cvss3,
+			vuln.cvss2,
+			vuln_package.package_name,
+			vuln_package.package_arch,
+			vuln.arch_operation,
+			vuln.fixed_in_version
+		FROM
+			vuln_package
+			LEFT JOIN vuln ON
+				vuln_package.name = vuln.name
+		WHERE
+			vuln_package.package_name = $1
+				AND vuln_package.package_module = $2
+				AND vuln_package.cpe = $3;`
 
 	insertRHELv2Layer = `
 		INSERT INTO rhelv2_layer (hash, parent_hash, dist, cpes)
 		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (hash) DO NOTHING;`
+
+	// Inside the `WITH RECURSIVE`, the base case is the top query, and the
+	// recursive case is the bottom query.
+	// Base: find the layer by hash.
+	// Recursive: find the layer whose hash matches the current layer's parent hash
+	//
+	// This query looks for all the layers in the given layer's hierarchy.
+	searchRHELv2Layers = `
+		WITH RECURSIVE layers AS (
+			SELECT id, hash, parent_hash, dist, cpes
+			FROM rhelv2_layer
+			WHERE hash = $1
+			UNION
+				SELECT l.id, l.hash, l.parent_hash, l.dist, l.cpes
+				FROM layers ll, rhelv2_layer l
+				WHERE ll.parent_hash = l.hash
+		)
+		SELECT id, hash, dist, cpes
+		FROM layers;`
 
 	insertRHELv2Package = `
 		INSERT INTO rhelv2_package (name, version, module, arch)
@@ -250,25 +295,6 @@ const (
 		VALUES ((SELECT layer_id FROM layer), (SELECT package_id FROM package))
 		ON CONFLICT (layer_id, package_id) DO NOTHING;`
 
-	// Inside the `WITH RECURSIVE`, the base case is the top query, and the
-	// recursive case is the bottom query.
-	// Base: find the layer by hash.
-	// Recursive: find the layer whose hash matches the current layer's parent hash
-	//
-	// This query looks for all the layers in the given layer's hierarchy.
-	searchRHELv2Layers = `
-		WITH RECURSIVE layers AS (
-			SELECT id, hash, parent_hash, dist, cpes
-			FROM rhelv2_layer
-			WHERE hash = $1
-			UNION
-				SELECT l.id, l.hash, l.parent_hash, l.dist, l.cpes
-				FROM layers ll, rhelv2_layer l
-				WHERE ll.parent_hash = l.hash
-		)
-		SELECT id, hash, dist, cpes
-		FROM layers;`
-
 	searchRHELv2Package = `
 		SELECT
 			rhelv2_package.id,
@@ -283,30 +309,6 @@ const (
 			JOIN rhelv2_layer ON rhelv2_layer.hash = $1
 		WHERE
 			rhelv2_package_scanartifact.layer_id = rhelv2_layer.id;`
-
-	searchRHELv2Vulnerabilities = `
-		SELECT
-			vuln.id,
-			vuln.name,
-			vuln_description.description,
-			vuln.link,
-			vuln.issued,
-			vuln.updated,
-			vuln.severity,
-			vuln.cvss3,
-			vuln.cvss2,
-			vuln.package_name,
-			vuln.package_arch,
-			vuln.arch_operation,
-			vuln.fixed_in_version
-		FROM
-			vuln
-			LEFT JOIN vuln_description ON
-				vuln.name = vuln_description.name
-		WHERE
-			vuln.package_name = $1
-				AND vuln.package_module = $2
-				AND vuln.cpe = $3;`
 
 	///////////////////////////////////////////////////
 	// END

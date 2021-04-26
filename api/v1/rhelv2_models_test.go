@@ -96,9 +96,11 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 		{
 			Name:           "v1",
 			FixedInVersion: "4",
-			Package: &database.RHELv2Package{
-				Name: "pkg",
-				Arch: "x86_64",
+			Packages: []*database.RHELv2Package{
+				{
+					Name: "pkg",
+					Arch: "x86_64",
+				},
 			},
 			ArchOperation: archop.OpEquals,
 		},
