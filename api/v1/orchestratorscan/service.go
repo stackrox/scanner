@@ -1,4 +1,4 @@
-package kubescan
+package orchestratorscan
 
 import (
 	"context"
@@ -44,8 +44,8 @@ func filterInvalidVulns(vulns []*v1.Vulnerability) []*v1.Vulnerability {
 }
 
 func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerability, error) {
-	if name == "" || version == "" {
-		return nil, nil
+	if version == "" {
+		return nil, errors.New("Can't get vulnerabilities for empty version.")
 	}
 	version, err := convert.TruncateVersion(version)
 	if err != nil {

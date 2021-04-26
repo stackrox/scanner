@@ -154,7 +154,7 @@ func RegisterOrchestratorScanServiceHandlerClient(ctx context.Context, mux *runt
 }
 
 var (
-	pattern_OrchestratorScanService_GetKubeVulnerabilities_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "kube", "vulnerabilities"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_OrchestratorScanService_GetKubeVulnerabilities_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "orchestrator", "kube", "vulnerabilities"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (
