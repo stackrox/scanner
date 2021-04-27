@@ -162,7 +162,6 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			VersionFormat: rpm.ParserName,
 			Version:       "2",
 			AddedBy:       "layer1",
-			Location:      "var/lib/rpm/Packages",
 			FixedBy:       "5",
 			Vulnerabilities: []Vulnerability{
 				{

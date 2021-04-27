@@ -298,9 +298,6 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			// Pre-Red Hat Certification, this image had vulnerabilities.
-			// These vulnerabilities were all marked by Red Hat as "Won't Fix",
-			// So they should no longer be output.
 			image:    "docker.io/anchore/anchore-engine:v0.5.0",
 			registry: "https://registry-1.docker.io",
 			source:   "Red Hat",
