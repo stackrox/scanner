@@ -1232,7 +1232,7 @@ func TestImageSanity(t *testing.T) {
 			registry: "https://registry.redhat.io",
 			username: os.Getenv("REDHAT_USERNAME"),
 			password: os.Getenv("REDHAT_PASSWORD"),
-			source:   "NVD",
+			source:   "Red Hat",
 		},
 		{
 
@@ -1240,7 +1240,7 @@ func TestImageSanity(t *testing.T) {
 			registry: "https://registry.redhat.io",
 			username: os.Getenv("REDHAT_USERNAME"),
 			password: os.Getenv("REDHAT_PASSWORD"),
-			source:   "NVD",
+			source:   "Red Hat",
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
