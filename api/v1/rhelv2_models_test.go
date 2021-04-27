@@ -108,6 +108,36 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name: "v2",
+			PackageInfos: []*database.RHELv2PackageInfo{
+				{
+					FixedInVersion: "5",
+					Packages: []*database.RHELv2Package{
+						{
+							Name: "pkg",
+							Arch: "i686|ppc64|s390x|x86_64",
+						},
+					},
+					ArchOperation: archop.OpPatternMatch,
+				},
+			},
+		},
+		{
+			Name: "v3",
+			PackageInfos: []*database.RHELv2PackageInfo{
+				{
+					FixedInVersion: "6",
+					Packages: []*database.RHELv2Package{
+						{
+							Name: "pkg",
+							Arch: "x86_64",
+						},
+					},
+					ArchOperation: archop.OpNotEquals,
+				},
+			},
+		},
 	}
 
 	dbLayer := database.Layer{
@@ -133,12 +163,23 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Version:       "2",
 			AddedBy:       "layer1",
 			Location:      "var/lib/rpm/Packages",
-			FixedBy:       "4",
+			FixedBy:       "5",
 			Vulnerabilities: []Vulnerability{
 				{
 					Name:          "v1",
 					NamespaceName: "rhel:8",
 					FixedBy:       "4",
+					Metadata: map[string]interface{}{
+						"Red Hat": &types.Metadata{
+							PublishedDateTime:    "0001-01-01 00:00:00 +0000 UTC",
+							LastModifiedDateTime: "0001-01-01 00:00:00 +0000 UTC",
+						},
+					},
+				},
+				{
+					Name:          "v2",
+					NamespaceName: "rhel:8",
+					FixedBy:       "5",
 					Metadata: map[string]interface{}{
 						"Red Hat": &types.Metadata{
 							PublishedDateTime:    "0001-01-01 00:00:00 +0000 UTC",
