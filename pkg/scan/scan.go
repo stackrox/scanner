@@ -125,7 +125,7 @@ func renderDigest(manifest payloadGetter) (digest.Digest, error) {
 	return dig, nil
 }
 
-func handleManifest(reg types.Registry, manifestType string, remote, ref string) (digest.Digest, []string, error) {
+func handleManifest(reg types.Registry, manifestType, remote, ref string) (digest.Digest, []string, error) {
 	switch manifestType {
 	case schema1.MediaTypeManifest:
 		manifest, err := reg.Manifest(remote, ref)
