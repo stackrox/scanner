@@ -349,22 +349,30 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 		// 1. The package's version is less than the vuln's fixed-in version, if present.
 		// 2. The ArchOperation passes.
 		for _, vuln := range vulns[pkg.ID] {
-			// We can safely assume there is one and only one element in the slice.
-			pkgInfo := vuln.PackageInfos[0]
+			if len(vuln.PackageInfos) != 1 {
+				log.Warnf("Unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
+				continue
+			}
+			vulnPkgInfo := vuln.PackageInfos[0]
+
+			if len(vulnPkgInfo.Packages) != 1 {
+				log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vulnPkgInfo.Packages), 1)
+				continue
+			}
+			vulnPkg := vulnPkgInfo.Packages[0]
 
 			// Assume the vulnerability is not fixed.
 			// In that case, all versions are affected.
 			affectedVersion := true
 			var vulnVersion *rpmVersion.Version
-			if pkgInfo.FixedInVersion != "" {
+			if vulnPkgInfo.FixedInVersion != "" {
 				// The vulnerability is fixed. Determine if this package is affected.
-				vulnVersion = rpmVersionPtr(rpmVersion.NewVersion(pkgInfo.FixedInVersion))
+				vulnVersion = rpmVersionPtr(rpmVersion.NewVersion(vulnPkgInfo.FixedInVersion))
 				affectedVersion = pkgVersion.LessThan(*vulnVersion)
 			}
 
 			// Compare the package's architecture to the affected architecture.
-			// We can safely assume there is one and only one element in the Packages slice.
-			affectedArch := pkgInfo.ArchOperation.Cmp(pkgArch, pkgInfo.Packages[0].Arch)
+			affectedArch := vulnPkgInfo.ArchOperation.Cmp(pkgArch, vulnPkg.Arch)
 
 			if affectedVersion && affectedArch {
 				feature.Vulnerabilities = append(feature.Vulnerabilities, rhelv2ToVulnerability(vuln, feature.NamespaceName))
