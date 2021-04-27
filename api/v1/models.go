@@ -146,7 +146,7 @@ func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability
 		NamespaceName: dbVuln.Namespace.Name,
 		Description:   dbVuln.Description,
 		Link:          dbVuln.Link,
-		Severity:      string(dbVuln.Severity),
+		Severity:      string(databaseVulnToSeverity(dbVuln)),
 		Metadata:      dbVuln.Metadata,
 	}
 	if dbVuln.FixedBy != versionfmt.MaxVersion {

@@ -89,7 +89,7 @@ func featureVersionToKernelComponent(fv database.FeatureVersion) *v1.GetNodeVuln
 	}
 }
 
-func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesRequest) ([]*v1.Vulnerability, *v1.GetNodeVulnerabilitiesResponse_KernelComponent, error) {
+func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesRequest) (string, []*v1.Vulnerability, *v1.GetNodeVulnerabilitiesResponse_KernelComponent, error) {
 	osImage := strings.ToLower(req.GetOsImage())
 
 	var match *kernelparser.ParseMatch
@@ -98,14 +98,14 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 		var err error
 		match, ok, err = parser(s.db, req.GetKernelVersion(), osImage)
 		if err != nil {
-			return nil, nil, err
+			return "", nil, nil, err
 		}
 		if !ok {
 			continue
 		}
 		if match == nil {
 			log.Debugf("%s %s matched %s, but no match found", osImage, req.GetKernelVersion(), name)
-			return nil, nil, nil
+			return "", nil, nil, nil
 		}
 		break
 	}
@@ -114,7 +114,7 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 		// Did not find relevant OS-specific kernel parser.
 		// Defaulting to general kernel vulns from NVD.
 		vulns, err := s.getNVDVulns("linux", "linux_kernel", req.GetKernelVersion())
-		return vulns, &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+		return "unknown", vulns, &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 			Name:    "kernel",
 			Version: req.GetKernelVersion(),
 		}, err
@@ -133,7 +133,7 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 
 	databaseVulns, err := s.db.GetVulnerabilitiesForFeatureVersion(fv)
 	if err != nil {
-		return nil, nil, err
+		return match.Namespace, nil, nil, err
 	}
 
 	vulns := make([]*v1.Vulnerability, 0, len(databaseVulns))
@@ -159,7 +159,7 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 		return vulns[i].Name < vulns[j].Name
 	})
 
-	return filterInvalidVulns(vulns), featureVersionToKernelComponent(fv), nil
+	return match.Namespace, filterInvalidVulns(vulns), featureVersionToKernelComponent(fv), nil
 }
 
 func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerability, error) {
@@ -215,7 +215,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	var err error
 	var resp v1.GetNodeVulnerabilitiesResponse
 
-	resp.KernelVulnerabilities, resp.KernelComponent, err = s.evaluateLinuxKernelVulns(req)
+	resp.OperatingSystem, resp.KernelVulnerabilities, resp.KernelComponent, err = s.evaluateLinuxKernelVulns(req)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

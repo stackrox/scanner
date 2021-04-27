@@ -32,14 +32,47 @@ type MetadataCVSSv3 struct {
 	ImpactScore         float64
 }
 
+func cvssToSeverity(metadata *Metadata) database.Severity {
+	if metadata == nil {
+		return database.UnknownSeverity
+	}
+	if metadata.CVSSv3.Score != 0 {
+		score := metadata.CVSSv3.Score
+		switch {
+		case score > 0 && score < 4:
+			return database.LowSeverity
+		case score >= 4 && score < 7:
+			return database.MediumSeverity
+		case score >= 7 && score < 9:
+			return database.HighSeverity
+		case score >= 9 && score <= 10:
+			return database.CriticalSeverity
+		}
+	}
+	if metadata.CVSSv2.Score != 0 {
+		score := metadata.CVSSv2.Score
+		switch {
+		case score > 0 && score < 4:
+			return database.LowSeverity
+		case score >= 4 && score < 7:
+			return database.MediumSeverity
+		case score >= 7 && score <= 10:
+			return database.HighSeverity
+		}
+	}
+	return database.UnknownSeverity
+}
+
 func NewVulnerability(cveitem *schema.NVDCVEFeedJSON10DefCVEItem) *database.Vulnerability {
+	metadata := ConvertNVDMetadata(cveitem)
 	return &database.Vulnerability{
 		Name:        cveitem.CVE.CVEDataMeta.ID,
 		Description: ConvertNVDSummary(cveitem),
 		Link:        fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", cveitem.CVE.CVEDataMeta.ID),
 		Metadata: map[string]interface{}{
-			"NVD": ConvertNVDMetadata(cveitem),
+			"NVD": metadata,
 		},
+		Severity: cvssToSeverity(metadata),
 	}
 }
 

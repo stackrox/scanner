@@ -186,7 +186,7 @@ func newDatabaseVuln(id string) database.Vulnerability {
 	return database.Vulnerability{
 		Name:     id,
 		Link:     fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", id),
-		Severity: "",
+		Severity: database.UnknownSeverity,
 		Metadata: map[string]interface{}{
 			"NVD": &types.Metadata{},
 		},
