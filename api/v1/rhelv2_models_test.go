@@ -94,15 +94,19 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 	}
 	db.vulns[0] = []*database.RHELv2Vulnerability{
 		{
-			Name:           "v1",
-			FixedInVersion: "4",
-			Packages: []*database.RHELv2Package{
+			Name: "v1",
+			PackageInfos: []*database.RHELv2PackageInfo{
 				{
-					Name: "pkg",
-					Arch: "x86_64",
+					FixedInVersion: "4",
+					Packages: []*database.RHELv2Package{
+						{
+							Name: "pkg",
+							Arch: "x86_64",
+						},
+					},
+					ArchOperation: archop.OpEquals,
 				},
 			},
-			ArchOperation: archop.OpEquals,
 		},
 	}
 

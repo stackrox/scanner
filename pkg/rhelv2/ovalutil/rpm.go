@@ -52,12 +52,12 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 	var cris []*oval.Criterion
 	for _, def := range root.Definitions.Definitions {
 		// create our prototype vulnerability
-		protoVuln, err := protoVuln(def)
+		vuln, err := protoVuln(def)
 		if err != nil {
 			log.Errorf("Received error when parsing RHELv2 vulnerability: %v", err)
 			return nil, err
 		}
-		if protoVuln == nil {
+		if vuln == nil {
 			continue
 		}
 		// recursively collect criterions for this definition
@@ -92,7 +92,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			object, err := rpmObjectLookup(root, objRef)
 			if err != nil {
 				if err == errObjectUnnamed {
-					log.Errorf("Object ref %s for criterion %s for vuln %s is unnamed. Skipping...", objRef, criterion.Comment, protoVuln.Name)
+					log.Errorf("Object ref %s for criterion %s for vuln %s is unnamed. Skipping...", objRef, criterion.Comment, vuln.Name)
 				}
 				continue
 			}
@@ -114,28 +114,27 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				}
 			}
 
-			vuln := *protoVuln
+			pkgInfo := &database.RHELv2PackageInfo{
+				Packages: make([]*database.RHELv2Package, 0, len(enabledModules)),
+			}
 			if state != nil {
-				vuln.FixedInVersion = state.EVR.Body
+				pkgInfo.FixedInVersion = state.EVR.Body
 				if state.Arch != nil {
-					vuln.ArchOperation = mapArchOp(state.Arch.Operation)
+					pkgInfo.ArchOperation = mapArchOp(state.Arch.Operation)
 				}
 			}
 			for _, module := range enabledModules {
-				pkg := &database.RHELv2Package{
+				pkgInfo.Packages = append(pkgInfo.Packages, &database.RHELv2Package{
 					// object.Name will never be empty.
 					Name:   object.Name,
 					Module: module,
-				}
-				if state != nil && state.Arch != nil {
-					pkg.Arch = state.Arch.Body
-				}
-
-				vuln.Packages = append(vuln.Packages, pkg)
+				})
 			}
 
-			vulns = append(vulns, &vuln)
+			vuln.PackageInfos = append(vuln.PackageInfos, pkgInfo)
 		}
+
+		vulns = append(vulns, vuln)
 	}
 
 	return vulns, nil

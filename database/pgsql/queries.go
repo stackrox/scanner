@@ -199,13 +199,11 @@ const (
 		INSERT INTO vuln (
 			hash,
 			name, description, issued, updated, link,
-			severity, cvss3, cvss2,
-			fixed_in_version, arch_operation
+			severity, cvss3, cvss2
 		) VALUES (
 			$1,
 			$2, $3, $4, $5, $6,
-			$7, $8, $9,
-			$10, $11
+			$7, $8, $9
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
@@ -214,12 +212,14 @@ const (
 			hash,
 			name,
 			package_name, package_module, package_arch,
-			cpe
+			cpe,
+			fixed_in_version, arch_operation
 		) VALUES (
 			$1,
 			$2,
 			$3, $4, $5,
-			$6
+			$6,
+			$7, $8
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
@@ -236,8 +236,8 @@ const (
 			vuln.cvss2,
 			vuln_package.package_name,
 			vuln_package.package_arch,
-			vuln.arch_operation,
-			vuln.fixed_in_version
+			vuln_package.fixed_in_version,
+			vuln_package.arch_operation
 		FROM
 			vuln_package
 			LEFT JOIN vuln ON

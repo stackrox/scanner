@@ -23,8 +23,6 @@ func init() {
 			severity         TEXT,
 			cvss3            TEXT,
 			cvss2            TEXT,
-			fixed_in_version TEXT,
-			arch_operation   TEXT,
 			UNIQUE (hash)
 		);
 		CREATE INDEX IF NOT EXISTS vuln_lookup_idx on vuln (name);
@@ -42,6 +40,8 @@ func init() {
 			package_module   TEXT,
 			package_arch     TEXT,
 			cpe              TEXT,
+			fixed_in_version TEXT,
+			arch_operation   TEXT,
 			UNIQUE (hash)
 		);
 		CREATE INDEX IF NOT EXISTS vuln_package_lookup_idx on vuln_package (package_name, package_module, cpe);`,
