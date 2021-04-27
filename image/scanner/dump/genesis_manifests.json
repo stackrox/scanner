@@ -155,7 +155,8 @@
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210422180424.zip",
       "timestamp": "2021-04-22T18:04:24.667582614Z",
-      "diffLocation": "gs://definitions.stackrox.io/84e446dc-af8d-49ef-8c1f-24c31170082d/diff.zip"
+      "diffLocation": "gs://definitions.stackrox.io/84e446dc-af8d-49ef-8c1f-24c31170082d/diff.zip",
+      "config": {
         "skipSeverityComparison": true
       }
     }
