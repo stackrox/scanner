@@ -230,7 +230,7 @@ func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 
 	return Vulnerability{
 		Name:          vuln.Name,
-		NamespaceName: namespace, // TODO: Purpose?
+		NamespaceName: namespace,
 		Description:   vuln.Description,
 		Link:          vuln.Link,
 		Severity:      vuln.Severity,
