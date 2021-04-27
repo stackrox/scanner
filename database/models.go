@@ -128,12 +128,18 @@ type RHELv2Vulnerability struct {
 	CVSSv2       string               `json:"cvssv2,omitempty"`
 	CPEs         []string             `json:"cpes" hash:"set"`
 	PackageInfos []*RHELv2PackageInfo `json:"package_info" hash:"set"`
+
+	SubCVEs []string `json:"sub_cves" hash:"set"`
 }
 
 type RHELv2PackageInfo struct {
-	Packages       []*RHELv2Package `json:"package" hash:"set"`
+	Packages       []*RHELv2Package `json:"packages" hash:"set"`
 	FixedInVersion string           `json:"fixed_in_version"`
 	ArchOperation  archop.ArchOp    `json:"arch_op,omitempty"`
+
+	// DeletedPackages signifies vulnerabilities to delete based on a diff.
+	// This usually occurs when a CVE becomes fixed and is replaced with an RHSA.
+	DeletedPackages []*RHELv2Package `json:"deleted_packages" hash:"ignore"`
 }
 
 type RHELv2Package struct {

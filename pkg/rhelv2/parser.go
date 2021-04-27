@@ -123,6 +123,8 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			CVSSv3:      cvss3Str,
 			CVSSv2:      cvss2Str,
 			CPEs:        cpes,
+
+			SubCVEs: subCVEs(def),
 		}, nil
 	}
 	vulns, err := ovalutil.RPMDefsToVulns(&root, protoVuln)
@@ -132,7 +134,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	return vulns, nil
 }
 
-// name gets the RHSA/RHBA ID from the given definition.
+// name gets the RHBA/RHEA/RHSA/CVE ID from the given definition.
 func name(definition oval.Definition) string {
 	if len(definition.References) > 0 {
 		return definition.References[0].RefID
@@ -148,4 +150,22 @@ func link(definition oval.Definition) string {
 	}
 
 	return ""
+}
+
+// subCVEs returns a slice of an RHBA/RHEA/RHSA's sub-CVEs.
+func subCVEs(definition oval.Definition) []string {
+	if len(definition.Advisory.Cves) == 0 {
+		return nil
+	}
+	// If the top-level definition is a CVE, then there are no sub-CVEs.
+	if len(definition.Advisory.Cves) == 1 && name(definition) == definition.Advisory.Cves[0].CveID {
+		return nil
+	}
+
+	cves := make([]string, 0, len(definition.Advisory.Cves))
+	for _, cve := range definition.Advisory.Cves {
+		cves = append(cves, cve.CveID)
+	}
+
+	return cves
 }

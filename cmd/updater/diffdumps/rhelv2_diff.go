@@ -11,6 +11,7 @@ import (
 	"github.com/mitchellh/hashstructure"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
@@ -62,18 +63,33 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 	for _, vuln := range baseRHEL.Vulns {
 		if _, ok := baseVulnsMap[vuln.Name]; ok {
 			// Should really never happen, but being defensive.
-			return errors.Errorf("UNEXPECTED: got multiple vulns for key: %s", vuln.Name)
+			return errors.Errorf("UNEXPECTED (base dump): got multiple vulns for key: %s", vuln.Name)
 		}
 		baseVulnsMap[vuln.Name] = vuln
 	}
 
+	// Keep track of all fixed CVEs,
+	// so we know which unfixed CVEs have since been fixed.
+	// We only want to display the relevant RHBA/RHEA/RHSA when a CVE is fixed.
+	fixedCVEs := set.NewStringSet()
+	for _, vuln := range rhel.Vulns {
+		fixedCVEs.AddAll(vuln.SubCVEs...)
+	}
+
 	var filtered []*database.RHELv2Vulnerability
+	var vulnsToDelete []string
 	for _, headVuln := range rhel.Vulns {
 		matchingBaseVuln, found := baseVulnsMap[headVuln.Name]
 		// If the vuln was not in the base, add it.
 		if !found {
 			filtered = append(filtered, headVuln)
 			continue
+		}
+
+		if fixedCVEs.Contains(matchingBaseVuln.Name) {
+			// The base dump contains an unfixed CVE that has since been fixed.
+			// Mark it for deletion.
+			vulnsToDelete = append(vulnsToDelete, matchingBaseVuln.Name)
 		}
 
 		matchingHash, err := vulnHash(matchingBaseVuln)
@@ -95,7 +111,7 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 		}
 	}
 
-	log.Infof("Diffed RHELv2 file %s; after filtering, %d/%d vulns are in the diff", headF.Name, len(filtered), len(rhel.Vulns))
+	log.Infof("Diffed RHELv2 file %s; after filtering, %d/%d vulns are in the diff and %d unfixed vulns have since been fixed", headF.Name, len(filtered), len(rhel.Vulns), len(vulnsToDelete))
 
 	outF, err := os.Create(filepath.Join(outputDir, filepath.Base(headF.Name)))
 	if err != nil {
@@ -104,8 +120,9 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 	defer utils.IgnoreError(outF.Close)
 
 	if err := json.NewEncoder(outF).Encode(&vulndump.RHELv2{
-		LastModified: rhel.LastModified,
-		Vulns:        filtered,
+		LastModified:  rhel.LastModified,
+		Vulns:         filtered,
+		VulnsToDelete: vulnsToDelete,
 	}); err != nil {
 		return errors.Wrap(err, "writing filtered RHELv2 dump to writer")
 	}
