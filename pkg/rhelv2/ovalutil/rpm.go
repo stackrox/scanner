@@ -124,11 +124,16 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				}
 			}
 			for _, module := range enabledModules {
-				pkgInfo.Packages = append(pkgInfo.Packages, &database.RHELv2Package{
+				pkg := &database.RHELv2Package{
 					// object.Name will never be empty.
 					Name:   object.Name,
 					Module: module,
-				})
+				}
+				if state != nil && state.Arch != nil {
+					pkg.Arch = state.Arch.Body
+				}
+
+				pkgInfo.Packages = append(pkgInfo.Packages, pkg)
 			}
 
 			vuln.PackageInfos = append(vuln.PackageInfos, pkgInfo)
