@@ -1227,6 +1227,21 @@ func TestImageSanity(t *testing.T) {
 			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:   "NVD",
 		},
+		{
+			image:    "registry.redhat.io/openshift3/logging-elasticsearch",
+			registry: "https://registry.redhat.io",
+			username: os.Getenv("REDHAT_USERNAME"),
+			password: os.Getenv("REDHAT_PASSWORD"),
+			source:   "NVD",
+		},
+		{
+
+			image:    "registry.redhat.io/openshift3/logging-elasticsearch:v3.10.175-1",
+			registry: "https://registry.redhat.io",
+			username: os.Getenv("REDHAT_USERNAME"),
+			password: os.Getenv("REDHAT_PASSWORD"),
+			source:   "NVD",
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
