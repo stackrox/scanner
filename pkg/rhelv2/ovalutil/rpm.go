@@ -32,7 +32,9 @@ const (
 
 var (
 	moduleCommentRegex  = regexp.MustCompile(`(Module )(.*)( is enabled)`)
-	definitionTypeRegex = regexp.MustCompile(`^oval\:com\.redhat\.([a-z]+)\:def\:\d+$`)
+	definitionTypeRegex = regexp.MustCompile(`^oval:com\.redhat\.([a-z]+):def:\d+$`)
+
+	errObjectUnnamed = errors.New("oval: rpminfo_object does not have a name: skip this object")
 )
 
 // ProtoVulnFunc allows a caller to create a prototype vulnerability that will be
@@ -50,12 +52,12 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 	var cris []*oval.Criterion
 	for _, def := range root.Definitions.Definitions {
 		// create our prototype vulnerability
-		protoVuln, err := protoVuln(def)
+		vuln, err := protoVuln(def)
 		if err != nil {
 			log.Errorf("Received error when parsing RHELv2 vulnerability: %v", err)
 			return nil, err
 		}
-		if protoVuln == nil {
+		if vuln == nil {
 			continue
 		}
 		// recursively collect criterions for this definition
@@ -89,6 +91,9 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			objRef := objRefs[0].ObjectRef
 			object, err := rpmObjectLookup(root, objRef)
 			if err != nil {
+				if err == errObjectUnnamed {
+					log.Errorf("Object ref %s for criterion %s for vuln %s is unnamed. Skipping...", objRef, criterion.Comment, vuln.Name)
+				}
 				continue
 			}
 
@@ -109,23 +114,32 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				}
 			}
 
+			pkgInfo := &database.RHELv2PackageInfo{
+				Packages: make([]*database.RHELv2Package, 0, len(enabledModules)),
+			}
+			if state != nil {
+				pkgInfo.FixedInVersion = state.EVR.Body
+				if state.Arch != nil {
+					pkgInfo.ArchOperation = mapArchOp(state.Arch.Operation)
+				}
+			}
 			for _, module := range enabledModules {
-				vuln := *protoVuln
-				vuln.Package = &database.RHELv2Package{
+				pkg := &database.RHELv2Package{
+					// object.Name will never be empty.
 					Name:   object.Name,
 					Module: module,
 				}
-				if state != nil {
-					vuln.FixedInVersion = state.EVR.Body
-					if state.Arch != nil {
-						vuln.ArchOperation = mapArchOp(state.Arch.Operation)
-						vuln.Package.Arch = state.Arch.Body
-					}
+				if state != nil && state.Arch != nil {
+					pkg.Arch = state.Arch.Body
 				}
 
-				vulns = append(vulns, &vuln)
+				pkgInfo.Packages = append(pkgInfo.Packages, pkg)
 			}
+
+			vuln.PackageInfos = append(vuln.PackageInfos, pkgInfo)
 		}
+
+		vulns = append(vulns, vuln)
 	}
 
 	return vulns, nil
@@ -179,6 +193,10 @@ func rpmObjectLookup(root *oval.Root, ref string) (*oval.RPMInfoObject, error) {
 	}
 	if kind != "rpminfo_object" {
 		return nil, errors.Errorf("oval: got kind %q: skip this object", kind)
+	}
+	obj := &root.Objects.RPMInfoObjects[index]
+	if obj.Name == "" {
+		return nil, errObjectUnnamed
 	}
 	return &root.Objects.RPMInfoObjects[index], nil
 }

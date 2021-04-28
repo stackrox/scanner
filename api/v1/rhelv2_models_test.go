@@ -94,13 +94,49 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 	}
 	db.vulns[0] = []*database.RHELv2Vulnerability{
 		{
-			Name:           "v1",
-			FixedInVersion: "4",
-			Package: &database.RHELv2Package{
-				Name: "pkg",
-				Arch: "x86_64",
+			Name: "v1",
+			PackageInfos: []*database.RHELv2PackageInfo{
+				{
+					FixedInVersion: "4",
+					Packages: []*database.RHELv2Package{
+						{
+							Name: "pkg",
+							Arch: "x86_64",
+						},
+					},
+					ArchOperation: archop.OpEquals,
+				},
 			},
-			ArchOperation: archop.OpEquals,
+		},
+		{
+			Name: "v2",
+			PackageInfos: []*database.RHELv2PackageInfo{
+				{
+					FixedInVersion: "5",
+					Packages: []*database.RHELv2Package{
+						{
+							Name: "pkg",
+							Arch: "i686|ppc64|s390x|x86_64",
+						},
+					},
+					ArchOperation: archop.OpPatternMatch,
+				},
+			},
+		},
+		{
+			Name: "v3",
+			PackageInfos: []*database.RHELv2PackageInfo{
+				{
+					FixedInVersion: "6",
+					Packages: []*database.RHELv2Package{
+						{
+							Name: "pkg",
+							Arch: "x86_64",
+						},
+					},
+					ArchOperation: archop.OpNotEquals,
+				},
+			},
 		},
 	}
 
@@ -126,12 +162,23 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			VersionFormat: rpm.ParserName,
 			Version:       "2",
 			AddedBy:       "layer1",
-			FixedBy:       "4",
+			FixedBy:       "5",
 			Vulnerabilities: []Vulnerability{
 				{
 					Name:          "v1",
 					NamespaceName: "rhel:8",
 					FixedBy:       "4",
+					Metadata: map[string]interface{}{
+						"Red Hat": &types.Metadata{
+							PublishedDateTime:    "0001-01-01 00:00:00 +0000 UTC",
+							LastModifiedDateTime: "0001-01-01 00:00:00 +0000 UTC",
+						},
+					},
+				},
+				{
+					Name:          "v2",
+					NamespaceName: "rhel:8",
+					FixedBy:       "5",
 					Metadata: map[string]interface{}{
 						"Red Hat": &types.Metadata{
 							PublishedDateTime:    "0001-01-01 00:00:00 +0000 UTC",
