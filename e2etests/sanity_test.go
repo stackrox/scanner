@@ -1230,11 +1230,12 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// One of the images used for Red Hat Scanner Certification.
-			image:    "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7",
-			registry: "https://registry-1.docker.io",
-			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-			source:   "Red Hat",
+			image:             "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "Red Hat",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "rh-maven35-log4j12",
@@ -1248,9 +1249,11 @@ func TestImageSanity(t *testing.T) {
 					Version:       "2.7.6-2.10.el7",
 					Vulnerabilities: []v1.Vulnerability{
 						{
-							Name:        "RHSA-2020:4173",
-							Description: "The jackson-databind package provides general data-binding functionality for Jackson, which works on top of Jackson core streaming API.\n\nSecurity Fix(es):\n\n* jackson-databind: Serialization gadgets in com.pastdev.httpcomponents.configuration.JndiConfiguration (CVE-2020-24750)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
-							Link:        "https://access.redhat.com/errata/RHSA-2020:4173",
+							Name:          "RHSA-2020:4173",
+							NamespaceName: "rhel:7",
+							Description:   "The jackson-databind package provides general data-binding functionality for Jackson, which works on top of Jackson core streaming API.\n\nSecurity Fix(es):\n\n* jackson-databind: Serialization gadgets in com.pastdev.httpcomponents.configuration.JndiConfiguration (CVE-2020-24750)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4173",
+							Severity:      "Important",
 							Metadata: map[string]interface{}{
 								"Red Hat": map[string]interface{}{
 									"CVSSv3": map[string]interface{}{
@@ -1274,9 +1277,11 @@ func TestImageSanity(t *testing.T) {
 					Version:       "2:7.4.629-6.el7",
 					Vulnerabilities: []v1.Vulnerability{
 						{
-							Name:        "CVE-2017-1000382",
-							Description: "It was found that vim applies the opened file read permissions to the swap file, overriding the process' umask. An attacker might search for vim swap files that were not deleted properly, in order to retrieve sensitive data.",
-							Link:        "https://access.redhat.com/security/cve/CVE-2017-1000382",
+							Name:          "CVE-2017-1000382",
+							NamespaceName: "rhel:7",
+							Description:   "It was found that vim applies the opened file read permissions to the swap file, overriding the process' umask. An attacker might search for vim swap files that were not deleted properly, in order to retrieve sensitive data.",
+							Link:          "https://access.redhat.com/security/cve/CVE-2017-1000382",
+							Severity:      "Low",
 							Metadata: map[string]interface{}{
 								"Red Hat": map[string]interface{}{
 									"CVSSv3": map[string]interface{}{
@@ -1297,11 +1302,12 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// One of the images used for Red Hat Scanner Certification.
-			image:    "docker.io/stackrox/sandbox:nodejs-10",
-			registry: "https://registry-1.docker.io",
-			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-			source:   "Red Hat",
+			image:             "docker.io/stackrox/sandbox:nodejs-10",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "Red Hat",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "nodejs-full-i18n",
@@ -1309,9 +1315,11 @@ func TestImageSanity(t *testing.T) {
 					Version:       "1:10.21.0-3.module+el8.2.0+7071+d2377ea3",
 					Vulnerabilities: []v1.Vulnerability{
 						{
-							Name:        "RHSA-2021:0548",
-							Description: "Node.js is a software development platform for building fast and scalable network applications in the JavaScript programming language. \n\nThe following packages have been upgraded to a later upstream version: nodejs (10.23.1).\n\nSecurity Fix(es):\n\n* libuv: buffer overflow in realpath (CVE-2020-8252)\n\n* nodejs-npm-user-validate: improper input validation when validating user emails leads to ReDoS (CVE-2020-7754)\n\n* nodejs-y18n: prototype pollution vulnerability (CVE-2020-7774)\n\n* nodejs-ini: prototype pollution via malicious INI file (CVE-2020-7788)\n\n* nodejs-dot-prop: prototype pollution (CVE-2020-8116)\n\n* nodejs: use-after-free in the TLS implementation (CVE-2020-8265)\n\n* npm: sensitive information exposure through logs (CVE-2020-15095)\n\n* nodejs-ajv: prototype pollution via crafted JSON schema in ajv.validate function (CVE-2020-15366)\n\n* nodejs-yargs-parser: prototype pollution vulnerability (CVE-2020-7608)\n\n* nodejs: HTTP request smuggling via two copies of a header field in an http request (CVE-2020-8287)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
-							Link:        "https://access.redhat.com/errata/RHSA-2021:0548",
+							Name:          "RHSA-2021:0548",
+							NamespaceName: "rhel:8",
+							Description:   "Node.js is a software development platform for building fast and scalable network applications in the JavaScript programming language. \n\nThe following packages have been upgraded to a later upstream version: nodejs (10.23.1).\n\nSecurity Fix(es):\n\n* libuv: buffer overflow in realpath (CVE-2020-8252)\n\n* nodejs-npm-user-validate: improper input validation when validating user emails leads to ReDoS (CVE-2020-7754)\n\n* nodejs-y18n: prototype pollution vulnerability (CVE-2020-7774)\n\n* nodejs-ini: prototype pollution via malicious INI file (CVE-2020-7788)\n\n* nodejs-dot-prop: prototype pollution (CVE-2020-8116)\n\n* nodejs: use-after-free in the TLS implementation (CVE-2020-8265)\n\n* npm: sensitive information exposure through logs (CVE-2020-15095)\n\n* nodejs-ajv: prototype pollution via crafted JSON schema in ajv.validate function (CVE-2020-15366)\n\n* nodejs-yargs-parser: prototype pollution vulnerability (CVE-2020-7608)\n\n* nodejs: HTTP request smuggling via two copies of a header field in an http request (CVE-2020-8287)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2021:0548",
+							Severity:      "Moderate",
 							Metadata: map[string]interface{}{
 								"Red Hat": map[string]interface{}{
 									"CVSSv3": map[string]interface{}{
@@ -1327,9 +1335,11 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "1:10.23.1-1.module+el8.3.0+9502+012d8a97",
 						},
 						{
-							Name:        "RHSA-2021:0735",
-							Description: "Node.js is a software development platform for building fast and scalable network applications in the JavaScript programming language. \n\nThe following packages have been upgraded to a later upstream version: nodejs (10.24.0).\n\nSecurity Fix(es):\n\n* nodejs: HTTP2 'unknownProtocol' cause DoS by resource exhaustion (CVE-2021-22883)\n\n* nodejs: DNS rebinding in --inspect (CVE-2021-22884)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
-							Link:        "https://access.redhat.com/errata/RHSA-2021:0735",
+							Name:          "RHSA-2021:0735",
+							NamespaceName: "rhel:8",
+							Description:   "Node.js is a software development platform for building fast and scalable network applications in the JavaScript programming language. \n\nThe following packages have been upgraded to a later upstream version: nodejs (10.24.0).\n\nSecurity Fix(es):\n\n* nodejs: HTTP2 'unknownProtocol' cause DoS by resource exhaustion (CVE-2021-22883)\n\n* nodejs: DNS rebinding in --inspect (CVE-2021-22884)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2021:0735",
+							Severity:      "Important",
 							Metadata: map[string]interface{}{
 								"Red Hat": map[string]interface{}{
 									"CVSSv3": map[string]interface{}{
@@ -1354,9 +1364,11 @@ func TestImageSanity(t *testing.T) {
 					Version:       "2.9.1-4.el8",
 					Vulnerabilities: []v1.Vulnerability{
 						{
-							Name:        "RHSA-2020:4952",
-							Description: "FreeType is a free, high-quality, portable font engine that can open and manage font files. FreeType loads, hints, and renders individual glyphs efficiently.\n\nSecurity Fix(es):\n\n* freetype: Heap-based buffer overflow due to integer truncation in Load_SBit_Png (CVE-2020-15999)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
-							Link:        "https://access.redhat.com/errata/RHSA-2020:4952",
+							Name:          "RHSA-2020:4952",
+							NamespaceName: "rhel:8",
+							Description:   "FreeType is a free, high-quality, portable font engine that can open and manage font files. FreeType loads, hints, and renders individual glyphs efficiently.\n\nSecurity Fix(es):\n\n* freetype: Heap-based buffer overflow due to integer truncation in Load_SBit_Png (CVE-2020-15999)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4952",
+							Severity:      "Important",
 							Metadata: map[string]interface{}{
 								"Red Hat": map[string]interface{}{
 									"CVSSv3": map[string]interface{}{
@@ -1381,9 +1393,11 @@ func TestImageSanity(t *testing.T) {
 					Version:       "0.7.7-1.el8",
 					Vulnerabilities: []v1.Vulnerability{
 						{
-							Name:        "RHSA-2020:4508",
-							Description: "The libsolv packages provide a library for resolving package dependencies using a satisfiability algorithm.\n\nThe following packages have been upgraded to a later upstream version: libsolv (0.7.11). (BZ#1809106)\n\nSecurity Fix(es):\n\n* libsolv: out-of-bounds read in repodata_schema2id in repodata.c (CVE-2019-20387)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.\n\nAdditional Changes:\n\nFor detailed information on changes in this release, see the Red Hat Enterprise Linux 8.3 Release Notes linked from the References section.",
-							Link:        "https://access.redhat.com/errata/RHSA-2020:4508",
+							Name:          "RHSA-2020:4508",
+							NamespaceName: "rhel:8",
+							Description:   "The libsolv packages provide a library for resolving package dependencies using a satisfiability algorithm.\n\nThe following packages have been upgraded to a later upstream version: libsolv (0.7.11). (BZ#1809106)\n\nSecurity Fix(es):\n\n* libsolv: out-of-bounds read in repodata_schema2id in repodata.c (CVE-2019-20387)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.\n\nAdditional Changes:\n\nFor detailed information on changes in this release, see the Red Hat Enterprise Linux 8.3 Release Notes linked from the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4508",
+							Severity:      "Moderate",
 							Metadata: map[string]interface{}{
 								"Red Hat": map[string]interface{}{
 									"CVSSv3": map[string]interface{}{
