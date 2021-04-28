@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/storage v1.12.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.5.1
+	github.com/containers/image/v5 v5.5.2
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker-credential-helpers v0.6.3
