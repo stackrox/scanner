@@ -6,6 +6,7 @@
 package pgsql
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/lib/pq"
@@ -76,7 +77,9 @@ func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*datab
 }
 
 func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, error) {
-	tx, err := pgSQL.Begin()
+	tx, err := pgSQL.BeginTx(context.Background(), &sql.TxOptions{
+		ReadOnly: true,
+	})
 	if err != nil {
 		return nil, handleError("GetRHELv2Layers.Begin()", err)
 	}
