@@ -127,12 +127,18 @@
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210223210505.zip",
       "timestamp": "2021-02-23T21:05:05.329403942Z",
-      "diffLocation": "gs://definitions.stackrox.io/eac616e1-e072-4cb1-9d63-db680fe73f92/diff.zip"
+      "diffLocation": "gs://definitions.stackrox.io/eac616e1-e072-4cb1-9d63-db680fe73f92/diff.zip",
+      "config": {
+        "skipRHELv2Vulns": true
+      }
     },
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210330190425.zip",
       "timestamp": "2021-03-30T19:04:25.199898949Z",
-      "diffLocation": "gs://definitions.stackrox.io/4999fed5-7189-45e4-bff0-53805366e4df/diff.zip"
+      "diffLocation": "gs://definitions.stackrox.io/4999fed5-7189-45e4-bff0-53805366e4df/diff.zip",
+      "config": {
+        "skipRHELv2Vulns": true
+      }
     },
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210422180424.zip",

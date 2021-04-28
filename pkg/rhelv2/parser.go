@@ -27,7 +27,20 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	}
 
 	protoVuln := func(def oval.Definition) (*database.RHELv2Vulnerability, error) {
+		defType, err := ovalutil.GetDefinitionType(def)
+		if err != nil {
+			return nil, err
+		}
+
+		// Red Hat OVAL v2 data include information about vulnerabilities,
+		// that actually don't affect the package in any way. Storing them
+		// would increase number of records in DB without adding any value.
+		if defType == ovalutil.UnaffectedDefinition {
+			return nil, nil
+		}
+
 		cpes := make([]string, 0, len(def.Advisory.AffectedCPEList))
+
 		for _, affected := range def.Advisory.AffectedCPEList {
 			// Work around having empty entries. This seems to be some issue
 			// with the tool used to produce the database but only seems to
@@ -84,7 +97,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 
 		var cvss3Str, cvss2Str string
 		if cvss3.score > 0 && cvss3.vector != "" {
-			cvss2Str = fmt.Sprintf("%.1f/%s", cvss3.score, cvss3.vector)
+			cvss3Str = fmt.Sprintf("%.1f/%s", cvss3.score, cvss3.vector)
 		}
 		if cvss2.score > 0 && cvss2.vector != "" {
 			cvss2Str = fmt.Sprintf("%.1f/%s", cvss2.score, cvss2.vector)
@@ -104,6 +117,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			Name:        name,
 			Description: def.Description,
 			Issued:      def.Advisory.Issued.Date,
+			Updated:     def.Advisory.Updated.Date,
 			Link:        link,
 			Severity:    def.Advisory.Severity,
 			CVSSv3:      cvss3Str,

@@ -26,7 +26,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt/language"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
-	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
+	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
 // These are possible package prefixes or suffixes. Package managers sometimes annotate
@@ -241,9 +241,9 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	if dbLayer.Namespace != nil {
 		layer.NamespaceName = dbLayer.Namespace.Name
 
-		if wellknownnamespaces.KnownStaleNamespaces.Contains(layer.NamespaceName) {
+		if namespaces.KnownStaleNamespaces.Contains(layer.NamespaceName) {
 			notes = append(notes, OSCVEsStale)
-		} else if !wellknownnamespaces.KnownSupportedNamespaces.Contains(layer.NamespaceName) {
+		} else if !namespaces.KnownSupportedNamespaces.Contains(layer.NamespaceName) {
 			notes = append(notes, OSCVEsUnavailable)
 		}
 	} else {
@@ -254,7 +254,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		notes = append(notes, LanguageCVEsUnavailable)
 	}
 
-	if (withFeatures || withVulnerabilities) && dbLayer.Features != nil {
+	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 	OUTER:
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion)
@@ -267,6 +267,11 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, dbFeatureVersion.Feature.Namespace.VersionFormat)
 			layer.Features = append(layer.Features, *feature)
+		}
+		if namespaces.IsRHELNamespace(layer.NamespaceName) {
+			if err := addRHELv2Vulns(db, &layer); err != nil {
+				return layer, notes, err
+			}
 		}
 		if env.LanguageVulns.Enabled() {
 			addLanguageVulns(db, &layer)

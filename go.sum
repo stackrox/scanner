@@ -786,6 +786,7 @@ github.com/klauspost/pgzip v1.2.4/go.mod h1:Ch1tH69qFZu15pkjo5kYi6mth2Zzwzt50oCQ
 github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f h1:GvCU5GXhHq+7LeOzx/haG7HSIZokl3/0GkoUFzsRJjg=
 github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f/go.mod h1:q59u9px8b7UTj0nIjEjvmTWekazka6xIt6Uogz5Dm+8=
 github.com/knqyf263/go-deb-version v0.0.0-20190517075300-09fca494f03d/go.mod h1:o8sgWoz3JADecfc/cTYD92/Et1yMqMy0utV1z+VaZao=
+github.com/knqyf263/go-rpm-version v0.0.0-20170716094938-74609b86c936 h1:HDjRqotkViMNcGMGicb7cgxklx8OwnjtCBmyWEqrRvM=
 github.com/knqyf263/go-rpm-version v0.0.0-20170716094938-74609b86c936/go.mod h1:i4sF0l1fFnY1aiw08QQSwVAFxHEm311Me3WsU/X7nL0=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.2/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=

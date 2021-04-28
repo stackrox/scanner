@@ -28,6 +28,8 @@ type MockDatastore struct {
 	FctFindLayer                           func(name string, withFeatures, withVulnerabilities bool) (Layer, error)
 	FctDeleteLayer                         func(name string) error
 	FctInsertRHELv2Layer                   func(*RHELv2Layer) error
+	FctGetRHELv2Layers                     func(layer string) ([]*RHELv2Layer, error)
+	FctGetRHELv2Vulnerabilities            func(records []*RHELv2Record) (map[int][]*RHELv2Vulnerability, error)
 	FctListVulnerabilities                 func(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
 	FctInsertVulnerabilities               func(vulnerabilities []Vulnerability) error
 	FctInsertRHELv2Vulnerabilities         func(vulnerabilities []*RHELv2Vulnerability) error
@@ -72,6 +74,20 @@ func (mds *MockDatastore) DeleteLayer(name string) error {
 func (mds *MockDatastore) InsertRHELv2Layer(layer *RHELv2Layer) error {
 	if mds.FctInsertRHELv2Layer != nil {
 		return mds.FctInsertRHELv2Layer(layer)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) GetRHELv2Layers(layer string) ([]*RHELv2Layer, error) {
+	if mds.FctGetRHELv2Layers != nil {
+		return mds.FctGetRHELv2Layers(layer)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) GetRHELv2Vulnerabilities(records []*RHELv2Record) (map[int][]*RHELv2Vulnerability, error) {
+	if mds.FctGetRHELv2Vulnerabilities != nil {
+		return mds.FctGetRHELv2Vulnerabilities(records)
 	}
 	panic("required mock function not implemented")
 }
