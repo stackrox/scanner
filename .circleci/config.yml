@@ -22,6 +22,12 @@ runOnAllTagsWithDockerIOPullCtx: &runOnAllTagsWithDockerIOPullCtx
   <<: *runOnAllTags
   context: docker-io-pull
 
+runOnAllTagsWithRedHatCtx: &runOnAllTagsWithRedHatCtx
+  <<: *runOnAllTags
+  context:
+  - docker-io-pull
+  - redhat-developer-account-login
+
 commands:
   check-on-master-or-tag:
     description: Run on master or tags only
@@ -783,12 +789,12 @@ workflows:
     - provision-cluster-rhel:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - e2e-tests:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithRedHatCtx
         requires:
           - build
           - provision-cluster
     - e2e-tests-rhel:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithRedHatCtx
         requires:
           - build-rhel
           - provision-cluster-rhel
