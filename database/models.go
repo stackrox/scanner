@@ -127,7 +127,7 @@ type RHELv2Vulnerability struct {
 	CVSSv3       string               `json:"cvssv3,omitempty"`
 	CVSSv2       string               `json:"cvssv2,omitempty"`
 	CPEs         []string             `json:"cpes" hash:"set"`
-	PackageInfos []*RHELv2PackageInfo `json:"package_info" hash:"set"`
+	PackageInfos []*RHELv2PackageInfo `json:"package_infos" hash:"set"`
 
 	SubCVEs []string `json:"sub_cves" hash:"set"`
 }
