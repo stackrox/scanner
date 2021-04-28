@@ -303,6 +303,9 @@ commands:
 
                 docker push "${stackrox_io_scanner_image}"
                 docker push "${stackrox_io_scanner_db_image}"
+
+                .circleci/set-cache-control.sh "${stackrox_io_scanner_image}"
+                .circleci/set-cache-control.sh "${stackrox_io_scanner_db_image}"
             fi
   run-e2e-tests:
     parameters:
