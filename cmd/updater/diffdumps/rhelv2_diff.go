@@ -68,8 +68,7 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 		baseVulnsMap[vuln.Name] = vuln
 	}
 
-	// Keep track of all fixed CVEs,
-	// so we know which unfixed CVEs have since been fixed.
+	// Keep track of all fixed CVEs so we know which unfixed CVEs have since been fixed.
 	// We only want to display the relevant RHBA/RHEA/RHSA when a CVE is fixed.
 	fixedCVEs := set.NewStringSet()
 	for _, vuln := range rhel.Vulns {
