@@ -202,11 +202,12 @@ func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 			if err != nil {
 				log.Errorf("Unable to parse CVSSv2 vector from RHEL vulnerability %s: %s", vuln.Name, vuln.CVSSv2)
 			} else {
-				cvss2 = *cvss2Ptr
 				if score != cvss2Ptr.Score {
 					log.Warnf("Given CVSSv2 score and computed score differ for RHEL vulnerability %s: %f != %f. Using given score...", vuln.Name, score, cvss2Ptr.Score)
 					cvss2Ptr.Score = score
 				}
+
+				cvss2 = *cvss2Ptr
 			}
 		}
 	}
@@ -222,11 +223,12 @@ func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 			if err != nil {
 				log.Errorf("Unable to parse CVSSv3 vector from RHEL vulnerability %s: %s", vuln.Name, vuln.CVSSv3)
 			} else {
-				cvss3 = *cvss3Ptr
 				if score != cvss3Ptr.Score {
 					log.Warnf("Given CVSSv3 score and computed score differ for RHEL vulnerability %s: %f != %f. Using given score...", vuln.Name, score, cvss3Ptr.Score)
 					cvss3Ptr.Score = score
 				}
+
+				cvss3 = *cvss3Ptr
 			}
 		}
 	}
