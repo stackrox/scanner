@@ -238,10 +238,17 @@ commands:
 
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 20.10.6
       - setup-gcp
       - attach_workspace:
           at: /tmp
+
+      - run: |
+        ssh remote-docker \<<EOF
+          sudo bash -c 'echo "{\"experimental\": true}" > /etc/docker/daemon.json'
+          sudo systemctl restart docker
+        EOF
 
       - run:
           name: Pull definitions dumps
