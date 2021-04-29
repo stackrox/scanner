@@ -114,7 +114,7 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 		// Did not find relevant OS-specific kernel parser.
 		// Defaulting to general kernel vulns from NVD.
 		vulns, err := s.getNVDVulns("linux", "linux_kernel", req.GetKernelVersion())
-		return "unknown", vulns, &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
+		return "", vulns, &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 			Name:    "kernel",
 			Version: req.GetKernelVersion(),
 		}, err

@@ -444,7 +444,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Docker Desktop",
 			kernelVersion: "5.4.39-linuxkit",
 
-			expectedOS: "unknown",
+			expectedOS: "",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "kernel",
 				Version: "5.4.39-linuxkit",
