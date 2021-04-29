@@ -150,7 +150,7 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 		},
 		Features: nil,
 	}
-	layer, _, err := LayerFromDatabaseModel(db, dbLayer, true, true)
+	layer, _, err := LayerFromDatabaseModel(db, dbLayer, true, true, false)
 	assert.NoError(t, err)
 	assert.Equal(t, "layer2", layer.Name)
 	assert.Equal(t, "", layer.ParentName)

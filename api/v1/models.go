@@ -227,7 +227,7 @@ func addLanguageVulns(db database.Datastore, layer *Layer) {
 	layer.Features = append(layer.Features, languageFeatures...)
 }
 
-func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, []Note, error) {
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities, uncertifiedRHEL bool) (Layer, []Note, error) {
 	layer := Layer{
 		Name:             dbLayer.Name,
 		IndexedByVersion: dbLayer.EngineVersion,
@@ -269,8 +269,12 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 			layer.Features = append(layer.Features, *feature)
 		}
 		if namespaces.IsRHELNamespace(layer.NamespaceName) {
-			if err := addRHELv2Vulns(db, &layer); err != nil {
-				return layer, notes, err
+			if uncertifiedRHEL {
+				notes = append(notes, CertifiedRHELScanUnavailable)
+			} else {
+				if err := addRHELv2Vulns(db, &layer); err != nil {
+					return layer, notes, err
+				}
 			}
 		}
 		if env.LanguageVulns.Enabled() {
@@ -414,6 +418,10 @@ const (
 	// LanguageCVEsUnavailable labels scans of images with without language CVEs.
 	// This is typically only populated when language CVEs are not enabled.
 	LanguageCVEsUnavailable
+	// CertifiedRHELScanUnavailable labels scans of RHEL-based images out-of-scope
+	// of the Red Hat Certification program.
+	// These images were made before June 2020, and they are missing content manifest JSON files.
+	CertifiedRHELScanUnavailable
 )
 
 type VulnerabilityEnvelope struct {

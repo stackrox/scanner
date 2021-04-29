@@ -86,21 +86,21 @@ func (suite *ClientTestSuite) TestRetrieveImageDataBySHA() {
 		Remote:   "library/nginx",
 		Tag:      "1.10",
 	}
-	envelope, err := suite.client.RetrieveImageDataByName(image, true, true)
+	envelope, err := suite.client.RetrieveImageDataByName(image, nil)
 	suite.NoError(err)
 	suite.NotNil(envelope)
 
 	image.Tag = "badtag"
-	_, err = suite.client.RetrieveImageDataByName(image, true, true)
+	_, err = suite.client.RetrieveImageDataByName(image, nil)
 	suite.Error(err)
 }
 
 func (suite *ClientTestSuite) TestRetrieveImageDataByName() {
-	envelope, err := suite.client.RetrieveImageDataBySHA("goodsha", true, true)
+	envelope, err := suite.client.RetrieveImageDataBySHA("goodsha", nil)
 	suite.NoError(err)
 	suite.NotNil(envelope)
 
-	_, err = suite.client.RetrieveImageDataBySHA("badsha", true, true)
+	_, err = suite.client.RetrieveImageDataBySHA("badsha", nil)
 	suite.Error(err)
 }
 

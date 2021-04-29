@@ -102,6 +102,11 @@ type ImageRequest struct {
 	Image    string `json:"image"`
 	Registry string `json:"registry"`
 	Insecure bool   `json:"insecure"`
+
+	// UncertifiedRHELScan tells the scanner to
+	// scan the given RHEL image in the old (uncertified)
+	// manner.
+	UncertifiedRHELScan bool `json:"uncertified_rhel"`
 }
 
 // Image contains image naming metadata.
@@ -165,3 +170,11 @@ func GenerateImageFromString(imageStr string) (*Image, error) {
 	}
 	return image, nil
 }
+
+// GetImageDataOpts contains all the options to be used when
+// retrieving image data from the scanner.
+type GetImageDataOpts struct {
+	UncertifiedRHELResults bool
+}
+
+const UncertifiedRHELResultsKey = "uncertifiedRHELResults"

@@ -22,6 +22,7 @@ message ScanImageRequest {
         bool   insecure = 4;
     }
     RegistryData registry = 2;
+    bool uncertifiedRHEL  = 3;
 }
 
 message ScanImageResponse {
@@ -38,6 +39,7 @@ message GetImageScanRequest {
     // Only one of the fields in ImageSpec needs to be set for the request to be properly formed
     // If both are set, then digest is used
     ImageSpec image_spec = 1;
+    bool uncertifiedRHEL = 2;
 }
 
 message GetLanguageLevelComponentsRequest {

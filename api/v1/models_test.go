@@ -162,7 +162,7 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 			},
 		},
 	}
-	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, true, true)
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, true, true, false)
 	assert.NoError(t, err)
 	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].FixedBy)
 }
@@ -218,7 +218,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 			},
 		},
 	}
-	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, true, true)
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, true, true, false)
 	assert.NoError(t, err)
 	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
 }
@@ -281,7 +281,7 @@ func TestNotesNoLanguageVulns(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false, false)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, LanguageCVEsUnavailable)
@@ -298,7 +298,7 @@ func TestNotesStaleCVEs(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false, false)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsStale)
@@ -315,10 +315,27 @@ func TestNotesUnavailableCVEs(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false, false)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsUnavailable)
+}
+
+func TestNotesUncertifiedRHEL(t *testing.T) {
+	dbLayer := database.Layer{
+		Name:          "example",
+		EngineVersion: 0,
+		Parent:        nil,
+		Namespace: &database.Namespace{
+			Name:          "rhel:8",
+			VersionFormat: "rpm",
+		},
+		Features: nil,
+	}
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false, true)
+	assert.NoError(t, err)
+	assert.Len(t, notes, 1)
+	assert.Contains(t, notes, CertifiedRHELScanUnavailable)
 }
 
 type mockDatastore struct {

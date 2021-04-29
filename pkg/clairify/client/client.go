@@ -90,14 +90,16 @@ func (c *Clairify) sendRequest(request *http.Request, timeout time.Duration) ([]
 	return data, nil
 }
 
-func encodeValues(features, vulnerabilities bool) url.Values {
+func encodeValues(opts *types.GetImageDataOpts) url.Values {
+	if opts == nil {
+		opts = new(types.GetImageDataOpts)
+	}
+
 	values := make(url.Values)
-	if features {
-		values.Add("features", "true")
+	if opts.UncertifiedRHELResults {
+		values.Add(types.UncertifiedRHELResultsKey, "true")
 	}
-	if vulnerabilities {
-		values.Add("vulnerabilities", "true")
-	}
+
 	return values
 }
 
@@ -141,8 +143,8 @@ func (c *Clairify) AddImage(username, password string, req *types.ImageRequest) 
 }
 
 // RetrieveImageDataBySHA contacts Clairify to fetch vulnerability data by the image SHA.
-func (c *Clairify) RetrieveImageDataBySHA(sha string, features, vulnerabilities bool) (*v1.LayerEnvelope, error) {
-	values := encodeValues(features, vulnerabilities)
+func (c *Clairify) RetrieveImageDataBySHA(sha string, opts *types.GetImageDataOpts) (*v1.LayerEnvelope, error) {
+	values := encodeValues(opts)
 	request, err := http.NewRequest("GET", c.endpoint+"/scanner/sha/"+sha, nil)
 	if err != nil {
 		return nil, err
@@ -160,8 +162,8 @@ func (c *Clairify) RetrieveImageDataBySHA(sha string, features, vulnerabilities 
 }
 
 // RetrieveImageDataByName contacts Clairify to fetch vulnerability data by the image name.
-func (c *Clairify) RetrieveImageDataByName(image *types.Image, features, vulnerabilities bool) (*v1.LayerEnvelope, error) {
-	values := encodeValues(features, vulnerabilities)
+func (c *Clairify) RetrieveImageDataByName(image *types.Image, opts *types.GetImageDataOpts) (*v1.LayerEnvelope, error) {
+	values := encodeValues(opts)
 	url := fmt.Sprintf("%s/scanner/image/%s/%s/%s", c.endpoint, image.Registry, image.Remote, image.Tag)
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {

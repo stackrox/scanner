@@ -60,7 +60,7 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 
 	reg := req.GetRegistry()
 
-	digest, err := server.ProcessImage(s.db, image, reg.GetUrl(), reg.GetUsername(), reg.GetPassword(), reg.GetInsecure())
+	digest, err := server.ProcessImage(s.db, image, reg.GetUrl(), reg.GetUsername(), reg.GetPassword(), reg.GetInsecure(), req.GetUncertifiedRHEL())
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 	}, nil
 }
 
-func (s *serviceImpl) getLayer(layerName string) (*v1.GetImageScanResponse, error) {
+func (s *serviceImpl) getLayer(layerName string, unCeritifedRHEL bool) (*v1.GetImageScanResponse, error) {
 	dbLayer, err := s.db.FindLayer(layerName, true, true)
 	if err == commonerr.ErrNotFound {
 		return nil, status.Errorf(codes.NotFound, "Could not find Clair layer %q", layerName)
@@ -83,7 +83,7 @@ func (s *serviceImpl) getLayer(layerName string) (*v1.GetImageScanResponse, erro
 	}
 
 	// This endpoint is not used, so not going to bother with notes until they are necessary.
-	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, true, true)
+	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, true, true, unCeritifedRHEL)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -132,7 +132,7 @@ func (s *serviceImpl) GetImageScan(ctx context.Context, req *v1.GetImageScanRequ
 	if err != nil {
 		return nil, err
 	}
-	return s.getLayer(layerName)
+	return s.getLayer(layerName, req.GetUncertifiedRHEL())
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.

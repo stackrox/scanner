@@ -111,7 +111,7 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 //
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
-func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, parentName string, reader io.ReadCloser) error {
+func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, parentName string, reader io.ReadCloser, uncertifiedRHEL bool) error {
 	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName)
 	if err != nil {
 		return err
@@ -124,7 +124,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 	var rhelv2Components *database.RHELv2Components
 	var languageComponents []*component.Component
 	var removedFiles []string
-	layer.Namespace, layer.Distroless, layer.Features, rhelv2Components, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
+	layer.Namespace, layer.Distroless, layer.Features, rhelv2Components, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent, uncertifiedRHEL)
 	if err != nil {
 		return err
 	}
@@ -175,7 +175,7 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 	var languageComponents []*component.Component
 	var removedComponents []string
 	// TODO: can be useful to not ignore for testing purposes...
-	layer.Namespace, layer.Distroless, layer.Features, _, languageComponents, removedComponents, err = detectContent(imageFormat, name, path, headers, layer.Parent)
+	layer.Namespace, layer.Distroless, layer.Features, _, languageComponents, removedComponents, err = detectContent(imageFormat, name, path, headers, layer.Parent, false)
 	if err != nil {
 		return err
 	}
@@ -187,8 +187,8 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedComponents)
 }
 
-func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
-	namespace := DetectNamespace(name, files, parent)
+func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
 
 	distroless := isDistroless(files) || (parent != nil && parent.Distroless)
 
@@ -251,13 +251,13 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	return namespace, distroless, featureVersions, rhelfeatures, allComponents, removedFiles, err
 }
 
-func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
 	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.SingletonMatcher())
 	if err != nil {
 		return nil, false, nil, nil, nil, nil, err
 	}
 
-	return detectFromFiles(files, name, parent)
+	return detectFromFiles(files, name, parent, uncertifiedRHEL)
 }
 
 func isDistroless(filesMap tarutil.FilesMap) bool {
@@ -267,18 +267,18 @@ func isDistroless(filesMap tarutil.FilesMap) bool {
 
 // detectContent downloads a layer's archive and extracts its Namespace and
 // Features.
-func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
 	files, err := imagefmt.Extract(imageFormat, path, headers, requiredfilenames.SingletonMatcher())
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{logLayerName: name, "path": cleanURL(path)}).Error("failed to extract data from path")
 		return nil, false, nil, nil, nil, nil, err
 	}
 
-	return detectFromFiles(files, name, parent)
+	return detectFromFiles(files, name, parent, uncertifiedRHEL)
 }
 
-func DetectNamespace(name string, files tarutil.FilesMap, parent *database.Layer) *database.Namespace {
-	namespace := featurens.Detect(files)
+func DetectNamespace(name string, files tarutil.FilesMap, parent *database.Layer, uncertifiedRHEL bool) *database.Namespace {
+	namespace := featurens.Detect(files, &featurens.DetectorOptions{UncertifiedRHEL: uncertifiedRHEL})
 	if namespace != nil {
 		log.WithFields(log.Fields{logLayerName: name, "detected namespace": namespace.Name}).Debug("detected namespace")
 		return namespace
