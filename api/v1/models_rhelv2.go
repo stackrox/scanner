@@ -191,11 +191,7 @@ func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2P
 }
 
 func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string) Vulnerability {
-	metadata := &types.Metadata{
-		PublishedDateTime:    vuln.Issued.String(),
-		LastModifiedDateTime: vuln.Updated.String(),
-	}
-
+	var cvss2 types.MetadataCVSSv2
 	if vuln.CVSSv2 != "" {
 		scoreStr, vector := stringutils.Split2(vuln.CVSSv2, "/")
 		score, err := strconv.ParseFloat(scoreStr, 64)
@@ -211,11 +207,12 @@ func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 					cvss2Ptr.Score = score
 				}
 
-				metadata.CVSSv2 = *cvss2Ptr
+				cvss2 = *cvss2Ptr
 			}
 		}
 	}
 
+	var cvss3 types.MetadataCVSSv3
 	if vuln.CVSSv3 != "" {
 		scoreStr, vector := stringutils.Split2(vuln.CVSSv3, "/")
 		score, err := strconv.ParseFloat(scoreStr, 64)
@@ -231,9 +228,18 @@ func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 					cvss3Ptr.Score = score
 				}
 
-				metadata.CVSSv3 = *cvss3Ptr
+				cvss3 = *cvss3Ptr
 			}
 		}
+	}
+
+	metadata := map[string]interface{}{
+		"Red Hat": &types.Metadata{
+			PublishedDateTime:    vuln.Issued.String(),
+			LastModifiedDateTime: vuln.Updated.String(),
+			CVSSv2:               cvss2,
+			CVSSv3:               cvss3,
+		},
 	}
 
 	return Vulnerability{
@@ -242,9 +248,7 @@ func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		Description:   vuln.Description,
 		Link:          vuln.Link,
 		Severity:      vuln.Severity,
-		Metadata: map[string]interface{}{
-			"Red Hat": metadata,
-		},
+		Metadata:      metadata,
 		// It is guaranteed there is 1 and only one element in `vuln.PackageInfos`.
 		FixedBy: vuln.PackageInfos[0].FixedInVersion, // Empty string if not fixed.
 	}
