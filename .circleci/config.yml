@@ -239,7 +239,7 @@ commands:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.6
+          version: 20.10.2
       - setup-gcp
       - attach_workspace:
           at: /tmp
