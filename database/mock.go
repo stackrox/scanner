@@ -33,7 +33,7 @@ type MockDatastore struct {
 	FctListVulnerabilities                 func(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
 	FctInsertVulnerabilities               func(vulnerabilities []Vulnerability) error
 	FctInsertRHELv2Vulnerabilities         func(vulnerabilities []*RHELv2Vulnerability) error
-	FctDeleteRHELv2VulnerabilityPackages   func(hashes [][]byte) error
+	FctDeleteRHELv2Vulnerabilities         func(vulnerabilities []*RHELv2Vulnerability) error
 	FctFindVulnerability                   func(namespaceName, name string) (Vulnerability, error)
 	FctDeleteVulnerability                 func(namespaceName, name string) error
 	FctInsertVulnerabilityFixes            func(vulnerabilityNamespace, vulnerabilityName string, fixes []FeatureVersion) error
@@ -114,9 +114,9 @@ func (mds *MockDatastore) InsertRHELv2Vulnerabilities(vulnerabilities []*RHELv2V
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) DeleteRHELv2VulnerabilityPackages(hashes [][]byte) error {
-	if mds.FctDeleteRHELv2VulnerabilityPackages != nil {
-		return mds.FctDeleteRHELv2VulnerabilityPackages(hashes)
+func (mds *MockDatastore) DeleteRHELv2Vulnerabilities(vulnerabilities []*RHELv2Vulnerability) error {
+	if mds.FctDeleteRHELv2Vulnerabilities != nil {
+		return mds.FctDeleteRHELv2Vulnerabilities(vulnerabilities)
 	}
 	panic("required mock function not implemented")
 }
