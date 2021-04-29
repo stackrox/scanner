@@ -251,14 +251,14 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 		}
 		log.Infof("Done inserting vulns from %q into DB", file.Name())
 
-		log.Infof("Deleting vulns from %q from DB", file.Name())
-		if err := db.DeleteRHELv2Vulnerabilities(vulns.VulnsToDelete); err != nil {
-			return errors.Wrapf(err, "inserting RHELv2 vulns from %q into the DB", file.Name())
+		log.Infof("Deleting vuln packages in %q from DB", file.Name())
+		if err := db.DeleteRHELv2VulnerabilityPackages(vulns.VulnPkgsToDelete); err != nil {
+			return errors.Wrapf(err, "deleting RHELv2 vuln packages in %q from the DB", file.Name())
 		}
-		log.Infof("Done deleting vulns in %q from DB", file.Name())
+		log.Infof("Done deleting vuln packages in %q from DB", file.Name())
 	}
 
-	log.Info("Done inserting RHELv2 vulns into the DB")
+	log.Info("Done inserting/deleting RHELv2 vulns into the DB")
 	return nil
 }
 

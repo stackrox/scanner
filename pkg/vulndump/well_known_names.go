@@ -29,5 +29,6 @@ type RHELv2 struct {
 	LastModified time.Time                       `json:"last_modified"`
 	Vulns        []*database.RHELv2Vulnerability `json:"vulns"`
 
-	VulnsToDelete []string `json:"vulns_to_delete"`
+	// VulnPkgsToDelete holds the hashes of vulnerable packages to delete.
+	VulnPkgsToDelete [][]byte `json:"vuln_pkgs_to_delete"`
 }

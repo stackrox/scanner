@@ -146,8 +146,8 @@ type Datastore interface {
 	// the database.
 	InsertRHELv2Vulnerabilities(vulnerabilities []*RHELv2Vulnerability) error
 
-	// DeleteRHELv2Vulnerabilities deletes then given RHELv2 vulnerabilities from the database.
-	DeleteRHELv2Vulnerabilities(vulnerabilities []string) error
+	// DeleteRHELv2VulnerabilityPackages deletes then given RHELv2 vulnerability packages from the database.
+	DeleteRHELv2VulnerabilityPackages(hashes [][]byte) error
 
 	// GetRHELv2Layers retrieves the corresponding layers for the image
 	// represented by the given layer.

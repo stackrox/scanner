@@ -223,13 +223,7 @@ const (
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
-	deleteRHELv2Vulnerability = `
-		DELETE FROM vuln
-			WHERE name = $1`
-
-	deleteRHELv2VulnPackage = `
-		DELETE FROM vuln_package
-			WHERE name = $1`
+	deleteRHELv2VulnPackage = `DELETE FROM vuln_package WHERE hash = $1;`
 
 	searchRHELv2Vulnerabilities = `
 		SELECT

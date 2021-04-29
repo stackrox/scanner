@@ -44,8 +44,7 @@ func init() {
 			arch_operation   TEXT,
 			UNIQUE (hash)
 		);
-		CREATE INDEX IF NOT EXISTS vuln_package_lookup_idx on vuln_package (package_name, package_module, cpe);
-		CREATE INDEX IF NOT EXISTS vuln_package_delete_idx on vuln_package (name)`,
+		CREATE INDEX IF NOT EXISTS vuln_package_lookup_idx on vuln_package (package_name, package_module, cpe);`,
 		}),
 	})
 }
