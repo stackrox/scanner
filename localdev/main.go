@@ -113,7 +113,7 @@ func analyzeLocalImage(path string) {
 	var total time.Duration
 	for _, l := range config.Layers {
 		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l]))
-		_, _, _, rhelv2Components, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace})
+		_, _, _, _, rhelv2Components, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace})
 		if err != nil {
 			fmt.Println(err.Error())
 			return

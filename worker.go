@@ -33,6 +33,7 @@ import (
 	featureFlags "github.com/stackrox/scanner/pkg/features"
 	rhelv2 "github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 	"github.com/stackrox/scanner/pkg/whiteout"
 	"github.com/stackrox/scanner/singletons/analyzers"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
@@ -124,7 +125,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 	var rhelv2Components *database.RHELv2Components
 	var languageComponents []*component.Component
 	var removedFiles []string
-	layer.Namespace, layer.Distroless, layer.Features, rhelv2Components, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
+	layer.Namespace, layer.Distroless, layer.Features, layer.RHELv2Packages, rhelv2Components, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent)
 	if err != nil {
 		return err
 	}
@@ -174,8 +175,7 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 	// Analyze the content.
 	var languageComponents []*component.Component
 	var removedComponents []string
-	// TODO: can be useful to not ignore for testing purposes...
-	layer.Namespace, layer.Distroless, layer.Features, _, languageComponents, removedComponents, err = detectContent(imageFormat, name, path, headers, layer.Parent)
+	layer.Namespace, layer.Distroless, layer.Features, _, _, languageComponents, removedComponents, err = detectContent(imageFormat, name, path, headers, layer.Parent)
 	if err != nil {
 		return err
 	}
@@ -187,33 +187,48 @@ func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, p
 	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedComponents)
 }
 
-func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, []byte, *database.RHELv2Components, []*component.Component, []string, error) {
 	namespace := DetectNamespace(name, files, parent)
 
 	distroless := isDistroless(files) || (parent != nil && parent.Distroless)
 
 	var featureVersions []database.FeatureVersion
+	var rhelPackages []byte
 	var rhelfeatures *database.RHELv2Components
 
-	if namespace != nil && strings.HasPrefix(namespace.Name, "rhel") {
+	var isProvdedByPackageManager func(string) bool
+	var finishPackageManagerCheck func()
+
+	if namespace != nil && namespaces.IsRHELNamespace(namespace.Name) {
 		// This is a RHEL-based image that must be scanned in a certified manner.
 		// Use the RHELv2 scanner instead.
-		packages, cpes, err := rhelv2.ListFeatures(files)
+		pkgBytes, packages, cpes, err := rhelv2.ListFeatures(files)
 		if err != nil {
-			return nil, distroless, nil, nil, nil, nil, err
+			return nil, distroless, nil, nil, nil, nil, nil, err
 		}
+		rhelPackages = pkgBytes
 		rhelfeatures = &database.RHELv2Components{
 			Dist:     namespace.Name,
 			Packages: packages,
 			CPEs:     cpes,
 		}
+
 		log.WithFields(log.Fields{logLayerName: name, "rhel package count": len(packages), "rhel cpe count": len(cpes)}).Debug("detected rhelv2 features")
+
+		var parentPackages []byte
+		if parent != nil {
+			parentPackages = parent.RHELv2Packages
+		}
+		isProvdedByPackageManager, finishPackageManagerCheck, err = rhelv2.GetIsProvidedByRPMPackage(parentPackages)
+		if err != nil {
+			return nil, distroless, nil, nil, nil, nil, nil, err
+		}
 	} else {
 		var err error
 		// Detect features.
 		featureVersions, err = detectFeatureVersions(name, files, namespace, parent)
 		if err != nil {
-			return nil, distroless, nil, nil, nil, nil, err
+			return nil, distroless, nil, nil, nil, nil, nil, err
 		}
 		if len(featureVersions) > 0 {
 			log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
@@ -221,9 +236,10 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	}
 
 	if !env.LanguageVulns.Enabled() {
-		return namespace, distroless, featureVersions, rhelfeatures, nil, nil, nil
+		return namespace, distroless, featureVersions, rhelPackages, rhelfeatures, nil, nil, nil
 	}
-	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())
+	allComponents, err := analyzer.Analyze(files, isProvdedByPackageManager, analyzers.Analyzers())
+	finishPackageManagerCheck()
 	if err != nil {
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
 	}
@@ -248,13 +264,13 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		}
 	}
 
-	return namespace, distroless, featureVersions, rhelfeatures, allComponents, removedFiles, err
+	return namespace, distroless, featureVersions, rhelPackages, rhelfeatures, allComponents, removedFiles, err
 }
 
-func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, []byte, *database.RHELv2Components, []*component.Component, []string, error) {
 	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.SingletonMatcher())
 	if err != nil {
-		return nil, false, nil, nil, nil, nil, err
+		return nil, false, nil, nil, nil, nil, nil, err
 	}
 
 	return detectFromFiles(files, name, parent)
@@ -267,11 +283,11 @@ func isDistroless(filesMap tarutil.FilesMap) bool {
 
 // detectContent downloads a layer's archive and extracts its Namespace and
 // Features.
-func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer) (*database.Namespace, bool, []database.FeatureVersion, []byte, *database.RHELv2Components, []*component.Component, []string, error) {
 	files, err := imagefmt.Extract(imageFormat, path, headers, requiredfilenames.SingletonMatcher())
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{logLayerName: name, "path": cleanURL(path)}).Error("failed to extract data from path")
-		return nil, false, nil, nil, nil, nil, err
+		return nil, false, nil, nil, nil, nil, nil, err
 	}
 
 	return detectFromFiles(files, name, parent)

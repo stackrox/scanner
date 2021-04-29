@@ -38,7 +38,7 @@ func matchRegex(path string) bool {
 	return dotNetCorePattern.MatchString(path)
 }
 
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
+func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap, _ func(string) bool) ([]*component.Component, error) {
 	var allComponents []*component.Component
 	for filePath := range fileMap {
 		if !matchRegex(filePath) {

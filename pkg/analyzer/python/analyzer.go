@@ -46,7 +46,7 @@ func matchSuffix(fullPath string) bool {
 	return false
 }
 
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
+func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap, _ func(string) bool) ([]*component.Component, error) {
 	return common.ExtractComponents(fileMap, matchSuffix, parseMetadataFile), nil
 }
 
