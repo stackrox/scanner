@@ -86,9 +86,11 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 	var filtered []*database.RHELv2Vulnerability
 	for _, headVuln := range rhel.Vulns {
 		matchingBaseVuln, found := baseVulnsMap[headVuln.Name]
-		// If the vuln was not in the base, add it.
+		// If the vuln was not in the base and it is unfixed, add it.
 		if !found {
-			filtered = append(filtered, headVuln)
+			if !fixedCVEs.Contains(headVuln.Name) {
+				filtered = append(filtered, headVuln)
+			}
 			continue
 		}
 
