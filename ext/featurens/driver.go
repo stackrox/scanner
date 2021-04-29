@@ -36,13 +36,17 @@ var (
 type Detector interface {
 	// Detect attempts to determine a Namespace from a FilesMap of an image
 	// layer.
-	Detect(tarutil.FilesMap) *database.Namespace
+	Detect(tarutil.FilesMap, *DetectorOptions) *database.Namespace
 
 	// RequiredFilenames returns the list of files required to be in the FilesMap
 	// provided to the Detect method.
 	//
 	// Filenames must not begin with "/".
 	RequiredFilenames() []string
+}
+
+type DetectorOptions struct {
+	UncertifiedRHEL bool
 }
 
 // RegisterDetector makes a detector available by the provided name.
@@ -69,12 +73,12 @@ func RegisterDetector(name string, d Detector) {
 
 // Detect iterators through all registered Detectors and returns the first
 // non-nil detected namespace.
-func Detect(files tarutil.FilesMap) *database.Namespace {
+func Detect(files tarutil.FilesMap, opts *DetectorOptions) *database.Namespace {
 	detectorsM.RLock()
 	defer detectorsM.RUnlock()
 
 	for name, detector := range detectors {
-		namespace := detector.Detect(files)
+		namespace := detector.Detect(files, opts)
 
 		if namespace != nil {
 			log.WithFields(log.Fields{"name": name, "namespace": namespace.Name}).Debug("detected namespace")
@@ -102,13 +106,14 @@ func RequiredFilenames() (files []string) {
 type TestData struct {
 	Files             tarutil.FilesMap
 	ExpectedNamespace *database.Namespace
+	Options           *DetectorOptions
 }
 
 // TestDetector runs a Detector on each provided instance of TestData and
 // asserts the output to be equal to the expected output.
 func TestDetector(t *testing.T, d Detector, testData []TestData) {
 	for _, td := range testData {
-		namespace := d.Detect(td.Files)
+		namespace := d.Detect(td.Files, td.Options)
 
 		if namespace == nil {
 			assert.Equal(t, td.ExpectedNamespace, namespace)
