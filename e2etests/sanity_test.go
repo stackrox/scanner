@@ -178,7 +178,7 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "debian:8",
 							Description:   "In GNU Coreutils through 8.29, chown-core.c in chown and chgrp does not prevent replacement of a plain file with a symlink during use of the POSIX \"-R -L\" options, which allows local users to modify the ownership of arbitrary files by leveraging a race condition.",
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2017-18018",
-							Severity:      "Negligible",
+							Severity:      "Low",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
@@ -218,7 +218,7 @@ func TestImageSanity(t *testing.T) {
 							Name:          "CVE-2011-3374",
 							NamespaceName: "debian:8",
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2011-3374",
-							Severity:      "Negligible",
+							Severity:      "Low",
 							Description:   "It was found that apt-key in apt, all versions, do not correctly validate gpg keys with the master keyring, leading to a potential man-in-the-middle attack.",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
@@ -245,7 +245,7 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "debian:8",
 							Description:   "Incorrect sanitation of the 302 redirect field in HTTP transport method of apt versions 1.4.8 and earlier can lead to content injection by a MITM attacker, potentially leading to remote code execution on the target machine.",
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2019-3462",
-							Severity:      "High",
+							Severity:      "Important",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
@@ -271,7 +271,7 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "debian:8",
 							Description:   "Missing input validation in the ar/tar implementations of APT before version 2.1.2 could result in denial of service when processing specially crafted deb files.",
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2020-3810",
-							Severity:      "Medium",
+							Severity:      "Moderate",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
@@ -462,6 +462,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-05-21T23:15:00Z",
 								},
 							},
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1147",
@@ -486,6 +487,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-07-14T23:15Z",
 								},
 							},
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2021-1721",
@@ -509,7 +511,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.12",
+							FixedBy:  "3.1.12",
+							Severity: "Moderate",
 						},
 						{
 							Name:        "CVE-2021-1723",
@@ -534,6 +537,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-01-12T20:15Z",
 								},
 							},
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2021-24112",
@@ -557,7 +561,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.12",
+							FixedBy:  "3.1.12",
+							Severity: "Critical",
 						},
 						{
 							Name:        "CVE-2021-26701",
@@ -581,7 +586,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.13",
+							FixedBy:  "3.1.13",
+							Severity: "Critical",
 						},
 					},
 				},
@@ -619,7 +625,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.1",
+							FixedBy:  "3.1.1",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-0603",
@@ -643,7 +650,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.1",
+							FixedBy:  "3.1.1",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1045",
@@ -667,7 +675,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.8",
+							FixedBy:  "3.1.8",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1161",
@@ -691,7 +700,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.4",
+							FixedBy:  "3.1.4",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1597",
@@ -715,7 +725,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.7",
+							FixedBy:  "3.1.7",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2021-1723",
@@ -740,6 +751,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-01-12T20:15Z",
 								},
 							},
+							Severity: "Important",
 						},
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
@@ -772,7 +784,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.1",
+							FixedBy:  "3.1.1",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-0606",
@@ -796,7 +809,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.1",
+							FixedBy:  "3.1.1",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1108",
@@ -820,7 +834,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.5",
+							FixedBy:  "3.1.5",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1147",
@@ -844,7 +859,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.6",
+							FixedBy:  "3.1.6",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2021-1721",
@@ -868,7 +884,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.12",
+							FixedBy:  "3.1.12",
+							Severity: "Moderate",
 						},
 						{
 							Name:        "CVE-2021-1723",
@@ -893,6 +910,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-01-12T20:15Z",
 								},
 							},
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2021-24112",
@@ -916,7 +934,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.12",
+							FixedBy:  "3.1.12",
+							Severity: "Critical",
 						},
 						{
 							Name:        "CVE-2021-26701",
@@ -940,7 +959,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.13",
+							FixedBy:  "3.1.13",
+							Severity: "Critical",
 						},
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
@@ -984,7 +1004,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "2.9.10.5",
+							FixedBy:  "2.9.10.5",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-14061",
@@ -1008,7 +1029,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-06-14T20:15Z",
 								},
 							},
-							FixedBy: "2.9.10.5",
+							FixedBy:  "2.9.10.5",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-14062",
@@ -1032,7 +1054,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-06-14T20:15Z",
 								},
 							},
-							FixedBy: "2.9.10.5",
+							FixedBy:  "2.9.10.5",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-14195",
@@ -1056,7 +1079,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-06-16T16:15Z",
 								},
 							},
-							FixedBy: "2.9.10.5",
+							FixedBy:  "2.9.10.5",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-24616",
@@ -1080,7 +1104,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-08-25T18:15Z",
 								},
 							},
-							FixedBy: "2.9.10.6",
+							FixedBy:  "2.9.10.6",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-24750",
@@ -1104,7 +1129,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-09-17T19:15Z",
 								},
 							},
-							FixedBy: "2.9.10.6",
+							FixedBy:  "2.9.10.6",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-25649",
@@ -1128,9 +1154,9 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-12-03T17:15Z",
 								},
 							},
-							FixedBy: "2.9.10.7",
+							FixedBy:  "2.9.10.7",
+							Severity: "Important",
 						},
-
 						{
 							Name:        "CVE-2020-35490",
 							Description: "FasterXML jackson-databind 2.x before 2.9.10.8 mishandles the interaction between serialization gadgets and typing, related to org.apache.commons.dbcp2.datasources.PerUserPoolDataSource.",
@@ -1153,7 +1179,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-12-17T19:15Z",
 								},
 							},
-							FixedBy: "2.9.10.8",
+							FixedBy:  "2.9.10.8",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-35491",
@@ -1177,7 +1204,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-12-17T19:15Z",
 								},
 							},
-							FixedBy: "2.9.10.8",
+							FixedBy:  "2.9.10.8",
+							Severity: "Important",
 						},
 					},
 					AddedBy:  "sha256:36e8e9714b9a509fae9e515ff16237928c3d809f5ae228b14d2f7d7605c02623",
