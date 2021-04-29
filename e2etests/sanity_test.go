@@ -178,7 +178,7 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "debian:8",
 							Description:   "In GNU Coreutils through 8.29, chown-core.c in chown and chgrp does not prevent replacement of a plain file with a symlink during use of the POSIX \"-R -L\" options, which allows local users to modify the ownership of arbitrary files by leveraging a race condition.",
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2017-18018",
-							Severity:      "Negligible",
+							Severity:      "Low",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
@@ -218,7 +218,7 @@ func TestImageSanity(t *testing.T) {
 							Name:          "CVE-2011-3374",
 							NamespaceName: "debian:8",
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2011-3374",
-							Severity:      "Negligible",
+							Severity:      "Low",
 							Description:   "It was found that apt-key in apt, all versions, do not correctly validate gpg keys with the master keyring, leading to a potential man-in-the-middle attack.",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
@@ -245,7 +245,7 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "debian:8",
 							Description:   "Incorrect sanitation of the 302 redirect field in HTTP transport method of apt versions 1.4.8 and earlier can lead to content injection by a MITM attacker, potentially leading to remote code execution on the target machine.",
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2019-3462",
-							Severity:      "High",
+							Severity:      "Important",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
@@ -271,7 +271,7 @@ func TestImageSanity(t *testing.T) {
 							NamespaceName: "debian:8",
 							Description:   "Missing input validation in the ar/tar implementations of APT before version 2.1.2 could result in denial of service when processing specially crafted deb files.",
 							Link:          "https://security-tracker.debian.org/tracker/CVE-2020-3810",
-							Severity:      "Medium",
+							Severity:      "Moderate",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
 									"CVSSv2": map[string]interface{}{
@@ -330,7 +330,6 @@ func TestImageSanity(t *testing.T) {
 					//					"Score":               3.9,
 					//					"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 					//				},
-					//				"PublishedDateTime": "2018-05-17T17:00:00Z",
 					//			},
 					//		},
 					//	},
@@ -354,7 +353,6 @@ func TestImageSanity(t *testing.T) {
 					//					"Score":               3.9,
 					//					"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 					//				},
-					//				"PublishedDateTime": "2018-05-17T17:00:00Z",
 					//			},
 					//		},
 					//	},
@@ -378,7 +376,6 @@ func TestImageSanity(t *testing.T) {
 					//					"Score":               4.4,
 					//					"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L",
 					//				},
-					//				"PublishedDateTime": "2018-05-17T17:00:00Z",
 					//			},
 					//		},
 					//	},
@@ -465,6 +462,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-05-21T23:15:00Z",
 								},
 							},
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1147",
@@ -489,6 +487,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-07-14T23:15Z",
 								},
 							},
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2021-1721",
@@ -512,7 +511,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.12",
+							FixedBy:  "3.1.12",
+							Severity: "Moderate",
 						},
 						{
 							Name:        "CVE-2021-1723",
@@ -537,6 +537,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-01-12T20:15Z",
 								},
 							},
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2021-24112",
@@ -560,7 +561,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.12",
+							FixedBy:  "3.1.12",
+							Severity: "Critical",
 						},
 						{
 							Name:        "CVE-2021-26701",
@@ -584,7 +586,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.13",
+							FixedBy:  "3.1.13",
+							Severity: "Critical",
 						},
 					},
 				},
@@ -597,7 +600,7 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "microsoft.aspnetcore.app",
-					VersionFormat: "DotNetCoreRuntimeSourceType",
+					VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
 					Version:       "3.1.0",
 					Vulnerabilities: []v1.Vulnerability{
 						{
@@ -622,7 +625,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.1",
+							FixedBy:  "3.1.1",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-0603",
@@ -646,7 +650,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.1",
+							FixedBy:  "3.1.1",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1045",
@@ -670,7 +675,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.8",
+							FixedBy:  "3.1.8",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1161",
@@ -694,7 +700,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.4",
+							FixedBy:  "3.1.4",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1597",
@@ -718,7 +725,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.7",
+							FixedBy:  "3.1.7",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2021-1723",
@@ -743,6 +751,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-01-12T20:15Z",
 								},
 							},
+							Severity: "Important",
 						},
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
@@ -775,7 +784,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.1",
+							FixedBy:  "3.1.1",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-0606",
@@ -799,7 +809,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.1",
+							FixedBy:  "3.1.1",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1108",
@@ -823,7 +834,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.5",
+							FixedBy:  "3.1.5",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-1147",
@@ -847,7 +859,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "3.1.6",
+							FixedBy:  "3.1.6",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2021-1721",
@@ -871,7 +884,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.12",
+							FixedBy:  "3.1.12",
+							Severity: "Moderate",
 						},
 						{
 							Name:        "CVE-2021-1723",
@@ -896,6 +910,7 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-01-12T20:15Z",
 								},
 							},
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2021-24112",
@@ -919,7 +934,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.12",
+							FixedBy:  "3.1.12",
+							Severity: "Critical",
 						},
 						{
 							Name:        "CVE-2021-26701",
@@ -943,7 +959,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2021-02-25T23:15Z",
 								},
 							},
-							FixedBy: "3.1.13",
+							FixedBy:  "3.1.13",
+							Severity: "Critical",
 						},
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
@@ -962,7 +979,7 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "jackson-databind",
-					VersionFormat: "JavaSourceType",
+					VersionFormat: component.JavaSourceType.String(),
 					Version:       "2.9.10.4",
 					Vulnerabilities: []v1.Vulnerability{
 						{
@@ -987,7 +1004,8 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "2.9.10.5",
+							FixedBy:  "2.9.10.5",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-14061",
@@ -1011,7 +1029,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-06-14T20:15Z",
 								},
 							},
-							FixedBy: "2.9.10.5",
+							FixedBy:  "2.9.10.5",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-14062",
@@ -1035,7 +1054,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-06-14T20:15Z",
 								},
 							},
-							FixedBy: "2.9.10.5",
+							FixedBy:  "2.9.10.5",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-14195",
@@ -1059,7 +1079,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-06-16T16:15Z",
 								},
 							},
-							FixedBy: "2.9.10.5",
+							FixedBy:  "2.9.10.5",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-24616",
@@ -1083,7 +1104,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-08-25T18:15Z",
 								},
 							},
-							FixedBy: "2.9.10.6",
+							FixedBy:  "2.9.10.6",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-24750",
@@ -1107,7 +1129,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-09-17T19:15Z",
 								},
 							},
-							FixedBy: "2.9.10.6",
+							FixedBy:  "2.9.10.6",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-25649",
@@ -1131,9 +1154,9 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-12-03T17:15Z",
 								},
 							},
-							FixedBy: "2.9.10.7",
+							FixedBy:  "2.9.10.7",
+							Severity: "Important",
 						},
-
 						{
 							Name:        "CVE-2020-35490",
 							Description: "FasterXML jackson-databind 2.x before 2.9.10.8 mishandles the interaction between serialization gadgets and typing, related to org.apache.commons.dbcp2.datasources.PerUserPoolDataSource.",
@@ -1156,7 +1179,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-12-17T19:15Z",
 								},
 							},
-							FixedBy: "2.9.10.8",
+							FixedBy:  "2.9.10.8",
+							Severity: "Important",
 						},
 						{
 							Name:        "CVE-2020-35491",
@@ -1180,7 +1204,8 @@ func TestImageSanity(t *testing.T) {
 									"PublishedDateTime":    "2020-12-17T19:15Z",
 								},
 							},
-							FixedBy: "2.9.10.8",
+							FixedBy:  "2.9.10.8",
+							Severity: "Important",
 						},
 					},
 					AddedBy:  "sha256:36e8e9714b9a509fae9e515ff16237928c3d809f5ae228b14d2f7d7605c02623",
@@ -1190,7 +1215,7 @@ func TestImageSanity(t *testing.T) {
 			unexpectedFeatures: []v1.Feature{
 				{
 					Name:          "jackson-databind",
-					VersionFormat: "JavaSourceType",
+					VersionFormat: component.JavaSourceType.String(),
 					Version:       "2.6.6",
 				},
 			},
@@ -1205,17 +1230,17 @@ func TestImageSanity(t *testing.T) {
 			unexpectedFeatures: []v1.Feature{
 				{
 					Name:          "zookeeper",
-					VersionFormat: "JavaSourceType",
+					VersionFormat: component.JavaSourceType.String(),
 					Version:       "3.4.13",
 				},
 				{
 					Name:          "guava",
-					VersionFormat: "JavaSourceType",
+					VersionFormat: component.JavaSourceType.String(),
 					Version:       "18.0",
 				},
 				{
 					Name:          "netty",
-					VersionFormat: "JavaSourceType",
+					VersionFormat: component.JavaSourceType.String(),
 					Version:       "3.10.6.final",
 				},
 			},
@@ -1227,6 +1252,220 @@ func TestImageSanity(t *testing.T) {
 			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
 			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:   "NVD",
+		},
+		{
+			// One of the images used for Red Hat Scanner Certification.
+			image:             "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "Red Hat",
+			checkContainsOnly: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "rh-maven35-log4j12",
+					VersionFormat: "rpm",
+					Version:       "1.2.17-19.2.el7",
+					AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				},
+				{
+					Name:          "rh-maven35-jackson-databind",
+					VersionFormat: "rpm",
+					Version:       "2.7.6-2.10.el7",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2020:4173",
+							NamespaceName: "rhel:7",
+							Description:   "The jackson-databind package provides general data-binding functionality for Jackson, which works on top of Jackson core streaming API.\n\nSecurity Fix(es):\n\n* jackson-databind: Serialization gadgets in com.pastdev.httpcomponents.configuration.JndiConfiguration (CVE-2020-24750)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4173",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "0:2.7.6-2.11.el7",
+						},
+					},
+					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				},
+				{
+					Name:          "vim-minimal",
+					VersionFormat: "rpm",
+					Version:       "2:7.4.629-6.el7",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2017-1000382",
+							NamespaceName: "rhel:7",
+							Description:   "DOCUMENTATION: It was found that vim applies the opened file read permissions to the swap file, overriding the process' umask. An attacker might search for vim swap files that were not deleted properly, in order to retrieve sensitive data.\n            STATEMENT: Red Hat Product Security has rated this issue as having Low security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
+							Link:          "https://access.redhat.com/security/cve/CVE-2017-1000382",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         3.6,
+										"Score":               5.5,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+						},
+					},
+					AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
+				},
+			},
+		},
+		{
+			// One of the images used for Red Hat Scanner Certification.
+			image:             "docker.io/stackrox/sandbox:nodejs-10",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "Red Hat",
+			checkContainsOnly: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "nodejs-full-i18n",
+					VersionFormat: "rpm",
+					Version:       "1:10.21.0-3.module+el8.2.0+7071+d2377ea3",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2021:0548",
+							NamespaceName: "rhel:8",
+							Description:   "Node.js is a software development platform for building fast and scalable network applications in the JavaScript programming language. \n\nThe following packages have been upgraded to a later upstream version: nodejs (10.23.1).\n\nSecurity Fix(es):\n\n* libuv: buffer overflow in realpath (CVE-2020-8252)\n\n* nodejs-npm-user-validate: improper input validation when validating user emails leads to ReDoS (CVE-2020-7754)\n\n* nodejs-y18n: prototype pollution vulnerability (CVE-2020-7774)\n\n* nodejs-ini: prototype pollution via malicious INI file (CVE-2020-7788)\n\n* nodejs-dot-prop: prototype pollution (CVE-2020-8116)\n\n* nodejs: use-after-free in the TLS implementation (CVE-2020-8265)\n\n* npm: sensitive information exposure through logs (CVE-2020-15095)\n\n* nodejs-ajv: prototype pollution via crafted JSON schema in ajv.validate function (CVE-2020-15366)\n\n* nodejs-yargs-parser: prototype pollution vulnerability (CVE-2020-7608)\n\n* nodejs: HTTP request smuggling via two copies of a header field in an http request (CVE-2020-8287)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2021:0548",
+							Severity:      "Moderate",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "1:10.23.1-1.module+el8.3.0+9502+012d8a97",
+						},
+						{
+							Name:          "RHSA-2021:0735",
+							NamespaceName: "rhel:8",
+							Description:   "Node.js is a software development platform for building fast and scalable network applications in the JavaScript programming language. \n\nThe following packages have been upgraded to a later upstream version: nodejs (10.24.0).\n\nSecurity Fix(es):\n\n* nodejs: HTTP2 'unknownProtocol' cause DoS by resource exhaustion (CVE-2021-22883)\n\n* nodejs: DNS rebinding in --inspect (CVE-2021-22884)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2021:0735",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "1:10.24.0-1.module+el8.3.0+10166+b07ac28e",
+						},
+					},
+					AddedBy: "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
+					FixedBy: "1:10.24.0-1.module+el8.3.0+10166+b07ac28e",
+				},
+				{
+					Name:          "freetype",
+					VersionFormat: "rpm",
+					Version:       "2.9.1-4.el8",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2020:4952",
+							NamespaceName: "rhel:8",
+							Description:   "FreeType is a free, high-quality, portable font engine that can open and manage font files. FreeType loads, hints, and renders individual glyphs efficiently.\n\nSecurity Fix(es):\n\n* freetype: Heap-based buffer overflow due to integer truncation in Load_SBit_Png (CVE-2020-15999)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4952",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         4.7,
+										"Score":               8.6,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "0:2.9.1-4.el8_3.1",
+						},
+					},
+					AddedBy: "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
+					FixedBy: "2.9.1-4.el8_3.1",
+				},
+				{
+					Name:          "libsolv",
+					VersionFormat: "rpm",
+					Version:       "0.7.7-1.el8",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2020:4508",
+							NamespaceName: "rhel:8",
+							Description:   "The libsolv packages provide a library for resolving package dependencies using a satisfiability algorithm.\n\nThe following packages have been upgraded to a later upstream version: libsolv (0.7.11). (BZ#1809106)\n\nSecurity Fix(es):\n\n* libsolv: out-of-bounds read in repodata_schema2id in repodata.c (CVE-2019-20387)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.\n\nAdditional Changes:\n\nFor detailed information on changes in this release, see the Red Hat Enterprise Linux 8.3 Release Notes linked from the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4508",
+							Severity:      "Moderate",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "0:0.7.11-1.el8",
+						},
+					},
+					AddedBy: "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
+					FixedBy: "0.7.11-1.el8",
+				},
+			},
 		},
 		{
 			image:    "registry.redhat.io/openshift3/logging-elasticsearch",

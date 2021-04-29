@@ -13,6 +13,7 @@
         "skipFixableCentOSVulns": true,
         "ignoreKubernetesVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -24,6 +25,7 @@
         "skipFixableCentOSVulns": true,
         "ignoreKubernetesVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -34,6 +36,7 @@
       "config": {
         "ignoreKubernetesVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -44,6 +47,7 @@
       "config": {
         "ignoreKubernetesVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -54,6 +58,7 @@
       "config": {
         "ignoreKubernetesVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -64,6 +69,7 @@
       "config": {
         "ignoreKubernetesVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -74,6 +80,7 @@
       "config": {
         "ignoreKubernetesVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -84,6 +91,7 @@
       "config": {
         "ignoreKubernetesVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -94,6 +102,7 @@
       "config": {
         "ignoreKubernetesVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -104,6 +113,7 @@
       "config": {
         "ignoreKubernetesVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -113,6 +123,7 @@
       "diffLocation": "gs://definitions.stackrox.io/1ef1caff-3e20-461c-a4d6-33f175f3ee24/diff.zip",
       "config": {
         "skipUbuntuLinuxKernelVulns": true,
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -121,6 +132,7 @@
       "timestamp": "2021-01-25T23:05:31.764433988Z",
       "diffLocation": "gs://definitions.stackrox.io/55b9538d-0d42-4bbd-b4d4-5d31421e7302/diff.zip",
       "config": {
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -129,6 +141,7 @@
       "timestamp": "2021-02-23T21:05:05.329403942Z",
       "diffLocation": "gs://definitions.stackrox.io/eac616e1-e072-4cb1-9d63-db680fe73f92/diff.zip",
       "config": {
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
@@ -137,13 +150,17 @@
       "timestamp": "2021-03-30T19:04:25.199898949Z",
       "diffLocation": "gs://definitions.stackrox.io/4999fed5-7189-45e4-bff0-53805366e4df/diff.zip",
       "config": {
+        "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
     },
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210422180424.zip",
       "timestamp": "2021-04-22T18:04:24.667582614Z",
-      "diffLocation": "gs://definitions.stackrox.io/84e446dc-af8d-49ef-8c1f-24c31170082d/diff.zip"
+      "diffLocation": "gs://definitions.stackrox.io/84e446dc-af8d-49ef-8c1f-24c31170082d/diff.zip",
+      "config": {
+        "skipSeverityComparison": true
+      }
     }
   ]
 }

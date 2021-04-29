@@ -187,9 +187,15 @@ func sortFeatureVersionSlice(slice []database.FeatureVersion) {
 	})
 }
 
-func vulnsAreEqual(v1, v2 database.Vulnerability) bool {
+func vulnsAreEqual(v1, v2 database.Vulnerability, skipSeverityComparison bool) bool {
 	sortFeatureVersionSlice(v1.FixedIn)
 	sortFeatureVersionSlice(v2.FixedIn)
+
+	if skipSeverityComparison {
+		// It is fine to set this to unknown w/o side effects because the vulns are passed by value and not reference
+		v1.Severity = database.UnknownSeverity
+		v2.Severity = database.UnknownSeverity
+	}
 	return reflect.DeepEqual(v1, v2)
 }
 
@@ -263,7 +269,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 		matchingBaseVuln, found := baseVulnsMap[key]
 		// If the vuln was in the base, and equal to what was in the base,
 		// skip it. Else, add.
-		if !(found && vulnsAreEqual(matchingBaseVuln, headVuln)) {
+		if !(found && vulnsAreEqual(matchingBaseVuln, headVuln, cfg.SkipSeverityComparison)) {
 			filtered = append(filtered, headVuln)
 		}
 	}
@@ -287,6 +293,7 @@ type config struct {
 	SkipFixableCentOSVulns     bool `json:"skipFixableCentOSVulns"`
 	IgnoreKubernetesVulns      bool `json:"ignoreKubernetesVulns"`
 	SkipUbuntuLinuxKernelVulns bool `json:"skipUbuntuLinuxKernelVulns"`
+	SkipSeverityComparison     bool `json:"skipSeverityComparison"`
 	SkipRHELv2Vulns            bool `json:"skipRHELv2Vulns"`
 }
 

@@ -230,6 +230,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		osImage       string
 		kernelVersion string
 
+		expectedOS              string
 		expectedKernelComponent *v1.GetNodeVulnerabilitiesResponse_KernelComponent
 		expectedCVEs            []expectedCVE
 		unexpectedCVEs          []string
@@ -239,6 +240,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Ubuntu 20.04.1 LTS",
 			kernelVersion: "5.4.0-51",
 
+			expectedOS: "ubuntu:20.04",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "linux",
 				Version: "5.4.0-51",
@@ -254,6 +256,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Ubuntu 16.04.7 LTS",
 			kernelVersion: "4.15.0-1050-gcp",
 
+			expectedOS: "ubuntu:16.04",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "linux-gcp",
 				Version: "4.15.0-1050",
@@ -273,6 +276,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Ubuntu 16.04.7 LTS",
 			kernelVersion: "4.2.0-1119-aws",
 
+			expectedOS: "ubuntu:16.04",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "linux-aws",
 				Version: "4.2.0-1119",
@@ -291,6 +295,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Ubuntu 18.04.5 LTS",
 			kernelVersion: "4.15.0-1050-aws",
 
+			expectedOS: "ubuntu:18.04",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "linux-aws",
 				Version: "4.15.0-1050",
@@ -311,6 +316,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Ubuntu 18.04.5 LTS",
 			kernelVersion: "5.3.0-1019-gke",
 
+			expectedOS: "ubuntu:18.04",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "linux-gke-5.3",
 				Version: "5.3.0-1019",
@@ -331,6 +337,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Debian GNU/Linux 9 (stretch)",
 			kernelVersion: "4.9.0-11-amd64",
 
+			expectedOS: "debian:9",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "linux",
 				Version: "4.9.0-11-amd64",
@@ -351,6 +358,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "OpenShift Enterprise",
 			kernelVersion: "3.10.0-1127.el7.x86_64",
 
+			expectedOS: "centos:7",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "kernel",
 				Version: "3.10.0-1127.el7.x86_64",
@@ -365,6 +373,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		{
 			osImage:       "Red Hat Enterprise Linux Server 7.8 (Maipo)",
 			kernelVersion: "3.10.0-1127.19.1.el7.x86_64",
+
+			expectedOS: "centos:7",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "kernel",
 				Version: "3.10.0-1127.19.1.el7.x86_64",
@@ -379,6 +389,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		{
 			osImage:       "CentOS Linux 7 (Core)",
 			kernelVersion: "3.10.0-957.12.2.el7.x86_64",
+
+			expectedOS: "centos:7",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "kernel",
 				Version: "3.10.0-957.12.2.el7.x86_64",
@@ -393,6 +405,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		{
 			osImage:       "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 			kernelVersion: "4.18.0-193.14.3.el8_2.x86_64",
+
+			expectedOS: "centos:8",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "kernel",
 				Version: "4.18.0-193.14.3.el8_2.x86_64",
@@ -409,6 +423,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		{
 			osImage:       "Amazon Linux 2",
 			kernelVersion: "4.14.177-139.253.amzn2.x86_64",
+
+			expectedOS: "amzn:2",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "kernel",
 				Version: "4.14.177-139.253.amzn2.x86_64",
@@ -427,6 +443,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		{
 			osImage:       "Docker Desktop",
 			kernelVersion: "5.4.39-linuxkit",
+
+			expectedOS: "",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "kernel",
 				Version: "5.4.39-linuxkit",
@@ -443,6 +461,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Garden Linux 184.0",
 			kernelVersion: "5.4.0-5-cloud-amd64",
 
+			expectedOS: "debian:11",
 			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 				Name:    "linux",
 				Version: "5.4.0-5-cloud-amd64",
@@ -468,6 +487,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			})
 			require.NoError(t, err)
 
+			assert.Equal(t, c.expectedOS, resp.GetOperatingSystem())
 			assert.Equal(t, c.expectedKernelComponent, resp.KernelComponent)
 
 			if len(resp.GetKernelVulnerabilities()) < len(c.expectedCVEs) {
