@@ -59,7 +59,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
-	env, err := client.RetrieveImageDataBySHA(img.SHA, true, true)
+	env, err := client.RetrieveImageDataBySHA(img.SHA, &types.GetImageDataOpts{UncertifiedRHELResults: imageRequest.UncertifiedRHELScan})
 	require.NoError(t, err)
 	require.Nil(t, env.Error)
 
