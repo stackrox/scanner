@@ -307,7 +307,7 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "procps-ng",
-					NamespaceName: "rhel:7",
+					NamespaceName: "centos:7",
 					VersionFormat: "rpm",
 					Version:       "3.3.10-26.el7",
 					Vulnerabilities: []v1.Vulnerability{
