@@ -253,7 +253,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	if !env.LanguageVulns.Enabled() {
 		notes = append(notes, LanguageCVEsUnavailable)
 	}
-	if namespaces.IsRHELNamespace(layer.NamespaceName)  && uncertifiedRHEL {
+	if namespaces.IsRHELNamespace(layer.NamespaceName) && uncertifiedRHEL {
 		notes = append(notes, CertifiedRHELScanUnavailable)
 	}
 
@@ -273,8 +273,8 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		}
 		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
 			if err := addRHELv2Vulns(db, &layer); err != nil {
-					return layer, notes, err
-				}
+				return layer, notes, err
+			}
 		}
 		if env.LanguageVulns.Enabled() {
 			addLanguageVulns(db, &layer)
