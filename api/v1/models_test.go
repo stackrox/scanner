@@ -321,23 +321,6 @@ func TestNotesUnavailableCVEs(t *testing.T) {
 	assert.Contains(t, notes, OSCVEsUnavailable)
 }
 
-func TestNotesUncertifiedRHEL(t *testing.T) {
-	dbLayer := database.Layer{
-		Name:          "example",
-		EngineVersion: 0,
-		Parent:        nil,
-		Namespace: &database.Namespace{
-			Name:          "rhel:8",
-			VersionFormat: "rpm",
-		},
-		Features: nil,
-	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, false, false, true)
-	assert.NoError(t, err)
-	assert.Len(t, notes, 1)
-	assert.Contains(t, notes, CertifiedRHELScanUnavailable)
-}
-
 type mockDatastore struct {
 	database.MockDatastore
 	layers map[string][]*component.LayerToComponents

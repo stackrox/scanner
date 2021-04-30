@@ -254,6 +254,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 		notes = append(notes, LanguageCVEsUnavailable)
 	}
 	if namespaces.IsRHELNamespace(layer.NamespaceName) && uncertifiedRHEL {
+		// Uncertified results were requested.
 		notes = append(notes, CertifiedRHELScanUnavailable)
 	}
 
@@ -272,8 +273,13 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 			layer.Features = append(layer.Features, *feature)
 		}
 		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
-			if err := addRHELv2Vulns(db, &layer); err != nil {
+			certified, err := addRHELv2Vulns(db, &layer)
+			if err != nil {
 				return layer, notes, err
+			}
+			if !certified {
+				// Client expected certified results, but they are unavailable.
+				notes = append(notes, CertifiedRHELScanUnavailable)
 			}
 		}
 		if env.LanguageVulns.Enabled() {
