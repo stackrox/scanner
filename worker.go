@@ -62,7 +62,7 @@ func cleanURL(str string) string {
 	return urlParametersRegexp.ReplaceAllString(str, "")
 }
 
-func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName string) (database.Layer, bool, error) {
+func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName string, force bool) (database.Layer, bool, error) {
 	// Verify parameters.
 	if name == "" {
 		return database.Layer{}, false, commonerr.NewBadRequestError("could not process a layer which does not have a name")
@@ -70,6 +70,10 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 
 	if imageFormat == "" {
 		return database.Layer{}, false, commonerr.NewBadRequestError("could not process a layer which does not have a format")
+	}
+
+	if force {
+		return database.Layer{Name: name, EngineVersion: Version}, false, nil
 	}
 
 	// Check to see if the layer is already in the database.
@@ -112,7 +116,7 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
 func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, parentName string, reader io.ReadCloser, uncertifiedRHEL bool) error {
-	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName)
+	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName, uncertifiedRHEL)
 	if err != nil {
 		return err
 	}
@@ -163,7 +167,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
 func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, path string, headers map[string]string) error {
-	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName)
+	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName, false)
 	if err != nil {
 		return err
 	}
