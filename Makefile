@@ -160,11 +160,14 @@ scanner-image-rhel-builder:
 	@echo "+ $@"
 	docker build -t $(RHEL_BUILD_IMAGE) -f build/Dockerfile_rhel build/
 
+.PHONY: run-build-cmd
+run-build-cmd:
+	@$(BUILD_CMD)
 .PHONY: scanner-build-dockerized
 scanner-build-dockerized: scanner-image-builder deps
 	@echo "+ $@"
 ifdef CI
-	docker container create --name builder $(BUILD_IMAGE) $(BUILD_CMD)
+	docker container create --name builder $(BUILD_IMAGE) make run-build-cmd
 	docker cp $(GOPATH) builder:/
 	docker start -i builder
 	docker cp builder:/go/src/github.com/stackrox/scanner/image/scanner/bin/scanner image/scanner/bin/scanner
