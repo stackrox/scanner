@@ -253,7 +253,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	if !env.LanguageVulns.Enabled() {
 		notes = append(notes, LanguageCVEsUnavailable)
 	}
-	if namespaces.IsRHELNamespace(layer.NamespaceName) && uncertifiedRHEL {
+	if uncertifiedRHEL {
 		// Uncertified results were requested.
 		notes = append(notes, CertifiedRHELScanUnavailable)
 	}
