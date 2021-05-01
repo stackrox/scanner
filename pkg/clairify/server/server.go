@@ -69,9 +69,18 @@ func clairError(w http.ResponseWriter, status int, err error) {
 func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, getUncertifiedRHEL bool) {
 	dbLayer, err := s.storage.FindLayer(layerName, true, true)
 	if err == commonerr.ErrNotFound {
-		clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layerName)
-		return
-	} else if err != nil {
+		if !getUncertifiedRHEL {
+			// Couldn't find the layer in the normal layer table.
+			// Check the RHELv2 table.
+			dbLayer, err = s.storage.FindRHELv2Layer(layerName)
+		}
+
+		if err == commonerr.ErrNotFound {
+			clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layerName)
+			return
+		}
+	}
+	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}

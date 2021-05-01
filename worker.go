@@ -134,6 +134,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 	}
 
 	if rhelv2Components != nil {
+		// Go this path for Red Hat Certified scans.
 		var parentHash string
 		if layer.Parent != nil && layer.Parent.Name != "" {
 			parentHash = layer.Parent.Name
@@ -149,13 +150,14 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 		if err := datastore.InsertRHELv2Layer(rhelv2Layer); err != nil {
 			return err
 		}
-	}
-
-	if err := datastore.InsertLayer(layer); err != nil {
-		if err == commonerr.ErrNoNeedToInsert {
-			return nil
+	} else {
+		// This path for non-RHEL an uncertified RHEL scans.
+		if err := datastore.InsertLayer(layer); err != nil {
+			if err == commonerr.ErrNoNeedToInsert {
+				return nil
+			}
+			return err
 		}
-		return err
 	}
 
 	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedFiles)
