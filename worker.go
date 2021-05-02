@@ -119,6 +119,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 	if exists {
 		return nil
 	}
+	// TODO: Read RHELv2 before analyzing?
 
 	// Analyze the content.
 	var rhelv2Components *database.RHELv2Components
