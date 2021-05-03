@@ -77,15 +77,7 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 func (s *serviceImpl) getLayer(layerName string, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
 	dbLayer, err := s.db.FindLayer(layerName, true, true)
 	if err == commonerr.ErrNotFound {
-		if !uncertifiedRHEL {
-			// Couldn't find the layer in the normal layer table.
-			// Check the RHELv2 table.
-			dbLayer, err = s.db.FindRHELv2Layer(layerName)
-		}
-
-		if err == commonerr.ErrNotFound {
-			return nil, status.Errorf(codes.NotFound, "Could not find Clair layer %q", layerName)
-		}
+		return nil, status.Errorf(codes.NotFound, "Could not find Clair layer %q", layerName)
 	}
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
