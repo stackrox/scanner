@@ -85,6 +85,9 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, getUncer
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
+	if getUncertifiedRHEL {
+		layer.Name = strings.TrimSuffix(layerName, "uncertified")
+	}
 	env := &v1.LayerEnvelope{
 		Layer: &layer,
 		Notes: notes,

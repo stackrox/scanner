@@ -25,12 +25,16 @@ const (
 func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string, uncertifiedRHEL bool) error {
 	var prevLayer string
 	for _, layer := range layers {
+		layerDigest := digest.Digest(layer)
 		layerReadCloser := &layerDownloadReadCloser{
 			downloader: func() (io.ReadCloser, error) {
-				return registry.DownloadLayer(image.Remote, digest.Digest(layer))
+				return registry.DownloadLayer(image.Remote, layerDigest)
 			},
 		}
 
+		if uncertifiedRHEL {
+			layer += "uncertified"
+		}
 		err := clair.ProcessLayerFromReader(storage, "Docker", layer, prevLayer, layerReadCloser, uncertifiedRHEL)
 		if err != nil {
 			logrus.Errorf("Error analyzing layer: %v", err)

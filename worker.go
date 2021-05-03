@@ -112,9 +112,6 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
 func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, parentName string, reader io.ReadCloser, uncertifiedRHEL bool) error {
-	if uncertifiedRHEL {
-		name += "uncertified"
-	}
 	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName)
 	if err != nil {
 		return err
