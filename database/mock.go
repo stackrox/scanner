@@ -29,6 +29,7 @@ type MockDatastore struct {
 	FctDeleteLayer                         func(name string) error
 	FctInsertRHELv2Layer                   func(*RHELv2Layer) error
 	FctGetRHELv2Layers                     func(layer string) ([]*RHELv2Layer, error)
+	FctFindRHELv2Layer                     func(layer string) (Layer, error)
 	FctGetRHELv2Vulnerabilities            func(records []*RHELv2Record) (map[int][]*RHELv2Vulnerability, error)
 	FctListVulnerabilities                 func(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
 	FctInsertVulnerabilities               func(vulnerabilities []Vulnerability) error
@@ -81,6 +82,13 @@ func (mds *MockDatastore) InsertRHELv2Layer(layer *RHELv2Layer) error {
 func (mds *MockDatastore) GetRHELv2Layers(layer string) ([]*RHELv2Layer, error) {
 	if mds.FctGetRHELv2Layers != nil {
 		return mds.FctGetRHELv2Layers(layer)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) FindRHELv2Layer(layer string) (Layer, error) {
+	if mds.FctFindRHELv2Layer != nil {
+		return mds.FctFindRHELv2Layer(layer)
 	}
 	panic("required mock function not implemented")
 }

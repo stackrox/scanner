@@ -22,18 +22,22 @@ const (
 	emptyLayer = "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4"
 )
 
-func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string) error {
+func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string, uncertifiedRHEL bool) error {
 	var prevLayer string
 	for _, layer := range layers {
+		layerDigest := digest.Digest(layer)
 		layerReadCloser := &layerDownloadReadCloser{
 			downloader: func() (io.ReadCloser, error) {
-				return registry.DownloadLayer(image.Remote, digest.Digest(layer))
+				return registry.DownloadLayer(image.Remote, layerDigest)
 			},
 		}
 
-		err := clair.ProcessLayerFromReader(storage, "Docker", layer, prevLayer, layerReadCloser)
+		if uncertifiedRHEL {
+			layer += "uncertified"
+		}
+		err := clair.ProcessLayerFromReader(storage, "Docker", layer, prevLayer, layerReadCloser, uncertifiedRHEL)
 		if err != nil {
-			logrus.Errorf("Error analyzing layer: %v", err)
+			logrus.Errorf("Error analyzing layer %s: %v", layer, err)
 			return err
 		}
 		prevLayer = layer
@@ -42,7 +46,7 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	return nil
 }
 
-func ProcessImage(storage database.Datastore, image *types.Image, registry, username, password string, insecure bool) (string, error) {
+func ProcessImage(storage database.Datastore, image *types.Image, registry, username, password string, insecure, uncertifiedRHEL bool) (string, error) {
 	var reg types.Registry
 	var err error
 	if insecure {
@@ -53,7 +57,7 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 	if err != nil {
 		return "", err
 	}
-	digest, layer, err := process(storage, image, reg)
+	digest, layer, err := process(storage, image, reg, uncertifiedRHEL)
 	if err != nil {
 		return digest, err
 	}
@@ -63,7 +67,7 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 	return digest, storage.AddImage(layer, image.SHA, image.TaggedName())
 }
 
-func process(storage database.Datastore, image *types.Image, reg types.Registry) (string, string, error) {
+func process(storage database.Datastore, image *types.Image, reg types.Registry, uncertifiedRHEL bool) (string, string, error) {
 	logrus.Debugf("Processing image %s", image)
 	digest, layers, err := fetchLayers(reg, image)
 	if err != nil {
@@ -74,7 +78,7 @@ func process(storage database.Datastore, image *types.Image, reg types.Registry)
 	}
 
 	logrus.Infof("Found %v layers for image %v", len(layers), image)
-	if err = analyzeLayers(storage, reg, image, layers); err != nil {
+	if err = analyzeLayers(storage, reg, image, layers, uncertifiedRHEL); err != nil {
 		logrus.Errorf("Failed to analyze image %q: %v", image.String(), err)
 		return digest, "", err
 	}

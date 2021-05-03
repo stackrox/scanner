@@ -252,6 +252,11 @@ const (
 		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (hash) DO NOTHING;`
 
+	searchRHELv2Layer = `
+		SELECT hash, dist
+		FROM rhelv2_layer
+		WHERE hash = $1;`
+
 	// Inside the `WITH RECURSIVE`, the base case is the top query, and the
 	// recursive case is the bottom query.
 	// Base: find the layer by hash.

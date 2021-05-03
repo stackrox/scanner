@@ -27,7 +27,7 @@ func TestPythonComponents(t *testing.T) {
 	anchoreComponents := loadExpectedComponentResponse("./testdata/anchore_components.json", t)
 	conn := connectToScanner(t)
 	client := v1.NewImageScanServiceClient(conn)
-	scanResp := scanPublicDockerHubImage(client, "docker.io/anchore/anchore-engine:v0.5.0", t)
+	scanResp := scanPublicDockerHubImage(client, "docker.io/anchore/anchore-engine:v0.5.0", true, t)
 	getComponentsResp, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
 		ImageSpec: &v1.ImageSpec{
 			Digest: scanResp.GetImage().GetDigest(),
@@ -92,9 +92,10 @@ func TestRemovedComponents(t *testing.T) {
 	client := v1.NewImageScanServiceClient(conn)
 	for _, c := range cases {
 		t.Run(c.distro, func(t *testing.T) {
-			scanResp := scanDockerIOStackRoxImage(client, fmt.Sprintf("stackrox/vuln-images:%s-package-removal", c.distro), t)
+			scanResp := scanDockerIOStackRoxImage(client, fmt.Sprintf("stackrox/vuln-images:%s-package-removal", c.distro), true, t)
 			scan, err := client.GetImageScan(context.Background(), &v1.GetImageScanRequest{
-				ImageSpec: scanResp.GetImage(),
+				ImageSpec:       scanResp.GetImage(),
+				UncertifiedRHEL: true,
 			})
 			require.NoError(t, err)
 
