@@ -27,7 +27,7 @@ require (
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
 	github.com/lib/pq v1.8.0
 	github.com/mailru/easyjson v0.7.6
-	github.com/mholt/archiver/v3 v3.5.0
+	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.0.2-0.20190823105129-775207bd45b6
 	github.com/pborman/uuid v1.2.0

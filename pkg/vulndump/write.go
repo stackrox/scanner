@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mholt/archiver/v3"
+	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 	"github.com/stackrox/scanner/database"
 )
