@@ -199,8 +199,8 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	var rhelPackages []byte
 	var rhelfeatures *database.RHELv2Components
 
-	var isProvdedByPackageManager func(string) bool
-	var finishPackageManagerCheck func()
+	var filterFunc func(string) bool
+	finishFunc := func() {}
 
 	if namespace != nil && namespaces.IsRHELNamespace(namespace.Name) {
 		// This is a RHEL-based image that must be scanned in a certified manner.
@@ -222,10 +222,12 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		if parent != nil {
 			parentPackages = parent.RHELv2Packages
 		}
-		isProvdedByPackageManager, finishPackageManagerCheck, err = rhelv2.GetIsProvidedByRPMPackage(parentPackages)
+		var isProvdedByPackageManager func(string) bool
+		isProvdedByPackageManager, finishFunc, err = rhelv2.GetIsProvidedByRPMPackage(parentPackages)
 		if err != nil {
 			return nil, distroless, nil, nil, nil, nil, nil, err
 		}
+		filterFunc = analyzer.Not(isProvdedByPackageManager)
 	} else {
 		var err error
 		// Detect features.
@@ -241,8 +243,8 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	if !env.LanguageVulns.Enabled() {
 		return namespace, distroless, featureVersions, rhelPackages, rhelfeatures, nil, nil, nil
 	}
-	allComponents, err := analyzer.Analyze(files, isProvdedByPackageManager, analyzers.Analyzers())
-	finishPackageManagerCheck()
+	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers(), analyzer.AnalyzeOptions{FilterFn: filterFunc})
+	finishFunc()
 	if err != nil {
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
 	}

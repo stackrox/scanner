@@ -24,8 +24,8 @@ func match(fullPath string) bool {
 	return gemSpecRegexp.MatchString(fullPath)
 }
 
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap, _ func(string) bool) ([]*component.Component, error) {
-	return common.ExtractComponents(fileMap, match, parseGemSpec), nil
+func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap, opts analyzer.AnalyzeOptions) ([]*component.Component, error) {
+	return common.ExtractComponents(fileMap, match, parseGemSpec, opts), nil
 }
 
 func Analyzer() analyzer.Analyzer {

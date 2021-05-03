@@ -21,8 +21,8 @@ func match(fullPath string) bool {
 	return (strings.Contains(fullPath, "node_modules") || strings.Contains(fullPath, "nodejs")) && strings.HasSuffix(fullPath, "/package.json")
 }
 
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap, _ func(string) bool) ([]*component.Component, error) {
-	return common.ExtractComponents(fileMap, match, parsePackageJSON), nil
+func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap, opts analyzer.AnalyzeOptions) ([]*component.Component, error) {
+	return common.ExtractComponents(fileMap, match, parsePackageJSON, opts), nil
 }
 
 func Analyzer() analyzer.Analyzer {
