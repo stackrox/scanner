@@ -37,7 +37,7 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 		}
 		err := clair.ProcessLayerFromReader(storage, "Docker", layer, prevLayer, layerReadCloser, uncertifiedRHEL)
 		if err != nil {
-			logrus.Errorf("Error analyzing layer: %v", err)
+			logrus.Errorf("Error analyzing layer %s: %v", layer, err)
 			return err
 		}
 		prevLayer = layer

@@ -95,6 +95,7 @@ func TestRemovedComponents(t *testing.T) {
 			scanResp := scanDockerIOStackRoxImage(client, fmt.Sprintf("stackrox/vuln-images:%s-package-removal", c.distro), true, t)
 			scan, err := client.GetImageScan(context.Background(), &v1.GetImageScanRequest{
 				ImageSpec: scanResp.GetImage(),
+				UncertifiedRHEL: true,
 			})
 			require.NoError(t, err)
 
