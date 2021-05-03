@@ -112,6 +112,9 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
 func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, parentName string, reader io.ReadCloser, uncertifiedRHEL bool) error {
+	if uncertifiedRHEL {
+		name += "uncertified"
+	}
 	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName)
 	if err != nil {
 		return err
@@ -119,7 +122,6 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 	if exists {
 		return nil
 	}
-	// TODO: Read RHELv2 before analyzing?
 
 	// Analyze the content.
 	var rhelv2Components *database.RHELv2Components
@@ -147,14 +149,15 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 		if err := datastore.InsertRHELv2Layer(rhelv2Layer); err != nil {
 			return err
 		}
-	} else {
-		// This path for non-RHEL an uncertified RHEL scans.
-		if err := datastore.InsertLayer(layer); err != nil {
-			if err == commonerr.ErrNoNeedToInsert {
-				return nil
-			}
-			return err
+	}
+
+	// This is required for RHEL-base images as well, as language vuln scanning
+	// relies on the original layer table.
+	if err := datastore.InsertLayer(layer); err != nil {
+		if err == commonerr.ErrNoNeedToInsert {
+			return nil
 		}
+		return err
 	}
 
 	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedFiles)
