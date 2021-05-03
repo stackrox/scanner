@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mholt/archiver/v3"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/concurrency"
@@ -265,7 +264,7 @@ func loadApplicationUpdater(cache cache.Cache, manifest *Manifest, zipPath, scra
 			return nil
 		}
 		targetDir := cache.Dir()
-		if err := archiver.DefaultZip.Extract(zipPath, targetDir, scratchDir); err != nil {
+		if err := ziputil.Extract(zipPath, targetDir, scratchDir); err != nil {
 			log.WithError(err).Errorf("Failed to extract %s dump from ZIP", targetDir)
 			return err
 		}
