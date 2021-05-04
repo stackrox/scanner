@@ -1,6 +1,6 @@
 package pgsql
 
-// GetLayerByName fetches the latest layer for an image by the image SHA.
+// GetLayerBySHA fetches the latest layer for an image by the image SHA.
 func (pgSQL *pgSQL) GetLayerBySHA(sha string) (string, bool, error) {
 	rows, err := pgSQL.Query("SELECT layer FROM ImageToLayer WHERE sha = $1", sha)
 	if err != nil {

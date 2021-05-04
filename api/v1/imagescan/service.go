@@ -13,6 +13,7 @@ import (
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/rhel"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -76,7 +77,7 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 
 func (s *serviceImpl) getLayer(layerName string, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
 	if uncertifiedRHEL {
-		layerName += "uncertified"
+		layerName = rhel.GetUncertifiedLayerName(layerName)
 	}
 	dbLayer, err := s.db.FindLayer(layerName, true, true)
 	if err == commonerr.ErrNotFound {

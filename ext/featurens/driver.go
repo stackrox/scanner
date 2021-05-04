@@ -49,6 +49,14 @@ type DetectorOptions struct {
 	UncertifiedRHEL bool
 }
 
+func (do *DetectorOptions) GetUncertifiedRHEL() bool {
+	if do == nil {
+		return false
+	}
+
+	return do.UncertifiedRHEL
+}
+
 // RegisterDetector makes a detector available by the provided name.
 //
 // If called twice with the same name, the name is blank, or if the provided

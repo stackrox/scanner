@@ -25,6 +25,7 @@ import (
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/mtls"
+	"github.com/stackrox/scanner/pkg/rhel"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"github.com/stackrox/scanner/pkg/updater"
 	"google.golang.org/grpc/codes"
@@ -66,9 +67,9 @@ func clairError(w http.ResponseWriter, status int, err error) {
 	clairErrorString(w, status, err.Error())
 }
 
-func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, getUncertifiedRHEL bool) {
-	if getUncertifiedRHEL {
-		layerName += "uncertified"
+func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, uncertifiedRHEL bool) {
+	if uncertifiedRHEL {
+		layerName = rhel.GetUncertifiedLayerName(layerName)
 	}
 	dbLayer, err := s.storage.FindLayer(layerName, true, true)
 	if err == commonerr.ErrNotFound {
@@ -80,12 +81,12 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, getUncer
 		return
 	}
 
-	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, true, true, getUncertifiedRHEL)
+	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, true, true, uncertifiedRHEL)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
-	if getUncertifiedRHEL {
+	if uncertifiedRHEL {
 		layer.Name = strings.TrimSuffix(layerName, "uncertified")
 	}
 	env := &v1.LayerEnvelope{

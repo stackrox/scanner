@@ -10,10 +10,8 @@ import (
 	"database/sql"
 
 	"github.com/lib/pq"
-	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/pkg/commonerr"
 )
 
 func (pgSQL *pgSQL) InsertRHELv2Layer(layer *database.RHELv2Layer) error {
@@ -158,21 +156,4 @@ func (pgSQL *pgSQL) getPackagesByLayer(tx *sql.Tx, layer *database.RHELv2Layer) 
 	}
 
 	return rows.Err()
-}
-
-func (pgSQL *pgSQL) FindRHELv2Layer(name string) (database.Layer, error) {
-	row := pgSQL.QueryRow(searchRHELv2Layer, name)
-	var hash, dist string
-	err := row.Scan(&hash, &dist)
-	if err == sql.ErrNoRows {
-		return database.Layer{}, commonerr.ErrNotFound
-	}
-	if err != nil {
-		return database.Layer{}, errors.Wrapf(err, "searching for RHELv2 layer %s", name)
-	}
-
-	return database.Layer{
-		Name:      hash,
-		Namespace: &database.Namespace{Name: dist},
-	}, nil
 }

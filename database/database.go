@@ -121,9 +121,6 @@ type Datastore interface {
 	// InsertRHELv2Layer inserts a RHELv2 layer into the database.
 	InsertRHELv2Layer(*RHELv2Layer) error
 
-	// FindRHELv2Layer retrieves a Layer from the rhelv2_layer table.
-	FindRHELv2Layer(name string) (Layer, error)
-
 	// InsertVulnerabilities stores the given Vulnerabilities in the database,
 	// updating them if necessary.
 	//

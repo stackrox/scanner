@@ -161,12 +161,14 @@ func (m *Image) Clone() *Image {
 }
 
 type ScanImageRequest struct {
-	Image                string                         `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
-	Registry             *ScanImageRequest_RegistryData `protobuf:"bytes,2,opt,name=registry,proto3" json:"registry,omitempty"`
-	UncertifiedRHEL      bool                           `protobuf:"varint,3,opt,name=uncertifiedRHEL,proto3" json:"uncertifiedRHEL,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                       `json:"-"`
-	XXX_unrecognized     []byte                         `json:"-"`
-	XXX_sizecache        int32                          `json:"-"`
+	Image    string                         `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
+	Registry *ScanImageRequest_RegistryData `protobuf:"bytes,2,opt,name=registry,proto3" json:"registry,omitempty"`
+	// uncertifiedRHEL tells the Scanner to scan the image
+	// in an uncertified manner, if the image is RHEL-based.
+	UncertifiedRHEL      bool     `protobuf:"varint,3,opt,name=uncertifiedRHEL,proto3" json:"uncertifiedRHEL,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *ScanImageRequest) Reset()         { *m = ScanImageRequest{} }
@@ -461,11 +463,14 @@ func (m *ImageSpec) Clone() *ImageSpec {
 type GetImageScanRequest struct {
 	// Only one of the fields in ImageSpec needs to be set for the request to be properly formed
 	// If both are set, then digest is used
-	ImageSpec            *ImageSpec `protobuf:"bytes,1,opt,name=image_spec,json=imageSpec,proto3" json:"image_spec,omitempty"`
-	UncertifiedRHEL      bool       `protobuf:"varint,2,opt,name=uncertifiedRHEL,proto3" json:"uncertifiedRHEL,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
+	ImageSpec *ImageSpec `protobuf:"bytes,1,opt,name=image_spec,json=imageSpec,proto3" json:"image_spec,omitempty"`
+	// uncertifiedRHEL set to `true` tells the Scanner to
+	// return uncertified scan results for the given RHEL-based image
+	// (if the image is RHEL-based).
+	UncertifiedRHEL      bool     `protobuf:"varint,2,opt,name=uncertifiedRHEL,proto3" json:"uncertifiedRHEL,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *GetImageScanRequest) Reset()         { *m = GetImageScanRequest{} }

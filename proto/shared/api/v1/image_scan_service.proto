@@ -22,6 +22,8 @@ message ScanImageRequest {
         bool   insecure = 4;
     }
     RegistryData registry = 2;
+    // uncertifiedRHEL tells the Scanner to scan the image
+    // in an uncertified manner, if the image is RHEL-based.
     bool uncertifiedRHEL  = 3;
 }
 
@@ -39,6 +41,9 @@ message GetImageScanRequest {
     // Only one of the fields in ImageSpec needs to be set for the request to be properly formed
     // If both are set, then digest is used
     ImageSpec image_spec = 1;
+    // uncertifiedRHEL set to `true` tells the Scanner to
+    // return uncertified scan results for the given RHEL-based image
+    // (if the image is RHEL-based).
     bool uncertifiedRHEL = 2;
 }
 
