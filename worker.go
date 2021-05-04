@@ -196,11 +196,12 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	distroless := isDistroless(files) || (parent != nil && parent.Distroless)
 
 	var featureVersions []database.FeatureVersion
+	// rhelPackages contains the bytes of the RPM database.
 	var rhelPackages []byte
 	var rhelfeatures *database.RHELv2Components
 
-	var filterFunc func(string) bool
-	finishFunc := func() {}
+	// Language analyzer function to use.
+	languageAnalyzer := analyzer.Analyze
 
 	if namespace != nil && namespaces.IsRHELNamespace(namespace.Name) {
 		// This is a RHEL-based image that must be scanned in a certified manner.
@@ -218,16 +219,11 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 
 		log.WithFields(log.Fields{logLayerName: name, "rhel package count": len(packages), "rhel cpe count": len(cpes)}).Debug("detected rhelv2 features")
 
-		var parentPackages []byte
-		if parent != nil {
-			parentPackages = parent.RHELv2Packages
+		pkgDB := rhelPackages
+		if pkgDB == nil && parent != nil {
+			pkgDB = parent.RHELv2Packages
 		}
-		var isProvdedByPackageManager func(string) bool
-		isProvdedByPackageManager, finishFunc, err = rhelv2.GetIsProvidedByRPMPackage(parentPackages)
-		if err != nil {
-			return nil, distroless, nil, nil, nil, nil, nil, err
-		}
-		filterFunc = analyzer.Not(isProvdedByPackageManager)
+		languageAnalyzer = analyzer.WrapAnalyzeWithFilterFuncProducer(rhelv2.GetIsNotProvidedByRPMPackage, pkgDB)
 	} else {
 		var err error
 		// Detect features.
@@ -243,8 +239,8 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	if !env.LanguageVulns.Enabled() {
 		return namespace, distroless, featureVersions, rhelPackages, rhelfeatures, nil, nil, nil
 	}
-	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers(), analyzer.AnalyzeOptions{FilterFn: filterFunc})
-	finishFunc()
+
+	allComponents, err := languageAnalyzer(files, analyzers.Analyzers())
 	if err != nil {
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
 	}

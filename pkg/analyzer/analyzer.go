@@ -12,29 +12,61 @@ type Analyzer interface {
 	matcher.Matcher
 }
 
-type FilterFunc func(path string) bool
+// FilterFuncProducer is a function that takes in package database contents
+// and outputs a FilterFunc, finish func, and error.
+// The FilterFunc is meant to be used AnalyzeOptions.FilterFn.
+// The FinishFunc is meant to be called once the given database is no longer needed.
+// It is common for the FilterFunc to require the database to be open while it is used,
+// so the finish func should be called once all calls to the FilterFunc have completed.
+type FilterFuncProducer func([]byte) (func(string) bool, func(), error)
 
 type AnalyzeOptions struct {
-	// FilterFn takes in a file path and determines if the given file should be ignored by the analyzer.
-	// It is an additional filter to be used alongside the analyzer's own filtering process.
-	// When FilterFn returns true, the file is NOT ignored.
 	FilterFn FilterFunc
 }
 
-// Not takes in a FilterFunc and returns another FilterFunc
-// which would return the inverse for the given func.
-func Not(f FilterFunc) FilterFunc {
-	return func(path string) bool {
-		return !f(path)
+type AnalyzeOption interface {
+	apply(*AnalyzeOptions)
+}
+
+// FilterFunc takes in a file path and determines if the given file should be ignored by the analyzer.
+// It is an additional filter to be used alongside the analyzer's own filtering process.
+// When FilterFunc returns true, the file is NOT ignored.
+type FilterFunc func(path string) bool
+
+func (f FilterFunc) apply(o *AnalyzeOptions) {
+	o.FilterFn = f
+}
+
+// WithFilterFunc uses the given function as a FilterFunc.
+func WithFilterFunc(f func(path string) bool) AnalyzeOption {
+	return FilterFunc(f)
+}
+
+// WrapAnalyzeWithFilterFuncProducer takes in a FilterFuncProducer and packages database
+// and wraps it around a call to Analyze with the FilterFunc option set as the FilterFunc produced by the given producer.
+// The returned function acts as a replacement for Analyze.
+func WrapAnalyzeWithFilterFuncProducer(producer FilterFuncProducer, db []byte) func(tarutil.FilesMap, []Analyzer, ...AnalyzeOption) ([]*component.Component, error) {
+	return func(filesMap tarutil.FilesMap, analyzers []Analyzer, opts ...AnalyzeOption) ([]*component.Component, error) {
+		filterFn, finishFn, err := producer(db)
+		if err != nil {
+			return nil, err
+		}
+		defer finishFn()
+
+		return Analyze(filesMap, analyzers, append(opts, WithFilterFunc(filterFn))...)
 	}
 }
 
-func Analyze(filesMap tarutil.FilesMap, analyzers []Analyzer, opts AnalyzeOptions) ([]*component.Component, error) {
-	validateOptions(&opts)
+func Analyze(filesMap tarutil.FilesMap, analyzers []Analyzer, opts ...AnalyzeOption) ([]*component.Component, error) {
+	var o AnalyzeOptions
+	for _, opt := range opts {
+		opt.apply(&o)
+	}
+	validateOptions(&o)
 
 	var allComponents []*component.Component
 	for _, a := range analyzers {
-		components, err := a.Analyze(filesMap, opts)
+		components, err := a.Analyze(filesMap, o)
 		if err != nil {
 			return nil, err
 		}
