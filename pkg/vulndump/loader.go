@@ -198,32 +198,28 @@ func loadOSVulns(zipR *zip.ReadCloser, db database.Datastore) error {
 }
 
 func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCPE *repo2cpe.Mapping) error {
-	// scratch directory for RHELv2 contents.
-	destDir := filepath.Join(scratchDir, RHELv2DirName)
-	if err := os.MkdirAll(destDir, 0755); err != nil {
-		return errors.Wrap(err, "couldn't make scratch dir for RHELv2 vulns")
-	}
+	rhelv2Dir := filepath.Join(scratchDir, RHELv2DirName)
 
 	if repoToCPE != nil {
 		targetFile := filepath.Join(RHELv2DirName, repo2cpe.RHELv2CPERepoName)
-		if err := ziputil.Extract(zipPath, targetFile, destDir); err != nil {
+		if err := ziputil.Extract(zipPath, targetFile, scratchDir); err != nil {
 			log.WithError(err).Errorf("Failed to extract %s from ZIP", targetFile)
 			return err
 		}
-		if err := repoToCPE.Load(destDir); err != nil {
+		if err := repoToCPE.Load(rhelv2Dir); err != nil {
 			return errors.Wrapf(err, "couldn't update in mem repository-to-cpe.json copy")
 		}
 	}
 
 	// RHELv2 contents inside ZIP file.
 	targetDir := filepath.Join(RHELv2DirName, RHELv2VulnsSubDirName)
-	if err := ziputil.Extract(zipPath, targetDir, destDir); err != nil {
+	if err := ziputil.Extract(zipPath, targetDir, scratchDir); err != nil {
 		log.WithError(err).Errorf("Failed to extract %s dump from ZIP", targetDir)
 		return err
 	}
 
 	// Extracted RHELv2 vulns directory.
-	vulnDir := filepath.Join(destDir, RHELv2VulnsSubDirName)
+	vulnDir := filepath.Join(rhelv2Dir, RHELv2VulnsSubDirName)
 	files, err := os.ReadDir(vulnDir)
 	if err != nil {
 		return errors.Wrap(err, "reading scratch dir for RHELv2")
