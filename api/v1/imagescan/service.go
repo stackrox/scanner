@@ -51,6 +51,11 @@ func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.Ge
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to retrieve components from DB: %v", err)
 	}
+	if req.GetUncertifiedRHEL() {
+		for _, component := range components {
+			component.Layer = rhel.GetOriginalLayerName(component.Layer)
+		}
+	}
 	return &v1.GetLanguageLevelComponentsResponse{
 		LayerToComponents: convertComponents(components),
 	}, nil
