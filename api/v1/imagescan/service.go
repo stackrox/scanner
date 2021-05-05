@@ -118,20 +118,18 @@ func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec, uncertifi
 		return "", status.Error(codes.InvalidArgument, "either image or digest must be specified")
 	}
 
-	var layerFetcher func(s string) (string, bool, error)
+	var layerFetcher func(layer string, uncertifiedRHEL bool) (string, bool, error)
 	var argument string
 	if digest := imgSpec.GetDigest(); digest != "" {
 		logrus.Debugf("Getting layer SHA by digest %s", digest)
 		argument = digest
-		layerFetcher = func(layer string) (string, bool, error) {
-			return s.db.GetLayerBySHA(layer, uncertifiedRHEL)
-		}
+		layerFetcher = s.db.GetLayerBySHA
 	} else {
 		logrus.Debugf("Getting layer SHA by image %s", imgSpec.GetImage())
 		argument = imgSpec.GetImage()
 		layerFetcher = s.db.GetLayerByName
 	}
-	layerName, exists, err := layerFetcher(argument)
+	layerName, exists, err := layerFetcher(argument, uncertifiedRHEL)
 	if err != nil {
 		return "", err
 	}

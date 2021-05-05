@@ -16,8 +16,8 @@ func (pgSQL *pgSQL) GetLayerBySHA(sha string, uncertifiedRHEL bool) (string, boo
 }
 
 // GetLayerByName fetches the latest layer for an image by the image name.
-func (pgSQL *pgSQL) GetLayerByName(name string) (string, bool, error) {
-	rows, err := pgSQL.Query("SELECT layer FROM ImageToLayer WHERE name = $1", name)
+func (pgSQL *pgSQL) GetLayerByName(name string, uncertifiedRHEL bool) (string, bool, error) {
+	rows, err := pgSQL.Query("SELECT layer FROM ImageToLayer WHERE name = $1 AND uncertified_rhel = $2", name, uncertifiedRHEL)
 	if err != nil {
 		return "", false, err
 	}

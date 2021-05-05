@@ -148,8 +148,9 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
 	logrus.Debugf("Getting layer sha by name %s", image)
-	layer, exists, err := s.storage.GetLayerByName(image)
+	layer, exists, err := s.storage.GetLayerByName(image, uncertifiedRHEL)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return

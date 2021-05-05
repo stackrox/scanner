@@ -196,7 +196,7 @@ func (mds *MockDatastore) GetLayerBySHA(sha string, uncertifiedRHEL bool) (strin
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) GetLayerByName(name string) (string, bool, error) {
+func (mds *MockDatastore) GetLayerByName(name string, uncertifiedRHEL bool) (string, bool, error) {
 	panic("required mock function not implemented")
 }
 

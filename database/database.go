@@ -189,7 +189,7 @@ type Datastore interface {
 
 	// Image
 	GetLayerBySHA(sha string, uncertifiedRHEL bool) (string, bool, error)
-	GetLayerByName(name string) (string, bool, error)
+	GetLayerByName(name string, uncertifiedRHEL bool) (string, bool, error)
 	AddImage(layer string, digest, name string, uncertifiedRHEL bool) error
 	InsertLayerComponents(l string, c []*component.Component, r []string) error
 
