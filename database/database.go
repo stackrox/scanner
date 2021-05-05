@@ -121,9 +121,6 @@ type Datastore interface {
 	// InsertRHELv2Layer inserts a RHELv2 layer into the database.
 	InsertRHELv2Layer(*RHELv2Layer) error
 
-	// FindRHELv2Layer retrieves a Layer from the rhelv2_layer table.
-	FindRHELv2Layer(name string) (Layer, error)
-
 	// InsertVulnerabilities stores the given Vulnerabilities in the database,
 	// updating them if necessary.
 	//
@@ -191,9 +188,9 @@ type Datastore interface {
 	FindLock(name string) (string, time.Time, error)
 
 	// Image
-	GetLayerBySHA(sha string) (string, bool, error)
-	GetLayerByName(name string) (string, bool, error)
-	AddImage(layer string, digest, name string) error
+	GetLayerBySHA(sha string, uncertifiedRHEL bool) (string, bool, error)
+	GetLayerByName(name string, uncertifiedRHEL bool) (string, bool, error)
+	AddImage(layer string, digest, name string, uncertifiedRHEL bool) error
 	InsertLayerComponents(l string, c []*component.Component, r []string) error
 
 	GetLayerLanguageComponents(layer string) ([]*component.LayerToComponents, error)

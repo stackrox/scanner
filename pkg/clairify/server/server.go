@@ -25,6 +25,7 @@ import (
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/mtls"
+	"github.com/stackrox/scanner/pkg/rhel"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"github.com/stackrox/scanner/pkg/updater"
 	"google.golang.org/grpc/codes"
@@ -66,9 +67,9 @@ func clairError(w http.ResponseWriter, status int, err error) {
 	clairErrorString(w, status, err.Error())
 }
 
-func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, getUncertifiedRHEL bool) {
-	if getUncertifiedRHEL {
-		layerName += "uncertified"
+func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, uncertifiedRHEL bool) {
+	if uncertifiedRHEL {
+		layerName = rhel.GetUncertifiedLayerName(layerName)
 	}
 	dbLayer, err := s.storage.FindLayer(layerName, true, true)
 	if err == commonerr.ErrNotFound {
@@ -80,13 +81,13 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, getUncer
 		return
 	}
 
-	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, true, true, getUncertifiedRHEL)
+	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, true, true, uncertifiedRHEL)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
-	if getUncertifiedRHEL {
-		layer.Name = strings.TrimSuffix(layerName, "uncertified")
+	if uncertifiedRHEL {
+		layer.Name = rhel.GetOriginalLayerName(layerName)
 	}
 	env := &v1.LayerEnvelope{
 		Layer: &layer,
@@ -109,7 +110,8 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusBadRequest, "sha must be provided")
 		return
 	}
-	layer, exists, err := s.storage.GetLayerBySHA(sha)
+	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
+	layer, exists, err := s.storage.GetLayerBySHA(sha, uncertifiedRHEL)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
@@ -119,7 +121,7 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.getClairLayer(w, layer, getUncertifiedRHELResults(r.URL.Query()))
+	s.getClairLayer(w, layer, uncertifiedRHEL)
 }
 
 func parseImagePath(path string) (string, error) {
@@ -146,8 +148,9 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
 	logrus.Debugf("Getting layer sha by name %s", image)
-	layer, exists, err := s.storage.GetLayerByName(image)
+	layer, exists, err := s.storage.GetLayerByName(image, uncertifiedRHEL)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return

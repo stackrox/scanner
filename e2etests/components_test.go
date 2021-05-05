@@ -32,10 +32,11 @@ func TestPythonComponents(t *testing.T) {
 		ImageSpec: &v1.ImageSpec{
 			Digest: scanResp.GetImage().GetDigest(),
 		},
+		UncertifiedRHEL: true,
 	})
-	gotComponents := getComponentsResp.GetLayerToComponents()
 	assert.NoError(t, err)
 
+	gotComponents := getComponentsResp.GetLayerToComponents()
 	assert.Equal(t, len(anchoreComponents), len(gotComponents), "Didn't get the same number of layers: %s %s", spew.Sdump(anchoreComponents), spew.Sdump(gotComponents))
 
 	for layer, components := range anchoreComponents {

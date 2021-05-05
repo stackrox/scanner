@@ -1,8 +1,8 @@
 package pgsql
 
-// GetLayerByName fetches the latest layer for an image by the image SHA.
-func (pgSQL *pgSQL) GetLayerBySHA(sha string) (string, bool, error) {
-	rows, err := pgSQL.Query("SELECT layer FROM ImageToLayer WHERE sha = $1", sha)
+// GetLayerBySHA fetches the latest layer for an image by the image SHA.
+func (pgSQL *pgSQL) GetLayerBySHA(sha string, uncertifiedRHEL bool) (string, bool, error) {
+	rows, err := pgSQL.Query("SELECT layer FROM ImageToLayer WHERE sha = $1 AND uncertified_rhel = $2", sha, uncertifiedRHEL)
 	if err != nil {
 		return "", false, err
 	}
@@ -16,8 +16,8 @@ func (pgSQL *pgSQL) GetLayerBySHA(sha string) (string, bool, error) {
 }
 
 // GetLayerByName fetches the latest layer for an image by the image name.
-func (pgSQL *pgSQL) GetLayerByName(name string) (string, bool, error) {
-	rows, err := pgSQL.Query("SELECT layer FROM ImageToLayer WHERE name = $1", name)
+func (pgSQL *pgSQL) GetLayerByName(name string, uncertifiedRHEL bool) (string, bool, error) {
+	rows, err := pgSQL.Query("SELECT layer FROM ImageToLayer WHERE name = $1 AND uncertified_rhel = $2", name, uncertifiedRHEL)
 	if err != nil {
 		return "", false, err
 	}
@@ -32,8 +32,8 @@ func (pgSQL *pgSQL) GetLayerByName(name string) (string, bool, error) {
 
 // AddImage inserts an image and its latest layer into the database.
 // Duplicate entries are ignored.
-func (pgSQL *pgSQL) AddImage(layer string, digest, name string) error {
-	_, err := pgSQL.Exec(`INSERT INTO ImageToLayer(layer, name, sha)
-	VALUES ($1, $2, $3) ON CONFLICT DO NOTHING;`, layer, name, digest)
+func (pgSQL *pgSQL) AddImage(layer string, digest, name string, uncertifiedRHEL bool) error {
+	_, err := pgSQL.Exec(`INSERT INTO ImageToLayer(layer, name, sha, uncertified_rhel)
+	VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING;`, layer, name, digest, uncertifiedRHEL)
 	return err
 }

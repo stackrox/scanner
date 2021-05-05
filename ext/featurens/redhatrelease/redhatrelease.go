@@ -43,10 +43,6 @@ func init() {
 }
 
 func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions) *database.Namespace {
-	if opts == nil {
-		opts = new(featurens.DetectorOptions)
-	}
-
 	for _, filePath := range d.RequiredFilenames() {
 		f, hasFile := files[filePath]
 		if !hasFile {
@@ -81,7 +77,7 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 			namespace := &database.Namespace{
 				VersionFormat: rpm.ParserName,
 			}
-			if opts.UncertifiedRHEL {
+			if opts.GetUncertifiedRHEL() {
 				namespace.Name = "centos:" + r[3]
 			} else {
 				namespace.Name = "rhel:" + r[3]
