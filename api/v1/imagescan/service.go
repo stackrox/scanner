@@ -44,6 +44,9 @@ func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.Ge
 	if err != nil {
 		return nil, err
 	}
+	if req.GetUncertifiedRHEL() {
+		logrus.Debugf("Getting language level components for uncertified layer %s", layerName)
+	}
 	components, err := s.db.GetLayerLanguageComponents(layerName)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to retrieve components from DB: %v", err)
@@ -60,6 +63,10 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 	}
 
 	reg := req.GetRegistry()
+
+	if req.GetUncertifiedRHEL() {
+		logrus.Debugf("Triggering uncertified image scan for %s", image)
+	}
 
 	digest, err := server.ProcessImage(s.db, image, reg.GetUrl(), reg.GetUsername(), reg.GetPassword(), reg.GetInsecure(), req.GetUncertifiedRHEL())
 	if err != nil {
@@ -138,6 +145,9 @@ func (s *serviceImpl) GetImageScan(ctx context.Context, req *v1.GetImageScanRequ
 	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec(), req.GetUncertifiedRHEL())
 	if err != nil {
 		return nil, err
+	}
+	if req.GetUncertifiedRHEL() {
+		logrus.Debugf("Getting image scan for uncertified image layer %s", layerName)
 	}
 	return s.getLayer(layerName, req.GetUncertifiedRHEL())
 }
