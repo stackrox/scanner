@@ -136,6 +136,9 @@ func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec, uncertifi
 	if !exists {
 		return "", status.Errorf(codes.NotFound, "image with reference %q not found", argument)
 	}
+	if uncertifiedRHEL {
+		layerName = rhel.GetUncertifiedLayerName(layerName)
+	}
 	return layerName, nil
 }
 
