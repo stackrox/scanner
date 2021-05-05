@@ -192,7 +192,7 @@ func (mds *MockDatastore) Close() {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) GetLayerBySHA(sha string) (string, bool, error) {
+func (mds *MockDatastore) GetLayerBySHA(sha string, uncertifiedRHEL bool) (string, bool, error) {
 	panic("required mock function not implemented")
 }
 
@@ -200,7 +200,7 @@ func (mds *MockDatastore) GetLayerByName(name string) (string, bool, error) {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) AddImage(layer string, digest, name string) error {
+func (mds *MockDatastore) AddImage(layer string, digest, name string, uncertifiedRHEL bool) error {
 	panic("required mock function not implemented")
 }
 

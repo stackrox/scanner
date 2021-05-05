@@ -40,7 +40,7 @@ type serviceImpl struct {
 }
 
 func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
-	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec())
+	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec(), req.GetUncertifiedRHEL())
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (s *serviceImpl) getLayer(layerName string, uncertifiedRHEL bool) (*v1.GetI
 	}, nil
 }
 
-func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec) (string, error) {
+func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec, uncertifiedRHEL bool) (string, error) {
 	if stringutils.AllEmpty(imgSpec.GetImage(), imgSpec.GetDigest()) {
 		return "", status.Error(codes.InvalidArgument, "either image or digest must be specified")
 	}
@@ -116,7 +116,9 @@ func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec) (string, 
 	if digest := imgSpec.GetDigest(); digest != "" {
 		logrus.Debugf("Getting layer SHA by digest %s", digest)
 		argument = digest
-		layerFetcher = s.db.GetLayerBySHA
+		layerFetcher = func(layer string) (string, bool, error) {
+			return s.db.GetLayerBySHA(layer, uncertifiedRHEL)
+		}
 	} else {
 		logrus.Debugf("Getting layer SHA by image %s", imgSpec.GetImage())
 		argument = imgSpec.GetImage()
@@ -133,7 +135,7 @@ func (s *serviceImpl) getLayerNameFromImageSpec(imgSpec *v1.ImageSpec) (string, 
 }
 
 func (s *serviceImpl) GetImageScan(ctx context.Context, req *v1.GetImageScanRequest) (*v1.GetImageScanResponse, error) {
-	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec())
+	layerName, err := s.getLayerNameFromImageSpec(req.GetImageSpec(), req.GetUncertifiedRHEL())
 	if err != nil {
 		return nil, err
 	}

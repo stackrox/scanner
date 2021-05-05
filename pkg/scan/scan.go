@@ -65,7 +65,7 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 	if image.SHA == "" {
 		image.SHA = digest
 	}
-	return digest, storage.AddImage(layer, image.SHA, image.TaggedName())
+	return digest, storage.AddImage(layer, image.SHA, image.TaggedName(), uncertifiedRHEL)
 }
 
 func process(storage database.Datastore, image *types.Image, reg types.Registry, uncertifiedRHEL bool) (string, string, error) {

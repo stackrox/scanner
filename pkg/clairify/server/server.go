@@ -110,7 +110,8 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusBadRequest, "sha must be provided")
 		return
 	}
-	layer, exists, err := s.storage.GetLayerBySHA(sha)
+	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
+	layer, exists, err := s.storage.GetLayerBySHA(sha, uncertifiedRHEL)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return

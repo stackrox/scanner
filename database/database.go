@@ -188,9 +188,9 @@ type Datastore interface {
 	FindLock(name string) (string, time.Time, error)
 
 	// Image
-	GetLayerBySHA(sha string) (string, bool, error)
+	GetLayerBySHA(sha string, uncertifiedRHEL bool) (string, bool, error)
 	GetLayerByName(name string) (string, bool, error)
-	AddImage(layer string, digest, name string) error
+	AddImage(layer string, digest, name string, uncertifiedRHEL bool) error
 	InsertLayerComponents(l string, c []*component.Component, r []string) error
 
 	GetLayerLanguageComponents(layer string) ([]*component.LayerToComponents, error)
