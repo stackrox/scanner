@@ -32,6 +32,7 @@ func TestPythonComponents(t *testing.T) {
 		ImageSpec: &v1.ImageSpec{
 			Digest: scanResp.GetImage().GetDigest(),
 		},
+		UncertifiedRHEL: true,
 	})
 	gotComponents := getComponentsResp.GetLayerToComponents()
 	assert.NoError(t, err)
