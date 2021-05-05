@@ -87,7 +87,7 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, uncertif
 		return
 	}
 	if uncertifiedRHEL {
-		layer.Name = strings.TrimSuffix(layerName, "uncertified")
+		layer.Name = rhel.GetOriginalLayerName(layerName)
 	}
 	env := &v1.LayerEnvelope{
 		Layer: &layer,
@@ -121,7 +121,7 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.getClairLayer(w, layer, getUncertifiedRHELResults(r.URL.Query()))
+	s.getClairLayer(w, layer, uncertifiedRHEL)
 }
 
 func parseImagePath(path string) (string, error) {
