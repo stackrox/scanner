@@ -16,7 +16,6 @@ import (
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/types"
-	"github.com/stackrox/scanner/pkg/rhel"
 )
 
 const (
@@ -26,16 +25,12 @@ const (
 func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string, uncertifiedRHEL bool) error {
 	var prevLayer string
 	for _, layer := range layers {
-		layerDigest := digest.Digest(layer)
 		layerReadCloser := &layerDownloadReadCloser{
 			downloader: func() (io.ReadCloser, error) {
-				return registry.DownloadLayer(image.Remote, layerDigest)
+				return registry.DownloadLayer(image.Remote, digest.Digest(layer))
 			},
 		}
 
-		if uncertifiedRHEL {
-			layer = rhel.GetUncertifiedLayerName(layer)
-		}
 		err := clair.ProcessLayerFromReader(storage, "Docker", layer, prevLayer, layerReadCloser, uncertifiedRHEL)
 		if err != nil {
 			logrus.Errorf("Error analyzing layer %s: %v", layer, err)
@@ -65,7 +60,9 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 	if image.SHA == "" {
 		image.SHA = digest
 	}
-	return digest, storage.AddImage(layer, image.SHA, image.TaggedName(), uncertifiedRHEL)
+	return digest, storage.AddImage(layer, image.SHA, image.TaggedName(), &database.DatastoreOptions{
+		UncertifiedRHEL: uncertifiedRHEL,
+	})
 }
 
 func process(storage database.Datastore, image *types.Image, reg types.Registry, uncertifiedRHEL bool) (string, string, error) {

@@ -68,10 +68,12 @@ func clairError(w http.ResponseWriter, status int, err error) {
 }
 
 func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, uncertifiedRHEL bool) {
-	if uncertifiedRHEL {
-		layerName = rhel.GetUncertifiedLayerName(layerName)
+	opts := &database.DatastoreOptions{
+		WithVulnerabilities: true,
+		WithFeatures:        true,
+		UncertifiedRHEL:     uncertifiedRHEL,
 	}
-	dbLayer, err := s.storage.FindLayer(layerName, true, true)
+	dbLayer, err := s.storage.FindLayer(layerName, opts)
 	if err == commonerr.ErrNotFound {
 		clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layerName)
 		return
@@ -81,7 +83,7 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, uncertif
 		return
 	}
 
-	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, true, true, uncertifiedRHEL)
+	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, opts)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
@@ -111,7 +113,9 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
-	layer, exists, err := s.storage.GetLayerBySHA(sha, uncertifiedRHEL)
+	layer, exists, err := s.storage.GetLayerBySHA(sha, &database.DatastoreOptions{
+		UncertifiedRHEL: uncertifiedRHEL,
+	})
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
@@ -150,7 +154,9 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 	}
 	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
 	logrus.Debugf("Getting layer sha by name %s", image)
-	layer, exists, err := s.storage.GetLayerByName(image, uncertifiedRHEL)
+	layer, exists, err := s.storage.GetLayerByName(image, &database.DatastoreOptions{
+		UncertifiedRHEL: uncertifiedRHEL,
+	})
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
@@ -160,7 +166,7 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.getClairLayer(w, layer, getUncertifiedRHELResults(r.URL.Query()))
+	s.getClairLayer(w, layer, uncertifiedRHEL)
 }
 
 func getUncertifiedRHELResults(queryValues url.Values) bool {
