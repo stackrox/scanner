@@ -69,8 +69,10 @@ type Layer struct {
 // A known issue is if a file defines multiple features, and the file is modified between layers in a way
 // that does affect the features it describes (adds, updates, or removes features), which is currently only a
 // concern for the Java source type. However, this event is unlikely, which is why it is not considered at this time.
-func getLanguageData(db database.Datastore, layerName string) ([]database.FeatureVersion, error) {
-	layersToComponents, err := db.GetLayerLanguageComponents(layerName)
+func getLanguageData(db database.Datastore, layerName string, uncertifiedRHEL bool) ([]database.FeatureVersion, error) {
+	layersToComponents, err := db.GetLayerLanguageComponents(layerName, &database.DatastoreOptions{
+		UncertifiedRHEL: uncertifiedRHEL,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -208,9 +210,9 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 
 // addLanguageVulns adds language-based features into the given layer.
 // Assumes layer is not nil.
-func addLanguageVulns(db database.Datastore, layer *Layer) {
+func addLanguageVulns(db database.Datastore, layer *Layer, uncertifiedRHEL bool) {
 	// Add Language Features
-	languageFeatureVersions, err := getLanguageData(db, layer.Name)
+	languageFeatureVersions, err := getLanguageData(db, layer.Name, uncertifiedRHEL)
 	if err != nil {
 		log.Errorf("error getting language data: %v", err)
 		return
@@ -227,7 +229,11 @@ func addLanguageVulns(db database.Datastore, layer *Layer) {
 	layer.Features = append(layer.Features, languageFeatures...)
 }
 
-func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, []Note, error) {
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, opts *database.DatastoreOptions) (Layer, []Note, error) {
+	withFeatures := opts.GetWithFeatures()
+	withVulnerabilities := opts.GetWithVulnerabilities()
+	uncertifiedRHEL := opts.GetUncertifiedRHEL()
+
 	layer := Layer{
 		Name:             dbLayer.Name,
 		IndexedByVersion: dbLayer.EngineVersion,
@@ -274,7 +280,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 			}
 		}
 		if env.LanguageVulns.Enabled() {
-			addLanguageVulns(db, &layer)
+			addLanguageVulns(db, &layer, uncertifiedRHEL)
 		}
 	}
 

@@ -35,7 +35,7 @@ func init() {
 	featurens.RegisterDetector("apt-sources", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
+func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
 	f, hasFile := files["etc/apt/sources.list"]
 	if !hasFile {
 		return nil
