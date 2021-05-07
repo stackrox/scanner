@@ -78,8 +78,8 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 
 func (s *serviceImpl) getLayer(layerName string, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
 	opts := &database.DatastoreOptions{
-		WithVulnerabilities: true,
 		WithFeatures:        true,
+		WithVulnerabilities: true,
 		UncertifiedRHEL:     uncertifiedRHEL,
 	}
 

@@ -4,7 +4,7 @@ package database
 type DatastoreOptions struct {
 	// WithFeatures is a read-only option.
 	// `true` indicates the Features field should be filled.
-	WithFeatures        bool
+	WithFeatures bool
 	// WithVulnerabilities is a read-only option.
 	// `true` means the Features field should be filled
 	// and their AffectedBy fields should contain every vulnerabilities that
@@ -12,7 +12,7 @@ type DatastoreOptions struct {
 	WithVulnerabilities bool
 	// UncertifiedRHEL indicates the returned results should be for an
 	// uncertified RHEL layer, if the layer's namespace is RHEL.
-	UncertifiedRHEL     bool
+	UncertifiedRHEL bool
 }
 
 func (o *DatastoreOptions) GetWithFeatures() bool {
