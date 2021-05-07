@@ -30,10 +30,13 @@ func addVersion(c *component.Component) {
 	c.Version = stringutils.FirstNonEmpty(c.JavaPkgMetadata.MavenVersion, c.JavaPkgMetadata.ImplementationVersion, c.JavaPkgMetadata.SpecificationVersion)
 }
 
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
+func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap, opts analyzer.AnalyzeOptions) ([]*component.Component, error) {
 	var allComponents []*component.Component
 	for filePath, contents := range fileMap {
 		if !match(filePath) || len(contents) == 0 {
+			continue
+		}
+		if !opts.FilterFn(filePath) {
 			continue
 		}
 		if filterComponent(filepath.Base(filePath)) {

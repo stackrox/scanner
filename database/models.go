@@ -38,6 +38,12 @@ type Layer struct {
 	Namespace     *Namespace
 	Distroless    bool
 	Features      []FeatureVersion
+
+	// RHELv2Packages is here for Red Hat Certification Scanning purposes.
+	// It tracks the contents of the rpm packages DB to be used in layers
+	// above the layer which populates the database.
+	// This is not added to the database, as there is no need to store it.
+	RHELv2Packages []byte
 }
 
 type Namespace struct {

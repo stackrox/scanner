@@ -38,6 +38,7 @@ const (
 	queryFmtTest = `%{name}\n` +
 		`%{evr}\n` +
 		`%{ARCH}\n` +
+		`(none)\n` +
 		`.\n`
 
 	delim = "\n.\n"
@@ -53,30 +54,31 @@ var (
 // ListFeatures returns the features found from the given files.
 // returns a slice of packages found via rpm and a slice of CPEs found in
 // /root/buildinfo/content_manifests.
-func ListFeatures(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
+func ListFeatures(files tarutil.FilesMap) ([]byte, []*database.RHELv2Package, []string, error) {
 	return listFeatures(files, queryFmt)
 }
 
 func ListFeaturesTest(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
-	return listFeatures(files, queryFmtTest)
+	_, pkgs, cpes, err := listFeatures(files, queryFmtTest)
+	return pkgs, cpes, err
 }
 
-func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Package, []string, error) {
+func listFeatures(files tarutil.FilesMap, queryFmt string) ([]byte, []*database.RHELv2Package, []string, error) {
 	cpes, err := getCPEsUsingEmbeddedContentSets(files)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	f, hasFile := files[packages]
 	if !hasFile {
-		return nil, cpes, nil
+		return nil, nil, cpes, nil
 	}
 
 	// Write the required "Packages" file to disk
 	tmpDir, err := os.MkdirTemp("", "rpm")
 	if err != nil {
 		log.WithError(err).Error("could not create temporary folder for RPM detection")
-		return nil, nil, commonerr.ErrFilesystem
+		return nil, nil, nil, commonerr.ErrFilesystem
 	}
 	defer func() {
 		_ = os.RemoveAll(tmpDir)
@@ -85,7 +87,7 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 	err = os.WriteFile(tmpDir+"/Packages", f, 0700)
 	if err != nil {
 		log.WithError(err).Error("could not create temporary file for RPM detection")
-		return nil, nil, commonerr.ErrFilesystem
+		return nil, nil, nil, commonerr.ErrFilesystem
 	}
 
 	cmd := exec.Command("rpm",
@@ -93,15 +95,15 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 		`--query`, `--all`, `--queryformat`, queryFmt)
 	r, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	var errbuf bytes.Buffer
 	cmd.Stderr = &errbuf
 
 	if err := cmd.Start(); err != nil {
-		_ = r.Close()
-		return nil, nil, err
+		utils.IgnoreError(r.Close)
+		return nil, nil, nil, err
 	}
 
 	var pkgs []*database.RHELv2Package
@@ -129,14 +131,14 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 		if errbuf.Len() != 0 {
 			log.Warnf("Error executing RPM command: %s", errbuf.String())
 		}
-		return nil, nil, errors.Errorf("rpm: error reading rpm output: %v", err)
+		return nil, nil, nil, errors.Errorf("rpm: error reading rpm output: %v", err)
 	}
 
 	if err := cmd.Wait(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return pkgs, cpes, nil
+	return f, pkgs, cpes, nil
 }
 
 func querySplit(data []byte, atEOF bool) (advance int, token []byte, err error) {
@@ -226,6 +228,54 @@ func getContentManifestFileContents(files tarutil.FilesMap) []byte {
 	}
 
 	return nil
+}
+
+// GetIsNotProvidedByRPMPackage uses the given package contents (expected to be an RPM Berkeley DB)
+// to return:
+// * a function which returns if the given file path is not provided by an RPM package.
+// * a function to be called once the package contents are no longer needed which cleans up any used resources.
+// * an error.
+func GetIsNotProvidedByRPMPackage(packagesContents []byte) (func(string) bool, func(), error) {
+	if packagesContents == nil {
+		// Default return always says the given path is not provided by an RPM package.
+		return func(string) bool { return true }, func() {}, nil
+	}
+
+	// Write the required "Packages" file to disk
+	tmpDir, err := os.MkdirTemp("", "rpm")
+	if err != nil {
+		log.WithError(err).Error("could not create temporary folder for RPM detection")
+		return nil, nil, err
+	}
+
+	err = os.WriteFile(tmpDir+"/Packages", packagesContents, 0700)
+	if err != nil {
+		log.WithError(err).Error("could not create temporary file for RPM detection")
+		return nil, nil, err
+	}
+
+	return func(path string) bool {
+		cmd := exec.Command("rpm",
+			`--dbpath`, tmpDir,
+			`-q`, `--whatprovides`, path)
+
+		if err := cmd.Run(); err != nil {
+			// When an RPM package does not provide a file, the expected output has
+			// status code 1.
+			if exitError, ok := err.(*exec.ExitError); ok && exitError.ExitCode() == 1 {
+				// RPM does NOT provide this package.
+				return true
+			}
+
+			log.WithError(err).Errorf("unexpected error when determining if %s belongs to an RPM package", path)
+			// Upon error, say no RPM package provides this file.
+			return true
+		}
+
+		// The command exited properly, which implies the file IS provided by an RPM package.
+		return false
+
+	}, func() { _ = os.RemoveAll(tmpDir) }, nil
 }
 
 func RequiredFilenames() []string {
