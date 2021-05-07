@@ -312,6 +312,10 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer, opts *database.DatastoreOp
 		}
 	}
 
+	if opts.GetUncertifiedRHEL() {
+		layer.Name = rhel.GetUncertifiedLayerName(layer.Name)
+	}
+
 	return pgSQL.insertLayerTx(&layer, namespaceID, parentID)
 }
 

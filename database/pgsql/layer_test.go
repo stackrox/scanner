@@ -36,7 +36,7 @@ func TestFindLayer(t *testing.T) {
 	defer datastore.Close()
 
 	// Layer-0: no parent, no namespace, no feature, no vulnerability
-	layer, err := datastore.FindLayer("layer-0", false, false)
+	layer, err := datastore.FindLayer("layer-0", nil)
 	if assert.Nil(t, err) && assert.NotNil(t, layer) {
 		assert.Equal(t, "layer-0", layer.Name)
 		assert.Nil(t, layer.Namespace)
@@ -45,13 +45,13 @@ func TestFindLayer(t *testing.T) {
 		assert.Len(t, layer.Features, 0)
 	}
 
-	layer, err = datastore.FindLayer("layer-0", true, false)
+	layer, err = datastore.FindLayer("layer-0", &database.DatastoreOptions{WithFeatures: true})
 	if assert.Nil(t, err) && assert.NotNil(t, layer) {
 		assert.Len(t, layer.Features, 0)
 	}
 
 	// Layer-1: one parent, adds two features, one vulnerability
-	layer, err = datastore.FindLayer("layer-1", false, false)
+	layer, err = datastore.FindLayer("layer-1", nil)
 	if assert.Nil(t, err) && assert.NotNil(t, layer) {
 		assert.Equal(t, layer.Name, "layer-1")
 		assert.Equal(t, "debian:7", layer.Namespace.Name)
@@ -62,7 +62,7 @@ func TestFindLayer(t *testing.T) {
 		assert.Len(t, layer.Features, 0)
 	}
 
-	layer, err = datastore.FindLayer("layer-1", true, false)
+	layer, err = datastore.FindLayer("layer-1", &database.DatastoreOptions{WithFeatures: true})
 	if assert.Nil(t, err) && assert.NotNil(t, layer) && assert.Len(t, layer.Features, 2) {
 		for _, featureVersion := range layer.Features {
 			assert.Equal(t, "debian:7", featureVersion.Feature.Namespace.Name)
@@ -78,7 +78,7 @@ func TestFindLayer(t *testing.T) {
 		}
 	}
 
-	layer, err = datastore.FindLayer("layer-1", true, true)
+	layer, err = datastore.FindLayer("layer-1", &database.DatastoreOptions{WithFeatures: true, WithVulnerabilities: true})
 	if assert.Nil(t, err) && assert.NotNil(t, layer) && assert.Len(t, layer.Features, 2) {
 		for _, featureVersion := range layer.Features {
 			assert.Equal(t, "debian:7", featureVersion.Feature.Namespace.Name)
@@ -130,7 +130,7 @@ func testInsertLayerInvalid(t *testing.T, datastore database.Datastore) {
 	}
 
 	for _, invalidLayer := range invalidLayers {
-		err := datastore.InsertLayer(invalidLayer)
+		err := datastore.InsertLayer(invalidLayer, nil)
 		assert.Error(t, err)
 	}
 }
@@ -256,10 +256,10 @@ func testInsertLayerTree(t *testing.T, datastore database.Datastore) {
 			layer.Parent = &parent
 		}
 
-		err = datastore.InsertLayer(layer)
+		err = datastore.InsertLayer(layer, nil)
 		assert.Nil(t, err)
 
-		retrievedLayers[layer.Name], err = datastore.FindLayer(layer.Name, true, false)
+		retrievedLayers[layer.Name], err = datastore.FindLayer(layer.Name, &database.DatastoreOptions{WithFeatures: true})
 		assert.Nil(t, err)
 	}
 
@@ -306,7 +306,7 @@ func testInsertLayerUpdate(t *testing.T, datastore database.Datastore) {
 		Version: "0.01",
 	}
 
-	l3, _ := datastore.FindLayer("TestInsertLayer3", true, false)
+	l3, _ := datastore.FindLayer("TestInsertLayer3", &database.DatastoreOptions{WithFeatures: true})
 	l3u := database.Layer{
 		Name:   l3.Name,
 		Parent: l3.Parent,
@@ -325,11 +325,11 @@ func testInsertLayerUpdate(t *testing.T, datastore database.Datastore) {
 	}
 
 	// Try to re-insert without increasing the EngineVersion.
-	err := datastore.InsertLayer(l3u)
+	err := datastore.InsertLayer(l3u, nil)
 	assert.Error(t, err)
 	assert.Equal(t, commonerr.ErrNoNeedToInsert, err)
 
-	l3uf, err := datastore.FindLayer(l3u.Name, true, false)
+	l3uf, err := datastore.FindLayer(l3u.Name, &database.DatastoreOptions{WithFeatures: true})
 	if assert.Nil(t, err) {
 		assert.Equal(t, l3.Namespace.Name, l3uf.Namespace.Name)
 		assert.Equal(t, l3.EngineVersion, l3uf.EngineVersion)
@@ -339,10 +339,10 @@ func testInsertLayerUpdate(t *testing.T, datastore database.Datastore) {
 	// Update layer l3.
 	// Verify that the Namespace, EngineVersion and FeatureVersions got updated.
 	l3u.EngineVersion = 2
-	err = datastore.InsertLayer(l3u)
+	err = datastore.InsertLayer(l3u, nil)
 	assert.Nil(t, err)
 
-	l3uf, err = datastore.FindLayer(l3u.Name, true, false)
+	l3uf, err = datastore.FindLayer(l3u.Name, &database.DatastoreOptions{WithFeatures: true})
 	if assert.Nil(t, err) {
 		assert.Equal(t, l3u.Namespace.Name, l3uf.Namespace.Name)
 		assert.Equal(t, l3u.EngineVersion, l3uf.EngineVersion)
@@ -355,10 +355,10 @@ func testInsertLayerUpdate(t *testing.T, datastore database.Datastore) {
 	// Verify that the Namespace got updated from its new Parent's, and also verify the
 	// EnginVersion and FeatureVersions.
 	l4u.Parent = &l3uf
-	err = datastore.InsertLayer(l4u)
+	err = datastore.InsertLayer(l4u, nil)
 	assert.Nil(t, err)
 
-	l4uf, err := datastore.FindLayer(l3u.Name, true, false)
+	l4uf, err := datastore.FindLayer(l3u.Name, &database.DatastoreOptions{WithFeatures: true})
 	if assert.Nil(t, err) {
 		assert.Equal(t, l3u.Namespace.Name, l4uf.Namespace.Name)
 		assert.Equal(t, l4u.EngineVersion, l4uf.EngineVersion)
