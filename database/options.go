@@ -10,8 +10,10 @@ type DatastoreOptions struct {
 	// and their AffectedBy fields should contain every vulnerabilities that
 	// affect them.
 	WithVulnerabilities bool
-	// UncertifiedRHEL indicates the returned results should be for an
+	// UncertifiedRHEL indicates the returned read results should be for an
 	// uncertified RHEL layer, if the layer's namespace is RHEL.
+	// For writes, it indicates the given input should be added to the database
+	// as an uncertified entry.
 	UncertifiedRHEL bool
 }
 
