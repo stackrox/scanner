@@ -16,7 +16,6 @@ package clair
 
 import (
 	"fmt"
-	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 	"io"
 	"path/filepath"
 	"regexp"
@@ -34,6 +33,7 @@ import (
 	featureFlags "github.com/stackrox/scanner/pkg/features"
 	rhelv2 "github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 	"github.com/stackrox/scanner/pkg/whiteout"
 	"github.com/stackrox/scanner/singletons/analyzers"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
