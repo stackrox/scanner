@@ -111,13 +111,15 @@ func analyzeLocalImage(path string) {
 	}
 	fmt.Println(namespace)
 	var total time.Duration
+	var prevRHELv2Packages []byte
 	for _, l := range config.Layers {
 		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l]))
-		_, _, _, _, rhelv2Components, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace}, false)
+		_, _, _, rhelv2Packages, rhelv2Components, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace, RHELv2Packages: prevRHELv2Packages}, false)
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
+		prevRHELv2Packages = rhelv2Packages
 
 		if rhelv2Components != nil {
 			fmt.Printf("RHELv2 Components (%d): %s\n", len(rhelv2Components.Packages), rhelv2Components)

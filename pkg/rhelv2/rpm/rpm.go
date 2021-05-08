@@ -230,54 +230,6 @@ func getContentManifestFileContents(files tarutil.FilesMap) []byte {
 	return nil
 }
 
-// GetIsNotProvidedByRPMPackage uses the given package contents (expected to be an RPM Berkeley DB)
-// to return:
-// * a function which returns if the given file path is not provided by an RPM package.
-// * a function to be called once the package contents are no longer needed which cleans up any used resources.
-// * an error.
-func GetIsNotProvidedByRPMPackage(packagesContents []byte) (func(string) bool, func(), error) {
-	if packagesContents == nil {
-		// Default return always says the given path is not provided by an RPM package.
-		return func(string) bool { return true }, func() {}, nil
-	}
-
-	// Write the required "Packages" file to disk
-	tmpDir, err := os.MkdirTemp("", "rpm")
-	if err != nil {
-		log.WithError(err).Error("could not create temporary folder for RPM detection")
-		return nil, nil, err
-	}
-
-	err = os.WriteFile(tmpDir+"/Packages", packagesContents, 0700)
-	if err != nil {
-		log.WithError(err).Error("could not create temporary file for RPM detection")
-		return nil, nil, err
-	}
-
-	return func(path string) bool {
-		cmd := exec.Command("rpm",
-			`--dbpath`, tmpDir,
-			`-q`, `--whatprovides`, path)
-
-		if err := cmd.Run(); err != nil {
-			// When an RPM package does not provide a file, the expected output has
-			// status code 1.
-			if exitError, ok := err.(*exec.ExitError); ok && exitError.ExitCode() == 1 {
-				// RPM does NOT provide this package.
-				return true
-			}
-
-			log.WithError(err).Errorf("unexpected error when determining if %s belongs to an RPM package", path)
-			// Upon error, say no RPM package provides this file.
-			return true
-		}
-
-		// The command exited properly, which implies the file IS provided by an RPM package.
-		return false
-
-	}, func() { _ = os.RemoveAll(tmpDir) }, nil
-}
-
 func RequiredFilenames() []string {
 	return []string{packages, contentManifests}
 }
