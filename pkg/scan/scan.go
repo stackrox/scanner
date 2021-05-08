@@ -24,6 +24,7 @@ const (
 
 func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string, uncertifiedRHEL bool) error {
 	var prevLayer string
+	var prevRHELv2Packages []byte
 	for _, layer := range layers {
 		layerReadCloser := &layerDownloadReadCloser{
 			downloader: func() (io.ReadCloser, error) {
@@ -31,7 +32,12 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 			},
 		}
 
-		err := clair.ProcessLayerFromReader(storage, "Docker", layer, prevLayer, layerReadCloser, uncertifiedRHEL)
+		var err error
+		parentLayer := clair.ParentLayer{
+			Name:           prevLayer,
+			RHELv2Packages: prevRHELv2Packages,
+		}
+		prevRHELv2Packages, err = clair.ProcessLayerFromReader(storage, "Docker", layer, parentLayer, layerReadCloser, uncertifiedRHEL)
 		if err != nil {
 			logrus.Errorf("Error analyzing layer: %v", err)
 			return err

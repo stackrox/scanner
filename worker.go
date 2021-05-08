@@ -112,27 +112,37 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 	return layer, false, nil
 }
 
+type ParentLayer struct {
+	Name           string
+	RHELv2Packages []byte
+}
+
 // ProcessLayerFromReader detects the Namespace of a layer, the features it adds/removes,
 // and then stores everything in the database.
 //
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
-func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, parentName string, reader io.ReadCloser, uncertifiedRHEL bool) error {
-	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName, uncertifiedRHEL)
+func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name string, parent ParentLayer, reader io.ReadCloser, uncertifiedRHEL bool) ([]byte, error) {
+	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parent.Name, uncertifiedRHEL)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if exists {
-		return nil
+		return nil, nil
+	}
+
+	if layer.Parent != nil {
+		layer.Parent.RHELv2Packages = parent.RHELv2Packages
 	}
 
 	// Analyze the content.
+	var rhelv2Packages []byte
 	var rhelv2Components *database.RHELv2Components
 	var languageComponents []*component.Component
 	var removedFiles []string
-	layer.Namespace, layer.Distroless, layer.Features, layer.RHELv2Packages, rhelv2Components, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent, uncertifiedRHEL)
+	layer.Namespace, layer.Distroless, layer.Features, rhelv2Packages, rhelv2Components, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent, uncertifiedRHEL)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if rhelv2Components != nil {
@@ -150,7 +160,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 		}
 
 		if err := datastore.InsertRHELv2Layer(rhelv2Layer); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -162,12 +172,12 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 	// relies on the original layer table.
 	if err := datastore.InsertLayer(layer, opts); err != nil {
 		if err == commonerr.ErrNoNeedToInsert {
-			return nil
+			return nil, nil
 		}
-		return err
+		return nil, err
 	}
 
-	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedFiles, opts)
+	return rhelv2Packages, datastore.InsertLayerComponents(layer.Name, languageComponents, removedFiles, opts)
 }
 
 // ProcessLayer detects the Namespace of a layer, the features it adds/removes,
