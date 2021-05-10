@@ -109,12 +109,12 @@ func (s *serviceImpl) getLayer(layerName string, uncertifiedRHEL bool) (*v1.GetI
 	}, nil
 }
 
-type imageReqI interface {
+type imageRequest interface {
 	GetImageSpec() *v1.ImageSpec
 	GetUncertifiedRHEL() bool
 }
 
-func (s *serviceImpl) getLayerNameFromImageReq(req imageReqI) (string, error) {
+func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, error) {
 	imgSpec := req.GetImageSpec()
 
 	if stringutils.AllEmpty(imgSpec.GetImage(), imgSpec.GetDigest()) {
