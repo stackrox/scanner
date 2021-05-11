@@ -33,6 +33,8 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 
 		locationAlreadyChecked := make(map[string]bool)
 		for _, c := range components {
+			// This handles jar-in-jar cases as the location is manually created so we only want
+			// the initial path
 			normalizedLocation := stringutils.GetUpTo(c.Location, ":")
 			fromPackageManager, ok := locationAlreadyChecked[normalizedLocation]
 			if ok {
@@ -54,7 +56,7 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, func(), error) {
 	if packagesContents == nil {
 		// Default return always says the given path is not provided by an RPM package.
-		return func(string) bool { return true }, func() {}, nil
+		return func(string) bool { return false }, func() {}, nil
 	}
 
 	// Write the required "Packages" file to disk
