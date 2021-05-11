@@ -25,7 +25,7 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 		if !hasFile {
 			return components, nil
 		}
-		matcher, finish, err := GetIsProvidedByRPMPackage(f)
+		matcher, finish, err := isProvidedByRPMPackageMatcher(f)
 		if err != nil {
 			return nil, err
 		}
@@ -46,12 +46,12 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 	}
 }
 
-// GetIsNotProvidedByRPMPackage uses the given package contents (expected to be an RPM Berkeley DB)
+// isProvidedByRPMPackageMatcher uses the given package contents (expected to be an RPM Berkeley DB)
 // to return:
-// * a function which returns if the given file path is not provided by an RPM package.
+// * a function which returns if the given file path is provided by an RPM package.
 // * a function to be called once the package contents are no longer needed which cleans up any used resources.
 // * an error.
-func GetIsProvidedByRPMPackage(packagesContents []byte) (func(string) bool, func(), error) {
+func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, func(), error) {
 	if packagesContents == nil {
 		// Default return always says the given path is not provided by an RPM package.
 		return func(string) bool { return true }, func() {}, nil
