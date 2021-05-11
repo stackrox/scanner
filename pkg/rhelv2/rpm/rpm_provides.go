@@ -28,14 +28,24 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 		}
 		defer finish()
 
+		locationAlreadyChecked := make(map[string]bool)
 		for _, c := range components {
+			normalizedLocation := stringutils.GetUpTo(c.Location, ":")
+			fromPackageManager, ok := locationAlreadyChecked[normalizedLocation]
+			if ok {
+				c.FromPackageManager = fromPackageManager
+				continue
+			}
+			c.FromPackageManager = matcher(normalizedLocation)
+			locationAlreadyChecked[normalizedLocation] = c.FromPackageManager
+
 			// Will probably need to normalize the location
-			if matcher(stringutils.GetUpTo(c.Location, ":")) {
+			if c.FromPackageManager {
 				log.Infof("Found match for location %s", c.Location)
-				c.FromPackageManager = true
 			} else {
 				log.Infof("Did not find match for location %s", c.Location)
 			}
+
 		}
 		return components, nil
 	}
