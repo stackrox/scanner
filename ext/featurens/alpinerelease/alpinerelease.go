@@ -41,7 +41,7 @@ func init() {
 
 type detector struct{}
 
-func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
+func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
 	file, exists := files[alpineReleasePath]
 	if exists {
 		scanner := bufio.NewScanner(bytes.NewBuffer(file))

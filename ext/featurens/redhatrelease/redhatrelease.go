@@ -42,7 +42,7 @@ func init() {
 	featurens.RegisterDetector("redhat-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
+func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions) *database.Namespace {
 	for _, filePath := range d.RequiredFilenames() {
 		f, hasFile := files[filePath]
 		if !hasFile {
@@ -74,10 +74,15 @@ func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 		// Attempt to match RHEL.
 		r = redhatReleaseRegexp.FindStringSubmatch(string(f))
 		if len(r) == 4 {
-			return &database.Namespace{
-				Name:          "rhel" + ":" + r[3],
+			namespace := &database.Namespace{
 				VersionFormat: rpm.ParserName,
 			}
+			if opts.GetUncertifiedRHEL() {
+				namespace.Name = "centos:" + r[3]
+			} else {
+				namespace.Name = "rhel:" + r[3]
+			}
+			return namespace
 		}
 
 		// Attempt to match CentOS.

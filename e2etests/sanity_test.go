@@ -59,7 +59,9 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
-	env, err := client.RetrieveImageDataBySHA(img.SHA, true, true)
+	env, err := client.RetrieveImageDataBySHA(img.SHA, &types.GetImageDataOpts{
+		UncertifiedRHELResults: imageRequest.UncertifiedRHELScan,
+	})
 	require.NoError(t, err)
 	require.Nil(t, env.Error)
 
@@ -129,6 +131,7 @@ func TestImageSanity(t *testing.T) {
 		expectedFeatures   []v1.Feature
 		unexpectedFeatures []v1.Feature
 		checkContainsOnly  bool
+		uncertifiedRHEL    bool
 	}{
 		{
 			image:    "docker.io/library/nginx:1.10",
@@ -301,85 +304,85 @@ func TestImageSanity(t *testing.T) {
 			image:    "docker.io/anchore/anchore-engine:v0.5.0",
 			registry: "https://registry-1.docker.io",
 			source:   "Red Hat",
+			// This image is older than June 2020, so we need to explicitly request for an uncertified scan.
+			uncertifiedRHEL: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "procps-ng",
-					NamespaceName: "rhel:7",
+					NamespaceName: "centos:7",
 					VersionFormat: "rpm",
 					Version:       "3.3.10-26.el7",
-					// This image is older than June 2020, so we currently do not find any vulnerabilities.
-					// TODO: Revert back to older scanning.
-					//Vulnerabilities: []v1.Vulnerability{
-					//	{
-					//		Name:          "CVE-2018-1121",
-					//		NamespaceName: "centos:7",
-					//		Description:   "DOCUMENTATION: Since the kernel's proc_pid_readdir() returns PID entries in ascending numeric order, a process occupying a high PID can use inotify events to determine when the process list is being scanned, and fork/exec to obtain a lower PID, thus avoiding enumeration. An unprivileged attacker can hide a process from procps-ng's utilities by exploiting a race condition in reading /proc/PID entries.             STATEMENT: The /proc filesystem is not a reliable mechanism to account for processes running on a system, as it is unable to offer snapshot semantics. Short-lived processes have always been able to escape detection by tools that monitor /proc. This CVE simply identifies a reliable way to do so using inotify. Process accounting for security purposes, or with a requirement to record very short-running processes and those attempting to evade detection, should be performed with more robust methods such as auditd(8) (the Linux Audit Daemon) or systemtap.",
-					//		Link:          "https://access.redhat.com/security/cve/CVE-2018-1121",
-					//		Severity:      "Low",
-					//		Metadata: map[string]interface{}{
-					//			"Red Hat": map[string]interface{}{
-					//				"CVSSv2": map[string]interface{}{
-					//					"ExploitabilityScore": 0.0,
-					//					"ImpactScore":         0.0,
-					//					"Score":               0.0,
-					//					"Vectors":             "",
-					//				},
-					//				"CVSSv3": map[string]interface{}{
-					//					"ExploitabilityScore": 1.3,
-					//					"ImpactScore":         2.5,
-					//					"Score":               3.9,
-					//					"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
-					//				},
-					//			},
-					//		},
-					//	},
-					//	{
-					//		Name:          "CVE-2018-1123",
-					//		NamespaceName: "centos:7",
-					//		Description:   "DOCUMENTATION: Due to incorrect accounting when decoding and escaping Unicode data in procfs, ps is vulnerable to overflowing an mmap()ed region when formatting the process list for display. Since ps maps a guard page at the end of the buffer, impact is limited to a crash.",
-					//		Link:          "https://access.redhat.com/security/cve/CVE-2018-1123",
-					//		Severity:      "Low",
-					//		Metadata: map[string]interface{}{
-					//			"Red Hat": map[string]interface{}{
-					//				"CVSSv2": map[string]interface{}{
-					//					"ExploitabilityScore": 0.0,
-					//					"ImpactScore":         0.0,
-					//					"Score":               0.0,
-					//					"Vectors":             "",
-					//				},
-					//				"CVSSv3": map[string]interface{}{
-					//					"ExploitabilityScore": 1.3,
-					//					"ImpactScore":         2.5,
-					//					"Score":               3.9,
-					//					"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
-					//				},
-					//			},
-					//		},
-					//	},
-					//	{
-					//		Name:          "CVE-2018-1125",
-					//		NamespaceName: "centos:7",
-					//		Description:   "DOCUMENTATION: If a process inspected by pgrep has an argument longer than INT_MAX bytes, \"int bytes\" could wrap around back to a large positive int (rather than approaching zero), leading to a stack buffer overflow via strncat().                          MITIGATION: The procps suite on Red Hat Enterprise Linux is built with FORTIFY, which limits the impact of this stack overflow (and others like it) to a crash.",
-					//		Link:          "https://access.redhat.com/security/cve/CVE-2018-1125",
-					//		Severity:      "Medium",
-					//		Metadata: map[string]interface{}{
-					//			"Red Hat": map[string]interface{}{
-					//				"CVSSv2": map[string]interface{}{
-					//					"ExploitabilityScore": 0.0,
-					//					"ImpactScore":         0.0,
-					//					"Score":               0.0,
-					//					"Vectors":             "",
-					//				},
-					//				"CVSSv3": map[string]interface{}{
-					//					"ExploitabilityScore": 1.8,
-					//					"ImpactScore":         2.5,
-					//					"Score":               4.4,
-					//					"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L",
-					//				},
-					//			},
-					//		},
-					//	},
-					//},
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2018-1121",
+							NamespaceName: "centos:7",
+							Description:   "DOCUMENTATION: Since the kernel's proc_pid_readdir() returns PID entries in ascending numeric order, a process occupying a high PID can use inotify events to determine when the process list is being scanned, and fork/exec to obtain a lower PID, thus avoiding enumeration. An unprivileged attacker can hide a process from procps-ng's utilities by exploiting a race condition in reading /proc/PID entries.             STATEMENT: The /proc filesystem is not a reliable mechanism to account for processes running on a system, as it is unable to offer snapshot semantics. Short-lived processes have always been able to escape detection by tools that monitor /proc. This CVE simply identifies a reliable way to do so using inotify. Process accounting for security purposes, or with a requirement to record very short-running processes and those attempting to evade detection, should be performed with more robust methods such as auditd(8) (the Linux Audit Daemon) or systemtap.",
+							Link:          "https://access.redhat.com/security/cve/CVE-2018-1121",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.3,
+										"ImpactScore":         2.5,
+										"Score":               3.9,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
+									},
+								},
+							},
+						},
+						{
+							Name:          "CVE-2018-1123",
+							NamespaceName: "centos:7",
+							Description:   "DOCUMENTATION: Due to incorrect accounting when decoding and escaping Unicode data in procfs, ps is vulnerable to overflowing an mmap()ed region when formatting the process list for display. Since ps maps a guard page at the end of the buffer, impact is limited to a crash.",
+							Link:          "https://access.redhat.com/security/cve/CVE-2018-1123",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.3,
+										"ImpactScore":         2.5,
+										"Score":               3.9,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
+									},
+								},
+							},
+						},
+						{
+							Name:          "CVE-2018-1125",
+							NamespaceName: "centos:7",
+							Description:   "DOCUMENTATION: If a process inspected by pgrep has an argument longer than INT_MAX bytes, \"int bytes\" could wrap around back to a large positive int (rather than approaching zero), leading to a stack buffer overflow via strncat().                          MITIGATION: The procps suite on Red Hat Enterprise Linux is built with FORTIFY, which limits the impact of this stack overflow (and others like it) to a crash.",
+							Link:          "https://access.redhat.com/security/cve/CVE-2018-1125",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         2.5,
+										"Score":               4.4,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L",
+									},
+								},
+							},
+						},
+					},
 					AddedBy: "sha256:c8d67acdb2ffaebd638cf55a8fccc63693211060670aa7f0ea1d65b5d2c674dd",
 				},
 			},
@@ -1332,6 +1335,98 @@ func TestImageSanity(t *testing.T) {
 					AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
 				},
 			},
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:    "jackson-databind",
+					Version: "2.7.6",
+				},
+			},
+		},
+		{
+			// One of the images used for Red Hat Scanner Certification with a chown on jackson-databind that should not show up in the results.
+			image:             "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7-chown",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "Red Hat",
+			checkContainsOnly: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "rh-maven35-log4j12",
+					VersionFormat: "rpm",
+					Version:       "1.2.17-19.2.el7",
+					AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				},
+				{
+					Name:          "rh-maven35-jackson-databind",
+					VersionFormat: "rpm",
+					Version:       "2.7.6-2.10.el7",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2020:4173",
+							NamespaceName: "rhel:7",
+							Description:   "The jackson-databind package provides general data-binding functionality for Jackson, which works on top of Jackson core streaming API.\n\nSecurity Fix(es):\n\n* jackson-databind: Serialization gadgets in com.pastdev.httpcomponents.configuration.JndiConfiguration (CVE-2020-24750)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4173",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "0:2.7.6-2.11.el7",
+						},
+					},
+					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				},
+				{
+					Name:          "vim-minimal",
+					VersionFormat: "rpm",
+					Version:       "2:7.4.629-6.el7",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2017-1000382",
+							NamespaceName: "rhel:7",
+							Description:   "DOCUMENTATION: It was found that vim applies the opened file read permissions to the swap file, overriding the process' umask. An attacker might search for vim swap files that were not deleted properly, in order to retrieve sensitive data.\n            STATEMENT: Red Hat Product Security has rated this issue as having Low security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
+							Link:          "https://access.redhat.com/security/cve/CVE-2017-1000382",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         3.6,
+										"Score":               5.5,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+						},
+					},
+					AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
+				},
+			},
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:    "jackson-databind",
+					Version: "2.7.6",
+				},
+			},
 		},
 		{
 			// One of the images used for Red Hat Scanner Certification.
@@ -1484,7 +1579,7 @@ func TestImageSanity(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
+			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
 		})
 	}
 }

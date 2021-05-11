@@ -35,7 +35,7 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	client := v1.NewImageScanServiceClient(conn)
 	var scanResp *v1.ScanImageResponse
 	if strings.HasPrefix(testCase.image, "docker.io") {
-		scanResp = scanDockerIOStackRoxImage(client, testCase.image, t)
+		scanResp = scanDockerIOStackRoxImage(client, testCase.image, false, t)
 	} else if strings.HasPrefix(testCase.image, "gcr.io") {
 		scanResp = scanGCRImage(client, testCase.image, t)
 	} else {

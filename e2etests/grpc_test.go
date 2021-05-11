@@ -14,7 +14,7 @@ import (
 func TestGRPCScanImage(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewImageScanServiceClient(conn)
-	scanImageResp := scanPublicDockerHubImage(client, "nginx", t)
+	scanImageResp := scanPublicDockerHubImage(client, "nginx", false, t)
 
 	getScanResp, err := client.GetImageScan(context.Background(), &v1.GetImageScanRequest{
 		ImageSpec: &v1.ImageSpec{Image: scanImageResp.Image.GetImage()},

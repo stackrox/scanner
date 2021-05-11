@@ -21,19 +21,24 @@ const (
 	timeFormat = "2006-01-02T15:04Z"
 )
 
-func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
+// addRHELv2Vulns appends vulnerabilities found during RHELv2 scanning.
+// RHELv2 scanning performs the scanning/analysis needed to be
+// certified as part of Red Hat's Scanner Certification Program.
+// The returned bool indicates if full certified scanning was performed.
+// This is typically only `false` for images without proper CPE information.
+func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 	layers, err := db.GetRHELv2Layers(layer.Name)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	shareCPEs(layers)
+	cpesExist := shareCPEs(layers)
 
 	pkgEnvs, records := getRHELv2PkgData(layers)
 
 	vulns, err := db.GetRHELv2Vulnerabilities(records)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	for _, pkgEnv := range pkgEnvs {
@@ -97,7 +102,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 		layer.Features = append(layer.Features, feature)
 	}
 
-	return nil
+	return cpesExist, nil
 }
 
 func rpmVersionPtr(ver rpmVersion.Version) *rpmVersion.Version {
@@ -105,14 +110,20 @@ func rpmVersionPtr(ver rpmVersion.Version) *rpmVersion.Version {
 }
 
 // shareRepos takes repository definition and share it with other layers
-// where repositories are missing
-func shareCPEs(layers []*database.RHELv2Layer) {
+// where repositories are missing.
+// Returns a bool indicating if any CPEs exist.
+func shareCPEs(layers []*database.RHELv2Layer) bool {
+	var cpesExist bool
+
 	// User's layers build on top of Red Hat images doesn't have a repository definition.
 	// We need to share CPE repo definition to all layer where CPEs are missing
 	var previousCPEs []string
 	for i := 0; i < len(layers); i++ {
 		if len(layers[i].CPEs) != 0 {
 			previousCPEs = layers[i].CPEs
+
+			// Some layer has CPEs.
+			cpesExist = true
 		} else {
 			layers[i].CPEs = append(layers[i].CPEs, previousCPEs...)
 		}
@@ -129,6 +140,8 @@ func shareCPEs(layers []*database.RHELv2Layer) {
 			layers[i].CPEs = append(layers[i].CPEs, previousCPEs...)
 		}
 	}
+
+	return cpesExist
 }
 
 func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2PackageEnv, []*database.RHELv2Record) {
