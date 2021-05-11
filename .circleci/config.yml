@@ -743,7 +743,7 @@ workflows:
       - provision-cluster:
           <<: *runOnAllTagsWithDockerIOPullCtx
       - e2e-tests:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+          <<: *runOnAllTagsWithRedHatCtx
           requires:
             - build
             - provision-cluster
