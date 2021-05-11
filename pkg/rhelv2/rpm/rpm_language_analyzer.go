@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/pkg/analyzer"
@@ -24,7 +25,7 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 		if !hasFile {
 			return components, nil
 		}
-		matcher, finish, err := GetIsNotProvidedByRPMPackage(f)
+		matcher, finish, err := GetIsProvidedByRPMPackage(f)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +51,7 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 // * a function which returns if the given file path is not provided by an RPM package.
 // * a function to be called once the package contents are no longer needed which cleans up any used resources.
 // * an error.
-func GetIsNotProvidedByRPMPackage(packagesContents []byte) (func(string) bool, func(), error) {
+func GetIsProvidedByRPMPackage(packagesContents []byte) (func(string) bool, func(), error) {
 	if packagesContents == nil {
 		// Default return always says the given path is not provided by an RPM package.
 		return func(string) bool { return true }, func() {}, nil
@@ -69,6 +70,14 @@ func GetIsNotProvidedByRPMPackage(packagesContents []byte) (func(string) bool, f
 		return nil, nil, err
 	}
 
+	finishFn := func() { _ = os.RemoveAll(tmpDir) }
+
+	cmd := exec.Command("rpmdb", `--rebuilddb`, `--dbpath`, tmpDir)
+	if err := cmd.Run(); err != nil {
+		finishFn()
+		return nil, nil, errors.Wrap(err, "rebuilding RPM DB")
+	}
+
 	return func(path string) bool {
 		// We need the full path of the file.
 		// When we originally extract the file, the `/` prefix is removed.
@@ -84,16 +93,16 @@ func GetIsNotProvidedByRPMPackage(packagesContents []byte) (func(string) bool, f
 			// status code 1.
 			if exitError, ok := err.(*exec.ExitError); ok && exitError.ExitCode() == 1 {
 				// RPM does NOT provide this package.
-				return true
+				return false
 			}
 
 			log.WithError(err).Errorf("unexpected error when determining if %s belongs to an RPM package", fullPath)
 			// Upon error, say no RPM package provides this file.
-			return true
+			return false
 		}
 
 		// The command exited properly, which implies the file IS provided by an RPM package.
-		return false
+		return true
 
-	}, func() { _ = os.RemoveAll(tmpDir) }, nil
+	}, finishFn, nil
 }

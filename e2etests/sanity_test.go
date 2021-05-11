@@ -1335,9 +1335,15 @@ func TestImageSanity(t *testing.T) {
 					AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
 				},
 			},
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:    "jackson-databind",
+					Version: "2.7.6",
+				},
+			},
 		},
 		{
-			// One of the images used for Red Hat Scanner Certification.
+			// One of the images used for Red Hat Scanner Certification with a chown on jackson-databind that should not show up in the results.
 			image:             "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7-chown",
 			registry:          "https://registry-1.docker.io",
 			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
