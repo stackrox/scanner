@@ -2,6 +2,7 @@ package v1
 
 import (
 	"testing"
+	"time"
 
 	archop "github.com/quay/claircore"
 	"github.com/stackrox/rox/pkg/set"
@@ -54,6 +55,7 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 	defer envIsolator.RestoreAll()
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 
+	now := time.Now()
 	db := newMockRHELv2Datastore()
 	// 3 layer image with deleted package.
 	db.layers["layer2"] = []*database.RHELv2Layer{
@@ -107,6 +109,7 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 					ArchOperation: archop.OpEquals,
 				},
 			},
+			Issued: now,
 		},
 		{
 			Name: "v2",
@@ -122,6 +125,8 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 					ArchOperation: archop.OpPatternMatch,
 				},
 			},
+			Issued:  now,
+			Updated: now,
 		},
 		{
 			Name: "v3",
@@ -173,8 +178,7 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 					FixedBy:       "4",
 					Metadata: map[string]interface{}{
 						"Red Hat": &types.Metadata{
-							PublishedDateTime:    "0001-01-01 00:00:00 +0000 UTC",
-							LastModifiedDateTime: "0001-01-01 00:00:00 +0000 UTC",
+							PublishedDateTime: now.Format(timeFormat),
 						},
 					},
 				},
@@ -184,8 +188,8 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 					FixedBy:       "5",
 					Metadata: map[string]interface{}{
 						"Red Hat": &types.Metadata{
-							PublishedDateTime:    "0001-01-01 00:00:00 +0000 UTC",
-							LastModifiedDateTime: "0001-01-01 00:00:00 +0000 UTC",
+							PublishedDateTime:    now.Format(timeFormat),
+							LastModifiedDateTime: now.Format(timeFormat),
 						},
 					},
 				},

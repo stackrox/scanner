@@ -17,6 +17,10 @@ import (
 	"github.com/stackrox/scanner/pkg/types"
 )
 
+const (
+	timeFormat = "2006-01-02T15:04Z"
+)
+
 // addRHELv2Vulns appends vulnerabilities found during RHELv2 scanning.
 // RHELv2 scanning performs the scanning/analysis needed to be
 // certified as part of Red Hat's Scanner Certification Program.
@@ -246,10 +250,18 @@ func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		}
 	}
 
+	var publishedTime, modifiedTime string
+	if !vuln.Issued.IsZero() {
+		publishedTime = vuln.Issued.Format(timeFormat)
+	}
+	if !vuln.Updated.IsZero() {
+		modifiedTime = vuln.Updated.Format(timeFormat)
+	}
+
 	metadata := map[string]interface{}{
 		"Red Hat": &types.Metadata{
-			PublishedDateTime:    vuln.Issued.String(),
-			LastModifiedDateTime: vuln.Updated.String(),
+			PublishedDateTime:    publishedTime,
+			LastModifiedDateTime: modifiedTime,
 			CVSSv2:               cvss2,
 			CVSSv3:               cvss3,
 		},
