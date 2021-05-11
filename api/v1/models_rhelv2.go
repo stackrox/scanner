@@ -17,6 +17,10 @@ import (
 	"github.com/stackrox/scanner/pkg/types"
 )
 
+const (
+	timeFormat = "2006-01-02T15:04Z"
+)
+
 func addRHELv2Vulns(db database.Datastore, layer *Layer) error {
 	layers, err := db.GetRHELv2Layers(layer.Name)
 	if err != nil {
@@ -233,10 +237,18 @@ func rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		}
 	}
 
+	var publishedTime, modifiedTime string
+	if !vuln.Issued.IsZero() {
+		publishedTime = vuln.Issued.Format(timeFormat)
+	}
+	if !vuln.Updated.IsZero() {
+		modifiedTime = vuln.Updated.Format(timeFormat)
+	}
+
 	metadata := map[string]interface{}{
 		"Red Hat": &types.Metadata{
-			PublishedDateTime:    vuln.Issued.String(),
-			LastModifiedDateTime: vuln.Updated.String(),
+			PublishedDateTime:    publishedTime,
+			LastModifiedDateTime: modifiedTime,
 			CVSSv2:               cvss2,
 			CVSSv3:               cvss3,
 		},
