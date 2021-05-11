@@ -6,8 +6,9 @@ type Component struct {
 	// they return, since a component is not meaningful without those fields.
 	// All other fields are optional.
 
-	Name    string
-	Version string
+	Name               string
+	Version            string
+	FromPackageManager bool
 
 	SourceType SourceType
 
