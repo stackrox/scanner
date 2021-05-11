@@ -1338,6 +1338,92 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// One of the images used for Red Hat Scanner Certification.
+			image:             "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7-chown",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "Red Hat",
+			checkContainsOnly: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "rh-maven35-log4j12",
+					VersionFormat: "rpm",
+					Version:       "1.2.17-19.2.el7",
+					AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				},
+				{
+					Name:          "rh-maven35-jackson-databind",
+					VersionFormat: "rpm",
+					Version:       "2.7.6-2.10.el7",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2020:4173",
+							NamespaceName: "rhel:7",
+							Description:   "The jackson-databind package provides general data-binding functionality for Jackson, which works on top of Jackson core streaming API.\n\nSecurity Fix(es):\n\n* jackson-databind: Serialization gadgets in com.pastdev.httpcomponents.configuration.JndiConfiguration (CVE-2020-24750)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4173",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "0:2.7.6-2.11.el7",
+						},
+					},
+					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				},
+				{
+					Name:          "vim-minimal",
+					VersionFormat: "rpm",
+					Version:       "2:7.4.629-6.el7",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2017-1000382",
+							NamespaceName: "rhel:7",
+							Description:   "DOCUMENTATION: It was found that vim applies the opened file read permissions to the swap file, overriding the process' umask. An attacker might search for vim swap files that were not deleted properly, in order to retrieve sensitive data.\n            STATEMENT: Red Hat Product Security has rated this issue as having Low security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
+							Link:          "https://access.redhat.com/security/cve/CVE-2017-1000382",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         3.6,
+										"Score":               5.5,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+						},
+					},
+					AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
+				},
+			},
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:    "jackson-databind",
+					Version: "2.7.6",
+				},
+			},
+		},
+		{
+			// One of the images used for Red Hat Scanner Certification.
 			image:             "docker.io/stackrox/sandbox:nodejs-10",
 			registry:          "https://registry-1.docker.io",
 			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),

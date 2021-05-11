@@ -84,6 +84,19 @@ func getLanguageData(db database.Datastore, layerName string, uncertifiedRHEL bo
 	var removedLanguageComponentLocations []string
 	var features []database.FeatureVersion
 
+	ignoredLanguageComponents := make(map[string]languageFeatureValue)
+	for _, layerToComponent := range layersToComponents {
+		for _, c := range layerToComponent.Components {
+			if c.FromPackageManager {
+				ignoredLanguageComponents[c.Location] = languageFeatureValue{
+					name:    c.Name,
+					version: c.Version,
+					layer:   layerToComponent.Layer,
+				}
+			}
+		}
+	}
+
 	// Loop from highest layer to lowest.
 	for i := len(layersToComponents) - 1; i >= 0; i-- {
 		layerToComponents := layersToComponents[i]
@@ -94,6 +107,9 @@ func getLanguageData(db database.Datastore, layerName string, uncertifiedRHEL bo
 			if c.FromPackageManager {
 				continue
 			}
+			if lfv, ok := ignoredLanguageComponents[c.Location]; ok && lfv.name == c.Name && lfv.version == c.Version {
+				continue
+			}
 			include := true
 			for _, removedLocation := range removedLanguageComponentLocations {
 				if strings.HasPrefix(c.Location, removedLocation) {
@@ -101,6 +117,7 @@ func getLanguageData(db database.Datastore, layerName string, uncertifiedRHEL bo
 					break
 				}
 			}
+
 			if include {
 				components = append(components, c)
 			}

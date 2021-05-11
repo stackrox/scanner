@@ -11,6 +11,8 @@ import (
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
+// WrapAnalyzer wraps the generic analyzer function with one that determines if the language
+// component was added via RPM
 func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Component, error) {
 	return func(files tarutil.FilesMap, analyzers []analyzer.Analyzer) ([]*component.Component, error) {
 		components, err := analyzer.Analyze(files, analyzers)
@@ -18,7 +20,7 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 			return nil, err
 		}
 
-		f, hasFile := files["var/lib/rpm/Packages"]
+		f, hasFile := files[packages]
 		if !hasFile {
 			return components, nil
 		}
@@ -38,14 +40,6 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 			}
 			c.FromPackageManager = matcher(normalizedLocation)
 			locationAlreadyChecked[normalizedLocation] = c.FromPackageManager
-
-			// Will probably need to normalize the location
-			if c.FromPackageManager {
-				log.Infof("Found match for location %s", c.Location)
-			} else {
-				log.Infof("Did not find match for location %s", c.Location)
-			}
-
 		}
 		return components, nil
 	}
