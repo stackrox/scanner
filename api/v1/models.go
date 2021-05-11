@@ -91,6 +91,9 @@ func getLanguageData(db database.Datastore, layerName string, uncertifiedRHEL bo
 		// Ignore components which were removed in higher layers.
 		components := layerToComponents.Components[:0]
 		for _, c := range layerToComponents.Components {
+			if c.FromPackageManager {
+				continue
+			}
 			include := true
 			for _, removedLocation := range removedLanguageComponentLocations {
 				if strings.HasPrefix(c.Location, removedLocation) {

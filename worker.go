@@ -33,6 +33,7 @@ import (
 	featureFlags "github.com/stackrox/scanner/pkg/features"
 	rhelv2 "github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 	"github.com/stackrox/scanner/pkg/whiteout"
 	"github.com/stackrox/scanner/singletons/analyzers"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
@@ -207,7 +208,8 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	var featureVersions []database.FeatureVersion
 	var rhelfeatures *database.RHELv2Components
 
-	if namespace != nil && strings.HasPrefix(namespace.Name, "rhel") {
+	languageAnalyzerFunc := analyzer.Analyze
+	if namespace != nil && namespaces.IsRHELNamespace(namespace.Name) {
 		// This is a RHEL-based image that must be scanned in a certified manner.
 		// Use the RHELv2 scanner instead.
 		packages, cpes, err := rhelv2.ListFeatures(files)
@@ -220,6 +222,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 			CPEs:     cpes,
 		}
 		log.WithFields(log.Fields{logLayerName: name, "rhel package count": len(packages), "rhel cpe count": len(cpes)}).Debug("detected rhelv2 features")
+		languageAnalyzerFunc = rhelv2.WrapAnalyzer()
 	} else {
 		var err error
 		// Detect features.
@@ -235,7 +238,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	if !env.LanguageVulns.Enabled() {
 		return namespace, distroless, featureVersions, rhelfeatures, nil, nil, nil
 	}
-	allComponents, err := analyzer.Analyze(files, analyzers.Analyzers())
+	allComponents, err := languageAnalyzerFunc(files, analyzers.Analyzers())
 	if err != nil {
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
 	}
