@@ -84,6 +84,9 @@ func getLanguageData(db database.Datastore, layerName string, uncertifiedRHEL bo
 	var removedLanguageComponentLocations []string
 	var features []database.FeatureVersion
 
+	// ignoredLanguageComponents keeps track of the language components that were ignored because
+	// they came from the package manager. This is from lowest (base image) up to the highest because
+	// modifications to the files in later layers may not have a package manager change associated (e.g. chown a JAR)
 	ignoredLanguageComponents := make(map[string]languageFeatureValue)
 	for _, layerToComponent := range layersToComponents {
 		for _, c := range layerToComponent.Components {
@@ -91,7 +94,6 @@ func getLanguageData(db database.Datastore, layerName string, uncertifiedRHEL bo
 				ignoredLanguageComponents[c.Location] = languageFeatureValue{
 					name:    c.Name,
 					version: c.Version,
-					layer:   layerToComponent.Layer,
 				}
 			}
 		}
