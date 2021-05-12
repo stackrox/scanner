@@ -18,6 +18,7 @@ message GetKubeVulnerabilitiesResponse {
     repeated Vulnerability apiserver_vulnerabilities          = 2;
     repeated Vulnerability controller_manager_vulnerabilities = 3;
     repeated Vulnerability scheduler_vulnerabilities          = 4;
+    repeated Vulnerability generic_vulnerabilities            = 5;
 }
 
 // KubeScanService APIs can be used to get vulnerabilities for Kubernetes components.
