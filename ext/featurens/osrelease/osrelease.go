@@ -19,15 +19,13 @@
 package osrelease
 
 import (
-	"bufio"
 	"regexp"
-	"strings"
 
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
-	"github.com/stackrox/scanner/ext/featurens/util"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	"github.com/stackrox/scanner/pkg/osrelease"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -64,23 +62,8 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 			continue
 		}
 
-		scanner := bufio.NewScanner(strings.NewReader(string(f)))
-		for scanner.Scan() {
-			line := scanner.Text()
-
-			r := osReleaseOSRegexp.FindStringSubmatch(line)
-			if len(r) == 2 {
-				OS = strings.Replace(strings.ToLower(r[1]), "\"", "", -1)
-			}
-
-			r = osReleaseVersionRegexp.FindStringSubmatch(line)
-			if len(r) == 2 {
-				version = strings.Replace(strings.ToLower(r[1]), "\"", "", -1)
-			}
-		}
+		OS, version = osrelease.GetIDFromOSRelease(f)
 	}
-
-	OS = util.NormalizeOSName(OS)
 
 	// Determine the VersionFormat.
 	var versionFormat string

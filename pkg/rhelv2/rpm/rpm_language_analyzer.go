@@ -7,10 +7,23 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/osrelease"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
+
+var (
+	operatingSystem string
+)
+
+func init() {
+	data, err := os.ReadFile("/etc/os-release")
+	utils.Must(err)
+
+	operatingSystem, _ = osrelease.GetIDFromOSRelease(data)
+}
 
 // WrapAnalyzer wraps the generic analyzer function with one that determines if the language
 // component was added via RPM
@@ -20,7 +33,9 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 		if err != nil {
 			return nil, err
 		}
-
+		if len(components) == 0 {
+			return components, nil
+		}
 		f, hasFile := files[packages]
 		if !hasFile {
 			return components, nil
@@ -74,10 +89,13 @@ func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, 
 
 	finishFn := func() { _ = os.RemoveAll(tmpDir) }
 
-	cmd := exec.Command("rpmdb", `--rebuilddb`, `--dbpath`, tmpDir)
-	if err := cmd.Run(); err != nil {
-		finishFn()
-		return nil, nil, errors.Wrap(err, "rebuilding RPM DB")
+	if operatingSystem != "rhel" {
+		log.Info("Rebuilding Package database for RHEL image. This may be more optimized on the RHEL-based Scanner image")
+		cmd := exec.Command("rpmdb", `--rebuilddb`, `--dbpath`, tmpDir)
+		if err := cmd.Run(); err != nil {
+			finishFn()
+			return nil, nil, errors.Wrap(err, "rebuilding RPM DB")
+		}
 	}
 
 	return func(path string) bool {
