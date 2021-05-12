@@ -35,4 +35,9 @@ func TestCache(t *testing.T) {
 
 	assert.Equal(t, 2, len(cache.GetVulnsByComponent(Kubelet, "1.0.0")))
 	assert.Equal(t, 1, len(cache.GetVulnsByComponent(Kubectl, "1.0.0")))
+
+	// Generic vulns which do not have specific components
+	vulns = cache.GetVulnsByComponent(Generic, "1.0.0")
+	assert.Equal(t, 1, len(vulns))
+	assert.Equal(t, "CVE-2020-1238", vulns[0].CVE)
 }
