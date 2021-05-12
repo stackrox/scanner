@@ -45,7 +45,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 		pkg := pkgEnv.Pkg
 
 		version := pkg.Version
-		if version != "" {
+		if pkg.Arch != "" {
 			version += "." + pkg.Arch
 		}
 
