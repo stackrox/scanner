@@ -19,8 +19,6 @@
 package osrelease
 
 import (
-	"regexp"
-
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
@@ -30,9 +28,6 @@ import (
 )
 
 var (
-	osReleaseOSRegexp      = regexp.MustCompile(`^ID=(.*)`)
-	osReleaseVersionRegexp = regexp.MustCompile(`^VERSION_ID=(.*)`)
-
 	// blacklistFilenames are files that should exclude this detector.
 	blacklistFilenames = []string{
 		"etc/oracle-release",
