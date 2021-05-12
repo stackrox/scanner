@@ -15,14 +15,14 @@ import (
 )
 
 var (
-	operatingSystem string
+	scannerOperatingSystem string
 )
 
 func init() {
 	data, err := os.ReadFile("/etc/os-release")
 	utils.Must(err)
 
-	operatingSystem, _ = osrelease.GetIDFromOSRelease(data)
+	scannerOperatingSystem, _ = osrelease.GetOSAndVersionFromOSRelease(data)
 }
 
 // WrapAnalyzer wraps the generic analyzer function with one that determines if the language
@@ -89,7 +89,7 @@ func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, 
 
 	finishFn := func() { _ = os.RemoveAll(tmpDir) }
 
-	if operatingSystem != "rhel" {
+	if scannerOperatingSystem != "rhel" {
 		log.Info("Rebuilding Package database for RHEL image. This may be more optimized on the RHEL-based Scanner image")
 		cmd := exec.Command("rpmdb", `--rebuilddb`, `--dbpath`, tmpDir)
 		if err := cmd.Run(); err != nil {

@@ -13,8 +13,8 @@ var (
 	osReleaseVersionRegexp = regexp.MustCompile(`^VERSION_ID=(.*)`)
 )
 
-// GetIDFromOSRelease returns the value of ID= from /etc/os-release formatted data
-func GetIDFromOSRelease(data []byte) (os, version string) {
+// GetOSAndVersionFromOSRelease returns the value of ID= and VERSION_ID= from /etc/os-release formatted data
+func GetOSAndVersionFromOSRelease(data []byte) (os, version string) {
 	scanner := bufio.NewScanner(strings.NewReader(string(data)))
 	for scanner.Scan() {
 		line := scanner.Text()

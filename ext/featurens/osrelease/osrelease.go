@@ -57,7 +57,7 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 			continue
 		}
 
-		OS, version = osrelease.GetIDFromOSRelease(f)
+		OS, version = osrelease.GetOSAndVersionFromOSRelease(f)
 	}
 
 	// Determine the VersionFormat.
