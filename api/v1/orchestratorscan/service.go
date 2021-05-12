@@ -86,6 +86,11 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	resp.GenericVulnerabilities, err = s.getKubernetesVuln(k8scache.Generic, req.GetKubernetesVersion())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &resp, nil
 }
 

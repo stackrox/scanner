@@ -20,6 +20,8 @@ const (
 	KubeScheduler         = "kube-scheduler"
 	Kubectl               = "kubectl"
 	Kubelet               = "kubelet"
+	// Generic includes the vulnerabilities not assigned to specific component(s).
+	Generic = "__generic"
 )
 
 func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
@@ -69,7 +71,10 @@ func (c *cacheImpl) handleYAMLFile(path string) (bool, error) {
 	c.cacheRWLock.Lock()
 	defer c.cacheRWLock.Unlock()
 	if len(cveData.Components) == 0 {
-		c.unsetVulns = append(c.unsetVulns, cveData)
+		if c.cache[Generic] == nil {
+			c.cache[Generic] = make(map[string]*validation.CVESchema)
+		}
+		c.cache[Generic][cveData.CVE] = cveData
 	} else {
 		for _, k8sComponent := range cveData.Components {
 			if c.cache[k8sComponent] == nil {

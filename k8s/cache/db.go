@@ -14,9 +14,9 @@ type cacheImpl struct {
 	// The expectation is that the number of Kubernetes vulns is rather low (100 or fewer).
 	// Because of this, we just store the vulns in memory instead of in BoltDB.
 	// Consider switching to BoltDB if this gets absurdly large (on the scale of NVD).
+	// Vulns that are not associated with a particular component are kept in the map with
+	// component Generic.
 	cache map[string]map[string]*validation.CVESchema
-	// Vulns that are not associated with a particular component.
-	unsetVulns []*validation.CVESchema
 
 	dir             string
 	timeRWLock      sync.RWMutex
