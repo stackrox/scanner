@@ -21,7 +21,7 @@ const (
 	Kubectl               = "kubectl"
 	Kubelet               = "kubelet"
 	// Generic includes the vulnerabilities not assigned to specific component(s).
-	Generic               = "__generic"
+	Generic = "__generic"
 )
 
 func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
