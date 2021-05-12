@@ -12,6 +12,7 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/osrelease"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
 var (
@@ -89,8 +90,8 @@ func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, 
 
 	finishFn := func() { _ = os.RemoveAll(tmpDir) }
 
-	if scannerOperatingSystem != "rhel" {
-		log.Info("Rebuilding Package database for RHEL image. This may be more optimized on the RHEL-based Scanner image")
+	if wellknownnamespaces.IsRHELNamespace(scannerOperatingSystem) {
+		log.Info("Rebuilding Package database for a RHEL image. This may be better optimized on the RHEL-based Scanner image")
 		cmd := exec.Command("rpmdb", `--rebuilddb`, `--dbpath`, tmpDir)
 		if err := cmd.Run(); err != nil {
 			finishFn()
