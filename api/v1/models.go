@@ -251,6 +251,15 @@ func addLanguageVulns(db database.Datastore, layer *Layer, uncertifiedRHEL bool)
 	layer.Features = append(layer.Features, languageFeatures...)
 }
 
+func hasKernelPrefix(name string) bool {
+	for _, prefix := range kernelPrefixes {
+		if strings.HasPrefix(name, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, opts *database.DatastoreOptions) (Layer, []Note, error) {
 	withFeatures := opts.GetWithFeatures()
 	withVulnerabilities := opts.GetWithVulnerabilities()
@@ -287,14 +296,11 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, opts 
 	}
 
 	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
-	OUTER:
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion)
 
-			for _, prefix := range kernelPrefixes {
-				if strings.HasPrefix(feature.Name, prefix) {
-					continue OUTER
-				}
+			if hasKernelPrefix(feature.Name) {
+				continue
 			}
 
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, dbFeatureVersion.Feature.Namespace.VersionFormat)
