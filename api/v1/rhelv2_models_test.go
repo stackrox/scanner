@@ -168,7 +168,7 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Name:          "pkg",
 			NamespaceName: "rhel:8",
 			VersionFormat: rpm.ParserName,
-			Version:       "2",
+			Version:       "2.x86_64",
 			AddedBy:       "layer1",
 			FixedBy:       "5",
 			Vulnerabilities: []Vulnerability{
