@@ -1392,7 +1392,7 @@ func TestImageSanity(t *testing.T) {
 				{
 					Name:          "vim-minimal",
 					VersionFormat: "rpm",
-					Version:       "2:7.4.629-6.el7",
+					Version:       "2:7.4.629-6.el7.x86_64",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2017-1000382",
