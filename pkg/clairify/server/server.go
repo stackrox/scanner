@@ -67,7 +67,6 @@ func clairError(w http.ResponseWriter, status int, err error) {
 }
 
 func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, uncertifiedRHEL bool) {
-	logrus.Infof("Getting uncertified scan (%v)", uncertifiedRHEL)
 	opts := &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
