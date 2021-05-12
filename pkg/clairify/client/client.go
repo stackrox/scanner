@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"net/url"
@@ -97,6 +98,7 @@ func encodeValues(opts *types.GetImageDataOpts) url.Values {
 
 	values := make(url.Values)
 	if opts.UncertifiedRHELResults {
+		log.Info("Setting Uncertified results key to true")
 		values.Add(types.UncertifiedRHELResultsKey, "true")
 	}
 
