@@ -90,7 +90,7 @@ func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, 
 
 	finishFn := func() { _ = os.RemoveAll(tmpDir) }
 
-	if wellknownnamespaces.IsRHELNamespace(scannerOperatingSystem) {
+	if !wellknownnamespaces.IsRHELNamespace(scannerOperatingSystem) {
 		log.Info("Rebuilding Package database for a RHEL image. This may be better optimized on the RHEL-based Scanner image")
 		cmd := exec.Command("rpmdb", `--rebuilddb`, `--dbpath`, tmpDir)
 		if err := cmd.Run(); err != nil {
