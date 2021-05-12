@@ -1268,13 +1268,13 @@ func TestImageSanity(t *testing.T) {
 				{
 					Name:          "rh-maven35-log4j12",
 					VersionFormat: "rpm",
-					Version:       "1.2.17-19.2.el7",
+					Version:       "1.2.17-19.2.el7.noarch",
 					AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
 					Name:          "rh-maven35-jackson-databind",
 					VersionFormat: "rpm",
-					Version:       "2.7.6-2.10.el7",
+					Version:       "2.7.6-2.10.el7.noarch",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4173",
@@ -1306,7 +1306,7 @@ func TestImageSanity(t *testing.T) {
 				{
 					Name:          "vim-minimal",
 					VersionFormat: "rpm",
-					Version:       "2:7.4.629-6.el7",
+					Version:       "2:7.4.629-6.el7.x86_64",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2017-1000382",
