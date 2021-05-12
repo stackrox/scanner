@@ -1354,13 +1354,13 @@ func TestImageSanity(t *testing.T) {
 				{
 					Name:          "rh-maven35-log4j12",
 					VersionFormat: "rpm",
-					Version:       "1.2.17-19.2.el7",
+					Version:       "1.2.17-19.2.el7.noarch",
 					AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
 					Name:          "rh-maven35-jackson-databind",
 					VersionFormat: "rpm",
-					Version:       "2.7.6-2.10.el7",
+					Version:       "2.7.6-2.10.el7.noarch",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4173",
@@ -1440,7 +1440,7 @@ func TestImageSanity(t *testing.T) {
 				{
 					Name:          "nodejs-full-i18n",
 					VersionFormat: "rpm",
-					Version:       "1:10.21.0-3.module+el8.2.0+7071+d2377ea3",
+					Version:       "1:10.21.0-3.module+el8.2.0+7071+d2377ea3.x86_64",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "RHSA-2021:0548",
@@ -1497,7 +1497,7 @@ func TestImageSanity(t *testing.T) {
 				{
 					Name:          "freetype",
 					VersionFormat: "rpm",
-					Version:       "2.9.1-4.el8",
+					Version:       "2.9.1-4.el8.x86_64",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4952",
@@ -1530,7 +1530,7 @@ func TestImageSanity(t *testing.T) {
 				{
 					Name:          "libsolv",
 					VersionFormat: "rpm",
-					Version:       "0.7.7-1.el8",
+					Version:       "0.7.7-1.el8.x86_64",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4508",
