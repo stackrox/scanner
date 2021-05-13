@@ -162,6 +162,11 @@
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true
       }
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210513220414.zip",
+      "timestamp": "2021-05-13T22:04:14.306636873Z",
+      "diffLocation": "gs://definitions.stackrox.io/21d1bee3-031c-4204-a2ae-ead6ed4b8c7b/diff.zip"
     }
   ]
 }
