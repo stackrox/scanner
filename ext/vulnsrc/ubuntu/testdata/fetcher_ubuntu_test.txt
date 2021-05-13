@@ -34,4 +34,5 @@ utopic_libmspack-anotherpkg: not-affected
 trusty_libmspack-anotherpkg: needs-triage
 precise_libmspack-anotherpkg: released
 saucy_libmspack-anotherpkg: needed
+xenial_libmspack-anotherpkg: released (0.2)
 esm-infra/xenial_libmspack-anotherpkg: released (0.2)

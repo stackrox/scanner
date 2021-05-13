@@ -38,6 +38,8 @@ const (
 	trackerGitURL = "git://git.launchpad.net/ubuntu-cve-tracker"
 	updaterFlag   = "ubuntuUpdater"
 	cveURL        = "http://people.ubuntu.com/~ubuntu-security/cve/%s"
+
+	xenialESMLinePrefix = "esm-infra/xenial_"
 )
 
 var (
@@ -261,7 +263,6 @@ func collectModifiedVulnerabilities(repositoryLocalPath string) (map[string]stru
 	}
 
 	return modifiedCVE, nil
-
 }
 
 func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability, unknownReleases map[string]struct{}, err error) {
@@ -269,6 +270,10 @@ func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability
 	readingDescription := false
 	scanner := bufio.NewScanner(fileContent)
 
+	type fvKey struct {
+		namespace, name, version string
+	}
+	addFVs := make(map[fvKey]struct{})
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 
@@ -352,17 +357,33 @@ func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability
 					continue
 				}
 
+				namespace := "ubuntu:" + database.UbuntuReleasesMapping[md["release"]]
+				fvKey := fvKey{
+					namespace: namespace,
+					name:      md["package"],
+					version:   version,
+				}
+
+				// For now, only dedupe feature versions when the prefix is the Xenial ESM
+				// because otherwise there will be a large number of diffs in the dump
+				if strings.HasPrefix(line, xenialESMLinePrefix) {
+					if _, ok := addFVs[fvKey]; ok {
+						continue
+					}
+				}
+
 				// Create and add the new package.
 				featureVersion := database.FeatureVersion{
 					Feature: database.Feature{
 						Namespace: database.Namespace{
-							Name:          "ubuntu:" + database.UbuntuReleasesMapping[md["release"]],
+							Name:          namespace,
 							VersionFormat: dpkg.ParserName,
 						},
 						Name: md["package"],
 					},
 					Version: version,
 				}
+				addFVs[fvKey] = struct{}{}
 				vulnerability.FixedIn = append(vulnerability.FixedIn, featureVersion)
 			}
 		}
