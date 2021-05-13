@@ -26,6 +26,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt/language"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
+	"github.com/stackrox/scanner/pkg/rhel"
 	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
@@ -179,10 +180,15 @@ func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability
 	return vuln
 }
 
-func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) *Feature {
+func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertified bool) *Feature {
 	version := dbFeatureVersion.Version
 	if version == versionfmt.MaxVersion {
 		version = "None"
+	}
+
+	addedBy := dbFeatureVersion.AddedBy.Name
+	if uncertified {
+		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
 	return &Feature{
@@ -190,7 +196,7 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) *Feature
 		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
 		VersionFormat: stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
 		Version:       version,
-		AddedBy:       dbFeatureVersion.AddedBy.Name,
+		AddedBy:       addedBy,
 		Location:      dbFeatureVersion.Feature.Location,
 	}
 }
@@ -242,7 +248,7 @@ func addLanguageVulns(db database.Datastore, layer *Layer, uncertifiedRHEL bool)
 
 	var languageFeatures []Feature
 	for _, dbFeatureVersion := range languageFeatureVersions {
-		feature := featureFromDatabaseModel(dbFeatureVersion)
+		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
 		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
 			languageFeatures = append(languageFeatures, *feature)
@@ -255,7 +261,6 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, opts 
 	withFeatures := opts.GetWithFeatures()
 	withVulnerabilities := opts.GetWithVulnerabilities()
 	uncertifiedRHEL := opts.GetUncertifiedRHEL()
-
 	layer := Layer{
 		Name:             dbLayer.Name,
 		IndexedByVersion: dbLayer.EngineVersion,
@@ -289,7 +294,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, opts 
 	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 	OUTER:
 		for _, dbFeatureVersion := range dbLayer.Features {
-			feature := featureFromDatabaseModel(dbFeatureVersion)
+			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL())
 
 			for _, prefix := range kernelPrefixes {
 				if strings.HasPrefix(feature.Name, prefix) {
