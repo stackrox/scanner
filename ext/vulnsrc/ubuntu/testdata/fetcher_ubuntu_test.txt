@@ -26,6 +26,7 @@ utopic_libmspack: ignored (reached end-of-life)
 vivid_libmspack : released ( 0.4-3 )
 devel_libmspack: not-affected
 unknown_libmspack: needed
+esm-infra/xenial_libmspack: needed
 
 Patches_libmspack-anotherpkg: wrong-syntax
 wily_libmspack-anotherpkg: released ((0.1)
@@ -33,3 +34,4 @@ utopic_libmspack-anotherpkg: not-affected
 trusty_libmspack-anotherpkg: needs-triage
 precise_libmspack-anotherpkg: released
 saucy_libmspack-anotherpkg: needed
+esm-infra/xenial_libmspack-anotherpkg: released (0.2)

@@ -68,7 +68,7 @@ var (
 		"product": {},
 	}
 
-	affectsCaptureRegexp      = regexp.MustCompile(`(?P<release>.*)_(?P<package>.*): (?P<status>[^\s]*)( \(+(?P<note>[^()]*)\)+)?`)
+	affectsCaptureRegexp      = regexp.MustCompile(`(esm-infra/)?(?P<release>.*)_(?P<package>.*): (?P<status>[^\s]*)( \(+(?P<note>[^()]*)\)+)?`)
 	affectsCaptureRegexpNames = affectsCaptureRegexp.SubexpNames()
 )
 
