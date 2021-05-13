@@ -131,6 +131,46 @@ func TestImageSanity(t *testing.T) {
 		checkContainsOnly  bool
 	}{
 		{
+			image:    "ubuntu:16.04",
+			registry: "https://registry-1.docker.io",
+			source:   "NVD",
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "lz4",
+					NamespaceName: "ubuntu:16.04",
+					VersionFormat: "dpkg",
+					Version:       "0.0~r131-2ubuntu2",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2019-17543",
+							NamespaceName: "ubuntu:16.04",
+							Description:   `LZ4 before 1.9.2 has a heap-based buffer overflow in LZ4_write32 (related to LZ4_compress_destSize), affecting applications that call LZ4_compress_fast with a large input. (This issue can also lead to data corruption.) NOTE: the vendor states "only a few specific / uncommon usages of the API are at risk."`,
+							Link:          "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-17543",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 8.6,
+										"ImpactScore":         6.4,
+										"PublishedDateTime":   "2019-10-14T02:15Z",
+										"Score":               6.8,
+										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+								},
+							},
+						},
+					},
+					AddedBy: "sha256:92473f7ef45574f608989888a6cfc8187d3a1425e3a63f974434acab03fed068",
+				},
+			},
+		},
+		{
 			image:    "docker.io/library/nginx:1.10",
 			registry: "https://registry-1.docker.io",
 			source:   "NVD",
