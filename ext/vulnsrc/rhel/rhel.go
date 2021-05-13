@@ -64,6 +64,8 @@ var (
 
 	cveIDRegexp  = regexp.MustCompile(`^oval:com\.redhat\.cve:def:(\d+)$`)
 	rhsaIDRegexp = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
+
+	ignoredCriterion = "Red Hat Enterprise Linux must be installed"
 )
 
 type oval struct {
@@ -169,20 +171,18 @@ func (u *updater) Update(_ vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
 
 	log.Info("RHEL: fetching bulk OVAL URIs")
 	var finalResp vulnsrc.UpdateResponse
-	coveredIDs := set.NewIntSet()
 	for url, osVersion := range bulkRHSAXMLBZ2URLs {
 		rhsaResp, err := getWithRetriesAndBackoff(url)
 		if err != nil {
 			log.WithError(err).Errorf("could not download RHEL's OVAL file from %s", url)
 			return finalResp, commonerr.ErrCouldNotDownload
 		}
-		previouslyCovered := len(coveredIDs)
 		vulns, err := parseBzip(rhsaResp.Body, osVersion)
 		if err != nil {
-			log.WithError(err).Errorf("could not prase RHEL's OVAL file from %s", url)
+			log.WithError(err).Errorf("could not parse RHEL's OVAL file from %s", url)
 			return finalResp, commonerr.ErrCouldNotParse
 		}
-		log.Infof("RHEL: done fetching OVAL file %s. Got %d vulns (%d RHSAs)", url, len(vulns), coveredIDs.Cardinality()-previouslyCovered)
+		log.Infof("RHEL: done fetching OVAL file %s. Got %d vulns", url, len(vulns))
 
 		finalResp.Vulnerabilities = append(finalResp.Vulnerabilities, vulns...)
 	}
@@ -365,6 +365,10 @@ func toFeatureVersions(criteria criteria, osVersion string) []database.FeatureVe
 
 	possibilities := getPossibilities(criteria)
 	for _, criterions := range possibilities {
+		if len(criterions) == 1 && criterions[0].Comment == ignoredCriterion {
+			continue
+		}
+
 		var featureVersion database.FeatureVersion
 		featureVersion.Version = versionfmt.MaxVersion
 
