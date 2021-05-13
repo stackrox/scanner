@@ -108,15 +108,13 @@ type Datastore interface {
 	// updated.
 	// The function has to be idempotent, inserting a layer that already exists
 	// shouldn't return an error.
-	InsertLayer(Layer) error
+	InsertLayer(Layer, *DatastoreOptions) error
 
 	// FindLayer retrieves a Layer from the database.
-	//
-	// When `withFeatures` is true, the Features field should be filled.
-	// When `withVulnerabilities` is true, the Features field should be filled
-	// and their AffectedBy fields should contain every vulnerabilities that
-	// affect them.
-	FindLayer(name string, withFeatures, withVulnerabilities bool) (Layer, error)
+	FindLayer(name string, opts *DatastoreOptions) (Layer, error)
+
+	// InsertRHELv2Layer inserts a RHELv2 layer into the database.
+	InsertRHELv2Layer(*RHELv2Layer) error
 
 	// InsertVulnerabilities stores the given Vulnerabilities in the database,
 	// updating them if necessary.
@@ -138,6 +136,19 @@ type Datastore interface {
 	// will contain the old and the updated Vulnerability, unless
 	// createNotification equals to true.
 	InsertVulnerabilities(vulnerabilities []Vulnerability) error
+
+	// InsertRHELv2Vulnerabilities stores the given RHELv2 vulnerabilities into
+	// the database.
+	InsertRHELv2Vulnerabilities(vulnerabilities []*RHELv2Vulnerability) error
+
+	// GetRHELv2Layers retrieves the corresponding layers for the image
+	// represented by the given layer.
+	// The returned slice is sorted in order from base layer to top.
+	GetRHELv2Layers(layer string) ([]*RHELv2Layer, error)
+
+	// GetRHELv2Vulnerabilities retrieves RHELv2 vulnerabilities based on the given records.
+	// The returned value maps package ID to the related vulnerabilities.
+	GetRHELv2Vulnerabilities(records []*RHELv2Record) (map[int][]*RHELv2Vulnerability, error)
 
 	// InsertKeyValue stores or updates a simple key/value pair in the database.
 	InsertKeyValue(key, value string) error
@@ -172,12 +183,12 @@ type Datastore interface {
 	FindLock(name string) (string, time.Time, error)
 
 	// Image
-	GetLayerBySHA(sha string) (string, bool, error)
-	GetLayerByName(name string) (string, bool, error)
-	AddImage(layer string, digest, name string) error
-	InsertLayerComponents(l string, c []*component.Component, r []string) error
+	GetLayerBySHA(sha string, opts *DatastoreOptions) (string, bool, error)
+	GetLayerByName(name string, opts *DatastoreOptions) (string, bool, error)
+	AddImage(layer string, digest, name string, opts *DatastoreOptions) error
+	InsertLayerComponents(l string, c []*component.Component, r []string, opts *DatastoreOptions) error
 
-	GetLayerLanguageComponents(layer string) ([]*component.LayerToComponents, error)
+	GetLayerLanguageComponents(layer string, opts *DatastoreOptions) ([]*component.LayerToComponents, error)
 
 	GetVulnerabilitiesForFeatureVersion(featureVersions FeatureVersion) ([]Vulnerability, error)
 

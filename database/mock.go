@@ -24,11 +24,15 @@ import (
 // The default behavior of each method is to simply panic.
 type MockDatastore struct {
 	FctListNamespaces                      func() ([]Namespace, error)
-	FctInsertLayer                         func(Layer) error
-	FctFindLayer                           func(name string, withFeatures, withVulnerabilities bool) (Layer, error)
+	FctInsertLayer                         func(Layer, *DatastoreOptions) error
+	FctFindLayer                           func(name string, opts *DatastoreOptions) (Layer, error)
 	FctDeleteLayer                         func(name string) error
+	FctInsertRHELv2Layer                   func(*RHELv2Layer) error
+	FctGetRHELv2Layers                     func(layer string) ([]*RHELv2Layer, error)
+	FctGetRHELv2Vulnerabilities            func(records []*RHELv2Record) (map[int][]*RHELv2Vulnerability, error)
 	FctListVulnerabilities                 func(namespaceName string, limit int, page int) ([]Vulnerability, int, error)
 	FctInsertVulnerabilities               func(vulnerabilities []Vulnerability) error
+	FctInsertRHELv2Vulnerabilities         func(vulnerabilities []*RHELv2Vulnerability) error
 	FctFindVulnerability                   func(namespaceName, name string) (Vulnerability, error)
 	FctDeleteVulnerability                 func(namespaceName, name string) error
 	FctInsertVulnerabilityFixes            func(vulnerabilityNamespace, vulnerabilityName string, fixes []FeatureVersion) error
@@ -40,22 +44,22 @@ type MockDatastore struct {
 	FctFindLock                            func(name string) (string, time.Time, error)
 	FctPing                                func() bool
 	FctClose                               func()
-	FctInsertLayerComponents               func(l string, c []*component.Component, r []string) error
-	FctGetLayerLanguageComponents          func(layer string) ([]*component.LayerToComponents, error)
+	FctInsertLayerComponents               func(l string, c []*component.Component, r []string, opts *DatastoreOptions) error
+	FctGetLayerLanguageComponents          func(layer string, opts *DatastoreOptions) ([]*component.LayerToComponents, error)
 	FctGetVulnerabilitiesForFeatureVersion func(featureVersions FeatureVersion) ([]Vulnerability, error)
 	FctFeatureExists                       func(namespace, feature string) (bool, error)
 }
 
-func (mds *MockDatastore) InsertLayer(layer Layer) error {
+func (mds *MockDatastore) InsertLayer(layer Layer, opts *DatastoreOptions) error {
 	if mds.FctInsertLayer != nil {
-		return mds.FctInsertLayer(layer)
+		return mds.FctInsertLayer(layer, opts)
 	}
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) FindLayer(name string, withFeatures, withVulnerabilities bool) (Layer, error) {
+func (mds *MockDatastore) FindLayer(name string, opts *DatastoreOptions) (Layer, error) {
 	if mds.FctFindLayer != nil {
-		return mds.FctFindLayer(name, withFeatures, withVulnerabilities)
+		return mds.FctFindLayer(name, opts)
 	}
 	panic("required mock function not implemented")
 }
@@ -63,6 +67,27 @@ func (mds *MockDatastore) FindLayer(name string, withFeatures, withVulnerabiliti
 func (mds *MockDatastore) DeleteLayer(name string) error {
 	if mds.FctDeleteLayer != nil {
 		return mds.FctDeleteLayer(name)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) InsertRHELv2Layer(layer *RHELv2Layer) error {
+	if mds.FctInsertRHELv2Layer != nil {
+		return mds.FctInsertRHELv2Layer(layer)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) GetRHELv2Layers(layer string) ([]*RHELv2Layer, error) {
+	if mds.FctGetRHELv2Layers != nil {
+		return mds.FctGetRHELv2Layers(layer)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) GetRHELv2Vulnerabilities(records []*RHELv2Record) (map[int][]*RHELv2Vulnerability, error) {
+	if mds.FctGetRHELv2Vulnerabilities != nil {
+		return mds.FctGetRHELv2Vulnerabilities(records)
 	}
 	panic("required mock function not implemented")
 }
@@ -77,6 +102,13 @@ func (mds *MockDatastore) ListVulnerabilities(namespaceName string, limit int, p
 func (mds *MockDatastore) InsertVulnerabilities(vulnerabilities []Vulnerability) error {
 	if mds.FctInsertVulnerabilities != nil {
 		return mds.FctInsertVulnerabilities(vulnerabilities)
+	}
+	panic("required mock function not implemented")
+}
+
+func (mds *MockDatastore) InsertRHELv2Vulnerabilities(vulnerabilities []*RHELv2Vulnerability) error {
+	if mds.FctInsertRHELv2Vulnerabilities != nil {
+		return mds.FctInsertRHELv2Vulnerabilities(vulnerabilities)
 	}
 	panic("required mock function not implemented")
 }
@@ -160,28 +192,28 @@ func (mds *MockDatastore) Close() {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) GetLayerBySHA(sha string) (string, bool, error) {
+func (mds *MockDatastore) GetLayerBySHA(sha string, opts *DatastoreOptions) (string, bool, error) {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) GetLayerByName(name string) (string, bool, error) {
+func (mds *MockDatastore) GetLayerByName(name string, opts *DatastoreOptions) (string, bool, error) {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) AddImage(layer string, digest, name string) error {
+func (mds *MockDatastore) AddImage(layer string, digest, name string, opts *DatastoreOptions) error {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) InsertLayerComponents(l string, c []*component.Component, r []string) error {
+func (mds *MockDatastore) InsertLayerComponents(l string, c []*component.Component, r []string, opts *DatastoreOptions) error {
 	if mds.FctInsertLayerComponents != nil {
-		return mds.FctInsertLayerComponents(l, c, r)
+		return mds.FctInsertLayerComponents(l, c, r, opts)
 	}
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) GetLayerLanguageComponents(layer string) ([]*component.LayerToComponents, error) {
+func (mds *MockDatastore) GetLayerLanguageComponents(layer string, opts *DatastoreOptions) ([]*component.LayerToComponents, error) {
 	if mds.FctGetLayerLanguageComponents != nil {
-		return mds.FctGetLayerLanguageComponents(layer)
+		return mds.FctGetLayerLanguageComponents(layer, opts)
 	}
 	panic("required mock function not implemented")
 }

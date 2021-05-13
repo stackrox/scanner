@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -65,8 +66,14 @@ func clairError(w http.ResponseWriter, status int, err error) {
 	clairErrorString(w, status, err.Error())
 }
 
-func (s *Server) getClairLayer(w http.ResponseWriter, layerName string) {
-	dbLayer, err := s.storage.FindLayer(layerName, true, true)
+func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, uncertifiedRHEL bool) {
+	opts := &database.DatastoreOptions{
+		WithVulnerabilities: true,
+		WithFeatures:        true,
+		UncertifiedRHEL:     uncertifiedRHEL,
+	}
+
+	dbLayer, err := s.storage.FindLayer(layerName, opts)
 	if err == commonerr.ErrNotFound {
 		clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layerName)
 		return
@@ -75,7 +82,7 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName string) {
 		return
 	}
 
-	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, true, true)
+	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, opts)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
@@ -101,7 +108,10 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusBadRequest, "sha must be provided")
 		return
 	}
-	layer, exists, err := s.storage.GetLayerBySHA(sha)
+	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
+	layer, exists, err := s.storage.GetLayerBySHA(sha, &database.DatastoreOptions{
+		UncertifiedRHEL: uncertifiedRHEL,
+	})
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
@@ -110,7 +120,7 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusNotFound, "Could not find sha %q", sha)
 		return
 	}
-	s.getClairLayer(w, layer)
+	s.getClairLayer(w, layer, uncertifiedRHEL)
 }
 
 func parseImagePath(path string) (string, error) {
@@ -137,8 +147,11 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
 	logrus.Debugf("Getting layer sha by name %s", image)
-	layer, exists, err := s.storage.GetLayerByName(image)
+	layer, exists, err := s.storage.GetLayerByName(image, &database.DatastoreOptions{
+		UncertifiedRHEL: uncertifiedRHEL,
+	})
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
@@ -147,7 +160,12 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusNotFound, "Could not find image %q", image)
 		return
 	}
-	s.getClairLayer(w, layer)
+	s.getClairLayer(w, layer, uncertifiedRHEL)
+}
+
+func getUncertifiedRHELResults(queryValues url.Values) bool {
+	values := queryValues[types.UncertifiedRHELResultsKey]
+	return len(values) == 1 && strings.EqualFold(values[0], "true")
 }
 
 func getAuth(authHeader string) (string, string, error) {
@@ -195,7 +213,7 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = server.ProcessImage(s.storage, image, imageRequest.Registry, username, password, imageRequest.Insecure)
+	_, err = server.ProcessImage(s.storage, image, imageRequest.Registry, username, password, imageRequest.Insecure, imageRequest.UncertifiedRHELScan)
 	if err != nil {
 		clairErrorString(w, http.StatusInternalServerError, "error processing image %q: %v", imageRequest.Image, err)
 		return

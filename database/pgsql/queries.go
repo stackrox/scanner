@@ -188,6 +188,133 @@ const (
 	updateLock        = `UPDATE Lock SET until = $3 WHERE name = $1 AND owner = $2`
 	removeLock        = `DELETE FROM Lock WHERE name = $1 AND owner = $2`
 	removeLockExpired = `DELETE FROM LOCK WHERE until < CURRENT_TIMESTAMP`
+
+	///////////////////////////////////////////////////
+	// BEGIN
+	// Influenced by ClairCore under Apache 2.0 License
+	// https://github.com/quay/claircore
+	///////////////////////////////////////////////////
+
+	insertRHELv2Vuln = `
+		INSERT INTO vuln (
+			hash,
+			name, description, issued, updated, link,
+			severity, cvss3, cvss2
+		) VALUES (
+			$1,
+			$2, $3, $4, $5, $6,
+			$7, $8, $9
+		)
+		ON CONFLICT (hash) DO NOTHING;`
+
+	insertRHELv2VulnPackage = `
+		INSERT INTO vuln_package (
+			hash,
+			name,
+			package_name, package_module, package_arch,
+			cpe,
+			fixed_in_version, arch_operation
+		) VALUES (
+			$1,
+			$2,
+			$3, $4, $5,
+			$6,
+			$7, $8
+		)
+		ON CONFLICT (hash) DO NOTHING;`
+
+	searchRHELv2Vulnerabilities = `
+		SELECT
+			vuln_package.id,
+			vuln_package.name,
+			vuln.description,
+			vuln.link,
+			vuln.issued,
+			vuln.updated,
+			vuln.severity,
+			vuln.cvss3,
+			vuln.cvss2,
+			vuln_package.package_name,
+			vuln_package.package_arch,
+			vuln_package.fixed_in_version,
+			vuln_package.arch_operation
+		FROM
+			vuln_package
+			LEFT JOIN vuln ON
+				vuln_package.name = vuln.name
+		WHERE
+			vuln_package.package_name = $1
+				AND vuln_package.package_module = $2
+				AND vuln_package.cpe = $3;`
+
+	insertRHELv2Layer = `
+		INSERT INTO rhelv2_layer (hash, parent_hash, dist, cpes)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (hash) DO NOTHING;`
+
+	// Inside the `WITH RECURSIVE`, the base case is the top query, and the
+	// recursive case is the bottom query.
+	// Base: find the layer by hash.
+	// Recursive: find the layer whose hash matches the current layer's parent hash
+	//
+	// This query looks for all the layers in the given layer's hierarchy.
+	searchRHELv2Layers = `
+		WITH RECURSIVE layers AS (
+			SELECT id, hash, parent_hash, dist, cpes
+			FROM rhelv2_layer
+			WHERE hash = $1
+			UNION
+				SELECT l.id, l.hash, l.parent_hash, l.dist, l.cpes
+				FROM layers ll, rhelv2_layer l
+				WHERE ll.parent_hash = l.hash
+		)
+		SELECT id, hash, dist, cpes
+		FROM layers;`
+
+	insertRHELv2Package = `
+		INSERT INTO rhelv2_package (name, version, module, arch)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (name, version, module, arch) DO NOTHING;`
+
+	insertRHELv2PackageArtifact = `
+		WITH package AS (
+			SELECT id AS package_id
+			FROM rhelv2_package
+			WHERE name = $1
+				AND version = $2
+				AND module = $3
+				AND arch = $4
+		),
+		layer AS (
+			SELECT id AS layer_id
+			FROM rhelv2_layer
+			WHERE rhelv2_layer.hash = $5
+		)
+		INSERT
+		INTO rhelv2_package_scanartifact (layer_id, package_id)
+		VALUES ((SELECT layer_id FROM layer), (SELECT package_id FROM package))
+		ON CONFLICT (layer_id, package_id) DO NOTHING;`
+
+	searchRHELv2Package = `
+		SELECT
+			rhelv2_package.id,
+			rhelv2_package.name,
+			rhelv2_package.version,
+			rhelv2_package.module,
+			rhelv2_package.arch
+		FROM
+			rhelv2_package_scanartifact
+			LEFT JOIN rhelv2_package ON
+				rhelv2_package_scanartifact.package_id = rhelv2_package.id
+			JOIN rhelv2_layer ON rhelv2_layer.hash = $1
+		WHERE
+			rhelv2_package_scanartifact.layer_id = rhelv2_layer.id;`
+
+	///////////////////////////////////////////////////
+	// END
+	// Influenced by ClairCore under Apache 2.0 License
+	// https://github.com/quay/claircore
+	///////////////////////////////////////////////////
 )
 
 // buildInputArray constructs a PostgreSQL input array from the specified integers.

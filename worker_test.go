@@ -49,18 +49,18 @@ func TestProcessWithDistUpgrade(t *testing.T) {
 
 	// Create a mock datastore.
 	datastore := newMockDatastore()
-	datastore.FctInsertLayer = func(layer database.Layer) error {
+	datastore.FctInsertLayer = func(layer database.Layer, opts *database.DatastoreOptions) error {
 		datastore.layers[layer.Name] = layer
 		return nil
 	}
-	datastore.FctFindLayer = func(name string, withFeatures, withVulnerabilities bool) (database.Layer, error) {
+	datastore.FctFindLayer = func(name string, opts *database.DatastoreOptions) (database.Layer, error) {
 		if layer, exists := datastore.layers[name]; exists {
 			return layer, nil
 		}
 		return database.Layer{}, commonerr.ErrNotFound
 	}
 
-	datastore.FctInsertLayerComponents = func(l string, c []*component.Component, r []string) error {
+	datastore.FctInsertLayerComponents = func(l string, c []*component.Component, r []string, opts *database.DatastoreOptions) error {
 		return nil
 	}
 

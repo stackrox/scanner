@@ -19,22 +19,15 @@
 package osrelease
 
 import (
-	"bufio"
-	"regexp"
-	"strings"
-
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
-	"github.com/stackrox/scanner/ext/featurens/util"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	"github.com/stackrox/scanner/pkg/osrelease"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 var (
-	osReleaseOSRegexp      = regexp.MustCompile(`^ID=(.*)`)
-	osReleaseVersionRegexp = regexp.MustCompile(`^VERSION_ID=(.*)`)
-
 	// blacklistFilenames are files that should exclude this detector.
 	blacklistFilenames = []string{
 		"etc/oracle-release",
@@ -49,7 +42,7 @@ func init() {
 	featurens.RegisterDetector("os-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
+func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
 	var OS, version string
 
 	for _, filePath := range blacklistFilenames {
@@ -64,23 +57,8 @@ func (d detector) Detect(files tarutil.FilesMap) *database.Namespace {
 			continue
 		}
 
-		scanner := bufio.NewScanner(strings.NewReader(string(f)))
-		for scanner.Scan() {
-			line := scanner.Text()
-
-			r := osReleaseOSRegexp.FindStringSubmatch(line)
-			if len(r) == 2 {
-				OS = strings.Replace(strings.ToLower(r[1]), "\"", "", -1)
-			}
-
-			r = osReleaseVersionRegexp.FindStringSubmatch(line)
-			if len(r) == 2 {
-				version = strings.Replace(strings.ToLower(r[1]), "\"", "", -1)
-			}
-		}
+		OS, version = osrelease.GetOSAndVersionFromOSRelease(f)
 	}
-
-	OS = util.NormalizeOSName(OS)
 
 	// Determine the VersionFormat.
 	var versionFormat string

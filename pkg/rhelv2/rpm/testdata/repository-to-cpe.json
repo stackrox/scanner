@@ -1,0 +1,14 @@
+{
+  "data": {
+    "rhel-8-for-x86_64-baseos-rpms": {
+      "cpes": [
+        "cpe:/o:redhat:enterprise_linux:8::baseos"
+      ]
+    },
+    "rhel-8-for-x86_64-appstream-rpms": {
+      "cpes": [
+        "cpe:/a:redhat:enterprise_linux:8::appstream"
+      ]
+    }
+  }
+}

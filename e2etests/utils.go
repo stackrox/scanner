@@ -69,16 +69,17 @@ func scanImage(client v1.ImageScanServiceClient, req *v1.ScanImageRequest, t *te
 	return scanImageResp
 }
 
-func scanPublicDockerHubImage(client v1.ImageScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
+func scanPublicDockerHubImage(client v1.ImageScanServiceClient, imageName string, uncertifiedRHEL bool, t *testing.T) *v1.ScanImageResponse {
 	return scanImage(client, &v1.ScanImageRequest{
 		Image: imageName,
 		Registry: &v1.ScanImageRequest_RegistryData{
 			Url: "https://registry-1.docker.io",
 		},
+		UncertifiedRHEL: uncertifiedRHEL,
 	}, t)
 }
 
-func scanDockerIOStackRoxImage(client v1.ImageScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
+func scanDockerIOStackRoxImage(client v1.ImageScanServiceClient, imageName string, uncertifiedRHEL bool, t *testing.T) *v1.ScanImageResponse {
 	user, pass := mustGetDockerCredentials(t)
 	return scanImage(client, &v1.ScanImageRequest{
 		Image: imageName,
@@ -87,6 +88,7 @@ func scanDockerIOStackRoxImage(client v1.ImageScanServiceClient, imageName strin
 			Username: user,
 			Password: pass,
 		},
+		UncertifiedRHEL: uncertifiedRHEL,
 	}, t)
 }
 

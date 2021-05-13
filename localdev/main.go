@@ -104,7 +104,7 @@ func analyzeLocalImage(path string) {
 		if err != nil {
 			panic(err)
 		}
-		namespace = clair.DetectNamespace(l, files, nil)
+		namespace = clair.DetectNamespace(l, files, nil, false)
 		if namespace != nil {
 			break
 		}
@@ -113,10 +113,14 @@ func analyzeLocalImage(path string) {
 	var total time.Duration
 	for _, l := range config.Layers {
 		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l]))
-		_, _, _, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace})
+		_, _, _, rhelv2Components, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace}, false)
 		if err != nil {
 			fmt.Println(err.Error())
 			return
+		}
+
+		if rhelv2Components != nil {
+			fmt.Printf("RHELv2 Components (%d): %s\n", len(rhelv2Components.Packages), rhelv2Components)
 		}
 
 		fmt.Printf("Removed components: %v\n", removedComponents)

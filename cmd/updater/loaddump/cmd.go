@@ -44,7 +44,7 @@ func Command() *cobra.Command {
 			return errors.Wrap(err, "creating scratch dir")
 		}
 		log.Info("Updating DB with vuln dump")
-		err = vulndump.UpdateFromVulnDump(dumpFile, scratchDir, db, 1*time.Hour, "updater", nil)
+		err = vulndump.UpdateFromVulnDump(dumpFile, scratchDir, db, 1*time.Hour, "updater", nil, nil)
 		if err != nil {
 			return errors.Wrap(err, "updating DB from dump")
 		}

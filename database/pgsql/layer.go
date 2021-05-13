@@ -24,9 +24,14 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/rhel"
 )
 
-func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities bool) (database.Layer, error) {
+func (pgSQL *pgSQL) FindLayer(name string, opts *database.DatastoreOptions) (database.Layer, error) {
+	withFeatures := opts.GetWithFeatures()
+	withVulnerabilities := opts.GetWithVulnerabilities()
+	uncertifiedRHEL := opts.GetUncertifiedRHEL()
+
 	subquery := "all"
 	if withFeatures {
 		subquery += "/features"
@@ -45,6 +50,10 @@ func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities boo
 		nsVersionFormat sql.NullString
 	)
 
+	if uncertifiedRHEL {
+		name = rhel.GetUncertifiedLayerName(name)
+	}
+
 	t := time.Now()
 	err := pgSQL.QueryRow(searchLayer, name).Scan(
 		&layer.ID,
@@ -59,11 +68,18 @@ func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities boo
 	)
 	observeQueryTime("FindLayer", "searchLayer", t)
 
+	if uncertifiedRHEL {
+		layer.Name = rhel.GetOriginalLayerName(layer.Name)
+	}
+
 	if err != nil {
 		return layer, handleError("searchLayer", err)
 	}
 
 	if !parentID.IsZero() {
+		if uncertifiedRHEL {
+			parentName.String = rhel.GetOriginalLayerName(parentName.String)
+		}
 		layer.Parent = &database.Layer{
 			Model: database.Model{ID: int(parentID.Int64)},
 			Name:  parentName.String,
@@ -242,7 +258,7 @@ func loadAffectedBy(tx *sql.Tx, featureVersions []database.FeatureVersion) error
 // (happens when Feature detectors relies on the detected layer Namespace). However, if the listed
 // Feature has the same Name/Version as its parent, InsertLayer considers that the Feature hasn't
 // been modified.
-func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
+func (pgSQL *pgSQL) InsertLayer(layer database.Layer, opts *database.DatastoreOptions) error {
 	tf := time.Now()
 
 	// Verify parameters
@@ -252,7 +268,10 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 	}
 
 	// Get a potentially existing layer.
-	existingLayer, err := pgSQL.FindLayer(layer.Name, true, false)
+	existingLayer, err := pgSQL.FindLayer(layer.Name, &database.DatastoreOptions{
+		WithFeatures:    true,
+		UncertifiedRHEL: opts.GetUncertifiedRHEL(),
+	})
 	if err != nil && err != commonerr.ErrNotFound {
 		return err
 	} else if err == nil {
@@ -291,6 +310,10 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer) error {
 		if layer.Parent.Namespace != nil {
 			namespaceID = zero.IntFrom(int64(layer.Parent.Namespace.ID))
 		}
+	}
+
+	if opts.GetUncertifiedRHEL() {
+		layer.Name = rhel.GetUncertifiedLayerName(layer.Name)
 	}
 
 	return pgSQL.insertLayerTx(&layer, namespaceID, parentID)

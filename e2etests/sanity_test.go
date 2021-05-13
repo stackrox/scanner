@@ -59,7 +59,9 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
-	env, err := client.RetrieveImageDataBySHA(img.SHA, true, true)
+	env, err := client.RetrieveImageDataBySHA(img.SHA, &types.GetImageDataOpts{
+		UncertifiedRHELResults: imageRequest.UncertifiedRHELScan,
+	})
 	require.NoError(t, err)
 	require.Nil(t, env.Error)
 
@@ -129,6 +131,7 @@ func TestImageSanity(t *testing.T) {
 		expectedFeatures   []v1.Feature
 		unexpectedFeatures []v1.Feature
 		checkContainsOnly  bool
+		uncertifiedRHEL    bool
 	}{
 		{
 			image:    "docker.io/library/nginx:1.10",
@@ -301,13 +304,14 @@ func TestImageSanity(t *testing.T) {
 			image:    "docker.io/anchore/anchore-engine:v0.5.0",
 			registry: "https://registry-1.docker.io",
 			source:   "Red Hat",
+			// This image is older than June 2020, so we need to explicitly request for an uncertified scan.
+			uncertifiedRHEL: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "procps-ng",
 					NamespaceName: "centos:7",
 					VersionFormat: "rpm",
 					Version:       "3.3.10-26.el7",
-					AddedBy:       "sha256:c8d67acdb2ffaebd638cf55a8fccc63693211060670aa7f0ea1d65b5d2c674dd",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2018-1121",
@@ -329,7 +333,6 @@ func TestImageSanity(t *testing.T) {
 										"Score":               3.9,
 										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 									},
-									"PublishedDateTime": "2018-05-17T17:00:00Z",
 								},
 							},
 						},
@@ -353,7 +356,6 @@ func TestImageSanity(t *testing.T) {
 										"Score":               3.9,
 										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:L",
 									},
-									"PublishedDateTime": "2018-05-17T17:00:00Z",
 								},
 							},
 						},
@@ -377,11 +379,11 @@ func TestImageSanity(t *testing.T) {
 										"Score":               4.4,
 										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L",
 									},
-									"PublishedDateTime": "2018-05-17T17:00:00Z",
 								},
 							},
 						},
 					},
+					AddedBy: "sha256:c8d67acdb2ffaebd638cf55a8fccc63693211060670aa7f0ea1d65b5d2c674dd",
 				},
 			},
 		},
@@ -397,8 +399,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "ubuntu:14.04",
 					VersionFormat: "dpkg",
 					Version:       "3.0pl1-124ubuntu2",
-
-					AddedBy: "sha256:bae382666908fd87a3a3646d7eb7176fa42226027d3256cac38ee0b79bdb0491",
+					AddedBy:       "sha256:bae382666908fd87a3a3646d7eb7176fa42226027d3256cac38ee0b79bdb0491",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2017-9525",
@@ -602,7 +603,7 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "microsoft.aspnetcore.app",
-					VersionFormat: "DotNetCoreRuntimeSourceType",
+					VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
 					Version:       "3.1.0",
 					Vulnerabilities: []v1.Vulnerability{
 						{
@@ -981,7 +982,7 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "jackson-databind",
-					VersionFormat: "JavaSourceType",
+					VersionFormat: component.JavaSourceType.String(),
 					Version:       "2.9.10.4",
 					Vulnerabilities: []v1.Vulnerability{
 						{
@@ -1217,7 +1218,7 @@ func TestImageSanity(t *testing.T) {
 			unexpectedFeatures: []v1.Feature{
 				{
 					Name:          "jackson-databind",
-					VersionFormat: "JavaSourceType",
+					VersionFormat: component.JavaSourceType.String(),
 					Version:       "2.6.6",
 				},
 			},
@@ -1232,17 +1233,17 @@ func TestImageSanity(t *testing.T) {
 			unexpectedFeatures: []v1.Feature{
 				{
 					Name:          "zookeeper",
-					VersionFormat: "JavaSourceType",
+					VersionFormat: component.JavaSourceType.String(),
 					Version:       "3.4.13",
 				},
 				{
 					Name:          "guava",
-					VersionFormat: "JavaSourceType",
+					VersionFormat: component.JavaSourceType.String(),
 					Version:       "18.0",
 				},
 				{
 					Name:          "netty",
-					VersionFormat: "JavaSourceType",
+					VersionFormat: component.JavaSourceType.String(),
 					Version:       "3.10.6.final",
 				},
 			},
@@ -1254,6 +1255,312 @@ func TestImageSanity(t *testing.T) {
 			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
 			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:   "NVD",
+		},
+		{
+			// One of the images used for Red Hat Scanner Certification.
+			image:             "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "Red Hat",
+			checkContainsOnly: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "rh-maven35-log4j12",
+					VersionFormat: "rpm",
+					Version:       "1.2.17-19.2.el7.noarch",
+					AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				},
+				{
+					Name:          "rh-maven35-jackson-databind",
+					VersionFormat: "rpm",
+					Version:       "2.7.6-2.10.el7.noarch",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2020:4173",
+							NamespaceName: "rhel:7",
+							Description:   "The jackson-databind package provides general data-binding functionality for Jackson, which works on top of Jackson core streaming API.\n\nSecurity Fix(es):\n\n* jackson-databind: Serialization gadgets in com.pastdev.httpcomponents.configuration.JndiConfiguration (CVE-2020-24750)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4173",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "0:2.7.6-2.11.el7",
+						},
+					},
+					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				},
+				{
+					Name:          "vim-minimal",
+					VersionFormat: "rpm",
+					Version:       "2:7.4.629-6.el7.x86_64",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2017-1000382",
+							NamespaceName: "rhel:7",
+							Description:   "DOCUMENTATION: It was found that vim applies the opened file read permissions to the swap file, overriding the process' umask. An attacker might search for vim swap files that were not deleted properly, in order to retrieve sensitive data.\n            STATEMENT: Red Hat Product Security has rated this issue as having Low security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
+							Link:          "https://access.redhat.com/security/cve/CVE-2017-1000382",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         3.6,
+										"Score":               5.5,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+						},
+					},
+					AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
+				},
+			},
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:    "jackson-databind",
+					Version: "2.7.6",
+				},
+			},
+		},
+		{
+			// One of the images used for Red Hat Scanner Certification with a chown on jackson-databind that should not show up in the results.
+			image:             "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7-chown",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "Red Hat",
+			checkContainsOnly: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "rh-maven35-log4j12",
+					VersionFormat: "rpm",
+					Version:       "1.2.17-19.2.el7.noarch",
+					AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				},
+				{
+					Name:          "rh-maven35-jackson-databind",
+					VersionFormat: "rpm",
+					Version:       "2.7.6-2.10.el7.noarch",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2020:4173",
+							NamespaceName: "rhel:7",
+							Description:   "The jackson-databind package provides general data-binding functionality for Jackson, which works on top of Jackson core streaming API.\n\nSecurity Fix(es):\n\n* jackson-databind: Serialization gadgets in com.pastdev.httpcomponents.configuration.JndiConfiguration (CVE-2020-24750)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4173",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "0:2.7.6-2.11.el7",
+						},
+					},
+					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				},
+				{
+					Name:          "vim-minimal",
+					VersionFormat: "rpm",
+					Version:       "2:7.4.629-6.el7.x86_64",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2017-1000382",
+							NamespaceName: "rhel:7",
+							Description:   "DOCUMENTATION: It was found that vim applies the opened file read permissions to the swap file, overriding the process' umask. An attacker might search for vim swap files that were not deleted properly, in order to retrieve sensitive data.\n            STATEMENT: Red Hat Product Security has rated this issue as having Low security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
+							Link:          "https://access.redhat.com/security/cve/CVE-2017-1000382",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         3.6,
+										"Score":               5.5,
+										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+						},
+					},
+					AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
+				},
+			},
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:    "jackson-databind",
+					Version: "2.7.6",
+				},
+			},
+		},
+		{
+			// One of the images used for Red Hat Scanner Certification.
+			image:             "docker.io/stackrox/sandbox:nodejs-10",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "Red Hat",
+			checkContainsOnly: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "nodejs-full-i18n",
+					VersionFormat: "rpm",
+					Version:       "1:10.21.0-3.module+el8.2.0+7071+d2377ea3.x86_64",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2021:0548",
+							NamespaceName: "rhel:8",
+							Description:   "Node.js is a software development platform for building fast and scalable network applications in the JavaScript programming language. \n\nThe following packages have been upgraded to a later upstream version: nodejs (10.23.1).\n\nSecurity Fix(es):\n\n* libuv: buffer overflow in realpath (CVE-2020-8252)\n\n* nodejs-npm-user-validate: improper input validation when validating user emails leads to ReDoS (CVE-2020-7754)\n\n* nodejs-y18n: prototype pollution vulnerability (CVE-2020-7774)\n\n* nodejs-ini: prototype pollution via malicious INI file (CVE-2020-7788)\n\n* nodejs-dot-prop: prototype pollution (CVE-2020-8116)\n\n* nodejs: use-after-free in the TLS implementation (CVE-2020-8265)\n\n* npm: sensitive information exposure through logs (CVE-2020-15095)\n\n* nodejs-ajv: prototype pollution via crafted JSON schema in ajv.validate function (CVE-2020-15366)\n\n* nodejs-yargs-parser: prototype pollution vulnerability (CVE-2020-7608)\n\n* nodejs: HTTP request smuggling via two copies of a header field in an http request (CVE-2020-8287)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2021:0548",
+							Severity:      "Moderate",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 2.2,
+										"ImpactScore":         5.9,
+										"Score":               8.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "1:10.23.1-1.module+el8.3.0+9502+012d8a97",
+						},
+						{
+							Name:          "RHSA-2021:0735",
+							NamespaceName: "rhel:8",
+							Description:   "Node.js is a software development platform for building fast and scalable network applications in the JavaScript programming language. \n\nThe following packages have been upgraded to a later upstream version: nodejs (10.24.0).\n\nSecurity Fix(es):\n\n* nodejs: HTTP2 'unknownProtocol' cause DoS by resource exhaustion (CVE-2021-22883)\n\n* nodejs: DNS rebinding in --inspect (CVE-2021-22884)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2021:0735",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "1:10.24.0-1.module+el8.3.0+10166+b07ac28e",
+						},
+					},
+					AddedBy: "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
+					FixedBy: "1:10.24.0-1.module+el8.3.0+10166+b07ac28e",
+				},
+				{
+					Name:          "freetype",
+					VersionFormat: "rpm",
+					Version:       "2.9.1-4.el8.x86_64",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2020:4952",
+							NamespaceName: "rhel:8",
+							Description:   "FreeType is a free, high-quality, portable font engine that can open and manage font files. FreeType loads, hints, and renders individual glyphs efficiently.\n\nSecurity Fix(es):\n\n* freetype: Heap-based buffer overflow due to integer truncation in Load_SBit_Png (CVE-2020-15999)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4952",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         4.7,
+										"Score":               8.6,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "0:2.9.1-4.el8_3.1",
+						},
+					},
+					AddedBy: "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
+					FixedBy: "2.9.1-4.el8_3.1",
+				},
+				{
+					Name:          "libsolv",
+					VersionFormat: "rpm",
+					Version:       "0.7.7-1.el8.x86_64",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "RHSA-2020:4508",
+							NamespaceName: "rhel:8",
+							Description:   "The libsolv packages provide a library for resolving package dependencies using a satisfiability algorithm.\n\nThe following packages have been upgraded to a later upstream version: libsolv (0.7.11). (BZ#1809106)\n\nSecurity Fix(es):\n\n* libsolv: out-of-bounds read in repodata_schema2id in repodata.c (CVE-2019-20387)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.\n\nAdditional Changes:\n\nFor detailed information on changes in this release, see the Red Hat Enterprise Linux 8.3 Release Notes linked from the References section.",
+							Link:          "https://access.redhat.com/errata/RHSA-2020:4508",
+							Severity:      "Moderate",
+							Metadata: map[string]interface{}{
+								"Red Hat": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "0:0.7.11-1.el8",
+						},
+					},
+					AddedBy: "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
+					FixedBy: "0.7.11-1.el8",
+				},
+			},
 		},
 		{
 			image:    "registry.redhat.io/openshift3/logging-elasticsearch",
@@ -1272,7 +1579,7 @@ func TestImageSanity(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
+			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
 		})
 	}
 }

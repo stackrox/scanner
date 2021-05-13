@@ -26,7 +26,8 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt/language"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
-	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
+	"github.com/stackrox/scanner/pkg/rhel"
+	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
 // These are possible package prefixes or suffixes. Package managers sometimes annotate
@@ -69,8 +70,10 @@ type Layer struct {
 // A known issue is if a file defines multiple features, and the file is modified between layers in a way
 // that does affect the features it describes (adds, updates, or removes features), which is currently only a
 // concern for the Java source type. However, this event is unlikely, which is why it is not considered at this time.
-func getLanguageData(db database.Datastore, layerName string) ([]database.FeatureVersion, error) {
-	layersToComponents, err := db.GetLayerLanguageComponents(layerName)
+func getLanguageData(db database.Datastore, layerName string, uncertifiedRHEL bool) ([]database.FeatureVersion, error) {
+	layersToComponents, err := db.GetLayerLanguageComponents(layerName, &database.DatastoreOptions{
+		UncertifiedRHEL: uncertifiedRHEL,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -82,6 +85,21 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 	var removedLanguageComponentLocations []string
 	var features []database.FeatureVersion
 
+	// ignoredLanguageComponents keeps track of the language components that were ignored because
+	// they came from the package manager. This is from lowest (base image) up to the highest because
+	// modifications to the files in later layers may not have a package manager change associated (e.g. chown a JAR)
+	ignoredLanguageComponents := make(map[string]languageFeatureValue)
+	for _, layerToComponent := range layersToComponents {
+		for _, c := range layerToComponent.Components {
+			if c.FromPackageManager {
+				ignoredLanguageComponents[c.Location] = languageFeatureValue{
+					name:    c.Name,
+					version: c.Version,
+				}
+			}
+		}
+	}
+
 	// Loop from highest layer to lowest.
 	for i := len(layersToComponents) - 1; i >= 0; i-- {
 		layerToComponents := layersToComponents[i]
@@ -89,6 +107,12 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 		// Ignore components which were removed in higher layers.
 		components := layerToComponents.Components[:0]
 		for _, c := range layerToComponents.Components {
+			if c.FromPackageManager {
+				continue
+			}
+			if lfv, ok := ignoredLanguageComponents[c.Location]; ok && lfv.name == c.Name && lfv.version == c.Version {
+				continue
+			}
 			include := true
 			for _, removedLocation := range removedLanguageComponentLocations {
 				if strings.HasPrefix(c.Location, removedLocation) {
@@ -96,6 +120,7 @@ func getLanguageData(db database.Datastore, layerName string) ([]database.Featur
 					break
 				}
 			}
+
 			if include {
 				components = append(components, c)
 			}
@@ -155,10 +180,15 @@ func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability
 	return vuln
 }
 
-func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) *Feature {
+func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertified bool) *Feature {
 	version := dbFeatureVersion.Version
 	if version == versionfmt.MaxVersion {
 		version = "None"
+	}
+
+	addedBy := dbFeatureVersion.AddedBy.Name
+	if uncertified {
+		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
 	return &Feature{
@@ -166,7 +196,7 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion) *Feature
 		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
 		VersionFormat: stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
 		Version:       version,
-		AddedBy:       dbFeatureVersion.AddedBy.Name,
+		AddedBy:       addedBy,
 		Location:      dbFeatureVersion.Feature.Location,
 	}
 }
@@ -208,9 +238,9 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 
 // addLanguageVulns adds language-based features into the given layer.
 // Assumes layer is not nil.
-func addLanguageVulns(db database.Datastore, layer *Layer) {
+func addLanguageVulns(db database.Datastore, layer *Layer, uncertifiedRHEL bool) {
 	// Add Language Features
-	languageFeatureVersions, err := getLanguageData(db, layer.Name)
+	languageFeatureVersions, err := getLanguageData(db, layer.Name, uncertifiedRHEL)
 	if err != nil {
 		log.Errorf("error getting language data: %v", err)
 		return
@@ -218,7 +248,7 @@ func addLanguageVulns(db database.Datastore, layer *Layer) {
 
 	var languageFeatures []Feature
 	for _, dbFeatureVersion := range languageFeatureVersions {
-		feature := featureFromDatabaseModel(dbFeatureVersion)
+		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
 		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
 			languageFeatures = append(languageFeatures, *feature)
@@ -227,7 +257,19 @@ func addLanguageVulns(db database.Datastore, layer *Layer) {
 	layer.Features = append(layer.Features, languageFeatures...)
 }
 
-func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withFeatures, withVulnerabilities bool) (Layer, []Note, error) {
+func hasKernelPrefix(name string) bool {
+	for _, prefix := range kernelPrefixes {
+		if strings.HasPrefix(name, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, opts *database.DatastoreOptions) (Layer, []Note, error) {
+	withFeatures := opts.GetWithFeatures()
+	withVulnerabilities := opts.GetWithVulnerabilities()
+	uncertifiedRHEL := opts.GetUncertifiedRHEL()
 	layer := Layer{
 		Name:             dbLayer.Name,
 		IndexedByVersion: dbLayer.EngineVersion,
@@ -241,9 +283,9 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	if dbLayer.Namespace != nil {
 		layer.NamespaceName = dbLayer.Namespace.Name
 
-		if wellknownnamespaces.KnownStaleNamespaces.Contains(layer.NamespaceName) {
+		if namespaces.KnownStaleNamespaces.Contains(layer.NamespaceName) {
 			notes = append(notes, OSCVEsStale)
-		} else if !wellknownnamespaces.KnownSupportedNamespaces.Contains(layer.NamespaceName) {
+		} else if !namespaces.KnownSupportedNamespaces.Contains(layer.NamespaceName) {
 			notes = append(notes, OSCVEsUnavailable)
 		}
 	} else {
@@ -253,23 +295,34 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, withF
 	if !env.LanguageVulns.Enabled() {
 		notes = append(notes, LanguageCVEsUnavailable)
 	}
+	if uncertifiedRHEL {
+		// Uncertified results were requested.
+		notes = append(notes, CertifiedRHELScanUnavailable)
+	}
 
-	if (withFeatures || withVulnerabilities) && dbLayer.Features != nil {
-	OUTER:
+	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
-			feature := featureFromDatabaseModel(dbFeatureVersion)
+			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL())
 
-			for _, prefix := range kernelPrefixes {
-				if strings.HasPrefix(feature.Name, prefix) {
-					continue OUTER
-				}
+			if hasKernelPrefix(feature.Name) {
+				continue
 			}
 
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, dbFeatureVersion.Feature.Namespace.VersionFormat)
 			layer.Features = append(layer.Features, *feature)
 		}
+		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
+			certified, err := addRHELv2Vulns(db, &layer)
+			if err != nil {
+				return layer, notes, err
+			}
+			if !certified {
+				// Client expected certified results, but they are unavailable.
+				notes = append(notes, CertifiedRHELScanUnavailable)
+			}
+		}
 		if env.LanguageVulns.Enabled() {
-			addLanguageVulns(db, &layer)
+			addLanguageVulns(db, &layer, uncertifiedRHEL)
 		}
 	}
 
@@ -409,6 +462,10 @@ const (
 	// LanguageCVEsUnavailable labels scans of images with without language CVEs.
 	// This is typically only populated when language CVEs are not enabled.
 	LanguageCVEsUnavailable
+	// CertifiedRHELScanUnavailable labels scans of RHEL-based images out-of-scope
+	// of the Red Hat Certification program.
+	// These images were made before June 2020, and they are missing content manifest JSON files.
+	CertifiedRHELScanUnavailable
 )
 
 type VulnerabilityEnvelope struct {

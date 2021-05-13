@@ -18,6 +18,7 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/cache"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/wellknownkeys"
 	"github.com/stackrox/scanner/pkg/ziputil"
 )
@@ -141,14 +142,16 @@ func renew(sig *concurrency.Signal, db database.Datastore, interval time.Duratio
 
 }
 
-func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) error {
+// startVulnLoad determines if this scanner should perform a vulnerability update and performs the necessary setup.
+// The returned function should be performed upon update completion.
+func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) (bool, func() error, error) {
 	shouldUpdate, err := determineWhetherToUpdate(db, manifest)
 	if err != nil {
-		return errors.Wrap(err, "determining whether to update")
+		return false, nil, errors.Wrap(err, "determining whether to update")
 	}
 	if !shouldUpdate {
 		log.Info("DB already contains all the vulns in the dump. Nothing to do here!")
-		return nil
+		return false, nil, nil
 	}
 	log.Info("Running the update.")
 
@@ -156,15 +159,30 @@ func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore
 	if !gotLock {
 		owner, _, err := db.FindLock(updateLockName)
 		if err != nil {
-			return err
+			return false, nil, err
 		}
 		log.Infof("DB update lock already acquired by %q", owner)
-		return nil
+		return false, nil, nil
 	}
 	finishedSig := concurrency.NewSignal()
 	go renew(&finishedSig, db, updateInterval, expiration, instanceName)
-	defer finishedSig.Signal()
 
+	return true, func() error {
+		defer finishedSig.Signal()
+
+		log.Info("Done inserting vulns into the DB")
+
+		marshaledDumpTS, err := manifest.Until.MarshalText()
+		// Really shouldn't happen because we literally just unmarshalled it.
+		utils.Must(err)
+		if err := db.InsertKeyValue(wellknownkeys.VulnUpdateTimestampKey, string(marshaledDumpTS)); err != nil {
+			return errors.Wrap(err, "couldn't update timestamp key in DB")
+		}
+		return nil
+	}, nil
+}
+
+func loadOSVulns(zipR *zip.ReadCloser, db database.Datastore) error {
 	log.Info("Loading OS vulns...")
 	osVulns, err := LoadOSVulnsFromDump(zipR)
 	if err != nil {
@@ -175,13 +193,61 @@ func loadOSVulns(zipR *zip.ReadCloser, manifest *Manifest, db database.Datastore
 	if err := db.InsertVulnerabilities(osVulns); err != nil {
 		return errors.Wrap(err, "inserting vulns into the DB")
 	}
-	log.Info("Done inserting vulns into the DB")
-	marshaledDumpTS, err := manifest.Until.MarshalText()
-	// Really shouldn't happen because we literally just unmarshalled it.
-	utils.Must(err)
-	if err := db.InsertKeyValue(wellknownkeys.VulnUpdateTimestampKey, string(marshaledDumpTS)); err != nil {
-		return errors.Wrap(err, "couldn't update timestamp key in DB")
+	log.Info("Done inserting OS vulns into the DB")
+	return nil
+}
+
+func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCPE *repo2cpe.Mapping) error {
+	rhelv2Dir := filepath.Join(scratchDir, RHELv2DirName)
+
+	if repoToCPE != nil {
+		targetFile := filepath.Join(RHELv2DirName, repo2cpe.RHELv2CPERepoName)
+		if err := ziputil.Extract(zipPath, targetFile, scratchDir); err != nil {
+			log.WithError(err).Errorf("Failed to extract %s from ZIP", targetFile)
+			return err
+		}
+		if err := repoToCPE.Load(rhelv2Dir); err != nil {
+			return errors.Wrapf(err, "couldn't update in mem repository-to-cpe.json copy")
+		}
 	}
+
+	// RHELv2 contents inside ZIP file.
+	targetDir := filepath.Join(RHELv2DirName, RHELv2VulnsSubDirName)
+	if err := ziputil.Extract(zipPath, targetDir, scratchDir); err != nil {
+		log.WithError(err).Errorf("Failed to extract %s dump from ZIP", targetDir)
+		return err
+	}
+
+	// Extracted RHELv2 vulns directory.
+	vulnDir := filepath.Join(rhelv2Dir, RHELv2VulnsSubDirName)
+	files, err := os.ReadDir(vulnDir)
+	if err != nil {
+		return errors.Wrap(err, "reading scratch dir for RHELv2")
+	}
+	for _, file := range files {
+		if filepath.Ext(file.Name()) != ".json" {
+			continue
+		}
+
+		f, err := os.Open(filepath.Join(vulnDir, file.Name()))
+		if err != nil {
+			return errors.Wrapf(err, "opening file at %q", file.Name())
+		}
+		defer utils.IgnoreError(f.Close)
+
+		var vulns RHELv2
+		if err := json.NewDecoder(f).Decode(&vulns); err != nil {
+			return errors.Wrapf(err, "decoding %q JSON from reader", file.Name())
+		}
+
+		log.Infof("Inserting vulns from %q into DB", file.Name())
+		if err := db.InsertRHELv2Vulnerabilities(vulns.Vulns); err != nil {
+			return errors.Wrapf(err, "inserting RHELv2 vulns from %q into the DB", file.Name())
+		}
+		log.Infof("Done inserting vulns from %q into DB", file.Name())
+	}
+
+	log.Info("Done inserting RHELv2 vulns into the DB")
 	return nil
 }
 
@@ -210,7 +276,7 @@ func loadApplicationUpdater(cache cache.Cache, manifest *Manifest, zipPath, scra
 // Check the well_known_names.go file for the manifest of the ZIP file.
 // The caller is responsible for providing a path to a scratchDir, which MUST be an empty, but existing, directory.
 // This function will delete the directory before returning.
-func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore, updateInterval time.Duration, instanceName string, caches []cache.Cache) error {
+func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore, updateInterval time.Duration, instanceName string, caches []cache.Cache, repoToCPE *repo2cpe.Mapping) error {
 	log.Infof("Attempting to update from vuln dump at %q", zipPath)
 	if !fileutils.DirExistsAndIsEmpty(scratchDir) {
 		return errors.Errorf("scratchDir %q invalid: must be an empty directory", scratchDir)
@@ -238,8 +304,24 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 	log.Info("Loaded manifest")
 
 	if db != nil {
-		if err := loadOSVulns(zipR, manifest, db, updateInterval, instanceName); err != nil {
-			return errors.Wrap(err, "error loading OS vulns")
+		performUpdate, finishFn, err := startVulnLoad(manifest, db, updateInterval, instanceName)
+		if err != nil {
+			return errors.Wrap(err, "error beginning vuln loading")
+		}
+		if performUpdate {
+			if err := loadRHELv2Vulns(db, zipPath, scratchDir, repoToCPE); err != nil {
+				utils.IgnoreError(finishFn)
+				return errors.Wrap(err, "error loading RHEL vulns")
+			}
+
+			if err := loadOSVulns(zipR, db); err != nil {
+				utils.IgnoreError(finishFn)
+				return errors.Wrap(err, "error loading OS vulns")
+			}
+
+			if err := finishFn(); err != nil {
+				return errors.Wrap(err, "error ending vuln loading")
+			}
 		}
 	}
 
