@@ -94,6 +94,14 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 	return &resp, nil
 }
 
+// GetOpenShiftVulnerabilities returns Openshift vulnerabilities for requested Openshift version.
+func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.GetOpenShiftVulnerabilitiesRequest) (*v1.GetOpenShiftVulnerabilitiesResponse, error) {
+	var err error
+	var resp v1.GetOpenShiftVulnerabilitiesResponse
+
+	return &resp, err
+}
+
 // RegisterServiceServer registers this service with the given gRPC Server.
 func (s *serviceImpl) RegisterServiceServer(grpcServer *grpc.Server) {
 	v1.RegisterOrchestratorScanServiceServer(grpcServer, s)

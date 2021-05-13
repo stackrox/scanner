@@ -21,11 +21,29 @@ message GetKubeVulnerabilitiesResponse {
     repeated Vulnerability generic_vulnerabilities            = 5;
 }
 
-// KubeScanService APIs can be used to get vulnerabilities for Kubernetes components.
+message GetOpenShiftVulnerabilitiesRequest {
+    string openShift_version = 1;
+}
+
+message ListOfVulnerability {
+    repeated Vulnerability vulns = 1;
+}
+
+message GetOpenShiftVulnerabilitiesResponse {
+    map<string, ListOfVulnerability> component_to_vulnerabilities = 1;
+}
+
+// OrchestratorScanService APIs can be used to get vulnerabilities for Kubernetes and Openshift components.
 service OrchestratorScanService {
     rpc GetKubeVulnerabilities(GetKubeVulnerabilitiesRequest) returns (GetKubeVulnerabilitiesResponse) {
         option (google.api.http) = {
             get: "/v1/orchestrator/kube/vulnerabilities"
+        };
+    }
+
+    rpc GetOpenShiftVulnerabilities(GetOpenShiftVulnerabilitiesRequest) returns (GetOpenShiftVulnerabilitiesResponse) {
+        option (google.api.http) = {
+            get: "/v1/orchestrator/openshift/vulnerabilities"
         };
     }
 }
