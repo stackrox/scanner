@@ -18,10 +18,6 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/types"
 )
 
-const (
-	emptyLayer = "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4"
-)
-
 func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string, uncertifiedRHEL bool) error {
 	var prevLayer string
 	for _, layer := range layers {
@@ -84,7 +80,11 @@ func process(storage database.Datastore, image *types.Image, reg types.Registry,
 }
 
 func isEmptyLayer(layer string) bool {
-	return layer == emptyLayer
+	return layer == "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4"
+}
+
+func isEmptyLayerSize(size int64) bool {
+	return size == 32
 }
 
 func parseV1Layers(manifest *schema1.SignedManifest) []string {
@@ -103,7 +103,7 @@ func parseV1Layers(manifest *schema1.SignedManifest) []string {
 func parseLayers(manifestLayers []distribution.Descriptor) []string {
 	var layers []string
 	for _, layer := range manifestLayers {
-		if isEmptyLayer(layer.Digest.String()) {
+		if isEmptyLayer(layer.Digest.String()) || isEmptyLayerSize(layer.Size) {
 			continue
 		}
 		layers = append(layers, layer.Digest.String())
