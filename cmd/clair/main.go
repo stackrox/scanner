@@ -157,7 +157,7 @@ func Boot(config *Config) {
 	grpcAPI.Register(
 		ping.NewService(),
 		imagescan.NewService(db, nvdVulnCache),
-		orchestratorscan.NewService(k8sVulnCache),
+		orchestratorscan.NewService(db, k8sVulnCache),
 		nodescan.NewService(db, nvdVulnCache, k8sVulnCache),
 		vulndefs.NewService(db),
 	)

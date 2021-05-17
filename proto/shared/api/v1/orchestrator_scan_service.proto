@@ -25,12 +25,8 @@ message GetOpenShiftVulnerabilitiesRequest {
     string openShift_version = 1;
 }
 
-message ListOfVulnerability {
-    repeated Vulnerability vulns = 1;
-}
-
 message GetOpenShiftVulnerabilitiesResponse {
-    map<string, ListOfVulnerability> component_to_vulnerabilities = 1;
+    repeated Vulnerability vulnerabilities = 1;
 }
 
 // OrchestratorScanService APIs can be used to get vulnerabilities for Kubernetes and Openshift components.
