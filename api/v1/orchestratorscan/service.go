@@ -2,14 +2,13 @@ package orchestratorscan
 
 import (
 	"context"
-	rpmVersion "github.com/knqyf263/go-rpm-version"
-	"github.com/stackrox/scanner/database"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/convert"
+	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"google.golang.org/grpc"
@@ -26,13 +25,13 @@ type Service interface {
 // NewService returns the service for scanning
 func NewService(db database.Datastore, k8sCache k8scache.Cache) Service {
 	return &serviceImpl{
-		db: db,
+		db:       db,
 		k8sCache: k8sCache,
 	}
 }
 
 type serviceImpl struct {
-	db database.Datastore
+	db       database.Datastore
 	k8sCache k8scache.Cache
 }
 
@@ -102,60 +101,28 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.GetOpenShiftVulnerabilitiesRequest) (*v1.GetOpenShiftVulnerabilitiesResponse, error) {
 	var err error
 	var resp v1.GetOpenShiftVulnerabilitiesResponse
-	version, err := New(req.OpenShiftVersion)
+	version, err := newVersion(req.OpenShiftVersion)
 	if err != nil {
 		return nil, err
 	}
-	pkg :=  &database.RHELv2Package{
-		Name: "openshift-hyperkube",
+	_ = &database.RHELv2Package{ // pkg
+		Name:    "openshift-hyperkube",
 		Version: req.OpenShiftVersion,
-		Model: database.Model{ID: 1},
+		Model:   database.Model{ID: 1},
 	}
 
 	records := []*database.RHELv2Record{
 		{
 			Pkg: &database.RHELv2Package{
-				Name: "openshift-hyperkube",
+				Name:    "openshift-hyperkube",
 				Version: req.OpenShiftVersion,
 			},
 			CPE: version.GetCPE(),
 		},
 	}
-	vulns, err := s.db.GetRHELv2Vulnerabilities(records)
-
-	for _, vuln := range vulns[pkg.ID] {
-		if len(vuln.PackageInfos) != 1 {
-			log.Warnf("Unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
-			continue
-		}
-		vulnPkgInfo := vuln.PackageInfos[0]
-
-		if len(vulnPkgInfo.Packages) != 1 {
-			log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vulnPkgInfo.Packages), 1)
-			continue
-		}
-		vulnPkg := vulnPkgInfo.Packages[0]
-
-		// Assume the vulnerability is not fixed.
-		// In that case, all versions are affected.
-		affectedVersion := true
-		var vulnVersion *rpmVersion.Version
-		if vulnPkgInfo.FixedInVersion != "" {
-			// The vulnerability is fixed. Determine if this package is affected.
-			vulnVersion = rpmVersionPtr(rpmVersion.NewVersion(vulnPkgInfo.FixedInVersion))
-			affectedVersion = pkgVersion.LessThan(*vulnVersion)
-		}
-
-		// Compare the package's architecture to the affected architecture.
-		affectedArch := vulnPkgInfo.ArchOperation.Cmp(pkgArch, vulnPkg.Arch)
-
-		if affectedVersion && affectedArch {
-			feature.Vulnerabilities = append(feature.Vulnerabilities, rhelv2ToVulnerability(vuln, feature.NamespaceName))
-
-			if vulnVersion != nil && vulnVersion.GreaterThan(fixedBy) {
-				fixedBy = *vulnVersion
-			}
-		}
+	_, err = s.db.GetRHELv2Vulnerabilities(records) // vulns
+	if err != nil {
+		return nil, err
 	}
 
 	return &resp, err

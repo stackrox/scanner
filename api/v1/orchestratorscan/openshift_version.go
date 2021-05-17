@@ -1,8 +1,9 @@
 package orchestratorscan
 
 import (
-	"github.com/pkg/errors"
 	"regexp"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -13,11 +14,11 @@ var (
 )
 
 type openShiftVersion struct {
-	version string
+	version       string
 	versionFamily string
 }
 
-func New(version string) (*openShiftVersion, error) {
+func newVersion(version string) (*openShiftVersion, error) {
 	var matched []string
 	matched = version4XRegex.FindStringSubmatch(version)
 	if len(matched) == 0 {
@@ -29,7 +30,7 @@ func New(version string) (*openShiftVersion, error) {
 	}
 
 	return &openShiftVersion{
-		version: version,
+		version:       version,
 		versionFamily: matched[1],
 	}, nil
 }
