@@ -108,10 +108,10 @@ type Datastore interface {
 	// updated.
 	// The function has to be idempotent, inserting a layer that already exists
 	// shouldn't return an error.
-	InsertLayer(Layer, *DatastoreOptions) error
+	InsertLayer(Layer, string, *DatastoreOptions) error
 
 	// FindLayer retrieves a Layer from the database.
-	FindLayer(name string, opts *DatastoreOptions) (Layer, error)
+	FindLayer(name string, lineage string, opts *DatastoreOptions) (Layer, error)
 
 	// InsertRHELv2Layer inserts a RHELv2 layer into the database.
 	InsertRHELv2Layer(*RHELv2Layer) error
@@ -183,12 +183,12 @@ type Datastore interface {
 	FindLock(name string) (string, time.Time, error)
 
 	// Image
-	GetLayerBySHA(sha string, opts *DatastoreOptions) (string, bool, error)
-	GetLayerByName(name string, opts *DatastoreOptions) (string, bool, error)
-	AddImage(layer string, digest, name string, opts *DatastoreOptions) error
-	InsertLayerComponents(l string, c []*component.Component, r []string, opts *DatastoreOptions) error
+	GetLayerBySHA(sha string, opts *DatastoreOptions) (string, string, bool, error)
+	GetLayerByName(name string, opts *DatastoreOptions) (string, string, bool, error)
+	AddImage(layer, lineage, digest, name string, opts *DatastoreOptions) error
+	InsertLayerComponents(l Layer, lineage string, c []*component.Component, r []string, opts *DatastoreOptions) error
 
-	GetLayerLanguageComponents(layer string, opts *DatastoreOptions) ([]*component.LayerToComponents, error)
+	GetLayerLanguageComponents(layer, lineage string, opts *DatastoreOptions) ([]*component.LayerToComponents, error)
 
 	GetVulnerabilitiesForFeatureVersion(featureVersions FeatureVersion) ([]Vulnerability, error)
 

@@ -27,7 +27,7 @@ import (
 	"github.com/stackrox/scanner/pkg/rhel"
 )
 
-func (pgSQL *pgSQL) FindLayer(name string, opts *database.DatastoreOptions) (database.Layer, error) {
+func (pgSQL *pgSQL) FindLayer(name string, lineage string, opts *database.DatastoreOptions) (database.Layer, error) {
 	withFeatures := opts.GetWithFeatures()
 	withVulnerabilities := opts.GetWithVulnerabilities()
 	uncertifiedRHEL := opts.GetUncertifiedRHEL()
@@ -55,7 +55,7 @@ func (pgSQL *pgSQL) FindLayer(name string, opts *database.DatastoreOptions) (dat
 	}
 
 	t := time.Now()
-	err := pgSQL.QueryRow(searchLayer, name).Scan(
+	err := pgSQL.QueryRow(searchLayer, name, lineage).Scan(
 		&layer.ID,
 		&layer.Name,
 		&layer.EngineVersion,
@@ -118,7 +118,7 @@ func (pgSQL *pgSQL) FindLayer(name string, opts *database.DatastoreOptions) (dat
 		}
 
 		t = time.Now()
-		featureVersions, err := getLayerFeatureVersions(tx, layer.ID)
+		featureVersions, err := getLayerFeatureVersions(tx, layer.ID, lineage)
 		observeQueryTime("FindLayer", "getLayerFeatureVersions", t)
 
 		if err != nil {
@@ -143,11 +143,12 @@ func (pgSQL *pgSQL) FindLayer(name string, opts *database.DatastoreOptions) (dat
 }
 
 // getLayerFeatureVersions returns list of database.FeatureVersion that a database.Layer has.
-func getLayerFeatureVersions(tx *sql.Tx, layerID int) ([]database.FeatureVersion, error) {
+func getLayerFeatureVersions(tx *sql.Tx, layerID int, lineage string) ([]database.FeatureVersion, error) {
 	var featureVersions []database.FeatureVersion
 
 	// Query.
-	rows, err := tx.Query(searchLayerFeatureVersion, layerID)
+	log.Infof("get layer feature versions: %+v %+v", layerID, lineage)
+	rows, err := tx.Query(searchLayerFeatureVersion, layerID, lineage)
 	if err != nil {
 		return featureVersions, handleError("searchLayerFeatureVersion", err)
 	}
@@ -258,7 +259,7 @@ func loadAffectedBy(tx *sql.Tx, featureVersions []database.FeatureVersion) error
 // (happens when Feature detectors relies on the detected layer Namespace). However, if the listed
 // Feature has the same Name/Version as its parent, InsertLayer considers that the Feature hasn't
 // been modified.
-func (pgSQL *pgSQL) InsertLayer(layer database.Layer, opts *database.DatastoreOptions) error {
+func (pgSQL *pgSQL) InsertLayer(layer database.Layer, lineage string, opts *database.DatastoreOptions) error {
 	tf := time.Now()
 
 	// Verify parameters
@@ -268,7 +269,7 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer, opts *database.DatastoreOp
 	}
 
 	// Get a potentially existing layer.
-	existingLayer, err := pgSQL.FindLayer(layer.Name, &database.DatastoreOptions{
+	existingLayer, err := pgSQL.FindLayer(layer.Name, lineage, &database.DatastoreOptions{
 		WithFeatures:    true,
 		UncertifiedRHEL: opts.GetUncertifiedRHEL(),
 	})
@@ -316,10 +317,10 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer, opts *database.DatastoreOp
 		layer.Name = rhel.GetUncertifiedLayerName(layer.Name)
 	}
 
-	return pgSQL.insertLayerTx(&layer, namespaceID, parentID)
+	return pgSQL.insertLayerTx(&layer, lineage, namespaceID, parentID)
 }
 
-func (pgSQL *pgSQL) insertLayerTx(layer *database.Layer, namespaceID, parentID zero.Int) error {
+func (pgSQL *pgSQL) insertLayerTx(layer *database.Layer, lineage string, namespaceID, parentID zero.Int) error {
 	// Begin transaction.
 	tx, err := pgSQL.Begin()
 	if err != nil {
@@ -328,7 +329,7 @@ func (pgSQL *pgSQL) insertLayerTx(layer *database.Layer, namespaceID, parentID z
 
 	if layer.ID == 0 {
 		// Insert a new layer.
-		err = tx.QueryRow(insertLayer, layer.Name, layer.EngineVersion, parentID, namespaceID, layer.Distroless).
+		err = tx.QueryRow(insertLayer, layer.Name, layer.EngineVersion, lineage, parentID, namespaceID, layer.Distroless).
 			Scan(&layer.ID)
 		if err != nil {
 			tx.Rollback()
@@ -342,14 +343,14 @@ func (pgSQL *pgSQL) insertLayerTx(layer *database.Layer, namespaceID, parentID z
 		}
 	} else {
 		// Update an existing layer.
-		_, err = tx.Exec(updateLayer, layer.ID, layer.EngineVersion, namespaceID, layer.Distroless)
+		_, err = tx.Exec(updateLayer, layer.ID, layer.EngineVersion, lineage, namespaceID, layer.Distroless)
 		if err != nil {
 			tx.Rollback()
 			return handleError("updateLayer", err)
 		}
 
 		// Remove all existing Layer_diff_FeatureVersion.
-		_, err = tx.Exec(removeLayerDiffFeatureVersion, layer.ID)
+		_, err = tx.Exec(removeLayerDiffFeatureVersion, layer.ID, lineage)
 		if err != nil {
 			tx.Rollback()
 			return handleError("removeLayerDiffFeatureVersion", err)
@@ -358,7 +359,7 @@ func (pgSQL *pgSQL) insertLayerTx(layer *database.Layer, namespaceID, parentID z
 
 	if !features.ContinueUnknownOS.Enabled() || layer.Namespace != nil {
 		// Update Layer_diff_FeatureVersion now.
-		err = pgSQL.updateDiffFeatureVersions(tx, layer)
+		err = pgSQL.updateDiffFeatureVersions(tx, layer, lineage)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -413,7 +414,7 @@ func diffFeatures(childFeatures, parentFeatures []database.FeatureVersion, distr
 	return added, deleted
 }
 
-func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer *database.Layer) error {
+func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer *database.Layer, lineage string) error {
 	// add and del are the FeatureVersion diff we should insert.
 	var add []database.FeatureVersion
 	var del []database.FeatureVersion
@@ -440,13 +441,13 @@ func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer *database.Layer)
 
 	// Insert diff in the database.
 	if len(addIDs) > 0 {
-		_, err = tx.Exec(insertLayerDiffFeatureVersion, layer.ID, "add", buildInputArray(addIDs))
+		_, err = tx.Exec(insertLayerDiffFeatureVersion, layer.ID, lineage, "add", buildInputArray(addIDs))
 		if err != nil {
 			return handleError("insertLayerDiffFeatureVersion.Add", err)
 		}
 	}
 	if len(delIDs) > 0 {
-		_, err = tx.Exec(insertLayerDiffFeatureVersion, layer.ID, "del", buildInputArray(delIDs))
+		_, err = tx.Exec(insertLayerDiffFeatureVersion, layer.ID, lineage, "del", buildInputArray(delIDs))
 		if err != nil {
 			parentID := "no_parent"
 			if layer.Parent != nil {

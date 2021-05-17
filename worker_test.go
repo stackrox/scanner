@@ -15,6 +15,8 @@
 package clair
 
 import (
+	"io"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -24,6 +26,7 @@ import (
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	// Register the required detectors.
 	_ "github.com/stackrox/scanner/ext/featurefmt/dpkg"
@@ -41,6 +44,12 @@ func newMockDatastore() *mockDatastore {
 	return &mockDatastore{
 		layers: make(map[string]database.Layer),
 	}
+}
+
+func getTestDataReader(t *testing.T, path string) io.ReadCloser {
+	f, err := os.Open(path)
+	require.NoError(t, err)
+	return f
 }
 
 func TestProcessWithDistUpgrade(t *testing.T) {
@@ -82,9 +91,9 @@ func TestProcessWithDistUpgrade(t *testing.T) {
 	// wheezy.tar: FROM debian:wheezy
 	// jessie.tar: RUN sed -i "s/precise/trusty/" /etc/apt/sources.list && apt-get update &&
 	//             apt-get -y dist-upgrade
-	assert.Nil(t, ProcessLayer(datastore, "Docker", "blank", "", testDataPath+"blank.tar.gz", nil))
-	assert.Nil(t, ProcessLayer(datastore, "Docker", "wheezy", "blank", testDataPath+"wheezy.tar.gz", nil))
-	assert.Nil(t, ProcessLayer(datastore, "Docker", "jessie", "wheezy", testDataPath+"jessie.tar.gz", nil))
+	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "blank", "", getTestDataReader(t, testDataPath+"blank.tar.gz"), false))
+	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "wheezy", "blank", getTestDataReader(t, testDataPath+"wheezy.tar.gz"), false))
+	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "jessie", "wheezy", getTestDataReader(t, testDataPath+"jessie.tar.gz"), false))
 
 	// Ensure that the 'wheezy' layer has the expected namespace and features.
 	wheezy, ok := datastore.layers["wheezy"]

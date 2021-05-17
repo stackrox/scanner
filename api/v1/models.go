@@ -70,8 +70,8 @@ type Layer struct {
 // A known issue is if a file defines multiple features, and the file is modified between layers in a way
 // that does affect the features it describes (adds, updates, or removes features), which is currently only a
 // concern for the Java source type. However, this event is unlikely, which is why it is not considered at this time.
-func getLanguageData(db database.Datastore, layerName string, uncertifiedRHEL bool) ([]database.FeatureVersion, error) {
-	layersToComponents, err := db.GetLayerLanguageComponents(layerName, &database.DatastoreOptions{
+func getLanguageData(db database.Datastore, layerName, lineage string, uncertifiedRHEL bool) ([]database.FeatureVersion, error) {
+	layersToComponents, err := db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
 	if err != nil {
@@ -238,9 +238,9 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 
 // addLanguageVulns adds language-based features into the given layer.
 // Assumes layer is not nil.
-func addLanguageVulns(db database.Datastore, layer *Layer, uncertifiedRHEL bool) {
+func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncertifiedRHEL bool) {
 	// Add Language Features
-	languageFeatureVersions, err := getLanguageData(db, layer.Name, uncertifiedRHEL)
+	languageFeatureVersions, err := getLanguageData(db, layer.Name, lineage, uncertifiedRHEL)
 	if err != nil {
 		log.Errorf("error getting language data: %v", err)
 		return
@@ -266,7 +266,7 @@ func hasKernelPrefix(name string) bool {
 	return false
 }
 
-func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, opts *database.DatastoreOptions) (Layer, []Note, error) {
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, opts *database.DatastoreOptions) (Layer, []Note, error) {
 	withFeatures := opts.GetWithFeatures()
 	withVulnerabilities := opts.GetWithVulnerabilities()
 	uncertifiedRHEL := opts.GetUncertifiedRHEL()
@@ -322,7 +322,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, opts 
 			}
 		}
 		if env.LanguageVulns.Enabled() {
-			addLanguageVulns(db, &layer, uncertifiedRHEL)
+			addLanguageVulns(db, &layer, lineage, uncertifiedRHEL)
 		}
 	}
 

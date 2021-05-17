@@ -63,7 +63,7 @@ func cleanURL(str string) string {
 	return urlParametersRegexp.ReplaceAllString(str, "")
 }
 
-func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName string, uncertifiedRHEL bool) (database.Layer, bool, error) {
+func preProcessLayer(datastore database.Datastore, imageFormat, name, lineage, parentName, parentLineage string, uncertifiedRHEL bool) (database.Layer, bool, error) {
 	// Verify parameters.
 	if name == "" {
 		return database.Layer{}, false, commonerr.NewBadRequestError("could not process a layer which does not have a name")
@@ -74,7 +74,7 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 	}
 
 	// Check to see if the layer is already in the database.
-	layer, err := datastore.FindLayer(name, &database.DatastoreOptions{
+	layer, err := datastore.FindLayer(name, lineage, &database.DatastoreOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
 	if err != nil && err != commonerr.ErrNotFound {
@@ -88,7 +88,9 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 		// Retrieve the parent if it has one.
 		// We need to get it with its Features in order to diff them.
 		if parentName != "" {
-			parent, err := datastore.FindLayer(parentName, &database.DatastoreOptions{
+			// rolling hash of parents up to point
+			log.Infof("looking for parent: %v %v", parentName, parentLineage)
+			parent, err := datastore.FindLayer(parentName, parentLineage, &database.DatastoreOptions{
 				WithFeatures:    true,
 				UncertifiedRHEL: uncertifiedRHEL,
 			})
@@ -117,8 +119,9 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, parentName
 //
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
-func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, parentName string, reader io.ReadCloser, uncertifiedRHEL bool) error {
-	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName, uncertifiedRHEL)
+func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lineage, parentName, parentLineage string, reader io.ReadCloser, uncertifiedRHEL bool) error {
+	log.Infof("Preprocess layer: name=%v lineage=%v parentNAme=%v parentLineage=%v rhel=%v", name, lineage, parentName, parentLineage, uncertifiedRHEL)
+	layer, exists, err := preProcessLayer(datastore, imageFormat, name, lineage, parentName, parentLineage, uncertifiedRHEL)
 	if err != nil {
 		return err
 	}
@@ -160,44 +163,14 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, par
 
 	// This is required for RHEL-base images as well, as language vuln scanning
 	// relies on the original layer table.
-	if err := datastore.InsertLayer(layer, opts); err != nil {
+	if err := datastore.InsertLayer(layer, lineage, opts); err != nil {
 		if err == commonerr.ErrNoNeedToInsert {
 			return nil
 		}
 		return err
 	}
 
-	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedFiles, opts)
-}
-
-// ProcessLayer detects the Namespace of a layer, the features it adds/removes,
-// and then stores everything in the database.
-//
-// TODO(Quentin-M): We could have a goroutine that looks for layers that have
-// been analyzed with an older engine version and that processes them.
-func ProcessLayer(datastore database.Datastore, imageFormat, name, parentName, path string, headers map[string]string) error {
-	layer, exists, err := preProcessLayer(datastore, imageFormat, name, parentName, false)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return nil
-	}
-
-	// Analyze the content.
-	var languageComponents []*component.Component
-	var removedComponents []string
-	// TODO: can be useful to not ignore for testing purposes...
-	layer.Namespace, layer.Distroless, layer.Features, _, languageComponents, removedComponents, err = detectContent(imageFormat, name, path, headers, layer.Parent, false)
-	if err != nil {
-		return err
-	}
-
-	if err := datastore.InsertLayer(layer, nil); err != nil {
-		return err
-	}
-
-	return datastore.InsertLayerComponents(layer.Name, languageComponents, removedComponents, nil)
+	return datastore.InsertLayerComponents(layer, lineage, languageComponents, removedFiles, opts)
 }
 
 func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
