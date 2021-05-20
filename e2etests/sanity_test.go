@@ -1618,11 +1618,11 @@ func TestImageSanity(t *testing.T) {
 			source:   "Red Hat",
 		},
 		{
-			image: "docker.io/stackrox/sandbox:alpine-jq-1.6-r1",
-			registry:          "https://registry-1.docker.io",
-			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-			source:            "NVD",
+			image:    "docker.io/stackrox/sandbox:alpine-jq-1.6-r1",
+			registry: "https://registry-1.docker.io",
+			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "jq",
