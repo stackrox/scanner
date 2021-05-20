@@ -8,6 +8,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/pkg/errors"
 	"github.com/stackrox/dotnet-scraper/types"
@@ -35,6 +36,20 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 	w, err := r.Worktree()
 	if err != nil {
 		return nil, errors.Wrap(err, "getting git worktree")
+	}
+
+	err = r.Fetch(&git.FetchOptions{
+		RefSpecs: []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = w.Checkout(&git.CheckoutOptions{
+		Branch: "refs/heads/cgorman-cve-2021-31204",
+	})
+	if err != nil {
+		panic(err)
 	}
 
 	files, err := w.Filesystem.ReadDir("cves")
