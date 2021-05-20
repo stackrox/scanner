@@ -1617,6 +1617,20 @@ func TestImageSanity(t *testing.T) {
 			password: os.Getenv("REDHAT_PASSWORD"),
 			source:   "Red Hat",
 		},
+		{
+			image: "docker.io/stackrox/sandbox:alpine-jq-1.6-r1",
+			registry:          "https://registry-1.docker.io",
+			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:            "NVD",
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "jq",
+					VersionFormat: "apk",
+					Version:       "1.6-r1",
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
