@@ -295,6 +295,7 @@ type config struct {
 	SkipUbuntuLinuxKernelVulns bool `json:"skipUbuntuLinuxKernelVulns"`
 	SkipSeverityComparison     bool `json:"skipSeverityComparison"`
 	SkipRHELv2Vulns            bool `json:"skipRHELv2Vulns"`
+	UseDPKGParserForAlpine     bool `json:"useDPKGParserForAlpine"`
 }
 
 func Command() *cobra.Command {
