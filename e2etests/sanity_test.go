@@ -1618,6 +1618,9 @@ func TestImageSanity(t *testing.T) {
 			source:   "Red Hat",
 		},
 		{
+			// Had an issue where Scanner claimed jq 6.1-r1 was vulnerable to
+			// a CVE fixed in 1.6_rc1-r0. We do NOT expect this version of
+			// jq to be vulnerable to this CVE (CVE-2016-4074).
 			image:    "docker.io/stackrox/sandbox:alpine-jq-1.6-r1",
 			registry: "https://registry-1.docker.io",
 			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
