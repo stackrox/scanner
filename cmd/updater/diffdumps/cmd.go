@@ -19,9 +19,11 @@ import (
 	"github.com/stackrox/scanner/cmd/updater/common"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
+	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
 	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
+	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
 func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
@@ -263,6 +265,10 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 				linuxKernelVulnsFiltered++
 				continue
 			}
+		}
+
+		if cfg.UseDPKGParserForAlpine && namespaces.IsAlpineNamespace(headVuln.Namespace.Name) {
+			headVuln.Namespace.VersionFormat = dpkg.ParserName
 		}
 
 		key := keyFromVuln(&headVuln)
