@@ -632,6 +632,31 @@ func TestImageSanity(t *testing.T) {
 							FixedBy:  "3.1.13",
 							Severity: "Critical",
 						},
+						{
+							Name:        "CVE-2021-31204",
+							Description: ".NET and Visual Studio Elevation of Privilege Vulnerability",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-31204",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         6.4,
+										"Score":               4.6,
+										"Vectors":             "AV:L/AC:L/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         5.9,
+										"Score":               7.8,
+										"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2021-05-20T12:48Z",
+									"PublishedDateTime":    "2021-05-11T19:15Z",
+								},
+							},
+							FixedBy:  "3.1.15",
+							Severity: "Important",
+						},
 					},
 				},
 			},
@@ -1004,6 +1029,31 @@ func TestImageSanity(t *testing.T) {
 							},
 							FixedBy:  "3.1.13",
 							Severity: "Critical",
+						},
+						{
+							Name:        "CVE-2021-31204",
+							Description: ".NET and Visual Studio Elevation of Privilege Vulnerability",
+							Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-31204",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         6.4,
+										"Score":               4.6,
+										"Vectors":             "AV:L/AC:L/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         5.9,
+										"Score":               7.8,
+										"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"LastModifiedDateTime": "2021-05-20T12:48Z",
+									"PublishedDateTime":    "2021-05-11T19:15Z",
+								},
+							},
+							FixedBy:  "3.1.15",
+							Severity: "Important",
 						},
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
@@ -1616,6 +1666,23 @@ func TestImageSanity(t *testing.T) {
 			username: os.Getenv("REDHAT_USERNAME"),
 			password: os.Getenv("REDHAT_PASSWORD"),
 			source:   "Red Hat",
+		},
+		{
+			// Had an issue where Scanner claimed jq 6.1-r1 was vulnerable to
+			// a CVE fixed in 1.6_rc1-r0. We do NOT expect this version of
+			// jq to be vulnerable to this CVE (CVE-2016-4074).
+			image:    "docker.io/stackrox/sandbox:alpine-jq-1.6-r1",
+			registry: "https://registry-1.docker.io",
+			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:   "NVD",
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "jq",
+					VersionFormat: "apk",
+					Version:       "1.6-r1",
+				},
+			},
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
