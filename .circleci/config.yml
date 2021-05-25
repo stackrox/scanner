@@ -475,6 +475,8 @@ jobs:
       - *defaultImage
       - image: postgres:12.0-alpine
     working_directory: *defaultWorkingDirectory
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
     steps:
       - checkout
       - check-label-to-run:
