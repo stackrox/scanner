@@ -5,8 +5,14 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+)
+
+var (
+	errEmptyOVAL = errors.New("OVAL file is empty")
 )
 
 // fetch fetches the resource as specified by the given URL,
@@ -26,7 +32,15 @@ func fetch(url *url.URL) (string, io.ReadCloser, error) {
 		return "", nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return "", nil, errors.Errorf("rhelv2: fetcher got unexpected HTTP response: %d (%s)", res.StatusCode, res.Status)
+		return "", nil, errors.Errorf("rhelv2: fetcher got unexpected HTTP response for %s: %d (%s)", url, res.StatusCode, res.Status)
+	}
+
+	if contentLength := res.Header.Get("content-length"); contentLength != "" {
+		length, err := strconv.Atoi(contentLength)
+		if err == nil && length == 0 {
+			log.Warnf("Empty OVAL file: %s", url)
+			return "", nil, errEmptyOVAL
+		}
 	}
 
 	return res.Header.Get("last-modified"), newReadCloser(res.Body), nil
