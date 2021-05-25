@@ -474,9 +474,10 @@ jobs:
     docker:
       - *defaultImage
       - image: postgres:10.16-alpine
+        environment:
+          POSTGRES_HOST_AUTH_METHOD: trust
     working_directory: *defaultWorkingDirectory
-    environment:
-      POSTGRES_HOST_AUTH_METHOD: trust
+    
     steps:
       - checkout
       - check-label-to-run:
