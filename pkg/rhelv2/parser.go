@@ -23,7 +23,7 @@ import (
 func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	var root oval.Root
 	if err := xml.NewDecoder(r).Decode(&root); err != nil {
-		return nil, fmt.Errorf("rhelv2: unable to decode OVAL document: %w", err)
+		return nil, fmt.Errorf("rhelv2: unable to decode OVAL document at %s: %w", uri, err)
 	}
 
 	protoVuln := func(def oval.Definition) (*database.RHELv2Vulnerability, error) {
