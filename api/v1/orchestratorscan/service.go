@@ -3,6 +3,8 @@ package orchestratorscan
 import (
 	"context"
 
+	apiV1 "github.com/stackrox/scanner/api/v1"
+	// rpmVersion "github.com/knqyf263/go-rpm-version"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -68,6 +70,7 @@ func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerabili
 func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeVulnerabilitiesRequest) (*v1.GetKubeVulnerabilitiesResponse, error) {
 	var err error
 	var resp v1.GetKubeVulnerabilitiesResponse
+	log.Info("Scanning k8s vulns")
 
 	resp.AggregatorVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeAggregator, req.GetKubernetesVersion())
 	if err != nil {
@@ -97,34 +100,77 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 	return &resp, nil
 }
 
-// GetOpenShiftVulnerabilities returns Openshift vulnerabilities for requested Openshift version.
-func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.GetOpenShiftVulnerabilitiesRequest) (*v1.GetOpenShiftVulnerabilitiesResponse, error) {
-	var err error
-	var resp v1.GetOpenShiftVulnerabilitiesResponse
-	version, err := newVersion(req.OpenShiftVersion)
-	if err != nil {
-		return nil, err
-	}
-	_ = &database.RHELv2Package{ // pkg
-		Name:    "openshift-hyperkube",
-		Version: req.OpenShiftVersion,
-		Model:   database.Model{ID: 1},
+func (s *serviceImpl) getOpenShiftVulns(version *openShiftVersion) ([]*database.RHELv2Vulnerability, error) {
+	pkg := &database.RHELv2Package{
+		Name:  version.CreatePkgName(),
+		Model: database.Model{ID: 1},
 	}
 
 	records := []*database.RHELv2Record{
 		{
-			Pkg: &database.RHELv2Package{
-				Name:    "openshift-hyperkube",
-				Version: req.OpenShiftVersion,
-			},
-			CPE: version.GetCPE(),
+			Pkg: pkg,
+			CPE: version.CreateCPE(),
 		},
 	}
-	_, err = s.db.GetRHELv2Vulnerabilities(records) // vulns
+
+	vulns, err := s.db.GetRHELv2Vulnerabilities(records)
+	if err != nil {
+		return nil, err
+	}
+	return vulns[pkg.ID], nil
+}
+
+// GetOpenShiftVulnerabilities returns Openshift vulnerabilities for requested Openshift version.
+func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.GetOpenShiftVulnerabilitiesRequest) (*v1.GetOpenShiftVulnerabilitiesResponse, error) {
+	version, err := newOpenShiftVersion(req.OpenShiftVersion)
 	if err != nil {
 		return nil, err
 	}
 
+	vulns, err := s.getOpenShiftVulns(version)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp v1.GetOpenShiftVulnerabilitiesResponse
+	for _, vuln := range vulns {
+		if len(vuln.PackageInfos) != 1 {
+			log.Warnf("unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
+			continue
+		}
+		vulnPkgInfo := vuln.PackageInfos[0]
+
+		// Skip fixed vulns.
+		if vulnPkgInfo.FixedInVersion != "" {
+			notFixed, err := version.LessThan(vulnPkgInfo.FixedInVersion)
+			if err != nil {
+				log.Warnf("unexpected fixed_in_version format for vuln %s: %v", vuln.Name, err)
+				continue
+			}
+			if !notFixed {
+				log.Infof("vuln %q has been fixed: %+v", vuln.Name, vulnPkgInfo.FixedInVersion)
+				continue
+			}
+		}
+		v1Vuln := apiV1.Rhelv2ToVulnerability(vuln, "")
+		metadata, err := convert.MetadataMap(v1Vuln.Metadata)
+		if err != nil {
+			log.Warnf("error converting metadata for %s: %v. Skipping...", vuln.Name, err)
+			continue
+		}
+		log.Infof("Add vuln: %q: %+v, fixed %s", vuln.Name, v1Vuln, getFixedVersion(vulnPkgInfo.FixedInVersion))
+
+		resp.Vulnerabilities = append(resp.Vulnerabilities, &v1.Vulnerability{
+			Name:        v1Vuln.Name,
+			Description: v1Vuln.Description,
+			Link:        v1Vuln.Link,
+			MetadataV2:  metadata,
+			FixedBy:     getFixedVersion(vulnPkgInfo.FixedInVersion),
+			Severity:    vuln.Severity,
+		})
+	}
+	resp.Vulnerabilities = filterInvalidVulns(resp.Vulnerabilities)
+	log.Infof("Found %d vulnerables for OpenShift version %s", len(resp.Vulnerabilities), req.OpenShiftVersion)
 	return &resp, err
 }
 
