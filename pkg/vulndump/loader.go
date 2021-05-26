@@ -203,7 +203,7 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 	if repoToCPE != nil {
 		targetFile := filepath.Join(RHELv2DirName, repo2cpe.RHELv2CPERepoName)
 		if err := ziputil.Extract(zipPath, targetFile, scratchDir); err != nil {
-			log.WithError(err).Errorf("Failed to extract %s from ZIP", targetFile)
+			log.WithError(err).Errorf("Failed to extract %s from %s", targetFile, zipPath)
 			return err
 		}
 		if err := repoToCPE.Load(rhelv2Dir); err != nil {

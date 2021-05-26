@@ -42,23 +42,23 @@ func extractFile(destination string, file *zip.File) error {
 
 	out, err := os.Create(path)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "creating %s", path)
 	}
 	defer utils.IgnoreError(out.Close)
 
 	err = out.Chmod(file.Mode())
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "chmod for %s", path)
 	}
 
 	f, err := file.Open()
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "opening %s", file.Name)
 	}
 	defer utils.IgnoreError(f.Close)
 
 	_, err = io.Copy(out, f)
-	return err
+	return errors.Wrapf(err, "copying %s to %s", file.Name, path)
 }
 
 // within returns true if sub is within or equal to parent.
