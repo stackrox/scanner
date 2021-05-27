@@ -205,7 +205,7 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 	rhelv2Dir := filepath.Join(scratchDir, RHELv2DirName)
 
 	if repoToCPE != nil {
-		if err := os.MkdirAll(rhelv2Dir, 0777); err != nil {
+		if err := os.MkdirAll(rhelv2Dir, 0755); err != nil {
 			return err
 		}
 		targetFile := filepath.Join(RHELv2DirName, repo2cpe.RHELv2CPERepoName)
