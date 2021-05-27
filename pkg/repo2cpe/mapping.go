@@ -14,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/ziputil"
 )
 
@@ -61,7 +62,11 @@ func (m *Mapping) Load(dir string) error {
 	return nil
 }
 
+// LoadFromReader reads the repo-to-cpe file from the given reader
+// and closes the reader once done.
 func (m *Mapping) LoadFromReader(r *ziputil.ReadCloser) error {
+	defer utils.IgnoreError(r.Close)
+
 	var mappingFile RHELv2MappingFile
 	if err := json.NewDecoder(r).Decode(&mappingFile); err != nil {
 		return errors.Wrapf(err, "unmarshalling mapping file at %s", r.Name)

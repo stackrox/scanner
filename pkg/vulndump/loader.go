@@ -206,7 +206,6 @@ func LoadRepoToCPEFromDump(zipR *zip.ReadCloser, repoToCPE *repo2cpe.Mapping) er
 	if err != nil {
 		return errors.Wrapf(err, "opening %s from zip", path)
 	}
-	defer utils.IgnoreError(repoToCPEFile.Close)
 
 	if err := repoToCPE.LoadFromReader(repoToCPEFile); err != nil {
 		return errors.Wrapf(err, "loading %s file into memory", path)
