@@ -7,7 +7,6 @@ package repo2cpe
 
 import (
 	"encoding/json"
-	"io"
 	"os"
 	"path/filepath"
 	"sync/atomic"
@@ -15,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/pkg/ziputil"
 )
 
 const (
@@ -61,10 +61,10 @@ func (m *Mapping) Load(dir string) error {
 	return nil
 }
 
-func (m *Mapping) LoadFromReader(r io.ReadCloser) error {
+func (m *Mapping) LoadFromReader(r *ziputil.ReadCloser) error {
 	var mappingFile RHELv2MappingFile
 	if err := json.NewDecoder(r).Decode(&mappingFile); err != nil {
-		return errors.Wrapf(err, "unmarshalling mapping file")
+		return errors.Wrapf(err, "unmarshalling mapping file at %s", r.Name)
 	}
 
 	m.mapping.Store(&mappingFile)

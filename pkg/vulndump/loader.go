@@ -142,7 +142,7 @@ func renew(sig *concurrency.Signal, db database.Datastore, interval time.Duratio
 
 // startVulnLoad determines if this scanner should perform a vulnerability update and performs the necessary setup.
 // The returned function should be performed upon update completion.
-func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) (bool, func() error, error) {
+func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) (bool, func(err error) error, error) {
 	shouldUpdate, err := determineWhetherToUpdate(db, manifest)
 	if err != nil {
 		return false, nil, errors.Wrap(err, "determining whether to update")
@@ -165,8 +165,12 @@ func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval tim
 	finishedSig := concurrency.NewSignal()
 	go renew(&finishedSig, db, updateInterval, expiration, instanceName)
 
-	return true, func() error {
+	return true, func(err error) error {
 		defer finishedSig.Signal()
+
+		if err != nil {
+			return err
+		}
 
 		log.Info("Done inserting vulns into the DB")
 
@@ -235,6 +239,7 @@ func loadRHELv2Vulns(db database.Datastore, zipR *zip.ReadCloser, repoToCPE *rep
 
 // insertRHELv2Vulns inserts the RHELv2 vulns from the given io.ReadCloser
 // into the DB.
+// The given reader is closed upon return.
 func insertRHELv2Vulns(db database.Datastore, r *ziputil.ReadCloser) error {
 	defer utils.IgnoreError(r.Close)
 
@@ -246,6 +251,7 @@ func insertRHELv2Vulns(db database.Datastore, r *ziputil.ReadCloser) error {
 	if err := db.InsertRHELv2Vulnerabilities(vulns.Vulns); err != nil {
 		return errors.Wrapf(err, "inserting RHELv2 vulns from %s into the DB", r.Name)
 	}
+	log.Debugf("Done inserting vulns from %q into DB", r.Name)
 
 	return nil
 }
@@ -279,6 +285,7 @@ func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval ti
 	if err != nil {
 		return errors.Wrap(err, "opening zip file")
 	}
+	defer utils.IgnoreError(zipR.Close)
 
 	log.Info("Loading manifest...")
 	manifest, err := LoadManifestFromDump(zipR)
@@ -294,33 +301,26 @@ func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval ti
 		}
 		if performUpdate {
 			if err := loadRHELv2Vulns(db, zipR, repoToCPE); err != nil {
-				utils.IgnoreError(finishFn)
+				_ = finishFn(err)
 				return errors.Wrap(err, "error loading RHEL vulns")
 			}
 
 			if err := loadOSVulns(zipR, db); err != nil {
-				utils.IgnoreError(finishFn)
+				_ = finishFn(err)
 				return errors.Wrap(err, "error loading OS vulns")
 			}
 
-			if err := finishFn(); err != nil {
+			if err := finishFn(nil); err != nil {
 				return errors.Wrap(err, "error ending vuln loading")
 			}
 		}
 	}
 
-	// Explicitly close the zip file because the
-	// archiver.Extract function below calls zip.Open again.
-	_ = zipR.Close()
-
 	errorList := errorhelpers.NewErrorList("loading application-level caches")
 	for _, appCache := range caches {
 		if err := loadApplicationUpdater(appCache, manifest, zipR); err != nil {
-			errorList.AddError(errors.Wrapf(err, "error loading into inmem cache %q", appCache.Dir()))
+			errorList.AddError(errors.Wrapf(err, "error loading into in-mem cache %q", appCache.Dir()))
 		}
-		// Explicitly close the zip file because the
-		// archiver.Extract function calls zip.Open.
-		_ = zipR.Close()
 	}
 
 	return errorList.ToError()
