@@ -113,7 +113,6 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			log.Warnf("Unable to determine link for vuln %q in %s", def.Title, uri)
 		}
 
-		log.Infof("Get %s: %s", name, def.Title)
 		return &database.RHELv2Vulnerability{
 			Name:        name,
 			Title:       def.Title,

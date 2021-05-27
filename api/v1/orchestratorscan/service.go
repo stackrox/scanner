@@ -3,13 +3,12 @@ package orchestratorscan
 import (
 	"context"
 
-	rpmVersion "github.com/knqyf263/go-rpm-version"
-	apiV1 "github.com/stackrox/scanner/api/v1"
-	// rpmVersion "github.com/knqyf263/go-rpm-version"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	rpmVersion "github.com/knqyf263/go-rpm-version"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
+	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
@@ -113,11 +112,15 @@ func (s *serviceImpl) getOpenShiftVulns(version *openShiftVersion) ([]*database.
 		},
 	}
 
-	vulns, err := s.db.GetRHELv2Vulnerabilities(records)
+	vulnsMap, err := s.db.GetRHELv2Vulnerabilities(records)
 	if err != nil {
 		return nil, err
 	}
-	return vulns[pkg.ID], nil
+
+	if vulns, ok := vulnsMap[pkg.ID]; ok {
+		return vulns, nil
+	}
+	return nil, errors.Errorf("failed to fetch vulns, %v", err)
 }
 
 // GetOpenShiftVulnerabilities returns Openshift vulnerabilities for requested Openshift version.
@@ -141,15 +144,15 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		vulnPkgInfo := vuln.PackageInfos[0]
 
 		// Skip fixed vulns.
-		fixedBy, err := version.getFixedVersion(vulnPkgInfo.FixedInVersion, vuln.Title)
+		fixedBy, err := version.GetFixedVersion(vulnPkgInfo.FixedInVersion, vuln.Title)
 		if err != nil {
-			// Skip it The vuln has a fixedBy version but we cannot get it
+			// Skip it. The vuln has a fixedBy version but we cannot extract it.
 			log.Warnf("cannot get fixed by for vuln %s: %v, Skipping ...", vuln.Name, err)
 			continue
 		}
 
 		if fixedBy != "" && !version.LessThan(rpmVersion.NewVersion(fixedBy)) {
-			log.Debugf("vuln %q has been fixed: %+v, Skipping", vuln.Name, vulnPkgInfo.FixedInVersion)
+			log.Debugf("vuln %s has been fixed: %s, Skipping", vuln.Name, vulnPkgInfo.FixedInVersion)
 			continue
 		}
 		v1Vuln := apiV1.Rhelv2ToVulnerability(vuln, "")

@@ -43,7 +43,7 @@ func generateDumpWithAllVulns(outFile string) error {
 	}
 	log.Infof("Using temp dir %q for scratch space", dumpDir)
 	defer func() {
-		_ = os.RemoveAll(dumpDir + "abc")
+		_ = os.RemoveAll(dumpDir)
 	}()
 
 	for name, loader := range vulnloader.Loaders() {

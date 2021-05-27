@@ -233,18 +233,13 @@ func parseConnectionString(source string) (dbName string, pgSourceURL string, er
 
 // migrate runs all available migrations on a pgSQL database.
 func migrateDatabase(db *sql.DB) error {
-	log.Infof("running database migrations %d", len(migrations.Migrations))
+	log.Info("running database migrations")
 
 	err := migrate.NewPostgresMigrator(db).Exec(migrate.Up, migrations.Migrations...)
 	if err != nil {
 		return fmt.Errorf("pgsql: an error occured while running migrations: %v", err)
 	}
 
-	log.Infof("running database migrations %d", len(migrations.Migrations[12:]))
-	err = migrate.NewPostgresMigrator(db).Exec(migrate.Up, migrations.Migrations[12:]...)
-	if err != nil {
-		return fmt.Errorf("pgsql: an error occured while running migrations: %v", err)
-	}
 	log.Info("database migration ran successfully")
 	return nil
 }

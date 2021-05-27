@@ -110,8 +110,6 @@ func (u *Updater) doUpdate(mode updateMode) error {
 	if err := os.RemoveAll(diffDumpScratchDir); err != nil {
 		return errors.Wrap(err, "removing diff dump scratch dir")
 	}
-
-	log.Infof("updater setup: %+v", u)
 	fetched, err := fetchDumpFromURL(u.stopSig, u.client, u.fetchIsFromCentral, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
 	if err != nil {
 		return errors.Wrap(err, "fetching update from URL")

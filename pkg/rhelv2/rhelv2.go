@@ -14,7 +14,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/quay/claircore/rhel/pulp"
-	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
@@ -149,7 +148,6 @@ func UpdateV2(outputDir string) (int, error) {
 				respC <- &response{err: err}
 				return
 			}
-			log.Info("path     " + filepath.Join(rhelV2Dir, fmt.Sprintf("%s.json", name)))
 
 			outF, err := os.Create(filepath.Join(rhelV2Dir, fmt.Sprintf("%s.json", name)))
 			if err != nil {

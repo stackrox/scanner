@@ -42,10 +42,12 @@ func newOpenShiftVersion(version string) (*openShiftVersion, error) {
 	}, nil
 }
 
+// CreateCPE returns the cpe used for search.
 func (o *openShiftVersion) CreateCPE() string {
 	return "cpe:/a:redhat:openshift:" + o.versionFamily
 }
 
+// CreatePkgName creates package name to filter.
 func (o *openShiftVersion) CreatePkgName() string {
 	pkgName := "openshift-hyperkube"
 	if o.versionFamily == "3.11" {
@@ -54,11 +56,13 @@ func (o *openShiftVersion) CreatePkgName() string {
 	return pkgName
 }
 
+// LessThan compares this OpenShift version with version and return true if it is less than version.
 func (o *openShiftVersion) LessThan(version rpmVersion.Version) bool {
 	return o.version.LessThan(version)
 }
 
-func (o *openShiftVersion) getFixedVersion(fixedIn string, title string) (string, error) {
+// GetFixedVersion extracts a comparable version from (fixedIn, title).
+func (o *openShiftVersion) GetFixedVersion(fixedIn string, title string) (string, error) {
 	if fixedIn == "" {
 		return "", nil
 	}

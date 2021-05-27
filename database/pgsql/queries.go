@@ -199,11 +199,11 @@ const (
 		INSERT INTO vuln (
 			hash,
 			name, title, description, issued, updated,
-            link, severity, cvss3, cvss2
+			link, severity, cvss3, cvss2
 		) VALUES (
 			$1,
 			$2, $3, $4, $5, $6,
-            $7, $8, $9, $10
+			$7, $8, $9, $10
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
@@ -227,7 +227,7 @@ const (
 		SELECT
 			vuln_package.id,
 			vuln_package.name,
-            vuln.title,
+			vuln.title,
 			vuln.description,
 			vuln.link,
 			vuln.issued,
