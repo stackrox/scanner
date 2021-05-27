@@ -3,6 +3,7 @@ package orchestratorscan
 import (
 	"context"
 
+	rpmVersion "github.com/knqyf263/go-rpm-version"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	// rpmVersion "github.com/knqyf263/go-rpm-version"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -70,7 +71,6 @@ func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerabili
 func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeVulnerabilitiesRequest) (*v1.GetKubeVulnerabilitiesResponse, error) {
 	var err error
 	var resp v1.GetKubeVulnerabilitiesResponse
-	log.Info("Scanning k8s vulns")
 
 	resp.AggregatorVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeAggregator, req.GetKubernetesVersion())
 	if err != nil {
@@ -141,16 +141,16 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		vulnPkgInfo := vuln.PackageInfos[0]
 
 		// Skip fixed vulns.
-		if vulnPkgInfo.FixedInVersion != "" {
-			notFixed, err := version.LessThan(vulnPkgInfo.FixedInVersion)
-			if err != nil {
-				log.Warnf("unexpected fixed_in_version format for vuln %s: %v", vuln.Name, err)
-				continue
-			}
-			if !notFixed {
-				log.Infof("vuln %q has been fixed: %+v", vuln.Name, vulnPkgInfo.FixedInVersion)
-				continue
-			}
+		fixedBy, err := version.getFixedVersion(vulnPkgInfo.FixedInVersion, vuln.Title)
+		if err != nil {
+			// Skip it The vuln has a fixedBy version but we cannot get it
+			log.Warnf("cannot get fixed by for vuln %s: %v, Skipping ...", vuln.Name, err)
+			continue
+		}
+
+		if fixedBy != "" && !version.LessThan(rpmVersion.NewVersion(fixedBy)) {
+			log.Debugf("vuln %q has been fixed: %+v, Skipping", vuln.Name, vulnPkgInfo.FixedInVersion)
+			continue
 		}
 		v1Vuln := apiV1.Rhelv2ToVulnerability(vuln, "")
 		metadata, err := convert.MetadataMap(v1Vuln.Metadata)
@@ -158,19 +158,17 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 			log.Warnf("error converting metadata for %s: %v. Skipping...", vuln.Name, err)
 			continue
 		}
-		log.Infof("Add vuln: %q: %+v, fixed %s", vuln.Name, v1Vuln, getFixedVersion(vulnPkgInfo.FixedInVersion))
 
 		resp.Vulnerabilities = append(resp.Vulnerabilities, &v1.Vulnerability{
 			Name:        v1Vuln.Name,
 			Description: v1Vuln.Description,
 			Link:        v1Vuln.Link,
 			MetadataV2:  metadata,
-			FixedBy:     getFixedVersion(vulnPkgInfo.FixedInVersion),
+			FixedBy:     fixedBy,
 			Severity:    vuln.Severity,
 		})
 	}
 	resp.Vulnerabilities = filterInvalidVulns(resp.Vulnerabilities)
-	log.Infof("Found %d vulnerables for OpenShift version %s", len(resp.Vulnerabilities), req.OpenShiftVersion)
 	return &resp, err
 }
 

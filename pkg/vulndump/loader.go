@@ -252,6 +252,7 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 			return errors.Wrapf(err, "inserting RHELv2 vulns from %q into the DB", file.Name())
 		}
 		log.Debugf("Done inserting vulns from %q into DB", file.Name())
+		log.Infof("Done inserting vulns from %q into DB", file.Name())
 	}
 
 	log.Info("Done inserting RHELv2 vulns into the DB")

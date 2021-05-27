@@ -6,21 +6,22 @@ import (
 
 	rpmVersion "github.com/knqyf263/go-rpm-version"
 	"github.com/pkg/errors"
-	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/api/v1/convert"
 )
 
 var (
+	// Version family is like 3.11, 4.5, 4.7 which defines the versions in the same stream and hence comparable.
 	versionFamilyRegex = regexp.MustCompile(`^(3\.11|[4-9][0-9]*)\.[0-9]+`)
 	// Version families we can compare directly.
-	// releaseDateRegex = regexp.MustCompile(`-[0-9]{12}(?:[.-].*)?$`)
-
-	// qualifiedVersionFamilies = set.StringSet{"4.0": {}, "4.1": {}, "4.2": {}, "4.3": {}, "3.11": {}}
+	// Ovals for OpenShift 4.4-current does not have valid patch number in the fixed versions.
+	// We will try to extract the fixed version from the title field.
+	titleVersionRegex        = regexp.MustCompile(`OpenShift Container Platform (4\.[0-9]+(?:\.[0-9]+)?) `)
+	qualifiedVersionFamilies = set.StringSet{"4.0": {}, "4.1": {}, "4.2": {}, "4.3": {}, "3.11": {}}
 )
 
 type openShiftVersion struct {
 	version       rpmVersion.Version
-	releaseDate   string
 	versionFamily string
 }
 
@@ -38,7 +39,6 @@ func newOpenShiftVersion(version string) (*openShiftVersion, error) {
 	return &openShiftVersion{
 		version:       rpmVersion.NewVersion(ver),
 		versionFamily: matched[1],
-		releaseDate:   "",
 	}, nil
 }
 
@@ -54,21 +54,43 @@ func (o *openShiftVersion) CreatePkgName() string {
 	return pkgName
 }
 
-func (o *openShiftVersion) LessThan(ver string) (bool, error) {
-	// if qualifiedVersionFamilies.Contains(o.versionFamily) {
-	ver, err := convert.TruncateVersion(ver)
-	if err != nil {
-		return false, err
-	}
-	return o.version.LessThan(rpmVersion.NewVersion(ver)), nil
-	// }
+func (o *openShiftVersion) LessThan(version rpmVersion.Version) bool {
+	return o.version.LessThan(version)
 }
 
-func getFixedVersion(ver string) string {
-	if ver == "" {
-		return ver
+func (o *openShiftVersion) getFixedVersion(fixedIn string, title string) (string, error) {
+	if fixedIn == "" {
+		return "", nil
 	}
-	fixedBy, err := convert.TruncateVersion(ver)
-	utils.Should(err)
-	return fixedBy
+
+	var version string
+	var err error
+
+	if qualifiedVersionFamilies.Contains(o.versionFamily) {
+		version, err = convert.TruncateVersion(fixedIn)
+		if err != nil {
+			return "", err
+		}
+		return version, nil
+	}
+
+	if title == "" {
+		return "", errors.Errorf("cannot get version from %s", fixedIn)
+	}
+
+	version, err = convert.TruncateVersion(title)
+	if err != nil {
+		// Patch: Get the version from title.
+		matched := titleVersionRegex.FindStringSubmatch(title)
+		if len(matched) != 2 {
+			return "", errors.Errorf("cannot get version from fixed_in_version %s, or title %s", fixedIn, title)
+		}
+		version = matched[1]
+	}
+
+	// Extra patch, according to the release notes, version 4.5 is 4.5.1 and version 4.6 is 4.6.1
+	if version == "4.5" || version == "4.6" {
+		version = version + ".1"
+	}
+	return version, nil
 }
