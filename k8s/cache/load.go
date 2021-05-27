@@ -72,7 +72,7 @@ func (c *cacheImpl) LoadFromZip(zipR *zip.ReadCloser, definitionsDir string) err
 		}
 	}
 
-	log.Infof("Total vulns in %q: %d", definitionsDir, totalVulns)
+	log.Infof("Total vulns in %s: %d", definitionsDir, totalVulns)
 
 	return nil
 }

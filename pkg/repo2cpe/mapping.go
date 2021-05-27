@@ -63,7 +63,7 @@ func (m *Mapping) Load(dir string) error {
 	return nil
 }
 
-// LoadFromZip reads the repo-to-cpe file in teh given directory from the given zip reader.
+// LoadFromZip reads the repo-to-cpe file in the given directory from the given zip reader.
 func (m *Mapping) LoadFromZip(zipR *zip.ReadCloser, dir string) error {
 	path := filepath.Join(dir, RHELv2CPERepoName)
 	r, err := ziputil.OpenFile(zipR, path)
