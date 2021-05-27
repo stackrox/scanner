@@ -27,7 +27,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
-	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/ext/versionfmt/apk"
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"github.com/stackrox/scanner/pkg/fsutil"
 	"gopkg.in/yaml.v2"
@@ -232,10 +232,10 @@ func (file *secDB) Vulnerabilities() (vulns []database.Vulnerability) {
 		return
 	}
 
-	namespace := database.Namespace{Name: "alpine:" + file.Distro, VersionFormat: dpkg.ParserName}
+	namespace := database.Namespace{Name: "alpine:" + file.Distro, VersionFormat: apk.ParserName}
 	for _, pkg := range file.Packages {
 		for version, cveNames := range pkg.Pkg.Fixes {
-			if err := versionfmt.Valid(dpkg.ParserName, version); err != nil {
+			if err := versionfmt.Valid(apk.ParserName, version); err != nil {
 				log.WithError(err).WithFields(log.Fields{
 					"version":      version,
 					"package name": pkg.Pkg.Name,

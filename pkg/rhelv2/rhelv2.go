@@ -131,7 +131,9 @@ func UpdateV2(outputDir string) (int, error) {
 			rl.Take()
 			lastModifiedStr, r, err := fetch(u)
 			if err != nil {
-				respC <- &response{err: err}
+				if err != errEmptyOVAL {
+					respC <- &response{err: err}
+				}
 				return
 			}
 			defer utils.IgnoreError(r.Close)

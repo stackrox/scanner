@@ -19,9 +19,11 @@ import (
 	"github.com/stackrox/scanner/cmd/updater/common"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
+	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
 	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
+	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
 func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
@@ -265,6 +267,10 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 			}
 		}
 
+		if cfg.UseDPKGParserForAlpine && namespaces.IsAlpineNamespace(headVuln.Namespace.Name) {
+			headVuln.Namespace.VersionFormat = dpkg.ParserName
+		}
+
 		key := keyFromVuln(&headVuln)
 		matchingBaseVuln, found := baseVulnsMap[key]
 		// If the vuln was in the base, and equal to what was in the base,
@@ -295,6 +301,7 @@ type config struct {
 	SkipUbuntuLinuxKernelVulns bool `json:"skipUbuntuLinuxKernelVulns"`
 	SkipSeverityComparison     bool `json:"skipSeverityComparison"`
 	SkipRHELv2Vulns            bool `json:"skipRHELv2Vulns"`
+	UseDPKGParserForAlpine     bool `json:"useDPKGParserForAlpine"`
 }
 
 func Command() *cobra.Command {

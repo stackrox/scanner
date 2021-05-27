@@ -1,5 +1,7 @@
 # Scanner
 
+![Red Hat Certified Image Scanner](img/Logo-Red_Hat-Certified_Technology-Vulnerability_Scanner-A-Red-RGB.png)
+
 ## To Build
 
 ### Prerequisites
