@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -54,14 +53,7 @@ var (
 	// ErrParentUnknown is the error that should be raised when a parent layer
 	// has yet to be processed for the current layer.
 	ErrParentUnknown = commonerr.NewBadRequestError("worker: parent layer is unknown, it must be processed first")
-
-	urlParametersRegexp = regexp.MustCompile(`(\?|\&)([^=]+)\=([^ &]+)`)
 )
-
-// cleanURL removes all parameters from an URL.
-func cleanURL(str string) string {
-	return urlParametersRegexp.ReplaceAllString(str, "")
-}
 
 func preProcessLayer(datastore database.Datastore, imageFormat, name, lineage, parentName, parentLineage string, uncertifiedRHEL bool) (database.Layer, bool, error) {
 	// Verify parameters.
@@ -170,7 +162,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 		return err
 	}
 
-	return datastore.InsertLayerComponents(layer, lineage, languageComponents, removedFiles, opts)
+	return datastore.InsertLayerComponents(layer.Name, lineage, languageComponents, removedFiles, opts)
 }
 
 func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
@@ -251,18 +243,6 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 func isDistroless(filesMap tarutil.FilesMap) bool {
 	_, ok := filesMap["var/lib/dpkg/status.d/"]
 	return ok
-}
-
-// detectContent downloads a layer's archive and extracts its Namespace and
-// Features.
-func detectContent(imageFormat, name, path string, headers map[string]string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
-	files, err := imagefmt.Extract(imageFormat, path, headers, requiredfilenames.SingletonMatcher())
-	if err != nil {
-		log.WithError(err).WithFields(log.Fields{logLayerName: name, "path": cleanURL(path)}).Error("failed to extract data from path")
-		return nil, false, nil, nil, nil, nil, err
-	}
-
-	return detectFromFiles(files, name, parent, uncertifiedRHEL)
 }
 
 func DetectNamespace(name string, files tarutil.FilesMap, parent *database.Layer, uncertifiedRHEL bool) *database.Namespace {

@@ -58,18 +58,18 @@ func TestProcessWithDistUpgrade(t *testing.T) {
 
 	// Create a mock datastore.
 	datastore := newMockDatastore()
-	datastore.FctInsertLayer = func(layer database.Layer, opts *database.DatastoreOptions) error {
+	datastore.FctInsertLayer = func(layer database.Layer, _ string, opts *database.DatastoreOptions) error {
 		datastore.layers[layer.Name] = layer
 		return nil
 	}
-	datastore.FctFindLayer = func(name string, opts *database.DatastoreOptions) (database.Layer, error) {
+	datastore.FctFindLayer = func(name string, _ string, opts *database.DatastoreOptions) (database.Layer, error) {
 		if layer, exists := datastore.layers[name]; exists {
 			return layer, nil
 		}
 		return database.Layer{}, commonerr.ErrNotFound
 	}
 
-	datastore.FctInsertLayerComponents = func(l string, c []*component.Component, r []string, opts *database.DatastoreOptions) error {
+	datastore.FctInsertLayerComponents = func(l, _ string, c []*component.Component, r []string, opts *database.DatastoreOptions) error {
 		return nil
 	}
 
@@ -91,9 +91,9 @@ func TestProcessWithDistUpgrade(t *testing.T) {
 	// wheezy.tar: FROM debian:wheezy
 	// jessie.tar: RUN sed -i "s/precise/trusty/" /etc/apt/sources.list && apt-get update &&
 	//             apt-get -y dist-upgrade
-	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "blank", "", getTestDataReader(t, testDataPath+"blank.tar.gz"), false))
-	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "wheezy", "blank", getTestDataReader(t, testDataPath+"wheezy.tar.gz"), false))
-	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "jessie", "wheezy", getTestDataReader(t, testDataPath+"jessie.tar.gz"), false))
+	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "blank", "", "", "", getTestDataReader(t, testDataPath+"blank.tar.gz"), false))
+	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "wheezy", "", "", "blank", getTestDataReader(t, testDataPath+"wheezy.tar.gz"), false))
+	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "jessie", "", "", "wheezy", getTestDataReader(t, testDataPath+"jessie.tar.gz"), false))
 
 	// Ensure that the 'wheezy' layer has the expected namespace and features.
 	wheezy, ok := datastore.layers["wheezy"]
