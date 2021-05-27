@@ -144,7 +144,7 @@ func renew(sig *concurrency.Signal, db database.Datastore, interval time.Duratio
 
 // startVulnLoad determines if this scanner should perform a vulnerability update and performs the necessary setup.
 // The returned function should be performed upon update completion.
-func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) (bool, func() error, error) {
+func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval time.Duration, instanceName string) (bool, func(err error) error, error) {
 	shouldUpdate, err := determineWhetherToUpdate(db, manifest)
 	if err != nil {
 		return false, nil, errors.Wrap(err, "determining whether to update")
@@ -167,8 +167,12 @@ func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval tim
 	finishedSig := concurrency.NewSignal()
 	go renew(&finishedSig, db, updateInterval, expiration, instanceName)
 
-	return true, func() error {
+	return true, func(err error) error {
 		defer finishedSig.Signal()
+
+		if err != nil {
+			return err
+		}
 
 		log.Info("Done inserting vulns into the DB")
 
@@ -201,6 +205,9 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 	rhelv2Dir := filepath.Join(scratchDir, RHELv2DirName)
 
 	if repoToCPE != nil {
+		if err := os.MkdirAll(rhelv2Dir, 0755); err != nil {
+			return err
+		}
 		targetFile := filepath.Join(RHELv2DirName, repo2cpe.RHELv2CPERepoName)
 		if err := ziputil.Extract(zipPath, targetFile, scratchDir); err != nil {
 			log.WithError(err).Errorf("Failed to extract %s from ZIP", targetFile)
@@ -240,11 +247,11 @@ func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCP
 			return errors.Wrapf(err, "decoding %q JSON from reader", file.Name())
 		}
 
-		log.Infof("Inserting vulns from %q into DB", file.Name())
+		log.WithField("count", len(vulns.Vulns)).Debugf("Inserting vulns from %q into DB", file.Name())
 		if err := db.InsertRHELv2Vulnerabilities(vulns.Vulns); err != nil {
 			return errors.Wrapf(err, "inserting RHELv2 vulns from %q into the DB", file.Name())
 		}
-		log.Infof("Done inserting vulns from %q into DB", file.Name())
+		log.Debugf("Done inserting vulns from %q into DB", file.Name())
 	}
 
 	log.Info("Done inserting RHELv2 vulns into the DB")
@@ -310,16 +317,16 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 		}
 		if performUpdate {
 			if err := loadRHELv2Vulns(db, zipPath, scratchDir, repoToCPE); err != nil {
-				utils.IgnoreError(finishFn)
+				_ = finishFn(err)
 				return errors.Wrap(err, "error loading RHEL vulns")
 			}
 
 			if err := loadOSVulns(zipR, db); err != nil {
-				utils.IgnoreError(finishFn)
+				_ = finishFn(err)
 				return errors.Wrap(err, "error loading OS vulns")
 			}
 
-			if err := finishFn(); err != nil {
+			if err := finishFn(nil); err != nil {
 				return errors.Wrap(err, "error ending vuln loading")
 			}
 		}
