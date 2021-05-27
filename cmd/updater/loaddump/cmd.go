@@ -24,6 +24,7 @@ func Command() *cobra.Command {
 	)
 
 	c.RunE = func(_ *cobra.Command, _ []string) error {
+		log.SetLevel(log.DebugLevel)
 		log.Infof("Attempting to open DB at %s:%d", postgresHost, postgresPort)
 		db, err := database.OpenWithRetries(database.RegistrableComponentConfig{
 			Type: "pgsql",
