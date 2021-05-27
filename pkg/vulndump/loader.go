@@ -199,25 +199,10 @@ func loadOSVulns(zipR *zip.ReadCloser, db database.Datastore) error {
 	return nil
 }
 
-// LoadRepoToCPEFromDump loads the repository-to-cpe.json file from the dump.
-func LoadRepoToCPEFromDump(zipR *zip.ReadCloser, repoToCPE *repo2cpe.Mapping) error {
-	path := filepath.Join(RHELv2DirName, repo2cpe.RHELv2CPERepoName)
-	repoToCPEFile, err := ziputil.OpenFile(zipR, path)
-	if err != nil {
-		return errors.Wrapf(err, "opening %s from zip", path)
-	}
-
-	if err := repoToCPE.LoadFromReader(repoToCPEFile); err != nil {
-		return errors.Wrapf(err, "loading %s file into memory", path)
-	}
-
-	return nil
-}
-
 func loadRHELv2Vulns(db database.Datastore, zipR *zip.ReadCloser, repoToCPE *repo2cpe.Mapping) error {
 	if repoToCPE != nil {
-		if err := LoadRepoToCPEFromDump(zipR, repoToCPE); err != nil {
-			return errors.Wrap(err, "loading repository-to-cpe")
+		if err := repoToCPE.LoadFromZip(zipR, RHELv2DirName); err != nil {
+			return errors.Wrap(err, "loading repo-to-cpe file into memory")
 		}
 	}
 

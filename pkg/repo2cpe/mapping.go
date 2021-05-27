@@ -6,6 +6,7 @@
 package repo2cpe
 
 import (
+	"archive/zip"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -62,9 +63,14 @@ func (m *Mapping) Load(dir string) error {
 	return nil
 }
 
-// LoadFromReader reads the repo-to-cpe file from the given reader
+// LoadFromZip reads the repo-to-cpe file from the given reader
 // and closes the reader once done.
-func (m *Mapping) LoadFromReader(r *ziputil.ReadCloser) error {
+func (m *Mapping) LoadFromZip(zipR *zip.ReadCloser, dir string) error {
+	path := filepath.Join(dir, RHELv2CPERepoName)
+	r, err := ziputil.OpenFile(zipR, path)
+	if err != nil {
+		return errors.Wrapf(err, "opening %s from zip", path)
+	}
 	defer utils.IgnoreError(r.Close)
 
 	var mappingFile RHELv2MappingFile
