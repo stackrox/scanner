@@ -12,11 +12,11 @@ import (
 
 var (
 	// Version family is like 3.11, 4.5, 4.7 which defines the versions in the same stream and hence comparable.
-	versionFamilyRegex = regexp.MustCompile(`^(3\.11|[4-9][0-9]*)\.[0-9]+`)
+	versionFamilyRegex = regexp.MustCompile(`^(3\.11|[4-9]\.[0-9]+)\.[0-9]+`)
 	// Version families we can compare directly.
 	// Ovals for OpenShift 4.4-current does not have valid patch number in the fixed versions.
 	// We will try to extract the fixed version from the title field.
-	titleVersionRegex        = regexp.MustCompile(`OpenShift Container Platform (4\.[0-9]+(?:\.[0-9]+)?) `)
+	titleVersionRegex        = regexp.MustCompile(`OpenShift Container Platform ([0-9]+\.[0-9]+(?:\.[0-9]+)?) `)
 	qualifiedVersionFamilies = set.StringSet{"4.0": {}, "4.1": {}, "4.2": {}, "4.3": {}, "3.11": {}}
 )
 
@@ -86,7 +86,7 @@ func (o *openShiftVersion) GetFixedVersion(fixedIn string, title string) (string
 	if err != nil {
 		// Patch: Get the version from title.
 		matched := titleVersionRegex.FindStringSubmatch(title)
-		if len(matched) != 2 {
+		if len(matched) != 2 || !strings.HasPrefix(matched[1], o.versionFamily) {
 			return "", errors.Errorf("cannot get version from fixed_in_version %s, or title %s", fixedIn, title)
 		}
 		version = matched[1]

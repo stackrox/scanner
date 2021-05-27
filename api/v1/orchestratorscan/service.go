@@ -143,6 +143,18 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		}
 		vulnPkgInfo := vuln.PackageInfos[0]
 
+		if len(vulnPkgInfo.Packages) != 1 {
+			log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vulnPkgInfo.Packages), 1)
+			continue
+		}
+
+		vulnPkg := vulnPkgInfo.Packages[0]
+		affectedArch := vulnPkgInfo.ArchOperation.Cmp("x86_64", vulnPkg.Arch)
+		if !affectedArch {
+			log.Warnf("cannot get fixed by for vuln %s: %v, Skipping ...", vuln.Name, err)
+			continue
+		}
+
 		// Skip fixed vulns.
 		fixedBy, err := version.GetFixedVersion(vulnPkgInfo.FixedInVersion, vuln.Title)
 		if err != nil {
