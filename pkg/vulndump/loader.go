@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -13,7 +12,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/rox/pkg/errorhelpers"
-	"github.com/stackrox/rox/pkg/fileutils"
 	"github.com/stackrox/rox/pkg/timeutil"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
@@ -91,7 +89,7 @@ func determineWhetherToUpdate(db database.Datastore, manifest *Manifest) (bool, 
 
 // LoadManifestFromDump validates and loads the manifest from the given zip file.
 func LoadManifestFromDump(zipR *zip.ReadCloser) (*Manifest, error) {
-	manifestFile, err := ziputil.OpenFileInZip(zipR, ManifestFileName)
+	manifestFile, err := ziputil.OpenFile(zipR, ManifestFileName)
 	if err != nil {
 		return nil, errors.Wrap(err, "opening manifest file")
 	}
@@ -104,7 +102,7 @@ func LoadManifestFromDump(zipR *zip.ReadCloser) (*Manifest, error) {
 
 // LoadOSVulnsFromDump loads the os vulns file from the dump into an in-memory slice.
 func LoadOSVulnsFromDump(zipR *zip.ReadCloser) ([]database.Vulnerability, error) {
-	osVulnsFile, err := ziputil.OpenFileInZip(zipR, OSVulnsFileName)
+	osVulnsFile, err := ziputil.OpenFile(zipR, OSVulnsFileName)
 	if err != nil {
 		return nil, errors.Wrap(err, "opening OS vulns file")
 	}
@@ -197,95 +195,81 @@ func loadOSVulns(zipR *zip.ReadCloser, db database.Datastore) error {
 	return nil
 }
 
-func loadRHELv2Vulns(db database.Datastore, zipPath, scratchDir string, repoToCPE *repo2cpe.Mapping) error {
-	rhelv2Dir := filepath.Join(scratchDir, RHELv2DirName)
-
-	if repoToCPE != nil {
-		targetFile := filepath.Join(RHELv2DirName, repo2cpe.RHELv2CPERepoName)
-		if err := ziputil.Extract(zipPath, targetFile, scratchDir); err != nil {
-			log.WithError(err).Errorf("Failed to extract %s from ZIP", targetFile)
-			return err
-		}
-		if err := repoToCPE.Load(rhelv2Dir); err != nil {
-			return errors.Wrapf(err, "couldn't update in mem repository-to-cpe.json copy")
-		}
-	}
-
-	// RHELv2 contents inside ZIP file.
-	targetDir := filepath.Join(RHELv2DirName, RHELv2VulnsSubDirName)
-	if err := ziputil.Extract(zipPath, targetDir, scratchDir); err != nil {
-		log.WithError(err).Errorf("Failed to extract %s dump from ZIP", targetDir)
-		return err
-	}
-
-	// Extracted RHELv2 vulns directory.
-	vulnDir := filepath.Join(rhelv2Dir, RHELv2VulnsSubDirName)
-	files, err := os.ReadDir(vulnDir)
+// LoadRepoToCPEFromDump loads the repository-to-cpe.json file from the dump.
+func LoadRepoToCPEFromDump(zipR *zip.ReadCloser, repoToCPE *repo2cpe.Mapping) error {
+	path := filepath.Join(RHELv2DirName, repo2cpe.RHELv2CPERepoName)
+	repoToCPEFile, err := ziputil.OpenFile(zipR, path)
 	if err != nil {
-		return errors.Wrap(err, "reading scratch dir for RHELv2")
+		return errors.Wrapf(err, "opening %s from zip", path)
 	}
-	for _, file := range files {
-		if filepath.Ext(file.Name()) != ".json" {
-			continue
-		}
+	defer utils.IgnoreError(repoToCPEFile.Close)
 
-		f, err := os.Open(filepath.Join(vulnDir, file.Name()))
-		if err != nil {
-			return errors.Wrapf(err, "opening file at %q", file.Name())
-		}
-		defer utils.IgnoreError(f.Close)
+	if err := repoToCPE.LoadFromReader(repoToCPEFile); err != nil {
+		return errors.Wrapf(err, "loading %s file into memory", path)
+	}
 
-		var vulns RHELv2
-		if err := json.NewDecoder(f).Decode(&vulns); err != nil {
-			return errors.Wrapf(err, "decoding %q JSON from reader", file.Name())
-		}
+	return nil
+}
 
-		log.Infof("Inserting vulns from %q into DB", file.Name())
-		if err := db.InsertRHELv2Vulnerabilities(vulns.Vulns); err != nil {
-			return errors.Wrapf(err, "inserting RHELv2 vulns from %q into the DB", file.Name())
+func loadRHELv2Vulns(db database.Datastore, zipR *zip.ReadCloser, repoToCPE *repo2cpe.Mapping) error {
+	if repoToCPE != nil {
+		if err := LoadRepoToCPEFromDump(zipR, repoToCPE); err != nil {
+			return errors.Wrap(err, "loading repository-to-cpe")
 		}
-		log.Infof("Done inserting vulns from %q into DB", file.Name())
+	}
+
+	rhelv2Readers, err := ziputil.OpenFilesInDir(zipR, filepath.Join(RHELv2DirName, RHELv2VulnsSubDirName), ".json")
+	if err != nil {
+		return errors.Wrap(err, "opening file in zip file")
+	}
+
+	for _, r := range rhelv2Readers {
+		if err := insertRHELv2Vulns(db, r); err != nil {
+			return errors.Wrap(err, "inserting RHELv2 vulns into DB")
+		}
 	}
 
 	log.Info("Done inserting RHELv2 vulns into the DB")
 	return nil
 }
 
+// insertRHELv2Vulns inserts the RHELv2 vulns from the given io.ReadCloser
+// into the DB.
+func insertRHELv2Vulns(db database.Datastore, r *ziputil.ReadCloser) error {
+	defer utils.IgnoreError(r.Close)
+
+	var vulns RHELv2
+	if err := json.NewDecoder(r).Decode(&vulns); err != nil {
+		return errors.Wrapf(err, "decoding JSON from %s", r.Name)
+	}
+
+	if err := db.InsertRHELv2Vulnerabilities(vulns.Vulns); err != nil {
+		return errors.Wrapf(err, "inserting RHELv2 vulns from %s into the DB", r.Name)
+	}
+
+	return nil
+}
+
 // This loads application-level vulnerabilities.
 // At the moment, this consists of vulnerabilities from NVD and K8s.
-func loadApplicationUpdater(cache cache.Cache, manifest *Manifest, zipPath, scratchDir string) error {
+func loadApplicationUpdater(cache cache.Cache, manifest *Manifest, zipR *zip.ReadCloser) error {
 	if cache != nil {
 		updateTime := cache.GetLastUpdate()
 		if !updateTime.IsZero() && !manifest.Until.After(updateTime) {
 			return nil
 		}
-		targetDir := cache.Dir()
-		if err := ziputil.Extract(zipPath, targetDir, scratchDir); err != nil {
-			log.WithError(err).Errorf("Failed to extract %s dump from ZIP", targetDir)
-			return err
-		}
-		if err := cache.LoadFromDirectory(filepath.Join(scratchDir, targetDir)); err != nil {
-			return errors.Wrapf(err, "couldn't update in mem %s copy", targetDir)
+		if err := cache.LoadFromZip(zipR, cache.Dir()); err != nil {
+			return errors.Wrapf(err, "couldn't update in mem copy of %s", cache.Dir())
 		}
 		cache.SetLastUpdate(manifest.Until)
 	}
 	return nil
 }
 
-// UpdateFromVulnDump updates the definitions (both in the DB and in the NVDCache) from the given zip file.
+// UpdateFromVulnDump updates the definitions (both in the DB and in the Application Caches) from the given zip file.
 // Check the well_known_names.go file for the manifest of the ZIP file.
-// The caller is responsible for providing a path to a scratchDir, which MUST be an empty, but existing, directory.
-// This function will delete the directory before returning.
-func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore, updateInterval time.Duration, instanceName string, caches []cache.Cache, repoToCPE *repo2cpe.Mapping) error {
+func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval time.Duration, instanceName string, caches []cache.Cache, repoToCPE *repo2cpe.Mapping) error {
 	log.Infof("Attempting to update from vuln dump at %q", zipPath)
-	if !fileutils.DirExistsAndIsEmpty(scratchDir) {
-		return errors.Errorf("scratchDir %q invalid: must be an empty directory", scratchDir)
-	}
-	defer func() {
-		if err := os.RemoveAll(scratchDir); err != nil {
-			log.WithError(err).WithField("dir", scratchDir).Warn("Failed to clean up scratch dir")
-		}
-	}()
 
 	if filepath.Ext(zipPath) != ".zip" {
 		return errors.Errorf("invalid path %q: only .zip files are supported", zipPath)
@@ -309,7 +293,7 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 			return errors.Wrap(err, "error beginning vuln loading")
 		}
 		if performUpdate {
-			if err := loadRHELv2Vulns(db, zipPath, scratchDir, repoToCPE); err != nil {
+			if err := loadRHELv2Vulns(db, zipR, repoToCPE); err != nil {
 				utils.IgnoreError(finishFn)
 				return errors.Wrap(err, "error loading RHEL vulns")
 			}
@@ -331,7 +315,7 @@ func UpdateFromVulnDump(zipPath string, scratchDir string, db database.Datastore
 
 	errorList := errorhelpers.NewErrorList("loading application-level caches")
 	for _, appCache := range caches {
-		if err := loadApplicationUpdater(appCache, manifest, zipPath, scratchDir); err != nil {
+		if err := loadApplicationUpdater(appCache, manifest, zipR); err != nil {
 			errorList.AddError(errors.Wrapf(err, "error loading into inmem cache %q", appCache.Dir()))
 		}
 		// Explicitly close the zip file because the

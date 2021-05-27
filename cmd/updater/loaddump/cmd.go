@@ -2,7 +2,6 @@ package loaddump
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -38,13 +37,8 @@ func Command() *cobra.Command {
 		defer db.Close()
 		log.Info("Successfully opened DB")
 
-		// We don't want to bother with an in-mem update.
-		scratchDir, err := os.MkdirTemp("", "vuln-updater-load-dump")
-		if err != nil {
-			return errors.Wrap(err, "creating scratch dir")
-		}
 		log.Info("Updating DB with vuln dump")
-		err = vulndump.UpdateFromVulnDump(dumpFile, scratchDir, db, 1*time.Hour, "updater", nil, nil)
+		err = vulndump.UpdateFromVulnDump(dumpFile, db, 1*time.Hour, "updater", nil, nil)
 		if err != nil {
 			return errors.Wrap(err, "updating DB from dump")
 		}

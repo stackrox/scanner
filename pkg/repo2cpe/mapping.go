@@ -7,6 +7,7 @@ package repo2cpe
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"sync/atomic"
@@ -53,6 +54,17 @@ func (m *Mapping) Load(dir string) error {
 	var mappingFile RHELv2MappingFile
 	if err := json.Unmarshal(bytes, &mappingFile); err != nil {
 		return errors.Wrapf(err, "unmarshalling mapping file at %s", path)
+	}
+
+	m.mapping.Store(&mappingFile)
+
+	return nil
+}
+
+func (m *Mapping) LoadFromReader(r io.ReadCloser) error {
+	var mappingFile RHELv2MappingFile
+	if err := json.NewDecoder(r).Decode(&mappingFile); err != nil {
+		return errors.Wrapf(err, "unmarshalling mapping file")
 	}
 
 	m.mapping.Store(&mappingFile)

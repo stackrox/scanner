@@ -25,7 +25,6 @@ import (
 
 var (
 	diffDumpOutputPath = filepath.Join(wellknowndirnames.WriteableDir, "diff-dump.zip")
-	diffDumpScratchDir = filepath.Join(wellknowndirnames.WriteableDir, "diff-dump-scratch")
 )
 
 const (
@@ -47,7 +46,7 @@ type Updater struct {
 	fetchIsFromCentral bool
 
 	db database.Datastore
-	// Slice of application-level caches. This includes CPE data from NVD, and Kubernetes data.
+	// Slice of application-level caches. This includes CPE data from NVD and CVE data from Kubernetes.
 	caches []cache.Cache
 	// RHELv2 repository-to-cpe.json file.
 	repoToCPE *repo2cpe.Mapping
@@ -107,9 +106,6 @@ func (u *Updater) doUpdate(mode updateMode) error {
 	if err := os.RemoveAll(diffDumpOutputPath); err != nil {
 		return errors.Wrap(err, "removing diff dump output path")
 	}
-	if err := os.RemoveAll(diffDumpScratchDir); err != nil {
-		return errors.Wrap(err, "removing diff dump scratch dir")
-	}
 	fetched, err := fetchDumpFromURL(u.stopSig, u.client, u.fetchIsFromCentral, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
 	if err != nil {
 		return errors.Wrap(err, "fetching update from URL")
@@ -118,15 +114,12 @@ func (u *Updater) doUpdate(mode updateMode) error {
 		log.Info("No new update to fetch")
 		return nil
 	}
-	if err := os.MkdirAll(diffDumpScratchDir, 0755); err != nil {
-		return errors.Wrap(err, "creating scratch dir")
-	}
 
 	var db database.Datastore
 	if mode == updateApplicationCachesAndPostgres {
 		db = u.db
 	}
-	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, diffDumpScratchDir, db, u.interval, podName, u.caches, u.repoToCPE); err != nil {
+	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, db, u.interval, podName, u.caches, u.repoToCPE); err != nil {
 		return errors.Wrap(err, "updating from vuln dump")
 	}
 	if mode == updateApplicationCachesAndPostgres {
