@@ -102,7 +102,7 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 func (s *serviceImpl) getOpenShiftVulns(version *openShiftVersion) ([]*database.RHELv2Vulnerability, error) {
 	pkg := &database.RHELv2Package{
 		Name:  version.CreatePkgName(),
-		Model: database.Model{ID: 1},
+		Model: database.Model{},
 	}
 
 	records := []*database.RHELv2Record{
@@ -151,7 +151,7 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		vulnPkg := vulnPkgInfo.Packages[0]
 		affectedArch := vulnPkgInfo.ArchOperation.Cmp("x86_64", vulnPkg.Arch)
 		if !affectedArch {
-			log.Warnf("cannot get fixed by for vuln %s: %v, Skipping ...", vuln.Name, err)
+			log.Warnf("vuln %s is for arch %v %s, Skipping ...", vuln.Name, vulnPkgInfo.ArchOperation, vulnPkg.Arch)
 			continue
 		}
 
@@ -159,12 +159,12 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		fixedBy, err := version.GetFixedVersion(vulnPkgInfo.FixedInVersion, vuln.Title)
 		if err != nil {
 			// Skip it. The vuln has a fixedBy version but we cannot extract it.
-			log.Warnf("cannot get fixed by for vuln %s: %v, Skipping ...", vuln.Name, err)
+			log.Warnf("cannot get fix version for vuln %s: %v, Skipping ...", vuln.Name, err)
 			continue
 		}
 
 		if fixedBy != "" && !version.LessThan(rpmVersion.NewVersion(fixedBy)) {
-			log.Debugf("vuln %s has been fixed: %s, Skipping", vuln.Name, vulnPkgInfo.FixedInVersion)
+			log.Debugf("vuln %s has been fixed: %s, Skipping", vuln.Name, fixedBy)
 			continue
 		}
 		v1Vuln := apiV1.Rhelv2ToVulnerability(vuln, "")
