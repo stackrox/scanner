@@ -183,7 +183,8 @@
       "timestamp": "2021-05-13T22:04:14.306636873Z",
       "diffLocation": "gs://definitions.stackrox.io/21d1bee3-031c-4204-a2ae-ead6ed4b8c7b/diff.zip",
       "config": {
-        "useDPKGParserForAlpine": true
+        "useDPKGParserForAlpine": true,
+        "skipRHELv2TitleComparison": true
       }
     }
   ]

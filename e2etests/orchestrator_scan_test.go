@@ -5,14 +5,14 @@ package e2etests
 import (
 	"context"
 	"fmt"
-	"github.com/stackrox/rox/pkg/set"
-	"github.com/stretchr/testify/assert"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 
+	"github.com/stackrox/rox/pkg/set"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -107,7 +107,7 @@ func TestGRPCGetOpenShiftVulnerabilities(t *testing.T) {
 			}
 
 			// Check for regression. All vulns known to be fixed should not be unfixed.
-			assert.GreaterOrEqual(t, initialSize, len(vulnNameMap) + c.knownFixed)
+			assert.GreaterOrEqual(t, initialSize, len(vulnNameMap)+c.knownFixed)
 			t.Logf("Fixed %d vulns from %s.0 to %s.%d", initialSize-len(vulnNameMap), c.addressFamily, c.addressFamily, c.maxPatch)
 		})
 	}
