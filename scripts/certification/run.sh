@@ -23,6 +23,3 @@ for img in ${images[@]}; do
   rm output.csv
   i=$((i+1))
 done
-
-
-
