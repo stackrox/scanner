@@ -1686,11 +1686,11 @@ func TestImageSanity(t *testing.T) {
 		},
 		// Verify uncertified and digest based scanning, this is also a v1 versioned image
 		{
-			image:    "docker.io/richxsl/rhel7@sha256:8f3aae325d2074d2dc328cb532d6e7aeb0c588e15ddf847347038fe0566364d6",
-			registry: "https://registry-1.docker.io",
-			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-			source:   "NVD",
+			image:           "docker.io/richxsl/rhel7@sha256:8f3aae325d2074d2dc328cb532d6e7aeb0c588e15ddf847347038fe0566364d6",
+			registry:        "https://registry-1.docker.io",
+			username:        os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:        os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:          "NVD",
 			uncertifiedRHEL: true,
 			expectedFeatures: []v1.Feature{
 				{
