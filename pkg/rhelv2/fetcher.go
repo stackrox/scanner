@@ -4,11 +4,11 @@ import (
 	"compress/bzip2"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/retry"
 )
 
 var (
@@ -17,14 +17,28 @@ var (
 
 // fetch fetches the resource as specified by the given URL,
 // using the client provided in this package.
-func fetch(url *url.URL) (string, io.ReadCloser, error) {
-	req := &http.Request{
-		Method:     http.MethodGet,
-		URL:        url,
-		Proto:      "HTTP/1.1",
-		ProtoMajor: 1,
-		ProtoMinor: 1,
-		Host:       url.Host,
+func fetch(uri string) (string, io.ReadCloser, error) {
+	var (
+		lastModified string
+		body         io.ReadCloser
+	)
+	tries := 5
+	err := retry.WithRetry(func() error {
+		var err error
+		lastModified, body, err = doFetch(uri)
+		return err
+	}, retry.BetweenAttempts(func(previousAttemptNumber int) {
+		log.Warnf("Attempt %d/%d to GET %s failed...", previousAttemptNumber+1, tries, uri)
+	}), retry.Tries(tries))
+	return lastModified, body, err
+}
+
+// doFetch performs the actual fetching.
+func doFetch(uri string) (string, io.ReadCloser, error) {
+	// No context needed as the client has a 20 second timeout.
+	req, err := http.NewRequest(http.MethodGet, uri, nil)
+	if err != nil {
+		return "", nil, err
 	}
 
 	res, err := client.Do(req)
@@ -32,13 +46,13 @@ func fetch(url *url.URL) (string, io.ReadCloser, error) {
 		return "", nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return "", nil, errors.Errorf("rhelv2: fetcher got unexpected HTTP response for %s: %d (%s)", url, res.StatusCode, res.Status)
+		return "", nil, errors.Errorf("rhelv2: fetcher got unexpected HTTP response for %s: %d (%s)", uri, res.StatusCode, res.Status)
 	}
 
 	if contentLength := res.Header.Get("content-length"); contentLength != "" {
 		length, err := strconv.Atoi(contentLength)
 		if err == nil && length == 0 {
-			log.Warnf("Empty OVAL file: %s", url)
+			log.Warnf("Empty OVAL file: %s", uri)
 			return "", nil, errEmptyOVAL
 		}
 	}

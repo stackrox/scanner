@@ -54,9 +54,8 @@ func UpdateV2(outputDir string) (int, error) {
 		return 0, err
 	}
 
-	ctx, cancelFn := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancelFn()
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	// No context needed as the client has a 20 second timeout.
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return 0, err
 	}
@@ -127,9 +126,8 @@ func UpdateV2(outputDir string) (int, error) {
 		go func() {
 			defer wg.Done()
 
-			u, _ := url.Parse(uri.String())
 			rl.Take()
-			lastModifiedStr, r, err := fetch(u)
+			lastModifiedStr, r, err := fetch(uri.String())
 			if err != nil {
 				if err != errEmptyOVAL {
 					respC <- &response{err: err}
