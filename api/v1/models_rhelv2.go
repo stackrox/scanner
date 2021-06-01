@@ -94,7 +94,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 			affectedArch := vulnPkgInfo.ArchOperation.Cmp(pkgArch, vulnPkg.Arch)
 
 			if affectedVersion && affectedArch {
-				feature.Vulnerabilities = append(feature.Vulnerabilities, Rhelv2ToVulnerability(vuln, feature.NamespaceName))
+				feature.Vulnerabilities = append(feature.Vulnerabilities, RHELv2ToVulnerability(vuln, feature.NamespaceName))
 
 				if vulnVersion != nil && vulnVersion.GreaterThan(fixedBy) {
 					fixedBy = *vulnVersion
@@ -214,7 +214,7 @@ func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2P
 	return pkgEnvs, records
 }
 
-func Rhelv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string) Vulnerability {
+func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string) Vulnerability {
 	var cvss2 types.MetadataCVSSv2
 	if vuln.CVSSv2 != "" {
 		scoreStr, vector := stringutils.Split2(vuln.CVSSv2, "/")

@@ -12,7 +12,7 @@ import (
 
 var (
 	// Version family is like 3.11, 4.5, 4.7 which defines the versions in the same stream and hence comparable.
-	versionFamilyRegex = regexp.MustCompile(`^(3\.11|[4-9]\.[0-9]+)\.[0-9]+`)
+	versionFamilyRegex = regexp.MustCompile(`^(3\.11|(:?[4-9]|[1-9][0-9]+)\.[0-9]+)\.[0-9]+`)
 	// Version families we can compare directly.
 	// Ovals for OpenShift 4.4-current does not have valid patch number in the fixed versions.
 	// We will try to extract the fixed version from the title field.
@@ -34,7 +34,7 @@ func newOpenShiftVersion(version string) (*openShiftVersion, error) {
 	}
 	ver, err := convert.TruncateVersion(version)
 	if err != nil {
-		return nil, errors.Wrap(err, "unrecognized OpenShift version")
+		return nil, errors.Wrapf(err, "unrecognized OpenShift version %s", version)
 	}
 	return &openShiftVersion{
 		version:       rpmVersion.NewVersion(ver),

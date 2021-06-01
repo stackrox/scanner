@@ -167,7 +167,7 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 			log.Debugf("vuln %s has been fixed: %s, Skipping", vuln.Name, fixedBy)
 			continue
 		}
-		v1Vuln := apiV1.Rhelv2ToVulnerability(vuln, "")
+		v1Vuln := apiV1.RHELv2ToVulnerability(vuln, "")
 		metadata, err := convert.MetadataMap(v1Vuln.Metadata)
 		if err != nil {
 			log.Warnf("error converting metadata for %s: %v. Skipping...", vuln.Name, err)
