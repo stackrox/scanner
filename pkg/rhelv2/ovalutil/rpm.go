@@ -122,6 +122,8 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				if state.Arch != nil {
 					pkgInfo.ArchOperation = mapArchOp(state.Arch.Operation)
 				}
+			} else {
+				vuln.Title = ""
 			}
 			for _, module := range enabledModules {
 				pkg := &database.RHELv2Package{
