@@ -29,7 +29,7 @@ func fetch(uri string) (string, io.ReadCloser, error) {
 		return err
 	}, retry.BetweenAttempts(func(previousAttemptNumber int) {
 		log.Warnf("Attempt %d/%d to GET %s failed...", previousAttemptNumber, tries, uri)
-	}), retry.Tries(tries))
+	}), retry.OnlyRetryableErrors(), retry.Tries(tries))
 	return lastModified, body, err
 }
 
@@ -43,10 +43,10 @@ func doFetch(uri string) (string, io.ReadCloser, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return "", nil, err
+		return "", nil, retry.MakeRetryable(err)
 	}
 	if res.StatusCode != http.StatusOK {
-		return "", nil, errors.Errorf("rhelv2: fetcher got unexpected HTTP response for %s: %d (%s)", uri, res.StatusCode, res.Status)
+		return "", nil, retry.MakeRetryable(errors.Errorf("rhelv2: fetcher got unexpected HTTP response for %s: %d (%s)", uri, res.StatusCode, res.Status))
 	}
 
 	if contentLength := res.Header.Get("content-length"); contentLength != "" {
