@@ -28,7 +28,7 @@ func fetch(uri string) (string, io.ReadCloser, error) {
 		lastModified, body, err = doFetch(uri)
 		return err
 	}, retry.BetweenAttempts(func(previousAttemptNumber int) {
-		log.Warnf("Attempt %d/%d to GET %s failed...", previousAttemptNumber+1, tries, uri)
+		log.Warnf("Attempt %d/%d to GET %s failed...", previousAttemptNumber, tries, uri)
 	}), retry.Tries(tries))
 	return lastModified, body, err
 }
