@@ -147,7 +147,6 @@ func getLayerFeatureVersions(tx *sql.Tx, layerID int, lineage string) ([]databas
 	var featureVersions []database.FeatureVersion
 
 	// Query.
-	log.Infof("get layer feature versions: %+v %+v", layerID, lineage)
 	rows, err := tx.Query(searchLayerFeatureVersion, layerID, lineage)
 	if err != nil {
 		return featureVersions, handleError("searchLayerFeatureVersion", err)

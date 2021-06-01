@@ -1,13 +1,11 @@
 package pgsql
 
 import (
-	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 )
 
 // GetLayerBySHA fetches the latest layer for an image by the image SHA.
 func (pgSQL *pgSQL) GetLayerBySHA(sha string, opts *database.DatastoreOptions) (string, string, bool, error) {
-	logrus.Infof("Finding image to layer: %v %v", sha, opts.GetUncertifiedRHEL())
 	rows, err := pgSQL.Query("SELECT layer, lineage FROM ImageToLayer WHERE sha = $1 AND uncertified_rhel = $2", sha, opts.GetUncertifiedRHEL())
 	if err != nil {
 		return "", "", false, err
@@ -23,7 +21,6 @@ func (pgSQL *pgSQL) GetLayerBySHA(sha string, opts *database.DatastoreOptions) (
 
 // GetLayerByName fetches the latest layer for an image by the image name.
 func (pgSQL *pgSQL) GetLayerByName(name string, opts *database.DatastoreOptions) (string, string, bool, error) {
-	logrus.Infof("Finding image to layer: %v %v", name, opts.GetUncertifiedRHEL())
 	rows, err := pgSQL.Query("SELECT layer,lineage FROM ImageToLayer WHERE name = $1 AND uncertified_rhel = $2", name, opts.GetUncertifiedRHEL())
 	if err != nil {
 		return "", "", false, err

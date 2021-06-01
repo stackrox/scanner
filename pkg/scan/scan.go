@@ -45,7 +45,6 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 
 		prevLineage = lineage
 		lineage = fmt.Sprintf("%x", h.Sum(nil))
-		logrus.Infof("Finding lineage: %v", lineage)
 		prevLayer = layer
 	}
 	logrus.Infof("Finished analyzing all layers for image %s", image)

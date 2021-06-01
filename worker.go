@@ -81,7 +81,6 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, lineage, p
 		// We need to get it with its Features in order to diff them.
 		if parentName != "" {
 			// rolling hash of parents up to point
-			log.Infof("looking for parent: %v %v", parentName, parentLineage)
 			parent, err := datastore.FindLayer(parentName, parentLineage, &database.DatastoreOptions{
 				WithFeatures:    true,
 				UncertifiedRHEL: uncertifiedRHEL,
@@ -112,7 +111,6 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, lineage, p
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
 func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lineage, parentName, parentLineage string, reader io.ReadCloser, uncertifiedRHEL bool) error {
-	log.Infof("Preprocess layer: name=%v lineage=%v parentNAme=%v parentLineage=%v rhel=%v", name, lineage, parentName, parentLineage, uncertifiedRHEL)
 	layer, exists, err := preProcessLayer(datastore, imageFormat, name, lineage, parentName, parentLineage, uncertifiedRHEL)
 	if err != nil {
 		return err
