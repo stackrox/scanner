@@ -1691,6 +1691,7 @@ func TestImageSanity(t *testing.T) {
 			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
 			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:   "NVD",
+			uncertifiedRHEL: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "fipscheck",
