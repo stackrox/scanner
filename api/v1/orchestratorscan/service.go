@@ -101,8 +101,7 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 
 func (s *serviceImpl) getOpenShiftVulns(version *openShiftVersion) ([]*database.RHELv2Vulnerability, error) {
 	pkg := &database.RHELv2Package{
-		Name:  version.CreatePkgName(),
-		Model: database.Model{},
+		Name: version.CreatePkgName(),
 	}
 
 	records := []*database.RHELv2Record{
@@ -120,7 +119,7 @@ func (s *serviceImpl) getOpenShiftVulns(version *openShiftVersion) ([]*database.
 	if vulns, ok := vulnsMap[pkg.ID]; ok {
 		return vulns, nil
 	}
-	return nil, errors.Errorf("failed to fetch vulns, %v", err)
+	return nil, errors.Wrap(err, "failed to fetch vulns")
 }
 
 // GetOpenShiftVulnerabilities returns Openshift vulnerabilities for requested Openshift version.
@@ -159,7 +158,7 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		fixedBy, err := version.GetFixedVersion(vulnPkgInfo.FixedInVersion, vuln.Title)
 		if err != nil {
 			// Skip it. The vuln has a fixedBy version but we cannot extract it.
-			log.Warnf("cannot get fix version for vuln %s: %v, Skipping ...", vuln.Name, err)
+			log.Errorf("cannot get fix version for vuln %s: %v, Skipping ...", vuln.Name, err)
 			continue
 		}
 
@@ -170,7 +169,7 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		v1Vuln := apiV1.RHELv2ToVulnerability(vuln, "")
 		metadata, err := convert.MetadataMap(v1Vuln.Metadata)
 		if err != nil {
-			log.Warnf("error converting metadata for %s: %v. Skipping...", vuln.Name, err)
+			log.Errorf("error converting metadata for %s: %v. Skipping...", vuln.Name, err)
 			continue
 		}
 

@@ -67,11 +67,8 @@ func (o *openShiftVersion) GetFixedVersion(fixedIn string, title string) (string
 		return "", nil
 	}
 
-	var version string
-	var err error
-
 	if qualifiedVersionFamilies.Contains(o.versionFamily) {
-		version, err = convert.TruncateVersion(fixedIn)
+		version, err := convert.TruncateVersion(fixedIn)
 		if err != nil {
 			return "", err
 		}
@@ -82,7 +79,7 @@ func (o *openShiftVersion) GetFixedVersion(fixedIn string, title string) (string
 		return "", errors.Errorf("cannot get version from %s", fixedIn)
 	}
 
-	version, err = convert.TruncateVersion(title)
+	version, err := convert.TruncateVersion(title)
 	if err != nil {
 		// Patch: Get the version from title.
 		matched := titleVersionRegex.FindStringSubmatch(title)

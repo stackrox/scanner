@@ -122,7 +122,9 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				if state.Arch != nil {
 					pkgInfo.ArchOperation = mapArchOp(state.Arch.Operation)
 				}
-			} else {
+			}
+
+			if pkgInfo.FixedInVersion == "" {
 				// Title is used only as supplementary to FixedInVersion without a patch number.
 				// If FixedInVersion is not defined, we keep the title empty to reduce the scale of the database.
 				vuln.Title = ""
