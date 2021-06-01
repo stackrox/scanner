@@ -1684,6 +1684,21 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		// Verify uncertified and digest based scanning, this is also a v1 versioned image
+		{
+			image:    "docker.io/richxsl/rhel7@sha256:8f3aae325d2074d2dc328cb532d6e7aeb0c588e15ddf847347038fe0566364d6",
+			registry: "https://registry-1.docker.io",
+			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:   "NVD",
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "fipscheck",
+					VersionFormat: "rpm",
+					Version:       "1.4.1-5.el7",
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
