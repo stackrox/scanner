@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/nvdutils"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
 )
@@ -73,6 +74,9 @@ func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir 
 	}
 
 	for _, item := range dump.CVEItems {
+		if !nvdutils.CheckValidityAndTrim(item) {
+			continue
+		}
 		if enrichedEntry, ok := enrichmentMap[item.CVE.CVEDataMeta.ID]; ok {
 			// Add the CPE matches instead of removing for backwards compatibility purposes
 			item.Configurations.Nodes = append(item.Configurations.Nodes, &schema.NVDCVEFeedJSON10DefNode{
