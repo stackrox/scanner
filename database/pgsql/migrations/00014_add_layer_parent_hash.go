@@ -4,7 +4,7 @@ import "github.com/remind101/migrate"
 
 func init() {
 	RegisterMigration(migrate.Migration{
-		ID: 13,
+		ID: 14,
 		Up: migrate.Queries([]string{
 			`ALTER TABLE ImageToLayer ADD COLUMN lineage varchar`,
 			`ALTER TABLE LanguageLayer ADD COLUMN lineage varchar`,
