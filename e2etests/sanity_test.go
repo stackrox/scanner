@@ -1701,6 +1701,34 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		// The next two images have the same layer and thus verify lineage checks between different images
+		// The first is a centos:7 image that has the package p11-kit. The second image is from fedora and we
+		// can't identify the OS so it should not have p11-kit
+		{
+			image:             "quay.io/dougtidwell/open-adventure@sha256:564c8dde1931f337a7bc8925f94cb594d9c81a5ee9eacc5ec5590f1e60e94b6a",
+			registry:          "https://quay.io",
+			source:            "NVD",
+			checkContainsOnly: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "p11-kit",
+					VersionFormat: "rpm",
+					Version:       "0.23.5-3.el7",
+				},
+			},
+		},
+		{
+			image:    "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
+			registry: "https://quay.io",
+			source:   "NVD",
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:          "p11-kit",
+					VersionFormat: "rpm",
+					Version:       "0.23.5-3.el7",
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
