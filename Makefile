@@ -258,11 +258,6 @@ db-integration-tests: deps
 	@echo "+ $@"
 	go test -tags db_integration -count=1 ./database/pgsql
 
-.PHONY: no-license-tests
-no-license-tests: deps
-	@echo "+ $@"
-	go test -tags e2e_nolicense -count=1 ./e2etests/...
-
 ####################
 ## Generated Srcs ##
 ####################

@@ -366,30 +366,6 @@ commands:
             .circleci/collect-service-logs.sh kube-system
           when: always
 
-      - run:
-          name: Delete license and bounce pod
-          command: |
-            kubectl -n stackrox delete secret scanner-license
-            POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner")].metadata.name}')"
-            [[ -n "${POD}" ]]
-            kubectl -n stackrox delete pod "${POD}"
-
-      - wait-for-scanner-and-pf:
-          condition: Initialized
-          sleep-after-condition-met: 60
-
-      - run:
-          name: Run no license tests
-          command: |
-            make no-license-tests
-
-      - run:
-          name: Collect k8s logs
-          command: |
-            .circleci/collect-service-logs.sh stackrox
-            .circleci/collect-service-logs.sh kube-system
-          when: always
-
       - store_artifacts:
           path: /tmp/k8s-service-logs
           destination: k8s-service-logs-<< parameters.cluster-id >>
@@ -439,10 +415,6 @@ jobs:
       - run:
           name: Run style checks
           command: make style
-
-      - run:
-          name: Run style checks on test code
-          command: make -C qa-tests style
 
   generate-genesis-dump:
     <<: *defaults
