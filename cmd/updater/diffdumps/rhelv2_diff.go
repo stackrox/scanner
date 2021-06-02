@@ -17,7 +17,7 @@ import (
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
-func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF, headF *zip.File, rhelExists bool) error {
+func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.Time, baseF, headF *zip.File, rhelExists bool) error {
 	reader, err := headF.Open()
 	if err != nil {
 		return errors.Wrap(err, "opening file")
@@ -83,6 +83,10 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 			continue
 		}
 
+		if cfg.SkipRHELv2TitleComparison {
+			headVuln.Title = ""
+		}
+
 		headHash, err := vulnHash(headVuln)
 		if err != nil {
 			log.Warnf("Unable to hash new vuln %s. Skipping head vuln...", headVuln.Name)
@@ -113,7 +117,7 @@ func generateRHELv2Diff(outputDir string, baseLastModifiedTime time.Time, baseF,
 	return nil
 }
 
-func generateRHELv2VulnsDiff(outputDir string, baseLastModifiedTime time.Time, baseZipR, headZipR *zip.ReadCloser) error {
+func generateRHELv2VulnsDiff(cfg config, outputDir string, baseLastModifiedTime time.Time, baseZipR, headZipR *zip.ReadCloser) error {
 	rhelv2VulnsSubDir := filepath.Join(outputDir, vulndump.RHELv2DirName, vulndump.RHELv2VulnsSubDirName)
 	if err := os.MkdirAll(rhelv2VulnsSubDir, 0755); err != nil {
 		return errors.Wrap(err, "creating subdir for RHELv2")
@@ -147,7 +151,7 @@ func generateRHELv2VulnsDiff(outputDir string, baseLastModifiedTime time.Time, b
 			continue
 		}
 
-		if err := generateRHELv2Diff(rhelv2VulnsSubDir, baseLastModifiedTime, baseFiles[name], headF, rhelExists); err != nil {
+		if err := generateRHELv2Diff(cfg, rhelv2VulnsSubDir, baseLastModifiedTime, baseFiles[name], headF, rhelExists); err != nil {
 			return errors.Wrapf(err, "generating RHELv2 diff for file %q", headF.Name)
 		}
 	}

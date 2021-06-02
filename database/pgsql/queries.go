@@ -198,12 +198,12 @@ const (
 	insertRHELv2Vuln = `
 		INSERT INTO vuln (
 			hash,
-			name, description, issued, updated, link,
-			severity, cvss3, cvss2
+			name, title, description, issued, updated,
+			link, severity, cvss3, cvss2
 		) VALUES (
 			$1,
 			$2, $3, $4, $5, $6,
-			$7, $8, $9
+			$7, $8, $9, $10
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
@@ -227,6 +227,7 @@ const (
 		SELECT
 			vuln_package.id,
 			vuln_package.name,
+			vuln.title,
 			vuln.description,
 			vuln.link,
 			vuln.issued,

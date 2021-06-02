@@ -63,6 +63,14 @@ func TestConvertVersion(t *testing.T) {
 			version:  "4.19.123-coreos",
 			expected: "4.19.123",
 		},
+		{
+			version:  "4.7.0-202104090228.p0.git.97111.77863f8.el7",
+			expected: "4.7.0",
+		},
+		{
+			version:  "0:4.7.0-202104030128.p0-2513fdb",
+			expected: "4.7.0",
+		},
 	} {
 		actual, err := TruncateVersion(testCase.version)
 		assert.NoError(t, err)
