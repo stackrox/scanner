@@ -1684,7 +1684,8 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
-		// Verify uncertified and digest based scanning, this is also a v1 versioned image
+		// Verify digest-based scanning and also a v1 versioned image
+		// This image result has two layers with the same digests so it checks a duplicate layer case
 		{
 			image:           "docker.io/richxsl/rhel7@sha256:8f3aae325d2074d2dc328cb532d6e7aeb0c588e15ddf847347038fe0566364d6",
 			registry:        "https://registry-1.docker.io",

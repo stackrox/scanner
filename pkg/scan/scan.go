@@ -23,6 +23,7 @@ const (
 	emptyLayer = "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4"
 )
 
+// analyzeLayers processes all of the layers and returns the lineage for the last layer so that we can uniquely identify it
 func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string, uncertifiedRHEL bool) (string, error) {
 	var prevLayer string
 
@@ -74,6 +75,7 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 	})
 }
 
+// process fetches and analyzes the layers for the requested image returning the image digest, the lineage of the last layer and the last layer digest
 func process(storage database.Datastore, image *types.Image, reg types.Registry, uncertifiedRHEL bool) (string, string, string, error) {
 	logrus.Debugf("Processing image %s", image)
 	digest, layers, err := fetchLayers(reg, image)
