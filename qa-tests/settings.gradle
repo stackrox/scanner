@@ -1,4 +1,0 @@
-rootProject.name = 'qa-tests'
-include 'buildSrc'
-include 'buildSrc'
-
