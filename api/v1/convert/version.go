@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	semverPattern = regexp.MustCompile(`(?:v)?([0-9]+.[0-9]+.[0-9]+)(?:[-+]?.*)`)
+	semverPattern = regexp.MustCompile(`(?:v)?([0-9]+\.[0-9]+\.[0-9]+)(?:[-+]?.*)`)
 )
 
 // TruncateVersion converts the given version into a semantic version x.y.z.

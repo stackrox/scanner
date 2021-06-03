@@ -155,7 +155,7 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 		},
 		Features: nil,
 	}
-	layer, _, err := LayerFromDatabaseModel(db, dbLayer, &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(db, dbLayer, "", &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
 	})

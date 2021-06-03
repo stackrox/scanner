@@ -119,6 +119,7 @@ type RHELv2Vulnerability struct {
 	Model
 
 	Name         string               `json:"name"`
+	Title        string               `json:"title"`
 	Description  string               `json:"description"`
 	Issued       time.Time            `json:"issued"`
 	Updated      time.Time            `json:"updated"`

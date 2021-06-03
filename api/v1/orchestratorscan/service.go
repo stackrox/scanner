@@ -4,10 +4,13 @@ import (
 	"context"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	rpmVersion "github.com/knqyf263/go-rpm-version"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
+	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
+	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"google.golang.org/grpc"
@@ -22,13 +25,15 @@ type Service interface {
 }
 
 // NewService returns the service for scanning
-func NewService(k8sCache k8scache.Cache) Service {
+func NewService(db database.Datastore, k8sCache k8scache.Cache) Service {
 	return &serviceImpl{
+		db:       db,
 		k8sCache: k8sCache,
 	}
 }
 
 type serviceImpl struct {
+	db       database.Datastore
 	k8sCache k8scache.Cache
 }
 
@@ -92,6 +97,93 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 	}
 
 	return &resp, nil
+}
+
+func (s *serviceImpl) getOpenShiftVulns(version *openShiftVersion) ([]*database.RHELv2Vulnerability, error) {
+	pkg := &database.RHELv2Package{
+		Name: version.CreatePkgName(),
+	}
+
+	records := []*database.RHELv2Record{
+		{
+			Pkg: pkg,
+			CPE: version.CreateCPE(),
+		},
+	}
+
+	vulnsMap, err := s.db.GetRHELv2Vulnerabilities(records)
+	if err != nil {
+		return nil, err
+	}
+
+	if vulns, ok := vulnsMap[pkg.ID]; ok {
+		return vulns, nil
+	}
+	return nil, errors.Wrap(err, "failed to fetch vulns")
+}
+
+// GetOpenShiftVulnerabilities returns Openshift vulnerabilities for requested Openshift version.
+func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.GetOpenShiftVulnerabilitiesRequest) (*v1.GetOpenShiftVulnerabilitiesResponse, error) {
+	version, err := newOpenShiftVersion(req.OpenShiftVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	vulns, err := s.getOpenShiftVulns(version)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp v1.GetOpenShiftVulnerabilitiesResponse
+	for _, vuln := range vulns {
+		if len(vuln.PackageInfos) != 1 {
+			log.Warnf("unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
+			continue
+		}
+		vulnPkgInfo := vuln.PackageInfos[0]
+
+		if len(vulnPkgInfo.Packages) != 1 {
+			log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vulnPkgInfo.Packages), 1)
+			continue
+		}
+
+		vulnPkg := vulnPkgInfo.Packages[0]
+		affectedArch := vulnPkgInfo.ArchOperation.Cmp("x86_64", vulnPkg.Arch)
+		if !affectedArch {
+			log.Warnf("vuln %s is for arch %v %s, Skipping ...", vuln.Name, vulnPkgInfo.ArchOperation, vulnPkg.Arch)
+			continue
+		}
+
+		// Skip fixed vulns.
+		fixedBy, err := version.GetFixedVersion(vulnPkgInfo.FixedInVersion, vuln.Title)
+		if err != nil {
+			// Skip it. The vuln has a fixedBy version but we cannot extract it.
+			log.Errorf("cannot get fix version for vuln %s: %v, Skipping ...", vuln.Name, err)
+			continue
+		}
+
+		if fixedBy != "" && !version.LessThan(rpmVersion.NewVersion(fixedBy)) {
+			log.Debugf("vuln %s has been fixed: %s, Skipping", vuln.Name, fixedBy)
+			continue
+		}
+		v1Vuln := apiV1.RHELv2ToVulnerability(vuln, "")
+		metadata, err := convert.MetadataMap(v1Vuln.Metadata)
+		if err != nil {
+			log.Errorf("error converting metadata for %s: %v. Skipping...", vuln.Name, err)
+			continue
+		}
+
+		resp.Vulnerabilities = append(resp.Vulnerabilities, &v1.Vulnerability{
+			Name:        v1Vuln.Name,
+			Description: v1Vuln.Description,
+			Link:        v1Vuln.Link,
+			MetadataV2:  metadata,
+			FixedBy:     fixedBy,
+			Severity:    vuln.Severity,
+		})
+	}
+	resp.Vulnerabilities = filterInvalidVulns(resp.Vulnerabilities)
+	return &resp, err
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.

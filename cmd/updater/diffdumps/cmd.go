@@ -302,6 +302,7 @@ type config struct {
 	SkipSeverityComparison     bool `json:"skipSeverityComparison"`
 	SkipRHELv2Vulns            bool `json:"skipRHELv2Vulns"`
 	UseDPKGParserForAlpine     bool `json:"useDPKGParserForAlpine"`
+	SkipRHELv2TitleComparison  bool `json:"skipRHELv2TitleComparison"`
 }
 
 func Command() *cobra.Command {
@@ -374,7 +375,7 @@ func Command() *cobra.Command {
 			log.Info("Skipping RHELv2 diff")
 		} else {
 			log.Info("Generating RHELv2 vulns diff")
-			if err := generateRHELv2VulnsDiff(stagingDir, baseManifest.Until, baseZipR, headZipR); err != nil {
+			if err := generateRHELv2VulnsDiff(cfg, stagingDir, baseManifest.Until, baseZipR, headZipR); err != nil {
 				return errors.Wrap(err, "creating RHELv2 vulns diff")
 			}
 			log.Info("Generated RHELv2 vulns diff")

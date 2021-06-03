@@ -183,8 +183,14 @@
       "timestamp": "2021-05-13T22:04:14.306636873Z",
       "diffLocation": "gs://definitions.stackrox.io/21d1bee3-031c-4204-a2ae-ead6ed4b8c7b/diff.zip",
       "config": {
-        "useDPKGParserForAlpine": true
+        "useDPKGParserForAlpine": true,
+        "skipRHELv2TitleComparison": true
       }
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210603180429.zip",
+      "timestamp": "2021-06-03T18:04:29.751005127Z",
+      "diffLocation": "gs://definitions.stackrox.io/e8f8b9ab-6a75-433a-8b86-15586ec41a7b/diff.zip"
     }
   ]
 }

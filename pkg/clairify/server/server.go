@@ -66,14 +66,14 @@ func clairError(w http.ResponseWriter, status int, err error) {
 	clairErrorString(w, status, err.Error())
 }
 
-func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, uncertifiedRHEL bool) {
+func (s *Server) getClairLayer(w http.ResponseWriter, layerName, lineage string, uncertifiedRHEL bool) {
 	opts := &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
 		UncertifiedRHEL:     uncertifiedRHEL,
 	}
 
-	dbLayer, err := s.storage.FindLayer(layerName, opts)
+	dbLayer, err := s.storage.FindLayer(layerName, lineage, opts)
 	if err == commonerr.ErrNotFound {
 		clairErrorString(w, http.StatusNotFound, "Could not find Clair layer %q", layerName)
 		return
@@ -82,7 +82,7 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName string, uncertif
 		return
 	}
 
-	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, opts)
+	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, lineage, opts)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
@@ -109,7 +109,7 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
-	layer, exists, err := s.storage.GetLayerBySHA(sha, &database.DatastoreOptions{
+	layer, lineage, exists, err := s.storage.GetLayerBySHA(sha, &database.DatastoreOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
 	if err != nil {
@@ -120,7 +120,7 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusNotFound, "Could not find sha %q", sha)
 		return
 	}
-	s.getClairLayer(w, layer, uncertifiedRHEL)
+	s.getClairLayer(w, layer, lineage, uncertifiedRHEL)
 }
 
 func parseImagePath(path string) (string, error) {
@@ -149,7 +149,7 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 	}
 	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
 	logrus.Debugf("Getting layer sha by name %s", image)
-	layer, exists, err := s.storage.GetLayerByName(image, &database.DatastoreOptions{
+	layer, lineage, exists, err := s.storage.GetLayerByName(image, &database.DatastoreOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
 	if err != nil {
@@ -160,7 +160,7 @@ func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusNotFound, "Could not find image %q", image)
 		return
 	}
-	s.getClairLayer(w, layer, uncertifiedRHEL)
+	s.getClairLayer(w, layer, lineage, uncertifiedRHEL)
 }
 
 func getUncertifiedRHELResults(queryValues url.Values) bool {

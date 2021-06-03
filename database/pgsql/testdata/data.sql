@@ -28,12 +28,12 @@ INSERT INTO featureversion (id, feature_id, version) VALUES
   (3, 2, '2.0'),
   (4, 3, '1.0');
 
-INSERT INTO layer (id, name, engineversion, parent_id, namespace_id) VALUES
-  (1, 'layer-0', 1, NULL, NULL),
-  (2, 'layer-1', 1, 1, 1),
-  (3, 'layer-2', 1, 2, 1),
-  (4, 'layer-3a', 1, 3, 1),
-  (5, 'layer-3b', 1, 3, 2);
+INSERT INTO layer (id, name, engineversion, parent_id, lineage, namespace_id) VALUES
+  (1, 'layer-0', 1, NULL, '', NULL),
+  (2, 'layer-1', 1, 1, 'layer0', 1),
+  (3, 'layer-2', 1, 2, 'layer1', 1),
+  (4, 'layer-3a', 1, 3, 'layer2', 1),
+  (5, 'layer-3b', 1, 3, 'layer2', 2);
 
 INSERT INTO layer_diff_featureversion (id, layer_id, featureversion_id, modification) VALUES
   (1, 2, 1, 'add'),
