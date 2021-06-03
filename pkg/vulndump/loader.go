@@ -86,6 +86,7 @@ func determineWhetherToUpdate(db database.Datastore, manifest *Manifest) (bool, 
 	if manifest.Since.After(dbTime) {
 		return false, errors.Errorf("cannot update with manifest: its start time (%s) is after the DB update time (%s)", manifest.Since, dbTime)
 	}
+	log.Infof("Comparing manifest until of %s to last DB update of %s", manifest.Until, dbTime)
 	return manifest.Until.After(dbTime), nil
 }
 
