@@ -39,11 +39,11 @@ type serviceImpl struct {
 }
 
 func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
-	layerName, err := s.getLayerNameFromImageReq(req)
+	layerName, lineage, err := s.getLayerNameFromImageReq(req)
 	if err != nil {
 		return nil, err
 	}
-	components, err := s.db.GetLayerLanguageComponents(layerName, &database.DatastoreOptions{
+	components, err := s.db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
 		UncertifiedRHEL: req.GetUncertifiedRHEL(),
 	})
 	if err != nil {
@@ -76,14 +76,14 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 	}, nil
 }
 
-func (s *serviceImpl) getLayer(layerName string, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
+func (s *serviceImpl) getLayer(layerName, lineage string, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
 	opts := &database.DatastoreOptions{
 		WithFeatures:        true,
 		WithVulnerabilities: true,
 		UncertifiedRHEL:     uncertifiedRHEL,
 	}
 
-	dbLayer, err := s.db.FindLayer(layerName, opts)
+	dbLayer, err := s.db.FindLayer(layerName, lineage, opts)
 	if err == commonerr.ErrNotFound {
 		return nil, status.Errorf(codes.NotFound, "Could not find Clair layer %q", layerName)
 	} else if err != nil {
@@ -91,7 +91,7 @@ func (s *serviceImpl) getLayer(layerName string, uncertifiedRHEL bool) (*v1.GetI
 	}
 
 	// This endpoint is not used, so not going to bother with notes until they are necessary.
-	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, opts)
+	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, lineage, opts)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -114,14 +114,14 @@ type imageRequest interface {
 	GetUncertifiedRHEL() bool
 }
 
-func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, error) {
+func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string, error) {
 	imgSpec := req.GetImageSpec()
 
 	if stringutils.AllEmpty(imgSpec.GetImage(), imgSpec.GetDigest()) {
-		return "", status.Error(codes.InvalidArgument, "either image or digest must be specified")
+		return "", "", status.Error(codes.InvalidArgument, "either image or digest must be specified")
 	}
 
-	var layerFetcher func(s string, opts *database.DatastoreOptions) (string, bool, error)
+	var layerFetcher func(s string, opts *database.DatastoreOptions) (string, string, bool, error)
 	var argument string
 	if digest := imgSpec.GetDigest(); digest != "" {
 		logrus.Debugf("Getting layer SHA by digest %s", digest)
@@ -132,24 +132,24 @@ func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, error)
 		argument = imgSpec.GetImage()
 		layerFetcher = s.db.GetLayerByName
 	}
-	layerName, exists, err := layerFetcher(argument, &database.DatastoreOptions{
+	layerName, lineage, exists, err := layerFetcher(argument, &database.DatastoreOptions{
 		UncertifiedRHEL: req.GetUncertifiedRHEL(),
 	})
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if !exists {
-		return "", status.Errorf(codes.NotFound, "image with reference %q not found", argument)
+		return "", "", status.Errorf(codes.NotFound, "image with reference %q not found", argument)
 	}
-	return layerName, nil
+	return layerName, lineage, nil
 }
 
 func (s *serviceImpl) GetImageScan(ctx context.Context, req *v1.GetImageScanRequest) (*v1.GetImageScanResponse, error) {
-	layerName, err := s.getLayerNameFromImageReq(req)
+	layerName, lineage, err := s.getLayerNameFromImageReq(req)
 	if err != nil {
 		return nil, err
 	}
-	return s.getLayer(layerName, req.GetUncertifiedRHEL())
+	return s.getLayer(layerName, lineage, req.GetUncertifiedRHEL())
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.

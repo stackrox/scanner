@@ -77,13 +77,13 @@ const (
 		FROM Layer l
 			LEFT JOIN Layer p ON l.parent_id = p.id
 			LEFT JOIN Namespace n ON l.namespace_id = n.id
-		WHERE l.name = $1;`
+		WHERE l.name = $1 and l.lineage = $2;`
 
 	searchLayerFeatureVersion = `
 		WITH RECURSIVE layer_tree(id, name, parent_id, depth, path, cycle) AS(
 			SELECT l.id, l.name, l.parent_id, 1, ARRAY[l.id], false
 			FROM Layer l
-			WHERE l.id = $1
+			WHERE l.id = $1 and l.lineage = $2
 		UNION ALL
 			SELECT l.id, l.name, l.parent_id, lt.depth + 1, path || l.id, l.id = ANY(path)
 			FROM Layer l, layer_tree lt
@@ -101,7 +101,7 @@ const (
 		WITH RECURSIVE layer_tree(id, name, parent_id, depth, path, cycle) AS(
 			SELECT l.id, l.name, l.parent_id, 1, ARRAY[l.id], false
 			FROM Layer l
-			WHERE l.name = $1
+			WHERE l.name = $1 and l.lineage = $2
 		UNION ALL
 			SELECT l.id, l.name, l.parent_id, lt.depth + 1, path || l.id, l.id = ANY(path)
 			FROM Layer l, layer_tree lt
@@ -125,23 +125,23 @@ const (
 						AND v.deleted_at IS NULL`
 
 	insertLayer = `
-		INSERT INTO Layer(name, engineversion, parent_id, namespace_id, distroless, created_at)
-		VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+		INSERT INTO Layer(name, engineversion, lineage, parent_id, namespace_id, distroless, created_at)
+		VALUES($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
 		ON CONFLICT DO NOTHING
 		RETURNING id
 	`
 
-	updateLayer = `UPDATE LAYER SET engineversion = $2, namespace_id = $3, distroless = $4 WHERE id = $1`
+	updateLayer = `UPDATE LAYER SET engineversion = $2, lineage = $3, namespace_id = $4, distroless = $5 WHERE id = $1`
 
 	removeLayerDiffFeatureVersion = `
 		DELETE FROM Layer_diff_FeatureVersion
-		WHERE layer_id = $1`
+		WHERE layer_id = $1 and lineage = $2`
 
 	insertLayerDiffFeatureVersion = `
-		INSERT INTO Layer_diff_FeatureVersion(layer_id, featureversion_id, modification)
-			SELECT $1, fv.id, $2
+		INSERT INTO Layer_diff_FeatureVersion(layer_id, lineage, featureversion_id, modification)
+			SELECT $1, $2, fv.id, $3
 			FROM FeatureVersion fv
-			WHERE fv.id = ANY($3::integer[])`
+			WHERE fv.id = ANY($4::integer[])`
 
 	// vulnerability.go
 	searchVulnerabilityBase = `

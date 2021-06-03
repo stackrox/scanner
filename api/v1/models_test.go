@@ -162,7 +162,7 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 			},
 		},
 	}
-	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
 	})
@@ -221,7 +221,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 			},
 		},
 	}
-	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
 	})
@@ -268,7 +268,7 @@ func TestLatestLanguageFeatureVersion(t *testing.T) {
 		Name: "layer",
 	}
 
-	addLanguageVulns(db, dbLayer, false)
+	addLanguageVulns(db, dbLayer, "", false)
 	assert.Equal(t, "2.3.29", dbLayer.Features[0].FixedBy)
 }
 
@@ -287,7 +287,7 @@ func TestNotesNoLanguageVulns(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, LanguageCVEsUnavailable)
@@ -304,7 +304,7 @@ func TestNotesStaleCVEs(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsStale)
@@ -321,7 +321,7 @@ func TestNotesUnavailableCVEs(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsUnavailable)
@@ -336,7 +336,7 @@ func newMockDatastore() *mockDatastore {
 	db := &mockDatastore{
 		layers: make(map[string][]*component.LayerToComponents),
 	}
-	db.FctGetLayerLanguageComponents = func(layer string, opts *database.DatastoreOptions) ([]*component.LayerToComponents, error) {
+	db.FctGetLayerLanguageComponents = func(layer, lineage string, opts *database.DatastoreOptions) ([]*component.LayerToComponents, error) {
 		return db.layers[layer], nil
 	}
 	return db
@@ -467,7 +467,7 @@ func TestAddLanguageVulns(t *testing.T) {
 	layer := &Layer{
 		Name: "layer2",
 	}
-	addLanguageVulns(db, layer, false)
+	addLanguageVulns(db, layer, "", false)
 	assert.Len(t, layer.Features, 1)
 	feature := layer.Features[0]
 	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
@@ -481,19 +481,19 @@ func TestAddLanguageVulns(t *testing.T) {
 	layer = &Layer{
 		Name: "layer3",
 	}
-	addLanguageVulns(db, layer, false)
+	addLanguageVulns(db, layer, "", false)
 	assert.Len(t, layer.Features, 2)
 
 	layer = &Layer{
 		Name: "layer4",
 	}
-	addLanguageVulns(db, layer, false)
+	addLanguageVulns(db, layer, "", false)
 	assert.Empty(t, layer.Features)
 
 	layer = &Layer{
 		Name: "layer6",
 	}
-	addLanguageVulns(db, layer, false)
+	addLanguageVulns(db, layer, "", false)
 	assert.Len(t, layer.Features, 1)
 	feature = layer.Features[0]
 	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
@@ -504,6 +504,6 @@ func TestAddLanguageVulns(t *testing.T) {
 	layer = &Layer{
 		Name: "layer8",
 	}
-	addLanguageVulns(db, layer, false)
+	addLanguageVulns(db, layer, "", false)
 	assert.Empty(t, layer.Features)
 }

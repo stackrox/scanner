@@ -20,12 +20,14 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 )
 
+var _ Datastore = (*MockDatastore)(nil)
+
 // MockDatastore implements Datastore and enables overriding each available method.
 // The default behavior of each method is to simply panic.
 type MockDatastore struct {
 	FctListNamespaces                      func() ([]Namespace, error)
-	FctInsertLayer                         func(Layer, *DatastoreOptions) error
-	FctFindLayer                           func(name string, opts *DatastoreOptions) (Layer, error)
+	FctInsertLayer                         func(Layer, string, *DatastoreOptions) error
+	FctFindLayer                           func(name, lineage string, opts *DatastoreOptions) (Layer, error)
 	FctDeleteLayer                         func(name string) error
 	FctInsertRHELv2Layer                   func(*RHELv2Layer) error
 	FctGetRHELv2Layers                     func(layer string) ([]*RHELv2Layer, error)
@@ -44,22 +46,22 @@ type MockDatastore struct {
 	FctFindLock                            func(name string) (string, time.Time, error)
 	FctPing                                func() bool
 	FctClose                               func()
-	FctInsertLayerComponents               func(l string, c []*component.Component, r []string, opts *DatastoreOptions) error
-	FctGetLayerLanguageComponents          func(layer string, opts *DatastoreOptions) ([]*component.LayerToComponents, error)
+	FctInsertLayerComponents               func(l, lineage string, c []*component.Component, r []string, opts *DatastoreOptions) error
+	FctGetLayerLanguageComponents          func(layer, lineage string, opts *DatastoreOptions) ([]*component.LayerToComponents, error)
 	FctGetVulnerabilitiesForFeatureVersion func(featureVersions FeatureVersion) ([]Vulnerability, error)
 	FctFeatureExists                       func(namespace, feature string) (bool, error)
 }
 
-func (mds *MockDatastore) InsertLayer(layer Layer, opts *DatastoreOptions) error {
+func (mds *MockDatastore) InsertLayer(layer Layer, lineage string, opts *DatastoreOptions) error {
 	if mds.FctInsertLayer != nil {
-		return mds.FctInsertLayer(layer, opts)
+		return mds.FctInsertLayer(layer, lineage, opts)
 	}
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) FindLayer(name string, opts *DatastoreOptions) (Layer, error) {
+func (mds *MockDatastore) FindLayer(name, lineage string, opts *DatastoreOptions) (Layer, error) {
 	if mds.FctFindLayer != nil {
-		return mds.FctFindLayer(name, opts)
+		return mds.FctFindLayer(name, lineage, opts)
 	}
 	panic("required mock function not implemented")
 }
@@ -192,28 +194,28 @@ func (mds *MockDatastore) Close() {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) GetLayerBySHA(sha string, opts *DatastoreOptions) (string, bool, error) {
+func (mds *MockDatastore) GetLayerBySHA(sha string, opts *DatastoreOptions) (string, string, bool, error) {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) GetLayerByName(name string, opts *DatastoreOptions) (string, bool, error) {
+func (mds *MockDatastore) GetLayerByName(name string, opts *DatastoreOptions) (string, string, bool, error) {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) AddImage(layer string, digest, name string, opts *DatastoreOptions) error {
+func (mds *MockDatastore) AddImage(layer, lineage, digest, name string, opts *DatastoreOptions) error {
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) InsertLayerComponents(l string, c []*component.Component, r []string, opts *DatastoreOptions) error {
+func (mds *MockDatastore) InsertLayerComponents(l, lineage string, c []*component.Component, r []string, opts *DatastoreOptions) error {
 	if mds.FctInsertLayerComponents != nil {
-		return mds.FctInsertLayerComponents(l, c, r, opts)
+		return mds.FctInsertLayerComponents(l, lineage, c, r, opts)
 	}
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) GetLayerLanguageComponents(layer string, opts *DatastoreOptions) ([]*component.LayerToComponents, error) {
+func (mds *MockDatastore) GetLayerLanguageComponents(layer, lineage string, opts *DatastoreOptions) ([]*component.LayerToComponents, error) {
 	if mds.FctGetLayerLanguageComponents != nil {
-		return mds.FctGetLayerLanguageComponents(layer, opts)
+		return mds.FctGetLayerLanguageComponents(layer, lineage, opts)
 	}
 	panic("required mock function not implemented")
 }
