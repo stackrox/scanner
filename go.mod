@@ -16,6 +16,7 @@ require (
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.3
+	github.com/golangci/golangci-lint v1.33.0
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -46,9 +47,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/bbolt v1.3.5
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e
-	golang.org/x/tools v0.0.0-20201019175715-b894a3290fff
 	google.golang.org/api v0.33.0
 	google.golang.org/grpc v1.33.0
 	gopkg.in/yaml.v2 v2.3.0

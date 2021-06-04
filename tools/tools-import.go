@@ -7,8 +7,7 @@ package tools
 // for an explanation of the approach.
 
 import (
-	// Tool dependencies, not used anywheree in the code.
-	_ "golang.org/x/lint/golint"
-	_ "golang.org/x/tools/cmd/goimports"
+	// Tool dependencies, not used anywhere in the code.
+	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "honnef.co/go/tools/cmd/staticcheck"
 )
