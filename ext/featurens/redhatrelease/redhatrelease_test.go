@@ -17,10 +17,9 @@ package redhatrelease
 import (
 	"testing"
 
-	"github.com/stackrox/scanner/ext/versionfmt/rpm"
-
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
+	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
