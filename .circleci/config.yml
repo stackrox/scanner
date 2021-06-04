@@ -264,6 +264,10 @@ commands:
             unzip -d image/scanner/dump /tmp/repo2cpe.zip
 
       - run:
+          name: Login to registry.redhat.io
+          command: docker login -u "$REDHAT_USERNAME" -p "$REDHAT_PASSWORD" registry.redhat.io
+
+      - run:
           name: Build images
           command: make << parameters.make-image-target >>
 
@@ -745,13 +749,13 @@ workflows:
     - style-checks:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - build:
-        <<: *runOnAllTags
+        <<: *runOnAllTagsWithRedHatCtx
         context: docker-io-and-stackrox-io-push
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
     - build-rhel:
-        <<: *runOnAllTags
+        <<: *runOnAllTagsWithRedHatCtx
         context: docker-io-and-stackrox-io-push
         requires:
           - create-postgres-dump-from-genesis-dump
