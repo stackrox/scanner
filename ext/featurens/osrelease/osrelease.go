@@ -21,6 +21,7 @@ package osrelease
 import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
+	"github.com/stackrox/scanner/ext/versionfmt/apk"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/osrelease"
@@ -28,8 +29,8 @@ import (
 )
 
 var (
-	// blacklistFilenames are files that should exclude this detector.
-	blacklistFilenames = []string{
+	// blocklistFilenames are files that should exclude this detector.
+	blocklistFilenames = []string{
 		"etc/oracle-release",
 		"etc/redhat-release",
 		"usr/lib/centos-release",
@@ -45,7 +46,7 @@ func init() {
 func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
 	var OS, version string
 
-	for _, filePath := range blacklistFilenames {
+	for _, filePath := range blocklistFilenames {
 		if _, hasFile := files[filePath]; hasFile {
 			return nil
 		}
@@ -67,6 +68,8 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 		versionFormat = dpkg.ParserName
 	case "centos", "rhel", "fedora", "amzn", "oracle":
 		versionFormat = rpm.ParserName
+	case "alpine":
+		versionFormat = apk.ParserName
 	default:
 		return nil
 	}

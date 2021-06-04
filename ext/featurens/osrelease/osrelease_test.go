@@ -17,6 +17,10 @@ package osrelease
 import (
 	"testing"
 
+	"github.com/stackrox/scanner/ext/versionfmt/apk"
+	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -25,7 +29,7 @@ import (
 func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
-			ExpectedNamespace: &database.Namespace{Name: "debian:8"},
+			ExpectedNamespace: &database.Namespace{Name: "debian:8", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/os-release": []byte(
 					`PRETTY_NAME="Debian GNU/Linux 8 (jessie)"
@@ -39,7 +43,7 @@ BUG_REPORT_URL="https://bugs.debian.org/"`),
 			},
 		},
 		{
-			ExpectedNamespace: &database.Namespace{Name: "ubuntu:15.10"},
+			ExpectedNamespace: &database.Namespace{Name: "ubuntu:15.10", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/os-release": []byte(
 					`NAME="Ubuntu"
@@ -54,7 +58,7 @@ BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"`),
 			},
 		},
 		{ // Doesn't have quotes around VERSION_ID
-			ExpectedNamespace: &database.Namespace{Name: "fedora:20"},
+			ExpectedNamespace: &database.Namespace{Name: "fedora:20", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/os-release": []byte(
 					`NAME=Fedora
@@ -70,6 +74,18 @@ REDHAT_BUGZILLA_PRODUCT="Fedora"
 REDHAT_BUGZILLA_PRODUCT_VERSION=20
 REDHAT_SUPPORT_PRODUCT="Fedora"
 REDHAT_SUPPORT_PRODUCT_VERSION=20`),
+			},
+		},
+		{
+			ExpectedNamespace: &database.Namespace{Name: "alpine:edge", VersionFormat: apk.ParserName},
+			Files: tarutil.FilesMap{
+				"etc/os-release": []byte(
+					`NAME="Alpine Linux"
+ID=alpine
+VERSION_ID=3.14.0_alpha20210212
+PRETTY_NAME="Alpine Linux edge"
+HOME_URL="https://alpinelinux.org/"
+BUG_REPORT_URL="https://bugs.alpinelinux.org/"`),
 			},
 		},
 		{
