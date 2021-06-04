@@ -15,6 +15,7 @@ type DatastoreOptions struct {
 	UncertifiedRHEL bool
 }
 
+// GetWithFeatures returns "true" if WithFeatures is "true"; "false" otherwise.
 func (o *DatastoreOptions) GetWithFeatures() bool {
 	if o == nil {
 		return false
@@ -22,6 +23,7 @@ func (o *DatastoreOptions) GetWithFeatures() bool {
 	return o.WithFeatures
 }
 
+// GetWithVulnerabilities returns "true" if WithVulnerabilities is "true"; "false" otherwise.
 func (o *DatastoreOptions) GetWithVulnerabilities() bool {
 	if o == nil {
 		return false
@@ -29,6 +31,7 @@ func (o *DatastoreOptions) GetWithVulnerabilities() bool {
 	return o.WithVulnerabilities
 }
 
+// GetUncertifiedRHEL returns "true" if UncertifiedRHEL is "true"; "false" otherwise.
 func (o *DatastoreOptions) GetUncertifiedRHEL() bool {
 	if o == nil {
 		return false

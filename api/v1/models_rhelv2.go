@@ -214,6 +214,7 @@ func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2P
 	return pkgEnvs, records
 }
 
+// RHELv2ToVulnerability converts the given database.RHELv2Vulnerability into a Vulnerability.
 func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string) Vulnerability {
 	var cvss2 types.MetadataCVSSv2
 	if vuln.CVSSv2 != "" {

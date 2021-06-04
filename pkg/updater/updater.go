@@ -38,6 +38,7 @@ var (
 	podName = os.Getenv("POD_NAME")
 )
 
+// Updater updates the Scanner's vulnerability data stores.
 type Updater struct {
 	lastUpdatedTime time.Time
 	client          *http.Client
@@ -220,12 +221,14 @@ func New(config Config, centralEndpoint string, db database.Datastore, repoToCPE
 	return u, nil
 }
 
-func (u *Updater) UpdateNVDCacheOnly() {
+// UpdateApplicationCachesOnly updates the application caches and not the Postgres DB.
+func (u *Updater) UpdateApplicationCachesOnly() {
 	if err := u.doUpdate(updateApplicationCachesOnly); err != nil {
 		log.WithError(err).Error("Updater failed")
 	}
 }
 
+// RunForever runs the updater "forever".
 func (u *Updater) RunForever() {
 	u.runForever()
 }

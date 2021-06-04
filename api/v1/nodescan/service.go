@@ -23,13 +23,14 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Service defines the node scanning service.
 type Service interface {
 	apiGRPC.APIService
 
 	v1.NodeScanServiceServer
 }
 
-// NewService returns the service for scanning
+// NewService returns the service for node scanning
 func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8scache.Cache) Service {
 	return &serviceImpl{
 		db:       db,

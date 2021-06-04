@@ -64,6 +64,7 @@ func ignored(c *component.Component) bool {
 	return false
 }
 
+// GetPythonAttributes returns the Python-related attributes for the given component.
 func GetPythonAttributes(c *component.Component) []*wfn.Attributes {
 	python := c.PythonPkgMetadata
 	if python == nil {

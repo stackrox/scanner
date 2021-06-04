@@ -17,11 +17,13 @@ const (
 	nvdEnricherRepo = "git@github.com:stackrox/dotnet-scraper.git"
 )
 
+// FileFormatWrapper is a wrapper around .NET vulnerability file.
 type FileFormatWrapper struct {
 	LastUpdated string
 	types.FileFormat
 }
 
+// Fetch fetches .NET and ASP.NET vulnerabilities from their source.
 func Fetch() (map[string]*FileFormatWrapper, error) {
 	r, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: nvdEnricherRepo,

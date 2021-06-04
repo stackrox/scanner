@@ -16,15 +16,18 @@
 // ALAS (Amazon Linux Security Advisories).
 package amzn
 
+// RepoMd ALAS repo metadata.
 type RepoMd struct {
 	RepoList []Repo `xml:"data"`
 }
 
+// Repo ALAS repository.
 type Repo struct {
 	Type     string   `xml:"type,attr"`
 	Location Location `xml:"location"`
 }
 
+// Location ALAs location.
 type Location struct {
 	Href string `xml:"href,attr"`
 }

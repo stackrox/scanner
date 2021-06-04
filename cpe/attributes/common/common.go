@@ -13,10 +13,12 @@ var (
 	numRegex = regexp.MustCompile(`[0-9].*$`)
 )
 
+// GenerateVersionKeys generates versions based on the given component.
 func GenerateVersionKeys(c *component.Component) set.StringSet {
 	return set.NewStringSet(c.Version, strings.ReplaceAll(c.Version, ".", `\.`))
 }
 
+// GenerateNameKeys generates names based on the given component.
 func GenerateNameKeys(c *component.Component) set.StringSet {
 	componentName := c.Name
 	if componentName == "" {
@@ -29,6 +31,7 @@ func GenerateNameKeys(c *component.Component) set.StringSet {
 	)
 }
 
+// AddMutatedNameKeys adds mutated keys to teh given nameSet based on the given component.
 func AddMutatedNameKeys(c *component.Component, nameSet set.StringSet) {
 	nameSet.Add(strings.TrimRight(numRegex.ReplaceAllString(c.Name, ""), "-_"))
 	for name := range nameSet {
@@ -38,6 +41,7 @@ func AddMutatedNameKeys(c *component.Component, nameSet set.StringSet) {
 	}
 }
 
+// GenerateAttributesFromSets returns the cross-product of the given attributes.
 func GenerateAttributesFromSets(vendors, names, versions set.StringSet, targetSW string) []*wfn.Attributes {
 	if vendors.Cardinality() == 0 {
 		vendors.Add("")

@@ -8,6 +8,7 @@ import (
 	"github.com/stackrox/scanner/pkg/whiteout"
 )
 
+// Matcher defines the functions necessary for matching files.
 type Matcher interface {
 	Match(fullPath string, fileInfo os.FileInfo) bool
 }

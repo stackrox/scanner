@@ -9,6 +9,7 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 )
 
+// GetDotNetCoreRuntimeAttributes returns the [ASP].NET attributes for the given component.
 func GetDotNetCoreRuntimeAttributes(c *component.Component) []*wfn.Attributes {
 	vendorSet := set.NewStringSet("microsoft")
 

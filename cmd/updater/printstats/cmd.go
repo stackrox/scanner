@@ -11,6 +11,7 @@ import (
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
+// Command defines the `print-stats` command.
 func Command() *cobra.Command {
 	c := &cobra.Command{
 		Use:  "print-stats",

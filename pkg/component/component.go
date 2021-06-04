@@ -35,6 +35,7 @@ type JavaPkgMetadata struct {
 	BundleName            string
 }
 
+// PythonPkgMetadata contains additional metadata that Python-based components have.
 type PythonPkgMetadata struct {
 	Homepage    string
 	AuthorEmail string

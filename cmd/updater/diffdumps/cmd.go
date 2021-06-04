@@ -305,6 +305,7 @@ type config struct {
 	SkipRHELv2TitleComparison  bool `json:"skipRHELv2TitleComparison"`
 }
 
+// Command defines the diff-dumps command.
 func Command() *cobra.Command {
 	c := &cobra.Command{
 		Use: "diff-dumps",

@@ -67,6 +67,7 @@ func parseMetadata(filePath string) *component.Component {
 	}
 }
 
+// Analyzer returns a .NET analyzer.
 func Analyzer() analyzer.Analyzer {
 	return analyzerImpl{}
 }

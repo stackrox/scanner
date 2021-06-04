@@ -229,6 +229,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	return namespace, distroless, featureVersions, rhelfeatures, allComponents, removedFiles, err
 }
 
+// DetectContentFromReader detects scanning content in the given reader.
 func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
 	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.SingletonMatcher())
 	if err != nil {
@@ -243,6 +244,7 @@ func isDistroless(filesMap tarutil.FilesMap) bool {
 	return ok
 }
 
+// DetectNamespace detects the layer's namespace.
 func DetectNamespace(name string, files tarutil.FilesMap, parent *database.Layer, uncertifiedRHEL bool) *database.Namespace {
 	namespace := featurens.Detect(files, &featurens.DetectorOptions{
 		UncertifiedRHEL: uncertifiedRHEL,

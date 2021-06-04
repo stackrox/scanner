@@ -7,6 +7,7 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 )
 
+// Result holds the results from performing vulnerability matching with NVD data.
 type Result struct {
 	CVE             cvefeed.Vuln
 	CPE             wfn.AttributesWithFixedIn

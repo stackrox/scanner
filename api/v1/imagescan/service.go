@@ -19,13 +19,14 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Service defines the image scanning service.
 type Service interface {
 	apiGRPC.APIService
 
 	v1.ImageScanServiceServer
 }
 
-// NewService returns the service for scanning
+// NewService returns the service for image scanning
 func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache) Service {
 	return &serviceImpl{
 		db:       db,

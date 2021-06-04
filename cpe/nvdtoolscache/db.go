@@ -39,6 +39,7 @@ func initializeDB(db *bbolt.DB) error {
 	})
 }
 
+// New returns a new NVD vulnerability cache.
 func New() (Cache, error) {
 	opts := bbolt.Options{
 		NoFreelistSync: true,

@@ -42,6 +42,7 @@ type UpdateResponse struct {
 	Vulnerabilities []database.Vulnerability
 }
 
+// DataStore defines a datastore for vulnerabilities.
 type DataStore interface {
 	GetKeyValue(key string) (string, error)
 }

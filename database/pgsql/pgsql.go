@@ -76,6 +76,7 @@ func init() {
 	database.Register("pgsql", openDatabase)
 }
 
+// Queryer defines an entity which performs queries (like the pgSQL struct).
 type Queryer interface {
 	Query(query string, args ...interface{}) (*sql.Rows, error)
 	QueryRow(query string, args ...interface{}) *sql.Row

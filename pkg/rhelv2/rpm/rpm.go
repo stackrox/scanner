@@ -57,6 +57,7 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, 
 	return listFeatures(files, queryFmt)
 }
 
+// ListFeaturesTest does the same as ListFeatures but should only be used for testing.
 func ListFeaturesTest(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
 	return listFeatures(files, queryFmtTest)
 }
@@ -228,6 +229,7 @@ func getContentManifestFileContents(files tarutil.FilesMap) []byte {
 	return nil
 }
 
+// RequiredFilenames lists the files required to be present for analysis to be run.
 func RequiredFilenames() []string {
 	return []string{packages, contentManifests}
 }

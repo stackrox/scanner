@@ -39,7 +39,7 @@ func (pgSQL *pgSQL) InsertKeyValue(key, value string) error {
 	return nil
 }
 
-// GetValue reads a single key / value tuple and returns an empty string if the key doesn't exist.
+// GetKeyValue reads a single key / value tuple and returns an empty string if the key doesn't exist.
 func (pgSQL *pgSQL) GetKeyValue(key string) (string, error) {
 	defer observeQueryTime("GetKeyValue", "all", time.Now())
 

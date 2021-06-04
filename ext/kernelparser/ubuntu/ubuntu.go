@@ -73,6 +73,7 @@ func parser(db database.Datastore, kernelVersion, osImage string) (*kernelparser
 	}, true, nil
 }
 
+// StripVersionPadding removes the version padding appended to the end of an Ubuntu version.
 func StripVersionPadding(version string) string {
 	return strings.TrimSuffix(version, versionPadding)
 }
