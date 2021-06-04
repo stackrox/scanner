@@ -190,16 +190,12 @@ scanner-image: scanner-build-dockerized
 	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/alpine/Dockerfile image/scanner
 	@docker tag us.gcr.io/stackrox-ci/scanner:$(TAG) stackrox/scanner:$(TAG)
 
-.PHONY: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
-$(CURDIR)/image/scanner/rhel/bundle.tar.gz: build
-	$(CURDIR)/image/scanner/rhel/create-bundle.sh $(CURDIR)/image/scanner $(CURDIR)/image/scanner/rhel
-
 .PHONY: $(CURDIR)/image/db/rhel/bundle.tar.gz
 $(CURDIR)/image/db/rhel/bundle.tar.gz:
 	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $(CURDIR)/image/db/rhel
 
 .PHONY: scanner-image-rhel
-scanner-image-rhel: scanner-rhel-build-dockerized $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image-rhel: scanner-rhel-build-dockerized
 	@echo "+ $@"
 	@docker build -t us.gcr.io/stackrox-ci/scanner-rhel:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner
 
