@@ -1,5 +1,5 @@
 // This package exists to avoid import cycles.
-package test
+package ziputil_test
 
 import (
 	"archive/zip"
@@ -18,7 +18,7 @@ import (
 
 func TestOpenFile(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
-	testZip := filepath.Join(filepath.Dir(filename), "../testdata/test.zip")
+	testZip := filepath.Join(filepath.Dir(filename), "testdata/test.zip")
 
 	zipR, err := zip.OpenReader(testZip)
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestOpenFile(t *testing.T) {
 
 func TestOpenFilesInDir(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
-	testZip := filepath.Join(filepath.Dir(filename), "../testdata/test.zip")
+	testZip := filepath.Join(filepath.Dir(filename), "testdata/test.zip")
 
 	zipR, err := zip.OpenReader(testZip)
 	require.NoError(t, err)
