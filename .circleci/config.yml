@@ -1,7 +1,7 @@
 version: 2.1
 
 defaultImage: &defaultImage
-  image: docker.io/stackrox/apollo-ci:0.3.11
+  image: docker.io/stackrox/apollo-ci:0.3.12
   auth:
     username: $DOCKER_IO_PULL_USERNAME
     password: $DOCKER_IO_PULL_PASSWORD
