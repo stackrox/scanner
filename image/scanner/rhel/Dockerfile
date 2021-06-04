@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/ubi:8.3
+FROM registry.access.redhat.com/ubi8/ubi:8.4
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
