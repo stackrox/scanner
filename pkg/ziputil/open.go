@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ReadCloser is a wrapper around io.ReadCloser for reading files in a ZIP.
 type ReadCloser struct {
 	io.ReadCloser
 	Name string

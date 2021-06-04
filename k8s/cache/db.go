@@ -23,6 +23,7 @@ type cacheImpl struct {
 	lastUpdatedTime time.Time
 }
 
+// New returns a new Kubernetes vulnerability cache.
 func New() Cache {
 	return &cacheImpl{
 		cache: make(map[string]map[string]*validation.CVESchema),

@@ -24,11 +24,13 @@ import (
 	archop "github.com/quay/claircore"
 )
 
+// Model defines the base type for each database entity.
 type Model struct {
 	// ID is only meant to be used by database implementations and should never be used for anything else.
 	ID int `json:"id,omitempty" hash:"ignore"`
 }
 
+// Layer is an image layer.
 type Layer struct {
 	Model
 
@@ -40,6 +42,7 @@ type Layer struct {
 	Features      []FeatureVersion
 }
 
+// Namespace is an image's OS.
 type Namespace struct {
 	Model
 
@@ -47,6 +50,7 @@ type Namespace struct {
 	VersionFormat string
 }
 
+// Feature is scanned package.
 type Feature struct {
 	Model
 
@@ -56,6 +60,7 @@ type Feature struct {
 	Location   string
 }
 
+// FeatureVersion is the full result of a scanned package.
 type FeatureVersion struct {
 	Model
 
@@ -67,6 +72,7 @@ type FeatureVersion struct {
 	AddedBy Layer
 }
 
+// Vulnerability defines a package vulnerability.
 type Vulnerability struct {
 	Model
 
@@ -89,8 +95,10 @@ type Vulnerability struct {
 	SubCVEs []string
 }
 
+// MetadataMap represents vulnerability metadata.
 type MetadataMap map[string]interface{}
 
+// Scan writes the given SQL value into the caller.
 func (mm *MetadataMap) Scan(value interface{}) error {
 	if value == nil {
 		return nil
@@ -104,6 +112,7 @@ func (mm *MetadataMap) Scan(value interface{}) error {
 	return json.Unmarshal([]byte(val), mm)
 }
 
+// Value converts the MetadataMap into a driver.Value.
 func (mm *MetadataMap) Value() (driver.Value, error) {
 	json, err := json.Marshal(*mm)
 	return string(json), err
@@ -115,6 +124,8 @@ func (mm *MetadataMap) Value() (driver.Value, error) {
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
 
+// RHELv2Vulnerability represents a RHEL vulnerability
+// from the OVAL v2 feeds as part of the Red Hat Scanner Certification program.
 type RHELv2Vulnerability struct {
 	Model
 
@@ -131,12 +142,14 @@ type RHELv2Vulnerability struct {
 	PackageInfos []*RHELv2PackageInfo `json:"package_info" hash:"set"`
 }
 
+// RHELv2PackageInfo defines all the data necessary for fully define a RHELv2 package.
 type RHELv2PackageInfo struct {
 	Packages       []*RHELv2Package `json:"package" hash:"set"`
 	FixedInVersion string           `json:"fixed_in_version"`
 	ArchOperation  archop.ArchOp    `json:"arch_op,omitempty"`
 }
 
+// RHELv2Package defines the basic information of a RHELv2 package.
 type RHELv2Package struct {
 	Model
 
@@ -150,6 +163,7 @@ func (p *RHELv2Package) String() string {
 	return strings.Join([]string{p.Name, p.Version, p.Module, p.Arch}, ":")
 }
 
+// RHELv2Layer defines a RHEL image layer.
 type RHELv2Layer struct {
 	Model
 
@@ -160,6 +174,7 @@ type RHELv2Layer struct {
 	CPEs       []string
 }
 
+// RHELv2Components defines the RHELv2 components found in a layer.
 type RHELv2Components struct {
 	Dist     string
 	Packages []*RHELv2Package

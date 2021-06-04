@@ -4,6 +4,7 @@ import (
 	"github.com/stackrox/scanner/database"
 )
 
+// MetadataEnricher defines functions used for enriching metadata.
 type MetadataEnricher interface {
 	Metadata() interface{}
 	Summary() string
@@ -19,9 +20,7 @@ type Appender interface {
 	// for future calls to Append.
 	BuildCache(dumpDir string) error
 
-	// AddMetadata adds metadata to the given database.Vulnerability.
-	// It is expected that the fetcher uses .Lock.Lock() when manipulating the Metadata map.
-	// Append
+	// Append adds metadata to the given database.Vulnerability.
 	Append(name string, subCVEs []string, callback AppendFunc) error
 
 	// PurgeCache deallocates metadata from memory after all calls to Append are

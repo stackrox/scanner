@@ -2,6 +2,8 @@
 
 set -e
 
+DIR="$(cd "$(dirname "$0")" && pwd)"
+
 if [[ -z "$1" ]]; then
   echo >&2 "<usage> <tag>"
   echo >&2 "tag must be specified as the first argument"
@@ -18,7 +20,7 @@ function retag() {
     for ext in "${exts[@]}"; do
       $1 docker pull "stackrox/${repo}${ext}:${tag}"
       $1 docker tag "stackrox/${repo}${ext}:${tag}" "stackrox.io/${repo}${ext}:${tag}"
-      $1 docker push "stackrox.io/${repo}${ext}:${tag}"
+      $1 "${DIR}/push-as-manifest-list.sh" "stackrox.io/${repo}${ext}:${tag}"
       echo
     done
   done

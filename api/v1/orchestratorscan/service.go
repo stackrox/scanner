@@ -18,6 +18,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Service defines an orchestrator scanning service.
 type Service interface {
 	apiGRPC.APIService
 

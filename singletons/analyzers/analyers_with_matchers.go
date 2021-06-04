@@ -19,6 +19,7 @@ var (
 	}
 )
 
+// Analyzers returns all the application-level analyzers.
 func Analyzers() []analyzer.Analyzer {
 	return analyzers
 }

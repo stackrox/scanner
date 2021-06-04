@@ -14,6 +14,7 @@ type JSONExtendedFormatter struct {
 	ShowLn bool
 }
 
+// Format formats log information to JSON format with time and line number in file.
 func (f *JSONExtendedFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// Because entry.Data is not concurrent write safe, we need to copy the dictionary
 	data := make(logrus.Fields, len(entry.Data)+4)

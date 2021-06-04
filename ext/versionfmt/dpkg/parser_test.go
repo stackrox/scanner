@@ -79,7 +79,7 @@ func TestParse(t *testing.T) {
 		v, err := newVersion(c.str)
 
 		if c.err {
-			assert.Error(t, err, "When parsing %q", c.str)
+			assert.Error(t, err, "When parsing %q", c.str) //nolint:govet
 		} else {
 			assert.Nil(t, err, "When parsing %q", c.str)
 		}
@@ -90,14 +90,14 @@ func TestParse(t *testing.T) {
 	versym := []rune{'!', '#', '@', '$', '%', '&', '/', '|', '\\', '<', '>', '(', ')', '[', ']', '{', '}', ';', ',', '=', '*', '^', '\''}
 	for _, r := range versym {
 		_, err := newVersion(strings.Join([]string{"0:0", string(r), "-0"}, ""))
-		assert.Error(t, err, "Parsing with invalid character %q in version should have failed", string(r))
+		assert.Error(t, err, "Parsing with invalid character %q in version should have failed", string(r)) //nolint:govet
 	}
 
 	// Test invalid characters in revision
 	versym = []rune{'!', '#', '@', '$', '%', '&', '/', '|', '\\', '<', '>', '(', ')', '[', ']', '{', '}', ':', ';', ',', '=', '*', '^', '\''}
 	for _, r := range versym {
 		_, err := newVersion(strings.Join([]string{"0:0-", string(r)}, ""))
-		assert.Error(t, err, "Parsing with invalid character %q in revision should have failed", string(r))
+		assert.Error(t, err, "Parsing with invalid character %q in revision should have failed", string(r)) //nolint:govet
 	}
 }
 

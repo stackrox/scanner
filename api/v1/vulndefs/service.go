@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Service defines a vulnerability definitions service.
 type Service interface {
 	apiGRPC.APIService
 

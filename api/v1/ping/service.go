@@ -9,12 +9,14 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Service defines the Ping service.
 type Service interface {
 	apiGRPC.APIService
 
 	v1.PingServiceServer
 }
 
+// NewService returns a new Ping service.
 func NewService() Service {
 	return &serviceImpl{}
 }

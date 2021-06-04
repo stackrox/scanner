@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.12.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.5.1
-	github.com/containers/image/v5 v5.5.2
+	github.com/containers/image/v5 v5.11.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker-credential-helpers v0.6.3
@@ -14,19 +14,20 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git/v5 v5.2.0
-	github.com/gogo/protobuf v1.3.1
+	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.4.3
+	github.com/golangci/golangci-lint v1.33.0
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.11.4-0.20191004150533-c677e419aa5c
 	github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible
-	github.com/hashicorp/go-version v1.2.1
-	github.com/hashicorp/golang-lru v0.5.3
+	github.com/hashicorp/go-version v1.3.0
+	github.com/hashicorp/golang-lru v0.5.4
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
 	github.com/knqyf263/go-rpm-version v0.0.0-20170716094938-74609b86c936
-	github.com/lib/pq v1.8.0
+	github.com/lib/pq v1.9.0
 	github.com/mailru/easyjson v0.7.6
 	github.com/mholt/archiver/v3 v3.5.0
 	github.com/mitchellh/hashstructure v1.0.0
@@ -38,26 +39,30 @@ require (
 	github.com/quay/claircore v0.4.0
 	github.com/quay/goval-parser v0.8.6
 	github.com/remind101/migrate v0.0.0-20170729031349-52c1edff7319
-	github.com/sirupsen/logrus v1.8.0
-	github.com/spf13/cobra v1.1.1
+	github.com/sirupsen/logrus v1.8.1
+	github.com/spf13/cobra v1.1.3
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
 	github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab
-	github.com/stackrox/rox v0.0.0-20201222223839-042406f3664c
+	github.com/stackrox/rox v0.0.0-20210604075136-10ae82b81f29
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/bbolt v1.3.5
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
-	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e
-	golang.org/x/tools v0.0.0-20201019175715-b894a3290fff
+	golang.org/x/sys v0.0.0-20210426230700-d19ff857e887
 	google.golang.org/api v0.33.0
-	google.golang.org/grpc v1.33.0
-	gopkg.in/yaml.v2 v2.3.0
+	google.golang.org/grpc v1.33.2
+	gopkg.in/yaml.v2 v2.4.0
 	honnef.co/go/tools v0.0.1-2020.1.6
 )
 
 replace (
 	github.com/blevesearch/bleve => github.com/stackrox/bleve v0.0.0-20190918030150-5ebdc2278ffe
 	github.com/dgraph-io/badger => github.com/stackrox/badger v1.6.1-0.20191025195058-f2b50b9f079c
+
+	// Due to github.com/stackrox/rox dependency.
+	// BE SURE TO KEEP THIS UP-TO-DATE.
+	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
+	github.com/docker/docker => github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
+
 	github.com/facebookincubator/nvdtools => github.com/stackrox/nvdtools v0.0.0-20210326191554-5daeb6395b56
 	github.com/fullsailor/pkcs7 => github.com/misberner/pkcs7 v0.0.0-20190417093538-a48bf0f78dea
 	github.com/go-resty/resty => gopkg.in/resty.v1 v1.11.0
@@ -66,8 +71,5 @@ replace (
 	github.com/mattn/goveralls => github.com/viswajithiii/goveralls v0.0.3-0.20190917224517-4dd02c532775
 	github.com/nilslice/protolock => github.com/viswajithiii/protolock v0.10.1-0.20190117180626-43bb8a9ba4e8
 	go.uber.org/zap => github.com/stackrox/zap v1.15.1-0.20200720133746-810fd602fd0f
-
-	// Due to github.com/stackrox/rox dependency.
-	// BE SURE TO KEEP THIS UP-TO-DATE.
-	k8s.io/client-go => k8s.io/client-go v0.20.2
+	k8s.io/client-go => k8s.io/client-go v0.20.4
 )
