@@ -2,7 +2,7 @@ FROM registry.access.redhat.com/ubi8/ubi:8.4
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN dnf install -y ca-certificates xz && dnf upgrade && dnf clean all
+RUN dnf upgrade -y && dnf install -y ca-certificates xz && dnf clean all
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 RUN mkdir -p "${NVD_DEFINITIONS_DIR}"
