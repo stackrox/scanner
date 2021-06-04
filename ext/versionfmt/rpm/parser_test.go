@@ -72,7 +72,7 @@ func TestParse(t *testing.T) {
 		v, err := newVersion(c.str)
 
 		if c.err {
-			assert.Error(t, err, "When parsing %q", c.str)
+			assert.Error(t, err, "When parsing %q", c.str) //nolint:govet
 		} else {
 			assert.Nil(t, err, "When parsing %q", c.str)
 		}

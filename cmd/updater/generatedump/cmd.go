@@ -90,6 +90,7 @@ func generateDumpWithAllVulns(outFile string) error {
 	return nil
 }
 
+// Command defines the `generate-dump` command.
 func Command() *cobra.Command {
 	c := &cobra.Command{
 		Use: "generate-dump",

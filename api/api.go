@@ -27,6 +27,7 @@ type Config struct {
 	GRPCPort  int
 }
 
+// RunClairify runs the main Scanner API server.
 func RunClairify(serv *server.Server) {
 	if err := serv.Start(); err != nil {
 		if err != http.ErrServerClosed {

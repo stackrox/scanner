@@ -42,10 +42,12 @@ var kernelPrefixes = []string{
 	"kernel",
 }
 
+// Error is a scanning error.
 type Error struct {
 	Message string `json:"Message,omitempty"`
 }
 
+// Layer is an image layer.
 type Layer struct {
 	Name             string            `json:"Name,omitempty"`
 	NamespaceName    string            `json:"NamespaceName,omitempty"`
@@ -165,6 +167,7 @@ func getLanguageData(db database.Datastore, layerName, lineage string, uncertifi
 	return filtered, nil
 }
 
+// VulnerabilityFromDatabaseModel converts the given database.Vulnerability into a Vulnerability.
 func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability {
 	vuln := Vulnerability{
 		Name:          dbVuln.Name,
@@ -266,6 +269,7 @@ func hasKernelPrefix(name string) bool {
 	return false
 }
 
+// LayerFromDatabaseModel returns the scan data for the given layer based on the data in the given datastore.
 func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, opts *database.DatastoreOptions) (Layer, []Note, error) {
 	withFeatures := opts.GetWithFeatures()
 	withVulnerabilities := opts.GetWithVulnerabilities()
@@ -350,11 +354,13 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 	feature.FixedBy = allVulnsFixedBy
 }
 
+// Namespace is the image's base OS.
 type Namespace struct {
 	Name          string `json:"Name,omitempty"`
 	VersionFormat string `json:"VersionFormat,omitempty"`
 }
 
+// Vulnerability defines a vulnerability.
 type Vulnerability struct {
 	Name          string                 `json:"Name,omitempty"`
 	NamespaceName string                 `json:"NamespaceName,omitempty"`
@@ -366,6 +372,7 @@ type Vulnerability struct {
 	FixedIn       []Feature              `json:"FixedIn,omitempty"`
 }
 
+// DatabaseModel returns the database.Vulnerability based on the caller Vulnerability.
 func (v Vulnerability) DatabaseModel() (database.Vulnerability, error) {
 	severity, err := database.NewSeverity(v.Severity)
 	if err != nil {
@@ -393,6 +400,7 @@ func (v Vulnerability) DatabaseModel() (database.Vulnerability, error) {
 	}, nil
 }
 
+// Feature is a scanned package in an image.
 type Feature struct {
 	Name            string          `json:"Name,omitempty"`
 	NamespaceName   string          `json:"NamespaceName,omitempty"`
@@ -404,6 +412,7 @@ type Feature struct {
 	FixedBy         string          `json:"FixedBy,omitempty"`
 }
 
+// DatabaseModel returns a database.FeatureVersion based on the caller Feature.
 func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {
 	var version string
 	if f.Version == "None" {
@@ -430,6 +439,7 @@ func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {
 	return
 }
 
+// VulnerabilityWithLayers combines a vulnerability with the related layer information.
 type VulnerabilityWithLayers struct {
 	Vulnerability *Vulnerability `json:"Vulnerability,omitempty"`
 
@@ -441,17 +451,20 @@ type VulnerabilityWithLayers struct {
 	LayersIntroducingVulnerability []string `json:"LayersIntroducingVulnerability,omitempty"`
 }
 
+// OrderedLayerName defines an ordered layer.
 type OrderedLayerName struct {
 	Index     int    `json:"Index"`
 	LayerName string `json:"LayerName"`
 }
 
+// LayerEnvelope envelopes complete scan data to return to the client.
 type LayerEnvelope struct {
 	Layer *Layer `json:"Layer,omitempty"`
 	Notes []Note `json:"Notes,omitempty"`
 	Error *Error `json:"Error,omitempty"`
 }
 
+// Note defines scanning notes.
 type Note int
 
 const (
@@ -468,6 +481,7 @@ const (
 	CertifiedRHELScanUnavailable
 )
 
+// VulnerabilityEnvelope envelopes complete vulnerability data to return to the client.
 type VulnerabilityEnvelope struct {
 	Vulnerability   *Vulnerability   `json:"Vulnerability,omitempty"`
 	Vulnerabilities *[]Vulnerability `json:"Vulnerabilities,omitempty"`
@@ -475,6 +489,7 @@ type VulnerabilityEnvelope struct {
 	Error           *Error           `json:"Error,omitempty"`
 }
 
+// FeatureEnvelope envelopes complete feature data to return to the client.
 type FeatureEnvelope struct {
 	Feature  *Feature   `json:"Feature,omitempty"`
 	Features *[]Feature `json:"Features,omitempty"`

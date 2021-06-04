@@ -22,20 +22,15 @@ $(STATICCHECK_BIN): deps
 	@echo "+ $@"
 	@go install honnef.co/go/tools/cmd/staticcheck
 
-GOIMPORTS_BIN := $(GOPATH)/bin/goimports
-$(GOIMPORTS_BIN): deps
-	@echo "+ $@"
-	go install golang.org/x/tools/cmd/goimports
-
-GOLINT_BIN := $(GOPATH)/bin/golint
-$(GOLINT_BIN): deps
-	@echo "+ $@"
-	go install golang.org/x/lint/golint
-
 EASYJSON_BIN := $(GOPATH)/bin/easyjson
 $(EASYJSON_BIN): deps
 	@echo "+ $@"
 	go install github.com/mailru/easyjson/easyjson
+
+GOLANGCILINT_BIN := $(GOBIN)/golangci-lint
+$(GOLANGCILINT_BIN): deps
+	@echo "+ $@"
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint
 
 #############
 ##  Build  ##
@@ -49,53 +44,34 @@ build-updater: deps
 ## Style ##
 ###########
 .PHONY: style
-style: imports blanks fmt lint vet staticcheck no-large-files
+style: blanks golangci-lint staticcheck no-large-files
 
 .PHONY: staticcheck
 staticcheck: $(STATICCHECK_BIN)
 	@echo "+ $@"
 	@$(BASE_DIR)/tools/staticcheck-wrap.sh ./...
 
-.PHONY: fmt
-fmt:
-	@echo "+ $@"
-ifdef CI
-		@echo "The environment indicates we are in CI; checking gofmt."
-		@echo 'If this fails, run `make style`.'
-		@$(eval FMT=`echo $(FORMATTING_FILES) | xargs gofmt -s -l`)
-		@echo "gofmt problems in the following files, if any:"
-		@echo $(FMT)
-		@test -z "$(FMT)"
-endif
-	@echo $(FORMATTING_FILES) | xargs gofmt -s -l -w
-
-.PHONY: imports
-imports: deps $(GOIMPORTS_BIN)
-	@echo "+ $@"
-ifdef CI
-		@echo "The environment indicates we are in CI; checking goimports."
-		@echo 'If this fails, run `make style`.'
-		@$(eval IMPORTS=`echo $(FORMATTING_FILES) | xargs goimports -l`)
-		@echo "goimports problems in the following files, if any:"
-		@echo $(IMPORTS)
-		@test -z "$(IMPORTS)"
-endif
-	@echo $(FORMATTING_FILES) | xargs goimports -w
-
 .PHONY: no-large-files
 no-large-files:
 	@echo "+ $@"
 	@$(BASE_DIR)/tools/large-git-files/find.sh
 
-.PHONY: lint
-lint: $(GOLINT_BIN)
-	@echo "+ $@"
-	@$(BASE_DIR)/tools/go-lint.sh $(FORMATTING_FILES)
-
-.PHONY: vet
-vet:
-	@echo "+ $@"
-	@$(BASE_DIR)/tools/go-vet.sh -tags "$(subst $(comma),$(space),$(RELEASE_GOTAGS))" $(shell go list -e ./... | grep -v generated | grep -v vendor)
+.PHONY: golangci-lint
+golangci-lint: $(GOLANGCILINT_BIN) proto-generated-srcs
+ifdef CI
+	@echo '+ $@'
+	@echo 'The environment indicates we are in CI; running linters in check mode.'
+	@echo 'If this fails, run `make style`.'
+	@echo "Running with no tags..."
+	golangci-lint run
+	@echo "Running with release tags..."
+	@# We use --tests=false because some unit tests don't compile with release tags,
+	@# since they use functions that we don't define in the release build. That's okay.
+	golangci-lint run --build-tags "$(subst $(comma),$(space),$(RELEASE_GOTAGS))" --tests=false
+else
+	golangci-lint run --fix
+	golangci-lint run --fix --build-tags "$(subst $(comma),$(space),$(RELEASE_GOTAGS))" --tests=false
+endif
 
 .PHONY: blanks
 blanks:

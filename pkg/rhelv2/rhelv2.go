@@ -49,6 +49,7 @@ func init() {
 	utils.Must(err)
 }
 
+// UpdateV2 reads the RHEL OVAL v2 feeds and writes them into a known directory.
 func UpdateV2(outputDir string) (int, error) {
 	if err := updateRepoToCPE(outputDir); err != nil {
 		return 0, err

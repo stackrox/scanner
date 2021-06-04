@@ -57,6 +57,7 @@ func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component,
 	return component.FilterToOnlyValid(filteredComponents), nil
 }
 
+// Analyzer returns the Java analyzer.
 func Analyzer() analyzer.Analyzer {
 	return analyzerImpl{}
 }

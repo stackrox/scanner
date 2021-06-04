@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Config defines the updater's configuration settings.
 type Config struct {
 	Interval time.Duration `yaml:"interval"`
 	// FetchFromCentral represents whether to fetch vulns from Central instead of from stackrox.io.

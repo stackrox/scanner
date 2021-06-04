@@ -13,6 +13,7 @@ import (
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
+// Command defines the `load-dump` command.
 func Command() *cobra.Command {
 	c := &cobra.Command{
 		Use: "load-dump",

@@ -52,6 +52,7 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	return prevLineage, nil
 }
 
+// ProcessImage scans the given image.
 func ProcessImage(storage database.Datastore, image *types.Image, registry, username, password string, insecure, uncertifiedRHEL bool) (string, error) {
 	var reg types.Registry
 	var err error

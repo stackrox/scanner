@@ -11,6 +11,7 @@ import (
 	"github.com/stackrox/scanner/database"
 )
 
+// Metadata is the vulnerability metadata.
 type Metadata struct {
 	PublishedDateTime    string
 	LastModifiedDateTime string
@@ -18,6 +19,7 @@ type Metadata struct {
 	CVSSv3               MetadataCVSSv3
 }
 
+// MetadataCVSSv2 is the CVSSv2 data.
 type MetadataCVSSv2 struct {
 	Vectors             string
 	Score               float64
@@ -25,6 +27,7 @@ type MetadataCVSSv2 struct {
 	ImpactScore         float64
 }
 
+// MetadataCVSSv3 is the CVSSv3.x data.
 type MetadataCVSSv3 struct {
 	Vectors             string
 	Score               float64
@@ -63,6 +66,7 @@ func cvssToSeverity(metadata *Metadata) database.Severity {
 	return database.UnknownSeverity
 }
 
+// NewVulnerability creates a new vulnerability based on the given NVD CVE.
 func NewVulnerability(cveitem *schema.NVDCVEFeedJSON10DefCVEItem) *database.Vulnerability {
 	metadata := ConvertNVDMetadata(cveitem)
 	return &database.Vulnerability{

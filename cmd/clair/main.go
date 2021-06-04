@@ -144,7 +144,7 @@ func Boot(config *Config) {
 	}
 
 	// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up to date
-	u.UpdateNVDCacheOnly()
+	u.UpdateApplicationCachesOnly()
 
 	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db)
 	go api.RunClairify(serv)

@@ -7,6 +7,7 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 )
 
+// GetRubyAttributes gets the Ruby-related attributes from the given component.
 func GetRubyAttributes(c *component.Component) []*wfn.Attributes {
 	vendorSet := set.NewStringSet()
 	nameSet := common.GenerateNameKeys(c)

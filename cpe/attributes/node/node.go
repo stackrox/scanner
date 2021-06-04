@@ -7,6 +7,7 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 )
 
+// GetNodeAttributes returns the attributes from the given NPM component.
 func GetNodeAttributes(c *component.Component) []*wfn.Attributes {
 	vendorSet := set.NewStringSet()
 	nameSet := common.GenerateNameKeys(c)

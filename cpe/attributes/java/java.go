@@ -93,6 +93,7 @@ func getPossibleVendors(origins []string) set.StringSet {
 	return vendorSet
 }
 
+// GetJavaAttributes returns the Java-related attributes of the given component.
 func GetJavaAttributes(c *component.Component) []*wfn.Attributes {
 	java := c.JavaPkgMetadata
 	if java == nil {

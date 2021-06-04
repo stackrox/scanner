@@ -25,6 +25,7 @@ func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component,
 	return common.ExtractComponents(fileMap, match, parsePackageJSON), nil
 }
 
+// Analyzer returns the NPM analyzer.
 func Analyzer() analyzer.Analyzer {
 	return analyzerImpl{}
 }

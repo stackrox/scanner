@@ -32,10 +32,12 @@ type RHELv2Repo struct {
 	CPEs []string `json:"cpes"`
 }
 
+// Mapping defines a repository-to-cpe mapping.
 type Mapping struct {
 	mapping atomic.Value
 }
 
+// NewMapping returns a new Mapping.
 func NewMapping() *Mapping {
 	m := new(Mapping)
 	m.mapping.Store((*RHELv2MappingFile)(nil))
@@ -43,6 +45,7 @@ func NewMapping() *Mapping {
 	return m
 }
 
+// Load loads the contents of the RHELv2CPERepoName file in the given directory into the Mapping.
 func (m *Mapping) Load(dir string) error {
 	path := filepath.Join(dir, RHELv2CPERepoName)
 	bytes, err := os.ReadFile(path)
@@ -60,6 +63,7 @@ func (m *Mapping) Load(dir string) error {
 	return nil
 }
 
+// Get returns the CPEs for the given repositories.
 func (m *Mapping) Get(repos []string) ([]string, error) {
 	if len(repos) == 0 {
 		return []string{}, nil

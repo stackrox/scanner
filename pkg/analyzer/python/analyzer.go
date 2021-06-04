@@ -50,6 +50,7 @@ func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component,
 	return common.ExtractComponents(fileMap, matchSuffix, parseMetadataFile), nil
 }
 
+// Analyzer returns the Python analyzer.
 func Analyzer() analyzer.Analyzer {
 	return analyzerImpl{}
 }

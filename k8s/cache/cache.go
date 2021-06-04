@@ -5,6 +5,7 @@ import (
 	"github.com/stackrox/scanner/pkg/cache"
 )
 
+// Cache defines a Kubernetes vulnerability cache.
 type Cache interface {
 	GetVulnsByComponent(component, version string) []*validation.CVESchema
 

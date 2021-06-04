@@ -28,6 +28,7 @@ func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component,
 	return common.ExtractComponents(fileMap, match, parseGemSpec), nil
 }
 
+// Analyzer returns a Ruby Gem analyzer.
 func Analyzer() analyzer.Analyzer {
 	return analyzerImpl{}
 }

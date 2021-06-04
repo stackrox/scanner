@@ -111,7 +111,8 @@ func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error
 	}
 	if currentValueToSet != nil {
 		*currentValueToSet = strings.TrimSpace(currentValue)
-		currentValueToSet = nil
+		// Ignore linting for potential future-proofing purposes.
+		currentValueToSet = nil //nolint:ineffassign
 	}
 
 	// Try to take the version from the jar name

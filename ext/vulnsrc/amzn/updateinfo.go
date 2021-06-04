@@ -16,10 +16,12 @@
 // ALAS (Amazon Linux Security Advisories).
 package amzn
 
+// UpdateInfo ALAS update information.
 type UpdateInfo struct {
 	ALASList []ALAS `xml:"update"`
 }
 
+// ALAS Amazon Linux Security Advisory.
 type ALAS struct {
 	ID          string      `xml:"id"`
 	Updated     Updated     `xml:"updated"`
@@ -29,14 +31,17 @@ type ALAS struct {
 	References  []Reference `xml:"references>reference"`
 }
 
+// Reference ALAS ID.
 type Reference struct {
 	ID string `xml:"id,attr"`
 }
 
+// Updated ALAS date.
 type Updated struct {
 	Date string `xml:"date,attr"`
 }
 
+// Package ALAS package.
 type Package struct {
 	Name    string `xml:"name,attr"`
 	Epoch   string `xml:"epoch,attr"`
