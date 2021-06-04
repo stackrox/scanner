@@ -201,7 +201,7 @@ $(CURDIR)/image/db/rhel/bundle.tar.gz:
 .PHONY: scanner-image-rhel
 scanner-image-rhel: scanner-rhel-build-dockerized $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/scanner-rhel:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
+	@docker build -t us.gcr.io/stackrox-ci/scanner-rhel:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner
 
 .PHONY: db-image
 db-image:
