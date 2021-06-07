@@ -706,13 +706,17 @@ workflows:
           <<: *runOnAllTagsWithDockerIOPullCtx
       - build:
           <<: *runOnAllTags
-          context: docker-io-and-stackrox-io-push
+          context:
+          - docker-io-and-stackrox-io-push
+          - redhat-developer-account-login
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
       - build-rhel:
           <<: *runOnAllTags
-          context: docker-io-and-stackrox-io-push
+          context:
+          - docker-io-and-stackrox-io-push
+          - redhat-developer-account-login
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
@@ -749,12 +753,18 @@ workflows:
     - style-checks:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - build:
-        <<: *runOnAllTagsWithRedHatCtx
+        <<: *runOnAllTags
+        context:
+        - docker-io-and-stackrox-io-push
+        - redhat-developer-account-login
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
     - build-rhel:
-        <<: *runOnAllTagsWithRedHatCtx
+        <<: *runOnAllTags
+        context:
+        - docker-io-and-stackrox-io-push
+        - redhat-developer-account-login
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
