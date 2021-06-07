@@ -264,6 +264,10 @@ commands:
             unzip -d image/scanner/dump /tmp/repo2cpe.zip
 
       - run:
+          name: Login to registry.redhat.io
+          command: docker login -u "$REDHAT_USERNAME" -p "$REDHAT_PASSWORD" registry.redhat.io
+
+      - run:
           name: Build images
           command: make << parameters.make-image-target >>
 
@@ -702,13 +706,17 @@ workflows:
           <<: *runOnAllTagsWithDockerIOPullCtx
       - build:
           <<: *runOnAllTags
-          context: docker-io-and-stackrox-io-push
+          context:
+          - docker-io-and-stackrox-io-push
+          - redhat-developer-account-login
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
       - build-rhel:
           <<: *runOnAllTags
-          context: docker-io-and-stackrox-io-push
+          context:
+          - docker-io-and-stackrox-io-push
+          - redhat-developer-account-login
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
@@ -746,13 +754,17 @@ workflows:
         <<: *runOnAllTagsWithDockerIOPullCtx
     - build:
         <<: *runOnAllTags
-        context: docker-io-and-stackrox-io-push
+        context:
+        - docker-io-and-stackrox-io-push
+        - redhat-developer-account-login
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
     - build-rhel:
         <<: *runOnAllTags
-        context: docker-io-and-stackrox-io-push
+        context:
+        - docker-io-and-stackrox-io-push
+        - redhat-developer-account-login
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
