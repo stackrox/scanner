@@ -1,5 +1,7 @@
 FROM postgres:12-alpine
 
+RUN apk upgrade
+
 COPY ./*.conf /etc/
 
 COPY ./dump/definitions.sql.gz /docker-entrypoint-initdb.d/

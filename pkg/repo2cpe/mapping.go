@@ -6,6 +6,7 @@
 package repo2cpe
 
 import (
+	"archive/zip"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -14,6 +15,8 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/ziputil"
 )
 
 const (
@@ -56,6 +59,25 @@ func (m *Mapping) Load(dir string) error {
 	var mappingFile RHELv2MappingFile
 	if err := json.Unmarshal(bytes, &mappingFile); err != nil {
 		return errors.Wrapf(err, "unmarshalling mapping file at %s", path)
+	}
+
+	m.mapping.Store(&mappingFile)
+
+	return nil
+}
+
+// LoadFromZip reads the repo-to-cpe file in the given directory from the given zip reader.
+func (m *Mapping) LoadFromZip(zipR *zip.ReadCloser, dir string) error {
+	path := filepath.Join(dir, RHELv2CPERepoName)
+	r, err := ziputil.OpenFile(zipR, path)
+	if err != nil {
+		return errors.Wrapf(err, "opening %s from zip", path)
+	}
+	defer utils.IgnoreError(r.Close)
+
+	var mappingFile RHELv2MappingFile
+	if err := json.NewDecoder(r).Decode(&mappingFile); err != nil {
+		return errors.Wrapf(err, "unmarshalling mapping file at %s", r.Name)
 	}
 
 	m.mapping.Store(&mappingFile)

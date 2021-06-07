@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"archive/zip"
 	"os"
 	"path/filepath"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
+	"github.com/stackrox/scanner/pkg/ziputil"
 )
 
 // These are the names of Kubernetes components we detect on
@@ -51,16 +53,49 @@ func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 	return nil
 }
 
+func (c *cacheImpl) LoadFromZip(zipR *zip.ReadCloser, definitionsDir string) error {
+	log.WithField("dir", definitionsDir).Info("Loading definitions directory")
+
+	rs, err := ziputil.OpenFilesInDir(zipR, definitionsDir, ".yaml")
+	if err != nil {
+		return err
+	}
+
+	var totalVulns int
+	for _, r := range rs {
+		updated, err := c.handleReader(r)
+		if err != nil {
+			return errors.Wrapf(err, "handling file %s", r.Name)
+		}
+		if updated {
+			totalVulns++
+		}
+	}
+
+	log.Infof("Total vulns in %s: %d", definitionsDir, totalVulns)
+
+	return nil
+}
+
 func (c *cacheImpl) handleYAMLFile(path string) (bool, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return false, errors.Wrapf(err, "opening file at %q", path)
 	}
-	defer utils.IgnoreError(f.Close)
 
-	cveData, err := k8sloader.LoadYAMLFileFromReader(f)
+	return c.handleReader(&ziputil.ReadCloser{
+		ReadCloser: f,
+		Name:       path,
+	})
+}
+
+// handleReader loads the data from the given reader and closes the reader once done.
+func (c *cacheImpl) handleReader(r *ziputil.ReadCloser) (bool, error) {
+	defer utils.IgnoreError(r.Close)
+
+	cveData, err := k8sloader.LoadYAMLFileFromReader(r)
 	if err != nil {
-		return false, errors.Wrapf(err, "loading YAML file at path %q", path)
+		return false, errors.Wrapf(err, "loading YAML file at path %q", r.Name)
 	}
 
 	// No need to bother validating more than the following, as it is done on the data source's side.
