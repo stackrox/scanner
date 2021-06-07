@@ -201,6 +201,7 @@ func loadOSVulns(zipR *zip.ReadCloser, db database.Datastore) error {
 }
 
 func loadRHELv2Vulns(db database.Datastore, zipR *zip.ReadCloser, repoToCPE *repo2cpe.Mapping) error {
+	log.Info("Loading RHELv2 vulns...")
 	if repoToCPE != nil {
 		if err := repoToCPE.LoadFromZip(zipR, RHELv2DirName); err != nil {
 			return errors.Wrap(err, "loading repo-to-cpe file into memory")
@@ -211,6 +212,7 @@ func loadRHELv2Vulns(db database.Datastore, zipR *zip.ReadCloser, repoToCPE *rep
 	if err != nil {
 		return errors.Wrap(err, "opening file in zip file")
 	}
+	log.Info("Done loading RHELv2 vulns")
 
 	for _, r := range rhelv2Readers {
 		if err := insertRHELv2Vulns(db, r); err != nil {
