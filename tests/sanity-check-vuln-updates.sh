@@ -116,14 +116,10 @@ sed -Ee "s#gs://definitions.stackrox.io/##g; s#/diff.zip##g;" \
 # List metadata for each diff
 gsutil stat $(cat "$FPATH_DIFF_LIST") > "$FPATH_DIFF_GSUTIL_STAT"
 
-# TODO(sbostick): troubleshoting...
-echo "Hello from $0".
-(set -x; ls -lh "$WORKING_DIR")
-exit 0
-
 # Check metadata for each diffs
 for entry in $(cat "$FPATH_DIFF_ID_LIST"); do
   run_tests_for_diff_id "$entry"
+  break  # TODO(sbostick): troubleshooting
 done
 
 echo "--------"
