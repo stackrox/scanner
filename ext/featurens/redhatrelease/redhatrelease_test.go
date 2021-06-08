@@ -19,68 +19,69 @@ import (
 
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
+	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
-			ExpectedNamespace: &database.Namespace{Name: "amzn:2"},
+			ExpectedNamespace: &database.Namespace{Name: "amzn:2", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/system-release": []byte(`Amazon Linux release 2 (Karoo)`),
 			},
 		},
 		{
-			ExpectedNamespace: &database.Namespace{Name: "amzn:2018.03"},
+			ExpectedNamespace: &database.Namespace{Name: "amzn:2018.03", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/system-release": []byte(`Amazon Linux AMI release 2018.03`),
 			},
 		},
 		{
-			ExpectedNamespace: &database.Namespace{Name: "oracle:6"},
+			ExpectedNamespace: &database.Namespace{Name: "oracle:6", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/oracle-release": []byte(`Oracle Linux Server release 6.8`),
 			},
 		},
 		{
-			ExpectedNamespace: &database.Namespace{Name: "oracle:7"},
+			ExpectedNamespace: &database.Namespace{Name: "oracle:7", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/oracle-release": []byte(`Oracle Linux Server release 7.2`),
 			},
 		},
 		{
-			ExpectedNamespace: &database.Namespace{Name: "centos:6"},
+			ExpectedNamespace: &database.Namespace{Name: "centos:6", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/centos-release": []byte(`CentOS release 6.6 (Final)`),
 			},
 		},
 		{
-			ExpectedNamespace: &database.Namespace{Name: "rhel:7"},
+			ExpectedNamespace: &database.Namespace{Name: "rhel:7", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/redhat-release": []byte(`Red Hat Enterprise Linux Server release 7.2 (Maipo)`),
 			},
 		},
 		{
-			ExpectedNamespace: &database.Namespace{Name: "rhel:8"},
+			ExpectedNamespace: &database.Namespace{Name: "rhel:8", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/redhat-release": []byte(`Red Hat Enterprise Linux release 8.0 (Ootpa)`),
 			},
 		},
 		{
-			ExpectedNamespace: &database.Namespace{Name: "centos:8"},
+			ExpectedNamespace: &database.Namespace{Name: "centos:8", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/redhat-release": []byte(`Red Hat Enterprise Linux release 8.0 (Ootpa)`),
 			},
 			Options: &featurens.DetectorOptions{UncertifiedRHEL: true},
 		},
 		{
-			ExpectedNamespace: &database.Namespace{Name: "centos:8"},
+			ExpectedNamespace: &database.Namespace{Name: "centos:8", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/redhat-release": []byte(`CentOS Linux release 8.3.2011`),
 			},
 		},
 		{
-			ExpectedNamespace: &database.Namespace{Name: "centos:7"},
+			ExpectedNamespace: &database.Namespace{Name: "centos:7", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/system-release": []byte(`CentOS Linux release 7.1.1503 (Core)`),
 			},

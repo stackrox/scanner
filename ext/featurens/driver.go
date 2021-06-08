@@ -109,12 +109,6 @@ type TestData struct {
 // asserts the output to be equal to the expected output.
 func TestDetector(t *testing.T, d Detector, testData []TestData) {
 	for _, td := range testData {
-		namespace := d.Detect(td.Files, td.Options)
-
-		if namespace == nil {
-			assert.Equal(t, td.ExpectedNamespace, namespace)
-		} else {
-			assert.Equal(t, td.ExpectedNamespace.Name, namespace.Name)
-		}
+		assert.Equal(t, td.ExpectedNamespace, d.Detect(td.Files, td.Options))
 	}
 }

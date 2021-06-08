@@ -19,13 +19,14 @@ import (
 
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
+	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
-			ExpectedNamespace: &database.Namespace{Name: "ubuntu:12.04"},
+			ExpectedNamespace: &database.Namespace{Name: "ubuntu:12.04", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/lsb-release": []byte(
 					`DISTRIB_ID=Ubuntu
@@ -35,7 +36,7 @@ DISTRIB_DESCRIPTION="Ubuntu 12.04 LTS"`),
 			},
 		},
 		{ // We don't care about the minor version of Debian
-			ExpectedNamespace: &database.Namespace{Name: "debian:7"},
+			ExpectedNamespace: &database.Namespace{Name: "debian:7", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
 				"etc/lsb-release": []byte(
 					`DISTRIB_ID=Debian

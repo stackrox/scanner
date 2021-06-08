@@ -1729,6 +1729,81 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			image:    "alpine:3.13.0",
+			registry: "https://registry-1.docker.io",
+			source:   "NVD",
+			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "apk-tools",
+					VersionFormat: "apk",
+					Version:       "2.12.0-r4",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2021-30139",
+							NamespaceName: "alpine:v3.13",
+							Description:   "In Alpine Linux apk-tools before 2.12.5, the tarball parser allows a buffer overflow and crash.",
+							Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-30139",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+										"Score":               5.0,
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+									},
+								},
+							},
+							FixedBy: "2.12.5-r0",
+						},
+					},
+					AddedBy: "sha256:7731472c3f2a25edbb9c085c78f42ec71259f2b83485aa60648276d408865839",
+					FixedBy: "2.12.5-r0",
+				},
+				{
+					Name:          "busybox",
+					VersionFormat: "apk",
+					Version:       "1.32.1-r0",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2021-28831",
+							NamespaceName: "alpine:v3.13",
+							Description:   "decompress_gunzip.c in BusyBox through 1.32.1 mishandles the error bit on the huft_build result pointer, with a resultant invalid free or segmentation fault, via malformed gzip data.",
+							Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-28831",
+							Severity:      "Important",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         3.6,
+										"Score":               7.5,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         2.9,
+										"Score":               5.0,
+										"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+									},
+								},
+							},
+							FixedBy: "1.32.1-r4",
+						},
+					},
+					AddedBy: "sha256:7731472c3f2a25edbb9c085c78f42ec71259f2b83485aa60648276d408865839",
+					FixedBy: "1.32.1-r4",
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
