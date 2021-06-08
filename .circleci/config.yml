@@ -748,7 +748,7 @@ workflows:
   sanity-check-vuln-updates-hourly:
     triggers:
       - schedule:
-          cron: "47 * * * *"
+          cron: "7 * * * *"
           filters:
             branches:
               only: shane/rox-7271-vuln-updates-caching
