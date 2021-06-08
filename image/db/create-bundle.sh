@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Creates a tgz bundle of all binary artifacts needed for scanner-db-rhel
 
-set -euo pipefail
+set -euox pipefail
 
 die() {
     echo >&2 "$@"
@@ -67,6 +67,7 @@ if tar --version | grep -q "gnu" ; then
 else
   tar_chown_args=("--uid=root:0" "--gid=root:0")
 fi
+tar_chown_args=()
 
 # Create output bundle of all files in $bundle_root
 tar cz "${tar_chown_args[@]}" --file "$OUTPUT_BUNDLE" --directory "${bundle_root}" .

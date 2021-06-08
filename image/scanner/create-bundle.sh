@@ -32,16 +32,6 @@ mkdir -p "${bundle_root}/${REPO_TO_CPE_DIR}"
 chmod -R 755 "${bundle_root}"
 
 # =============================================================================
-# Copy scripts to image build context directory
-
-mkdir -p "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/entrypoint.sh"               "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/import-additional-cas"       "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/restore-all-dir-contents"    "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/save-dir-contents"           "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/trust-root-ca"               "${OUTPUT_DIR}/scripts"
-
-# =============================================================================
 # Add binaries and data files to be included in the Dockerfile here. This
 # includes artifacts that would be otherwise downloaded or included via a COPY
 # command in the Dockerfile.
@@ -58,7 +48,7 @@ cp -p "${INPUT_ROOT}/dump/rhelv2/repository-to-cpe.json" "${bundle_root}/${REPO_
 if tar --version | grep -q "gnu" ; then
   tar_chown_args=("--owner=root:0" "--group=root:0")
 else
-  tar_chown_args=("--uid=root:0" "--gid=root:0")
+  tar_chown_args=("--disable-copyfile")
 fi
 
 # Create output bundle of all files in $bundle_root

@@ -1,5 +1,13 @@
-FROM golang:1.16.5-alpine3.13
+FROM centos:8
 
-RUN apk add --update --no-cache build-base
+ENV GOLANG_VERSION "1.16.5"
+
+RUN yum update -y && yum install -y epel-release dnf-plugins-core
+RUN yum -y groupinstall "Development Tools"
+RUN curl -L https://dl.google.com/go/go${GOLANG_VERSION}.linux-amd64.tar.gz | tar -C /usr/local -zxvf -
+
+ENV GOPATH /go
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 WORKDIR /go/src/github.com/stackrox/scanner
