@@ -36,7 +36,7 @@ import (
 const (
 	baseURL      = "https://secdb.alpinelinux.org/" // Web source for alpine vuln data
 	updaterFlag  = "alpine-secdbUpdater"
-	nvdURLPrefix = "https://cve.mitre.org/cgi-bin/cvename.cgi?name="
+	nvdURLPrefix = "https://nvd.nist.gov/vuln/detail/"
 )
 
 func init() {
