@@ -11,8 +11,6 @@ import (
 var (
 	osPattern      = regexp.MustCompile(`^ID=(.*)`)
 	versionPattern = regexp.MustCompile(`^VERSION_ID=(.*)`)
-
-	alpineEdgePrettyName = `PRETTY_NAME="Alpine Linux edge"`
 )
 
 // GetOSAndVersionFromOSRelease returns the value of ID= and VERSION_ID= from /etc/os-release formatted data
@@ -20,10 +18,6 @@ func GetOSAndVersionFromOSRelease(data []byte) (os, version string) {
 	scanner := bufio.NewScanner(strings.NewReader(string(data)))
 	for scanner.Scan() {
 		line := scanner.Text()
-
-		if line == alpineEdgePrettyName {
-			return util.NormalizeOSName("alpine"), "edge"
-		}
 
 		r := osPattern.FindStringSubmatch(line)
 		if len(r) == 2 {

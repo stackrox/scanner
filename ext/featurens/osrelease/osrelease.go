@@ -21,7 +21,6 @@ package osrelease
 import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
-	"github.com/stackrox/scanner/ext/versionfmt/apk"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/osrelease"
@@ -33,7 +32,9 @@ var (
 	blocklistFilenames = []string{
 		"etc/oracle-release",
 		"etc/redhat-release",
+		"etc/centos-release",
 		"usr/lib/centos-release",
+		"etc/alpine-release",
 	}
 )
 
@@ -62,14 +63,14 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 	}
 
 	// Determine the VersionFormat.
+	// This intentionally does not support alpine,
+	// as this detector does not handle alpine correctly.
 	var versionFormat string
 	switch OS {
 	case "debian", "ubuntu":
 		versionFormat = dpkg.ParserName
 	case "centos", "rhel", "fedora", "amzn", "oracle":
 		versionFormat = rpm.ParserName
-	case "alpine":
-		versionFormat = apk.ParserName
 	default:
 		return nil
 	}

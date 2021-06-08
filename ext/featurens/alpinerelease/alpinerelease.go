@@ -18,7 +18,6 @@ package alpinerelease
 
 import (
 	"bufio"
-	"bytes"
 	"regexp"
 	"strings"
 
@@ -31,6 +30,9 @@ import (
 const (
 	osName            = "alpine"
 	alpineReleasePath = "etc/alpine-release"
+	osReleasePath     = "etc/os-release"
+
+	alpineEdgePrettyName = `PRETTY_NAME="Alpine Linux edge"`
 )
 
 var versionRegexp = regexp.MustCompile(`^(\d)+\.(\d)+\.(\d)+$`)
@@ -43,17 +45,35 @@ type detector struct{}
 
 func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
 	file, exists := files[alpineReleasePath]
-	if exists {
-		scanner := bufio.NewScanner(bytes.NewBuffer(file))
-		for scanner.Scan() {
-			line := scanner.Text()
-			match := versionRegexp.FindStringSubmatch(line)
-			if len(match) > 0 {
-				versionNumbers := strings.Split(match[0], ".")
-				return &database.Namespace{
-					Name:          osName + ":" + "v" + versionNumbers[0] + "." + versionNumbers[1],
-					VersionFormat: apk.ParserName,
-				}
+	if !exists {
+		return nil
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(string(file)))
+	for scanner.Scan() {
+		line := scanner.Text()
+		match := versionRegexp.FindStringSubmatch(line)
+		if len(match) > 0 {
+			versionNumbers := strings.Split(match[0], ".")
+			return &database.Namespace{
+				Name:          osName + ":" + "v" + versionNumbers[0] + "." + versionNumbers[1],
+				VersionFormat: apk.ParserName,
+			}
+		}
+	}
+
+	// It is possible this is an alpine:edge image.
+	// Verify this.
+	file, exists = files[osReleasePath]
+	if !exists {
+		return nil
+	}
+	scanner = bufio.NewScanner(strings.NewReader(string(file)))
+	for scanner.Scan() {
+		if scanner.Text() == alpineEdgePrettyName {
+			return &database.Namespace{
+				Name:          osName + ":edge",
+				VersionFormat: apk.ParserName,
 			}
 		}
 	}
@@ -62,5 +82,5 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 }
 
 func (d detector) RequiredFilenames() []string {
-	return []string{alpineReleasePath}
+	return []string{alpineReleasePath, osReleasePath}
 }

@@ -44,6 +44,19 @@ func TestDetector(t *testing.T) {
 `)},
 		},
 		{
+			ExpectedNamespace: &database.Namespace{Name: "alpine:edge", VersionFormat: apk.ParserName},
+			Files: tarutil.FilesMap{
+				"etc/alpine-release": []byte(`3.14.0_alpha20210212`),
+				"etc/os-release": []byte(
+					`NAME="Alpine Linux"
+ID=alpine
+VERSION_ID=3.14.0_alpha20210212
+PRETTY_NAME="Alpine Linux edge"
+HOME_URL="https://alpinelinux.org/"
+BUG_REPORT_URL="https://bugs.alpinelinux.org/"`),
+			},
+		},
+		{
 			ExpectedNamespace: nil,
 			Files:             tarutil.FilesMap{},
 		},
