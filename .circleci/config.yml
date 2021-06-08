@@ -666,6 +666,30 @@ jobs:
       - provision-gke-cluster:
           cluster-id: rhel
 
+  check-scanner-vuln-updates:
+    <<: *defaultImage
+
+    steps:
+      - run:
+          name: Init
+          command: |
+            echo "hello"
+      - run:
+          name: Check scanner vulnerability updates
+          command: |
+            shopt -s nullglob
+            echo "world"
+            [[ 0 -eq 0 ]]
+
+      #- store_artifacts:
+      #    path: /tmp/failures
+
+      #- slack/status:
+      #    fail_only: true
+      #    mentions: SGX5Y89KJ
+      #    only_for_branches: master
+      #    webhook: '${SLACK_WEBHOOK_KERNEL_PROBE_BUILD_FAILURE}'
+
 workflows:
   version: 2
 
@@ -719,6 +743,25 @@ workflows:
           requires:
             - build
             - provision-cluster
+
+  check-scanner-vuln-updates:
+    triggers:
+      - schedule:
+          cron: "5 * * * *"
+          filters:
+            branches:
+              only: shane/rox-7271-vuln-updates-caching
+
+    triggers:
+      - schedule:
+          cron: "0 * * * *"
+          filters:
+            branches:
+              only: master
+
+    jobs:
+      - generate-genesis-dump:
+          <<: *runOnAllTagsWithDockerIOPullCtx
 
   build:
     jobs:
