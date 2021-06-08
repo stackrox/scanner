@@ -1778,7 +1778,7 @@ func TestImageSanity(t *testing.T) {
 							Name:          "CVE-2021-28831",
 							NamespaceName: "alpine:v3.13",
 							Description:   "decompress_gunzip.c in BusyBox through 1.32.1 mishandles the error bit on the huft_build result pointer, with a resultant invalid free or segmentation fault, via malformed gzip data.",
-							Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-28831",
+							Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-28831",
 							Severity:      "Important",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
