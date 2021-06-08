@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
 set -eu
 
+function is_mac   { uname | grep -qi 'darwin'; }
+function is_linux { uname | grep -qi 'linux'; }
+
+function parse_date_to_epoch_sec {
+  local date_string=$1
+  local date_format=$2
+
+  if is_linux; then
+    date --date "$date_string" "+%s"
+  elif is_mac; then
+    date -j -f "$date_format" "$date_string" "+%s"
+  fi
+}
+
 function get_manifest_content_from_zip {
   local fpath_zipfile=$1
   unzip -q -c "$fpath_zipfile" manifest.json
@@ -10,7 +24,7 @@ function get_manifest_age_seconds_from_zip {
   local fpath_zipfile=$1
   local manifest_until_raw=$(get_manifest_content_from_zip "$fpath_zipfile" \
       | jq -r ".until" | sed -Ee 's#\.[0-9]+Z# GMT#')
-  local manifest_until_epoch_sec=$(date -j -f "%Y-%M-%dT%H:%M:%S %Z" "$manifest_until_raw" "+%s")
+  local manifest_until_epoch_sec=$(parse_date_to_epoch_sec "$manifest_until_raw" "%Y-%M-%dT%H:%M:%S %Z")
   local now_epoch_sec=$(date "+%s")
   local age_seconds=$(( $now_epoch_sec - $manifest_until_epoch_sec ))
   echo "$age_seconds"
@@ -82,11 +96,10 @@ function run_tests_for_diff_id {
 }
 
 function get_gcs_object_age_seconds {
-  local DIFF_ID="$1"
-  local GCS_STAT_DATE_FORMAT="%a, %d %b %Y %H:%M:%S %Z"
-  local created_datestamp_raw=$(grep -A2 "$DIFF_ID" "$FPATH_DIFF_GSUTIL_STAT" \
+  local diff_id="$1"
+  local created_datestamp_raw=$(grep -A2 "$diff_id" "$FPATH_DIFF_GSUTIL_STAT" \
     | grep "Creation time:" | sed -Ee 's/ +/ /g; s/^ +//;' | cut -d' ' -f3-)
-  local created_datestamp_epoch_sec=$(date -j -f "$GCS_STAT_DATE_FORMAT" "$created_datestamp_raw" "+%s")
+  local created_datestamp_epoch_sec=$(parse_date_to_epoch_sec "$created_datestamp_raw" "%a, %d %b %Y %H:%M:%S %Z")
   local now_epoch_sec=$(date "+%s")
   local obj_age_seconds=$(( $now_epoch_sec - $created_datestamp_epoch_sec ))
   echo "$obj_age_seconds"
@@ -121,6 +134,9 @@ for entry in $(cat "$FPATH_DIFF_ID_LIST"); do
   run_tests_for_diff_id "$entry"
   break  # TODO(sbostick): troubleshooting
 done
+
+# Cleanup files we don't want archived by the ci job
+rm -f diff{1,2}.zip
 
 echo "--------"
 echo "ran to completion -- see $FPATH_TRANSCRIPT"

@@ -667,7 +667,12 @@ jobs:
           cluster-id: rhel
 
   sanity-check-vuln-updates:
-    <<: *defaults
+    docker:
+      - image: docker.io/stackrox/apollo-ci:0.3.12
+        auth:
+          username: $DOCKER_IO_PULL_USERNAME
+          password: $DOCKER_IO_PULL_PASSWORD
+    working_directory: /go/src/github.com/stackrox/scanner
     steps:
       - checkout
       - setup-gcp:
