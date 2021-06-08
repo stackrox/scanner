@@ -666,7 +666,7 @@ jobs:
       - provision-gke-cluster:
           cluster-id: rhel
 
-  sanity-check-scanner-vuln-updates:
+  sanity-check-vuln-updates:
     <<: *defaults
     steps:
       - checkout
@@ -678,17 +678,18 @@ jobs:
             echo "hello"
       - run:
           name: Check scanner vulnerability updates
-          command: |
-            shopt -s nullglob
-            echo "world"
-            [[ 0 -eq 0 ]]
+          command: ./tests/sanity-check-vuln-updates.sh
       - store_artifacts:
-          path: /tmp/failures
+          path: /tmp/ROX-7271
       #- slack/status:
       #    fail_only: true
       #    mentions: SGX5Y89KJ
       #    only_for_branches: master
       #    webhook: '${SLACK_WEBHOOK_KERNEL_PROBE_BUILD_FAILURE}'
+      #
+      # curl -X POST -H 'Content-type: application/json' \
+      #   --data '{"text":"<!subteam^ST21FM29X|scanner-defs-oncall> FAILED: sanity-check-vuln-updates"}' \
+      #   ${{ secrets.SLACK_WEBHOOK }}
 
 workflows:
   version: 2
@@ -744,7 +745,7 @@ workflows:
             - build
             - provision-cluster
 
-  sanity-check-scanner-vuln-updates-hourly:
+  sanity-check-vuln-updates-hourly:
     triggers:
       - schedule:
           cron: "47 * * * *"
@@ -752,7 +753,7 @@ workflows:
             branches:
               only: shane/rox-7271-vuln-updates-caching
     jobs:
-      - sanity-check-scanner-vuln-updates:
+      - sanity-check-vuln-updates:
           <<: *runOnAllTagsWithDockerIOPullCtx
 
   build:
