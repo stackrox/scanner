@@ -666,10 +666,10 @@ jobs:
       - provision-gke-cluster:
           cluster-id: rhel
 
-  check-scanner-vuln-updates:
-    <<: *defaultImage
-
+  sanity-check-scanner-vuln-updates:
+    <<: *defaults
     steps:
+      - checkout
       - run:
           name: Init
           command: |
@@ -680,10 +680,8 @@ jobs:
             shopt -s nullglob
             echo "world"
             [[ 0 -eq 0 ]]
-
-      #- store_artifacts:
-      #    path: /tmp/failures
-
+      - store_artifacts:
+          path: /tmp/failures
       #- slack/status:
       #    fail_only: true
       #    mentions: SGX5Y89KJ
@@ -744,24 +742,15 @@ workflows:
             - build
             - provision-cluster
 
-  check-scanner-vuln-updates:
+  sanity-check-scanner-vuln-updates-hourly:
     triggers:
       - schedule:
           cron: "5 * * * *"
           filters:
             branches:
               only: shane/rox-7271-vuln-updates-caching
-
-    triggers:
-      - schedule:
-          cron: "0 * * * *"
-          filters:
-            branches:
-              only: master
-
     jobs:
-      - generate-genesis-dump:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+      - sanity-check-scanner-vuln-updates
 
   build:
     jobs:
