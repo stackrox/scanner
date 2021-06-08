@@ -673,10 +673,6 @@ jobs:
       - setup-gcp:
           service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
       - run:
-          name: Init
-          command: |
-            echo "hello"
-      - run:
           name: Check scanner vulnerability updates
           command: ./tests/sanity-check-vuln-updates.sh
       - store_artifacts:
@@ -748,7 +744,7 @@ workflows:
   sanity-check-vuln-updates-hourly:
     triggers:
       - schedule:
-          cron: "7 * * * *"
+          cron: "21 * * * *"
           filters:
             branches:
               only: shane/rox-7271-vuln-updates-caching

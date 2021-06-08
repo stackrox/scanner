@@ -106,10 +106,6 @@ mkdir -p "$WORKING_DIR"
 cd "$WORKING_DIR"
 exec > >(tee -i "$FPATH_TRANSCRIPT") 2>&1
 
-# TODO(sbostick): troubleshoting...
-echo "Hello from $0".
-exit 0
-
 # Get a list of diffs (incremental vulnerability db updates)
 gsutil ls -r "gs://definitions.stackrox.io/*/diff.zip" > "$FPATH_DIFF_LIST"
 
@@ -119,6 +115,11 @@ sed -Ee "s#gs://definitions.stackrox.io/##g; s#/diff.zip##g;" \
 
 # List metadata for each diff
 gsutil stat $(cat "$FPATH_DIFF_LIST") > "$FPATH_DIFF_GSUTIL_STAT"
+
+# TODO(sbostick): troubleshoting...
+echo "Hello from $0".
+(set -x; ls -lh "$WORKING_DIR")
+exit 0
 
 # Check metadata for each diffs
 for entry in $(cat "$FPATH_DIFF_ID_LIST"); do
