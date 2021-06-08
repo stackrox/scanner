@@ -672,8 +672,6 @@ jobs:
       - checkout
       - setup-gcp:
           service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
-      - attach_workspace:
-          at: /tmp
       - run:
           name: Init
           command: |
@@ -754,7 +752,8 @@ workflows:
             branches:
               only: shane/rox-7271-vuln-updates-caching
     jobs:
-      - sanity-check-scanner-vuln-updates
+      - sanity-check-scanner-vuln-updates:
+          <<: *runOnAllTagsWithDockerIOPullCtx
 
   build:
     jobs:
