@@ -670,6 +670,10 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - setup-gcp:
+          service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
+      - attach_workspace:
+          at: /tmp
       - run:
           name: Init
           command: |
