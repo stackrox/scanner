@@ -1745,7 +1745,7 @@ func TestImageSanity(t *testing.T) {
 							Name:          "CVE-2021-30139",
 							NamespaceName: "alpine:v3.13",
 							Description:   "In Alpine Linux apk-tools before 2.12.5, the tarball parser allows a buffer overflow and crash.",
-							Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-30139",
+							Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-30139",
 							Severity:      "Important",
 							Metadata: map[string]interface{}{
 								"NVD": map[string]interface{}{
