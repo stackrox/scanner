@@ -3,11 +3,9 @@ FROM alpine:3.13
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 # Scanner requires the following binaries.
-RUN apk update && \
-    apk --no-cache add \
-            ca-certificates xz \
-        && apk --repository "http://nl.alpinelinux.org/alpine/3.11/community" --no-cache add rpm \
-        && apk --purge del apk-tools;
+RUN apk update \
+    && apk --no-cache add ca-certificates xz rpm \
+    && apk --purge del apk-tools;
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 RUN mkdir -p "${NVD_DEFINITIONS_DIR}"
