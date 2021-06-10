@@ -6,7 +6,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 RUN apk update && \
     apk --no-cache add \
             ca-certificates xz \
-        && apk --repository "http://nl.alpinelinux.org/alpine/3.11/community" --no-cache add rpm \
+        && apk --repository "http://nl.alpinelinux.org/alpine/3.13/community" --no-cache add rpm \
         && apk --purge del apk-tools;
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
