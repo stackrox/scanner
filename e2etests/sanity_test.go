@@ -168,6 +168,30 @@ func TestImageSanity(t *testing.T) {
 								},
 							},
 						},
+						{
+							Name:          "CVE-2021-3520",
+							NamespaceName: "ubuntu:16.04",
+							Description:   "There's a flaw in lz4. An attacker who submits a crafted file to an application linked with lz4 may be able to trigger an integer overflow, leading to calling of memmove() on a negative size argument, causing an out-of-bounds write and/or a crash. The greatest impact of this flaw is to availability, with some potential impact to confidentiality and integrity as well.",
+							Link:          "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2021-3520",
+							Severity:      "Moderate",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         6.4,
+										"Score":               7.5,
+										"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         5.9,
+										"Score":               9.8,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									},
+								},
+							},
+							FixedBy: "0.0~r131-2ubuntu2+esm1",
+						},
 					},
 					AddedBy: "sha256:92473f7ef45574f608989888a6cfc8187d3a1425e3a63f974434acab03fed068",
 				},
@@ -306,7 +330,6 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-
 							FixedBy: "1.0.9.8.5",
 						},
 						{
