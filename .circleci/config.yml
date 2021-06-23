@@ -671,7 +671,7 @@ jobs:
     steps:
       - run:
           name: Set tag to 2.11.0
-          command: cci-export CIRCLE_TAG "2.11.0"
+          command: export CIRCLE_TAG="2.11.0"
       - checkout
       - run:
           name: Build updater bin
