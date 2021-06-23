@@ -672,14 +672,17 @@ jobs:
       - checkout
       - run:
           name: Checkout Scanner 2.11.0
-          # Checkout the commit associated with the 2.11.0 tag.
-          command: git checkout 6567873c9ef4e151a44e342b055da7f98c778347
+          command: git checkout 2.11.0
       - run:
           name: Build updater bin
           command: |
             cci-export GOPRIVATE "github.com/stackrox"
+            # Mimic make build-updater to avoid the "go.mod/go.sum updated" error
+            ## Start ##
             make proto-generated-srcs
             go mod tidy
+            go build -o ./bin/updater ./cmd/updater
+            ## End ##
             mkdir -p /tmp/updater-bin-old
             cp ./bin/updater /tmp/updater-bin-old/
       - persist_to_workspace:
