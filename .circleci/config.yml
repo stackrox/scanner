@@ -666,20 +666,37 @@ jobs:
       - provision-gke-cluster:
           cluster-id: rhel
 
+  build-old-updater:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Checkout Scanner 2.11.0
+          command: git checkout 2.11.0
+      - run:
+          name: Build updater bin
+          command: |
+            make build-updater
+            mkdir -p /tmp/updater-bin-old
+            cp ./bin/updater /tmp/updater-bin-old/
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - updater-bin
+
   update-tests:
     docker:
       - *defaultImage
       - image: postgres:12.0-alpine
     working_directory: *defaultWorkingDirectory
     steps:
-      - checkout
-      - run:
-          name: Checkout Scanner 2.11.0
-          command: git checkout 2.11.0
       - setup_remote_docker
+      - attach_workspace:
+          at: /tmp
       - run:
-          name: Build updater bin
-          command: make build-updater
+          name: Restore updater bin
+          command: |
+            cp /tmp/updater-bin-old/updater ./bin/
       - run:
           name: Download Genesis Dump for Scanner 2.11.0
           command: gsutil cp gs://stackrox-scanner-ci-vuln-dump/genesis-20210223210505.zip .
@@ -792,5 +809,9 @@ workflows:
         requires:
           - build-rhel
           - provision-cluster-rhel
+    - build-old-updater:
+        <<: *runOnAllTagsWithDockerIOPullCtx
     - update-tests:
         <<: *runOnAllTagsWithDockerIOPullCtx
+        requires:
+          - build-old-updater
