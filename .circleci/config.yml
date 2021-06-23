@@ -29,19 +29,6 @@ runOnAllTagsWithRedHatCtx: &runOnAllTagsWithRedHatCtx
   - redhat-developer-account-login
 
 commands:
-  set-circle-tag:
-    description: Set the CIRCLE_TAG environment variable
-    parameters:
-      tag:
-        type: string
-    steps:
-      - run:
-          name: Set CIRCLE_TAG
-          command: |
-            CIRCLE_TAG=<< parameters.tag >>
-            cci-export CIRCLE_TAG "$CIRCLE_TAG"
-            echo "CIRCLE_TAG set to $CIRCLE_TAG"
-
   check-on-master-or-tag:
     description: Run on master or tags only
     steps:
@@ -682,9 +669,11 @@ jobs:
   build-old-updater:
     <<: *defaults
     steps:
-      - set-circle-tag:
-          tag: "2.11.0"
       - checkout
+      - run:
+          name: Checkout Scanner 2.11.0
+          # Checkout the commit associated with the 2.11.0 tag.
+          command: git checkout 6567873c9ef4e151a44e342b055da7f98c778347
       - run:
           name: Build updater bin
           command: |
