@@ -671,7 +671,10 @@ jobs:
     steps:
       - run:
           name: Set tag to 2.11.0
-          command: export CIRCLE_TAG="2.11.0"
+          command: |
+            CIRCLE_TAG=2.11.0
+            cci-export CIRCLE_TAG "$CIRCLE_TAG"
+            echo "CIRCLE_TAG set to $CIRCLE_TAG"
       - checkout
       - run:
           name: Build updater bin
@@ -698,6 +701,7 @@ jobs:
           command: |
             mkdir ./bin/
             cp /tmp/updater-bin-old/updater ./bin/
+      - setup-gcp
       - run:
           name: Download Genesis Dump for Scanner 2.11.0
           command: gsutil cp gs://stackrox-scanner-ci-vuln-dump/genesis-20210223210505.zip .
