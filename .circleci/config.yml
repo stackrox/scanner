@@ -707,11 +707,11 @@ jobs:
       - setup-gcp
       - run:
           name: Download Genesis Dump for Scanner 2.11.0
-          command: gsutil cp gs://stackrox-scanner-ci-vuln-dump/genesis-20210223210505.zip .
+          command: gsutil cp gs://definitions.stackrox.io/eac616e1-e072-4cb1-9d63-db680fe73f92/diff.zip .
       - run:
           name: Load vuln contents into postgres
           command: |
-            ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file genesis-20210223210505.zip
+            ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file diff.zip
 
 workflows:
   version: 2
