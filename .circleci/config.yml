@@ -678,7 +678,8 @@ jobs:
           name: Build updater bin
           command: |
             cci-export GOPRIVATE "github.com/stackrox"
-            make build-old-updater
+            make proto-generated-srcs
+            go mod tidy
             mkdir -p /tmp/updater-bin-old
             cp ./bin/updater /tmp/updater-bin-old/
       - persist_to_workspace:

@@ -40,11 +40,6 @@ build-updater: deps
 	@echo "+ $@"
 	go build -o ./bin/updater ./cmd/updater
 
-.PHONY: build-old-updater
-build-old-updater: old-deps
-	@echo "+ $@"
-	go build -o ./bin/updater ./cmd/updater
-
 ###########
 ## Style ##
 ###########
@@ -96,15 +91,6 @@ deps: proto-generated-srcs go.mod
 	@go mod tidy
 ifdef CI
 	@git diff --exit-code -- go.mod go.sum || { echo "go.mod/go.sum files were updated after running 'go mod tidy', run this command on your local machine and commit the results." ; exit 1 ; }
-	go mod verify
-endif
-	@touch deps
-
-old-deps: proto-generated-srcs go.mod
-	@echo "+ $@"
-	@go mod tidy
-ifdef CI
-	# Do not git diff here, as a change is expected/allowed.
 	go mod verify
 endif
 	@touch deps
