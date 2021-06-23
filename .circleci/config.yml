@@ -669,15 +669,13 @@ jobs:
   build-old-updater:
     <<: *defaults
     steps:
-      - checkout
       - run:
-          name: Checkout Scanner 2.11.0
-          command: git checkout 2.11.0
+          name: Set tag to 2.11.0
+          command: cci-export CIRCLE_TAG "2.11.0"
+      - checkout
       - run:
           name: Build updater bin
           command: |
-            git config --global url."ssh://git@github.com".insteadOf "https://github.com" || true
-            git config --global gc.auto 0 || true
             make build-updater
             mkdir -p /tmp/updater-bin-old
             cp ./bin/updater /tmp/updater-bin-old/
