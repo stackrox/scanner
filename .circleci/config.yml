@@ -389,32 +389,6 @@ commands:
           name: Run db integration tests
           command: make db-integration-tests
 
-  run-update-tests:
-    docker:
-      - *defaultImage
-      - image: postgres:12.0-alpine
-    working_directory: *defaultWorkingDirectory
-    steps:
-      - check-label-to-run:
-          label: generate-dumps-on-pr
-      - run:
-          name: Checkout Scanner 2.11.0
-          command: git checkout 2.11.0
-      - setup_remote_docker
-
-      - run:
-          name: Build updater bin
-          command: make build-updater
-
-      - run:
-          name: Download Genesis Dump for Scanner 2.11.0
-          command: gsutil cp gs://stackrox-scanner-ci-vuln-dump/genesis-20210223210505.zip .
-
-      - run:
-          name: Load vuln contents into postgres
-          command: |
-            ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file genesis-20210223210505.zip
-
 jobs:
   unit-tests:
     <<: *defaults
@@ -693,10 +667,27 @@ jobs:
           cluster-id: rhel
 
   update-tests:
-    <<: *defaults
+    docker:
+      - *defaultImage
+      - image: postgres:12.0-alpine
+    working_directory: *defaultWorkingDirectory
     steps:
-      - run-update-tests:
-          version: "2.11.0"
+      - check-label-to-run:
+          label: generate-dumps-on-pr
+      - run:
+          name: Checkout Scanner 2.11.0
+          command: git checkout 2.11.0
+      - setup_remote_docker
+      - run:
+          name: Build updater bin
+          command: make build-updater
+      - run:
+          name: Download Genesis Dump for Scanner 2.11.0
+          command: gsutil cp gs://stackrox-scanner-ci-vuln-dump/genesis-20210223210505.zip .
+      - run:
+          name: Load vuln contents into postgres
+          command: |
+            ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file genesis-20210223210505.zip
 
 workflows:
   version: 2
@@ -803,7 +794,4 @@ workflows:
           - build-rhel
           - provision-cluster-rhel
     - update-tests:
-        <<: *runOnAllTagsWithRedHatCtx
-        requires:
-          - build
-          - provision-cluster
+        <<: *runOnAllTagsWithDockerIOPullCtx
