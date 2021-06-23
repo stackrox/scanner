@@ -670,12 +670,13 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-#      - run:
-#          name: Checkout Scanner 2.11.0
-#          command: git checkout 2.11.0
+      - run:
+          name: Checkout Scanner 2.11.0
+          command: git checkout 2.11.0
       - run:
           name: Build updater bin
           command: |
+            git config --global url."ssh://git@github.com".insteadOf "https://github.com" || true
             make build-updater
             mkdir -p /tmp/updater-bin-old
             cp ./bin/updater /tmp/updater-bin-old/
@@ -696,6 +697,7 @@ jobs:
       - run:
           name: Restore updater bin
           command: |
+            mkdir ./bin/
             cp /tmp/updater-bin-old/updater ./bin/
       - run:
           name: Download Genesis Dump for Scanner 2.11.0
