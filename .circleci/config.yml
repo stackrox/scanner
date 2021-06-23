@@ -670,9 +670,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run:
-          name: Checkout Scanner 2.11.0
-          command: git checkout 2.11.0
+#      - run:
+#          name: Checkout Scanner 2.11.0
+#          command: git checkout 2.11.0
       - run:
           name: Build updater bin
           command: |
@@ -682,7 +682,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - updater-bin
+            - updater-bin-old
 
   update-tests:
     docker:
