@@ -85,8 +85,7 @@ type Vulnerability struct {
 
 	Metadata MetadataMap
 
-	FixedIn                        []FeatureVersion
-	LayersIntroducingVulnerability []Layer
+	FixedIn []FeatureVersion
 
 	// For output purposes. Only make sense when the vulnerability
 	// is already about a specific Feature/FeatureVersion.
