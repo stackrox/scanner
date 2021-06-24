@@ -702,9 +702,7 @@ jobs:
           at: /tmp
       - run:
           name: Restore updater bin
-          command: |
-            mkdir ./bin/
-            cp /tmp/updater-bin-old/updater ./bin/
+          command: cp /tmp/updater-bin-old/updater ./bin/
       - setup-gcp
       - run:
           name: Download Genesis and Diff Dump for Scanner 2.11.0
