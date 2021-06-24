@@ -5,12 +5,6 @@ import "github.com/stackrox/rox/pkg/set"
 var (
 	// KnownStaleNamespaces is the set of base namespaces we know have stale vulnerabilities.
 	KnownStaleNamespaces = set.NewFrozenStringSet(
-		"alpine:v3.2",
-		"alpine:v3.3",
-		"alpine:v3.4",
-		"alpine:v3.5",
-		"alpine:v3.6",
-		"alpine:v3.7",
 		"debian:8",
 		"oracle:5",
 		"ubuntu:12.10",
@@ -30,12 +24,19 @@ var (
 	// If you add a new Debian or Ubuntu version, be sure to add it to
 	// database/namespace_mapping.go as well.
 	KnownSupportedNamespaces = set.NewFrozenStringSet(
+		"alpine:v3.2",
+		"alpine:v3.3",
+		"alpine:v3.4",
+		"alpine:v3.5",
+		"alpine:v3.6",
+		"alpine:v3.7",
 		"alpine:v3.8",
 		"alpine:v3.9",
 		"alpine:v3.10",
 		"alpine:v3.11",
 		"alpine:v3.12",
 		"alpine:v3.13",
+		"alpine:v3.14",
 		"alpine:edge",
 		"amzn:2018.03",
 		"amzn:2",
