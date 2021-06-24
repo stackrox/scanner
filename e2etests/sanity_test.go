@@ -1827,6 +1827,25 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			image:    "alpine:3.14.0",
+			registry: "https://registry-1.docker.io",
+			source:   "NVD",
+			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "apk-tools",
+					VersionFormat: "apk",
+					Version:       "2.12.5-r1",
+				},
+				{
+					Name:          "busybox",
+					VersionFormat: "apk",
+					Version:       "1.33.1-r2",
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
