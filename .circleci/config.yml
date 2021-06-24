@@ -836,3 +836,4 @@ workflows:
         <<: *runOnAllTagsWithDockerIOPullCtx
         requires:
           - build-old-updater
+          - create-diff-dumps
