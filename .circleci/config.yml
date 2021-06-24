@@ -696,6 +696,7 @@ jobs:
       - image: postgres:12.0-alpine
     working_directory: *defaultWorkingDirectory
     steps:
+      - checkout
       - setup_remote_docker
       - attach_workspace:
           at: /tmp
