@@ -708,12 +708,22 @@ jobs:
       - run:
           name: Download Genesis and Diff Dump for Scanner 2.11.0
           command: |
-            gsutil cp gs://stackrox-scanner-ci-vuln-dump/genesis-20210223210505.zip .
-            gsutil cp gs://definitions.stackrox.io/eac616e1-e072-4cb1-9d63-db680fe73f92/diff.zip .
+            set +e
+
+            gsutil cp gs://stackrox-scanner-ci-vuln-dump/genesis-20210223210505.zip genesis.zip
+
+            .circleci/pr_has_label.sh generate-dumps-on-pr
+            if [[ $? -eq 1 || "${CIRCLE_BRANCH}" == "master" || -n "${CIRCLE_TAG}" ]]; then
+              echo "On master, tag, or generate-dumps-on-pr is unset. Downloading from GCS"
+              gsutil cp gs://definitions.stackrox.io/eac616e1-e072-4cb1-9d63-db680fe73f92/diff.zip diff.zip
+            else
+              echo "In a PR with the generate-dumps-on-pr label. Using generated diff"
+              cp /tmp/diff-dumps/dump13/diff.zip diff.zip
+            fi
       - run:
           name: Load vuln contents into postgres
           command: |
-            ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file genesis-20210223210505.zip
+            ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file genesis.zip
             psql -U postgres -c "DELETE FROM Lock WHERE name = 'update' AND owner = 'updater'" postgres://127.0.0.1:5432
             ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file diff.zip
 
