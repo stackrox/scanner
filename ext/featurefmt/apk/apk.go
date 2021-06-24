@@ -23,7 +23,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
-	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/ext/versionfmt/apk"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -57,7 +57,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			ipkg.Feature.Name = line[2:]
 		case line[:2] == "V:":
 			version := line[2:]
-			err := versionfmt.Valid(dpkg.ParserName, version)
+			err := versionfmt.Valid(apk.ParserName, version)
 			if err != nil {
 				log.WithError(err).WithField("version", version).Warning("could not parse package version; skipping")
 			} else {
