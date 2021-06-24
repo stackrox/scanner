@@ -714,6 +714,7 @@ jobs:
           name: Load vuln contents into postgres
           command: |
             ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file genesis-20210223210505.zip
+            psql -U postgres -c "DELETE FROM Lock WHERE name = 'update' AND owner = 'updater'" postgres://127.0.0.1:5432
             ./bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file diff.zip
 
 workflows:
