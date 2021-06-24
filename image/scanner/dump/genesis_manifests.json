@@ -191,6 +191,11 @@
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210603180429.zip",
       "timestamp": "2021-06-03T18:04:29.751005127Z",
       "diffLocation": "gs://definitions.stackrox.io/e8f8b9ab-6a75-433a-8b86-15586ec41a7b/diff.zip"
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210623230354.zip",
+      "timestamp": "2021-06-23T23:03:54.136744962Z",
+      "diffLocation": "gs://definitions.stackrox.io/975b4be1-f760-45e9-ad80-5047421c591d/diff.zip"
     }
   ]
 }
