@@ -439,24 +439,6 @@ func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {
 	return
 }
 
-// VulnerabilityWithLayers combines a vulnerability with the related layer information.
-type VulnerabilityWithLayers struct {
-	Vulnerability *Vulnerability `json:"Vulnerability,omitempty"`
-
-	// This field is guaranteed to be in order only for pagination.
-	// Indices from different notifications may not be comparable.
-	OrderedLayersIntroducingVulnerability []OrderedLayerName `json:"OrderedLayersIntroducingVulnerability,omitempty"`
-
-	// This field is deprecated.
-	LayersIntroducingVulnerability []string `json:"LayersIntroducingVulnerability,omitempty"`
-}
-
-// OrderedLayerName defines an ordered layer.
-type OrderedLayerName struct {
-	Index     int    `json:"Index"`
-	LayerName string `json:"LayerName"`
-}
-
 // LayerEnvelope envelopes complete scan data to return to the client.
 type LayerEnvelope struct {
 	Layer *Layer `json:"Layer,omitempty"`
