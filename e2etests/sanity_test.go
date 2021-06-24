@@ -1838,13 +1838,11 @@ func TestImageSanity(t *testing.T) {
 					Name:          "apk-tools",
 					VersionFormat: "apk",
 					Version:       "2.12.5-r1",
-					AddedBy: "sha256:7731472c3f2a25edbb9c085c78f42ec71259f2b83485aa60648276d408865839",
 				},
 				{
 					Name:          "busybox",
 					VersionFormat: "apk",
 					Version:       "1.33.1-r2",
-					AddedBy: "sha256:7731472c3f2a25edbb9c085c78f42ec71259f2b83485aa60648276d408865839",
 				},
 			},
 		},
