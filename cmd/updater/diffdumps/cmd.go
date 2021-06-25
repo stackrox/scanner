@@ -269,6 +269,10 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 
 		if cfg.UseDPKGParserForAlpine && namespaces.IsAlpineNamespace(headVuln.Namespace.Name) {
 			headVuln.Namespace.VersionFormat = dpkg.ParserName
+
+			for i := range headVuln.FixedIn {
+				headVuln.FixedIn[i].Feature.Namespace.VersionFormat = dpkg.ParserName
+			}
 		}
 
 		key := keyFromVuln(&headVuln)
