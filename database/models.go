@@ -36,10 +36,10 @@ type Layer struct {
 
 	Name          string
 	EngineVersion int
-	Parent        *Layer
-	Namespace     *Namespace
-	Distroless    bool
-	Features      []FeatureVersion
+	Parent        *Layer           `json:",omitempty"`
+	Namespace     *Namespace       `json:",omitempty"`
+	Distroless    bool             `json:",omitempty"`
+	Features      []FeatureVersion `json:",omitempty"`
 }
 
 // Namespace is an image's OS.
@@ -55,9 +55,9 @@ type Feature struct {
 	Model
 
 	Name       string
-	Namespace  Namespace
-	SourceType string
-	Location   string
+	Namespace  Namespace `json:",omitempty"`
+	SourceType string    `json:",omitempty"`
+	Location   string    `json:",omitempty"`
 }
 
 // FeatureVersion is the full result of a scanned package.
@@ -66,10 +66,10 @@ type FeatureVersion struct {
 
 	Feature    Feature
 	Version    string
-	AffectedBy []Vulnerability
+	AffectedBy []Vulnerability `json:",omitempty"`
 
 	// For output purposes. Only make sense when the feature version is in the context of an image.
-	AddedBy Layer
+	AddedBy Layer `json:",omitempty"`
 }
 
 // Vulnerability defines a package vulnerability.
@@ -79,19 +79,19 @@ type Vulnerability struct {
 	Name      string
 	Namespace Namespace
 
-	Description string
-	Link        string
+	Description string `json:",omitempty"`
+	Link        string `json:",omitempty"`
 	Severity    Severity
 
 	Metadata MetadataMap
 
-	FixedIn []FeatureVersion
+	FixedIn []FeatureVersion `json:",omitempty"`
 
 	// For output purposes. Only make sense when the vulnerability
 	// is already about a specific Feature/FeatureVersion.
 	FixedBy string `json:",omitempty"`
 
-	SubCVEs []string
+	SubCVEs []string `json:",omitempty"`
 }
 
 // MetadataMap represents vulnerability metadata.
