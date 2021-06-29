@@ -46,7 +46,7 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 	}
 
 	err = w.Checkout(&git.CheckoutOptions{
-		Branch: "refs/heads/cgorman-cve-2021-31204",
+		Branch: "refs/heads/cgorman-cve-2021-31957",
 	})
 	if err != nil {
 		panic(err)
