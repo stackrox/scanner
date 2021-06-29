@@ -1432,8 +1432,8 @@ github.com/stackrox/external-network-pusher v0.0.0-20201201000949-ec60e0486e7a/g
 github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab h1:77xJmm1YkqbgrQzHI3C4MyPckWL+PYRLWakQRC6Mzj8=
 github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab/go.mod h1:EBskgGC5Gzt/r8ToNsuD6tYMcf+AWY0ubaFSRy5/3QM=
 github.com/stackrox/k8s-istio-cve-pusher v0.0.0-20191029220117-2a73008e51a9/go.mod h1:13vPFaMtP66fobTXqiv3SB32ZCZfa9btx3O6uOlTCDY=
-github.com/stackrox/nvdtools v0.0.0-20210326191554-5daeb6395b56 h1:D2wYiy+hcKy8qZAg9SxSWfZgbvmEgD9AdV0g0lJqGZ0=
-github.com/stackrox/nvdtools v0.0.0-20210326191554-5daeb6395b56/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
+github.com/stackrox/nvdtools v0.0.0-20210602180013-485adad3ba69 h1:Y2qDYaOo1kIqWpi6fuOMquvstlAbGzrMWdn445pdoQQ=
+github.com/stackrox/nvdtools v0.0.0-20210602180013-485adad3ba69/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
 github.com/stackrox/rox v0.0.0-20191128130813-ae51554fc242/go.mod h1:Qshd7p6Hw8xBvPlJM3pKWh81R2s3qhbAdYIvA6pPStw=
 github.com/stackrox/rox v0.0.0-20200813232042-403e0ab8a77e/go.mod h1:X/6FdUgnl7zcQX+YgQt1tJHRU8joAifnMAj9pefVjrI=
 github.com/stackrox/rox v0.0.0-20200902200840-183e12662c50/go.mod h1:U3X7wnmLK3TQbM0jAf5SvKLnVsq/neyQNTEc23X8zkY=
