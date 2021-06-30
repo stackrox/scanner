@@ -32,10 +32,10 @@ type Model struct {
 
 // Layer is an image layer.
 type Layer struct {
-	Model
+	Model `json:",omitempty"`
 
-	Name          string
-	EngineVersion int
+	Name          string           `json:",omitempty"`
+	EngineVersion int              `json:",omitempty"`
 	Parent        *Layer           `json:",omitempty"`
 	Namespace     *Namespace       `json:",omitempty"`
 	Distroless    bool             `json:",omitempty"`
@@ -44,17 +44,17 @@ type Layer struct {
 
 // Namespace is an image's OS.
 type Namespace struct {
-	Model
+	Model `json:",omitempty"`
 
-	Name          string
-	VersionFormat string
+	Name          string `json:",omitempty"`
+	VersionFormat string `json:",omitempty"`
 }
 
 // Feature is scanned package.
 type Feature struct {
-	Model
+	Model `json:",omitempty"`
 
-	Name       string
+	Name       string    `json:",omitempty"`
 	Namespace  Namespace `json:",omitempty"`
 	SourceType string    `json:",omitempty"`
 	Location   string    `json:",omitempty"`
@@ -62,10 +62,10 @@ type Feature struct {
 
 // FeatureVersion is the full result of a scanned package.
 type FeatureVersion struct {
-	Model
+	Model `json:",omitempty"`
 
-	Feature    Feature
-	Version    string
+	Feature    Feature         `json:",omitempty"`
+	Version    string          `json:",omitempty"`
 	AffectedBy []Vulnerability `json:",omitempty"`
 
 	// For output purposes. Only make sense when the feature version is in the context of an image.
@@ -74,16 +74,16 @@ type FeatureVersion struct {
 
 // Vulnerability defines a package vulnerability.
 type Vulnerability struct {
-	Model
+	Model `json:",omitempty"`
 
-	Name      string
-	Namespace Namespace
+	Name      string    `json:",omitempty"`
+	Namespace Namespace `json:",omitempty"`
 
-	Description string `json:",omitempty"`
-	Link        string `json:",omitempty"`
-	Severity    Severity
+	Description string   `json:",omitempty"`
+	Link        string   `json:",omitempty"`
+	Severity    Severity `json:",omitempty"`
 
-	Metadata MetadataMap
+	Metadata MetadataMap `json:",omitempty"`
 
 	FixedIn []FeatureVersion `json:",omitempty"`
 
