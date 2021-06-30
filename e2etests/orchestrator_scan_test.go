@@ -28,28 +28,24 @@ func TestGRPCGetOpenShiftVulnerabilities(t *testing.T) {
 		addressFamily   string
 		maxPatch        int
 		step            int
-		minInitialVulns int
 		knownFixed      int
 	}{
 		{
 			addressFamily:   "3.11",
 			maxPatch:        439,
 			step:            1,
-			minInitialVulns: 49,
 			knownFixed:      19,
 		},
 		{
 			addressFamily:   "4.5",
 			maxPatch:        40,
 			step:            1,
-			minInitialVulns: 5,
 			knownFixed:      5,
 		},
 		{
 			addressFamily:   "4.7",
 			maxPatch:        12,
 			step:            1,
-			minInitialVulns: 13,
 			knownFixed:      3,
 		},
 	}
@@ -62,7 +58,6 @@ func TestGRPCGetOpenShiftVulnerabilities(t *testing.T) {
 			resp, err := client.GetOpenShiftVulnerabilities(context.Background(), req)
 			assert.NoError(t, err)
 			initialSize := len(resp.Vulnerabilities)
-			assert.GreaterOrEqual(t, initialSize, c.minInitialVulns)
 			vulnNameMap := make(map[string]*v1.Vulnerability)
 			for _, vuln := range resp.GetVulnerabilities() {
 				if strings.HasPrefix(vuln.Name, "RHBA-") || strings.HasPrefix(vuln.Name, "RHSA-") {
