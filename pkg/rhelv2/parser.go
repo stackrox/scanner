@@ -66,6 +66,8 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			score  float64
 			vector string
 		}
+
+		log.Infof("%s: %d", name(def), len(def.Advisory.Cves))
 		// For CVEs, there will only be 1 element in this slice.
 		// For RHSAs, RHBAs, etc, there will typically be 1 or more.
 		// As we have done in the past, we will take the maximum score.
