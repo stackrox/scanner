@@ -451,9 +451,9 @@ jobs:
             - genesis-dump
             - updater-bin
 
-      store_artifacts:
-        path: /cves.txt
-        destination: cves.txt
+      - store_artifacts:
+          path: /cves.txt
+          destination: cves.txt
 
   create-postgres-dump-from-genesis-dump:
     docker:
