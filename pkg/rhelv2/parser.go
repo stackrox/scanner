@@ -71,9 +71,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 		// For RHSAs, RHBAs, etc, there will typically be 1 or more.
 		// As we have done in the past, we will take the maximum score.
 		for _, cve := range def.Advisory.Cves {
-			if cve.CveID != name(def) {
-				numToDelete++
-			}
+			numToDelete++
 
 			if cve.Cvss3 != "" {
 				scoreStr, vector := stringutils.Split2(cve.Cvss3, "/")

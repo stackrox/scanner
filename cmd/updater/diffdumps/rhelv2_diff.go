@@ -17,6 +17,8 @@ import (
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
+var numNewSubCVEs int
+
 func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.Time, baseF, headF *zip.File, rhelExists bool) error {
 	reader, err := headF.Open()
 	if err != nil {
@@ -67,8 +69,6 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 		baseVulnsMap[vuln.Name] = vuln
 	}
 
-	var numNewSubCVEs int
-
 	var filtered []*database.RHELv2Vulnerability
 	for _, headVuln := range rhel.Vulns {
 		matchingBaseVuln, found := baseVulnsMap[headVuln.Name]
@@ -105,7 +105,6 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 	}
 
 	log.Infof("Diffed RHELv2 file %s; after filtering, %d/%d vulns are in the diff", headF.Name, len(filtered), len(rhel.Vulns))
-	log.Infof("Number of new RHSA sub-CVEs (doesnt account for RHSA updates): %d", numNewSubCVEs)
 
 	outF, err := os.Create(filepath.Join(outputDir, filepath.Base(headF.Name)))
 	if err != nil {

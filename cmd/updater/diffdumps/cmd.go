@@ -385,6 +385,7 @@ func Command() *cobra.Command {
 				return errors.Wrap(err, "creating RHELv2 vulns diff")
 			}
 			log.Info("Generated RHELv2 vulns diff")
+			log.Infof("Number of new RHSA sub-CVEs (doesnt account for RHSA updates): %d", numNewSubCVEs)
 		}
 
 		err = vulndump.WriteManifestFile(stagingDir, vulndump.Manifest{
