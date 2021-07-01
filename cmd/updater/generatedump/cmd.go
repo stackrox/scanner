@@ -59,6 +59,7 @@ func generateDumpWithAllVulns(outFile string) error {
 		return errors.Wrap(err, "fetching RHELv2 vulns")
 	}
 	log.Infof("Finished fetching RHEL OVAL v2 vulns (total: %d)", nRHELVulns)
+	log.Infof("CVEs:\n %s", rhelv2.CvesFile)
 
 	log.Info("Fetching OS vulns...")
 	fetchedVulns, err := fetchVulns(emptyDataStore{}, dumpDir)

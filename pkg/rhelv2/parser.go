@@ -9,7 +9,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 
@@ -22,11 +21,7 @@ import (
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
 )
 
-var cvesFile *os.File
-
-func init() {
-	cvesFile, _ = os.Create("/cves.txt")
-}
+var CvesFile string
 
 func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	var root oval.Root
@@ -126,8 +121,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 		}
 
 		if strings.HasPrefix(name, "CVE") {
-			cvesFile.WriteString(name)
-			cvesFile.WriteString("\n")
+			CvesFile += name + "\n"
 		}
 
 		return &database.RHELv2Vulnerability{
