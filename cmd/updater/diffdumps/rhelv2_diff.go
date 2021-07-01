@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/mitchellh/hashstructure"
@@ -18,6 +19,7 @@ import (
 )
 
 var numNewSubCVEs int
+var numNewNonCVEs int
 
 func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.Time, baseF, headF *zip.File, rhelExists bool) error {
 	reader, err := headF.Open()
@@ -76,6 +78,9 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 		if !found {
 
 			numNewSubCVEs += headVuln.NSubCVEs
+			if !strings.HasPrefix(headVuln.Name, "CVE") {
+				numNewNonCVEs++
+			}
 
 			filtered = append(filtered, headVuln)
 			continue
