@@ -145,6 +145,8 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			vuln.PackageInfos = append(vuln.PackageInfos, pkgInfo)
 		}
 
+		vuln.CrossProd = len(vuln.PackageInfos) * len(vuln.CPEs)
+
 		vulns = append(vulns, vuln)
 	}
 

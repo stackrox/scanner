@@ -141,6 +141,7 @@ type RHELv2Vulnerability struct {
 	PackageInfos []*RHELv2PackageInfo `json:"package_info" hash:"set"`
 
 	NSubCVEs int `json:"n_sub_cves"`
+	CrossProd int `json:"cross"`
 }
 
 // RHELv2PackageInfo defines all the data necessary for fully define a RHELv2 package.

@@ -20,6 +20,7 @@ import (
 
 var numNewSubCVEs int
 var numNewNonCVEs int
+var cross int
 
 func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.Time, baseF, headF *zip.File, rhelExists bool) error {
 	reader, err := headF.Open()
@@ -80,6 +81,7 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 			numNewSubCVEs += headVuln.NSubCVEs
 			if !strings.HasPrefix(headVuln.Name, "CVE") {
 				numNewNonCVEs++
+				cross += headVuln.CrossProd
 			}
 
 			filtered = append(filtered, headVuln)
