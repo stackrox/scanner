@@ -8,6 +8,11 @@ package rhelv2
 import (
 	"encoding/xml"
 	"fmt"
+	"io"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/pkg/errors"
 	"github.com/quay/claircore/pkg/cpe"
 	"github.com/quay/goval-parser/oval"
@@ -15,9 +20,13 @@ import (
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
-	"io"
-	"strconv"
 )
+
+var cvesFile *os.File
+
+func init() {
+	cvesFile, _ = os.Create("/cves.txt")
+}
 
 func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	var root oval.Root
@@ -114,6 +123,11 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 		if link == "" {
 			// Log as a warning, as this is not critical, but it is good to know.
 			log.Warnf("Unable to determine link for vuln %q in %s", def.Title, uri)
+		}
+
+		if strings.HasPrefix(name, "CVE") {
+			cvesFile.WriteString(name)
+			cvesFile.WriteString("\n")
 		}
 
 		return &database.RHELv2Vulnerability{

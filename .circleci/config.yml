@@ -450,6 +450,10 @@ jobs:
           paths:
             - genesis-dump
             - updater-bin
+      - persist_to_workspace:
+          root: /
+          paths:
+            - "cves.txt"
 
   create-postgres-dump-from-genesis-dump:
     docker:
