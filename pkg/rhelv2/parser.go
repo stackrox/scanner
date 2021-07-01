@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/quay/claircore/pkg/cpe"
@@ -19,6 +20,8 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
 )
+
+var ToDelete int
 
 func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	var root oval.Root
@@ -67,11 +70,15 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			vector string
 		}
 
-		log.Infof("%s: %d", name(def), len(def.Advisory.Cves))
+		var numToDelete int
 		// For CVEs, there will only be 1 element in this slice.
 		// For RHSAs, RHBAs, etc, there will typically be 1 or more.
 		// As we have done in the past, we will take the maximum score.
 		for _, cve := range def.Advisory.Cves {
+			if cve.CveID != name(def) {
+				numToDelete++
+			}
+
 			if cve.Cvss3 != "" {
 				scoreStr, vector := stringutils.Split2(cve.Cvss3, "/")
 				score, err := strconv.ParseFloat(scoreStr, 64)
@@ -113,6 +120,10 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 		if link == "" {
 			// Log as a warning, as this is not critical, but it is good to know.
 			log.Warnf("Unable to determine link for vuln %q in %s", def.Title, uri)
+		}
+
+		if !strings.HasPrefix("CVE", name) {
+			ToDelete += numToDelete - 1
 		}
 
 		return &database.RHELv2Vulnerability{
