@@ -8,10 +8,6 @@ package rhelv2
 import (
 	"encoding/xml"
 	"fmt"
-	"io"
-	"strconv"
-	"strings"
-
 	"github.com/pkg/errors"
 	"github.com/quay/claircore/pkg/cpe"
 	"github.com/quay/goval-parser/oval"
@@ -19,9 +15,9 @@ import (
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
+	"io"
+	"strconv"
 )
-
-var ToDelete int
 
 func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	var root oval.Root
@@ -122,10 +118,6 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			log.Warnf("Unable to determine link for vuln %q in %s", def.Title, uri)
 		}
 
-		if !strings.HasPrefix("CVE", name) {
-			ToDelete += numToDelete - 1
-		}
-
 		return &database.RHELv2Vulnerability{
 			Name:        name,
 			Title:       def.Title,
@@ -137,6 +129,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			CVSSv3:      cvss3Str,
 			CVSSv2:      cvss2Str,
 			CPEs:        cpes,
+			NSubCVEs:    numToDelete - 1,
 		}, nil
 	}
 	vulns, err := ovalutil.RPMDefsToVulns(&root, protoVuln)

@@ -67,11 +67,16 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 		baseVulnsMap[vuln.Name] = vuln
 	}
 
+	var numNewSubCVEs int
+
 	var filtered []*database.RHELv2Vulnerability
 	for _, headVuln := range rhel.Vulns {
 		matchingBaseVuln, found := baseVulnsMap[headVuln.Name]
 		// If the vuln was not in the base, add it.
 		if !found {
+
+			numNewSubCVEs += headVuln.NSubCVEs
+
 			filtered = append(filtered, headVuln)
 			continue
 		}
@@ -100,6 +105,7 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 	}
 
 	log.Infof("Diffed RHELv2 file %s; after filtering, %d/%d vulns are in the diff", headF.Name, len(filtered), len(rhel.Vulns))
+	log.Infof("Number of new RHSA sub-CVEs (doesnt account for RHSA updates): %d", numNewSubCVEs)
 
 	outF, err := os.Create(filepath.Join(outputDir, filepath.Base(headF.Name)))
 	if err != nil {

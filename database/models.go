@@ -139,6 +139,8 @@ type RHELv2Vulnerability struct {
 	CVSSv2       string               `json:"cvssv2,omitempty"`
 	CPEs         []string             `json:"cpes" hash:"set"`
 	PackageInfos []*RHELv2PackageInfo `json:"package_info" hash:"set"`
+
+	NSubCVEs int `json:"n_sub_cves"`
 }
 
 // RHELv2PackageInfo defines all the data necessary for fully define a RHELv2 package.
