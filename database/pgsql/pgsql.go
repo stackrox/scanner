@@ -168,6 +168,7 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		pg.Close()
 		return nil, fmt.Errorf("pgsql: could not open database: %v", err)
 	}
+	pg.DB.SetConnMaxLifetime(1 * time.Minute)
 
 	// Verify database state.
 	if err = pg.DB.Ping(); err != nil {
