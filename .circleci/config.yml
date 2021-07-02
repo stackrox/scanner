@@ -65,7 +65,7 @@ slackTemplateTestFailure: &slackTemplateTestFailure
              {
                "type": "mrkdwn",
                "text": "*Branch*: $CIRCLE_BRANCH"
-             },
+             }
            ]
          },
          {
