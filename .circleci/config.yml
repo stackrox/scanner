@@ -687,15 +687,77 @@ jobs:
           channel: oncall
           event: fail
           ignore_errors: false
-          mentions: "SGX5Y89KJ,@shane"
-          template: basic_fail_1
+          mentions: "@scanner-defs-oncall,@shane"
+          #template: basic_fail_1
+          custom: |
+             {
+               "text": "CircleCI job failed.",
+               "blocks": [
+                 {
+                   "type": "header",
+                   "text": {
+                     "type": "plain_text",
+                     "text": "Job Failed. :red_circle:",
+                     "emoji": true
+                   }
+                 },
+                 {
+                   "type": "section",
+                   "fields": [
+                     {
+                       "type": "mrkdwn",
+                       "text": "*Job*: ${CIRCLE_JOB}"
+                     }
+                   ]
+                 },
+                 {
+                   "type": "section",
+                   "fields": [
+                     {
+                       "type": "mrkdwn",
+                       "text": "*Project*:\\n$CIRCLE_PROJECT_REPONAME"
+                     },
+                     {
+                       "type": "mrkdwn",
+                       "text": "*Branch*:\\n$CIRCLE_BRANCH"
+                     },
+                     {
+                       "type": "mrkdwn",
+                       "text": "*Author*:\\n$CIRCLE_USERNAME"
+                     }
+                   ],
+                 },
+                 {
+                   "type": "section",
+                   "fields": [
+                     {
+                       "type": "mrkdwn",
+                       "text": "*Mentions*:\\n$SLACK_PARAM_MENTIONS"
+                     }
+                   ]
+                 },
+                 {
+                   "type": "actions",
+                   "elements": [
+                     {
+                       "type": "button",
+                       "text": {
+                         "type": "plain_text",
+                         "text": "View Job"
+                       },
+                       "url": "${CIRCLE_BUILD_URL}"
+                     }
+                   ]
+                 }
+               ]
+             }
       - slack/notify:
           branch_pattern: master,release/.+
           tag_pattern: v?\d+\.\d+\.\d+(-.+)*
           channel: oncall
           event: fail
           ignore_errors: false
-          mentions: "SGX5Y89KJ,@shane"
+          mentions: "@scanner-defs-oncall,@shane"
           template: basic_fail_1
 
 workflows:
@@ -755,7 +817,7 @@ workflows:
   sanity-check-vuln-updates-hourly:
     triggers:
       - schedule:
-          cron: "45 * * * *"
+          cron: "18 * * * *"
           filters:
             branches:
               only: shane/rox-7271-vuln-updates-caching
