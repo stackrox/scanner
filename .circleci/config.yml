@@ -687,7 +687,7 @@ jobs:
           channel: oncall
           event: fail
           ignore_errors: false
-          mentions: "<@SGX5Y89KJ>,@shane"
+          mentions: "@SGX5Y89KJ,@shane"
           template: basic_fail_1
       - slack/notify:
           branch_pattern: master,release/.+
@@ -695,7 +695,7 @@ jobs:
           channel: oncall
           event: fail
           ignore_errors: false
-          mentions: "<@SGX5Y89KJ>,@shane"
+          mentions: "@SGX5Y89KJ,@shane"
           template: basic_fail_1
 
 workflows:
@@ -755,7 +755,7 @@ workflows:
   sanity-check-vuln-updates-hourly:
     triggers:
       - schedule:
-          cron: "39 * * * *"
+          cron: "42 * * * *"
           filters:
             branches:
               only: shane/rox-7271-vuln-updates-caching
