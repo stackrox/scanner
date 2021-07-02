@@ -681,18 +681,21 @@ jobs:
           command: ./tests/sanity-check-vuln-updates.sh
       - store_artifacts:
           path: /tmp/ROX-7271
-      # https://circleci.com/developer/orbs/orb/circleci/slack#commands-notify
       - slack/notify:
           branch_pattern: shane/rox-7271-vuln-updates-caching
           channel: infra-notifications
-          event: always
-          ignore_errors: false
+          event: fail
+          ignore_errors: true
           mentions: "@shane"
           template: basic_fail_1
-
-      # curl -X POST -H 'Content-type: application/json' \
-      #   --data '{"text":"<!subteam^ST21FM29X|scanner-defs-oncall> FAILED: sanity-check-vuln-updates"}' \
-      #   ${{ secrets.SLACK_WEBHOOK }}
+      - slack/notify:
+          branch_pattern: master,release/.+
+          tag_pattern: v?\d+\.\d+\.\d+(-.+)*
+          channel: infra-notifications
+          event: fail
+          ignore_errors: true
+          mentions: "@shane"
+          template: basic_fail_1
 
 workflows:
   version: 2

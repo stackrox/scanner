@@ -150,3 +150,6 @@ rm -f diff{1,2}.zip
 echo "--------"
 echo "ran to completion -- see $FPATH_TRANSCRIPT"
 echo
+
+echo "Failing deliberately -- TODO(sbostick)"
+exit 1
