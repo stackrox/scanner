@@ -29,6 +29,7 @@ runOnAllTagsWithRedHatCtx: &runOnAllTagsWithRedHatCtx
   - docker-io-pull
   - redhat-developer-account-login
 
+# https://circleci.com/developer/orbs/orb/circleci/slack
 orbs:
   slack: circleci/slack@4.4.2
 
@@ -683,18 +684,18 @@ jobs:
           path: /tmp/ROX-7271
       - slack/notify:
           branch_pattern: shane/rox-7271-vuln-updates-caching
-          channel: infra-notifications
+          channel: oncall
           event: fail
-          ignore_errors: true
-          mentions: "@shane"
+          ignore_errors: false
+          mentions: "<@SGX5Y89KJ>,@shane"
           template: basic_fail_1
       - slack/notify:
           branch_pattern: master,release/.+
           tag_pattern: v?\d+\.\d+\.\d+(-.+)*
-          channel: infra-notifications
+          channel: oncall
           event: fail
-          ignore_errors: true
-          mentions: "@shane"
+          ignore_errors: false
+          mentions: "<@SGX5Y89KJ>,@shane"
           template: basic_fail_1
 
 workflows:
