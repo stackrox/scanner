@@ -28,6 +28,9 @@ runOnAllTagsWithRedHatCtx: &runOnAllTagsWithRedHatCtx
   - docker-io-pull
   - redhat-developer-account-login
 
+orbs:
+  slack: circleci/slack@4.4.2
+
 commands:
   check-on-master-or-tag:
     description: Run on master or tags only
@@ -677,12 +680,14 @@ jobs:
           command: ./tests/sanity-check-vuln-updates.sh
       - store_artifacts:
           path: /tmp/ROX-7271
-      #- slack/status:
-      #    fail_only: true
-      #    mentions: SGX5Y89KJ
-      #    only_for_branches: master
-      #    webhook: '${SLACK_WEBHOOK_KERNEL_PROBE_BUILD_FAILURE}'
-      #
+      - slack/notify:
+          branch_pattern: shane/rox-7271-vuln-updates-caching
+          channel: infra-notifications
+          event: always
+          ignore_errors: false
+          mentions: "@shane"
+          custom:
+
       # curl -X POST -H 'Content-type: application/json' \
       #   --data '{"text":"<!subteam^ST21FM29X|scanner-defs-oncall> FAILED: sanity-check-vuln-updates"}' \
       #   ${{ secrets.SLACK_WEBHOOK }}
@@ -744,13 +749,15 @@ workflows:
   sanity-check-vuln-updates-hourly:
     triggers:
       - schedule:
-          cron: "9 * * * *"
+          cron: "9 0,4,8,12,16,20 * * *"
           filters:
             branches:
               only: shane/rox-7271-vuln-updates-caching
     jobs:
       - sanity-check-vuln-updates:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+          context:
+          - docker-io-pull
+          - com-slack-srox
 
   build:
     jobs:

@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+#
+# Setup:
+#   pip install --upgrade cryptography gsutil google-cloud
+#   gcloud components update
+#
+# Usage:
+#   ./sanity-check-vuln-updates.sh
 set -eu
 
 function is_mac   { uname | grep -qi 'darwin'; }
@@ -70,7 +77,7 @@ function run_tests_for_diff_id {
   echo "diff1_cache_control        => $diff1_cache_control"
   echo "diff2_cache_control        => $diff2_cache_control"
 
-  if [[ "$gcs_object_age_seconds" -gt 3600 ]]; then
+  if [[ "$gcs_object_age_seconds" -gt "$MAX_GCS_OBJECT_AGE_SECONDS" ]]; then
     echo "FAILURE: gcs_object_age_seconds exceeds target"
   fi
 
@@ -78,11 +85,11 @@ function run_tests_for_diff_id {
     echo "WARNING: (diff1_archive_md5 != diff1_archive_md5)"
   fi
 
-  if [[ "$diff1_manifest_age_seconds" -gt 3600 ]]; then
+  if [[ "$diff1_manifest_age_seconds" -gt "$MAX_MANIFEST_AGE_SECONDS" ]]; then
     echo "FAILURE: diff1_manifest_age_seconds exceeds target"
   fi
 
-  if [[ "$diff2_manifest_age_seconds" -gt 3600 ]]; then
+  if [[ "$diff2_manifest_age_seconds" -gt "$MAX_MANIFEST_AGE_SECONDS" ]]; then
     echo "FAILURE: diff2_manifest_age_seconds exceeds target"
   fi
 
@@ -112,6 +119,8 @@ FPATH_DIFF_LIST="$WORKING_DIR/diff.txt"
 FPATH_DIFF_ID_LIST="$WORKING_DIR/ids.txt"
 FPATH_DIFF_GSUTIL_STAT="$WORKING_DIR/metadata.txt"
 FPATH_TRANSCRIPT="$WORKING_DIR/transcript.txt"
+MAX_GCS_OBJECT_AGE_SECONDS=$((4 * 3600))
+MAX_MANIFEST_AGE_SECONDS=$((4 * 3600))
 
 # Initialize working dir
 rm -rf "$WORKING_DIR"
