@@ -725,7 +725,7 @@ jobs:
                        "type": "mrkdwn",
                        "text": "*Author*:\\n$CIRCLE_USERNAME"
                      }
-                   ],
+                   ]
                  },
                  {
                    "type": "section",
@@ -817,7 +817,7 @@ workflows:
   sanity-check-vuln-updates-hourly:
     triggers:
       - schedule:
-          cron: "18 * * * *"
+          cron: "22 * * * *"
           filters:
             branches:
               only: shane/rox-7271-vuln-updates-caching
