@@ -1,3 +1,4 @@
+#! circleci config validate
 version: 2.1
 
 defaultImage: &defaultImage
@@ -680,13 +681,14 @@ jobs:
           command: ./tests/sanity-check-vuln-updates.sh
       - store_artifacts:
           path: /tmp/ROX-7271
+      # https://circleci.com/developer/orbs/orb/circleci/slack#commands-notify
       - slack/notify:
           branch_pattern: shane/rox-7271-vuln-updates-caching
           channel: infra-notifications
           event: always
           ignore_errors: false
           mentions: "@shane"
-          custom:
+          template: basic_fail_1
 
       # curl -X POST -H 'Content-type: application/json' \
       #   --data '{"text":"<!subteam^ST21FM29X|scanner-defs-oncall> FAILED: sanity-check-vuln-updates"}' \
@@ -749,7 +751,7 @@ workflows:
   sanity-check-vuln-updates-hourly:
     triggers:
       - schedule:
-          cron: "7 * * * *"
+          cron: "13 * * * *"
           filters:
             branches:
               only: shane/rox-7271-vuln-updates-caching
