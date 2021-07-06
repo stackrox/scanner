@@ -254,9 +254,9 @@ commands:
               gsutil cp gs://stackrox-scanner-ci-vuln-dump/repo2cpe.zip /tmp/repo2cpe.zip
             else
               cp /tmp/postgres/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
-              zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/nvd-definitions.zip
-              zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/k8s-definitions.zip
-              zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/repo2cpe.zip
+              zip -9 /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/nvd-definitions.zip
+              zip -9 /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/k8s-definitions.zip
+              zip -9 /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/repo2cpe.zip
             fi
 
             unzip -d image/scanner/dump /tmp/nvd-definitions.zip
@@ -512,9 +512,9 @@ jobs:
       - run:
           name: Generate dumps
           command: |
-            zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out nvd-definitions.zip
-            zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out k8s-definitions.zip
-            zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out repo2cpe.zip
+            zip -9 /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out nvd-definitions.zip
+            zip -9 /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out k8s-definitions.zip
+            zip -9 /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out repo2cpe.zip
 
       - run:
           name: Upload to Google Storage
@@ -614,10 +614,10 @@ jobs:
             mkdir -p /tmp/scratch
             gsutil cp -r gs://definitions.stackrox.io/cve/* /tmp/scratch/
             cd /tmp/scratch
-            zip -r /tmp/offline-dump/k8s-istio.zip *
+            zip -9 -r /tmp/offline-dump/k8s-istio.zip *
 
             cd /tmp/offline-dump
-            zip scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
+            zip -9 scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
             du -skh scanner-vuln-updates.zip
             cmd=()
             if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
