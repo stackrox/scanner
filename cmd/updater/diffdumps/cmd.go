@@ -306,6 +306,7 @@ type config struct {
 	SkipSeverityComparison     bool `json:"skipSeverityComparison"`
 	SkipRHELv2Vulns            bool `json:"skipRHELv2Vulns"`
 	UseDPKGParserForAlpine     bool `json:"useDPKGParserForAlpine"`
+	// SkipRHELv2TitleComparison need only be set when SkipRHELv2Vulns is NOT set.
 	SkipRHELv2TitleComparison  bool `json:"skipRHELv2TitleComparison"`
 }
 
