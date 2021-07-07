@@ -743,13 +743,6 @@ jobs:
       - store_artifacts:
           path: /tmp/ROX-7271
       - slack/notify:
-          branch_pattern: shane/rox-7271-vuln-updates-caching
-          channel: oncall
-          event: fail
-          ignore_errors: false
-          mentions: "@scanner-defs-oncall,@shane"
-          <<: *slackTemplateTestFailure
-      - slack/notify:
           branch_pattern: master,release/.+
           tag_pattern: v?\d+\.\d+\.\d+(-.+)*
           channel: oncall
@@ -815,11 +808,11 @@ workflows:
   sanity-check-vuln-updates-scheduled:
     triggers:
       - schedule:
-          cron: "23 * * * *"
+          cron: "35 * * * *"
           filters:
             branches:
               only:
-                - shane/rox-7271-vuln-updates-caching
+                - master
     jobs:
       - sanity-check-vuln-updates:
           context:
