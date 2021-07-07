@@ -808,7 +808,7 @@ workflows:
   sanity-check-vuln-updates-scheduled:
     triggers:
       - schedule:
-          cron: "35 4,8,12,16,20,24 * * *"
+          cron: "35 0,4,8,12,16,20 * * *"
           filters:
             branches:
               only:
