@@ -1,3 +1,4 @@
+#! circleci config validate
 version: 2.1
 
 defaultImage: &defaultImage
@@ -27,6 +28,70 @@ runOnAllTagsWithRedHatCtx: &runOnAllTagsWithRedHatCtx
   context:
   - docker-io-pull
   - redhat-developer-account-login
+
+# https://circleci.com/developer/orbs/orb/circleci/slack
+orbs:
+  slack: circleci/slack@4.4.2
+
+slackTemplateTestFailure: &slackTemplateTestFailure
+  custom: |
+     {
+       "text": "CircleCI job failed.",
+       "blocks": [
+         {
+           "type": "header",
+           "text": {
+             "type": "plain_text",
+             "text": "Job Failed. :red_circle:",
+             "emoji": true
+           }
+         },
+         {
+           "type": "section",
+           "fields": [
+             {
+               "type": "mrkdwn",
+               "text": "*Job*: ${CIRCLE_JOB}"
+             }
+           ]
+         },
+         {
+           "type": "section",
+           "fields": [
+             {
+               "type": "mrkdwn",
+               "text": "*Project*: $CIRCLE_PROJECT_REPONAME"
+             },
+             {
+               "type": "mrkdwn",
+               "text": "*Branch*: $CIRCLE_BRANCH"
+             }
+           ]
+         },
+         {
+           "type": "section",
+           "fields": [
+             {
+               "type": "mrkdwn",
+               "text": "*Mentions*: $SLACK_PARAM_MENTIONS"
+             }
+           ]
+         },
+         {
+           "type": "actions",
+           "elements": [
+             {
+               "type": "button",
+               "text": {
+                 "type": "plain_text",
+                 "text": "View Job"
+               },
+               "url": "${CIRCLE_BUILD_URL}"
+             }
+           ]
+         }
+       ]
+     }
 
 commands:
   check-on-master-or-tag:
@@ -666,6 +731,25 @@ jobs:
       - provision-gke-cluster:
           cluster-id: rhel
 
+  sanity-check-vuln-updates:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup-gcp:
+          service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
+      - run:
+          name: Check scanner vulnerability updates
+          command: ./tests/sanity-check-vuln-updates.sh
+      - store_artifacts:
+          path: /tmp/ROX-7271
+      - slack/notify:
+          branch_pattern: master
+          channel: oncall
+          event: fail
+          ignore_errors: false
+          mentions: "@scanner-defs-oncall,@shane"
+          <<: *slackTemplateTestFailure
+
 workflows:
   version: 2
 
@@ -719,6 +803,20 @@ workflows:
           requires:
             - build
             - provision-cluster
+
+  sanity-check-vuln-updates-scheduled:
+    triggers:
+      - schedule:
+          cron: "35 0,4,8,12,16,20 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - sanity-check-vuln-updates:
+          context:
+          - docker-io-pull
+          - com-slack-srox
 
   build:
     jobs:
