@@ -6,6 +6,11 @@
 #
 # Usage:
 #   ./sanity-check-vuln-updates.sh
+#
+# Note:
+#   This work was tracked in https://stack-rox.atlassian.net/browse/ROX-7271.
+#   This test downloads ~500 MiB of vulnerability diffs with each run.
+#   gsutil stat "gs://definitions.stackrox.io/*/diff.zip"
 set -eu
 
 function is_mac   { uname | grep -qi 'darwin'; }
