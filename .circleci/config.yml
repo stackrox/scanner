@@ -812,18 +812,19 @@ workflows:
             - build
             - provision-cluster
 
-#  sanity-check-vuln-updates-hourly:
-#    triggers:
-#      - schedule:
-#          cron: "37 * * * *"
-#          filters:
-#            branches:
-#              only: shane/rox-7271-vuln-updates-caching
-#    jobs:
-#      - sanity-check-vuln-updates:
-#          context:
-#          - docker-io-pull
-#          - com-slack-srox
+  sanity-check-vuln-updates-scheduled:
+    triggers:
+      - schedule:
+          cron: "23 * * * *"
+          filters:
+            branches:
+              only:
+                - shane/rox-7271-vuln-updates-caching
+    jobs:
+      - sanity-check-vuln-updates:
+          context:
+          - docker-io-pull
+          - com-slack-srox
 
   build:
     jobs:
