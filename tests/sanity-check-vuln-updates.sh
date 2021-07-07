@@ -43,20 +43,20 @@ function run_tests_for_diff_id {
   local DIFF1_CLOUDFLARE_URL="https://definitions.stackrox.io/$DIFF_ID/diff.zip"
   local DIFF2_GCS_URL="https://storage.googleapis.com/definitions.stackrox.io/$DIFF_ID/diff.zip"
 
-  echo "--------"
-  echo "DIFF_ID              => $DIFF_ID"
-  echo "GCS_CONSOLE_URL      => $GCS_CONSOLE_URL"
-  echo "DIFF1_CLOUDFLARE_URL => $DIFF1_CLOUDFLARE_URL"
-  echo "DIFF2_GCS_URL        => $DIFF2_GCS_URL"
-  echo "WORKING_DIR          => $WORKING_DIR"
+  info "--------"
+  info "DIFF_ID              => $DIFF_ID"
+  info "GCS_CONSOLE_URL      => $GCS_CONSOLE_URL"
+  info "DIFF1_CLOUDFLARE_URL => $DIFF1_CLOUDFLARE_URL"
+  info "DIFF2_GCS_URL        => $DIFF2_GCS_URL"
+  info "WORKING_DIR          => $WORKING_DIR"
 
   rm -f diff{1,2}.zip
 
-  echo "downloading diff1.zip from $DIFF1_CLOUDFLARE_URL"
+  info "downloading diff1.zip from $DIFF1_CLOUDFLARE_URL"
   diff1_cache_control=$(curl -s -o ./diff1.zip -v "$DIFF1_CLOUDFLARE_URL" 2>&1 \
     | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
 
-  echo "downloading diff2.zip from $DIFF2_GCS_URL"
+  info "downloading diff2.zip from $DIFF2_GCS_URL"
   diff2_cache_control=$(curl -s -o ./diff2.zip -v "$DIFF2_GCS_URL" 2>&1 \
     | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
 
@@ -67,38 +67,38 @@ function run_tests_for_diff_id {
   local diff2_manifest_age_seconds=$(get_manifest_age_seconds_from_zip "diff2.zip")
   local diff1_archive_md5=$(md5sum "diff1.zip" | cut -d" " -f1)
   local diff2_archive_md5=$(md5sum "diff2.zip" | cut -d" " -f1)
-  echo "gcs_object_age_seconds     => $gcs_object_age_seconds"
-  echo "diff1_manifest_content     => $diff1_manifest_content"
-  echo "diff2_manifest_content     => $diff2_manifest_content"
-  echo "diff1_manifest_age_seconds => $diff1_manifest_age_seconds"
-  echo "diff2_manifest_age_seconds => $diff2_manifest_age_seconds"
-  echo "diff1_archive_md5          => $diff1_archive_md5"
-  echo "diff2_archive_md5          => $diff2_archive_md5"
-  echo "diff1_cache_control        => $diff1_cache_control"
-  echo "diff2_cache_control        => $diff2_cache_control"
+  info "gcs_object_age_seconds     => $gcs_object_age_seconds"
+  info "diff1_manifest_content     => $diff1_manifest_content"
+  info "diff2_manifest_content     => $diff2_manifest_content"
+  info "diff1_manifest_age_seconds => $diff1_manifest_age_seconds"
+  info "diff2_manifest_age_seconds => $diff2_manifest_age_seconds"
+  info "diff1_archive_md5          => $diff1_archive_md5"
+  info "diff2_archive_md5          => $diff2_archive_md5"
+  info "diff1_cache_control        => $diff1_cache_control"
+  info "diff2_cache_control        => $diff2_cache_control"
 
   if [[ "$gcs_object_age_seconds" -gt "$MAX_GCS_OBJECT_AGE_SECONDS" ]]; then
-    echo "FAILURE: gcs_object_age_seconds exceeds target"
+    testfail "gcs_object_age_seconds exceeds target"
   fi
 
   if [[ "$diff1_archive_md5" != "$diff2_archive_md5" ]]; then
-    echo "WARNING: (diff1_archive_md5 != diff1_archive_md5)"
+    warn "(diff1_archive_md5 != diff2_archive_md5)"
   fi
 
   if [[ "$diff1_manifest_age_seconds" -gt "$MAX_MANIFEST_AGE_SECONDS" ]]; then
-    echo "FAILURE: diff1_manifest_age_seconds exceeds target"
+    testfail "diff1_manifest_age_seconds exceeds target"
   fi
 
   if [[ "$diff2_manifest_age_seconds" -gt "$MAX_MANIFEST_AGE_SECONDS" ]]; then
-    echo "FAILURE: diff2_manifest_age_seconds exceeds target"
+    testfail "diff2_manifest_age_seconds exceeds target"
   fi
 
   if [[ "$diff1_cache_control" != "cache-control: public, max-age=3600" ]]; then
-    echo "FAILURE: incorrect diff1_cache_control"
+    testfail "incorrect diff1_cache_control"
   fi
 
   if [[ "$diff2_cache_control" != "cache-control: public, max-age=3600" ]]; then
-    echo "FAILURE: incorrect diff2_cache_control"
+    testfail "incorrect diff2_cache_control"
   fi
 }
 
@@ -112,6 +112,15 @@ function get_gcs_object_age_seconds {
   echo "$obj_age_seconds"
 }
 
+function info { >&1 echo "INFO: $@"; }
+function warn { >&1 echo "WARN: $@"; }
+function error { >&2 echo "ERROR: $@"; }
+function testfail { >&2 echo "FAIL: $@"; (( FAILURE_COUNT += 1 )); }
+function bash_true { ((0 == 0)); }
+function bash_false { ((0 == 1)); }
+function bash_exit_success { info "$@"; bash_true; exit $?; }
+function bash_exit_failure { error "$@"; bash_false; exit $?; }
+
 
 # __MAIN__
 WORKING_DIR="/tmp/ROX-7271"
@@ -121,6 +130,7 @@ FPATH_DIFF_GSUTIL_STAT="$WORKING_DIR/metadata.txt"
 FPATH_TRANSCRIPT="$WORKING_DIR/transcript.txt"
 MAX_GCS_OBJECT_AGE_SECONDS=$((4 * 3600))
 MAX_MANIFEST_AGE_SECONDS=$((4 * 3600))
+FAILURE_COUNT=0
 
 # Initialize working dir
 rm -rf "$WORKING_DIR"
@@ -141,15 +151,15 @@ gsutil stat $(cat "$FPATH_DIFF_LIST") > "$FPATH_DIFF_GSUTIL_STAT"
 # Check metadata for each diffs
 for entry in $(cat "$FPATH_DIFF_ID_LIST"); do
   run_tests_for_diff_id "$entry"
-  break  # TODO(sbostick): troubleshooting
 done
 
 # Cleanup files we don't want archived by the ci job
 rm -f diff{1,2}.zip
 
-echo "--------"
-echo "ran to completion -- see $FPATH_TRANSCRIPT"
-echo
+info "--------"
+info "ran to completion -- see $FPATH_TRANSCRIPT"
 
-echo "Failing deliberately -- TODO(sbostick)"
-exit 1
+if [[ $FAILURE_COUNT -gt 0 ]]; then
+  bash_exit_failure "$FAILURE_COUNT test failures"
+fi
+bash_exit_success "$FAILURE_COUNT test failures"
