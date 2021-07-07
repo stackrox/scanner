@@ -743,8 +743,7 @@ jobs:
       - store_artifacts:
           path: /tmp/ROX-7271
       - slack/notify:
-          branch_pattern: master,release/.+
-          tag_pattern: v?\d+\.\d+\.\d+(-.+)*
+          branch_pattern: master
           channel: oncall
           event: fail
           ignore_errors: false
