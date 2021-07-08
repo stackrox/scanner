@@ -50,7 +50,8 @@ function get_manifest_content_from_zip {
 }
 
 function validate_manifest_until {
-  if ! echo "$1" | grep -qE "^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2} GMT$"; then
+  DIGIT="[[:digit:]]"
+  if ! echo "$1" | grep -qE "^$DIGIT{4}-$DIGIT{2}-$DIGIT{2}T$DIGIT{2}:$DIGIT{2}:$DIGIT{2} GMT$"; then
     bash_exit_failure "BAD manifest_until value [$1]"
   fi
 }
