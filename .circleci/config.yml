@@ -749,6 +749,13 @@ jobs:
           ignore_errors: false
           mentions: "@scanner-defs-oncall,@shane"
           <<: *slackTemplateTestFailure
+      - slack/notify:
+          branch_pattern: shane/ROX-7271-vuln-update-test-fix2
+          channel: oncall
+          event: fail
+          ignore_errors: false
+          mentions: "@shane"
+          <<: *slackTemplateTestFailure
 
 workflows:
   version: 2
@@ -814,6 +821,20 @@ workflows:
             branches:
               only:
                 - master
+    jobs:
+      - sanity-check-vuln-updates:
+          context:
+          - docker-io-pull
+          - com-slack-srox
+
+  sanity-check-vuln-updates-debug:
+    triggers:
+      - schedule:
+          cron: "19 * * * *"
+          filters:
+            branches:
+              only:
+                - shane/ROX-7271-vuln-update-test-fix2
     jobs:
       - sanity-check-vuln-updates:
           context:
