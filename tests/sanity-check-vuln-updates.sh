@@ -74,7 +74,7 @@ function validate_integer {
 }
 
 function get_manifest_age_seconds_from_zip {
-  local fpath_zipfile manifest_raw manifest_until_raw manifest_until_epoch_sec now_epoch_sec age_seconds
+  local fpath_zipfile manifest_content manifest_until manifest_until_epoch_sec now_epoch_sec age_seconds
   fpath_zipfile=$1
 
   manifest_content=$(get_manifest_content_from_zip "$fpath_zipfile")
@@ -114,13 +114,13 @@ function run_tests_for_diff_id {
 
   info "downloading diff1.zip from $DIFF1_CLOUDFLARE_URL"
   diff1_cache_control=$(curl -s -o ./diff1.zip -v "$DIFF1_CLOUDFLARE_URL" 2>&1 \
-    | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
-  [[ $? -eq 0 ]] || bash_exit_failure "curl failed on $DIFF1_CLOUDFLARE_URL"
+    | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
+    || bash_exit_failure "curl failed on $DIFF1_CLOUDFLARE_URL"
 
   info "downloading diff2.zip from $DIFF2_GCS_URL"
   diff2_cache_control=$(curl -s -o ./diff2.zip -v "$DIFF2_GCS_URL" 2>&1 \
-    | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
-  [[ $? -eq 0 ]] || bash_exit_failure "curl failed on $DIFF2_GCS_URL"
+    | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
+    || bash_exit_failure "curl failed on $DIFF2_GCS_URL"
 
   local gcs_object_age_seconds diff1_manifest_content diff2_manifest_content \
     diff1_manifest_age_seconds diff2_manifest_age_seconds diff1_archive_md5 \
@@ -169,8 +169,7 @@ function run_tests_for_diff_id {
 }
 
 function get_gcs_object_age_seconds {
-  local diff_id created_datestamp_raw created_datestamp_epoch_sec
-  local now_epoch_sec obj_age_seconds
+  local diff_id created_time_raw created_time_epoch_sec now_epoch_sec obj_age_seconds
 
   diff_id="$1"
   created_time_raw=$(grep -A2 "$diff_id" "$FPATH_DIFF_GSUTIL_STAT" | sed -Ene 's/^ +Creation time: +(.*)/\1/p')
@@ -218,7 +217,7 @@ fi
 sed -Ee "s#gs://definitions.stackrox.io/##g; s#/diff.zip##g;" < "$FPATH_DIFF_LIST" > "$FPATH_DIFF_ID_LIST"
 
 # List metadata for each diff
-gsutil stat $(cat "$FPATH_DIFF_LIST") > "$FPATH_DIFF_GSUTIL_STAT"
+paste -sd ' ' $FPATH_DIFF_LIST | xargs gsutil stat > "$FPATH_DIFF_GSUTIL_STAT"
 
 # Check metadata for each diffs
 while read -r line; do
