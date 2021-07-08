@@ -130,8 +130,9 @@ func TestImageSanity(t *testing.T) {
 		source             string
 		expectedFeatures   []v1.Feature
 		unexpectedFeatures []v1.Feature
-		checkContainsOnly  bool
-		uncertifiedRHEL    bool
+		// This specifies to check that the feature only CONTAINS the specified vulnerabilities and does not need to match exactly
+		checkContainsOnly bool
+		uncertifiedRHEL   bool
 	}{
 		{
 			image:             "ubuntu:16.04",
