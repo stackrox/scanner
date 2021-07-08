@@ -5,7 +5,7 @@
 #   gcloud components update
 #
 # Usage:
-#   ./sanity-check-vuln-updates.sh
+#   ./sanity-check-vuln-updates.sh [diff_id]
 #
 # Note:
 #   This work was tracked in https://stack-rox.atlassian.net/browse/ROX-7271.
@@ -17,8 +17,9 @@ function is_mac   { uname | grep -qi 'darwin'; }
 function is_linux { uname | grep -qi 'linux'; }
 
 function parse_date_to_epoch_sec {
-  local date_string=$1
-  local date_format=$2
+  local date_string date_format
+  date_string=$1
+  date_format=$2
 
   if is_linux; then
     date --date "$date_string" "+%s"
@@ -28,25 +29,29 @@ function parse_date_to_epoch_sec {
 }
 
 function get_manifest_content_from_zip {
-  local fpath_zipfile=$1
+  local fpath_zipfile
+  fpath_zipfile=$1
   unzip -q -c "$fpath_zipfile" manifest.json
 }
 
 function get_manifest_age_seconds_from_zip {
-  local fpath_zipfile=$1
-  local manifest_until_raw=$(get_manifest_content_from_zip "$fpath_zipfile" \
+  local fpath_zipfile manifest_until_raw manifest_until_epoch_sec now_epoch_sec age_seconds
+  fpath_zipfile=$1
+  manifest_until_raw=$(get_manifest_content_from_zip "$fpath_zipfile" \
       | jq -r ".until" | sed -Ee 's#\.[0-9]+Z# GMT#')
-  local manifest_until_epoch_sec=$(parse_date_to_epoch_sec "$manifest_until_raw" "%Y-%M-%dT%H:%M:%S %Z")
-  local now_epoch_sec=$(date "+%s")
-  local age_seconds=$(( $now_epoch_sec - $manifest_until_epoch_sec ))
+  manifest_until_epoch_sec=$(parse_date_to_epoch_sec "$manifest_until_raw" "%Y-%M-%dT%H:%M:%S %Z")
+  now_epoch_sec=$(date "+%s")
+  age_seconds=$(( now_epoch_sec - manifest_until_epoch_sec ))
   echo "$age_seconds"
 }
 
 function run_tests_for_diff_id {
-  local DIFF_ID="$1"
-  local GCS_CONSOLE_URL="https://console.cloud.google.com/storage/browser/definitions.stackrox.io/$DIFF_ID"
-  local DIFF1_CLOUDFLARE_URL="https://definitions.stackrox.io/$DIFF_ID/diff.zip"
-  local DIFF2_GCS_URL="https://storage.googleapis.com/definitions.stackrox.io/$DIFF_ID/diff.zip"
+  local DIFF_ID GCS_CONSOLE_URL DIFF1_CLOUDFLARE_URL DIFF2_GCS_URL
+
+  DIFF_ID="$1"
+  GCS_CONSOLE_URL="https://console.cloud.google.com/storage/browser/definitions.stackrox.io/$DIFF_ID"
+  DIFF1_CLOUDFLARE_URL="https://definitions.stackrox.io/$DIFF_ID/diff.zip"
+  DIFF2_GCS_URL="https://storage.googleapis.com/definitions.stackrox.io/$DIFF_ID/diff.zip"
 
   info "--------"
   info "DIFF_ID              => $DIFF_ID"
@@ -65,13 +70,17 @@ function run_tests_for_diff_id {
   diff2_cache_control=$(curl -s -o ./diff2.zip -v "$DIFF2_GCS_URL" 2>&1 \
     | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
 
-  local gcs_object_age_seconds=$(get_gcs_object_age_seconds $DIFF_ID)
-  local diff1_manifest_content=$(get_manifest_content_from_zip "diff1.zip")
-  local diff2_manifest_content=$(get_manifest_content_from_zip "diff2.zip")
-  local diff1_manifest_age_seconds=$(get_manifest_age_seconds_from_zip "diff1.zip")
-  local diff2_manifest_age_seconds=$(get_manifest_age_seconds_from_zip "diff2.zip")
-  local diff1_archive_md5=$(md5sum "diff1.zip" | cut -d" " -f1)
-  local diff2_archive_md5=$(md5sum "diff2.zip" | cut -d" " -f1)
+  local gcs_object_age_seconds diff1_manifest_content diff2_manifest_content \
+    diff1_manifest_age_seconds diff2_manifest_age_seconds diff1_archive_md5 \
+    diff2_archive_md5
+
+  gcs_object_age_seconds=$(get_gcs_object_age_seconds "$DIFF_ID")
+  diff1_manifest_content=$(get_manifest_content_from_zip "diff1.zip")
+  diff2_manifest_content=$(get_manifest_content_from_zip "diff2.zip")
+  diff1_manifest_age_seconds=$(get_manifest_age_seconds_from_zip "diff1.zip")
+  diff2_manifest_age_seconds=$(get_manifest_age_seconds_from_zip "diff2.zip")
+  diff1_archive_md5=$(md5sum "diff1.zip" | cut -d" " -f1)
+  diff2_archive_md5=$(md5sum "diff2.zip" | cut -d" " -f1)
   info "gcs_object_age_seconds     => $gcs_object_age_seconds"
   info "diff1_manifest_content     => $diff1_manifest_content"
   info "diff2_manifest_content     => $diff2_manifest_content"
@@ -108,19 +117,22 @@ function run_tests_for_diff_id {
 }
 
 function get_gcs_object_age_seconds {
-  local diff_id="$1"
-  local created_datestamp_raw=$(grep -A2 "$diff_id" "$FPATH_DIFF_GSUTIL_STAT" \
+  local diff_id created_datestamp_raw created_datestamp_epoch_sec \
+    now_epoch_sec obj_age_seconds
+
+  diff_id="$1"
+  created_datestamp_raw=$(grep -A2 "$diff_id" "$FPATH_DIFF_GSUTIL_STAT" \
     | grep "Creation time:" | sed -Ee 's/ +/ /g; s/^ +//;' | cut -d' ' -f3-)
-  local created_datestamp_epoch_sec=$(parse_date_to_epoch_sec "$created_datestamp_raw" "%a, %d %b %Y %H:%M:%S %Z")
-  local now_epoch_sec=$(date "+%s")
-  local obj_age_seconds=$(( $now_epoch_sec - $created_datestamp_epoch_sec ))
+  created_datestamp_epoch_sec=$(parse_date_to_epoch_sec "$created_datestamp_raw" "%a, %d %b %Y %H:%M:%S %Z")
+  now_epoch_sec=$(date "+%s")
+  obj_age_seconds=$(( now_epoch_sec - created_datestamp_epoch_sec ))
   echo "$obj_age_seconds"
 }
 
-function info { >&1 echo "INFO: $@"; }
-function warn { >&1 echo "WARN: $@"; }
-function error { >&2 echo "ERROR: $@"; }
-function testfail { >&2 echo "FAIL: $@"; (( FAILURE_COUNT += 1 )); }
+function info { >&1 echo "INFO: $*"; }
+function warn { >&1 echo "WARN: $*"; }
+function error { >&2 echo "ERROR: $*"; }
+function testfail { >&2 echo "FAIL: $*"; (( FAILURE_COUNT += 1 )); }
 function bash_true { ((0 == 0)); }
 function bash_false { ((0 == 1)); }
 function bash_exit_success { info "$@"; bash_true; exit $?; }
@@ -143,20 +155,25 @@ mkdir -p "$WORKING_DIR"
 cd "$WORKING_DIR"
 exec > >(tee -i "$FPATH_TRANSCRIPT") 2>&1
 
-# Get a list of diffs (incremental vulnerability db updates)
-gsutil ls -r "gs://definitions.stackrox.io/*/diff.zip" > "$FPATH_DIFF_LIST"
+# Construct the list of diffs to run tests against
+if [[ $# -eq 1 ]]; then
+  diff_id="$1"
+  echo "gs://definitions.stackrox.io/$diff_id/diff.zip" > "$FPATH_DIFF_LIST"
+else
+  gsutil ls -r "gs://definitions.stackrox.io/*/diff.zip" > "$FPATH_DIFF_LIST"
+fi
 
 # Extract the ids (uniquely identifying hashes).
 sed -Ee "s#gs://definitions.stackrox.io/##g; s#/diff.zip##g;" \
   < "$FPATH_DIFF_LIST" > "$FPATH_DIFF_ID_LIST"
 
 # List metadata for each diff
-gsutil stat $(cat "$FPATH_DIFF_LIST") > "$FPATH_DIFF_GSUTIL_STAT"
+gsutil stat "$(cat $FPATH_DIFF_LIST)" > "$FPATH_DIFF_GSUTIL_STAT"
 
 # Check metadata for each diffs
-for entry in $(cat "$FPATH_DIFF_ID_LIST"); do
-  run_tests_for_diff_id "$entry"
-done
+while read -r line; do
+  run_tests_for_diff_id "$line"
+done < "$FPATH_DIFF_ID_LIST"
 
 # Cleanup files we don't want archived by the ci job
 rm -f diff{1,2}.zip
