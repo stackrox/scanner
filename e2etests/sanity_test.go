@@ -130,7 +130,7 @@ func TestImageSanity(t *testing.T) {
 		source             string
 		expectedFeatures   []v1.Feature
 		unexpectedFeatures []v1.Feature
-		// This specifies to check that the feature only CONTAINS the specified vulnerabilities and does not need to match exactly
+		// This specifies that the features only need to contain at least the vulnerabilities specified
 		checkContainsOnly bool
 		uncertifiedRHEL   bool
 	}{
