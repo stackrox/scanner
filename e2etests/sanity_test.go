@@ -130,13 +130,15 @@ func TestImageSanity(t *testing.T) {
 		source             string
 		expectedFeatures   []v1.Feature
 		unexpectedFeatures []v1.Feature
-		checkContainsOnly  bool
-		uncertifiedRHEL    bool
+		// This specifies that the features only need to contain at least the vulnerabilities specified
+		checkContainsOnly bool
+		uncertifiedRHEL   bool
 	}{
 		{
-			image:    "ubuntu:16.04",
-			registry: "https://registry-1.docker.io",
-			source:   "NVD",
+			image:             "ubuntu:16.04",
+			registry:          "https://registry-1.docker.io",
+			source:            "NVD",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "lz4",
@@ -144,30 +146,6 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: "dpkg",
 					Version:       "0.0~r131-2ubuntu2",
 					Vulnerabilities: []v1.Vulnerability{
-						{
-							Name:          "CVE-2019-17543",
-							NamespaceName: "ubuntu:16.04",
-							Description:   `LZ4 before 1.9.2 has a heap-based buffer overflow in LZ4_write32 (related to LZ4_compress_destSize), affecting applications that call LZ4_compress_fast with a large input. (This issue can also lead to data corruption.) NOTE: the vendor states "only a few specific / uncommon usages of the API are at risk."`,
-							Link:          "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-17543",
-							Severity:      "Low",
-							Metadata: map[string]interface{}{
-								"NVD": map[string]interface{}{
-									"CVSSv2": map[string]interface{}{
-										"ExploitabilityScore": 8.6,
-										"ImpactScore":         6.4,
-										"PublishedDateTime":   "2019-10-14T02:15Z",
-										"Score":               6.8,
-										"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
-									},
-									"CVSSv3": map[string]interface{}{
-										"ExploitabilityScore": 2.2,
-										"ImpactScore":         5.9,
-										"Score":               8.1,
-										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-									},
-								},
-							},
-						},
 						{
 							Name:          "CVE-2021-3520",
 							NamespaceName: "ubuntu:16.04",
@@ -494,9 +472,10 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "mcr.microsoft.com/dotnet/core/runtime:3.1.2",
-			registry: "https://mcr.microsoft.com",
-			source:   "NVD",
+			image:             "mcr.microsoft.com/dotnet/core/runtime:3.1.2",
+			registry:          "https://mcr.microsoft.com",
+			source:            "NVD",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "microsoft.netcore.app",
@@ -685,9 +664,10 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "mcr.microsoft.com/dotnet/core/sdk:3.1.100@sha256:091126a93870729f4438ee7ed682ed98639a89acebed40409af90f84302c48dd",
-			registry: "https://mcr.microsoft.com",
-			source:   "NVD",
+			image:             "mcr.microsoft.com/dotnet/core/sdk:3.1.100@sha256:091126a93870729f4438ee7ed682ed98639a89acebed40409af90f84302c48dd",
+			registry:          "https://mcr.microsoft.com",
+			source:            "NVD",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "microsoft.aspnetcore.app",
