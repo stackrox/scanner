@@ -5,7 +5,7 @@
 #   gcloud components update
 #
 # Usage:
-#   ./sanity-check-vuln-updates.sh
+#   ./sanity-check-vuln-updates.sh [diff_id]
 #
 # Note:
 #   This work was tracked in https://stack-rox.atlassian.net/browse/ROX-7271.
@@ -143,8 +143,13 @@ mkdir -p "$WORKING_DIR"
 cd "$WORKING_DIR"
 exec > >(tee -i "$FPATH_TRANSCRIPT") 2>&1
 
-# Get a list of diffs (incremental vulnerability db updates)
-gsutil ls -r "gs://definitions.stackrox.io/*/diff.zip" > "$FPATH_DIFF_LIST"
+# Construct the list of diffs to run tests against
+if [[ $# -eq 1 ]]; then
+  diff_id="$1"
+  echo "gs://definitions.stackrox.io/$diff_id/diff.zip" > "$FPATH_DIFF_LIST"
+else
+  gsutil ls -r "gs://definitions.stackrox.io/*/diff.zip" > "$FPATH_DIFF_LIST"
+fi
 
 # Extract the ids (uniquely identifying hashes).
 sed -Ee "s#gs://definitions.stackrox.io/##g; s#/diff.zip##g;" \
