@@ -134,9 +134,10 @@ func TestImageSanity(t *testing.T) {
 		uncertifiedRHEL    bool
 	}{
 		{
-			image:    "ubuntu:16.04",
-			registry: "https://registry-1.docker.io",
-			source:   "NVD",
+			image:             "ubuntu:16.04",
+			registry:          "https://registry-1.docker.io",
+			source:            "NVD",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "lz4",
@@ -494,9 +495,10 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "mcr.microsoft.com/dotnet/core/runtime:3.1.2",
-			registry: "https://mcr.microsoft.com",
-			source:   "NVD",
+			image:             "mcr.microsoft.com/dotnet/core/runtime:3.1.2",
+			registry:          "https://mcr.microsoft.com",
+			source:            "NVD",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "microsoft.netcore.app",
@@ -685,9 +687,10 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "mcr.microsoft.com/dotnet/core/sdk:3.1.100@sha256:091126a93870729f4438ee7ed682ed98639a89acebed40409af90f84302c48dd",
-			registry: "https://mcr.microsoft.com",
-			source:   "NVD",
+			image:             "mcr.microsoft.com/dotnet/core/sdk:3.1.100@sha256:091126a93870729f4438ee7ed682ed98639a89acebed40409af90f84302c48dd",
+			registry:          "https://mcr.microsoft.com",
+			source:            "NVD",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "microsoft.aspnetcore.app",
