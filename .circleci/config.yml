@@ -798,6 +798,8 @@ workflows:
             - upload-dumps-for-embedding-into-image
       - provision-cluster:
           <<: *runOnAllTagsWithDockerIOPullCtx
+          requires:
+            - create-postgres-dump-from-genesis-dump
       - e2e-tests:
           <<: *runOnAllTagsWithRedHatCtx
           requires:
@@ -856,8 +858,12 @@ workflows:
           - upload-dumps-for-embedding-into-image
     - provision-cluster:
         <<: *runOnAllTagsWithDockerIOPullCtx
+        requires:
+          - create-postgres-dump-from-genesis-dump
     - provision-cluster-rhel:
         <<: *runOnAllTagsWithDockerIOPullCtx
+        requires:
+          - create-postgres-dump-from-genesis-dump
     - e2e-tests:
         <<: *runOnAllTagsWithRedHatCtx
         requires:
