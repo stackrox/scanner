@@ -144,7 +144,7 @@ function run_tests_for_diff_id {
   info "diff2_cache_control        => $diff2_cache_control"
 
   if [[ "$gcs_object_age_seconds" -gt "$MAX_GCS_OBJECT_AGE_SECONDS" ]]; then
-    testfail "gcs_object_age_seconds exceeds target"
+    warn "gcs_object_age_seconds exceeds target"
   fi
 
   if [[ "$diff1_archive_md5" != "$diff2_archive_md5" ]]; then
