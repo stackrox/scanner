@@ -172,7 +172,7 @@ function get_gcs_object_age_seconds {
   local diff_id created_time_raw created_time_epoch_sec now_epoch_sec obj_age_seconds
 
   diff_id="$1"
-  created_time_raw=$(grep -A2 "$diff_id" "$FPATH_DIFF_GSUTIL_STAT" | sed -Ene 's/^ +Creation time: +(.*)/\1/p')
+  created_time_raw=$(grep -A3 "$diff_id" "$FPATH_DIFF_GSUTIL_STAT" | sed -Ene 's/^ +Update time: +(.*)/\1/p')
   created_time_epoch_sec=$(parse_date_to_epoch_sec "$created_time_raw" "%a, %d %b %Y %H:%M:%S %Z")
   now_epoch_sec=$(date "+%s")
   obj_age_seconds=$(( now_epoch_sec - created_time_epoch_sec ))
