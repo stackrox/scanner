@@ -50,14 +50,13 @@ function get_manifest_content_from_zip {
 }
 
 function validate_manifest_until {
-  DIGIT="[[:digit:]]"
   if ! echo "$1" | grep -qE "^$DIGIT{4}-$DIGIT{2}-$DIGIT{2}T$DIGIT{2}:$DIGIT{2}:$DIGIT{2} GMT$"; then
     bash_exit_failure "BAD manifest_until value [$1]"
   fi
 }
 
 function validate_epoch_sec {
-  if ! echo "$1" | grep -qE "^\d{10}$"; then
+  if ! echo "$1" | grep -qE "^$DIGIT{10}$"; then
     bash_exit_failure "BAD epoch_sec value [$1]"
   fi
 }
@@ -69,7 +68,7 @@ function validate_manifest_content {
 }
 
 function validate_integer {
-  if ! echo "$1" | grep -qE "^\d+$"; then
+  if ! echo "$1" | grep -qE "^$DIGIT+$"; then
     bash_exit_failure "BAD integer [$1]"
   fi
 }
@@ -191,6 +190,7 @@ function bash_exit_failure { error "$@"; bash_false; exit $?; }
 
 
 # __MAIN__
+DIGIT="[[:digit:]]"
 WORKING_DIR="/tmp/ROX-7271"
 FPATH_DIFF_LIST="$WORKING_DIR/diff.txt"
 FPATH_DIFF_ID_LIST="$WORKING_DIR/ids.txt"

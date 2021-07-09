@@ -830,7 +830,7 @@ workflows:
   sanity-check-vuln-updates-debug:
     triggers:
       - schedule:
-          cron: "54 * * * *"
+          cron: "21 * * * *"
           filters:
             branches:
               only:
