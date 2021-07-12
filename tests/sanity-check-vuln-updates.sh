@@ -29,7 +29,7 @@ function manual_repro_check {
   echo "gcs_https_url => $gcs_https_url"
   wget -q "$gcs_https_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip
   echo "gcs_gs_url=> $gcs_gs_url"
-  gsutil stat "$gcs_gs_url" | sed -Ene 's/^ *(Update time:.*)/\1/'
+  gsutil stat "$gcs_gs_url" | sed -Ene 's/^ +Update time: +(.*)/\1/p'
 }
 
 function parse_date_to_epoch_sec {
