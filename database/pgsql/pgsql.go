@@ -36,7 +36,8 @@ import (
 )
 
 const (
-	passwordFile = "/run/secrets/stackrox.io/secrets/password"
+	passwordFile           = "/run/secrets/stackrox.io/secrets/password"
+	defaultConnMaxLifetime = 1 * time.Minute
 )
 
 var (
@@ -108,8 +109,9 @@ func (pgSQL *pgSQL) Ping() bool {
 
 // Config is the configuration that is used by openDatabase.
 type Config struct {
-	Source    string
-	CacheSize int
+	Source                string
+	CacheSize             int
+	ConnectionMaxLifetime *time.Duration
 
 	ManageDatabaseLifecycle bool
 	FixturePath             string
@@ -168,6 +170,11 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		pg.Close()
 		return nil, fmt.Errorf("pgsql: could not open database: %v", err)
 	}
+	connectionMaxLifetime := defaultConnMaxLifetime
+	if pg.config.ConnectionMaxLifetime != nil {
+		connectionMaxLifetime = *pg.config.ConnectionMaxLifetime
+	}
+	pg.DB.SetConnMaxLifetime(connectionMaxLifetime)
 
 	// Verify database state.
 	if err = pg.DB.Ping(); err != nil {
