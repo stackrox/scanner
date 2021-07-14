@@ -41,6 +41,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
+	"github.com/stackrox/scanner/pkg/clairify/metrics"
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/formatter"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
@@ -146,6 +147,9 @@ func Boot(config *Config) {
 	// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up to date
 	u.UpdateApplicationCachesOnly()
 
+	metricsServ := metrics.NewDefaultHTTPServer(config.API)
+	go metricsServ.RunForever()
+
 	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db)
 	go api.RunClairify(serv)
 
@@ -161,7 +165,6 @@ func Boot(config *Config) {
 		nodescan.NewService(db, nvdVulnCache, k8sVulnCache),
 		vulndefs.NewService(db),
 	)
-
 	go grpcAPI.Start()
 
 	go u.RunForever()
