@@ -104,7 +104,9 @@ func UpdateV2(outputDir string) (int, error) {
 		}
 		p := uri.Path
 		switch {
-		case strings.Contains(p, "RHEL6") || strings.Contains(p, "RHEL8"):
+		case strings.Contains(p, "RHEL6"):
+			// We do not support certified scanning for RHEL6 so no need to get the data for it
+			continue
 		case strings.Contains(p, "RHEL7"):
 			// We need to disregard this OVAL stream because some advisories therein have
 			// been released with the CPEs identical to those used in classic RHEL stream.
@@ -114,6 +116,8 @@ func UpdateV2(outputDir string) (int, error) {
 			if name == "RHEL7-rhel-7-alt" {
 				continue
 			}
+		case strings.Contains(p, "RHEL8"):
+		case strings.Contains(p, "RHEL9"):
 		default: // skip
 			continue
 		}
