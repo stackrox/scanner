@@ -48,6 +48,8 @@ func (s *HTTPServer) RunForever() {
 		Addr:    s.Address,
 		Handler: mux,
 	}
+
+	go gatherThrottleMetricsForever()
 	go runForever(httpServer)
 }
 
