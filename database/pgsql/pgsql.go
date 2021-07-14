@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	passwordFile           = "/run/secrets/stackrox.io/secrets/password"
+	passwordFile = "/run/secrets/stackrox.io/secrets/password"
 )
 
 var (
