@@ -37,7 +37,6 @@ import (
 
 const (
 	passwordFile           = "/run/secrets/stackrox.io/secrets/password"
-	defaultConnMaxLifetime = 1 * time.Minute
 )
 
 var (
