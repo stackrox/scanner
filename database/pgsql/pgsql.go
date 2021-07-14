@@ -36,8 +36,7 @@ import (
 )
 
 const (
-	passwordFile           = "/run/secrets/stackrox.io/secrets/password"
-	defaultConnMaxLifetime = 1 * time.Minute
+	passwordFile = "/run/secrets/stackrox.io/secrets/password"
 )
 
 var (
@@ -170,11 +169,9 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		pg.Close()
 		return nil, fmt.Errorf("pgsql: could not open database: %v", err)
 	}
-	connectionMaxLifetime := defaultConnMaxLifetime
 	if pg.config.ConnectionMaxLifetime != nil {
-		connectionMaxLifetime = *pg.config.ConnectionMaxLifetime
+		pg.DB.SetConnMaxLifetime(*pg.config.ConnectionMaxLifetime)
 	}
-	pg.DB.SetConnMaxLifetime(connectionMaxLifetime)
 
 	// Verify database state.
 	if err = pg.DB.Ping(); err != nil {
