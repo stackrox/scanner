@@ -1,6 +1,6 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8/ubi
-ARG BASE_TAG=8.3
+ARG BASE_TAG=8.4
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 COPY bundle.tar.gz /
@@ -9,6 +9,9 @@ WORKDIR /bundle
 RUN tar -xzf /bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
+
+ARG REDHAT_USERNAME
+ARG REDHAT_PASSWORD
 
 LABEL name="scanner-db-rhel" \
       vendor="StackRox" \
@@ -27,7 +30,9 @@ COPY --from=extracted_bundle /bundle/postgres.rpm /bundle/postgres-libs.rpm /bun
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
-RUN groupadd -g 70 postgres && \
+RUN subscription-manager register --username "${REDHAT_USERNAME}" --password "${REDHAT_PASSWORD}" && \
+    subscription-manager attach && \
+    groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
     rpm --import RPM-GPG-KEY-PGDG-12 && \
     dnf upgrade -y && \
