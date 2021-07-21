@@ -3,6 +3,7 @@ package matcher
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/stackrox/scanner/pkg/whiteout"
@@ -10,7 +11,7 @@ import (
 
 // Matcher defines the functions necessary for matching files.
 type Matcher interface {
-	Match(fullPath string, fileInfo os.FileInfo) bool
+	Match(fullPath string, fileInfo os.FileInfo) (bool, bool)
 }
 
 type allowlistMatcher struct {
@@ -43,6 +44,32 @@ func (w *whiteoutMatcher) Match(fullPath string, _ os.FileInfo) bool {
 // (ie files which have been deleted).
 func NewWhiteoutMatcher() Matcher {
 	return &whiteoutMatcher{}
+}
+
+type executableMatcher struct{}
+
+func (e *executableMatcher) Match(_ string, fi os.FileInfo) bool {
+	return fi.Mode().IsRegular() && fi.Mode()&0111 != 0
+}
+
+// NewExecutableMatcher returns a matcher that matches all executable regular files.
+func NewExecutableMatcher() Matcher {
+	return &whiteoutMatcher{}
+}
+
+type regexpMatcher struct{
+	expr *regexp.Regexp
+}
+
+func (r *regexpMatcher) Match(fullPath string, _ os.FileInfo) bool {
+	return r.expr.MatchString(fullPath)
+}
+
+// NewRegexpMatcher returns a matcher that matches all files which adhere to the given regexp pattern.
+func NewRegexpMatcher(expr *regexp.Regexp) Matcher {
+	return &regexpMatcher{
+		expr: expr,
+	}
 }
 
 type orMatcher struct {

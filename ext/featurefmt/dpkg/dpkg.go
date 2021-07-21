@@ -18,6 +18,9 @@ package dpkg
 import (
 	"bufio"
 	"bytes"
+	"github.com/quay/zlog"
+	"github.com/stackrox/rox/pkg/stringutils"
+	"net/mail"
 	"regexp"
 	"strings"
 
@@ -33,11 +36,18 @@ import (
 const (
 	statusFile = "var/lib/dpkg/status"
 	statusDir  = "var/lib/dpkg/status.d"
+
+	dpkgInfoPrefix = "var/lib/dpkg/info/"
+	dpkgFilenamesSuffix = ".list"
 )
 
 var (
-	dpkgSrcCaptureRegexp      = regexp.MustCompile(`Source: (?P<name>[^\s]*)( \((?P<version>.*)\))?`)
+	dpkgSrcCaptureRegexp      = regexp.MustCompile(`(?P<name>[^\s]*)( \((?P<version>.*)\))?`)
 	dpkgSrcCaptureRegexpNames = dpkgSrcCaptureRegexp.SubexpNames()
+
+	// FilenamesListRegexp is the pattern for dpkg files which list the filenames the
+	// related package provides.
+	FilenamesListRegexp = regexp.MustCompile(`^var/lib/dpkg/info/(.*)\.list$`)
 )
 
 type lister struct{}
@@ -46,7 +56,95 @@ func init() {
 	featurefmt.RegisterLister("dpkg", &lister{})
 }
 
-func (l lister) parseComponent(file []byte, packagesMap map[string]database.FeatureVersion, removedPackages set.StringSet) {
+///////////////////////////////////////////////////
+// BEGIN
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
+
+func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[string]database.FeatureVersion) {
+	// The database is actually an RFC822-like message with "\n\n"
+	// separators, so don't be alarmed by the usage of the "net/mail"
+	// package here.
+	scanner := bufio.NewScanner(bytes.NewReader(file))
+	scanner.Split(dbSplit)
+	for scanner.Scan() {
+		msg, err := mail.ReadMessage(bytes.NewReader(scanner.Bytes()))
+		if err != nil {
+			log.WithError(err).Warning("could not parse dpkg db entry. skipping")
+			continue
+		}
+
+		// This package is meant to be uninstalled, so ignore it.
+		if strings.Contains(msg.Header.Get("Status"), "deinstall") {
+			continue
+		}
+
+		name := msg.Header.Get("Package")
+		version := msg.Header.Get("Version")
+		err = versionfmt.Valid(dpkg.ParserName, version)
+		if err != nil {
+			log.WithError(err).WithField("version", version).Warning("could not parse package version. skipping")
+			continue
+		}
+
+		if src := msg.Header.Get("Source"); src != "" {
+			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(src, -1)[0]
+			md := map[string]string{}
+
+			for i, n := range srcCapture {
+				md[dpkgSrcCaptureRegexpNames[i]] = strings.TrimSpace(n)
+			}
+
+			name = md["name"]
+
+			if md["version"] != "" {
+				v := md["version"]
+				err = versionfmt.Valid(dpkg.ParserName, v)
+				if err != nil {
+					log.WithError(err).WithField("version", v).Warning("could not parse package version. skipping")
+					continue
+				} else {
+					version = v
+				}
+			}
+		}
+
+		key := name + "#" + version
+		if _, exists := packagesMap[key]; exists {
+			// No need to look through the executable files again.
+			continue
+		}
+
+		var executables []string
+		var filenames []byte
+		// for example: var/lib/dpkg/info/vim.list
+		if filenames = files[dpkgInfoPrefix + name + dpkgFilenamesSuffix]; len(filenames) == 0 {
+			arch := msg.Header.Get("Architecture")
+			// for example: /var/lib/dpkg/info/zlib1g:amd64.list
+			filenames = files[dpkgInfoPrefix + name + ":" + arch + dpkgFilenamesSuffix]
+		}
+
+		filenameScanner := bufio.NewScanner(bytes.NewReader(filenames))
+		for filenameScanner.Scan() {
+			filename := scanner.Text()
+
+			// The first character is always "/", which is removed when inserted into the files maps.
+			if _, exists := files[filename[1:]]; exists {
+
+			}
+		}
+
+		packagesMap[key] := database.FeatureVersion{
+			Feature: database.Feature{
+				Name:       name,
+			},
+			Version:             version,
+			ProvidedExecutables: executables,
+		}
+	}
+
 	var pkg database.FeatureVersion
 	var currentPkgIsRemoved bool
 	var err error
@@ -119,6 +217,32 @@ func (l lister) parseComponent(file []byte, packagesMap map[string]database.Feat
 	}
 }
 
+// dbSplit is a bufio.SplitFunc that looks for a double-newline and leaves it
+// attached to the resulting token.
+func dbSplit(data []byte, atEOF bool) (int, []byte, error) {
+	const delim = "\n\n"
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+	if i := bytes.Index(data, []byte(delim)); i >= 0 {
+		return i + len(delim), data[:i+len(delim)], nil
+	}
+	if atEOF {
+		return len(data), data, nil
+	}
+	return 0, nil, nil
+}
+
+///////////////////////////////////////////////////
+// END
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
+func (l lister) parseFilenamesList(packageName string, file []byte, packagesMap map[string]database.FeatureVersion) {
+
+}
+
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
 	packagesMap := make(map[string]database.FeatureVersion)
@@ -133,6 +257,14 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
 			l.parseComponent(file, packagesMap, removedPackages)
+		}
+	}
+
+	// Do this AFTER finding all the packages in the layer to properly map the files to the associated package.
+	for filename, file := range files {
+		if match := FilenamesListRegexp.FindStringSubmatch(filename); len(match) == 2 {
+			packageName, _ := stringutils.Split2Last(match[1], ":")
+			l.parseFilenamesList(packageName, file, packagesMap)
 		}
 	}
 

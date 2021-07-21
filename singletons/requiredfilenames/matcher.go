@@ -1,6 +1,7 @@
 package requiredfilenames
 
 import (
+	"github.com/stackrox/scanner/ext/featurefmt/dpkg"
 	"sync"
 
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -20,11 +21,13 @@ func SingletonMatcher() matcher.Matcher {
 		allFileNames := append(featurefmt.RequiredFilenames(), featurens.RequiredFilenames()...)
 		clairMatcher := matcher.NewPrefixAllowlistMatcher(allFileNames...)
 		whiteoutMatcher := matcher.NewWhiteoutMatcher()
+		executableMatcher := matcher.NewExecutableMatcher()
+		dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp)
 
 		allAnalyzers := analyzers.Analyzers()
 
-		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+2)
-		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
+		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+4)
+		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher, executableMatcher, dpkgFilenamesMatcher)
 		for _, a := range allAnalyzers {
 			allMatchers = append(allMatchers, a)
 		}
