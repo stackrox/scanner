@@ -20,6 +20,7 @@ var (
 
 func init() {
 	data, err := os.ReadFile("/etc/os-release")
+	log.WithError(err).Error("UNEXPECTED: /etc/os-release cannot be read")
 	if err != nil {
 		log.WithError(err).Error("UNEXPECTED: /etc/os-release cannot be read")
 		return
