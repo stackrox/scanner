@@ -11,6 +11,9 @@ import (
 
 // Matcher defines the functions necessary for matching files.
 type Matcher interface {
+	// Match determines if the given file, identified by the given path and info,
+	// matches. The first return indicates if it matches. The second return
+	// indicates if the contents of the file should be saved.
 	Match(fullPath string, fileInfo os.FileInfo) (bool, bool)
 }
 
@@ -18,13 +21,13 @@ type allowlistMatcher struct {
 	allowlist []string
 }
 
-func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo) bool {
+func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo) (bool, bool) {
 	for _, s := range w.allowlist {
 		if strings.HasPrefix(fullPath, s) {
-			return true
+			return true, true
 		}
 	}
-	return false
+	return false, true
 }
 
 // NewPrefixAllowlistMatcher returns a matcher that matches all filenames which have any
@@ -35,9 +38,9 @@ func NewPrefixAllowlistMatcher(allowlist ...string) Matcher {
 
 type whiteoutMatcher struct{}
 
-func (w *whiteoutMatcher) Match(fullPath string, _ os.FileInfo) bool {
+func (w *whiteoutMatcher) Match(fullPath string, _ os.FileInfo) (bool, bool) {
 	basePath := filepath.Base(fullPath)
-	return strings.HasPrefix(basePath, whiteout.Prefix)
+	return strings.HasPrefix(basePath, whiteout.Prefix), false
 }
 
 // NewWhiteoutMatcher returns a matcher that matches all whiteout files
@@ -48,21 +51,21 @@ func NewWhiteoutMatcher() Matcher {
 
 type executableMatcher struct{}
 
-func (e *executableMatcher) Match(_ string, fi os.FileInfo) bool {
-	return fi.Mode().IsRegular() && fi.Mode()&0111 != 0
+func (e *executableMatcher) Match(_ string, fi os.FileInfo) (bool, bool) {
+	return fi.Mode().IsRegular() && fi.Mode()&0111 != 0, false
 }
 
 // NewExecutableMatcher returns a matcher that matches all executable regular files.
 func NewExecutableMatcher() Matcher {
-	return &whiteoutMatcher{}
+	return &executableMatcher{}
 }
 
 type regexpMatcher struct{
 	expr *regexp.Regexp
 }
 
-func (r *regexpMatcher) Match(fullPath string, _ os.FileInfo) bool {
-	return r.expr.MatchString(fullPath)
+func (r *regexpMatcher) Match(fullPath string, _ os.FileInfo) (bool, bool) {
+	return r.expr.MatchString(fullPath), true
 }
 
 // NewRegexpMatcher returns a matcher that matches all files which adhere to the given regexp pattern.
@@ -76,13 +79,13 @@ type orMatcher struct {
 	matchers []Matcher
 }
 
-func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo) bool {
+func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo) (bool, bool) {
 	for _, subMatcher := range o.matchers {
-		if subMatcher.Match(fullPath, fileInfo) {
-			return true
+		if matches, extractable := subMatcher.Match(fullPath, fileInfo); matches {
+			return true, extractable
 		}
 	}
-	return false
+	return false, false
 }
 
 // NewOrMatcher returns a matcher that matches if and only if any of the passed submatchers does.

@@ -89,18 +89,24 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		// Get element filename
 		filename := strings.TrimPrefix(hdr.Name, "./")
 
-		if !filenameMatcher.Match(filename, hdr.FileInfo()) {
+		var match, extractContents bool
+		if match, extractContents = filenameMatcher.Match(filename, hdr.FileInfo()); !match {
 			continue
 		}
 
 		// File size limit
-		if hdr.Size > maxExtractableFileSize {
+		if extractContents && hdr.Size > maxExtractableFileSize {
 			log.Errorf("Skipping file %q because it was too large (%d bytes)", filename, hdr.Size)
 			continue
 		}
 
 		// Extract the element
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
+			if !extractContents {
+				data[filename] = nil
+				continue
+			}
+
 			d, _ := io.ReadAll(tr)
 			if len(d) != 0 && javaArchiveRegex.MatchString(hdr.Name) {
 				newData, err := rewriteArchive(d)

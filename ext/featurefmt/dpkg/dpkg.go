@@ -18,14 +18,11 @@ package dpkg
 import (
 	"bufio"
 	"bytes"
-	"github.com/quay/zlog"
-	"github.com/stackrox/rox/pkg/stringutils"
 	"net/mail"
 	"regexp"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
@@ -128,15 +125,16 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 
 		filenameScanner := bufio.NewScanner(bytes.NewReader(filenames))
 		for filenameScanner.Scan() {
-			filename := scanner.Text()
-
 			// The first character is always "/", which is removed when inserted into the files maps.
-			if _, exists := files[filename[1:]]; exists {
+			filename := scanner.Text()[1:]
 
+			// It is assumed if the listed file is tracked, it is an executable file.
+			if _, exists := files[filename]; exists {
+				executables = append(executables, filename)
 			}
 		}
 
-		packagesMap[key] := database.FeatureVersion{
+		packagesMap[key] = database.FeatureVersion{
 			Feature: database.Feature{
 				Name:       name,
 			},
@@ -145,76 +143,76 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 		}
 	}
 
-	var pkg database.FeatureVersion
-	var currentPkgIsRemoved bool
-	var err error
-	scanner := bufio.NewScanner(bytes.NewReader(file))
-	for scanner.Scan() {
-		line := scanner.Text()
-
-		if strings.HasPrefix(line, "Package: ") {
-			// Package line
-			// Defines the name of the package
-			pkg.Feature.Name = strings.TrimSpace(strings.TrimPrefix(line, "Package: "))
-			pkg.Version = ""
-		} else if strings.HasPrefix(line, "Source: ") {
-			// Source line (Optional)
-			// Gives the name of the source package
-			// May also specifies a version
-
-			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(line, -1)[0]
-			md := map[string]string{}
-
-			for i, n := range srcCapture {
-				md[dpkgSrcCaptureRegexpNames[i]] = strings.TrimSpace(n)
-			}
-
-			pkg.Feature.Name = md["name"]
-
-			if md["version"] != "" {
-				version := md["version"]
-				err = versionfmt.Valid(dpkg.ParserName, version)
-
-				if err != nil {
-					log.WithError(err).WithField("version", string(line[1])).Warning("could not parse package version. skipping")
-
-				} else {
-					pkg.Version = version
-				}
-			}
-		} else if strings.HasPrefix(line, "Version: ") && pkg.Version == "" {
-			// Version line
-			// Defines the version of the package
-			// This version is less important than a version retrieved from a Source line
-			// because the Debian vulnerabilities often skips the epoch from the Version field
-			// which is not present in the Source version, and because +bX revisions don't matter
-			version := strings.TrimPrefix(line, "Version: ")
-			err = versionfmt.Valid(dpkg.ParserName, version)
-			if err != nil {
-				log.WithError(err).WithField("version", string(line[1])).Warning("could not parse package version. skipping")
-			} else {
-				pkg.Version = version
-			}
-		} else if strings.HasPrefix(line, "Status: ") {
-			currentPkgIsRemoved = strings.Contains(line, "deinstall")
-		} else if line == "" {
-			pkg = database.FeatureVersion{}
-			currentPkgIsRemoved = false
-		}
-
-		// Add the package to the result array if we have all the information
-		if pkg.Feature.Name != "" && pkg.Version != "" {
-			key := pkg.Feature.Name + "#" + pkg.Version
-
-			if !currentPkgIsRemoved {
-				packagesMap[key] = pkg
-			} else {
-				removedPackages.Add(key)
-			}
-			pkg = database.FeatureVersion{}
-			currentPkgIsRemoved = false
-		}
-	}
+	//var pkg database.FeatureVersion
+	//var currentPkgIsRemoved bool
+	//var err error
+	//scanner := bufio.NewScanner(bytes.NewReader(file))
+	//for scanner.Scan() {
+	//	line := scanner.Text()
+	//
+	//	if strings.HasPrefix(line, "Package: ") {
+	//		// Package line
+	//		// Defines the name of the package
+	//		pkg.Feature.Name = strings.TrimSpace(strings.TrimPrefix(line, "Package: "))
+	//		pkg.Version = ""
+	//	} else if strings.HasPrefix(line, "Source: ") {
+	//		// Source line (Optional)
+	//		// Gives the name of the source package
+	//		// May also specifies a version
+	//
+	//		srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(line, -1)[0]
+	//		md := map[string]string{}
+	//
+	//		for i, n := range srcCapture {
+	//			md[dpkgSrcCaptureRegexpNames[i]] = strings.TrimSpace(n)
+	//		}
+	//
+	//		pkg.Feature.Name = md["name"]
+	//
+	//		if md["version"] != "" {
+	//			version := md["version"]
+	//			err = versionfmt.Valid(dpkg.ParserName, version)
+	//
+	//			if err != nil {
+	//				log.WithError(err).WithField("version", string(line[1])).Warning("could not parse package version. skipping")
+	//
+	//			} else {
+	//				pkg.Version = version
+	//			}
+	//		}
+	//	} else if strings.HasPrefix(line, "Version: ") && pkg.Version == "" {
+	//		// Version line
+	//		// Defines the version of the package
+	//		// This version is less important than a version retrieved from a Source line
+	//		// because the Debian vulnerabilities often skips the epoch from the Version field
+	//		// which is not present in the Source version, and because +bX revisions don't matter
+	//		version := strings.TrimPrefix(line, "Version: ")
+	//		err = versionfmt.Valid(dpkg.ParserName, version)
+	//		if err != nil {
+	//			log.WithError(err).WithField("version", string(line[1])).Warning("could not parse package version. skipping")
+	//		} else {
+	//			pkg.Version = version
+	//		}
+	//	} else if strings.HasPrefix(line, "Status: ") {
+	//		currentPkgIsRemoved = strings.Contains(line, "deinstall")
+	//	} else if line == "" {
+	//		pkg = database.FeatureVersion{}
+	//		currentPkgIsRemoved = false
+	//	}
+	//
+	//	// Add the package to the result array if we have all the information
+	//	if pkg.Feature.Name != "" && pkg.Version != "" {
+	//		key := pkg.Feature.Name + "#" + pkg.Version
+	//
+	//		if !currentPkgIsRemoved {
+	//			packagesMap[key] = pkg
+	//		} else {
+	//			removedPackages.Add(key)
+	//		}
+	//		pkg = database.FeatureVersion{}
+	//		currentPkgIsRemoved = false
+	//	}
+	//}
 }
 
 // dbSplit is a bufio.SplitFunc that looks for a double-newline and leaves it
@@ -246,35 +244,22 @@ func (l lister) parseFilenamesList(packageName string, file []byte, packagesMap 
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
 	packagesMap := make(map[string]database.FeatureVersion)
-	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
-		l.parseComponent(f, packagesMap, removedPackages)
+		l.parseComponent(files, f, packagesMap)
 	}
 
 	for filename, file := range files {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			l.parseComponent(file, packagesMap, removedPackages)
-		}
-	}
-
-	// Do this AFTER finding all the packages in the layer to properly map the files to the associated package.
-	for filename, file := range files {
-		if match := FilenamesListRegexp.FindStringSubmatch(filename); len(match) == 2 {
-			packageName, _ := stringutils.Split2Last(match[1], ":")
-			l.parseFilenamesList(packageName, file, packagesMap)
+			l.parseComponent(files, file, packagesMap)
 		}
 	}
 
 	// Convert the map to a slice
 	packages := make([]database.FeatureVersion, 0, len(packagesMap))
-	for key, pkg := range packagesMap {
-		// Ignore packages that were removed
-		if removedPackages.Contains(key) {
-			continue
-		}
+	for _, pkg := range packagesMap {
 		packages = append(packages, pkg)
 	}
 
