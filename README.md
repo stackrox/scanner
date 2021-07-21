@@ -25,3 +25,6 @@ $ make image
 ```
 
 For any other time, just run `make image`.
+
+Be sure to set the environment variable `LOCAL_SCANNER_DEV=true` to be able to run/test locally.
+It may be best to add this to your `~/.bash_profile`.

@@ -20,6 +20,10 @@ var (
 )
 
 func init() {
+	if _, localDev := os.LookupEnv("SCANNER_LOCAL_DEV"); localDev {
+		return
+	}
+
 	data, err := os.ReadFile("/etc/os-release")
 	utils.Must(err)
 
