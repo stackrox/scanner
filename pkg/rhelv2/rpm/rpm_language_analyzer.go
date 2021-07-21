@@ -3,11 +3,11 @@ package rpm
 import (
 	"os"
 	"os/exec"
+	"sync"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
-	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/osrelease"
@@ -17,18 +17,8 @@ import (
 
 var (
 	scannerOperatingSystem string
+	once                   sync.Once
 )
-
-func init() {
-	if _, localDev := os.LookupEnv("SCANNER_LOCAL_DEV"); localDev {
-		return
-	}
-
-	data, err := os.ReadFile("/etc/os-release")
-	utils.Must(err)
-
-	scannerOperatingSystem, _ = osrelease.GetOSAndVersionFromOSRelease(data)
-}
 
 // WrapAnalyzer wraps the generic analyzer function with one that determines if the language
 // component was added via RPM
@@ -93,6 +83,14 @@ func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, 
 	}
 
 	finishFn := func() { _ = os.RemoveAll(tmpDir) }
+
+	once.Do(func() {
+		data, err := os.ReadFile("/etc/os-release")
+		if err == nil {
+			scannerOperatingSystem, _ = osrelease.GetOSAndVersionFromOSRelease(data)
+		}
+		// Upon error, we will just assume the image is not RHEL-based, and we will rebuild the rpmdb.
+	})
 
 	if !wellknownnamespaces.IsRHELNamespace(scannerOperatingSystem) {
 		log.Info("Rebuilding Package database for a RHEL image. This may be better optimized on the RHEL-based Scanner image")
