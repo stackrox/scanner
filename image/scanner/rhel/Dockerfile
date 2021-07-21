@@ -1,6 +1,6 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8/ubi
-ARG BASE_TAG=8.3
+ARG BASE_TAG=8.4
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 
@@ -9,6 +9,9 @@ WORKDIR /bundle
 RUN tar -xzf /bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
+
+ARG REDHAT_USERNAME
+ARG REDHAT_PASSWORD
 
 LABEL name="scanner-rhel" \
       vendor="StackRox" \
@@ -29,7 +32,9 @@ COPY --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITION
 COPY --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
 COPY --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 
-RUN dnf upgrade -y && \
+RUN subscription-manager register --username "${REDHAT_USERNAME}" --password "${REDHAT_PASSWORD}" && \
+    subscription-manager attach && \
+    dnf upgrade -y && \
     dnf install -y ca-certificates xz && \
     dnf clean all && \
     rm -rf /var/cache/dnf && \
