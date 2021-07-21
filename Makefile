@@ -183,7 +183,7 @@ scanner-image-rhel: scanner-rhel-build-dockerized $(CURDIR)/image/scanner/rhel/b
 db-image:
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build --build-arg REDHAT_USERNAME="${REDHAT_USERNAME}" --build-arg REDHAT_PASSWORD="${REDHAT_PASSWORD}" -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/db/alpine/Dockerfile image/db
+	@docker build -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/db/alpine/Dockerfile image/db
 	@docker tag us.gcr.io/stackrox-ci/scanner-db:$(TAG) stackrox/scanner-db:$(TAG)
 
 
@@ -191,7 +191,7 @@ db-image:
 db-image-rhel: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t us.gcr.io/stackrox-ci/scanner-db-rhel:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
+	@docker build --build-arg REDHAT_USERNAME="${REDHAT_USERNAME}" --build-arg REDHAT_PASSWORD="${REDHAT_PASSWORD}" -t us.gcr.io/stackrox-ci/scanner-db-rhel:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered
