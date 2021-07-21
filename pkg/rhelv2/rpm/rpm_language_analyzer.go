@@ -3,7 +3,6 @@ package rpm
 import (
 	"os"
 	"os/exec"
-	"sync"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -17,8 +16,17 @@ import (
 
 var (
 	scannerOperatingSystem string
-	once                   sync.Once
 )
+
+func init() {
+	data, err := os.ReadFile("/etc/os-release")
+	if err != nil {
+		log.WithError(err).Error("UNEXPECTED: /etc/os-release cannot be read")
+		return
+	}
+
+	scannerOperatingSystem, _ = osrelease.GetOSAndVersionFromOSRelease(data)
+}
 
 // WrapAnalyzer wraps the generic analyzer function with one that determines if the language
 // component was added via RPM
@@ -83,14 +91,6 @@ func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, 
 	}
 
 	finishFn := func() { _ = os.RemoveAll(tmpDir) }
-
-	once.Do(func() {
-		data, err := os.ReadFile("/etc/os-release")
-		if err == nil {
-			scannerOperatingSystem, _ = osrelease.GetOSAndVersionFromOSRelease(data)
-		}
-		// Upon error, we will just assume the image is not RHEL-based, and we will rebuild the rpmdb.
-	})
 
 	if !wellknownnamespaces.IsRHELNamespace(scannerOperatingSystem) {
 		log.Info("Rebuilding Package database for a RHEL image. This may be better optimized on the RHEL-based Scanner image")
