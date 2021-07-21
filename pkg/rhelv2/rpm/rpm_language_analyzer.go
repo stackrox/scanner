@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
-	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/osrelease"
@@ -21,7 +20,10 @@ var (
 
 func init() {
 	data, err := os.ReadFile("/etc/os-release")
-	utils.Must(err)
+	if err != nil {
+		log.WithError(err).Error("UNEXPECTED: /etc/os-release cannot be read")
+		return
+	}
 
 	scannerOperatingSystem, _ = osrelease.GetOSAndVersionFromOSRelease(data)
 }
