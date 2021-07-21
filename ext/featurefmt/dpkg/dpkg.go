@@ -18,6 +18,7 @@ package dpkg
 import (
 	"bufio"
 	"bytes"
+	"io"
 	"net/mail"
 	"regexp"
 	"strings"
@@ -67,11 +68,15 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 	scanner := bufio.NewScanner(bytes.NewReader(file))
 	scanner.Split(dbSplit)
 	for scanner.Scan() {
+		log.Info(scanner.Text())
 		msg, err := mail.ReadMessage(bytes.NewReader(scanner.Bytes()))
 		if err != nil {
-			log.WithError(err).Warning("could not parse dpkg db entry. skipping")
+			if err != io.EOF {
+				log.WithError(err).Warning("could not parse dpkg db entry. skipping")
+			}
 			continue
 		}
+		log.Info("Howdy")
 
 		// This package is meant to be uninstalled, so ignore it.
 		if strings.Contains(msg.Header.Get("Status"), "deinstall") {
@@ -82,7 +87,7 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 		version := msg.Header.Get("Version")
 		err = versionfmt.Valid(dpkg.ParserName, version)
 		if err != nil {
-			log.WithError(err).WithField("version", version).Warning("could not parse package version. skipping")
+			log.WithError(err).WithFields(map[string]interface{}{"name": name, "version": version}).Warning("could not parse package version. skipping")
 			continue
 		}
 
@@ -253,6 +258,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
+			log.Info("Hello")
 			l.parseComponent(files, file, packagesMap)
 		}
 	}
