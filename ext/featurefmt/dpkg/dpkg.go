@@ -88,7 +88,7 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 
 		if src := msg.Header.Get("Source"); src != "" {
 			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(src, -1)[0]
-			md := map[string]string{}
+			md := make(map[string]string)
 
 			for i, n := range srcCapture {
 				md[dpkgSrcCaptureRegexpNames[i]] = strings.TrimSpace(n)
