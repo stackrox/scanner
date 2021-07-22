@@ -29,16 +29,18 @@ func TestDpkgFeatureDetection(t *testing.T) {
 			FeatureVersions: []database.FeatureVersion{
 				// Two packages from this source are installed, it should only appear one time
 				{
-					Feature: database.Feature{Name: "pam"},
-					Version: "1.1.8-3.1ubuntu3",
+					Feature:             database.Feature{Name: "pam"},
+					Version:             "1.1.8-3.1ubuntu3",
+					ProvidedExecutables: []string{"/test/executable"},
 				},
 				{
 					Feature: database.Feature{Name: "makedev"}, // The source name and the package name are equals
 					Version: "2.3.1-93ubuntu1",                 // The version comes from the "Version:" line
 				},
 				{
-					Feature: database.Feature{Name: "gcc-5"},
-					Version: "5.1.1-12ubuntu1", // The version comes from the "Source:" line
+					Feature:             database.Feature{Name: "gcc-5"},
+					Version:             "5.1.1-12ubuntu1", // The version comes from the "Source:" line
+					ProvidedExecutables: []string{"/i/am/an/executable"},
 				},
 				{
 					Feature: database.Feature{Name: "base-files"},
@@ -50,9 +52,13 @@ func TestDpkgFeatureDetection(t *testing.T) {
 				},
 			},
 			Files: tarutil.FilesMap{
-				"var/lib/dpkg/status":           featurefmt.LoadFileForTest("dpkg/testdata/status"),
-				"var/lib/dpkg/status.d/base":    featurefmt.LoadFileForTest("dpkg/testdata/statusd-base"),
-				"var/lib/dpkg/status.d/netbase": featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase"),
+				"var/lib/dpkg/status":                featurefmt.LoadFileForTest("dpkg/testdata/status"),
+				"var/lib/dpkg/status.d/base":         featurefmt.LoadFileForTest("dpkg/testdata/statusd-base"),
+				"var/lib/dpkg/status.d/netbase":      featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase"),
+				"var/lib/dpkg/info/pam.list":         featurefmt.LoadFileForTest("dpkg/testdata/pam.list"),
+				"var/lib/dpkg/info/gcc-5:amd64.list": featurefmt.LoadFileForTest("dpkg/testdata/gcc-5:amd64.list"),
+				"test/executable":                    nil,
+				"i/am/an/executable":                 nil,
 			},
 		},
 	}

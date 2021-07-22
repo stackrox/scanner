@@ -60,7 +60,7 @@ func NewExecutableMatcher() Matcher {
 	return &executableMatcher{}
 }
 
-type regexpMatcher struct{
+type regexpMatcher struct {
 	expr *regexp.Regexp
 }
 

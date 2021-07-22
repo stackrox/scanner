@@ -35,7 +35,7 @@ const (
 	statusFile = "var/lib/dpkg/status"
 	statusDir  = "var/lib/dpkg/status.d"
 
-	dpkgInfoPrefix = "var/lib/dpkg/info/"
+	dpkgInfoPrefix      = "var/lib/dpkg/info/"
 	dpkgFilenamesSuffix = ".list"
 )
 
@@ -60,7 +60,6 @@ func init() {
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
 
-
 func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[string]database.FeatureVersion) {
 	// The database is actually an RFC822-like message with "\n\n"
 	// separators, so don't be alarmed by the usage of the "net/mail"
@@ -68,7 +67,6 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 	scanner := bufio.NewScanner(bytes.NewReader(file))
 	scanner.Split(dbSplit)
 	for scanner.Scan() {
-		log.Info(scanner.Text())
 		msg, err := mail.ReadMessage(bytes.NewReader(scanner.Bytes()))
 		if err != nil {
 			if err != io.EOF {
@@ -76,7 +74,6 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			}
 			continue
 		}
-		log.Info("Howdy")
 
 		// This package is meant to be uninstalled, so ignore it.
 		if strings.Contains(msg.Header.Get("Status"), "deinstall") {
@@ -122,102 +119,32 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 		var executables []string
 		var filenames []byte
 		// for example: var/lib/dpkg/info/vim.list
-		if filenames = files[dpkgInfoPrefix + name + dpkgFilenamesSuffix]; len(filenames) == 0 {
+		if filenames = files[dpkgInfoPrefix+name+dpkgFilenamesSuffix]; len(filenames) == 0 {
 			arch := msg.Header.Get("Architecture")
 			// for example: /var/lib/dpkg/info/zlib1g:amd64.list
-			filenames = files[dpkgInfoPrefix + name + ":" + arch + dpkgFilenamesSuffix]
+			filenames = files[dpkgInfoPrefix+name+":"+arch+dpkgFilenamesSuffix]
 		}
 
 		filenameScanner := bufio.NewScanner(bytes.NewReader(filenames))
 		for filenameScanner.Scan() {
-			// The first character is always "/", which is removed when inserted into the files maps.
-			filename := scanner.Text()[1:]
+			filename := filenameScanner.Text()
 
+			// The first character is always "/", which is removed when inserted into the files maps.
 			// It is assumed if the listed file is tracked, it is an executable file.
-			if _, exists := files[filename]; exists {
+			if _, exists := files[filename[1:]]; exists {
+				log.Info(filename)
 				executables = append(executables, filename)
 			}
 		}
 
 		packagesMap[key] = database.FeatureVersion{
 			Feature: database.Feature{
-				Name:       name,
+				Name: name,
 			},
 			Version:             version,
 			ProvidedExecutables: executables,
 		}
 	}
-
-	//var pkg database.FeatureVersion
-	//var currentPkgIsRemoved bool
-	//var err error
-	//scanner := bufio.NewScanner(bytes.NewReader(file))
-	//for scanner.Scan() {
-	//	line := scanner.Text()
-	//
-	//	if strings.HasPrefix(line, "Package: ") {
-	//		// Package line
-	//		// Defines the name of the package
-	//		pkg.Feature.Name = strings.TrimSpace(strings.TrimPrefix(line, "Package: "))
-	//		pkg.Version = ""
-	//	} else if strings.HasPrefix(line, "Source: ") {
-	//		// Source line (Optional)
-	//		// Gives the name of the source package
-	//		// May also specifies a version
-	//
-	//		srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(line, -1)[0]
-	//		md := map[string]string{}
-	//
-	//		for i, n := range srcCapture {
-	//			md[dpkgSrcCaptureRegexpNames[i]] = strings.TrimSpace(n)
-	//		}
-	//
-	//		pkg.Feature.Name = md["name"]
-	//
-	//		if md["version"] != "" {
-	//			version := md["version"]
-	//			err = versionfmt.Valid(dpkg.ParserName, version)
-	//
-	//			if err != nil {
-	//				log.WithError(err).WithField("version", string(line[1])).Warning("could not parse package version. skipping")
-	//
-	//			} else {
-	//				pkg.Version = version
-	//			}
-	//		}
-	//	} else if strings.HasPrefix(line, "Version: ") && pkg.Version == "" {
-	//		// Version line
-	//		// Defines the version of the package
-	//		// This version is less important than a version retrieved from a Source line
-	//		// because the Debian vulnerabilities often skips the epoch from the Version field
-	//		// which is not present in the Source version, and because +bX revisions don't matter
-	//		version := strings.TrimPrefix(line, "Version: ")
-	//		err = versionfmt.Valid(dpkg.ParserName, version)
-	//		if err != nil {
-	//			log.WithError(err).WithField("version", string(line[1])).Warning("could not parse package version. skipping")
-	//		} else {
-	//			pkg.Version = version
-	//		}
-	//	} else if strings.HasPrefix(line, "Status: ") {
-	//		currentPkgIsRemoved = strings.Contains(line, "deinstall")
-	//	} else if line == "" {
-	//		pkg = database.FeatureVersion{}
-	//		currentPkgIsRemoved = false
-	//	}
-	//
-	//	// Add the package to the result array if we have all the information
-	//	if pkg.Feature.Name != "" && pkg.Version != "" {
-	//		key := pkg.Feature.Name + "#" + pkg.Version
-	//
-	//		if !currentPkgIsRemoved {
-	//			packagesMap[key] = pkg
-	//		} else {
-	//			removedPackages.Add(key)
-	//		}
-	//		pkg = database.FeatureVersion{}
-	//		currentPkgIsRemoved = false
-	//	}
-	//}
 }
 
 // dbSplit is a bufio.SplitFunc that looks for a double-newline and leaves it
@@ -242,10 +169,6 @@ func dbSplit(data []byte, atEOF bool) (int, []byte, error) {
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
 
-func (l lister) parseFilenamesList(packageName string, file []byte, packagesMap map[string]database.FeatureVersion) {
-
-}
-
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
 	packagesMap := make(map[string]database.FeatureVersion)
@@ -258,7 +181,6 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			log.Info("Hello")
 			l.parseComponent(files, file, packagesMap)
 		}
 	}

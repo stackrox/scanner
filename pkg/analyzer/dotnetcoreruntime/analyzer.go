@@ -30,8 +30,8 @@ var (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) bool {
-	return fileInfo.IsDir() && dotNetCorePattern.MatchString(fullPath)
+func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) (bool, bool) {
+	return fileInfo.IsDir() && dotNetCorePattern.MatchString(fullPath), false
 }
 
 func matchRegex(path string) bool {

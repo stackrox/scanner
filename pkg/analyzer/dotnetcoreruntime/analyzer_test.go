@@ -37,8 +37,16 @@ func (f *mockFileInfo) Sys() interface{} {
 
 func TestMatching(t *testing.T) {
 	a := Analyzer()
-	assert.True(t, a.Match("/usr/share/dotnet/shared/Microsoft.AspNetCore.App/3.1.8/", &mockFileInfo{}))
-	assert.True(t, a.Match("/usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.8/", &mockFileInfo{}))
-	assert.False(t, a.Match("/usr/share/dotnet/shared/Hello/3.1.8/", &mockFileInfo{}))
-	assert.False(t, a.Match("/usr/share/dotnet/shared/Microsoft.NETCore.App/3.1/", &mockFileInfo{}))
+	match, extract := a.Match("/usr/share/dotnet/shared/Microsoft.AspNetCore.App/3.1.8/", &mockFileInfo{})
+	assert.True(t, match)
+	assert.False(t, extract)
+	match, extract = a.Match("/usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.8/", &mockFileInfo{})
+	assert.True(t, match)
+	assert.False(t, extract)
+	match, extract = a.Match("/usr/share/dotnet/shared/Hello/3.1.8/", &mockFileInfo{})
+	assert.False(t, match)
+	assert.False(t, extract)
+	match, extract = a.Match("/usr/share/dotnet/shared/Microsoft.NETCore.App/3.1/", &mockFileInfo{})
+	assert.False(t, match)
+	assert.False(t, extract)
 }
