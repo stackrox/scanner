@@ -99,7 +99,7 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 				v := md["version"]
 				err = versionfmt.Valid(dpkg.ParserName, v)
 				if err != nil {
-					log.WithError(err).WithField("version", v).Warning("could not parse package version. skipping")
+					log.WithError(err).WithFields(map[string]interface{}{"name": name, "version": v}).Warning("could not parse package version. skipping")
 					continue
 				} else {
 					version = v
