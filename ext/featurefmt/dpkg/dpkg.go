@@ -27,6 +27,7 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -115,21 +116,24 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 
 		var executables []string
 		var filenames []byte
-		// for example: var/lib/dpkg/info/vim.list
-		if filenames = files[dpkgInfoPrefix+name+dpkgFilenamesSuffix]; len(filenames) == 0 {
-			arch := msg.Header.Get("Architecture")
-			// for example: /var/lib/dpkg/info/zlib1g:amd64.list
-			filenames = files[dpkgInfoPrefix+name+":"+arch+dpkgFilenamesSuffix]
-		}
 
-		filenameScanner := bufio.NewScanner(bytes.NewReader(filenames))
-		for filenameScanner.Scan() {
-			filename := filenameScanner.Text()
+		if features.ActiveVulnMgmt.Enabled() {
+			// for example: var/lib/dpkg/info/vim.list
+			if filenames = files[dpkgInfoPrefix+name+dpkgFilenamesSuffix]; len(filenames) == 0 {
+				arch := msg.Header.Get("Architecture")
+				// for example: /var/lib/dpkg/info/zlib1g:amd64.list
+				filenames = files[dpkgInfoPrefix+name+":"+arch+dpkgFilenamesSuffix]
+			}
 
-			// The first character is always "/", which is removed when inserted into the files maps.
-			// It is assumed if the listed file is tracked, it is an executable file.
-			if _, exists := files[filename[1:]]; exists {
-				executables = append(executables, filename)
+			filenameScanner := bufio.NewScanner(bytes.NewReader(filenames))
+			for filenameScanner.Scan() {
+				filename := filenameScanner.Text()
+
+				// The first character is always "/", which is removed when inserted into the files maps.
+				// It is assumed if the listed file is tracked, it is an executable file.
+				if _, exists := files[filename[1:]]; exists {
+					executables = append(executables, filename)
+				}
 			}
 		}
 

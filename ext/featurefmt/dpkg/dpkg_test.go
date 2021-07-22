@@ -17,12 +17,18 @@ package dpkg
 import (
 	"testing"
 
+	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 func TestDpkgFeatureDetection(t *testing.T) {
+	env := envisolator.NewEnvIsolator(t)
+	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
+	defer env.RestoreAll()
+
 	testData := []featurefmt.TestData{
 		// Test an Ubuntu dpkg status file
 		{
