@@ -809,9 +809,7 @@ workflows:
             - upload-dumps-for-embedding-into-image
       - build-rhel:
           <<: *runOnAllTags
-          context:
-            - docker-io-and-stackrox-io-push
-            - redhat-developer-account-login
+          context: docker-io-and-stackrox-io-push
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
@@ -871,9 +869,7 @@ workflows:
           - upload-dumps-for-embedding-into-image
     - build-rhel:
         <<: *runOnAllTags
-        context:
-          - docker-io-and-stackrox-io-push
-          - redhat-developer-account-login
+        context: docker-io-and-stackrox-io-push
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
