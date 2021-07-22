@@ -18,7 +18,6 @@ package dpkg
 import (
 	"bufio"
 	"bytes"
-	"io"
 	"net/mail"
 	"regexp"
 	"strings"
@@ -69,9 +68,7 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 	for scanner.Scan() {
 		msg, err := mail.ReadMessage(bytes.NewReader(scanner.Bytes()))
 		if err != nil {
-			if err != io.EOF {
-				log.WithError(err).Warning("could not parse dpkg db entry. skipping")
-			}
+			log.WithError(err).Warning("could not parse dpkg db entry. skipping")
 			continue
 		}
 
@@ -132,7 +129,6 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			// The first character is always "/", which is removed when inserted into the files maps.
 			// It is assumed if the listed file is tracked, it is an executable file.
 			if _, exists := files[filename[1:]]; exists {
-				log.Info(filename)
 				executables = append(executables, filename)
 			}
 		}
