@@ -78,14 +78,19 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			continue
 		}
 
-		name := msg.Header.Get("Package")
-		version := msg.Header.Get("Version")
-		err = versionfmt.Valid(dpkg.ParserName, version)
+		installedName := msg.Header.Get("Package")
+		installedVersion := msg.Header.Get("Version")
+		err = versionfmt.Valid(dpkg.ParserName, installedVersion)
 		if err != nil {
-			log.WithError(err).WithFields(map[string]interface{}{"name": name, "version": version}).Warning("could not parse package version. skipping")
+			log.WithError(err).WithFields(map[string]interface{}{"name": installedName, "version": installedVersion}).Warning("could not parse package version. skipping")
 			continue
 		}
 
+		name := installedName
+		version := installedVersion
+
+		// Only display the source package, even if it's not installed.
+		// TODO: I don't like this
 		if src := msg.Header.Get("Source"); src != "" {
 			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(src, -1)[0]
 			md := make(map[string]string)
@@ -100,7 +105,7 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 				v := md["version"]
 				err = versionfmt.Valid(dpkg.ParserName, v)
 				if err != nil {
-					log.WithError(err).WithFields(map[string]interface{}{"name": name, "version": v}).Warning("could not parse package version. skipping")
+					log.WithError(err).WithFields(map[string]interface{}{"name": name, "version": v}).Warning("could not parse source package version. skipping")
 					continue
 				} else {
 					version = v
