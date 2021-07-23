@@ -6,6 +6,7 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/featurefmt/dpkg"
 	"github.com/stackrox/scanner/ext/featurens"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/singletons/analyzers"
 )
@@ -21,15 +22,21 @@ func SingletonMatcher() matcher.Matcher {
 		allFileNames := append(featurefmt.RequiredFilenames(), featurens.RequiredFilenames()...)
 		clairMatcher := matcher.NewPrefixAllowlistMatcher(allFileNames...)
 		whiteoutMatcher := matcher.NewWhiteoutMatcher()
-		executableMatcher := matcher.NewExecutableMatcher()
-		dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp)
 
 		allAnalyzers := analyzers.Analyzers()
 
+		// Allocate 2 extra spaces for the feature-flagged matchers.
 		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+4)
-		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher, executableMatcher, dpkgFilenamesMatcher)
+		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
 		for _, a := range allAnalyzers {
 			allMatchers = append(allMatchers, a)
+		}
+
+		if features.ActiveVulnMgmt.Enabled() {
+			executableMatcher := matcher.NewExecutableMatcher()
+			dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp)
+
+			allMatchers = append(allMatchers, executableMatcher, dpkgFilenamesMatcher)
 		}
 
 		instance = matcher.NewOrMatcher(allMatchers...)
