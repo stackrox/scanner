@@ -25,6 +25,48 @@ import (
 )
 
 func TestDpkgFeatureDetection(t *testing.T) {
+	testData := []featurefmt.TestData{
+		// Test an Ubuntu dpkg status file
+		{
+			FeatureVersions: []database.FeatureVersion{
+				// Two packages from this source are installed, it should only appear one time
+				{
+					Feature: database.Feature{Name: "pam"},
+					Version: "1.1.8-3.1ubuntu3",
+				},
+				{
+					Feature: database.Feature{Name: "makedev"},
+					Version: "2.3.1-93ubuntu1",
+				},
+				{
+					Feature: database.Feature{Name: "gcc-5"},
+					Version: "5.1.1-12ubuntu1", // The version comes from the "Source:" line
+				},
+				{
+					Feature: database.Feature{Name: "base-files"},
+					Version: "10.3+deb10u6",
+				},
+				{
+					Feature: database.Feature{Name: "netbase"},
+					Version: "5.6",
+				},
+				{
+					Feature: database.Feature{Name: "pkg-source"},
+					Version: "1.1.8-3.1ubuntu3",
+				},
+			},
+			Files: tarutil.FilesMap{
+				"var/lib/dpkg/status":           featurefmt.LoadFileForTest("dpkg/testdata/status"),
+				"var/lib/dpkg/status.d/base":    featurefmt.LoadFileForTest("dpkg/testdata/statusd-base"),
+				"var/lib/dpkg/status.d/netbase": featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase"),
+			},
+		},
+	}
+
+	featurefmt.TestLister(t, &lister{}, testData)
+}
+
+func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 	env := envisolator.NewEnvIsolator(t)
 	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
 	defer env.RestoreAll()
@@ -35,17 +77,21 @@ func TestDpkgFeatureDetection(t *testing.T) {
 			FeatureVersions: []database.FeatureVersion{
 				// Two packages from this source are installed, it should only appear one time
 				{
-					Feature:             database.Feature{Name: "pam"},
+					Feature:             database.Feature{Name: "libpam-runtime"},
 					Version:             "1.1.8-3.1ubuntu3",
 					ProvidedExecutables: []string{"/test/executable"},
 				},
 				{
-					Feature: database.Feature{Name: "makedev"}, // The source name and the package name are equals
-					Version: "2.3.1-93ubuntu1",                 // The version comes from the "Version:" line
+					Feature: database.Feature{Name: "libpam-modules-bin"},
+					Version: "1.1.8-3.1ubuntu3",
 				},
 				{
-					Feature:             database.Feature{Name: "gcc-5"},
-					Version:             "5.1.1-12ubuntu1", // The version comes from the "Source:" line
+					Feature: database.Feature{Name: "makedev"},
+					Version: "2.3.1-93ubuntu1",
+				},
+				{
+					Feature:             database.Feature{Name: "libgcc1"},
+					Version:             "1:5.1.1-12ubuntu1",
 					ProvidedExecutables: []string{"/i/am/an/executable"},
 				},
 				{
@@ -56,15 +102,27 @@ func TestDpkgFeatureDetection(t *testing.T) {
 					Feature: database.Feature{Name: "netbase"},
 					Version: "5.6",
 				},
+				{
+					Feature:             database.Feature{Name: "pkg-source"},
+					Version:             "1.1.8-3.1ubuntu3",
+					ProvidedExecutables: []string{"/exec-me", "/exec-me-2"},
+				},
 			},
 			Files: tarutil.FilesMap{
-				"var/lib/dpkg/status":                featurefmt.LoadFileForTest("dpkg/testdata/status"),
-				"var/lib/dpkg/status.d/base":         featurefmt.LoadFileForTest("dpkg/testdata/statusd-base"),
-				"var/lib/dpkg/status.d/netbase":      featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase"),
-				"var/lib/dpkg/info/pam.list":         featurefmt.LoadFileForTest("dpkg/testdata/pam.list"),
-				"var/lib/dpkg/info/gcc-5:amd64.list": featurefmt.LoadFileForTest("dpkg/testdata/gcc-5:amd64.list"),
-				"test/executable":                    nil,
-				"i/am/an/executable":                 nil,
+				"var/lib/dpkg/status":                   featurefmt.LoadFileForTest("dpkg/testdata/status"),
+				"var/lib/dpkg/status.d/base":            featurefmt.LoadFileForTest("dpkg/testdata/statusd-base"),
+				"var/lib/dpkg/info/base-files.list":     []byte{},
+				"var/lib/dpkg/status.d/netbase":         featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase"),
+				"var/lib/dpkg/info/netbase.list":        []byte{},
+				"var/lib/dpkg/info/libpam-runtime.list": featurefmt.LoadFileForTest("dpkg/testdata/libpam-runtime.list"),
+				"var/lib/dpkg/info/libgcc1:amd64.list":  featurefmt.LoadFileForTest("dpkg/testdata/libgcc1:amd64.list"),
+				"test/executable":                       nil,
+				"i/am/an/executable":                    nil,
+				"var/lib/dpkg/info/pkg-source.list":     featurefmt.LoadFileForTest("dpkg/testdata/pkg-source.list"),
+				"var/lib/dpkg/info/pkg1:amd64.list":     featurefmt.LoadFileForTest("dpkg/testdata/pkg1:amd64.list"),
+				"var/lib/dpkg/info/pkg2.list":           featurefmt.LoadFileForTest("dpkg/testdata/pkg2.list"),
+				"exec-me":                               nil,
+				"exec-me-2":                             nil,
 			},
 		},
 	}

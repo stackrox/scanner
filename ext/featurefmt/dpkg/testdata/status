@@ -86,3 +86,20 @@ Package: invalidpkg
 Source: invalidpkg-5 (5.#)
 Version: 1:5.#
 
+Package: pkg1
+Status: install ok installed
+Source: pkg-source
+Architecture: amd64
+Version: 1.1.8-3.1ubuntu3
+
+Package: pkg2
+Status: install ok installed
+Source: pkg-source
+Architecture: amd64
+Version: 1.1.8-3.1ubuntu3
+
+Package: pkg-source
+Status: install ok installed
+Architecture: amd64
+Version: 1.1.8-3.1ubuntu3
+

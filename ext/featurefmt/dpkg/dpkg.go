@@ -60,7 +60,7 @@ func init() {
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
 
-func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[string]database.FeatureVersion) {
+func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[string]*database.FeatureVersion) {
 	// The database is actually an RFC822-like message with "\n\n"
 	// separators, so don't be alarmed by the usage of the "net/mail"
 	// package here.
@@ -86,11 +86,10 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			continue
 		}
 
-		name := installedName
-		version := installedVersion
+		var sourceName, sourceVersion string
 
-		// Only display the source package, even if it's not installed.
-		// TODO: I don't like this
+		// If there is a Source package specified for the current package,
+		// then use that instead of the current package.
 		if src := msg.Header.Get("Source"); src != "" {
 			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(src, -1)[0]
 			md := make(map[string]string)
@@ -99,35 +98,50 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 				md[dpkgSrcCaptureRegexpNames[i]] = strings.TrimSpace(n)
 			}
 
-			name = md["name"]
+			sourceName = md["name"]
+			sourceVersion = installedVersion
 
 			if md["version"] != "" {
-				v := md["version"]
-				err = versionfmt.Valid(dpkg.ParserName, v)
+				version := md["version"]
+				err = versionfmt.Valid(dpkg.ParserName, version)
 				if err != nil {
-					log.WithError(err).WithFields(map[string]interface{}{"name": name, "version": v}).Warning("could not parse source package version. skipping")
+					log.WithError(err).WithFields(map[string]interface{}{"name": sourceName, "version": version}).Warning("could not parse source package version. skipping")
 					continue
-				} else {
-					version = v
 				}
+
+				sourceVersion = version
 			}
 		}
 
-		key := name + "#" + version
-		if _, exists := packagesMap[key]; exists {
-			// No need to look through the executable files again.
-			continue
-		}
-
+		var name, version string
 		var executables []string
 		var filenames []byte
 
 		if features.ActiveVulnMgmt.Enabled() {
+			name = sourceName
+			version = sourceVersion
+
+			// See if the source package exists in the image.
+			if sourceName != "" {
+				if filenames = files[dpkgInfoPrefix+sourceName+dpkgFilenamesSuffix]; len(filenames) == 0 {
+					arch := msg.Header.Get("Architecture")
+					// for example: /var/lib/dpkg/info/zlib1g:amd64.list
+					filenames = files[dpkgInfoPrefix+sourceName+":"+arch+dpkgFilenamesSuffix]
+				}
+			}
+
+			// The source package does not exist, so output the current package.
+			if len(filenames) == 0 {
+				name = installedName
+				version = installedVersion
+			}
+
+			// Read the list of files provided by the current package.
 			// for example: var/lib/dpkg/info/vim.list
-			if filenames = files[dpkgInfoPrefix+name+dpkgFilenamesSuffix]; len(filenames) == 0 {
+			if filenames = files[dpkgInfoPrefix+installedName+dpkgFilenamesSuffix]; len(filenames) == 0 {
 				arch := msg.Header.Get("Architecture")
 				// for example: /var/lib/dpkg/info/zlib1g:amd64.list
-				filenames = files[dpkgInfoPrefix+name+":"+arch+dpkgFilenamesSuffix]
+				filenames = files[dpkgInfoPrefix+installedName+":"+arch+dpkgFilenamesSuffix]
 			}
 
 			filenameScanner := bufio.NewScanner(bytes.NewReader(filenames))
@@ -140,9 +154,26 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 					executables = append(executables, filename)
 				}
 			}
+		} else {
+			name = sourceName
+			version = sourceVersion
+			if name == "" {
+				name = installedName
+				version = installedVersion
+			}
 		}
 
-		packagesMap[key] = database.FeatureVersion{
+		key := name + "#" + version
+
+		// If the package already exists, then this must be a source package
+		// with multiple associated packages.
+		if feature, exists := packagesMap[key]; exists {
+			// Append the executable files for the associated package to the source package.
+			feature.ProvidedExecutables = append(feature.ProvidedExecutables, executables...)
+			continue
+		}
+
+		packagesMap[key] = &database.FeatureVersion{
 			Feature: database.Feature{
 				Name: name,
 			},
@@ -176,7 +207,7 @@ func dbSplit(data []byte, atEOF bool) (int, []byte, error) {
 
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
-	packagesMap := make(map[string]database.FeatureVersion)
+	packagesMap := make(map[string]*database.FeatureVersion)
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
 		l.parseComponent(files, f, packagesMap)
@@ -193,7 +224,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// Convert the map to a slice
 	packages := make([]database.FeatureVersion, 0, len(packagesMap))
 	for _, pkg := range packagesMap {
-		packages = append(packages, pkg)
+		packages = append(packages, *pkg)
 	}
 
 	return packages, nil
