@@ -25,7 +25,7 @@ func SingletonMatcher() matcher.Matcher {
 
 		allAnalyzers := analyzers.Analyzers()
 
-		// Allocate 2 extra spaces for the feature-flagged matchers.
+		// Allocate extra spaces for the feature-flagged matchers.
 		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+4)
 		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
 		for _, a := range allAnalyzers {
