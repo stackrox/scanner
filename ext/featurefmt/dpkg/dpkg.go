@@ -115,11 +115,12 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 
 		var name, version string
 		var executables []string
-		var filenames []byte
 
 		if features.ActiveVulnMgmt.Enabled() {
 			name = sourceName
 			version = sourceVersion
+
+			var filenames []byte
 
 			// See if the source package exists in the image.
 			if sourceName != "" {
