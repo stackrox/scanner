@@ -78,18 +78,17 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			continue
 		}
 
-		installedName := msg.Header.Get("Package")
-		installedVersion := msg.Header.Get("Version")
-		err = versionfmt.Valid(dpkg.ParserName, installedVersion)
+		currPkgName := msg.Header.Get("Package")
+		currPkgVersion := msg.Header.Get("Version")
+		err = versionfmt.Valid(dpkg.ParserName, currPkgVersion)
 		if err != nil {
-			log.WithError(err).WithFields(map[string]interface{}{"name": installedName, "version": installedVersion}).Warning("could not parse package version. skipping")
+			log.WithError(err).WithFields(map[string]interface{}{"name": currPkgName, "version": currPkgVersion}).Warning("could not parse package version. skipping")
 			continue
 		}
 
 		var sourceName, sourceVersion string
 
-		// If there is a Source package specified for the current package,
-		// then use that instead of the current package.
+		// Get the package's source, if it exists.
 		if src := msg.Header.Get("Source"); src != "" {
 			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(src, -1)[0]
 			md := make(map[string]string)
@@ -99,7 +98,7 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			}
 
 			sourceName = md["name"]
-			sourceVersion = installedVersion
+			sourceVersion = currPkgVersion
 
 			if md["version"] != "" {
 				version := md["version"]
@@ -113,16 +112,20 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			}
 		}
 
-		var name, version string
+		var pkgName, pkgVersion string
 		var executables []string
 
 		if features.ActiveVulnMgmt.Enabled() {
-			name = sourceName
-			version = sourceVersion
+			pkgName = sourceName
+			pkgVersion = sourceVersion
 
 			var filenames []byte
 
 			// See if the source package exists in the image.
+			// It exists, if there is a related *.list file.
+			// If it does exist, the source package's name and version are output instead of the current package's
+			// information. This is because it is easier to update the single source package than its, potentially,
+			// multiple related packages.
 			if sourceName != "" {
 				if filenames = files[dpkgInfoPrefix+sourceName+dpkgFilenamesSuffix]; len(filenames) == 0 {
 					arch := msg.Header.Get("Architecture")
@@ -131,18 +134,18 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 				}
 			}
 
-			// The source package does not exist, so output the current package.
+			// If the source package does not exist, output the current package.
 			if len(filenames) == 0 {
-				name = installedName
-				version = installedVersion
+				pkgName = currPkgName
+				pkgVersion = currPkgVersion
 			}
 
 			// Read the list of files provided by the current package.
 			// for example: var/lib/dpkg/info/vim.list
-			if filenames = files[dpkgInfoPrefix+installedName+dpkgFilenamesSuffix]; len(filenames) == 0 {
+			if filenames = files[dpkgInfoPrefix+currPkgName+dpkgFilenamesSuffix]; len(filenames) == 0 {
 				arch := msg.Header.Get("Architecture")
 				// for example: /var/lib/dpkg/info/zlib1g:amd64.list
-				filenames = files[dpkgInfoPrefix+installedName+":"+arch+dpkgFilenamesSuffix]
+				filenames = files[dpkgInfoPrefix+currPkgName+":"+arch+dpkgFilenamesSuffix]
 			}
 
 			filenameScanner := bufio.NewScanner(bytes.NewReader(filenames))
@@ -156,15 +159,16 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 				}
 			}
 		} else {
-			name = sourceName
-			version = sourceVersion
-			if name == "" {
-				name = installedName
-				version = installedVersion
+			// When ActiveVulnMgmt is disabled, output the source package's name and version, if it exists.
+			pkgName = sourceName
+			pkgVersion = sourceVersion
+			if pkgName == "" {
+				pkgName = currPkgName
+				pkgVersion = currPkgVersion
 			}
 		}
 
-		key := name + "#" + version
+		key := pkgName + "#" + pkgVersion
 
 		// If the package already exists, then this must be a source package
 		// with multiple associated packages.
@@ -176,9 +180,9 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 
 		packagesMap[key] = &database.FeatureVersion{
 			Feature: database.Feature{
-				Name: name,
+				Name: pkgName,
 			},
-			Version:             version,
+			Version:             pkgVersion,
 			ProvidedExecutables: executables,
 		}
 	}

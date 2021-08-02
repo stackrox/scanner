@@ -72,7 +72,7 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 			matchingIdx := sliceutils.FindMatching(scan.GetImage().GetFeatures(), func(feature *v1.Feature) bool {
 				return feature.GetName() == expectedFeat.name && feature.GetVersion() == expectedFeat.version
 			})
-			require.NotEqual(t, -1, matchingIdx)
+			require.NotEqual(t, -1, matchingIdx, "did not find expected feature %s:%s")
 			matchingFeature := scan.GetImage().GetFeatures()[matchingIdx]
 
 			for _, expectedVuln := range expectedFeat.vulns {
