@@ -78,18 +78,14 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			}
 
 			pkg.Version = version
-		case line[:2] == "F:":
-			if features.ActiveVulnMgmt.Enabled() {
-				dir = line[2:]
-			}
-		case line[:2] == "R:":
-			if features.ActiveVulnMgmt.Enabled() {
-				filename := "/" + dir + "/" + line[2:]
-				// The first character is always "/", which is removed when inserted into the files maps.
-				// It is assumed if the listed file is tracked, it is an executable file.
-				if _, exists := files[filename[1:]]; exists {
-					pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, filename)
-				}
+		case line[:2] == "F:" && features.ActiveVulnMgmt.Enabled():
+			dir = line[2:]
+		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
+			filename := "/" + dir + "/" + line[2:]
+			// The first character is always "/", which is removed when inserted into the files maps.
+			// It is assumed if the listed file is tracked, it is an executable file.
+			if _, exists := files[filename[1:]]; exists {
+				pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, filename)
 			}
 		}
 	}
