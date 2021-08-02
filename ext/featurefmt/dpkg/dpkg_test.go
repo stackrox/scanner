@@ -25,6 +25,10 @@ import (
 )
 
 func TestDpkgFeatureDetection(t *testing.T) {
+	env := envisolator.NewEnvIsolator(t)
+	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
+	defer env.RestoreAll()
+
 	testData := []featurefmt.TestData{
 		// Test an Ubuntu dpkg status file
 		{

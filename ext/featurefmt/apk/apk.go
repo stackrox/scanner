@@ -18,13 +18,13 @@ package apk
 import (
 	"bufio"
 	"bytes"
-	"github.com/stackrox/scanner/pkg/features"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/apk"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -53,14 +53,18 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	var dir string
 	for scanner.Scan() {
 		line := scanner.Text()
-		// Ensure this is a valid line in the apk-db.
-		// See https://wiki.alpinelinux.org/wiki/Apk_spec#Syntax for more information.
-		if len(line) < 2 {
-			continue
-		}
-
 		// Parse the package name or version.
+		// See https://wiki.alpinelinux.org/wiki/Apk_spec#Syntax for more information.
 		switch {
+		case line == "":
+			// Reached end of package definition.
+
+			// Protect the map from entries with invalid versions.
+			if pkg.Feature.Name != "" && pkg.Version != "" {
+				pkgSet[pkg.Feature.Name+"#"+pkg.Version] = pkg
+			}
+
+			pkg = database.FeatureVersion{}
 		case line[:2] == "P:":
 			// Start of a package definition.
 			pkg.Feature.Name = line[2:]
@@ -80,16 +84,13 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			}
 		case line[:2] == "R:":
 			if features.ActiveVulnMgmt.Enabled() {
-				pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, "/"+dir+"/"+line[2:])
+				filename := "/" + dir + "/" + line[2:]
+				// The first character is always "/", which is removed when inserted into the files maps.
+				// It is assumed if the listed file is tracked, it is an executable file.
+				if _, exists := files[filename[1:]]; exists {
+					pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, filename)
+				}
 			}
-		case line == "":
-			// Reached end of package definition.
-
-			// Protect the map from entries with invalid versions.
-			if pkg.Feature.Name != "" && pkg.Version != "" {
-				pkgSet[pkg.Feature.Name+"#"+pkg.Version] = pkg
-			}
-			pkg = database.FeatureVersion{}
 		}
 	}
 
