@@ -50,6 +50,7 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	// If the test failed, print helpful debug information.
 	defer func() {
 		if t.Failed() {
+			fmt.Println("PRINTING COMPONENTS FROM SCAN")
 			for _, feat := range scan.GetImage().GetFeatures() {
 				fmt.Println(feat.GetName(), feat.GetVersion())
 			}
@@ -59,6 +60,7 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 				ImageSpec: scanResp.GetImage(),
 			})
 			require.NoError(t, err)
+			fmt.Println("PRINTING LANGUAGE LEVEL COMPONENTS")
 			for _, components := range componentsMap.GetLayerToComponents() {
 				for _, component := range components.GetComponents() {
 					fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
