@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
@@ -60,7 +61,7 @@ func init() {
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
 
-func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[string]*database.FeatureVersion) {
+func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[string]*database.FeatureVersion, removedPackages set.StringSet) {
 	// The database is actually an RFC822-like message with "\n\n"
 	// separators, so don't be alarmed by the usage of the "net/mail"
 	// package here.
@@ -73,12 +74,14 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			continue
 		}
 
+		currPkgName := msg.Header.Get("Package")
+
 		// This package is meant to be uninstalled, so ignore it.
 		if strings.Contains(msg.Header.Get("Status"), "deinstall") {
+			removedPackages.Add(currPkgName)
 			continue
 		}
 
-		currPkgName := msg.Header.Get("Package")
 		currPkgVersion := msg.Header.Get("Version")
 		err = versionfmt.Valid(dpkg.ParserName, currPkgVersion)
 		if err != nil {
@@ -213,23 +216,28 @@ func dbSplit(data []byte, atEOF bool) (int, []byte, error) {
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
 	packagesMap := make(map[string]*database.FeatureVersion)
+	// Create a set to store removed packages to ensure it holds between files.
+	// TODO: This may not be needed cross-file...
+	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
-		l.parseComponent(files, f, packagesMap)
+		l.parseComponent(files, f, packagesMap, removedPackages)
 	}
 
 	for filename, file := range files {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			l.parseComponent(files, file, packagesMap)
+			l.parseComponent(files, file, packagesMap, removedPackages)
 		}
 	}
 
 	// Convert the map to a slice
 	packages := make([]database.FeatureVersion, 0, len(packagesMap))
 	for _, pkg := range packagesMap {
-		packages = append(packages, *pkg)
+		if !removedPackages.Contains(pkg.Feature.Name) {
+			packages = append(packages, *pkg)
+		}
 	}
 
 	return packages, nil

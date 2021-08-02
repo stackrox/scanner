@@ -103,3 +103,14 @@ Status: install ok installed
 Architecture: amd64
 Version: 1.1.8-3.1ubuntu3
 
+Package: apt
+Status: deinstall ok config-files
+Architecture: amd64
+Version: 1.6.12
+Config-Version: 1.6.12
+
+Package: libapt-pkg5.0
+Status: install ok installed
+Architecture: amd64
+Version: 1.6.12
+
