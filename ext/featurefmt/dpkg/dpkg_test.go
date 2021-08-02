@@ -111,6 +111,10 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Version:             "1.1.8-3.1ubuntu3",
 					ProvidedExecutables: []string{"/exec-me", "/exec-me-2"},
 				},
+				{
+					Feature: database.Feature{Name: "libapt-pkg5.0"},
+					Version: "1.6.12",
+				},
 			},
 			Files: tarutil.FilesMap{
 				"var/lib/dpkg/status":                   featurefmt.LoadFileForTest("dpkg/testdata/status"),
