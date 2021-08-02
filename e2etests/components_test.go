@@ -103,7 +103,7 @@ func TestRemovedComponents(t *testing.T) {
 
 			for _, f := range scan.GetImage().GetFeatures() {
 				for _, missing := range c.missingComponents {
-					assert.NotEqual(t, missing, f.GetName(), "incorrectly found %s in %s image", f.GetName(), c.distro)
+					assert.NotEqual(t, missing, f.GetName(), "Incorrectly found %s in %s image", f.GetName(), c.distro)
 				}
 			}
 		})
