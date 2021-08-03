@@ -65,6 +65,9 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			}
 
 			pkg = database.FeatureVersion{}
+		case len(line) < 2:
+			// Invalid line.
+			continue
 		case line[:2] == "P:":
 			// Start of a package definition.
 			pkg.Feature.Name = line[2:]
