@@ -25,6 +25,10 @@ import (
 )
 
 func TestDpkgFeatureDetection(t *testing.T) {
+	env := envisolator.NewEnvIsolator(t)
+	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
+	defer env.RestoreAll()
+
 	testData := []featurefmt.TestData{
 		// Test an Ubuntu dpkg status file
 		{
@@ -106,6 +110,10 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Feature:             database.Feature{Name: "pkg-source"},
 					Version:             "1.1.8-3.1ubuntu3",
 					ProvidedExecutables: []string{"/exec-me", "/exec-me-2"},
+				},
+				{
+					Feature: database.Feature{Name: "libapt-pkg5.0"},
+					Version: "1.6.12",
 				},
 			},
 			Files: tarutil.FilesMap{

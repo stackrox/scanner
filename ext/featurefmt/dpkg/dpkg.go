@@ -228,7 +228,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			l.parseComponent(files, file, packagesMap, removedPackages)
+			l.parseComponent(files, append(file, '\n'), packagesMap, removedPackages)
 		}
 	}
 

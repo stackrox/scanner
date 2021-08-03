@@ -112,5 +112,6 @@ Config-Version: 1.6.12
 Package: libapt-pkg5.0
 Status: install ok installed
 Architecture: amd64
+Source: apt
 Version: 1.6.12
 
