@@ -147,7 +147,7 @@ func Boot(config *Config) {
 	// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up to date
 	u.UpdateApplicationCachesOnly()
 
-	metricsServ := metrics.NewDefaultHTTPServer(config.API)
+	metricsServ := metrics.NewHTTPServer(config.API)
 	go metricsServ.RunForever()
 
 	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db)

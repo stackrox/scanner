@@ -15,15 +15,13 @@ const (
 	metricsURLPath = "/metrics"
 )
 
-// HTTPServer is a HTTP server for exporting Prometheus metrics.
+// HTTPServer is an HTTP server for exporting Prometheus metrics.
 type HTTPServer struct {
-	Address     string
-	Gatherer    prometheus.Gatherer
-	HandlerOpts promhttp.HandlerOpts
+	server *http.Server
 }
 
-// NewDefaultHTTPServer creates and returns a new metrics http server with configured settings.
-func NewDefaultHTTPServer(config *api.Config) *HTTPServer {
+// NewHTTPServer creates and returns a new metrics HTTP server with the configured settings.
+func NewHTTPServer(config *api.Config) *HTTPServer {
 	addr := defaultAddress
 	if port := config.MetricsPort; port != nil {
 		if *port == 0 {
@@ -31,9 +29,15 @@ func NewDefaultHTTPServer(config *api.Config) *HTTPServer {
 		}
 		addr = fmt.Sprintf(":%d", *port)
 	}
+
+	mux := http.NewServeMux()
+	mux.Handle(metricsURLPath, promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{}))
+
 	return &HTTPServer{
-		Address:  addr,
-		Gatherer: prometheus.DefaultGatherer,
+		server: &http.Server{
+			Addr:    addr,
+			Handler: mux,
+		},
 	}
 }
 
@@ -42,19 +46,10 @@ func (s *HTTPServer) RunForever() {
 	if s == nil {
 		return
 	}
-	mux := http.NewServeMux()
-	mux.Handle(metricsURLPath, promhttp.HandlerFor(s.Gatherer, s.HandlerOpts))
-	httpServer := &http.Server{
-		Addr:    s.Address,
-		Handler: mux,
-	}
 
 	go gatherThrottleMetricsForever()
-	go runForever(httpServer)
-}
 
-func runForever(server *http.Server) {
-	err := server.ListenAndServe()
-	// The HTTP server should never terminate.
+	err := s.server.ListenAndServe()
+	// The metrics HTTP server should never terminate.
 	log.Panicf("Unexpected termination of metrics HTTP server: %v", err)
 }

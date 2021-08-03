@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -12,6 +12,8 @@ import (
 
 const statFile = "/sys/fs/cgroup/cpu/cpu.stat"
 
+// gatherThrottleMetricsForever gathers prometheus throttle metrics forever.
+// Be sure to only call this function ONCE globally.
 func gatherThrottleMetricsForever() {
 	processCPUPeriods := prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: "process_cpu_nr_periods",
@@ -35,7 +37,7 @@ func gatherThrottleMetricsForever() {
 
 	ticker := time.NewTicker(30 * time.Second)
 	for range ticker.C {
-		data, err := ioutil.ReadFile(statFile)
+		data, err := os.ReadFile(statFile)
 		if err != nil {
 			continue
 		}
@@ -56,8 +58,6 @@ func gatherThrottleMetricsForever() {
 				processCPUThrottledCount.Set(float64(value))
 			case "throttled_time":
 				processCPUThrottledTime.Set(float64(value))
-			default:
-				continue
 			}
 		}
 	}
