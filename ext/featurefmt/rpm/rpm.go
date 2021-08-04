@@ -31,6 +31,8 @@ import (
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
+const dbpath = "var/lib/rpm/Packages"
+
 type lister struct{}
 
 func init() {
@@ -38,7 +40,7 @@ func init() {
 }
 
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
-	f, hasFile := files["var/lib/rpm/Packages"]
+	f, hasFile := files[dbpath]
 	if !hasFile {
 		return []database.FeatureVersion{}, nil
 	}
@@ -48,7 +50,9 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 	// Write the required "Packages" file to disk
 	tmpDir, err := os.MkdirTemp("", "rpm")
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		_ = os.RemoveAll(tmpDir)
+	}()
 	if err != nil {
 		log.WithError(err).Error("could not create temporary folder for RPM detection")
 		return []database.FeatureVersion{}, commonerr.ErrFilesystem
@@ -110,5 +114,5 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 }
 
 func (l lister) RequiredFilenames() []string {
-	return []string{"var/lib/rpm/Packages"}
+	return []string{dbpath}
 }
