@@ -34,6 +34,12 @@ var (
 	listers  = make(map[string]Lister)
 )
 
+// PackageKey is a key identifying a unique package.
+type PackageKey struct {
+	Name    string
+	Version string
+}
+
 // Lister represents an ability to list the features present in an image layer.
 type Lister interface {
 	// ListFeatures produces a list of FeatureVersions present in an image layer.

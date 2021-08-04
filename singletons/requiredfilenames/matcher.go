@@ -33,10 +33,15 @@ func SingletonMatcher() matcher.Matcher {
 		}
 
 		if features.ActiveVulnMgmt.Enabled() {
-			executableMatcher := matcher.NewExecutableMatcher()
 			dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp)
+			// All other matchers take precedence over this matcher.
+			// For example, an executable python file should be matched by
+			// the Python matcher. This matcher should be used for any
+			// remaining executable files which went unmatched otherwise.
+			// Therefore, this matcher MUST be the last matcher.
+			executableMatcher := matcher.NewExecutableMatcher()
 
-			allMatchers = append(allMatchers, executableMatcher, dpkgFilenamesMatcher)
+			allMatchers = append(allMatchers, dpkgFilenamesMatcher, executableMatcher)
 		}
 
 		instance = matcher.NewOrMatcher(allMatchers...)

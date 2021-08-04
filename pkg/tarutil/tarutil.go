@@ -89,8 +89,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		// Get element filename
 		filename := strings.TrimPrefix(hdr.Name, "./")
 
-		var match, extractContents bool
-		if match, extractContents = filenameMatcher.Match(filename, hdr.FileInfo()); !match {
+		match, extractContents := filenameMatcher.Match(filename, hdr.FileInfo())
+		if !match {
 			continue
 		}
 
