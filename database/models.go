@@ -158,6 +158,8 @@ type RHELv2Package struct {
 	Version string `json:"version,omitempty"`
 	Module  string `json:"module,omitempty"`
 	Arch    string `json:"arch,omitempty"`
+
+	ProvidedExecutables []string `json:"provided_executables,omitempty"`
 }
 
 func (p *RHELv2Package) String() string {
