@@ -10,9 +10,6 @@ RUN tar -xzf /bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
-ARG REDHAT_USERNAME
-ARG REDHAT_PASSWORD
-
 LABEL name="scanner-db-rhel" \
       vendor="StackRox" \
       maintainer="support@stackrox.com" \
@@ -30,9 +27,7 @@ COPY --from=extracted_bundle /bundle/postgres.rpm /bundle/postgres-libs.rpm /bun
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
-RUN subscription-manager register --username "${REDHAT_USERNAME}" --password "${REDHAT_PASSWORD}" && \
-    subscription-manager attach && \
-    groupadd -g 70 postgres && \
+RUN groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
     rpm --import RPM-GPG-KEY-PGDG-12 && \
     dnf upgrade -y && \

@@ -12,16 +12,17 @@ import (
 // Matcher defines the functions necessary for matching files.
 type Matcher interface {
 	// Match determines if the given file, identified by the given path and info,
-	// matches. The first return indicates if it matches. The second return
-	// indicates if the contents of the file should be saved.
-	Match(fullPath string, fileInfo os.FileInfo) (bool, bool)
+	// matches.
+	// The first return indicates if it matches.
+	// The second return indicates if the contents of the file should be saved (if the first value is true).
+	Match(fullPath string, fileInfo os.FileInfo) (match bool, extract bool)
 }
 
 type allowlistMatcher struct {
 	allowlist []string
 }
 
-func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo) (bool, bool) {
+func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo) (match bool, extract bool) {
 	for _, s := range w.allowlist {
 		if strings.HasPrefix(fullPath, s) {
 			return true, true
@@ -38,7 +39,7 @@ func NewPrefixAllowlistMatcher(allowlist ...string) Matcher {
 
 type whiteoutMatcher struct{}
 
-func (w *whiteoutMatcher) Match(fullPath string, _ os.FileInfo) (bool, bool) {
+func (w *whiteoutMatcher) Match(fullPath string, _ os.FileInfo) (match bool, extract bool) {
 	basePath := filepath.Base(fullPath)
 	return strings.HasPrefix(basePath, whiteout.Prefix), false
 }
@@ -51,7 +52,7 @@ func NewWhiteoutMatcher() Matcher {
 
 type executableMatcher struct{}
 
-func (e *executableMatcher) Match(_ string, fi os.FileInfo) (bool, bool) {
+func (e *executableMatcher) Match(_ string, fi os.FileInfo) (match bool, extract bool) {
 	return fi.Mode().IsRegular() && fi.Mode()&0111 != 0, false
 }
 
@@ -64,7 +65,7 @@ type regexpMatcher struct {
 	expr *regexp.Regexp
 }
 
-func (r *regexpMatcher) Match(fullPath string, _ os.FileInfo) (bool, bool) {
+func (r *regexpMatcher) Match(fullPath string, _ os.FileInfo) (match bool, extract bool) {
 	return r.expr.MatchString(fullPath), true
 }
 
@@ -79,7 +80,7 @@ type orMatcher struct {
 	matchers []Matcher
 }
 
-func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo) (bool, bool) {
+func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo) (match bool, extract bool) {
 	for _, subMatcher := range o.matchers {
 		if matches, extractable := subMatcher.Match(fullPath, fileInfo); matches {
 			return true, extractable

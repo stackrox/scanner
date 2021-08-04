@@ -2,10 +2,10 @@
 version: 2.1
 
 defaultImage: &defaultImage
-  image: docker.io/stackrox/apollo-ci:0.3.12
+  image: quay.io/stackrox/testing:apollo-ci-0.3.12
   auth:
-    username: $DOCKER_IO_PULL_USERNAME
-    password: $DOCKER_IO_PULL_PASSWORD
+    username: $QUAY_USERNAME
+    password: $QUAY_PASSWORD
 
 defaultWorkingDirectory: &defaultWorkingDirectory '/go/src/github.com/stackrox/scanner'
 
@@ -809,9 +809,7 @@ workflows:
             - upload-dumps-for-embedding-into-image
       - build-rhel:
           <<: *runOnAllTags
-          context:
-            - docker-io-and-stackrox-io-push
-            - redhat-developer-account-login
+          context: docker-io-and-stackrox-io-push
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
@@ -871,9 +869,7 @@ workflows:
           - upload-dumps-for-embedding-into-image
     - build-rhel:
         <<: *runOnAllTags
-        context:
-          - docker-io-and-stackrox-io-push
-          - redhat-developer-account-login
+        context: docker-io-and-stackrox-io-push
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image

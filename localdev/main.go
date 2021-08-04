@@ -47,7 +47,7 @@ import (
 
 type manifestMatcher struct{}
 
-func (m *manifestMatcher) Match(fullPath string, _ os.FileInfo) (bool, bool) {
+func (m *manifestMatcher) Match(fullPath string, _ os.FileInfo) (match bool, extract bool) {
 	return fullPath == "manifest.json" || strings.HasSuffix(fullPath, ".tar"), true
 }
 
