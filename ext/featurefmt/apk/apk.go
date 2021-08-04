@@ -18,6 +18,7 @@ package apk
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
@@ -47,8 +48,8 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// Iterate over each line in the "installed" file attempting to parse each
 	// package into a feature that will be stored in a set to guarantee
 	// uniqueness.
-	pkgSet := make(map[string]database.FeatureVersion)
-	pkg := database.FeatureVersion{}
+	pkgSet := make(map[featurefmt.PackageKey]database.FeatureVersion)
+	var pkg database.FeatureVersion
 	scanner := bufio.NewScanner(bytes.NewBuffer(file))
 	var dir string
 	for scanner.Scan() {
@@ -61,7 +62,11 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 			// Protect the map from entries with invalid versions.
 			if pkg.Feature.Name != "" && pkg.Version != "" {
-				pkgSet[pkg.Feature.Name+"#"+pkg.Version] = pkg
+				key := featurefmt.PackageKey{
+					Name:    pkg.Feature.Name,
+					Version: pkg.Version,
+				}
+				pkgSet[key] = pkg
 			}
 
 			pkg = database.FeatureVersion{}
@@ -76,7 +81,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			err := versionfmt.Valid(apk.ParserName, version)
 			if err != nil {
 				// Assumes we already passed the "P:", as is expected in a well-formed alpine database.
-				log.WithError(err).WithFields(map[string]interface{}{"name": pkg.Feature.Name, "version": version}).Warning("could not parse package version; skipping")
+				log.WithError(err).WithFields(log.Fields{"name": pkg.Feature.Name, "version": version}).Warning("could not parse package version; skipping")
 				continue
 			}
 
@@ -84,7 +89,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		case line[:2] == "F:" && features.ActiveVulnMgmt.Enabled():
 			dir = line[2:]
 		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
-			filename := "/" + dir + "/" + line[2:]
+			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the files maps.
 			// It is assumed if the listed file is tracked, it is an executable file.
 			if _, exists := files[filename[1:]]; exists {
