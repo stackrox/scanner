@@ -34,8 +34,9 @@ var (
 	listers  = make(map[string]Lister)
 )
 
+// PackageKey is a key identifying a unique package.
 type PackageKey struct {
-	Name string
+	Name    string
 	Version string
 }
 

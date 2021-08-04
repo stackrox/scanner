@@ -172,7 +172,7 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 		}
 
 		key := featurefmt.PackageKey{
-			Name: pkgName,
+			Name:    pkgName,
 			Version: pkgVersion,
 		}
 
