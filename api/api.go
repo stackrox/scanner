@@ -23,8 +23,9 @@ import (
 
 // Config is the configuration for the API service.
 type Config struct {
-	HTTPSPort int
-	GRPCPort  int
+	HTTPSPort   int
+	GRPCPort    int
+	MetricsPort *int
 }
 
 // RunClairify runs the main Scanner API server.
