@@ -16,7 +16,7 @@ var (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, _ os.FileInfo) (bool, bool) {
+func (a analyzerImpl) Match(fullPath string, _ os.FileInfo) (matches bool, extract bool) {
 	return match(fullPath), true
 }
 

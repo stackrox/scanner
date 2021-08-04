@@ -61,12 +61,12 @@ func init() {
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
 
-func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[string]*database.FeatureVersion, removedPackages set.StringSet) {
+func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet) {
 	// The database is actually an RFC822-like message with "\n\n"
 	// separators, so don't be alarmed by the usage of the "net/mail"
 	// package here.
 	scanner := bufio.NewScanner(bytes.NewReader(file))
-	scanner.Split(dbSplit)
+	scanner.Split(dbSplitFunc)
 	for scanner.Scan() {
 		msg, err := mail.ReadMessage(bytes.NewReader(scanner.Bytes()))
 		if err != nil {
@@ -76,8 +76,8 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 
 		currPkgName := msg.Header.Get("Package")
 
-		// This package is meant to be uninstalled, so ignore it.
 		if strings.Contains(msg.Header.Get("Status"), "deinstall") {
+			// This package is meant to be uninstalled, so ignore it.
 			removedPackages.Add(currPkgName)
 			continue
 		}
@@ -93,9 +93,9 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 
 		// Get the package's source, if it exists.
 		if src := msg.Header.Get("Source"); src != "" {
-			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(src, -1)[0]
 			md := make(map[string]string)
 
+			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(src, -1)[0]
 			for i, n := range srcCapture {
 				md[dpkgSrcCaptureRegexpNames[i]] = strings.TrimSpace(n)
 			}
@@ -107,7 +107,7 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 				version := md["version"]
 				err = versionfmt.Valid(dpkg.ParserName, version)
 				if err != nil {
-					log.WithError(err).WithFields(map[string]interface{}{"name": sourceName, "version": version}).Warning("could not parse source package version. skipping")
+					log.WithError(err).WithFields(log.Fields{"name": sourceName, "version": version}).Warning("could not parse source package version. skipping")
 					continue
 				}
 
@@ -122,7 +122,7 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			pkgName = sourceName
 			pkgVersion = sourceVersion
 
-			var filenames []byte
+			var filenamesFile []byte
 
 			// See if the source package exists in the image.
 			// It exists, if there is a related *.list file.
@@ -130,30 +130,30 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			// information. This is because it is easier to update the single source package than its, potentially,
 			// multiple related packages.
 			if sourceName != "" {
-				if filenames = files[dpkgInfoPrefix+sourceName+dpkgFilenamesSuffix]; len(filenames) == 0 {
+				if filenamesFile = files[dpkgInfoPrefix+sourceName+dpkgFilenamesSuffix]; len(filenamesFile) == 0 {
 					arch := msg.Header.Get("Architecture")
 					// for example: /var/lib/dpkg/info/zlib1g:amd64.list
-					filenames = files[dpkgInfoPrefix+sourceName+":"+arch+dpkgFilenamesSuffix]
+					filenamesFile = files[dpkgInfoPrefix+sourceName+":"+arch+dpkgFilenamesSuffix]
 				}
 			}
 
 			// If the source package does not exist, output the current package.
-			if len(filenames) == 0 {
+			if len(filenamesFile) == 0 {
 				pkgName = currPkgName
 				pkgVersion = currPkgVersion
 			}
 
 			// Read the list of files provided by the current package.
 			// for example: var/lib/dpkg/info/vim.list
-			if filenames = files[dpkgInfoPrefix+currPkgName+dpkgFilenamesSuffix]; len(filenames) == 0 {
+			if filenamesFile = files[dpkgInfoPrefix+currPkgName+dpkgFilenamesSuffix]; len(filenamesFile) == 0 {
 				arch := msg.Header.Get("Architecture")
 				// for example: /var/lib/dpkg/info/zlib1g:amd64.list
-				filenames = files[dpkgInfoPrefix+currPkgName+":"+arch+dpkgFilenamesSuffix]
+				filenamesFile = files[dpkgInfoPrefix+currPkgName+":"+arch+dpkgFilenamesSuffix]
 			}
 
-			filenameScanner := bufio.NewScanner(bytes.NewReader(filenames))
-			for filenameScanner.Scan() {
-				filename := filenameScanner.Text()
+			filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFile))
+			for filenamesFileScanner.Scan() {
+				filename := filenamesFileScanner.Text()
 
 				// The first character is always "/", which is removed when inserted into the files maps.
 				// It is assumed if the listed file is tracked, it is an executable file.
@@ -171,7 +171,10 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			}
 		}
 
-		key := pkgName + "#" + pkgVersion
+		key := featurefmt.PackageKey{
+			Name: pkgName,
+			Version: pkgVersion,
+		}
 
 		// If the package already exists, then this must be a source package
 		// with multiple associated packages.
@@ -191,9 +194,9 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 	}
 }
 
-// dbSplit is a bufio.SplitFunc that looks for a double-newline and leaves it
+// dbSplitFunc is a bufio.SplitFunc that looks for a double-newline and leaves it
 // attached to the resulting token.
-func dbSplit(data []byte, atEOF bool) (int, []byte, error) {
+func dbSplitFunc(data []byte, atEOF bool) (int, []byte, error) {
 	const delim = "\n\n"
 	if atEOF && len(data) == 0 {
 		return 0, nil, nil
@@ -215,7 +218,7 @@ func dbSplit(data []byte, atEOF bool) (int, []byte, error) {
 
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
-	packagesMap := make(map[string]*database.FeatureVersion)
+	packagesMap := make(map[featurefmt.PackageKey]*database.FeatureVersion)
 	// Create a set to store removed packages to ensure it holds between files.
 	// TODO: This may not be needed cross-file...
 	removedPackages := set.NewStringSet()
