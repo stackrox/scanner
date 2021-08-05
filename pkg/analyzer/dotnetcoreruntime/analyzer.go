@@ -30,7 +30,7 @@ var (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) (match bool, extract bool) {
+func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) (matches bool, extract bool) {
 	return fileInfo.IsDir() && dotNetCorePattern.MatchString(fullPath), false
 }
 
