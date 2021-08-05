@@ -881,16 +881,16 @@ workflows:
     - build:
         <<: *runOnAllTags
         context:
-        - docker-io-and-stackrox-io-push
-        - quay-cgorman1-readwrite
+          - docker-io-and-stackrox-io-push
+          - quay-cgorman1-readwrite
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
     - build-rhel:
         <<: *runOnAllTags
         context:
-        - docker-io-and-stackrox-io-push
-        - quay-cgorman1-readwrite
+          - docker-io-and-stackrox-io-push
+          - quay-cgorman1-readwrite
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
