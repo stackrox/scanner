@@ -16,8 +16,8 @@ var (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) bool {
-	return match(fullPath)
+func (a analyzerImpl) Match(fullPath string, _ os.FileInfo) (matches bool, extract bool) {
+	return match(fullPath), true
 }
 
 func match(fullPath string) bool {

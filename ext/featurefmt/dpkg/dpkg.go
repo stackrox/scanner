@@ -18,6 +18,7 @@ package dpkg
 import (
 	"bufio"
 	"bytes"
+	"net/mail"
 	"regexp"
 	"strings"
 
@@ -27,17 +28,25 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 const (
 	statusFile = "var/lib/dpkg/status"
 	statusDir  = "var/lib/dpkg/status.d"
+
+	dpkgInfoPrefix      = "var/lib/dpkg/info/"
+	dpkgFilenamesSuffix = ".list"
 )
 
 var (
-	dpkgSrcCaptureRegexp      = regexp.MustCompile(`Source: (?P<name>[^\s]*)( \((?P<version>.*)\))?`)
+	dpkgSrcCaptureRegexp      = regexp.MustCompile(`(?P<name>[^\s]*)( \((?P<version>.*)\))?`)
 	dpkgSrcCaptureRegexpNames = dpkgSrcCaptureRegexp.SubexpNames()
+
+	// FilenamesListRegexp is the pattern for dpkg files which list the filenames the
+	// related package provides.
+	FilenamesListRegexp = regexp.MustCompile(`^var/lib/dpkg/info/(.*)\.list$`)
 )
 
 type lister struct{}
@@ -46,104 +55,192 @@ func init() {
 	featurefmt.RegisterLister("dpkg", &lister{})
 }
 
-func (l lister) parseComponent(file []byte, packagesMap map[string]database.FeatureVersion, removedPackages set.StringSet) {
-	var pkg database.FeatureVersion
-	var currentPkgIsRemoved bool
-	var err error
+///////////////////////////////////////////////////
+// BEGIN
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
+func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet) {
+	// The database is actually an RFC822-like message with "\n\n"
+	// separators, so don't be alarmed by the usage of the "net/mail"
+	// package here.
 	scanner := bufio.NewScanner(bytes.NewReader(file))
+	scanner.Split(dbSplitFunc)
 	for scanner.Scan() {
-		line := scanner.Text()
+		msg, err := mail.ReadMessage(bytes.NewReader(scanner.Bytes()))
+		if err != nil {
+			log.WithError(err).Warning("could not parse dpkg db entry. skipping")
+			continue
+		}
 
-		if strings.HasPrefix(line, "Package: ") {
-			// Package line
-			// Defines the name of the package
-			pkg.Feature.Name = strings.TrimSpace(strings.TrimPrefix(line, "Package: "))
-			pkg.Version = ""
-		} else if strings.HasPrefix(line, "Source: ") {
-			// Source line (Optional)
-			// Gives the name of the source package
-			// May also specifies a version
+		currPkgName := msg.Header.Get("Package")
 
-			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(line, -1)[0]
-			md := map[string]string{}
+		if strings.Contains(msg.Header.Get("Status"), "deinstall") {
+			// This package is meant to be uninstalled, so ignore it.
+			removedPackages.Add(currPkgName)
+			continue
+		}
 
+		currPkgVersion := msg.Header.Get("Version")
+		err = versionfmt.Valid(dpkg.ParserName, currPkgVersion)
+		if err != nil {
+			log.WithError(err).WithFields(map[string]interface{}{"name": currPkgName, "version": currPkgVersion}).Warning("could not parse package version. skipping")
+			continue
+		}
+
+		var sourceName, sourceVersion string
+
+		// Get the package's source, if it exists.
+		if src := msg.Header.Get("Source"); src != "" {
+			md := make(map[string]string)
+
+			srcCapture := dpkgSrcCaptureRegexp.FindAllStringSubmatch(src, -1)[0]
 			for i, n := range srcCapture {
 				md[dpkgSrcCaptureRegexpNames[i]] = strings.TrimSpace(n)
 			}
 
-			pkg.Feature.Name = md["name"]
+			sourceName = md["name"]
+			sourceVersion = currPkgVersion
 
 			if md["version"] != "" {
 				version := md["version"]
 				err = versionfmt.Valid(dpkg.ParserName, version)
-
 				if err != nil {
-					log.WithError(err).WithField("version", string(line[1])).Warning("could not parse package version. skipping")
-
-				} else {
-					pkg.Version = version
+					log.WithError(err).WithFields(log.Fields{"name": sourceName, "version": version}).Warning("could not parse source package version. skipping")
+					continue
 				}
+
+				sourceVersion = version
 			}
-		} else if strings.HasPrefix(line, "Version: ") && pkg.Version == "" {
-			// Version line
-			// Defines the version of the package
-			// This version is less important than a version retrieved from a Source line
-			// because the Debian vulnerabilities often skips the epoch from the Version field
-			// which is not present in the Source version, and because +bX revisions don't matter
-			version := strings.TrimPrefix(line, "Version: ")
-			err = versionfmt.Valid(dpkg.ParserName, version)
-			if err != nil {
-				log.WithError(err).WithField("version", string(line[1])).Warning("could not parse package version. skipping")
-			} else {
-				pkg.Version = version
-			}
-		} else if strings.HasPrefix(line, "Status: ") {
-			currentPkgIsRemoved = strings.Contains(line, "deinstall")
-		} else if line == "" {
-			pkg = database.FeatureVersion{}
-			currentPkgIsRemoved = false
 		}
 
-		// Add the package to the result array if we have all the information
-		if pkg.Feature.Name != "" && pkg.Version != "" {
-			key := pkg.Feature.Name + "#" + pkg.Version
+		var pkgName, pkgVersion string
+		var executables []string
 
-			if !currentPkgIsRemoved {
-				packagesMap[key] = pkg
-			} else {
-				removedPackages.Add(key)
+		if features.ActiveVulnMgmt.Enabled() {
+			pkgName = sourceName
+			pkgVersion = sourceVersion
+
+			var filenamesFile []byte
+
+			// See if the source package exists in the image.
+			// It exists, if there is a related *.list file.
+			// If it does exist, the source package's name and version are output instead of the current package's
+			// information. This is because it is easier to update the single source package than its, potentially,
+			// multiple related packages.
+			if sourceName != "" {
+				if filenamesFile = files[dpkgInfoPrefix+sourceName+dpkgFilenamesSuffix]; len(filenamesFile) == 0 {
+					arch := msg.Header.Get("Architecture")
+					// for example: /var/lib/dpkg/info/zlib1g:amd64.list
+					filenamesFile = files[dpkgInfoPrefix+sourceName+":"+arch+dpkgFilenamesSuffix]
+				}
 			}
-			pkg = database.FeatureVersion{}
-			currentPkgIsRemoved = false
+
+			// If the source package does not exist, output the current package.
+			if len(filenamesFile) == 0 {
+				pkgName = currPkgName
+				pkgVersion = currPkgVersion
+			}
+
+			// Read the list of files provided by the current package.
+			// for example: var/lib/dpkg/info/vim.list
+			if filenamesFile = files[dpkgInfoPrefix+currPkgName+dpkgFilenamesSuffix]; len(filenamesFile) == 0 {
+				arch := msg.Header.Get("Architecture")
+				// for example: /var/lib/dpkg/info/zlib1g:amd64.list
+				filenamesFile = files[dpkgInfoPrefix+currPkgName+":"+arch+dpkgFilenamesSuffix]
+			}
+
+			filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFile))
+			for filenamesFileScanner.Scan() {
+				filename := filenamesFileScanner.Text()
+
+				// The first character is always "/", which is removed when inserted into the files maps.
+				// It is assumed if the listed file is tracked, it is an executable file.
+				if _, exists := files[filename[1:]]; exists {
+					executables = append(executables, filename)
+				}
+			}
+		} else {
+			// When ActiveVulnMgmt is disabled, output the source package's name and version, if it exists.
+			pkgName = sourceName
+			pkgVersion = sourceVersion
+			if pkgName == "" {
+				pkgName = currPkgName
+				pkgVersion = currPkgVersion
+			}
+		}
+
+		key := featurefmt.PackageKey{
+			Name:    pkgName,
+			Version: pkgVersion,
+		}
+
+		// If the package already exists, then this must be a source package
+		// with multiple associated packages.
+		if feature, exists := packagesMap[key]; exists {
+			// Append the executable files for the associated package to the source package.
+			feature.ProvidedExecutables = append(feature.ProvidedExecutables, executables...)
+			continue
+		}
+
+		packagesMap[key] = &database.FeatureVersion{
+			Feature: database.Feature{
+				Name: pkgName,
+			},
+			Version:             pkgVersion,
+			ProvidedExecutables: executables,
 		}
 	}
 }
 
+// dbSplitFunc is a bufio.SplitFunc that looks for a double-newline and leaves it
+// attached to the resulting token.
+func dbSplitFunc(data []byte, atEOF bool) (int, []byte, error) {
+	const delim = "\n\n"
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+	if i := bytes.Index(data, []byte(delim)); i >= 0 {
+		return i + len(delim), data[:i+len(delim)], nil
+	}
+	if atEOF {
+		return len(data), data, nil
+	}
+	return 0, nil, nil
+}
+
+///////////////////////////////////////////////////
+// END
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
-	packagesMap := make(map[string]database.FeatureVersion)
+	packagesMap := make(map[featurefmt.PackageKey]*database.FeatureVersion)
+	// Create a set to store removed packages to ensure it holds between files.
+	// TODO: This may not be needed cross-file...
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
-		l.parseComponent(f, packagesMap, removedPackages)
+		l.parseComponent(files, f, packagesMap, removedPackages)
 	}
 
 	for filename, file := range files {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			l.parseComponent(file, packagesMap, removedPackages)
+			l.parseComponent(files, append(file, '\n'), packagesMap, removedPackages)
 		}
 	}
 
 	// Convert the map to a slice
 	packages := make([]database.FeatureVersion, 0, len(packagesMap))
-	for key, pkg := range packagesMap {
-		// Ignore packages that were removed
-		if removedPackages.Contains(key) {
-			continue
+	for _, pkg := range packagesMap {
+		if !removedPackages.Contains(pkg.Feature.Name) {
+			packages = append(packages, *pkg)
 		}
-		packages = append(packages, pkg)
 	}
 
 	return packages, nil
