@@ -18,6 +18,7 @@ package rpm
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"github.com/stackrox/rox/pkg/utils"
 	"io"
 	"os"
@@ -35,7 +36,7 @@ import (
 )
 
 const (
-	dbpath = "var/lib/rpm/Packages"
+	dbPath = "var/lib/rpm/Packages"
 
 	queryFmt = `%{name}\n` +
 		`%{evr}\n` +
@@ -50,7 +51,7 @@ func init() {
 }
 
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
-	f, hasFile := files[dbpath]
+	f, hasFile := files[dbPath]
 	if !hasFile {
 		return []database.FeatureVersion{}, nil
 	}
@@ -88,6 +89,8 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	if err := cmd.Start(); err != nil {
 		return []database.FeatureVersion{}, errors.Wrap(err, "Could not query RPM: either the DB is corrupted or FIPs mode is enabled")
 	}
+
+	features, err := parseFeatures(r, files)
 
 	if err != nil {
 		log.WithError(err).WithField("output", string(out)).Error("could not query RPM: either the DB is corrupted or FIPs mode is enabled")
@@ -140,10 +143,60 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	return packages, nil
 }
 
-func parsePackages(r io.Reader, files tarutil.FilesMap) []database.FeatureVersion {
+func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersion, error) {
+	var features []database.FeatureVersion
 
+	fv := new(database.FeatureVersion)
+	s := bufio.NewScanner(r)
+	for i := 0; s.Scan(); i++ {
+		line := strings.TrimSpace(s.Text())
+		if line == "" || strings.HasPrefix(line, "(none)") {
+			continue
+		}
+
+		if line == "." {
+			// Reached feature delimiter.
+
+			// Ensure the current feature is well-formed.
+			// If it is, add it to the return slice.
+			if fv.Name != "" && p.Version != "" && p.Arch != "" {
+				if len(p.ProvidedExecutables) > 0 {
+					fmt.Println(p, " ", p.ProvidedExecutables[0])
+				}
+				pkgs = append(pkgs, p)
+			}
+
+			// Start a new package definition and reset 'i'.
+			p = new(database.RHELv2Package)
+			i = -1
+			continue
+		}
+
+		switch i {
+		case 0:
+			// This is not a real feature. Skip it...
+			if line == "gpg-pubkey" {
+				continue
+			}
+			fv.Feature.Name = line
+		case 1:
+			fv.Version = line
+		default:
+			// i >= 2 is reserved for provided filenames.
+
+			// Rename to make it clear what the line represents.
+			filename := line
+			// The first character is always "/", which is removed when inserted into the files maps.
+			// It is assumed if the listed file is tracked, it is an executable file.
+			if _, exists := files[filename[1:]]; exists && filename[1:] != dbPath {
+				fv.ProvidedExecutables = append(fv.ProvidedExecutables, filename)
+			}
+		}
+	}
+
+	return features, s.Err()
 }
 
 func (l lister) RequiredFilenames() []string {
-	return []string{dbpath}
+	return []string{dbPath}
 }

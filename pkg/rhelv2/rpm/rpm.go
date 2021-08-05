@@ -52,7 +52,7 @@ const (
 		`[%{FILENAMES}\n]` +
 		`.\n`
 
-	packages         = `var/lib/rpm/Packages`
+	dbPath           = `var/lib/rpm/Packages`
 	contentManifests = `root/buildinfo/content_manifests`
 )
 
@@ -84,7 +84,7 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 		return nil, nil, err
 	}
 
-	f, hasFile := files[packages]
+	f, hasFile := files[dbPath]
 	if !hasFile {
 		return nil, cpes, nil
 	}
@@ -189,7 +189,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
 			// It is assumed if the listed file is tracked, it is an executable file.
-			if _, exists := files[filename[1:]]; exists && filename[1:] != packages {
+			if _, exists := files[filename[1:]]; exists && filename[1:] != dbPath {
 				p.ProvidedExecutables = append(p.ProvidedExecutables, filename)
 			}
 		}
@@ -230,5 +230,5 @@ func getContentManifestFileContents(files tarutil.FilesMap) []byte {
 
 // RequiredFilenames lists the files required to be present for analysis to be run.
 func RequiredFilenames() []string {
-	return []string{packages, contentManifests}
+	return []string{dbPath, contentManifests}
 }
