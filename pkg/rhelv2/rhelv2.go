@@ -117,7 +117,6 @@ func UpdateV2(outputDir string) (int, error) {
 				continue
 			}
 		case strings.Contains(p, "RHEL8"):
-		case strings.Contains(p, "RHEL9"):
 		default: // skip
 			continue
 		}
