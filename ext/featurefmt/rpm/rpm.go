@@ -17,11 +17,14 @@ package rpm
 
 import (
 	"bufio"
-	"errors"
+	"bytes"
+	"github.com/stackrox/rox/pkg/utils"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -31,7 +34,14 @@ import (
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
-const dbpath = "var/lib/rpm/Packages"
+const (
+	dbpath = "var/lib/rpm/Packages"
+
+	queryFmt = `%{name}\n` +
+		`%{evr}\n` +
+		`[%{FILENAMES}\n]` +
+		`.\n`
+)
 
 type lister struct{}
 
@@ -46,7 +56,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	}
 
 	// Create a map to store packages and ensure their uniqueness
-	packagesMap := make(map[string]database.FeatureVersion)
+	packagesMap := make(map[featurefmt.PackageKey]database.FeatureVersion)
 
 	// Write the required "Packages" file to disk
 	tmpDir, err := os.MkdirTemp("", "rpm")
@@ -65,7 +75,20 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	}
 
 	// Extract binary package names because RHSA refers to binary package names.
-	out, err := exec.Command("rpm", "--dbpath", tmpDir, "-qa", "--qf", "%{NAME} %{EPOCH}:%{VERSION}-%{RELEASE}\n").CombinedOutput()
+	cmd := exec.Command("rpm", "--dbpath", tmpDir, "-qa", "--qf", queryFmt)
+	r, err := cmd.StdoutPipe()
+	if err != nil {
+		return []database.FeatureVersion{}, errors.Wrap(err, "Unable to get pipe for RPM command")
+	}
+	defer utils.IgnoreError(r.Close)
+
+	var errbuf bytes.Buffer
+	cmd.Stderr = &errbuf
+
+	if err := cmd.Start(); err != nil {
+		return []database.FeatureVersion{}, errors.Wrap(err, "Could not query RPM: either the DB is corrupted or FIPs mode is enabled")
+	}
+
 	if err != nil {
 		log.WithError(err).WithField("output", string(out)).Error("could not query RPM: either the DB is corrupted or FIPs mode is enabled")
 		// Bubble up because this may be fixable by using a different base image.
@@ -101,7 +124,11 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			},
 			Version: version,
 		}
-		packagesMap[pkg.Feature.Name+"#"+pkg.Version] = pkg
+		key := featurefmt.PackageKey{
+			Name:    pkg.Feature.Name,
+			Version: pkg.Version,
+		}
+		packagesMap[key] = pkg
 	}
 
 	// Convert the map to a slice
@@ -111,6 +138,10 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	}
 
 	return packages, nil
+}
+
+func parsePackages(r io.Reader, files tarutil.FilesMap) []database.FeatureVersion {
+
 }
 
 func (l lister) RequiredFilenames() []string {
