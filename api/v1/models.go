@@ -402,14 +402,15 @@ func (v Vulnerability) DatabaseModel() (database.Vulnerability, error) {
 
 // Feature is a scanned package in an image.
 type Feature struct {
-	Name            string          `json:"Name,omitempty"`
-	NamespaceName   string          `json:"NamespaceName,omitempty"`
-	VersionFormat   string          `json:"VersionFormat,omitempty"`
-	Version         string          `json:"Version,omitempty"`
-	Vulnerabilities []Vulnerability `json:"Vulnerabilities,omitempty"`
-	AddedBy         string          `json:"AddedBy,omitempty"`
-	Location        string          `json:"Location,omitempty"`
-	FixedBy         string          `json:"FixedBy,omitempty"`
+	Name                string          `json:"Name,omitempty"`
+	NamespaceName       string          `json:"NamespaceName,omitempty"`
+	VersionFormat       string          `json:"VersionFormat,omitempty"`
+	Version             string          `json:"Version,omitempty"`
+	Vulnerabilities     []Vulnerability `json:"Vulnerabilities,omitempty"`
+	AddedBy             string          `json:"AddedBy,omitempty"`
+	Location            string          `json:"Location,omitempty"`
+	FixedBy             string          `json:"FixedBy,omitempty"`
+	ProvidedExecutables []string        `json:"ProvidedExecutables,omitempty"`
 }
 
 // DatabaseModel returns a database.FeatureVersion based on the caller Feature.
