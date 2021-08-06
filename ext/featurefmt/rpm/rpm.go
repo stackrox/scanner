@@ -30,6 +30,7 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -148,8 +149,8 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			// Rename to make it clear what the line represents.
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
-			// It is assumed if the listed file is tracked, it is an executable file.
-			if _, exists := files[filename[1:]]; exists && filename[1:] != dbPath {
+			// It is assumed if the listed file is tracked, and not otherwise required, it is an executable file.
+			if _, exists := files[filename[1:]]; exists && !rpm.AllRHELRequiredFiles.Contains(filename[1:]) {
 				fv.ProvidedExecutables = append(fv.ProvidedExecutables, filename)
 			}
 		}

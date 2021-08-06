@@ -18,8 +18,11 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurens/osrelease"
+	"github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
@@ -56,9 +59,17 @@ const (
 	contentManifests = `root/buildinfo/content_manifests`
 )
 
-var (
-	contentManifestPattern = regexp.MustCompile(`^root/buildinfo/content_manifests/.*\.json$`)
-)
+var contentManifestPattern = regexp.MustCompile(`^root/buildinfo/content_manifests/.*\.json$`)
+
+// AllRHELRequiredFiles lists all the names of the files required to identify RHEL-based releases.
+var AllRHELRequiredFiles set.StringSet
+
+func init() {
+	AllRHELRequiredFiles.Add(dbPath)
+	AllRHELRequiredFiles.AddAll(RequiredFilenames()...)
+	AllRHELRequiredFiles.AddAll(redhatrelease.RequiredFilenames...)
+	AllRHELRequiredFiles.AddAll(osrelease.RequiredFilenames...)
+}
 
 // ListFeatures returns the features found from the given files.
 // returns a slice of packages found via rpm and a slice of CPEs found in
@@ -186,7 +197,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
 			// It is assumed if the listed file is tracked, it is an executable file.
-			if _, exists := files[filename[1:]]; exists && filename[1:] != dbPath {
+			if _, exists := files[filename[1:]]; exists && !AllRHELRequiredFiles.Contains(filename[1:]) {
 				p.ProvidedExecutables = append(p.ProvidedExecutables, filename)
 			}
 		}
