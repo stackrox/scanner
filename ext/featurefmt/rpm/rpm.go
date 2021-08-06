@@ -18,7 +18,6 @@ package rpm
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -125,10 +124,6 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			// Ensure the current feature is well-formed.
 			// If it is, add it to the return slice.
 			if fv.Feature.Name != "" && fv.Version != "" {
-				if len(fv.ProvidedExecutables) > 0 {
-					// TODO: remove
-					fmt.Println(fv, " ", fv.ProvidedExecutables[0])
-				}
 				featureVersions = append(featureVersions, fv)
 			}
 
