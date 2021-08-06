@@ -67,6 +67,8 @@ type FeatureVersion struct {
 	Feature    Feature
 	Version    string
 	AffectedBy []Vulnerability
+	// ProvidedExecutables indicates which regular executable files this feature provided.
+	ProvidedExecutables []string
 
 	// For output purposes. Only make sense when the feature version is in the context of an image.
 	AddedBy Layer
