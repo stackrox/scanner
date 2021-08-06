@@ -323,9 +323,6 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id: "CVE-2020-27675",
-				},
-				{
 					id:      "CVE-2020-14381",
 					fixedBy: "5.3.0-1020.22~18.04.1",
 				},
