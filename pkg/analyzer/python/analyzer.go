@@ -29,12 +29,12 @@ var (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) bool {
+func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) (matches bool, extract bool) {
 	if fileInfo.IsDir() {
-		return false
+		return false, false
 	}
 
-	return matchSuffix(fullPath)
+	return matchSuffix(fullPath), true
 }
 
 func matchSuffix(fullPath string) bool {

@@ -18,13 +18,19 @@ package apk
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/apk"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
+)
+
+const (
+	dbPath = "lib/apk/db/installed"
 )
 
 func init() {
@@ -34,7 +40,7 @@ func init() {
 type lister struct{}
 
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
-	file, exists := files["lib/apk/db/installed"]
+	file, exists := files[dbPath]
 	if !exists {
 		return []database.FeatureVersion{}, nil
 	}
@@ -42,38 +48,53 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// Iterate over each line in the "installed" file attempting to parse each
 	// package into a feature that will be stored in a set to guarantee
 	// uniqueness.
-	pkgSet := make(map[string]database.FeatureVersion)
-	ipkg := database.FeatureVersion{}
+	pkgSet := make(map[featurefmt.PackageKey]database.FeatureVersion)
+	var pkg database.FeatureVersion
 	scanner := bufio.NewScanner(bytes.NewBuffer(file))
+	var dir string
 	for scanner.Scan() {
 		line := scanner.Text()
-		if len(line) < 2 {
-			continue
-		}
-
 		// Parse the package name or version.
+		// See https://wiki.alpinelinux.org/wiki/Apk_spec#Syntax for more information.
 		switch {
+		case line == "":
+			// Reached end of package definition.
+
+			// Protect the map from entries with invalid versions.
+			if pkg.Feature.Name != "" && pkg.Version != "" {
+				key := featurefmt.PackageKey{
+					Name:    pkg.Feature.Name,
+					Version: pkg.Version,
+				}
+				pkgSet[key] = pkg
+			}
+
+			pkg = database.FeatureVersion{}
+		case len(line) < 2:
+			// Invalid line.
+			continue
 		case line[:2] == "P:":
-			ipkg.Feature.Name = line[2:]
+			// Start of a package definition.
+			pkg.Feature.Name = line[2:]
 		case line[:2] == "V:":
 			version := line[2:]
 			err := versionfmt.Valid(apk.ParserName, version)
 			if err != nil {
-				log.WithError(err).WithField("version", version).Warning("could not parse package version; skipping")
-			} else {
-				ipkg.Version = version
+				// Assumes we already passed the "P:", as is expected in a well-formed alpine database.
+				log.WithError(err).WithFields(log.Fields{"name": pkg.Feature.Name, "version": version}).Warning("could not parse package version; skipping")
+				continue
 			}
-		case line == "":
-			// Restart if the parser reaches another package definition before
-			// creating a valid package.
-			ipkg = database.FeatureVersion{}
-		}
 
-		// If we have a whole feature, store it in the set and try to parse a new
-		// one.
-		if ipkg.Feature.Name != "" && ipkg.Version != "" {
-			pkgSet[ipkg.Feature.Name+"#"+ipkg.Version] = ipkg
-			ipkg = database.FeatureVersion{}
+			pkg.Version = version
+		case line[:2] == "F:" && features.ActiveVulnMgmt.Enabled():
+			dir = line[2:]
+		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
+			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
+			// The first character is always "/", which is removed when inserted into the files maps.
+			// It is assumed if the listed file is tracked, it is an executable file.
+			if _, exists := files[filename[1:]]; exists {
+				pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, filename)
+			}
 		}
 	}
 
@@ -87,5 +108,5 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 }
 
 func (l lister) RequiredFilenames() []string {
-	return []string{"lib/apk/db/installed"}
+	return []string{dbPath}
 }

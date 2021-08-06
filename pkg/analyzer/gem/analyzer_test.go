@@ -8,5 +8,7 @@ import (
 
 func TestMatching(t *testing.T) {
 	a := Analyzer()
-	assert.True(t, a.Match("/usr/local/bundle/specifications/rails-4.2.5.1.gemspec", nil))
+	match, extract := a.Match("/usr/local/bundle/specifications/rails-4.2.5.1.gemspec", nil)
+	assert.True(t, match)
+	assert.True(t, extract)
 }
