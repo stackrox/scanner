@@ -39,7 +39,7 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 		if len(components) == 0 {
 			return components, nil
 		}
-		f, hasFile := files[packages]
+		f, hasFile := files[dbPath]
 		if !hasFile {
 			return components, nil
 		}

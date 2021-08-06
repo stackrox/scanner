@@ -7,9 +7,8 @@ import (
 	"testing"
 
 	"github.com/stackrox/rox/pkg/testutils/envisolator"
-	"github.com/stackrox/scanner/pkg/features"
-
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"

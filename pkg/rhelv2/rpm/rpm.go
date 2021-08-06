@@ -152,9 +152,6 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			// Ensure the current package is well-formed.
 			// If it is, add it to the return slice.
 			if p.Name != "" && p.Version != "" && p.Arch != "" {
-				if len(p.ProvidedExecutables) > 0 {
-					fmt.Println(p, " ", p.ProvidedExecutables[0])
-				}
 				pkgs = append(pkgs, p)
 			}
 
