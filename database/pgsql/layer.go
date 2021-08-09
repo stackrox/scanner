@@ -19,9 +19,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/lib/pq"
-
 	"github.com/guregu/null/zero"
+	"github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/commonerr"

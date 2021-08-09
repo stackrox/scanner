@@ -128,6 +128,8 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
+	providedExecs := []string{"/exec/me", "/pls/exec/me"}
+
 	dbLayer := database.Layer{
 		Name:          "example",
 		EngineVersion: 0,
@@ -159,6 +161,7 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 						FixedBy: "7.35.0-1ubuntu2.20+esm2",
 					},
 				},
+				ProvidedExecutables: providedExecs,
 			},
 		},
 	}
@@ -168,12 +171,15 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].FixedBy)
+	assert.ElementsMatch(t, providedExecs, layer.Features[0].ProvidedExecutables)
 }
 
 func TestLatestCentOSFeatureVersion(t *testing.T) {
 	envIsolator := testutils.NewEnvIsolator(t)
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
+
+	providedExecs := []string{"/exec/me", "/pls/exec/me"}
 
 	dbLayer := database.Layer{
 		Name:          "example",
@@ -218,6 +224,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 						FixedBy: "0:3.26.0-11.el8",
 					},
 				},
+				ProvidedExecutables: providedExecs,
 			},
 		},
 	}
@@ -227,6 +234,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
+	assert.ElementsMatch(t, providedExecs, layer.Features[0].ProvidedExecutables)
 }
 
 func TestLatestLanguageFeatureVersion(t *testing.T) {
