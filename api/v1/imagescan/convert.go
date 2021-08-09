@@ -65,6 +65,7 @@ func convertFeatures(apiFeatures []apiV1.Feature) ([]*v1.Feature, error) {
 			FeatureType:     a.VersionFormat,
 			AddedByLayer:    a.AddedBy,
 			Location:        a.Location,
+			ProvidedExecutables: a.ProvidedExecutables,
 		})
 	}
 	return features, nil
