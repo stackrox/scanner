@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/commonerr"
