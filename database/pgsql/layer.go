@@ -19,6 +19,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/lib/pq"
+
 	"github.com/guregu/null/zero"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
@@ -168,6 +170,7 @@ func getLayerFeatureVersions(tx *sql.Tx, layerID int, lineage string) ([]databas
 			&fv.Feature.Name,
 			&fv.ID,
 			&fv.Version,
+			pq.Array(&fv.ProvidedExecutables),
 			&fv.AddedBy.ID,
 			&fv.AddedBy.Name,
 		)
