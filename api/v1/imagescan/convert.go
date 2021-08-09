@@ -59,12 +59,12 @@ func convertFeatures(apiFeatures []apiV1.Feature) ([]*v1.Feature, error) {
 		vulns := convertVulnerabilities(a.Vulnerabilities)
 
 		features = append(features, &v1.Feature{
-			Name:            a.Name,
-			Version:         a.Version,
-			Vulnerabilities: vulns,
-			FeatureType:     a.VersionFormat,
-			AddedByLayer:    a.AddedBy,
-			Location:        a.Location,
+			Name:                a.Name,
+			Version:             a.Version,
+			Vulnerabilities:     vulns,
+			FeatureType:         a.VersionFormat,
+			AddedByLayer:        a.AddedBy,
+			Location:            a.Location,
 			ProvidedExecutables: a.ProvidedExecutables,
 		})
 	}
