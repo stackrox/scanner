@@ -37,9 +37,9 @@ func TestRPMFeatureDetection(t *testing.T) {
 			Arch:    "x86_64",
 		},
 		{
-			Name: "redhat-release",
+			Name:    "redhat-release",
 			Version: "8.3-1.0.el8",
-			Arch: "x86_64",
+			Arch:    "x86_64",
 		},
 	}
 
