@@ -86,6 +86,8 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 				})
 			}
 
+			assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
+
 			if !checkContainsOnly {
 				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
 					matchingBytes, _ := json.MarshalIndent(matching.Vulnerabilities, "", "  ")
