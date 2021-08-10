@@ -28,7 +28,7 @@ func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1
 	if allowNotFound && candidateIdx == -1 {
 		return nil
 	}
-	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list", featureToFind)
+	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list: %v", featureToFind, featureList)
 	return &featureList[candidateIdx]
 }
 
