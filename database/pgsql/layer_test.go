@@ -289,15 +289,13 @@ func testInsertLayerTree(t *testing.T, datastore database.Datastore) {
 	}
 	assert.Len(t, l4a.Features, 3)
 	for _, featureVersion := range l4a.Features {
+		errMsg := fmt.Sprintf("TestInsertLayer4a contains an unexpected package: %#v. Should contain %#v and %#v and %#v.", featureVersion, f1, f2, f3)
 		// Check if the feature version somehow is equal to all three.
-		if cmpFV(featureVersion, f1) && cmpFV(featureVersion, f2) && cmpFV(featureVersion, f3) {
-			assert.Error(t, fmt.Errorf("TestInsertLayer4a contains an unexpected package: %#v. Should contain %#v and %#v and %#v.", featureVersion, f1, f2, f3))
-		}
+		assert.False(t, cmpFV(featureVersion, f1) && cmpFV(featureVersion, f2) && cmpFV(featureVersion, f3), errMsg)
 		// Check if the feature version doesn't equal any of the three.
-		if !cmpFV(featureVersion, f1) && !cmpFV(featureVersion, f2) && !cmpFV(featureVersion, f3) {
-			assert.Error(t, fmt.Errorf("TestInsertLayer4a contains an unexpected package: %#v. Should contain %#v and %#v and %#v.", featureVersion, f1, f2, f3))
-		}
-		// It is assumed if we get past the two ifs without error, then we are ok.
+		assert.False(t, !cmpFV(featureVersion, f1) && !cmpFV(featureVersion, f2) && !cmpFV(featureVersion, f3), errMsg)
+
+		// It is assumed if the two previous asserts pass, then we are ok.
 	}
 
 	l4b := retrievedLayers["TestInsertLayer4b"]
