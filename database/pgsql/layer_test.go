@@ -282,6 +282,7 @@ func testInsertLayerTree(t *testing.T, datastore database.Datastore) {
 		}
 	}
 
+	f2.ProvidedExecutables = []string{}
 	l4a := retrievedLayers["TestInsertLayer4a"]
 	if assert.NotNil(t, l4a.Namespace) {
 		assert.Equal(t, "TestInsertLayerNamespace2", l4a.Namespace.Name)
