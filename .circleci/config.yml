@@ -390,6 +390,9 @@ commands:
       cluster-id:
         type: string
 
+    environment:
+      - ROX_ACTIVE_VULN_MGMT: true
+
     steps:
       - checkout
       - setup_remote_docker
