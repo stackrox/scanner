@@ -751,6 +751,8 @@ jobs:
 
   e2e-tests-rhel:
     <<: *defaults
+    environment:
+      - ROX_ACTIVE_VULN_MGMT: true
     steps:
       - run-e2e-tests:
           cluster-id: rhel
