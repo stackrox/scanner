@@ -48,8 +48,7 @@ func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*datab
 	// Sort packages to avoid potential deadlock.
 	// Sort by the unique index (name, version, module, arch).
 	sort.SliceStable(pkgs, func(i, j int) bool {
-		a := pkgs[i]
-		b := pkgs[j]
+		a, b := pkgs[i], pkgs[j]
 		if a.Name != b.Name {
 			return a.Name < b.Name
 		}
