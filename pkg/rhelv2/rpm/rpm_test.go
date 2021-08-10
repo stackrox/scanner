@@ -36,6 +36,11 @@ func TestRPMFeatureDetection(t *testing.T) {
 			Version: "6.1-7.20180224.el8",
 			Arch:    "x86_64",
 		},
+		{
+			Name: "redhat-release",
+			Version: "8.3-1.0.el8",
+			Arch: "x86_64",
+		},
 	}
 
 	unexpectedPkgs := []*database.RHELv2Package{
@@ -102,6 +107,11 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				"/usr/lib64/libpanelw.so.6",
 			},
 		},
+		{
+			Name:    "redhat-release",
+			Version: "8.3-1.0.el8",
+			Arch:    "x86_64",
+		},
 	}
 
 	unexpectedPkgs := []*database.RHELv2Package{
@@ -136,6 +146,9 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 		"usr/lib64/libform.so.6":                     nil,
 		"usr/lib64/libncursesw.so.6.1":               nil,
 		"usr/lib64/libpanelw.so.6":                   nil,
+		"etc/redhat-release":                         nil,
+		"etc/os-release":                             nil,
+		"usr/lib/redhat-release":                     nil,
 	})
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, cpes, expectedCPEs)
