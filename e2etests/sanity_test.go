@@ -147,6 +147,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "ubuntu:16.04",
 					VersionFormat: "dpkg",
 					Version:       "0.0~r131-2ubuntu2",
+					ProvidedExecutables: []string{"/usr/lib/x86_64-linux-gnu/liblz4.so.1"},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2021-3520",
@@ -187,6 +188,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName:   "debian:8",
 					VersionFormat:   "dpkg",
 					Version:         "1:3.3-1",
+					ProvidedExecutables: []string{"/usr/bin/cmp", "/usr/bin/diff", "/usr/bin/diff3", "/usr/bin/sdiff"},
 					Vulnerabilities: nil,
 					AddedBy:         "sha256:6d827a3ef358f4fa21ef8251f95492e667da826653fd43641cef5a877dc03a70",
 				},

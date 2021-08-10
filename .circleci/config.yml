@@ -390,9 +390,6 @@ commands:
       cluster-id:
         type: string
 
-    environment:
-      - ROX_ACTIVE_VULN_MGMT: true
-
     steps:
       - checkout
       - setup_remote_docker
@@ -746,6 +743,8 @@ jobs:
 
   e2e-tests:
     <<: *defaults
+    environment:
+      - ROX_ACTIVE_VULN_MGMT: true
     steps:
       - run-e2e-tests:
           cluster-id: alpine
