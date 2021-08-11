@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/api/v1"
@@ -122,6 +123,8 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 
 func TestImageSanity(t *testing.T) {
 	cli := client.New(getScannerHTTPEndpoint(t), true)
+
+	_, inCIRun := os.LookupEnv("CI")
 
 	for _, testCase := range []struct {
 		image              string
@@ -1692,8 +1695,6 @@ func TestImageSanity(t *testing.T) {
 		{
 			image:           "docker.io/richxsl/rhel7@sha256:8f3aae325d2074d2dc328cb532d6e7aeb0c588e15ddf847347038fe0566364d6",
 			registry:        "https://registry-1.docker.io",
-			username:        os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password:        os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:          "NVD",
 			uncertifiedRHEL: true,
 			expectedFeatures: []v1.Feature{
@@ -1736,8 +1737,6 @@ func TestImageSanity(t *testing.T) {
 			image:    "alpine:3.13.0",
 			registry: "https://registry-1.docker.io",
 			source:   "NVD",
-			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apk-tools",
@@ -1811,8 +1810,6 @@ func TestImageSanity(t *testing.T) {
 			image:    "alpine:3.14.0",
 			registry: "https://registry-1.docker.io",
 			source:   "NVD",
-			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apk-tools",
@@ -1828,6 +1825,11 @@ func TestImageSanity(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
+			if inCIRun && strings.HasPrefix(testCase.image, "docker.io") && testCase.username != "" {
+				testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/cgorman1/qa:sandbox-", -1)
+				testCase.username = os.Getenv("QUAY_CGORMAN1_RO_USER")
+				testCase.password = os.Getenv("QUAY_CGORMAN1_RO_PASSWORD")
+			}
 			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
 		})
 	}
