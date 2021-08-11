@@ -2,10 +2,10 @@
 version: 2.1
 
 defaultImage: &defaultImage
-  image: quay.io/stackrox/testing:apollo-ci-0.3.12
+  image: quay.io/cgorman1/apollo-ci:0.3.13
   auth:
-    username: $QUAY_USERNAME
-    password: $QUAY_PASSWORD
+    username: $QUAY_CGORMAN1_RO_USER
+    password: $QUAY_CGORMAN1_RO_PASSWORD
 
 defaultWorkingDirectory: &defaultWorkingDirectory '/go/src/github.com/stackrox/scanner'
 
@@ -19,15 +19,15 @@ runOnAllTags: &runOnAllTags
     tags:
       only: /.*/
 
-runOnAllTagsWithDockerIOPullCtx: &runOnAllTagsWithDockerIOPullCtx
+runOnAllTagsWithQuayPullCtx: &runOnAllTagsWithQuayPullCtx
   <<: *runOnAllTags
-  context: docker-io-pull
+  context: quay-cgorman1-readonly
 
 runOnAllTagsWithRedHatCtx: &runOnAllTagsWithRedHatCtx
   <<: *runOnAllTags
   context:
-  - docker-io-pull
   - redhat-developer-account-login
+  - quay-cgorman1-readonly
 
 # https://circleci.com/developer/orbs/orb/circleci/slack
 orbs:
@@ -793,27 +793,27 @@ workflows:
 
     jobs:
       - generate-genesis-dump:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+          <<: *runOnAllTagsWithQuayPullCtx
       - create-postgres-dump-from-genesis-dump:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+          <<: *runOnAllTagsWithQuayPullCtx
           requires:
             - generate-genesis-dump
       - create-diff-dumps:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+          <<: *runOnAllTagsWithQuayPullCtx
           requires:
             - generate-genesis-dump
       - upload-dumps-for-embedding-into-image:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+          <<: *runOnAllTagsWithQuayPullCtx
           requires:
             - generate-genesis-dump
       - upload-diff-dumps-and-offline-dumps:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+          <<: *runOnAllTagsWithQuayPullCtx
           requires:
             - create-diff-dumps
       - unit-tests:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+          <<: *runOnAllTagsWithQuayPullCtx
       - style-checks:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+          <<: *runOnAllTagsWithQuayPullCtx
       - build:
           <<: *runOnAllTags
           context:
@@ -831,7 +831,7 @@ workflows:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
       - provision-cluster:
-          <<: *runOnAllTagsWithDockerIOPullCtx
+          <<: *runOnAllTagsWithQuayPullCtx
           requires:
             - create-postgres-dump-from-genesis-dump
       - e2e-tests:
@@ -857,31 +857,32 @@ workflows:
   build:
     jobs:
     - generate-genesis-dump:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithQuayPullCtx
     - create-postgres-dump-from-genesis-dump:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithQuayPullCtx
         requires:
           - generate-genesis-dump
     - create-diff-dumps:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithQuayPullCtx
         requires:
           - generate-genesis-dump
     - upload-dumps-for-embedding-into-image:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithQuayPullCtx
         requires:
           - generate-genesis-dump
     - upload-diff-dumps-and-offline-dumps:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithQuayPullCtx
         requires:
           - create-diff-dumps
     - unit-tests:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithQuayPullCtx
     - style-checks:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithQuayPullCtx
     - build:
         <<: *runOnAllTags
         context:
           - docker-io-and-stackrox-io-push
+          - quay-cgorman1-readonly
           - quay-cgorman1-readwrite
         requires:
           - create-postgres-dump-from-genesis-dump
@@ -890,16 +891,17 @@ workflows:
         <<: *runOnAllTags
         context:
           - docker-io-and-stackrox-io-push
+          - quay-cgorman1-readonly
           - quay-cgorman1-readwrite
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
     - provision-cluster:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithQuayPullCtx
         requires:
           - create-postgres-dump-from-genesis-dump
     - provision-cluster-rhel:
-        <<: *runOnAllTagsWithDockerIOPullCtx
+        <<: *runOnAllTagsWithQuayPullCtx
         requires:
           - create-postgres-dump-from-genesis-dump
     - e2e-tests:
