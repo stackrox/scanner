@@ -1418,6 +1418,7 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: "rpm",
 					Version:       "1.2.17-19.2.el7.noarch",
 					ProvidedExecutables: []string{
+						// TODO: /opt/rh/rh-maven35/root/usr/share/java/log4j-1.2.17.jar is not actually executable.
 						"/opt/rh/rh-maven35/root/usr/share/java/log4j-1.2.17.jar",
 						"/opt/rh/rh-maven35/root/usr/share/java/log4j-1.jar",
 						"/opt/rh/rh-maven35/root/usr/share/java/log4j12-1.2.17.jar",
@@ -1425,9 +1426,10 @@ func TestImageSanity(t *testing.T) {
 					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
-					Name:                "rh-maven35-jackson-databind",
-					VersionFormat:       "rpm",
-					Version:             "2.7.6-2.10.el7.noarch",
+					Name:          "rh-maven35-jackson-databind",
+					VersionFormat: "rpm",
+					Version:       "2.7.6-2.10.el7.noarch",
+					// TODO: /opt/rh/rh-maven35/root/usr/share/java/jackson-databind.jar is not actually executable.
 					ProvidedExecutables: []string{"/opt/rh/rh-maven35/root/usr/share/java/jackson-databind.jar"},
 					Vulnerabilities: []v1.Vulnerability{
 						{
