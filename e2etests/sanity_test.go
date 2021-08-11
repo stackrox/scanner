@@ -191,7 +191,7 @@ func TestImageSanity(t *testing.T) {
 					Name:            "diffutils",
 					NamespaceName:   "debian:8",
 					VersionFormat:   "dpkg",
-					Version:         "1:3.3-1",
+					Version:         "1:3.3-1+b1",
 					Vulnerabilities: nil,
 					AddedBy:         "sha256:6d827a3ef358f4fa21ef8251f95492e667da826653fd43641cef5a877dc03a70",
 				},
