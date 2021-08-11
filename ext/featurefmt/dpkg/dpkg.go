@@ -148,8 +148,10 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 				}
 			}
 			if err := filenamesFileScanner.Err(); err != nil {
-				log.WithError(err).WithFields(log.Fields{"name": currPkgName, "version": currPkgVersion}).Warning("could not parse provided file list. skipping")
-				continue
+				log.WithError(err).WithFields(log.Fields{"name": currPkgName, "version": currPkgVersion}).Warning("could not parse provided file list")
+				// Even though there is an error, do not skip the package.
+				// The active vulnerability management analysis may be incomplete, but that should not prevent us from
+				// performing typical vulnerability management analysis.
 			}
 		}
 
