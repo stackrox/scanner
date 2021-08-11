@@ -15,6 +15,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// ListFeaturesTest does the same as ListFeatures but should only be used for testing.
+func ListFeaturesTest(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
+	if features.ActiveVulnMgmt.Enabled() {
+		return listFeatures(files, queryFmtActiveVulnMgmtTest)
+	}
+	return listFeatures(files, queryFmtTest)
+}
+
 func TestRPMFeatureDetection(t *testing.T) {
 	env := envisolator.NewEnvIsolator(t)
 	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
