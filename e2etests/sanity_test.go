@@ -147,7 +147,10 @@ func TestImageSanity(t *testing.T) {
 			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
-					Name:                "lz4",
+					// This used to be lz4, which is the source package. However,
+					// lz4 is not actually installed on this image, so it does not make sense to have
+					// users update a non-existent package.
+					Name:                "liblz4-1",
 					NamespaceName:       "ubuntu:16.04",
 					VersionFormat:       "dpkg",
 					Version:             "0.0~r131-2ubuntu2",
@@ -188,9 +191,10 @@ func TestImageSanity(t *testing.T) {
 			source:   "NVD",
 			expectedFeatures: []v1.Feature{
 				{
-					Name:            "diffutils",
-					NamespaceName:   "debian:8",
-					VersionFormat:   "dpkg",
+					Name:          "diffutils",
+					NamespaceName: "debian:8",
+					VersionFormat: "dpkg",
+					// This was originally 1:3.3-1, which was the version of the source package, diffutils (same package name...). However, the true installed version is 1:3.3-1+b1.
 					Version:         "1:3.3-1+b1",
 					Vulnerabilities: nil,
 					AddedBy:         "sha256:6d827a3ef358f4fa21ef8251f95492e667da826653fd43641cef5a877dc03a70",

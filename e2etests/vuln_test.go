@@ -260,7 +260,7 @@ func TestDistrolessVulnImages(t *testing.T) {
 					{name: "CVE-2019-1551"},
 				},
 				},
-				{"glibc", "2.24-11+deb9u4", []expectedVuln{
+				{"libc6", "2.24-11+deb9u4", []expectedVuln{
 					{name: "CVE-2019-9192"},
 					{name: "CVE-2019-6488"},
 					{name: "CVE-2018-6551"},
@@ -293,7 +293,7 @@ func TestDistrolessVulnImages(t *testing.T) {
 		{
 			image: "gcr.io/distroless/java-debian10@sha256:6fa3088bb0b2df2419dda9808cdf90d706ff190cff17c2a68397ac7765b3098f",
 			expectedFeatures: []feature{
-				{"openjdk-11", "11.0.9+11-1~deb10u1", []expectedVuln{}},
+				{"openjdk-11-jre-headless", "11.0.9+11-1~deb10u1", []expectedVuln{}},
 				{"openssl", "1.1.1d-0+deb10u3", []expectedVuln{
 					{name: "CVE-2020-1971"},
 					{name: "CVE-2021-23841"},
@@ -303,7 +303,7 @@ func TestDistrolessVulnImages(t *testing.T) {
 		{
 			image: "gcr.io/distroless/python2.7@sha256:6d3895c4a1629ac99e73c7dc9cbe0ad8cb213d6cdebf3e835c2c388fc5aab1b2",
 			expectedFeatures: []feature{
-				{"python2.7", "2.7.13-2+deb9u4", []expectedVuln{
+				{"python2.7-minimal", "2.7.13-2+deb9u4", []expectedVuln{
 					{name: "CVE-2013-7040"},
 					{name: "CVE-2019-16935"},
 					{name: "CVE-2019-18348"},
@@ -318,7 +318,7 @@ func TestDistrolessVulnImages(t *testing.T) {
 		{
 			image: "gcr.io/distroless/python3@sha256:8e74b6697d0a741a5d1bb7366260f48721783f71e01d800c13cd2392586639f3",
 			expectedFeatures: []feature{
-				{"python3.5", "3.5.3-1+deb9u2", []expectedVuln{
+				{"python3.5-minimal", "3.5.3-1+deb9u2", []expectedVuln{
 					{name: "CVE-2020-26116"},
 					{name: "CVE-2019-20907"},
 					{name: "CVE-2019-9674"},
