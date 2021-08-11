@@ -150,11 +150,12 @@ func TestImageSanity(t *testing.T) {
 					// This used to be lz4, which is the source package. However,
 					// lz4 is not actually installed on this image, so it does not make sense to have
 					// users update a non-existent package.
-					Name:                "liblz4-1",
-					NamespaceName:       "ubuntu:16.04",
-					VersionFormat:       "dpkg",
-					Version:             "0.0~r131-2ubuntu2",
-					ProvidedExecutables: []string{"/usr/lib/x86_64-linux-gnu/liblz4.so.1"},
+					Name:          "liblz4-1",
+					NamespaceName: "ubuntu:16.04",
+					VersionFormat: "dpkg",
+					Version:       "0.0~r131-2ubuntu2",
+					// The only provided executable file is a symlink, so there are no regular executable files.
+					ProvidedExecutables: []string{},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2021-3520",
