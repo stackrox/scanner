@@ -22,6 +22,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
@@ -61,7 +62,7 @@ func init() {
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
 
-func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet) {
+func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet) error {
 	// The database is actually an RFC822-like message with "\n\n"
 	// separators, so don't be alarmed by the usage of the "net/mail"
 	// package here.
@@ -115,33 +116,18 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			}
 		}
 
-		var pkgName, pkgVersion string
+		// Debian and Ubuntu vulnerability feeds only have entries for source packages,
+		// and not the package binaries, though usually only the binaries are installed.
+		pkgName := sourceName
+		pkgVersion := sourceVersion
+		if pkgName == "" {
+			pkgName = currPkgName
+			pkgVersion = currPkgVersion
+		}
+
 		var executables []string
-
 		if features.ActiveVulnMgmt.Enabled() {
-			pkgName = sourceName
-			pkgVersion = sourceVersion
-
 			var filenamesFile []byte
-
-			// See if the source package exists in the image.
-			// It exists, if there is a related *.list file.
-			// If it does exist, the source package's name and version are output instead of the current package's
-			// information. This is because it is easier to update the single source package than its, potentially,
-			// multiple related packages.
-			if sourceName != "" {
-				if filenamesFile = files[dpkgInfoPrefix+sourceName+dpkgFilenamesSuffix]; len(filenamesFile) == 0 {
-					arch := msg.Header.Get("Architecture")
-					// for example: /var/lib/dpkg/info/zlib1g:amd64.list
-					filenamesFile = files[dpkgInfoPrefix+sourceName+":"+arch+dpkgFilenamesSuffix]
-				}
-			}
-
-			// If the source package does not exist, output the current package.
-			if len(filenamesFile) == 0 {
-				pkgName = currPkgName
-				pkgVersion = currPkgVersion
-			}
 
 			// Read the list of files provided by the current package.
 			// for example: var/lib/dpkg/info/vim.list
@@ -161,13 +147,9 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 					executables = append(executables, filename)
 				}
 			}
-		} else {
-			// When ActiveVulnMgmt is disabled, output the source package's name and version, if it exists.
-			pkgName = sourceName
-			pkgVersion = sourceVersion
-			if pkgName == "" {
-				pkgName = currPkgName
-				pkgVersion = currPkgVersion
+			if err := filenamesFileScanner.Err(); err != nil {
+				log.WithError(err).WithFields(log.Fields{"name": currPkgName, "version": currPkgVersion}).Warning("could not parse provided file list. skipping")
+				continue
 			}
 		}
 
@@ -192,6 +174,8 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			ProvidedExecutables: executables,
 		}
 	}
+
+	return scanner.Err()
 }
 
 // dbSplitFunc is a bufio.SplitFunc that looks for a double-newline and leaves it
@@ -224,14 +208,18 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
-		l.parseComponent(files, f, packagesMap, removedPackages)
+		if err := l.parseComponent(files, f, packagesMap, removedPackages); err != nil {
+			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", statusFile)
+		}
 	}
 
 	for filename, file := range files {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			l.parseComponent(files, append(file, '\n'), packagesMap, removedPackages)
+			if err := l.parseComponent(files, append(file, '\n'), packagesMap, removedPackages); err != nil {
+				return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", filename)
+			}
 		}
 	}
 

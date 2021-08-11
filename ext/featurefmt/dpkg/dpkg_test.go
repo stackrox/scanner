@@ -81,21 +81,17 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 			FeatureVersions: []database.FeatureVersion{
 				// Two packages from this source are installed, it should only appear one time
 				{
-					Feature:             database.Feature{Name: "libpam-runtime"},
+					Feature:             database.Feature{Name: "pam"},
 					Version:             "1.1.8-3.1ubuntu3",
 					ProvidedExecutables: []string{"/test/executable"},
-				},
-				{
-					Feature: database.Feature{Name: "libpam-modules-bin"},
-					Version: "1.1.8-3.1ubuntu3",
 				},
 				{
 					Feature: database.Feature{Name: "makedev"},
 					Version: "2.3.1-93ubuntu1",
 				},
 				{
-					Feature:             database.Feature{Name: "libgcc1"},
-					Version:             "1:5.1.1-12ubuntu1",
+					Feature:             database.Feature{Name: "gcc-5"},
+					Version:             "5.1.1-12ubuntu1", // The version comes from the "Source:" line
 					ProvidedExecutables: []string{"/i/am/an/executable"},
 				},
 				{
@@ -110,10 +106,6 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Feature:             database.Feature{Name: "pkg-source"},
 					Version:             "1.1.8-3.1ubuntu3",
 					ProvidedExecutables: []string{"/exec-me", "/exec-me-2"},
-				},
-				{
-					Feature: database.Feature{Name: "libapt-pkg5.0"},
-					Version: "1.6.12",
 				},
 			},
 			Files: tarutil.FilesMap{
