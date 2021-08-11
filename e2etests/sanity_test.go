@@ -1825,8 +1825,9 @@ func TestImageSanity(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			if inCIRun && strings.HasPrefix(testCase.image, "docker.io") && testCase.username != "" {
+			if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
 				testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/cgorman1/qa:sandbox-", -1)
+				testCase.registry = "https://quay.io"
 				testCase.username = os.Getenv("QUAY_CGORMAN1_RO_USER")
 				testCase.password = os.Getenv("QUAY_CGORMAN1_RO_PASSWORD")
 			}
