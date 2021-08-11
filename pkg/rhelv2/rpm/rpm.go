@@ -159,7 +159,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			}
 
 			// Start a new package definition and reset 'i'.
-			p = new(database.RHELv2Package)
+			p = &database.RHELv2Package{}
 			i = -1
 			continue
 		}
