@@ -55,7 +55,7 @@ func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulne
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
-func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, checkContainsOnly bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
+func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, checkContainsOnly, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
@@ -86,7 +86,9 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 				})
 			}
 
-			assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
+			if checkProvidedExecutables {
+				assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
+			}
 
 			if !checkContainsOnly {
 				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
@@ -133,20 +135,22 @@ func TestImageSanity(t *testing.T) {
 		expectedFeatures   []v1.Feature
 		unexpectedFeatures []v1.Feature
 		// This specifies that the features only need to contain at least the vulnerabilities specified
-		checkContainsOnly bool
-		uncertifiedRHEL   bool
+		checkContainsOnly        bool
+		uncertifiedRHEL          bool
+		checkProvidedExecutables bool
 	}{
 		{
-			image:             "ubuntu:16.04",
-			registry:          "https://registry-1.docker.io",
-			source:            "NVD",
-			checkContainsOnly: true,
+			image:                    "ubuntu:16.04",
+			registry:                 "https://registry-1.docker.io",
+			source:                   "NVD",
+			checkContainsOnly:        true,
+			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
-					Name:          "lz4",
-					NamespaceName: "ubuntu:16.04",
-					VersionFormat: "dpkg",
-					Version:       "0.0~r131-2ubuntu2",
+					Name:                "lz4",
+					NamespaceName:       "ubuntu:16.04",
+					VersionFormat:       "dpkg",
+					Version:             "0.0~r131-2ubuntu2",
 					ProvidedExecutables: []string{"/usr/lib/x86_64-linux-gnu/liblz4.so.1"},
 					Vulnerabilities: []v1.Vulnerability{
 						{
@@ -188,7 +192,6 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName:   "debian:8",
 					VersionFormat:   "dpkg",
 					Version:         "1:3.3-1",
-					ProvidedExecutables: []string{"/usr/bin/cmp", "/usr/bin/diff", "/usr/bin/diff3", "/usr/bin/sdiff"},
 					Vulnerabilities: nil,
 					AddedBy:         "sha256:6d827a3ef358f4fa21ef8251f95492e667da826653fd43641cef5a877dc03a70",
 				},
@@ -253,15 +256,42 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "docker.io/kaizheh/apache-struts2-cve-2017-5638:latest",
-			registry: "https://registry-1.docker.io",
-			source:   "NVD",
+			image:                    "docker.io/kaizheh/apache-struts2-cve-2017-5638:latest",
+			registry:                 "https://registry-1.docker.io",
+			source:                   "NVD",
+			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apt",
 					NamespaceName: "debian:8",
 					VersionFormat: "dpkg",
 					Version:       "1.0.9.8.4",
+					ProvidedExecutables: []string{
+						"/etc/cron.daily/apt",
+						"/etc/kernel/postinst.d/apt-auto-removal",
+						"/usr/share/bug/apt/script",
+						"/usr/lib/dpkg/methods/apt/update",
+						"/usr/lib/dpkg/methods/apt/setup",
+						"/usr/lib/dpkg/methods/apt/install",
+						"/usr/lib/apt/apt-helper",
+						"/usr/lib/apt/methods/cdrom",
+						"/usr/lib/apt/methods/copy",
+						"/usr/lib/apt/methods/file",
+						"/usr/lib/apt/methods/ftp",
+						"/usr/lib/apt/methods/gpgv",
+						"/usr/lib/apt/methods/gzip",
+						"/usr/lib/apt/methods/http",
+						"/usr/lib/apt/methods/mirror",
+						"/usr/lib/apt/methods/rred",
+						"/usr/lib/apt/methods/rsh",
+						"/usr/bin/apt",
+						"/usr/bin/apt-cache",
+						"/usr/bin/apt-cdrom",
+						"/usr/bin/apt-config",
+						"/usr/bin/apt-get",
+						"/usr/bin/apt-mark",
+						"/usr/bin/apt-key",
+					},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2011-3374",
@@ -350,13 +380,33 @@ func TestImageSanity(t *testing.T) {
 			registry: "https://registry-1.docker.io",
 			source:   "Red Hat",
 			// This image is older than June 2020, so we need to explicitly request for an uncertified scan.
-			uncertifiedRHEL: true,
+			uncertifiedRHEL:          true,
+			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "procps-ng",
 					NamespaceName: "centos:7",
 					VersionFormat: "rpm",
 					Version:       "3.3.10-26.el7",
+					ProvidedExecutables: []string{
+						"/usr/bin/free",
+						"/usr/bin/pgrep",
+						"/usr/bin/pkill",
+						"/usr/bin/pmap",
+						"/usr/bin/ps",
+						"/usr/bin/pwdx",
+						"/usr/bin/skill",
+						"/usr/bin/slabtop",
+						"/usr/bin/snice",
+						"/usr/bin/tload",
+						"/usr/bin/top",
+						"/usr/bin/uptime",
+						"/usr/bin/vmstat",
+						"/usr/bin/w",
+						"/usr/bin/watch",
+						"/usr/lib64/libprocps.so.4.0.0",
+						"/usr/sbin/sysctl",
+					},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2018-1121",
@@ -1355,23 +1405,30 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// One of the images used for Red Hat Scanner Certification.
-			image:             "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7",
-			registry:          "https://registry-1.docker.io",
-			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-			source:            "Red Hat",
-			checkContainsOnly: true,
+			image:                    "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7",
+			registry:                 "https://registry-1.docker.io",
+			username:                 os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:                 os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:                   "Red Hat",
+			checkContainsOnly:        true,
+			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "rh-maven35-log4j12",
 					VersionFormat: "rpm",
 					Version:       "1.2.17-19.2.el7.noarch",
-					AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+					ProvidedExecutables: []string{
+						"/opt/rh/rh-maven35/root/usr/share/java/log4j-1.2.17.jar",
+						"/opt/rh/rh-maven35/root/usr/share/java/log4j-1.jar",
+						"/opt/rh/rh-maven35/root/usr/share/java/log4j12-1.2.17.jar",
+					},
+					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
-					Name:          "rh-maven35-jackson-databind",
-					VersionFormat: "rpm",
-					Version:       "2.7.6-2.10.el7.noarch",
+					Name:                "rh-maven35-jackson-databind",
+					VersionFormat:       "rpm",
+					Version:             "2.7.6-2.10.el7.noarch",
+					ProvidedExecutables: []string{"/opt/rh/rh-maven35/root/usr/share/java/jackson-databind.jar"},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4173",
@@ -1401,9 +1458,10 @@ func TestImageSanity(t *testing.T) {
 					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
-					Name:          "vim-minimal",
-					VersionFormat: "rpm",
-					Version:       "2:7.4.629-6.el7.x86_64",
+					Name:                "vim-minimal",
+					VersionFormat:       "rpm",
+					Version:             "2:7.4.629-6.el7.x86_64",
+					ProvidedExecutables: []string{"/usr/bin/vi"},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2017-1000382",
@@ -1832,7 +1890,7 @@ func TestImageSanity(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
+			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.checkProvidedExecutables, testCase.expectedFeatures, testCase.unexpectedFeatures)
 		})
 	}
 }
