@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/pkg/commonerr"
@@ -142,7 +141,6 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	}
 
 	t = time.Now()
-	logrus.Infof("Inserting %s:%s - %v", fv.Feature.Name, fv.Version, fv.ProvidedExecutables)
 	err = tx.QueryRow(insertFeatureVersion, featureID, fv.Version, pq.Array(fv.ProvidedExecutables)).Scan(&fv.ID)
 	observeQueryTime("insertFeatureVersion", "insertFeatureVersion", t)
 

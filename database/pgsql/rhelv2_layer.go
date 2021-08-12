@@ -11,7 +11,6 @@ import (
 	"sort"
 
 	"github.com/lib/pq"
-	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 )
@@ -67,7 +66,6 @@ func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*datab
 			continue
 		}
 
-		log.Infof("Inserting %s:%s - %v", pkg.Name, pkg.Version, pkg.ProvidedExecutables)
 		_, err := tx.Exec(insertRHELv2Package, pkg.Name, pkg.Version, pkg.Module, pkg.Arch, pq.Array(pkg.ProvidedExecutables))
 		if err != nil {
 			return err

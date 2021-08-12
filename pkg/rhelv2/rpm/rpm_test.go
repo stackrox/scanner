@@ -85,7 +85,7 @@ func TestRPMFeatureDetection(t *testing.T) {
 	assert.NotSubset(t, pkgs, unexpectedPkgs)
 }
 
-func TestRPMFeatureDetectionWithActiveVulnMgmt2(t *testing.T) {
+func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 	env := envisolator.NewEnvIsolator(t)
 	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
 	defer env.RestoreAll()
@@ -114,11 +114,6 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt2(t *testing.T) {
 				"/usr/lib64/libncursesw.so.6.1",
 				"/usr/lib64/libpanelw.so.6",
 			},
-		},
-		{
-			Name:    "redhat-release",
-			Version: "8.3-1.0.el8",
-			Arch:    "x86_64",
 		},
 		{
 			Name:    "redhat-release",
@@ -154,6 +149,14 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt2(t *testing.T) {
 	pkgs, cpes, err := ListFeaturesTest(tarutil.FilesMap{
 		"var/lib/rpm/Packages":                       d,
 		"root/buildinfo/content_manifests/test.json": manifest,
+		"usr/lib64/libz.so.1":                        nil,
+		"usr/lib64/libz.so.1.2.11":                   nil,
+		"usr/lib64/libform.so.6":                     nil,
+		"usr/lib64/libncursesw.so.6.1":               nil,
+		"usr/lib64/libpanelw.so.6":                   nil,
+		"etc/redhat-release":                         nil,
+		"etc/os-release":                             nil,
+		"usr/lib/redhat-release":                     nil,
 	})
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, cpes, expectedCPEs)
