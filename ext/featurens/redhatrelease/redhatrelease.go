@@ -34,6 +34,9 @@ var (
 	oracleReleaseRegexp = regexp.MustCompile(`(?P<os>Oracle) (Linux Server release) (?P<version>[\d]+)`)
 	centosReleaseRegexp = regexp.MustCompile(`(?P<os>[^\s]*) (Linux release|release) (?P<version>[\d]+)`)
 	redhatReleaseRegexp = regexp.MustCompile(`(?P<os>Red Hat Enterprise Linux) (Client release|Server release|Workstation release|release) (?P<version>[\d]+)`)
+
+	// RequiredFilenames defines the names of the files required to identify the RHEL-based release.
+	RequiredFilenames = []string{"etc/oracle-release", "etc/centos-release", "etc/redhat-release", "etc/system-release"}
 )
 
 type detector struct{}
@@ -99,5 +102,5 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 }
 
 func (d detector) RequiredFilenames() []string {
-	return []string{"etc/oracle-release", "etc/centos-release", "etc/redhat-release", "etc/system-release"}
+	return RequiredFilenames
 }
