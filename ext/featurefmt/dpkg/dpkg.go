@@ -215,7 +215,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
-		if err := l.parseComponent(files, f.Contents, packagesMap, removedPackages, false); err != nil {
+		if err := l.parseComponent(files, f.GetContents(), packagesMap, removedPackages, false); err != nil {
 			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", statusFile)
 		}
 	}
@@ -224,7 +224,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			if err := l.parseComponent(files, append(file.Contents, '\n'), packagesMap, removedPackages, true); err != nil {
+			if err := l.parseComponent(files, append(file.GetContents(), '\n'), packagesMap, removedPackages, true); err != nil {
 				return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", filename)
 			}
 		}
