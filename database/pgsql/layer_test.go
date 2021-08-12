@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/guregu/null/zero"
-	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/pkg/commonerr"
@@ -390,18 +389,18 @@ func cmpFV(a, b database.FeatureVersion) bool {
 		cmpStringSlices(a.ProvidedExecutables, b.ProvidedExecutables)
 }
 
+// cmpStringSlices compares the given string slices.
+// It assumes the slices are sorted.
 func cmpStringSlices(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
 	}
 
-	aSet := set.NewFrozenStringSet(a...)
-	bSet := set.NewFrozenStringSet(b...)
-
-	// Account for repeated values.
-	if aSet.Cardinality() != bSet.Cardinality() {
-		return false
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
 	}
 
-	return aSet.Difference(bSet).Cardinality() == 0
+	return true
 }
