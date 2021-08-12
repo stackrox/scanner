@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -143,6 +144,8 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 	var pkgs []*database.RHELv2Package
 
 	p := &database.RHELv2Package{}
+	// executablesSet ensures only unique executables are stored per package.
+	executablesSet := set.NewStringSet()
 	s := bufio.NewScanner(r)
 	for i := 0; s.Scan(); i++ {
 		line := strings.TrimSpace(s.Text())
@@ -155,11 +158,19 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			// Ensure the current package is well-formed.
 			// If it is, add it to the return slice.
 			if p.Name != "" && p.Version != "" && p.Arch != "" {
+				executables := make([]string, 0, executablesSet.Cardinality())
+				for executable := range executablesSet {
+					executables = append(executables, executable)
+				}
+				sort.Strings(executables)
+				p.ProvidedExecutables = append(p.ProvidedExecutables, executables...)
+
 				pkgs = append(pkgs, p)
 			}
 
 			// Start a new package definition and reset 'i'.
 			p = &database.RHELv2Package{}
+			executablesSet.Clear()
 			i = -1
 			continue
 		}

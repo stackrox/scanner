@@ -21,10 +21,12 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -112,6 +114,8 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 	var featureVersions []database.FeatureVersion
 
 	var fv database.FeatureVersion
+	// executablesSet ensures only unique executables are stored per package.
+	executablesSet := set.NewStringSet()
 	s := bufio.NewScanner(r)
 	for i := 0; s.Scan(); i++ {
 		line := strings.TrimSpace(s.Text())
@@ -125,11 +129,19 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			// Ensure the current feature is well-formed.
 			// If it is, add it to the return slice.
 			if fv.Feature.Name != "" && fv.Version != "" {
+				executables := make([]string, 0, executablesSet.Cardinality())
+				for executable := range executablesSet {
+					executables = append(executables, executable)
+				}
+				sort.Strings(executables)
+				fv.ProvidedExecutables = append(fv.ProvidedExecutables, executables...)
+
 				featureVersions = append(featureVersions, fv)
 			}
 
 			// Start a new package definition and reset 'i'.
 			fv = database.FeatureVersion{}
+			executablesSet.Clear()
 			i = -1
 			continue
 		}

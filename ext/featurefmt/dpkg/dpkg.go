@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"net/mail"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -229,6 +230,18 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	packages := make([]database.FeatureVersion, 0, len(packagesMap))
 	for _, pkg := range packagesMap {
 		if !removedPackages.Contains(pkg.Feature.Name) {
+			// Sort the provided executables and only allow unique executables.
+			sort.Strings(pkg.ProvidedExecutables)
+			filtered := pkg.ProvidedExecutables[:0]
+			prev := ""
+			for _, executable := range pkg.ProvidedExecutables {
+				if executable != prev {
+					filtered = append(filtered, executable)
+				}
+				prev = executable
+			}
+			pkg.ProvidedExecutables = filtered
+
 			packages = append(packages, *pkg)
 		}
 	}
