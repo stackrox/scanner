@@ -102,7 +102,7 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 		_ = os.RemoveAll(tmpDir)
 	}()
 
-	err = os.WriteFile(tmpDir+"/Packages", f, 0700)
+	err = os.WriteFile(tmpDir+"/Packages", f.Contents, 0700)
 	if err != nil {
 		log.WithError(err).Error("could not create temporary file for RPM detection")
 		return nil, nil, commonerr.ErrFilesystem
@@ -222,7 +222,7 @@ func getContentManifestFileContents(files tarutil.FilesMap) []byte {
 		}
 
 		// Return the first one found, as there should only be one per layer.
-		return contents
+		return contents.Contents
 	}
 
 	return nil

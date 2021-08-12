@@ -50,7 +50,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// uniqueness.
 	pkgSet := make(map[featurefmt.PackageKey]database.FeatureVersion)
 	var pkg database.FeatureVersion
-	scanner := bufio.NewScanner(bytes.NewBuffer(file))
+	scanner := bufio.NewScanner(bytes.NewBuffer(file.Contents))
 	var dir string
 	for scanner.Scan() {
 		line := scanner.Text()

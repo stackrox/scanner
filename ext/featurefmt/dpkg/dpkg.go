@@ -127,17 +127,23 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 
 		var executables []string
 		if features.ActiveVulnMgmt.Enabled() {
-			var filenamesFile []byte
+			// for example: var/lib/dpkg/info/vim.list
+			filenamesList := dpkgInfoPrefix + currPkgName + dpkgFilenamesSuffix
+			arch := msg.Header.Get("Architecture")
+			// for example: /var/lib/dpkg/info/zlib1g:amd64.list
+			filenamesArchList := dpkgInfoPrefix + currPkgName + ":" + arch + dpkgFilenamesSuffix
 
 			// Read the list of files provided by the current package.
-			// for example: var/lib/dpkg/info/vim.list
-			if filenamesFile = files[dpkgInfoPrefix+currPkgName+dpkgFilenamesSuffix]; len(filenamesFile) == 0 {
-				arch := msg.Header.Get("Architecture")
-				// for example: /var/lib/dpkg/info/zlib1g:amd64.list
-				filenamesFile = files[dpkgInfoPrefix+currPkgName+":"+arch+dpkgFilenamesSuffix]
+			filenamesFileData := files[filenamesList]
+			if filenamesFileData == nil || len(filenamesFileData.Contents) == 0 {
+				filenamesFileData = files[filenamesArchList]
 			}
 
-			filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFile))
+			if filenamesFileData == nil || len(filenamesFileData.Contents) == 0 {
+				log.Warningf("Unexpected nonexistent contents for %s and %s", filenamesList, filenamesArchList)
+			}
+
+			filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.Contents))
 			for filenamesFileScanner.Scan() {
 				filename := filenamesFileScanner.Text()
 
@@ -210,7 +216,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
-		if err := l.parseComponent(files, f, packagesMap, removedPackages); err != nil {
+		if err := l.parseComponent(files, f.Contents, packagesMap, removedPackages); err != nil {
 			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", statusFile)
 		}
 	}
@@ -219,7 +225,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			if err := l.parseComponent(files, append(file, '\n'), packagesMap, removedPackages); err != nil {
+			if err := l.parseComponent(files, append(file.Contents, '\n'), packagesMap, removedPackages); err != nil {
 				return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", filename)
 			}
 		}

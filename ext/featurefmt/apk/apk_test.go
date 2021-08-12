@@ -78,7 +78,7 @@ func TestAPKFeatureDetection(t *testing.T) {
 				},
 			},
 			Files: tarutil.FilesMap{
-				"lib/apk/db/installed": featurefmt.LoadFileForTest("apk/testdata/installed"),
+				"lib/apk/db/installed": &tarutil.FileData{Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
 			},
 		},
 	}
@@ -150,7 +150,7 @@ func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				},
 			},
 			Files: tarutil.FilesMap{
-				"lib/apk/db/installed":      featurefmt.LoadFileForTest("apk/testdata/installed"),
+				"lib/apk/db/installed":      &tarutil.FileData{Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
 				"lib/libc.musl-x86_64.so.1": nil,
 				"lib/ld-musl-x86_64.so.1":   nil,
 				"bin/busybox":               nil,

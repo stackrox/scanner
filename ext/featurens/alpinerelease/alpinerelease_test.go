@@ -27,33 +27,33 @@ func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v3.3", VersionFormat: apk.ParserName},
-			Files:             tarutil.FilesMap{"etc/alpine-release": []byte(`3.3.4`)},
+			Files:             tarutil.FilesMap{"etc/alpine-release": &tarutil.FileData{Contents: []byte(`3.3.4`)}},
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v3.4", VersionFormat: apk.ParserName},
-			Files:             tarutil.FilesMap{"etc/alpine-release": []byte(`3.4.0`)},
+			Files:             tarutil.FilesMap{"etc/alpine-release": &tarutil.FileData{Contents: []byte(`3.4.0`)}},
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v0.3", VersionFormat: apk.ParserName},
-			Files:             tarutil.FilesMap{"etc/alpine-release": []byte(`0.3.4`)},
+			Files:             tarutil.FilesMap{"etc/alpine-release": &tarutil.FileData{Contents: []byte(`0.3.4`)}},
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v0.3", VersionFormat: apk.ParserName},
-			Files: tarutil.FilesMap{"etc/alpine-release": []byte(`
+			Files: tarutil.FilesMap{"etc/alpine-release": &tarutil.FileData{Contents: []byte(`
 0.3.4
-`)},
+`)}},
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:edge", VersionFormat: apk.ParserName},
 			Files: tarutil.FilesMap{
-				"etc/alpine-release": []byte(`3.14.0_alpha20210212`),
-				"etc/os-release": []byte(
+				"etc/alpine-release": &tarutil.FileData{Contents: []byte(`3.14.0_alpha20210212`)},
+				"etc/os-release": &tarutil.FileData{Contents: []byte(
 					`NAME="Alpine Linux"
 ID=alpine
 VERSION_ID=3.14.0_alpha20210212
 PRETTY_NAME="Alpine Linux edge"
 HOME_URL="https://alpinelinux.org/"
-BUG_REPORT_URL="https://bugs.alpinelinux.org/"`),
+BUG_REPORT_URL="https://bugs.alpinelinux.org/"`)},
 			},
 		},
 		{

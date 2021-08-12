@@ -76,8 +76,8 @@ func TestRPMFeatureDetection(t *testing.T) {
 	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
 	pkgs, cpes, err := ListFeaturesTest(tarutil.FilesMap{
-		"var/lib/rpm/Packages":                       d,
-		"root/buildinfo/content_manifests/test.json": manifest,
+		"var/lib/rpm/Packages":                       &tarutil.FileData{Contents: d},
+		"root/buildinfo/content_manifests/test.json": &tarutil.FileData{Contents: manifest},
 	})
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, cpes, expectedCPEs)
@@ -147,8 +147,8 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
 	pkgs, cpes, err := ListFeaturesTest(tarutil.FilesMap{
-		"var/lib/rpm/Packages":                       d,
-		"root/buildinfo/content_manifests/test.json": manifest,
+		"var/lib/rpm/Packages":                       &tarutil.FileData{Contents: d},
+		"root/buildinfo/content_manifests/test.json": &tarutil.FileData{Contents: manifest},
 		"usr/lib64/libz.so.1":                        nil,
 		"usr/lib64/libz.so.1.2.11":                   nil,
 		"usr/lib64/libform.so.6":                     nil,

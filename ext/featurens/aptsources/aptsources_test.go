@@ -28,14 +28,14 @@ func TestDetector(t *testing.T) {
 		{
 			ExpectedNamespace: &database.Namespace{Name: "debian:unstable", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
-				"etc/os-release": []byte(
+				"etc/os-release": &tarutil.FileData{Contents: []byte(
 					`PRETTY_NAME="Debian GNU/Linux stretch/sid"
 NAME="Debian GNU/Linux"
 ID=debian
 HOME_URL="https://www.debian.org/"
 SUPPORT_URL="https://www.debian.org/support/"
-BUG_REPORT_URL="https://bugs.debian.org/"`),
-				"etc/apt/sources.list": []byte(`deb http://httpredir.debian.org/debian unstable main`),
+BUG_REPORT_URL="https://bugs.debian.org/"`)},
+				"etc/apt/sources.list": &tarutil.FileData{Contents: []byte(`deb http://httpredir.debian.org/debian unstable main`)},
 			},
 		},
 		{
