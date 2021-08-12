@@ -8,6 +8,7 @@ package pgsql
 import (
 	"context"
 	"database/sql"
+	"sort"
 
 	"github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
@@ -45,6 +46,22 @@ func (pgSQL *pgSQL) insertRHELv2Layer(tx *sql.Tx, layer *database.RHELv2Layer) e
 }
 
 func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*database.RHELv2Package) error {
+	// Sort packages to avoid potential deadlock.
+	// Sort by the unique index (name, version, module, arch).
+	sort.SliceStable(pkgs, func(i, j int) bool {
+		a, b := pkgs[i], pkgs[j]
+		if a.Name != b.Name {
+			return a.Name < b.Name
+		}
+		if a.Version != b.Version {
+			return a.Version < b.Version
+		}
+		if a.Module != b.Module {
+			return a.Module < b.Module
+		}
+		return a.Arch < b.Arch
+	})
+
 	for _, pkg := range pkgs {
 		if pkg.Name == "" {
 			continue

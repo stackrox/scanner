@@ -5,6 +5,7 @@ package e2etests
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -35,7 +36,13 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	client := v1.NewImageScanServiceClient(conn)
 	var scanResp *v1.ScanImageResponse
 	if strings.HasPrefix(testCase.image, "docker.io") {
-		scanResp = scanDockerIOStackRoxImage(client, testCase.image, false, t)
+		_, inCIRun := os.LookupEnv("CI")
+		if inCIRun {
+			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/vuln-images", "quay.io/cgorman1/qa", -1)
+			scanResp = scanQuayStackRoxImage(client, testCase.image, false, t)
+		} else {
+			scanResp = scanDockerIOStackRoxImage(client, testCase.image, false, t)
+		}
 	} else if strings.HasPrefix(testCase.image, "gcr.io") {
 		scanResp = scanGCRImage(client, testCase.image, t)
 	} else {

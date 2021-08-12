@@ -81,14 +81,6 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, 
 	return listFeatures(files, queryFmt)
 }
 
-// ListFeaturesTest does the same as ListFeatures but should only be used for testing.
-func ListFeaturesTest(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
-	if features.ActiveVulnMgmt.Enabled() {
-		return listFeatures(files, queryFmtActiveVulnMgmtTest)
-	}
-	return listFeatures(files, queryFmtTest)
-}
-
 func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Package, []string, error) {
 	cpes, err := getCPEsUsingEmbeddedContentSets(files)
 	if err != nil {
@@ -150,7 +142,7 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Package, error) {
 	var pkgs []*database.RHELv2Package
 
-	p := new(database.RHELv2Package)
+	p := &database.RHELv2Package{}
 	s := bufio.NewScanner(r)
 	for i := 0; s.Scan(); i++ {
 		line := strings.TrimSpace(s.Text())
@@ -167,7 +159,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			}
 
 			// Start a new package definition and reset 'i'.
-			p = new(database.RHELv2Package)
+			p = &database.RHELv2Package{}
 			i = -1
 			continue
 		}
