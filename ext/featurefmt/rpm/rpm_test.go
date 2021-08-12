@@ -82,10 +82,10 @@ func TestRpmFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 			},
 			Files: tarutil.FilesMap{
 				"var/lib/rpm/Packages": &tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
-				"etc/centos-release":   nil,
-				"usr/games":            nil,
-				"usr/include":          nil,
-				"usr/lib/debug":        nil,
+				"etc/centos-release":   &tarutil.FileData{Executable: true},
+				"usr/games":            &tarutil.FileData{Executable: true},
+				"usr/include":          &tarutil.FileData{Executable: true},
+				"usr/lib/debug":        &tarutil.FileData{Executable: true},
 			},
 		},
 	}

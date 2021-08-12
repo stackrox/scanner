@@ -33,14 +33,14 @@ func addVersion(c *component.Component) {
 func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
 	var allComponents []*component.Component
 	for filePath, contents := range fileMap {
-		if !match(filePath) || len(contents.Contents) == 0 {
+		if !match(filePath) || len(contents.GetContents()) == 0 {
 			continue
 		}
 		if filterComponent(filepath.Base(filePath)) {
 			continue
 		}
 
-		components, err := parseContents(filePath, contents.Contents)
+		components, err := parseContents(filePath, contents.GetContents())
 		if err != nil {
 			return nil, err
 		}

@@ -151,11 +151,11 @@ func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 			},
 			Files: tarutil.FilesMap{
 				"lib/apk/db/installed":      &tarutil.FileData{Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
-				"lib/libc.musl-x86_64.so.1": nil,
-				"lib/ld-musl-x86_64.so.1":   nil,
-				"bin/busybox":               nil,
-				"etc/hosts":                 nil,
-				"etc/crontabs/root":         nil,
+				"lib/libc.musl-x86_64.so.1": &tarutil.FileData{Executable: true},
+				"lib/ld-musl-x86_64.so.1":   &tarutil.FileData{Executable: true},
+				"bin/busybox":               &tarutil.FileData{Executable: true},
+				"etc/hosts":                 &tarutil.FileData{Executable: true},
+				"etc/crontabs/root":         &tarutil.FileData{Executable: true},
 			},
 		},
 	}

@@ -43,7 +43,7 @@ func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Co
 		if !hasFile {
 			return components, nil
 		}
-		matcher, finish, err := isProvidedByRPMPackageMatcher(f.Contents)
+		matcher, finish, err := isProvidedByRPMPackageMatcher(f.GetContents())
 		if err != nil {
 			return nil, err
 		}

@@ -149,14 +149,14 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 	pkgs, cpes, err := ListFeaturesTest(tarutil.FilesMap{
 		"var/lib/rpm/Packages":                       &tarutil.FileData{Contents: d},
 		"root/buildinfo/content_manifests/test.json": &tarutil.FileData{Contents: manifest},
-		"usr/lib64/libz.so.1":                        nil,
-		"usr/lib64/libz.so.1.2.11":                   nil,
-		"usr/lib64/libform.so.6":                     nil,
-		"usr/lib64/libncursesw.so.6.1":               nil,
-		"usr/lib64/libpanelw.so.6":                   nil,
-		"etc/redhat-release":                         nil,
-		"etc/os-release":                             nil,
-		"usr/lib/redhat-release":                     nil,
+		"usr/lib64/libz.so.1":                        &tarutil.FileData{Executable: true},
+		"usr/lib64/libz.so.1.2.11":                   &tarutil.FileData{Executable: true},
+		"usr/lib64/libform.so.6":                     &tarutil.FileData{Executable: true},
+		"usr/lib64/libncursesw.so.6.1":               &tarutil.FileData{Executable: true},
+		"usr/lib64/libpanelw.so.6":                   &tarutil.FileData{Executable: true},
+		"etc/redhat-release":                         &tarutil.FileData{Executable: true},
+		"etc/os-release":                             &tarutil.FileData{Executable: true},
+		"usr/lib/redhat-release":                     &tarutil.FileData{Executable: true},
 	})
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, cpes, expectedCPEs)

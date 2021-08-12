@@ -62,7 +62,7 @@ func init() {
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
 
-func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet) error {
+func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) error {
 	// The database is actually an RFC822-like message with "\n\n"
 	// separators, so don't be alarmed by the usage of the "net/mail"
 	// package here.
@@ -126,7 +126,8 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 		}
 
 		var executables []string
-		if features.ActiveVulnMgmt.Enabled() {
+		// Distroless containers do not provide executable files the same way distro containers do.
+		if !distroless && features.ActiveVulnMgmt.Enabled() {
 			// for example: var/lib/dpkg/info/vim.list
 			filenamesList := dpkgInfoPrefix + currPkgName + dpkgFilenamesSuffix
 			arch := msg.Header.Get("Architecture")
@@ -135,21 +136,19 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 
 			// Read the list of files provided by the current package.
 			filenamesFileData := files[filenamesList]
-			if filenamesFileData == nil || len(filenamesFileData.Contents) == 0 {
+			if len(filenamesFileData.GetContents()) == 0 {
 				filenamesFileData = files[filenamesArchList]
 			}
-
-			if filenamesFileData == nil || len(filenamesFileData.Contents) == 0 {
+			if len(filenamesFileData.GetContents()) == 0 {
 				log.Warningf("Unexpected nonexistent contents for %s and %s", filenamesList, filenamesArchList)
 			}
 
-			filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.Contents))
+			filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.GetContents()))
 			for filenamesFileScanner.Scan() {
 				filename := filenamesFileScanner.Text()
 
 				// The first character is always "/", which is removed when inserted into the files maps.
-				// It is assumed if the listed file is tracked, it is an executable file.
-				if _, exists := files[filename[1:]]; exists {
+				if fileData := files[filename[1:]]; fileData.IsExecutable() {
 					executables = append(executables, filename)
 				}
 			}
@@ -216,7 +215,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
-		if err := l.parseComponent(files, f.Contents, packagesMap, removedPackages); err != nil {
+		if err := l.parseComponent(files, f.Contents, packagesMap, removedPackages, false); err != nil {
 			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", statusFile)
 		}
 	}
@@ -225,7 +224,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			if err := l.parseComponent(files, append(file.Contents, '\n'), packagesMap, removedPackages); err != nil {
+			if err := l.parseComponent(files, append(file.Contents, '\n'), packagesMap, removedPackages, true); err != nil {
 				return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", filename)
 			}
 		}
@@ -243,5 +242,5 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 }
 
 func (l lister) RequiredFilenames() []string {
-	return []string{"var/lib/dpkg/status"}
+	return []string{statusFile}
 }

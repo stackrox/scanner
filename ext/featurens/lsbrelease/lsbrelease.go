@@ -50,7 +50,7 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 
 	var OS, version string
 
-	scanner := bufio.NewScanner(strings.NewReader(string(f.Contents)))
+	scanner := bufio.NewScanner(strings.NewReader(string(f.GetContents())))
 	for scanner.Scan() {
 		line := scanner.Text()
 

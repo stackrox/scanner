@@ -43,7 +43,7 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 
 	var OS, version string
 
-	scanner := bufio.NewScanner(strings.NewReader(string(f.Contents)))
+	scanner := bufio.NewScanner(strings.NewReader(string(f.GetContents())))
 	for scanner.Scan() {
 		// Format: man sources.list | https://wiki.debian.org/SourcesList)
 		// deb uri distribution component1 component2 component3

@@ -55,7 +55,7 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 		var r []string
 
 		// Attempt to match Amazon Linux.
-		r = amazonReleaseRegexp.FindStringSubmatch(string(f.Contents))
+		r = amazonReleaseRegexp.FindStringSubmatch(string(f.GetContents()))
 		if len(r) == 4 {
 			// Amazon Linux's namespace name should be amzn but the
 			// /etc/system-release file uses Amazon.
@@ -66,7 +66,7 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 		}
 
 		// Attempt to match Oracle Linux.
-		r = oracleReleaseRegexp.FindStringSubmatch(string(f.Contents))
+		r = oracleReleaseRegexp.FindStringSubmatch(string(f.GetContents()))
 		if len(r) == 4 {
 			return &database.Namespace{
 				Name:          strings.ToLower(r[1]) + ":" + r[3],
@@ -75,7 +75,7 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 		}
 
 		// Attempt to match RHEL.
-		r = redhatReleaseRegexp.FindStringSubmatch(string(f.Contents))
+		r = redhatReleaseRegexp.FindStringSubmatch(string(f.GetContents()))
 		if len(r) == 4 {
 			namespace := &database.Namespace{
 				VersionFormat: rpm.ParserName,
@@ -89,7 +89,7 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 		}
 
 		// Attempt to match CentOS.
-		r = centosReleaseRegexp.FindStringSubmatch(string(f.Contents))
+		r = centosReleaseRegexp.FindStringSubmatch(string(f.GetContents()))
 		if len(r) == 4 {
 			return &database.Namespace{
 				Name:          strings.ToLower(r[1]) + ":" + r[3],

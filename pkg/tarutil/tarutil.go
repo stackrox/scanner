@@ -75,8 +75,8 @@ func (fd *FileData) GetContents() []byte {
 	return fd.Contents
 }
 
-// GetExecutable indicates if the file is an executable file.
-func (fd *FileData) GetExecutable() bool {
+// IsExecutable indicates if the file is an executable file.
+func (fd *FileData) IsExecutable() bool {
 	if fd == nil {
 		return false
 	}

@@ -49,7 +49,7 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 		return nil
 	}
 
-	scanner := bufio.NewScanner(strings.NewReader(string(file.Contents)))
+	scanner := bufio.NewScanner(strings.NewReader(string(file.GetContents())))
 	for scanner.Scan() {
 		line := scanner.Text()
 		match := versionRegexp.FindStringSubmatch(line)
@@ -68,7 +68,7 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 	if !exists {
 		return nil
 	}
-	scanner = bufio.NewScanner(strings.NewReader(string(file.Contents)))
+	scanner = bufio.NewScanner(strings.NewReader(string(file.GetContents())))
 	for scanner.Scan() {
 		if scanner.Text() == alpineEdgePrettyName {
 			return &database.Namespace{
