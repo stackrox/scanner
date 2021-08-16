@@ -200,7 +200,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
 			if fileData := files[filename[1:]]; fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
-				p.ProvidedExecutables = append(p.ProvidedExecutables, filename)
+				executablesSet.Add(filename)
 			}
 		}
 	}

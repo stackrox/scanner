@@ -162,7 +162,7 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
 			if fileData := files[filename[1:]]; fileData.Executable && !rpm.AllRHELRequiredFiles.Contains(filename[1:]) {
-				fv.ProvidedExecutables = append(fv.ProvidedExecutables, filename)
+				executablesSet.Add(filename)
 			}
 		}
 	}

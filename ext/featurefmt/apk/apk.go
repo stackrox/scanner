@@ -104,7 +104,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the files maps.
 			if fileData := files[filename[1:]]; fileData.Executable {
-				pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, filename)
+				executablesSet.Add(filename)
 			}
 		}
 	}
