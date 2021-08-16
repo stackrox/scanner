@@ -29,7 +29,7 @@ func TestDetector(t *testing.T) {
 		{
 			ExpectedNamespace: &database.Namespace{Name: "debian:8", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
-				"etc/os-release": []byte(
+				"etc/os-release": tarutil.FileData{Contents: []byte(
 					`PRETTY_NAME="Debian GNU/Linux 8 (jessie)"
 NAME="Debian GNU/Linux"
 VERSION_ID="8"
@@ -37,13 +37,13 @@ VERSION="8 (jessie)"
 ID=debian
 HOME_URL="http://www.debian.org/"
 SUPPORT_URL="http://www.debian.org/support/"
-BUG_REPORT_URL="https://bugs.debian.org/"`),
+BUG_REPORT_URL="https://bugs.debian.org/"`)},
 			},
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "ubuntu:15.10", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
-				"etc/os-release": []byte(
+				"etc/os-release": tarutil.FileData{Contents: []byte(
 					`NAME="Ubuntu"
 VERSION="15.10 (Wily Werewolf)"
 ID=ubuntu
@@ -52,13 +52,13 @@ PRETTY_NAME="Ubuntu Wily Werewolf (development branch)"
 VERSION_ID="15.10"
 HOME_URL="http://www.ubuntu.com/"
 SUPPORT_URL="http://help.ubuntu.com/"
-BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"`),
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"`)},
 			},
 		},
 		{ // Doesn't have quotes around VERSION_ID
 			ExpectedNamespace: &database.Namespace{Name: "fedora:20", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
-				"etc/os-release": []byte(
+				"etc/os-release": tarutil.FileData{Contents: []byte(
 					`NAME=Fedora
 VERSION="20 (Heisenbug)"
 ID=fedora
@@ -71,7 +71,7 @@ BUG_REPORT_URL="https://bugzilla.redhat.com/"
 REDHAT_BUGZILLA_PRODUCT="Fedora"
 REDHAT_BUGZILLA_PRODUCT_VERSION=20
 REDHAT_SUPPORT_PRODUCT="Fedora"
-REDHAT_SUPPORT_PRODUCT_VERSION=20`),
+REDHAT_SUPPORT_PRODUCT_VERSION=20`)},
 			},
 		},
 		{

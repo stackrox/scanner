@@ -102,7 +102,7 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 		_ = os.RemoveAll(tmpDir)
 	}()
 
-	err = os.WriteFile(tmpDir+"/Packages", f, 0700)
+	err = os.WriteFile(tmpDir+"/Packages", f.Contents, 0700)
 	if err != nil {
 		log.WithError(err).Error("could not create temporary file for RPM detection")
 		return nil, nil, commonerr.ErrFilesystem
@@ -188,8 +188,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			// Rename to make it clear what the line represents.
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
-			// It is assumed if the listed file is tracked, it is an executable file.
-			if _, exists := files[filename[1:]]; exists && !AllRHELRequiredFiles.Contains(filename[1:]) {
+			if fileData := files[filename[1:]]; fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
 				p.ProvidedExecutables = append(p.ProvidedExecutables, filename)
 			}
 		}
@@ -222,7 +221,7 @@ func getContentManifestFileContents(files tarutil.FilesMap) []byte {
 		}
 
 		// Return the first one found, as there should only be one per layer.
-		return contents
+		return contents.Contents
 	}
 
 	return nil

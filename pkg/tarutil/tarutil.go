@@ -61,13 +61,25 @@ func SetMaxExtractableFileSize(val int64) {
 	maxExtractableFileSize = val
 }
 
+// FileData is the contents of a file and relevant metadata.
+type FileData struct {
+	// Contents is the contents of the file.
+	Contents []byte
+	// Executable indicates if the file is executable.
+	Executable bool
+}
+
 // FilesMap is a map of files' paths to their contents.
-type FilesMap map[string][]byte
+type FilesMap map[string]FileData
 
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
 func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error) {
-	data := make(map[string][]byte)
+	data := make(map[string]FileData)
+
+	// executableMatcher indicates if the given file is executable
+	// for the FileData struct.
+	executableMatcher := matcher.NewExecutableMatcher()
 
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
@@ -102,8 +114,13 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 		// Extract the element
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
+			executable, _ := executableMatcher.Match(filename, hdr.FileInfo())
+
 			if !extractContents {
-				data[filename] = nil
+				data[filename] = FileData{
+					Contents:   nil, // Making this explicit.
+					Executable: executable,
+				}
 				continue
 			}
 
@@ -117,11 +134,18 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 					d = newData
 				}
 			}
+
 			// Put the file directly
-			data[filename] = d
+			data[filename] = FileData{
+				Contents:   d,
+				Executable: executable,
+			}
 		}
 		if hdr.Typeflag == tar.TypeDir {
-			data[filename] = nil
+			// Do not bother saving the contents,
+			// and directories are NOT considered executable.
+			// However, add to the map, so the entry will exist.
+			data[filename] = FileData{}
 		}
 	}
 
