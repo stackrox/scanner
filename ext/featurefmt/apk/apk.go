@@ -66,12 +66,10 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 			// Protect the map from entries with invalid versions.
 			if pkg.Feature.Name != "" && pkg.Version != "" {
-				executables := make([]string, 0, executablesSet.Cardinality())
 				for executable := range executablesSet {
-					executables = append(executables, executable)
+					pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, executable)
 				}
-				sort.Strings(executables)
-				pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, executables...)
+				sort.Strings(pkg.ProvidedExecutables)
 
 				key := featurefmt.PackageKey{
 					Name:    pkg.Feature.Name,
