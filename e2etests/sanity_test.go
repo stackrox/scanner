@@ -1767,6 +1767,30 @@ func TestImageSanity(t *testing.T) {
 							},
 							FixedBy: "2.12.5-r0",
 						},
+						{
+							Name:          "CVE-2021-36159",
+							NamespaceName: "alpine:v3.13",
+							Description:   "libfetch before 2021-07-26, as used in apk-tools, xbps, and other products, mishandles numeric strings for the FTP and HTTP protocols. The FTP passive mode implementation allows an out-of-bounds read because strtol is used to parse the relevant numbers into address bytes. It does not check if the line ends prematurely. If it does, the for-loop condition checks for the '\\0' terminator one byte too late.",
+							Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-36159",
+							Severity:      "Critical",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         5.2,
+										"Score":               9.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         4.9,
+										"Score":               6.4,
+										"Vectors":             "AV:N/AC:L/Au:N/C:P/I:N/A:P",
+									},
+								},
+							},
+							FixedBy: "2.12.6-r0",
+						},
 					},
 					AddedBy: "sha256:7731472c3f2a25edbb9c085c78f42ec71259f2b83485aa60648276d408865839",
 					FixedBy: "2.12.5-r0",
@@ -1815,6 +1839,32 @@ func TestImageSanity(t *testing.T) {
 					Name:          "apk-tools",
 					VersionFormat: "apk",
 					Version:       "2.12.5-r1",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2021-36159",
+							NamespaceName: "alpine:v3.14",
+							Description:   "libfetch before 2021-07-26, as used in apk-tools, xbps, and other products, mishandles numeric strings for the FTP and HTTP protocols. The FTP passive mode implementation allows an out-of-bounds read because strtol is used to parse the relevant numbers into address bytes. It does not check if the line ends prematurely. If it does, the for-loop condition checks for the '\\0' terminator one byte too late.",
+							Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-36159",
+							Severity:      "Critical",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         5.2,
+										"Score":               9.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         4.9,
+										"Score":               6.4,
+										"Vectors":             "AV:N/AC:L/Au:N/C:P/I:N/A:P",
+									},
+								},
+							},
+							FixedBy: "2.12.6-r0",
+						},
+					},
 				},
 				{
 					Name:          "busybox",
