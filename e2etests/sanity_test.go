@@ -1421,20 +1421,16 @@ func TestImageSanity(t *testing.T) {
 					Name:          "rh-maven35-log4j12",
 					VersionFormat: "rpm",
 					Version:       "1.2.17-19.2.el7.noarch",
-					ProvidedExecutables: []string{
-						// TODO: /opt/rh/rh-maven35/root/usr/share/java/log4j-1.2.17.jar is not actually executable.
-						"/opt/rh/rh-maven35/root/usr/share/java/log4j-1.2.17.jar",
-						"/opt/rh/rh-maven35/root/usr/share/java/log4j-1.jar",
-						"/opt/rh/rh-maven35/root/usr/share/java/log4j12-1.2.17.jar",
-					},
+					// This feature provides several JAR files, but they are either not executable or they are symlinks.
+					ProvidedExecutables: []string{},
 					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
 					Name:          "rh-maven35-jackson-databind",
 					VersionFormat: "rpm",
 					Version:       "2.7.6-2.10.el7.noarch",
-					// TODO: /opt/rh/rh-maven35/root/usr/share/java/jackson-databind.jar is not actually executable.
-					ProvidedExecutables: []string{"/opt/rh/rh-maven35/root/usr/share/java/jackson-databind.jar"},
+					// This feature provides a JAR file that is not executable.
+					ProvidedExecutables: []string{},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4173",
