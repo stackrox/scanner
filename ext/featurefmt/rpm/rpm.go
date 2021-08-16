@@ -70,7 +70,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		return []database.FeatureVersion{}, commonerr.ErrFilesystem
 	}
 
-	err = os.WriteFile(tmpDir+"/Packages", f, 0700)
+	err = os.WriteFile(tmpDir+"/Packages", f.Contents, 0700)
 	if err != nil {
 		log.WithError(err).Error("could not create temporary file for RPM detection")
 		return []database.FeatureVersion{}, commonerr.ErrFilesystem
@@ -161,8 +161,7 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			// Rename to make it clear what the line represents.
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
-			// It is assumed if the listed file is tracked, and not otherwise required, it is an executable file.
-			if _, exists := files[filename[1:]]; exists && !rpm.AllRHELRequiredFiles.Contains(filename[1:]) {
+			if fileData := files[filename[1:]]; fileData.Executable && !rpm.AllRHELRequiredFiles.Contains(filename[1:]) {
 				fv.ProvidedExecutables = append(fv.ProvidedExecutables, filename)
 			}
 		}

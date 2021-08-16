@@ -54,7 +54,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	var pkg database.FeatureVersion
 	// executablesSet ensures only unique executables are stored per package.
 	executablesSet := set.NewStringSet()
-	scanner := bufio.NewScanner(bytes.NewBuffer(file))
+	scanner := bufio.NewScanner(bytes.NewBuffer(file.Contents))
 	var dir string
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -103,9 +103,8 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the files maps.
-			// It is assumed if the listed file is tracked, it is an executable file.
-			if _, exists := files[filename[1:]]; exists {
-				executablesSet.Add(filename)
+			if fileData := files[filename[1:]]; fileData.Executable {
+				pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, filename)
 			}
 		}
 	}
