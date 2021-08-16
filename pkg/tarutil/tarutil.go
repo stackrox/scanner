@@ -61,35 +61,21 @@ func SetMaxExtractableFileSize(val int64) {
 	maxExtractableFileSize = val
 }
 
-// FileData is the contents of a file.
+// FileData is the contents of a file and relevant metadata.
 type FileData struct {
-	Contents   []byte
+	// Contents is the contents of the file.
+	Contents []byte
+	// Executable indicates if the file is executable.
 	Executable bool
 }
 
-// GetContents returns the contents of the file data.
-func (fd *FileData) GetContents() []byte {
-	if fd == nil {
-		return nil
-	}
-	return fd.Contents
-}
-
-// IsExecutable indicates if the file is an executable file.
-func (fd *FileData) IsExecutable() bool {
-	if fd == nil {
-		return false
-	}
-	return fd.Executable
-}
-
 // FilesMap is a map of files' paths to their contents.
-type FilesMap map[string]*FileData
+type FilesMap map[string]FileData
 
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
 func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error) {
-	data := make(map[string]*FileData)
+	data := make(map[string]FileData)
 
 	// executableMatcher indicates if the given file is executable
 	// for the FileData struct.
@@ -131,8 +117,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo())
 
 			if !extractContents {
-				data[filename] = &FileData{
-					Contents:   nil,
+				data[filename] = FileData{
+					Contents:   nil, // Making this explicit.
 					Executable: executable,
 				}
 				continue
@@ -150,13 +136,16 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			}
 
 			// Put the file directly
-			data[filename] = &FileData{
+			data[filename] = FileData{
 				Contents:   d,
 				Executable: executable,
 			}
 		}
 		if hdr.Typeflag == tar.TypeDir {
-			data[filename] = nil
+			// Do not bother saving the contents,
+			// and directories are NOT considered executable.
+			// However, add to the map, so the entry will exist.
+			data[filename] = FileData{}
 		}
 	}
 

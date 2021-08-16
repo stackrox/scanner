@@ -51,7 +51,7 @@ func TestExtract(t *testing.T) {
 		if c, n := data["test/test.txt"]; !n {
 			assert.Fail(t, "test/test.txt should have been extracted")
 		} else {
-			assert.NotEqual(t, 0, len(c.GetContents()) > 0, "test/test.txt file is empty")
+			assert.NotEqual(t, 0, len(c.Contents) > 0, "test/test.txt file is empty")
 		}
 		if _, n := data["test.txt"]; n {
 			assert.Fail(t, "test.txt should not be extracted")

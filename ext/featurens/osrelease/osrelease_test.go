@@ -29,7 +29,7 @@ func TestDetector(t *testing.T) {
 		{
 			ExpectedNamespace: &database.Namespace{Name: "debian:8", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
-				"etc/os-release": &tarutil.FileData{Contents: []byte(
+				"etc/os-release": tarutil.FileData{Contents: []byte(
 					`PRETTY_NAME="Debian GNU/Linux 8 (jessie)"
 NAME="Debian GNU/Linux"
 VERSION_ID="8"
@@ -43,7 +43,7 @@ BUG_REPORT_URL="https://bugs.debian.org/"`)},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "ubuntu:15.10", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
-				"etc/os-release": &tarutil.FileData{Contents: []byte(
+				"etc/os-release": tarutil.FileData{Contents: []byte(
 					`NAME="Ubuntu"
 VERSION="15.10 (Wily Werewolf)"
 ID=ubuntu
@@ -58,7 +58,7 @@ BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"`)},
 		{ // Doesn't have quotes around VERSION_ID
 			ExpectedNamespace: &database.Namespace{Name: "fedora:20", VersionFormat: rpm.ParserName},
 			Files: tarutil.FilesMap{
-				"etc/os-release": &tarutil.FileData{Contents: []byte(
+				"etc/os-release": tarutil.FileData{Contents: []byte(
 					`NAME=Fedora
 VERSION="20 (Heisenbug)"
 ID=fedora

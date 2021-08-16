@@ -136,19 +136,19 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 
 			// Read the list of files provided by the current package.
 			filenamesFileData := files[filenamesList]
-			if len(filenamesFileData.GetContents()) == 0 {
+			if len(filenamesFileData.Contents) == 0 {
 				filenamesFileData = files[filenamesArchList]
 			}
-			if len(filenamesFileData.GetContents()) == 0 {
+			if len(filenamesFileData.Contents) == 0 {
 				log.Warningf("Unexpected nonexistent contents for %s and %s", filenamesList, filenamesArchList)
 			}
 
-			filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.GetContents()))
+			filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.Contents))
 			for filenamesFileScanner.Scan() {
 				filename := filenamesFileScanner.Text()
 
 				// The first character is always "/", which is removed when inserted into the files maps.
-				if fileData := files[filename[1:]]; fileData.IsExecutable() {
+				if fileData := files[filename[1:]]; fileData.Executable {
 					executables = append(executables, filename)
 				}
 			}
@@ -215,7 +215,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
-		if err := l.parseComponent(files, f.GetContents(), packagesMap, removedPackages, false); err != nil {
+		if err := l.parseComponent(files, f.Contents, packagesMap, removedPackages, false); err != nil {
 			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", statusFile)
 		}
 	}
@@ -224,7 +224,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			if err := l.parseComponent(files, append(file.GetContents(), '\n'), packagesMap, removedPackages, true); err != nil {
+			if err := l.parseComponent(files, append(file.Contents, '\n'), packagesMap, removedPackages, true); err != nil {
 				return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", filename)
 			}
 		}

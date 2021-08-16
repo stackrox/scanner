@@ -12,7 +12,7 @@ func ExtractComponents(fileMap tarutil.FilesMap, matchFunc func(filePath string)
 		if !matchFunc(filePath) {
 			continue
 		}
-		if c := extractFunc(filePath, contents.GetContents()); c != nil {
+		if c := extractFunc(filePath, contents.Contents); c != nil {
 			allComponents = append(allComponents, c)
 		}
 	}

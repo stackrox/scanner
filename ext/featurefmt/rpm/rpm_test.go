@@ -46,7 +46,7 @@ func TestRpmFeatureDetection(t *testing.T) {
 				},
 			},
 			Files: tarutil.FilesMap{
-				"var/lib/rpm/Packages": &tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
+				"var/lib/rpm/Packages": tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
 			},
 		},
 	}
@@ -81,11 +81,11 @@ func TestRpmFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				},
 			},
 			Files: tarutil.FilesMap{
-				"var/lib/rpm/Packages": &tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
-				"etc/centos-release":   &tarutil.FileData{Executable: true},
-				"usr/games":            &tarutil.FileData{Executable: true},
-				"usr/include":          &tarutil.FileData{Executable: true},
-				"usr/lib/debug":        &tarutil.FileData{Executable: true},
+				"var/lib/rpm/Packages": tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
+				"etc/centos-release":   tarutil.FileData{Executable: true},
+				"usr/games":            tarutil.FileData{Executable: true},
+				"usr/include":          tarutil.FileData{Executable: true},
+				"usr/lib/debug":        tarutil.FileData{Executable: true},
 			},
 		},
 	}

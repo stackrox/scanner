@@ -28,7 +28,7 @@ func TestDetector(t *testing.T) {
 		{
 			ExpectedNamespace: &database.Namespace{Name: "ubuntu:12.04", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
-				"etc/lsb-release": &tarutil.FileData{
+				"etc/lsb-release": tarutil.FileData{
 					Contents: []byte(
 						`DISTRIB_ID=Ubuntu
 DISTRIB_RELEASE=12.04
@@ -40,7 +40,7 @@ DISTRIB_DESCRIPTION="Ubuntu 12.04 LTS"`),
 		{ // We don't care about the minor version of Debian
 			ExpectedNamespace: &database.Namespace{Name: "debian:7", VersionFormat: dpkg.ParserName},
 			Files: tarutil.FilesMap{
-				"etc/lsb-release": &tarutil.FileData{
+				"etc/lsb-release": tarutil.FileData{
 					Contents: []byte(
 						`DISTRIB_ID=Debian
 DISTRIB_RELEASE=7.1

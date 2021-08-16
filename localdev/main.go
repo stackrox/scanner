@@ -89,7 +89,7 @@ func analyzeLocalImage(path string) {
 	}
 
 	var configs []Config
-	if err := json.Unmarshal(filemap["manifest.json"].GetContents(), &configs); err != nil {
+	if err := json.Unmarshal(filemap["manifest.json"].Contents, &configs); err != nil {
 		panic(err)
 	}
 	if len(configs) == 0 {
@@ -100,7 +100,7 @@ func analyzeLocalImage(path string) {
 	// detect namespace
 	var namespace *database.Namespace
 	for _, l := range config.Layers {
-		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l].GetContents()))
+		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l].Contents))
 		files, err := imagefmt.ExtractFromReader(layerTarReader, "Docker", requiredfilenames.SingletonMatcher())
 		if err != nil {
 			panic(err)
@@ -113,7 +113,7 @@ func analyzeLocalImage(path string) {
 	fmt.Println(namespace)
 	var total time.Duration
 	for _, l := range config.Layers {
-		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l].GetContents()))
+		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l].Contents))
 		_, _, _, rhelv2Components, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace}, false)
 		if err != nil {
 			fmt.Println(err.Error())

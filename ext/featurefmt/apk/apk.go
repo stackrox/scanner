@@ -50,7 +50,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// uniqueness.
 	pkgSet := make(map[featurefmt.PackageKey]database.FeatureVersion)
 	var pkg database.FeatureVersion
-	scanner := bufio.NewScanner(bytes.NewBuffer(file.GetContents()))
+	scanner := bufio.NewScanner(bytes.NewBuffer(file.Contents))
 	var dir string
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -91,7 +91,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the files maps.
-			if fileData := files[filename[1:]]; fileData.IsExecutable() {
+			if fileData := files[filename[1:]]; fileData.Executable {
 				pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, filename)
 			}
 		}
