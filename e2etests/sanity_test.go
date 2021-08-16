@@ -1423,7 +1423,7 @@ func TestImageSanity(t *testing.T) {
 					Version:       "1.2.17-19.2.el7.noarch",
 					// This feature provides several JAR files, but they are either not executable or they are symlinks.
 					ProvidedExecutables: []string{},
-					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+					AddedBy:             "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
 					Name:          "rh-maven35-jackson-databind",
