@@ -1934,6 +1934,19 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			image:    "quay.io/cgorman1/qa:debian-package-removal",
+			registry: "https://quay.io",
+			source:   "NVD",
+			checkProvidedExecutables: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "fdisk",
+					VersionFormat: "dpkg",
+					Version:       "2.12.5-r1",
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
