@@ -1935,11 +1935,14 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:                    "quay.io/cgorman1/qa:debian-package-removal",
-			registry:                 "https://quay.io",
-			username:                 os.Getenv("QUAY_CGORMAN1_RO_USER"),
-			password:                 os.Getenv("QUAY_CGORMAN1_RO_PASSWORD"),
-			source:                   "NVD",
+			image:    "quay.io/cgorman1/qa:debian-package-removal",
+			registry: "https://quay.io",
+			username: os.Getenv("QUAY_CGORMAN1_RO_USER"),
+			password: os.Getenv("QUAY_CGORMAN1_RO_PASSWORD"),
+			source:   "NVD",
+			// Ensure we find the executable files for packages added in a layer lower than the latest
+			// package DB version. The relevant *.list file will only exist in the layer the package is added
+			// so the layer with the latest packages DB will not have the *.list file for these packages.
 			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
