@@ -1,10 +1,5 @@
 FROM alpine
 
-ENV ALPINE_MIRROR=sjc.edge.kernel.org
-
-RUN echo http://${ALPINE_MIRROR}/alpine/v3.10/main > /etc/apk/repositories; \
- echo http://${ALPINE_MIRROR}/alpine/v3.10/community >> /etc/apk/repositories
-
 RUN apk update && apk add curl
 
 RUN apk --purge del apk-tools curl
