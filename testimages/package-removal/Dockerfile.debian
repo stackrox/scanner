@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM debian
 
 RUN apt-get update && apt-get install -y curl
 RUN apt-get purge -y --auto-remove curl
