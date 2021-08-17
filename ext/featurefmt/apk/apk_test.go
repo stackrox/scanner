@@ -97,8 +97,8 @@ func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Feature: database.Feature{Name: "musl"},
 					Version: "1.1.14-r10",
 					ProvidedExecutables: []string{
-						"/lib/libc.musl-x86_64.so.1",
 						"/lib/ld-musl-x86_64.so.1",
+						"/lib/libc.musl-x86_64.so.1",
 					},
 				},
 				{
@@ -112,8 +112,8 @@ func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Feature: database.Feature{Name: "alpine-baselayout"},
 					Version: "3.0.3-r0",
 					ProvidedExecutables: []string{
-						"/etc/hosts",
 						"/etc/crontabs/root",
+						"/etc/hosts",
 					},
 				},
 				{

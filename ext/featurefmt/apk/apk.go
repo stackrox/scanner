@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
@@ -50,6 +51,8 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// uniqueness.
 	pkgSet := make(map[featurefmt.PackageKey]database.FeatureVersion)
 	var pkg database.FeatureVersion
+	// executablesSet ensures only unique executables are stored per package.
+	executablesSet := set.NewStringSet()
 	scanner := bufio.NewScanner(bytes.NewBuffer(file.Contents))
 	var dir string
 	for scanner.Scan() {
@@ -62,6 +65,10 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 			// Protect the map from entries with invalid versions.
 			if pkg.Feature.Name != "" && pkg.Version != "" {
+				pkg.ProvidedExecutables = executablesSet.AsSortedSlice(func(i, j string) bool {
+					return i < j
+				})
+
 				key := featurefmt.PackageKey{
 					Name:    pkg.Feature.Name,
 					Version: pkg.Version,
@@ -70,6 +77,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			}
 
 			pkg = database.FeatureVersion{}
+			executablesSet.Clear()
 		case len(line) < 2:
 			// Invalid line.
 			continue
@@ -92,7 +100,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the files maps.
 			if fileData := files[filename[1:]]; fileData.Executable {
-				pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, filename)
+				executablesSet.Add(filename)
 			}
 		}
 	}

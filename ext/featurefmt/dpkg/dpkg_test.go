@@ -83,7 +83,7 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				{
 					Feature:             database.Feature{Name: "pam"},
 					Version:             "1.1.8-3.1ubuntu3",
-					ProvidedExecutables: []string{"/test/executable", "/another/one"},
+					ProvidedExecutables: []string{"/another/one", "/test/executable"},
 				},
 				{
 					Feature: database.Feature{Name: "makedev"},

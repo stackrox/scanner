@@ -69,9 +69,10 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Dist:       "rhel:8",
 			Pkgs: []*database.RHELv2Package{
 				{
-					Name:    "pkg",
-					Version: "2",
-					Arch:    "x86_64",
+					Name:                "pkg",
+					Version:             "2",
+					Arch:                "x86_64",
+					ProvidedExecutables: []string{"/exec/me", "/pls/exec/me"},
 				},
 				{
 					Name:    "pkg2",
@@ -87,9 +88,10 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Dist:       "rhel:8",
 			Pkgs: []*database.RHELv2Package{
 				{
-					Name:    "pkg",
-					Version: "2",
-					Arch:    "x86_64",
+					Name:                "pkg",
+					Version:             "2",
+					Arch:                "x86_64",
+					ProvidedExecutables: []string{"/exec/me", "/pls/exec/me"},
 				},
 			},
 		},
@@ -165,12 +167,13 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 	assert.Equal(t, "rhel:8", layer.NamespaceName)
 	features := []Feature{
 		{
-			Name:          "pkg",
-			NamespaceName: "rhel:8",
-			VersionFormat: rpm.ParserName,
-			Version:       "2.x86_64",
-			AddedBy:       "layer1",
-			FixedBy:       "5",
+			Name:                "pkg",
+			NamespaceName:       "rhel:8",
+			VersionFormat:       rpm.ParserName,
+			Version:             "2.x86_64",
+			AddedBy:             "layer1",
+			FixedBy:             "5",
+			ProvidedExecutables: []string{"/exec/me", "/pls/exec/me"},
 			Vulnerabilities: []Vulnerability{
 				{
 					Name:          "v1",

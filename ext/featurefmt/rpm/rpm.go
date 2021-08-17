@@ -25,6 +25,7 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -112,6 +113,8 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 	var featureVersions []database.FeatureVersion
 
 	var fv database.FeatureVersion
+	// executablesSet ensures only unique executables are stored per package.
+	executablesSet := set.NewStringSet()
 	s := bufio.NewScanner(r)
 	for i := 0; s.Scan(); i++ {
 		line := strings.TrimSpace(s.Text())
@@ -125,11 +128,16 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			// Ensure the current feature is well-formed.
 			// If it is, add it to the return slice.
 			if fv.Feature.Name != "" && fv.Version != "" {
+				fv.ProvidedExecutables = executablesSet.AsSortedSlice(func(i, j string) bool {
+					return i < j
+				})
+
 				featureVersions = append(featureVersions, fv)
 			}
 
 			// Start a new package definition and reset 'i'.
 			fv = database.FeatureVersion{}
+			executablesSet.Clear()
 			i = -1
 			continue
 		}
@@ -150,7 +158,7 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
 			if fileData := files[filename[1:]]; fileData.Executable && !rpm.AllRHELRequiredFiles.Contains(filename[1:]) {
-				fv.ProvidedExecutables = append(fv.ProvidedExecutables, filename)
+				executablesSet.Add(filename)
 			}
 		}
 	}
