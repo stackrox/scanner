@@ -14,7 +14,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -158,10 +157,9 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			// Ensure the current package is well-formed.
 			// If it is, add it to the return slice.
 			if p.Name != "" && p.Version != "" && p.Arch != "" {
-				for executable := range executablesSet {
-					p.ProvidedExecutables = append(p.ProvidedExecutables, executable)
-				}
-				sort.Strings(p.ProvidedExecutables)
+				p.ProvidedExecutables = executablesSet.AsSortedSlice(func(i, j string) bool {
+					return i < j
+				})
 
 				pkgs = append(pkgs, p)
 			}

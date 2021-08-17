@@ -19,7 +19,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"sort"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -66,10 +65,9 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 			// Protect the map from entries with invalid versions.
 			if pkg.Feature.Name != "" && pkg.Version != "" {
-				for executable := range executablesSet {
-					pkg.ProvidedExecutables = append(pkg.ProvidedExecutables, executable)
-				}
-				sort.Strings(pkg.ProvidedExecutables)
+				pkg.ProvidedExecutables = executablesSet.AsSortedSlice(func(i, j string) bool {
+					return i < j
+				})
 
 				key := featurefmt.PackageKey{
 					Name:    pkg.Feature.Name,

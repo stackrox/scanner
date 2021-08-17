@@ -21,7 +21,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -129,10 +128,9 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			// Ensure the current feature is well-formed.
 			// If it is, add it to the return slice.
 			if fv.Feature.Name != "" && fv.Version != "" {
-				for executable := range executablesSet {
-					fv.ProvidedExecutables = append(fv.ProvidedExecutables, executable)
-				}
-				sort.Strings(fv.ProvidedExecutables)
+				fv.ProvidedExecutables = executablesSet.AsSortedSlice(func(i, j string) bool {
+					return i < j
+				})
 
 				featureVersions = append(featureVersions, fv)
 			}
