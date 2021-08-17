@@ -140,9 +140,6 @@ func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap 
 			if len(filenamesFileData.Contents) == 0 {
 				filenamesFileData = files[filenamesArchList]
 			}
-			if len(filenamesFileData.Contents) == 0 {
-				log.Warningf("Unexpected nonexistent contents for %s and %s", filenamesList, filenamesArchList)
-			}
 
 			filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.Contents))
 			for filenamesFileScanner.Scan() {

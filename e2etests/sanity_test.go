@@ -1948,7 +1948,6 @@ func TestImageSanity(t *testing.T) {
 					Version:       "0.5.11+git20200708+dd9ef66-5",
 					ProvidedExecutables: []string{
 						"/bin/dash",
-						"/bin/sh",
 					},
 				},
 				{
