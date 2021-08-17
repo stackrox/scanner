@@ -1935,15 +1935,30 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "quay.io/cgorman1/qa:debian-package-removal",
-			registry: "https://quay.io",
-			source:   "NVD",
+			image:                    "quay.io/cgorman1/qa:debian-package-removal",
+			registry:                 "https://quay.io",
+			source:                   "NVD",
 			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
-					Name:          "fdisk",
+					Name:          "dash",
 					VersionFormat: "dpkg",
-					Version:       "2.12.5-r1",
+					Version:       "0.5.11+git20200708+dd9ef66-5",
+					ProvidedExecutables: []string{
+						"/bin/dash",
+						"/bin/sh",
+					},
+				},
+				{
+					Name:          "diffutils",
+					VersionFormat: "dpkg",
+					Version:       "1:3.7-5",
+					ProvidedExecutables: []string{
+						"/usr/bin/cmp",
+						"/usr/bin/diff",
+						"/usr/bin/diff3",
+						"/usr/bin/sdiff",
+					},
 				},
 			},
 		},
