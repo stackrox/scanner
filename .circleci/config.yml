@@ -819,6 +819,8 @@ workflows:
           context:
           - docker-io-and-stackrox-io-push
           - quay-cgorman1-readwrite
+          - quay-cgorman1-readonly
+
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
@@ -827,6 +829,7 @@ workflows:
           context:
           - docker-io-and-stackrox-io-push
           - quay-cgorman1-readwrite
+          - quay-cgorman1-readonly
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
@@ -851,7 +854,7 @@ workflows:
     jobs:
       - sanity-check-vuln-updates:
           context:
-          - docker-io-pull
+          - quay-cgorman1-readonly
           - com-slack-srox
 
   build:
