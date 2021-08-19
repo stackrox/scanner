@@ -20,6 +20,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database/metrics"
 )
 
 // Lock tries to set a temporary lock in the database.
@@ -32,7 +33,7 @@ func (pgSQL *pgSQL) Lock(name string, owner string, duration time.Duration, rene
 		return false, time.Time{}
 	}
 
-	defer observeQueryTime("Lock", "all", time.Now())
+	defer metrics.ObserveQueryTime("Lock", "all", time.Now())
 
 	// Compute expiration.
 	until := time.Now().Add(duration)
@@ -75,7 +76,7 @@ func (pgSQL *pgSQL) Unlock(name, owner string) {
 		return
 	}
 
-	defer observeQueryTime("Unlock", "all", time.Now())
+	defer metrics.ObserveQueryTime("Unlock", "all", time.Now())
 
 	pgSQL.Exec(removeLock, name, owner)
 }
@@ -88,7 +89,7 @@ func (pgSQL *pgSQL) FindLock(name string) (string, time.Time, error) {
 		return "", time.Time{}, errors.New("can not find a lock with an empty name")
 	}
 
-	defer observeQueryTime("FindLock", "all", time.Now())
+	defer metrics.ObserveQueryTime("FindLock", "all", time.Now())
 
 	var owner string
 	var until time.Time
@@ -102,7 +103,7 @@ func (pgSQL *pgSQL) FindLock(name string) (string, time.Time, error) {
 
 // pruneLocks removes every expired locks from the database
 func (pgSQL *pgSQL) pruneLocks() {
-	defer observeQueryTime("pruneLocks", "all", time.Now())
+	defer metrics.ObserveQueryTime("pruneLocks", "all", time.Now())
 
 	if _, err := pgSQL.Exec(removeLockExpired); err != nil {
 		handleError("removeLockExpired", err)

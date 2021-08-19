@@ -23,6 +23,7 @@ import (
 	"github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/rhel"
@@ -39,7 +40,7 @@ func (pgSQL *pgSQL) FindLayer(name string, lineage string, opts *database.Datast
 	} else if withVulnerabilities {
 		subquery += "/features+vulnerabilities"
 	}
-	defer observeQueryTime("FindLayer", subquery, time.Now())
+	defer metrics.ObserveQueryTime("FindLayer", subquery, time.Now())
 
 	// Find the layer
 	var (
@@ -67,7 +68,7 @@ func (pgSQL *pgSQL) FindLayer(name string, lineage string, opts *database.Datast
 		&nsName,
 		&nsVersionFormat,
 	)
-	observeQueryTime("FindLayer", "searchLayer", t)
+	metrics.ObserveQueryTime("FindLayer", "searchLayer", t)
 
 	if uncertifiedRHEL {
 		layer.Name = rhel.GetOriginalLayerName(layer.Name)
@@ -120,7 +121,7 @@ func (pgSQL *pgSQL) FindLayer(name string, lineage string, opts *database.Datast
 
 		t = time.Now()
 		featureVersions, err := getLayerFeatureVersions(tx, layer.ID, lineage)
-		observeQueryTime("FindLayer", "getLayerFeatureVersions", t)
+		metrics.ObserveQueryTime("FindLayer", "getLayerFeatureVersions", t)
 
 		if err != nil {
 			return layer, err
@@ -132,7 +133,7 @@ func (pgSQL *pgSQL) FindLayer(name string, lineage string, opts *database.Datast
 			// Load the vulnerabilities that affect the FeatureVersions.
 			t = time.Now()
 			err := loadAffectedBy(tx, layer.Features)
-			observeQueryTime("FindLayer", "loadAffectedBy", t)
+			metrics.ObserveQueryTime("FindLayer", "loadAffectedBy", t)
 
 			if err != nil {
 				return layer, err
@@ -285,8 +286,8 @@ func (pgSQL *pgSQL) InsertLayer(layer database.Layer, lineage string, opts *data
 		layer.ID = existingLayer.ID
 	}
 
-	// We do `defer observeQueryTime` here because we don't want to observe existing layers.
-	defer observeQueryTime("InsertLayer", "all", tf)
+	// We do `defer metrics.ObserveQueryTime` here because we don't want to observe existing layers.
+	defer metrics.ObserveQueryTime("InsertLayer", "all", tf)
 
 	// Get parent ID.
 	var parentID zero.Int

@@ -19,6 +19,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/pkg/commonerr"
 )
 
@@ -29,7 +30,7 @@ func (pgSQL *pgSQL) InsertKeyValue(key, value string) error {
 		return commonerr.NewBadRequestError("could not insert a flag which has an empty name or value")
 	}
 
-	defer observeQueryTime("InsertKeyValue", "all", time.Now())
+	defer metrics.ObserveQueryTime("InsertKeyValue", "all", time.Now())
 
 	_, err := pgSQL.Exec(upsertKeyValue, key, value)
 	if err != nil {
@@ -41,7 +42,7 @@ func (pgSQL *pgSQL) InsertKeyValue(key, value string) error {
 
 // GetKeyValue reads a single key / value tuple and returns an empty string if the key doesn't exist.
 func (pgSQL *pgSQL) GetKeyValue(key string) (string, error) {
-	defer observeQueryTime("GetKeyValue", "all", time.Now())
+	defer metrics.ObserveQueryTime("GetKeyValue", "all", time.Now())
 
 	var value string
 	err := pgSQL.QueryRow(searchKeyValue, key).Scan(&value)
