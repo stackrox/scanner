@@ -435,6 +435,8 @@ commands:
             cat nohup.out || true
           when: always
 
+      - fetch-and-upload-scanner-metrics
+
       - run-db-integration-tests
 
       - run:
@@ -483,6 +485,18 @@ commands:
       - run:
           name: Run db integration tests
           command: make db-integration-tests
+
+  fetch-and-upload-scanner-metrics:
+    steps:
+      - run:
+          name: Portforward and curl scanner metrics
+          command: |
+            kubectl -n stackrox port-forward deploy/scanner 9090:9090 1>/dev/null 2>&1 &
+            sleep 5
+            mkdir -p /tmp/metrics
+            curl localhost:9090/metrics > /tmp/metrics/metrics.prom
+      - store_artifacts:
+          path: /tmp/metrics
 
 jobs:
   unit-tests:
