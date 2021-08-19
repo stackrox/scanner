@@ -9,25 +9,48 @@ import (
 	"context"
 	"database/sql"
 	"sort"
+	"time"
 
 	"github.com/lib/pq"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/database/metrics"
 )
 
 func (pgSQL *pgSQL) InsertRHELv2Layer(layer *database.RHELv2Layer) error {
+	query := "insertRHELv2Layer"
+	defer metrics.ObserveQueryTime(query, "all", time.Now())
+
 	tx, err := pgSQL.Begin()
 	if err != nil {
 		return handleError("InsertRHELv2Layer.Begin()", err)
 	}
 
-	if err := pgSQL.insertRHELv2Layer(tx, layer); err != nil {
-		utils.IgnoreError(tx.Rollback)
+	err = func() error {
+		defer metrics.ObserveQueryTime(query, "layer", time.Now())
+
+		if err := pgSQL.insertRHELv2Layer(tx, layer); err != nil {
+			utils.IgnoreError(tx.Rollback)
+			return err
+		}
+
+		return nil
+	}()
+	if err != nil {
 		return err
 	}
 
-	if err := pgSQL.insertRHELv2Packages(tx, layer.Hash, layer.Pkgs); err != nil {
-		utils.IgnoreError(tx.Rollback)
+	err = func() error {
+		defer metrics.ObserveQueryTime(query, "packages", time.Now())
+
+		if err := pgSQL.insertRHELv2Packages(tx, layer.Hash, layer.Pkgs); err != nil {
+			utils.IgnoreError(tx.Rollback)
+			return err
+		}
+
+		return nil
+	}()
+	if err != nil {
 		return err
 	}
 
@@ -94,6 +117,9 @@ func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*datab
 }
 
 func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, error) {
+	query := "getRHELv2Layers"
+	defer metrics.ObserveQueryTime(query, "all", time.Now())
+
 	tx, err := pgSQL.BeginTx(context.Background(), &sql.TxOptions{
 		ReadOnly: true,
 	})
@@ -128,11 +154,20 @@ func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, 
 		return nil, err
 	}
 
-	for _, layer := range layers {
-		if err := pgSQL.getPackagesByLayer(tx, layer); err != nil {
-			utils.IgnoreError(tx.Rollback)
-			return nil, err
+	err = func() error {
+		defer metrics.ObserveQueryTime(query, "packages", time.Now())
+
+		for _, layer := range layers {
+			if err := pgSQL.getPackagesByLayer(tx, layer); err != nil {
+				utils.IgnoreError(tx.Rollback)
+				return err
+			}
 		}
+
+		return nil
+	}()
+	if err != nil {
+		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -140,7 +175,7 @@ func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, 
 		return nil, handleError("GetRHELv2Layers.Commit()", err)
 	}
 
-	// layers is in order from highest layer to lowest.
+	// layers is in order from the highest layer to lowest.
 	// This may be counterintuitive, so reverse it.
 	for left, right := 0, len(layers)-1; left < right; left, right = left+1, right-1 {
 		layers[left], layers[right] = layers[right], layers[left]
