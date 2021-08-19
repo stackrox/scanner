@@ -36,6 +36,9 @@ var (
 		"usr/lib/centos-release",
 		"etc/alpine-release",
 	}
+
+	// RequiredFilenames defines the names of the files required to identify the release.
+	RequiredFilenames = []string{"etc/os-release", "usr/lib/os-release"}
 )
 
 type detector struct{}
@@ -59,7 +62,7 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 			continue
 		}
 
-		OS, version = osrelease.GetOSAndVersionFromOSRelease(f)
+		OS, version = osrelease.GetOSAndVersionFromOSRelease(f.Contents)
 	}
 
 	// Determine the VersionFormat.
@@ -85,5 +88,5 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 }
 
 func (d detector) RequiredFilenames() []string {
-	return []string{"etc/os-release", "usr/lib/os-release"}
+	return RequiredFilenames
 }

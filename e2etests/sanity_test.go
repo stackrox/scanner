@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/api/v1"
@@ -28,7 +29,7 @@ func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1
 	if allowNotFound && candidateIdx == -1 {
 		return nil
 	}
-	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list", featureToFind)
+	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list: %v", featureToFind, featureList)
 	return &featureList[candidateIdx]
 }
 
@@ -55,7 +56,7 @@ func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulne
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
-func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, checkContainsOnly bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
+func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, checkContainsOnly, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
@@ -84,6 +85,10 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 				sort.Slice(matching.Vulnerabilities, func(i, j int) bool {
 					return matching.Vulnerabilities[i].Name < matching.Vulnerabilities[j].Name
 				})
+			}
+
+			if checkProvidedExecutables {
+				assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
 			}
 
 			if !checkContainsOnly {
@@ -123,6 +128,8 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 func TestImageSanity(t *testing.T) {
 	cli := client.New(getScannerHTTPEndpoint(t), true)
 
+	_, inCIRun := os.LookupEnv("CI")
+
 	for _, testCase := range []struct {
 		image              string
 		registry           string
@@ -131,20 +138,24 @@ func TestImageSanity(t *testing.T) {
 		expectedFeatures   []v1.Feature
 		unexpectedFeatures []v1.Feature
 		// This specifies that the features only need to contain at least the vulnerabilities specified
-		checkContainsOnly bool
-		uncertifiedRHEL   bool
+		checkContainsOnly        bool
+		uncertifiedRHEL          bool
+		checkProvidedExecutables bool
 	}{
 		{
-			image:             "ubuntu:16.04",
-			registry:          "https://registry-1.docker.io",
-			source:            "NVD",
-			checkContainsOnly: true,
+			image:                    "ubuntu:16.04",
+			registry:                 "https://registry-1.docker.io",
+			source:                   "NVD",
+			checkContainsOnly:        true,
+			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "lz4",
 					NamespaceName: "ubuntu:16.04",
 					VersionFormat: "dpkg",
 					Version:       "0.0~r131-2ubuntu2",
+					// The only provided executable file is a symlink, so there are no regular executable files.
+					ProvidedExecutables: []string{},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2021-3520",
@@ -249,15 +260,42 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "docker.io/kaizheh/apache-struts2-cve-2017-5638:latest",
-			registry: "https://registry-1.docker.io",
-			source:   "NVD",
+			image:                    "docker.io/kaizheh/apache-struts2-cve-2017-5638:latest",
+			registry:                 "https://registry-1.docker.io",
+			source:                   "NVD",
+			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apt",
 					NamespaceName: "debian:8",
 					VersionFormat: "dpkg",
 					Version:       "1.0.9.8.4",
+					ProvidedExecutables: []string{
+						"/etc/cron.daily/apt",
+						"/etc/kernel/postinst.d/apt-auto-removal",
+						"/usr/share/bug/apt/script",
+						"/usr/lib/dpkg/methods/apt/update",
+						"/usr/lib/dpkg/methods/apt/setup",
+						"/usr/lib/dpkg/methods/apt/install",
+						"/usr/lib/apt/apt-helper",
+						"/usr/lib/apt/methods/cdrom",
+						"/usr/lib/apt/methods/copy",
+						"/usr/lib/apt/methods/file",
+						"/usr/lib/apt/methods/ftp",
+						"/usr/lib/apt/methods/gpgv",
+						"/usr/lib/apt/methods/gzip",
+						"/usr/lib/apt/methods/http",
+						"/usr/lib/apt/methods/mirror",
+						"/usr/lib/apt/methods/rred",
+						"/usr/lib/apt/methods/rsh",
+						"/usr/bin/apt",
+						"/usr/bin/apt-cache",
+						"/usr/bin/apt-cdrom",
+						"/usr/bin/apt-config",
+						"/usr/bin/apt-get",
+						"/usr/bin/apt-mark",
+						"/usr/bin/apt-key",
+					},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2011-3374",
@@ -346,13 +384,33 @@ func TestImageSanity(t *testing.T) {
 			registry: "https://registry-1.docker.io",
 			source:   "Red Hat",
 			// This image is older than June 2020, so we need to explicitly request for an uncertified scan.
-			uncertifiedRHEL: true,
+			uncertifiedRHEL:          true,
+			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "procps-ng",
 					NamespaceName: "centos:7",
 					VersionFormat: "rpm",
 					Version:       "3.3.10-26.el7",
+					ProvidedExecutables: []string{
+						"/usr/bin/free",
+						"/usr/bin/pgrep",
+						"/usr/bin/pkill",
+						"/usr/bin/pmap",
+						"/usr/bin/ps",
+						"/usr/bin/pwdx",
+						"/usr/bin/skill",
+						"/usr/bin/slabtop",
+						"/usr/bin/snice",
+						"/usr/bin/tload",
+						"/usr/bin/top",
+						"/usr/bin/uptime",
+						"/usr/bin/vmstat",
+						"/usr/bin/w",
+						"/usr/bin/watch",
+						"/usr/lib64/libprocps.so.4.0.0",
+						"/usr/sbin/sysctl",
+					},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2018-1121",
@@ -1351,23 +1409,28 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// One of the images used for Red Hat Scanner Certification.
-			image:             "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7",
-			registry:          "https://registry-1.docker.io",
-			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-			source:            "Red Hat",
-			checkContainsOnly: true,
+			image:                    "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7",
+			registry:                 "https://registry-1.docker.io",
+			username:                 os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:                 os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:                   "Red Hat",
+			checkContainsOnly:        true,
+			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "rh-maven35-log4j12",
 					VersionFormat: "rpm",
 					Version:       "1.2.17-19.2.el7.noarch",
-					AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+					// This feature provides several JAR files, but they are either not executable or they are symlinks.
+					ProvidedExecutables: []string{},
+					AddedBy:             "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
 					Name:          "rh-maven35-jackson-databind",
 					VersionFormat: "rpm",
 					Version:       "2.7.6-2.10.el7.noarch",
+					// This feature provides a JAR file that is not executable.
+					ProvidedExecutables: []string{},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4173",
@@ -1397,9 +1460,10 @@ func TestImageSanity(t *testing.T) {
 					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
-					Name:          "vim-minimal",
-					VersionFormat: "rpm",
-					Version:       "2:7.4.629-6.el7.x86_64",
+					Name:                "vim-minimal",
+					VersionFormat:       "rpm",
+					Version:             "2:7.4.629-6.el7.x86_64",
+					ProvidedExecutables: []string{"/usr/bin/vi"},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2017-1000382",
@@ -1692,8 +1756,6 @@ func TestImageSanity(t *testing.T) {
 		{
 			image:           "docker.io/richxsl/rhel7@sha256:8f3aae325d2074d2dc328cb532d6e7aeb0c588e15ddf847347038fe0566364d6",
 			registry:        "https://registry-1.docker.io",
-			username:        os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password:        os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:          "NVD",
 			uncertifiedRHEL: true,
 			expectedFeatures: []v1.Feature{
@@ -1736,8 +1798,6 @@ func TestImageSanity(t *testing.T) {
 			image:    "alpine:3.13.0",
 			registry: "https://registry-1.docker.io",
 			source:   "NVD",
-			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apk-tools",
@@ -1767,6 +1827,30 @@ func TestImageSanity(t *testing.T) {
 								},
 							},
 							FixedBy: "2.12.5-r0",
+						},
+						{
+							Name:          "CVE-2021-36159",
+							NamespaceName: "alpine:v3.13",
+							Description:   "libfetch before 2021-07-26, as used in apk-tools, xbps, and other products, mishandles numeric strings for the FTP and HTTP protocols. The FTP passive mode implementation allows an out-of-bounds read because strtol is used to parse the relevant numbers into address bytes. It does not check if the line ends prematurely. If it does, the for-loop condition checks for the '\\0' terminator one byte too late.",
+							Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-36159",
+							Severity:      "Critical",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         5.2,
+										"Score":               9.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         4.9,
+										"Score":               6.4,
+										"Vectors":             "AV:N/AC:L/Au:N/C:P/I:N/A:P",
+									},
+								},
+							},
+							FixedBy: "2.12.6-r0",
 						},
 					},
 					AddedBy: "sha256:7731472c3f2a25edbb9c085c78f42ec71259f2b83485aa60648276d408865839",
@@ -1811,13 +1895,37 @@ func TestImageSanity(t *testing.T) {
 			image:    "alpine:3.14.0",
 			registry: "https://registry-1.docker.io",
 			source:   "NVD",
-			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apk-tools",
 					VersionFormat: "apk",
 					Version:       "2.12.5-r1",
+					Vulnerabilities: []v1.Vulnerability{
+						{
+							Name:          "CVE-2021-36159",
+							NamespaceName: "alpine:v3.14",
+							Description:   "libfetch before 2021-07-26, as used in apk-tools, xbps, and other products, mishandles numeric strings for the FTP and HTTP protocols. The FTP passive mode implementation allows an out-of-bounds read because strtol is used to parse the relevant numbers into address bytes. It does not check if the line ends prematurely. If it does, the for-loop condition checks for the '\\0' terminator one byte too late.",
+							Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-36159",
+							Severity:      "Critical",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         5.2,
+										"Score":               9.1,
+										"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 10.0,
+										"ImpactScore":         4.9,
+										"Score":               6.4,
+										"Vectors":             "AV:N/AC:L/Au:N/C:P/I:N/A:P",
+									},
+								},
+							},
+							FixedBy: "2.12.6-r0",
+						},
+					},
 				},
 				{
 					Name:          "busybox",
@@ -1826,9 +1934,47 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			image:    "quay.io/cgorman1/qa:debian-package-removal",
+			registry: "https://quay.io",
+			username: os.Getenv("QUAY_CGORMAN1_RO_USER"),
+			password: os.Getenv("QUAY_CGORMAN1_RO_PASSWORD"),
+			source:   "NVD",
+			// Ensure we find the executable files for packages added in a layer lower than the latest
+			// package DB version. The relevant *.list file will only exist in the layer the package is added
+			// so the layer with the latest packages DB will not have the *.list file for these packages.
+			checkProvidedExecutables: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "dash",
+					VersionFormat: "dpkg",
+					Version:       "0.5.11+git20200708+dd9ef66-5",
+					ProvidedExecutables: []string{
+						"/bin/dash",
+					},
+				},
+				{
+					Name:          "diffutils",
+					VersionFormat: "dpkg",
+					Version:       "1:3.7-5",
+					ProvidedExecutables: []string{
+						"/usr/bin/cmp",
+						"/usr/bin/diff",
+						"/usr/bin/diff3",
+						"/usr/bin/sdiff",
+					},
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
-			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.expectedFeatures, testCase.unexpectedFeatures)
+			if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
+				testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/cgorman1/qa:sandbox-", -1)
+				testCase.registry = "https://quay.io"
+				testCase.username = os.Getenv("QUAY_CGORMAN1_RO_USER")
+				testCase.password = os.Getenv("QUAY_CGORMAN1_RO_PASSWORD")
+			}
+			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.checkProvidedExecutables, testCase.expectedFeatures, testCase.unexpectedFeatures)
 		})
 	}
 }

@@ -25,28 +25,28 @@ func TestGRPCGetOpenShiftVulnerabilities(t *testing.T) {
 
 	// Map from address families to their current state.
 	testCases := []*struct {
-		addressFamily   string
-		maxPatch        int
-		step            int
-		knownFixed      int
+		addressFamily string
+		maxPatch      int
+		step          int
+		knownFixed    int
 	}{
 		{
-			addressFamily:   "3.11",
-			maxPatch:        439,
-			step:            1,
-			knownFixed:      19,
+			addressFamily: "3.11",
+			maxPatch:      439,
+			step:          1,
+			knownFixed:    19,
 		},
 		{
-			addressFamily:   "4.5",
-			maxPatch:        40,
-			step:            1,
-			knownFixed:      5,
+			addressFamily: "4.5",
+			maxPatch:      40,
+			step:          1,
+			knownFixed:    5,
 		},
 		{
-			addressFamily:   "4.7",
-			maxPatch:        12,
-			step:            1,
-			knownFixed:      3,
+			addressFamily: "4.7",
+			maxPatch:      12,
+			step:          1,
+			knownFixed:    3,
 		},
 	}
 

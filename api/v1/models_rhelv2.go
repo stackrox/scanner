@@ -52,11 +52,12 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 		}
 
 		feature := Feature{
-			Name:          pkg.Name,
-			NamespaceName: layer.NamespaceName,
-			VersionFormat: rpm.ParserName,
-			Version:       version,
-			AddedBy:       pkgEnv.AddedBy,
+			Name:                pkg.Name,
+			NamespaceName:       layer.NamespaceName,
+			VersionFormat:       rpm.ParserName,
+			Version:             version,
+			AddedBy:             pkgEnv.AddedBy,
+			ProvidedExecutables: pkg.ProvidedExecutables,
 		}
 
 		pkgVersion := rpmVersion.NewVersion(pkg.Version)

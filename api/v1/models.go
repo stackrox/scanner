@@ -195,12 +195,13 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 	}
 
 	return &Feature{
-		Name:          dbFeatureVersion.Feature.Name,
-		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
-		VersionFormat: stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
-		Version:       version,
-		AddedBy:       addedBy,
-		Location:      dbFeatureVersion.Feature.Location,
+		Name:                dbFeatureVersion.Feature.Name,
+		NamespaceName:       dbFeatureVersion.Feature.Namespace.Name,
+		VersionFormat:       stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
+		Version:             version,
+		AddedBy:             addedBy,
+		Location:            dbFeatureVersion.Feature.Location,
+		ProvidedExecutables: dbFeatureVersion.ProvidedExecutables,
 	}
 }
 

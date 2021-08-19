@@ -60,9 +60,9 @@ func TestDpkgFeatureDetection(t *testing.T) {
 				},
 			},
 			Files: tarutil.FilesMap{
-				"var/lib/dpkg/status":           featurefmt.LoadFileForTest("dpkg/testdata/status"),
-				"var/lib/dpkg/status.d/base":    featurefmt.LoadFileForTest("dpkg/testdata/statusd-base"),
-				"var/lib/dpkg/status.d/netbase": featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase"),
+				"var/lib/dpkg/status":           tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
+				"var/lib/dpkg/status.d/base":    tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
+				"var/lib/dpkg/status.d/netbase": tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase")},
 			},
 		},
 	}
@@ -81,21 +81,17 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 			FeatureVersions: []database.FeatureVersion{
 				// Two packages from this source are installed, it should only appear one time
 				{
-					Feature:             database.Feature{Name: "libpam-runtime"},
+					Feature:             database.Feature{Name: "pam"},
 					Version:             "1.1.8-3.1ubuntu3",
-					ProvidedExecutables: []string{"/test/executable"},
-				},
-				{
-					Feature: database.Feature{Name: "libpam-modules-bin"},
-					Version: "1.1.8-3.1ubuntu3",
+					ProvidedExecutables: []string{"/another/one", "/test/executable"},
 				},
 				{
 					Feature: database.Feature{Name: "makedev"},
 					Version: "2.3.1-93ubuntu1",
 				},
 				{
-					Feature:             database.Feature{Name: "libgcc1"},
-					Version:             "1:5.1.1-12ubuntu1",
+					Feature:             database.Feature{Name: "gcc-5"},
+					Version:             "5.1.1-12ubuntu1", // The version comes from the "Source:" line
 					ProvidedExecutables: []string{"/i/am/an/executable"},
 				},
 				{
@@ -111,26 +107,25 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Version:             "1.1.8-3.1ubuntu3",
 					ProvidedExecutables: []string{"/exec-me", "/exec-me-2"},
 				},
-				{
-					Feature: database.Feature{Name: "libapt-pkg5.0"},
-					Version: "1.6.12",
-				},
 			},
 			Files: tarutil.FilesMap{
-				"var/lib/dpkg/status":                   featurefmt.LoadFileForTest("dpkg/testdata/status"),
-				"var/lib/dpkg/status.d/base":            featurefmt.LoadFileForTest("dpkg/testdata/statusd-base"),
-				"var/lib/dpkg/info/base-files.list":     []byte{},
-				"var/lib/dpkg/status.d/netbase":         featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase"),
-				"var/lib/dpkg/info/netbase.list":        []byte{},
-				"var/lib/dpkg/info/libpam-runtime.list": featurefmt.LoadFileForTest("dpkg/testdata/libpam-runtime.list"),
-				"var/lib/dpkg/info/libgcc1:amd64.list":  featurefmt.LoadFileForTest("dpkg/testdata/libgcc1:amd64.list"),
-				"test/executable":                       nil,
-				"i/am/an/executable":                    nil,
-				"var/lib/dpkg/info/pkg-source.list":     featurefmt.LoadFileForTest("dpkg/testdata/pkg-source.list"),
-				"var/lib/dpkg/info/pkg1:amd64.list":     featurefmt.LoadFileForTest("dpkg/testdata/pkg1:amd64.list"),
-				"var/lib/dpkg/info/pkg2.list":           featurefmt.LoadFileForTest("dpkg/testdata/pkg2.list"),
-				"exec-me":                               nil,
-				"exec-me-2":                             nil,
+				"var/lib/dpkg/status":                       tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
+				"var/lib/dpkg/status.d/base":                tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
+				"var/lib/dpkg/info/base-files.list":         tarutil.FileData{Contents: []byte{}},
+				"var/lib/dpkg/status.d/netbase":             tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase")},
+				"var/lib/dpkg/info/netbase.list":            tarutil.FileData{Contents: []byte{}},
+				"var/lib/dpkg/info/libpam-runtime.list":     tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/libpam-runtime.list")},
+				"var/lib/dpkg/info/libpam-modules-bin.list": tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/libpam-modules-bin.list")},
+				"var/lib/dpkg/info/libgcc1:amd64.list":      tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/libgcc1:amd64.list")},
+				"test/executable":                           tarutil.FileData{Executable: true},
+				"another/one":                               tarutil.FileData{Executable: true},
+				"i/am/an/executable":                        tarutil.FileData{Executable: true},
+				"var/lib/dpkg/info/pkg-source.list":         tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg-source.list")},
+				"var/lib/dpkg/info/pkg1:amd64.list":         tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg1:amd64.list")},
+				"var/lib/dpkg/info/pkg2.list":               tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg2.list")},
+				"exec-me":                                   tarutil.FileData{Executable: true},
+				"exec-me-2":                                 tarutil.FileData{Executable: true},
+				"my-jar.jar":                                tarutil.FileData{Contents: []byte("jar contents")},
 			},
 		},
 	}

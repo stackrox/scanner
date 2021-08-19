@@ -18,9 +18,13 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurens/osrelease"
+	"github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -32,34 +36,49 @@ const (
 		`%{ARCH}\n` +
 		`%{RPMTAG_MODULARITYLABEL}\n` +
 		`.\n`
+	queryFmtActiveVulnMgmt = `%{name}\n` +
+		`%{evr}\n` +
+		`%{ARCH}\n` +
+		`%{RPMTAG_MODULARITYLABEL}\n` +
+		`[%{FILENAMES}\n]` +
+		`.\n`
 
-	// Older versions of rpm do no have the `RPMTAG_MODULARITYLABEL` tag.
+	// Older versions of rpm do not have the `RPMTAG_MODULARITYLABEL` tag.
 	// Ignore it for testing.
 	queryFmtTest = `%{name}\n` +
 		`%{evr}\n` +
 		`%{ARCH}\n` +
 		`.\n`
+	queryFmtActiveVulnMgmtTest = `%{name}\n` +
+		`%{evr}\n` +
+		`%{ARCH}\n` +
+		`[%{FILENAMES}\n]` +
+		`.\n`
 
-	delim = "\n.\n"
-
-	packages         = `var/lib/rpm/Packages`
+	dbPath           = `var/lib/rpm/Packages`
 	contentManifests = `root/buildinfo/content_manifests`
 )
 
-var (
-	contentManifestPattern = regexp.MustCompile(`^root/buildinfo/content_manifests/.*\.json`)
-)
+var contentManifestPattern = regexp.MustCompile(`^root/buildinfo/content_manifests/.*\.json$`)
+
+// AllRHELRequiredFiles lists all the names of the files required to identify RHEL-based releases.
+var AllRHELRequiredFiles set.StringSet
+
+func init() {
+	AllRHELRequiredFiles.Add(dbPath)
+	AllRHELRequiredFiles.AddAll(RequiredFilenames()...)
+	AllRHELRequiredFiles.AddAll(redhatrelease.RequiredFilenames...)
+	AllRHELRequiredFiles.AddAll(osrelease.RequiredFilenames...)
+}
 
 // ListFeatures returns the features found from the given files.
 // returns a slice of packages found via rpm and a slice of CPEs found in
 // /root/buildinfo/content_manifests.
 func ListFeatures(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
+	if features.ActiveVulnMgmt.Enabled() {
+		return listFeatures(files, queryFmtActiveVulnMgmt)
+	}
 	return listFeatures(files, queryFmt)
-}
-
-// ListFeaturesTest does the same as ListFeatures but should only be used for testing.
-func ListFeaturesTest(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
-	return listFeatures(files, queryFmtTest)
 }
 
 func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Package, []string, error) {
@@ -68,7 +87,7 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 		return nil, nil, err
 	}
 
-	f, hasFile := files[packages]
+	f, hasFile := files[dbPath]
 	if !hasFile {
 		return nil, cpes, nil
 	}
@@ -83,7 +102,7 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 		_ = os.RemoveAll(tmpDir)
 	}()
 
-	err = os.WriteFile(tmpDir+"/Packages", f, 0700)
+	err = os.WriteFile(tmpDir+"/Packages", f.Contents, 0700)
 	if err != nil {
 		log.WithError(err).Error("could not create temporary file for RPM detection")
 		return nil, nil, commonerr.ErrFilesystem
@@ -96,37 +115,17 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 	if err != nil {
 		return nil, nil, err
 	}
+	defer utils.IgnoreError(r.Close)
 
 	var errbuf bytes.Buffer
 	cmd.Stderr = &errbuf
 
 	if err := cmd.Start(); err != nil {
-		_ = r.Close()
 		return nil, nil, err
 	}
 
-	var pkgs []*database.RHELv2Package
-
-	// Use a closure to defer the Close call.
-	if err := func() error {
-		defer utils.IgnoreError(r.Close)
-
-		s := bufio.NewScanner(r)
-		s.Split(querySplit)
-
-		for s.Scan() {
-			p, err := parsePackage(bytes.NewBuffer(s.Bytes()))
-			if err != nil {
-				return err
-			}
-			if p == nil {
-				continue
-			}
-			pkgs = append(pkgs, p)
-		}
-
-		return s.Err()
-	}(); err != nil {
+	pkgs, err := parsePackages(r, files)
+	if err != nil {
 		if errbuf.Len() != 0 {
 			log.Warnf("Error executing RPM command: %s", errbuf.String())
 		}
@@ -140,41 +139,43 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 	return pkgs, cpes, nil
 }
 
-func querySplit(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	i := bytes.Index(data, []byte(delim))
-	switch {
-	case len(data) == 0 && atEOF:
-		return 0, nil, io.EOF
-	case i == -1 && atEOF:
-		return 0, nil, errors.New("invalid format")
-	case i == -1 && !atEOF:
-		return 0, nil, nil
-	default:
-	}
-	tok := data[:i]
-	return len(tok) + len(delim), tok, nil
-}
+func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Package, error) {
+	var pkgs []*database.RHELv2Package
 
-func parsePackage(buf *bytes.Buffer) (*database.RHELv2Package, error) {
-	var p database.RHELv2Package
-	var err error
-	var line string
-
-	for i := 0; ; i++ {
-		// Look at the "queryFmt" string for the line numbers.
-		line, err = buf.ReadString('\n')
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "(none)") {
+	p := &database.RHELv2Package{}
+	// executablesSet ensures only unique executables are stored per package.
+	executablesSet := set.NewStringSet()
+	s := bufio.NewScanner(r)
+	for i := 0; s.Scan(); i++ {
+		line := strings.TrimSpace(s.Text())
+		if line == "" || strings.HasPrefix(line, "(none)") {
 			continue
 		}
-		if line == "" && err == nil {
+		if line == "." {
+			// Reached package delimiter.
+
+			// Ensure the current package is well-formed.
+			// If it is, add it to the return slice.
+			if p.Name != "" && p.Version != "" && p.Arch != "" {
+				p.ProvidedExecutables = executablesSet.AsSortedSlice(func(i, j string) bool {
+					return i < j
+				})
+
+				pkgs = append(pkgs, p)
+			}
+
+			// Start a new package definition and reset 'i'.
+			p = &database.RHELv2Package{}
+			executablesSet.Clear()
+			i = -1
 			continue
 		}
+
 		switch i {
 		case 0:
 			// This is not a real package. Skip it...
 			if line == "gpg-pubkey" {
-				return nil, nil
+				continue
 			}
 			p.Name = line
 		case 1:
@@ -188,15 +189,19 @@ func parsePackage(buf *bytes.Buffer) (*database.RHELv2Package, error) {
 			}
 			moduleStream := fmt.Sprintf("%s:%s", moduleSplit[0], moduleSplit[1])
 			p.Module = moduleStream
-		}
-		switch err {
-		case nil:
-		case io.EOF:
-			return &p, nil
 		default:
-			return nil, err
+			// i >= 4 is reserved for provided filenames.
+
+			// Rename to make it clear what the line represents.
+			filename := line
+			// The first character is always "/", which is removed when inserted into the files maps.
+			if fileData := files[filename[1:]]; fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
+				executablesSet.Add(filename)
+			}
 		}
 	}
+
+	return pkgs, s.Err()
 }
 
 func getCPEsUsingEmbeddedContentSets(files tarutil.FilesMap) ([]string, error) {
@@ -223,7 +228,7 @@ func getContentManifestFileContents(files tarutil.FilesMap) []byte {
 		}
 
 		// Return the first one found, as there should only be one per layer.
-		return contents
+		return contents.Contents
 	}
 
 	return nil
@@ -231,5 +236,5 @@ func getContentManifestFileContents(files tarutil.FilesMap) []byte {
 
 // RequiredFilenames lists the files required to be present for analysis to be run.
 func RequiredFilenames() []string {
-	return []string{packages, contentManifests}
+	return []string{dbPath, contentManifests}
 }

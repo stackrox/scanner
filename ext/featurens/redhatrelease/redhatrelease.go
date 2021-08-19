@@ -34,6 +34,9 @@ var (
 	oracleReleaseRegexp = regexp.MustCompile(`(?P<os>Oracle) (Linux Server release) (?P<version>[\d]+)`)
 	centosReleaseRegexp = regexp.MustCompile(`(?P<os>[^\s]*) (Linux release|release) (?P<version>[\d]+)`)
 	redhatReleaseRegexp = regexp.MustCompile(`(?P<os>Red Hat Enterprise Linux) (Client release|Server release|Workstation release|release) (?P<version>[\d]+)`)
+
+	// RequiredFilenames defines the names of the files required to identify the RHEL-based release.
+	RequiredFilenames = []string{"etc/oracle-release", "etc/centos-release", "etc/redhat-release", "etc/system-release"}
 )
 
 type detector struct{}
@@ -52,7 +55,7 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 		var r []string
 
 		// Attempt to match Amazon Linux.
-		r = amazonReleaseRegexp.FindStringSubmatch(string(f))
+		r = amazonReleaseRegexp.FindStringSubmatch(string(f.Contents))
 		if len(r) == 4 {
 			// Amazon Linux's namespace name should be amzn but the
 			// /etc/system-release file uses Amazon.
@@ -63,7 +66,7 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 		}
 
 		// Attempt to match Oracle Linux.
-		r = oracleReleaseRegexp.FindStringSubmatch(string(f))
+		r = oracleReleaseRegexp.FindStringSubmatch(string(f.Contents))
 		if len(r) == 4 {
 			return &database.Namespace{
 				Name:          strings.ToLower(r[1]) + ":" + r[3],
@@ -72,7 +75,7 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 		}
 
 		// Attempt to match RHEL.
-		r = redhatReleaseRegexp.FindStringSubmatch(string(f))
+		r = redhatReleaseRegexp.FindStringSubmatch(string(f.Contents))
 		if len(r) == 4 {
 			namespace := &database.Namespace{
 				VersionFormat: rpm.ParserName,
@@ -86,7 +89,7 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 		}
 
 		// Attempt to match CentOS.
-		r = centosReleaseRegexp.FindStringSubmatch(string(f))
+		r = centosReleaseRegexp.FindStringSubmatch(string(f.Contents))
 		if len(r) == 4 {
 			return &database.Namespace{
 				Name:          strings.ToLower(r[1]) + ":" + r[3],
@@ -99,5 +102,5 @@ func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions
 }
 
 func (d detector) RequiredFilenames() []string {
-	return []string{"etc/oracle-release", "etc/centos-release", "etc/redhat-release", "etc/system-release"}
+	return RequiredFilenames
 }

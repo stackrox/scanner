@@ -17,18 +17,34 @@ package rpm
 
 import (
 	"bufio"
-	"errors"
+	"bytes"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
-	"github.com/stackrox/scanner/ext/versionfmt"
-	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
+)
+
+const (
+	dbPath = "var/lib/rpm/Packages"
+
+	queryFmt = `%{name}\n` +
+		`%{evr}\n` +
+		`.\n`
+	queryFmtActiveVulnMgmt = `%{name}\n` +
+		`%{evr}\n` +
+		`[%{FILENAMES}\n]` +
+		`.\n`
 )
 
 type lister struct{}
@@ -38,77 +54,118 @@ func init() {
 }
 
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
-	f, hasFile := files["var/lib/rpm/Packages"]
+	f, hasFile := files[dbPath]
 	if !hasFile {
 		return []database.FeatureVersion{}, nil
 	}
 
-	// Create a map to store packages and ensure their uniqueness
-	packagesMap := make(map[string]database.FeatureVersion)
-
 	// Write the required "Packages" file to disk
 	tmpDir, err := os.MkdirTemp("", "rpm")
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		_ = os.RemoveAll(tmpDir)
+	}()
 	if err != nil {
 		log.WithError(err).Error("could not create temporary folder for RPM detection")
 		return []database.FeatureVersion{}, commonerr.ErrFilesystem
 	}
 
-	err = os.WriteFile(tmpDir+"/Packages", f, 0700)
+	err = os.WriteFile(tmpDir+"/Packages", f.Contents, 0700)
 	if err != nil {
 		log.WithError(err).Error("could not create temporary file for RPM detection")
 		return []database.FeatureVersion{}, commonerr.ErrFilesystem
 	}
 
 	// Extract binary package names because RHSA refers to binary package names.
-	out, err := exec.Command("rpm", "--dbpath", tmpDir, "-qa", "--qf", "%{NAME} %{EPOCH}:%{VERSION}-%{RELEASE}\n").CombinedOutput()
+	qf := queryFmt
+	if features.ActiveVulnMgmt.Enabled() {
+		qf = queryFmtActiveVulnMgmt
+	}
+	cmd := exec.Command("rpm", "--dbpath", tmpDir, "-qa", "--qf", qf)
+	r, err := cmd.StdoutPipe()
 	if err != nil {
-		log.WithError(err).WithField("output", string(out)).Error("could not query RPM: either the DB is corrupted or FIPs mode is enabled")
-		// Bubble up because this may be fixable by using a different base image.
-		return []database.FeatureVersion{}, errors.New("could not query RPM: either the DB is corrupted or FIPs mode is enabled")
+		return []database.FeatureVersion{}, errors.Wrap(err, "Unable to get pipe for RPM command")
+	}
+	defer utils.IgnoreError(r.Close)
+
+	var errbuf bytes.Buffer
+	cmd.Stderr = &errbuf
+
+	if err := cmd.Start(); err != nil {
+		return []database.FeatureVersion{}, errors.Wrap(err, "Could not start RPM query: either the DB is corrupted or FIPs mode is enabled")
 	}
 
-	scanner := bufio.NewScanner(strings.NewReader(string(out)))
-	for scanner.Scan() {
-		line := strings.Split(scanner.Text(), " ")
-		if len(line) != 2 {
-			// We may see warnings on some RPM versions:
-			// "warning: Generating 12 missing index(es), please wait..."
+	featureVersions, err := parseFeatures(r, files)
+	if err != nil {
+		if errbuf.Len() != 0 {
+			log.Warnf("Error executing RPM command: %s", errbuf.String())
+		}
+		return nil, errors.Wrap(err, "Could not query RPM: either the DB is corrupted or FIPs mode is enabled")
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return nil, errors.Wrap(err, "Could not wait for RPM query: either the DB is corrupted or FIPs mode is enabled")
+	}
+
+	return featureVersions, nil
+}
+
+func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersion, error) {
+	var featureVersions []database.FeatureVersion
+
+	var fv database.FeatureVersion
+	// executablesSet ensures only unique executables are stored per package.
+	executablesSet := set.NewStringSet()
+	s := bufio.NewScanner(r)
+	for i := 0; s.Scan(); i++ {
+		line := strings.TrimSpace(s.Text())
+		if line == "" || strings.HasPrefix(line, "(none)") {
 			continue
 		}
 
-		// Ignore gpg-pubkey packages which are fake packages used to store GPG keys - they are not versionned properly.
-		if line[0] == "gpg-pubkey" {
+		if line == "." {
+			// Reached feature delimiter.
+
+			// Ensure the current feature is well-formed.
+			// If it is, add it to the return slice.
+			if fv.Feature.Name != "" && fv.Version != "" {
+				fv.ProvidedExecutables = executablesSet.AsSortedSlice(func(i, j string) bool {
+					return i < j
+				})
+
+				featureVersions = append(featureVersions, fv)
+			}
+
+			// Start a new package definition and reset 'i'.
+			fv = database.FeatureVersion{}
+			executablesSet.Clear()
+			i = -1
 			continue
 		}
 
-		// Parse version
-		version := strings.Replace(line[1], "(none):", "", -1)
-		err := versionfmt.Valid(rpm.ParserName, version)
-		if err != nil {
-			log.WithError(err).WithField("version", line[1]).Warning("could not parse package version. skipping")
-			continue
-		}
+		switch i {
+		case 0:
+			// This is not a real feature. Skip it...
+			if line == "gpg-pubkey" {
+				continue
+			}
+			fv.Feature.Name = line
+		case 1:
+			fv.Version = line
+		default:
+			// i >= 2 is reserved for provided filenames.
 
-		// Add package
-		pkg := database.FeatureVersion{
-			Feature: database.Feature{
-				Name: line[0],
-			},
-			Version: version,
+			// Rename to make it clear what the line represents.
+			filename := line
+			// The first character is always "/", which is removed when inserted into the files maps.
+			if fileData := files[filename[1:]]; fileData.Executable && !rpm.AllRHELRequiredFiles.Contains(filename[1:]) {
+				executablesSet.Add(filename)
+			}
 		}
-		packagesMap[pkg.Feature.Name+"#"+pkg.Version] = pkg
 	}
 
-	// Convert the map to a slice
-	packages := make([]database.FeatureVersion, 0, len(packagesMap))
-	for _, pkg := range packagesMap {
-		packages = append(packages, pkg)
-	}
-
-	return packages, nil
+	return featureVersions, s.Err()
 }
 
 func (l lister) RequiredFilenames() []string {
-	return []string{"var/lib/rpm/Packages"}
+	return []string{dbPath}
 }
