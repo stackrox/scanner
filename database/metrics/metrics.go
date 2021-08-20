@@ -23,8 +23,8 @@ var (
 	}, []string{"object"})
 
 	promQueryDurationMilliseconds = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name: "clair_pgsql_query_duration_milliseconds",
-		Help: "Time it takes to execute the database query.",
+		Name:    "clair_pgsql_query_duration_milliseconds",
+		Help:    "Time it takes to execute the database query.",
 		Buckets: []float64{1, 5, 10, 25, 50, 100, 200, 500, 1000},
 	}, []string{"query", "subquery"})
 
