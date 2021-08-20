@@ -10,6 +10,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -124,9 +125,17 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			}
 			defer resp.Body.Close()
 
-			securityData = &database.SecurityData{}
-			if err := json.NewDecoder(resp.Body).Decode(securityData); err != nil {
-				return nil, errors.Wrapf(err, "could not parse cve %s", name)
+			data, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, errors.Wrapf(err, "error reading body for %s", name)
+			}
+			if json.Valid(data) {
+				securityData = &database.SecurityData{}
+				if err := json.Unmarshal(data, securityData); err != nil {
+					return nil, errors.Wrapf(err, "could not parse cve %s", name)
+				}
+			} else {
+				log.Warnf("could not decode valid security data for %s: %s", name, data)
 			}
 		}
 
