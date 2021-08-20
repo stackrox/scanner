@@ -18,8 +18,7 @@ import (
 )
 
 func (pgSQL *pgSQL) InsertRHELv2Layer(layer *database.RHELv2Layer) error {
-	query := "insertRHELv2Layer"
-	defer metrics.ObserveQueryTime(query, "all", time.Now())
+	defer metrics.ObserveQueryTime("insertRHELv2Layer", "all", time.Now())
 
 	tx, err := pgSQL.Begin()
 	if err != nil {
