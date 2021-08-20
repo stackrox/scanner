@@ -276,7 +276,7 @@ func handleError(desc string, err error) error {
 	}
 
 	log.WithError(err).WithField("Description", desc).Error("Handled Database Error")
-	metrics.IncrementErrors(desc)
+	metrics.IncErrors(desc)
 
 	if _, o := err.(*pq.Error); o || err == sql.ErrTxDone || strings.HasPrefix(err.Error(), "sql:") {
 		return database.ErrBackendException

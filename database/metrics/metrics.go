@@ -25,7 +25,7 @@ var (
 	promQueryDurationMilliseconds = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "clair_pgsql_query_duration_milliseconds",
 		Help:    "Time it takes to execute the database query.",
-		Buckets: []float64{1, 5, 10, 25, 50, 100, 200, 500, 1000, 2000, 5000, 10000},
+		Buckets: []float64{1, 10, 100, 500, 1000, 2000, 5000, 10000},
 	}, []string{"query", "subquery"})
 
 	promConcurrentLockVAFV = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -45,18 +45,18 @@ func MustRegisterAll() {
 	)
 }
 
-// IncrementErrors increments the error total metric with the given description of the error.
-func IncrementErrors(description string) {
+// IncErrors increments the error total metric with the given description of the error.
+func IncErrors(description string) {
 	promErrorsTotal.WithLabelValues(description).Inc()
 }
 
-// IncrementCacheQueries increments the number of cache queries.
-func IncrementCacheQueries(labels ...string) {
+// IncCacheQueries increments the number of cache queries.
+func IncCacheQueries(labels ...string) {
 	promCacheQueriesTotal.WithLabelValues(labels...).Inc()
 }
 
-// IncrementCacheHits increments the number of cache hits.
-func IncrementCacheHits(labels ...string) {
+// IncCacheHits increments the number of cache hits.
+func IncCacheHits(labels ...string) {
 	promCacheHitsTotal.WithLabelValues(labels...).Inc()
 }
 
@@ -67,12 +67,12 @@ func ObserveQueryTime(query, subquery string, start time.Time) {
 		Observe(float64(time.Since(start).Nanoseconds()) / float64(time.Millisecond))
 }
 
-// LockVAFV increments the number of transactions trying to acquire the VAFV lock.
-func LockVAFV() {
+// IncLockVAFV increments the number of transactions trying to acquire the VAFV lock.
+func IncLockVAFV() {
 	promConcurrentLockVAFV.Inc()
 }
 
-// UnlockVAFV decrements the number of transactions trying to acquire the VAFV lock.
-func UnlockVAFV() {
+// DecLockVAFV decrements the number of transactions trying to acquire the VAFV lock.
+func DecLockVAFV() {
 	promConcurrentLockVAFV.Dec()
 }

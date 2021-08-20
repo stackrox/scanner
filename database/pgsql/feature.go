@@ -34,10 +34,10 @@ func (pgSQL *pgSQL) insertFeature(feature database.Feature) (int, error) {
 
 	// Do cache lookup.
 	if pgSQL.cache != nil {
-		metrics.IncrementCacheQueries("feature")
+		metrics.IncCacheQueries("feature")
 		id, found := pgSQL.cache.Get("feature:" + feature.Namespace.Name + ":" + feature.Name)
 		if found {
-			metrics.IncrementCacheHits("feature")
+			metrics.IncCacheHits("feature")
 			return id.(int), nil
 		}
 	}
@@ -84,10 +84,10 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	// Do cache lookup.
 	cacheIndex := strings.Join([]string{"featureversion", fv.Feature.Namespace.Name, fv.Feature.Name, fv.Version}, ":")
 	if pgSQL.cache != nil {
-		metrics.IncrementCacheQueries("featureversion")
+		metrics.IncCacheQueries("featureversion")
 		id, found := pgSQL.cache.Get(cacheIndex)
 		if found {
-			metrics.IncrementCacheHits("featureversion")
+			metrics.IncCacheHits("featureversion")
 			return id.(int), nil
 		}
 	}
@@ -130,8 +130,8 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 
 	// Lock Vulnerability_Affects_FeatureVersion exclusively.
 	// We want to prevent InsertVulnerability to modify it.
-	metrics.LockVAFV()
-	defer metrics.UnlockVAFV()
+	metrics.IncLockVAFV()
+	defer metrics.DecLockVAFV()
 	t = time.Now()
 	_, err = tx.Exec(lockVulnerabilityAffects)
 	metrics.ObserveQueryTime("insertFeatureVersion", "lock", t)
