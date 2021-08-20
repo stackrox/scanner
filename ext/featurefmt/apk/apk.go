@@ -19,6 +19,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -27,6 +28,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/apk"
 	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -45,6 +47,8 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	if !exists {
 		return []database.FeatureVersion{}, nil
 	}
+
+	defer metrics.ObserveListFeaturesTime("apk", "all", time.Now())
 
 	// Iterate over each line in the "installed" file attempting to parse each
 	// package into a feature that will be stored in a set to guarantee

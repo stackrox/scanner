@@ -22,6 +22,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -31,6 +32,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -64,6 +66,12 @@ func init() {
 ///////////////////////////////////////////////////
 
 func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) error {
+	pkgFmt := `dpkg`
+	if distroless {
+		pkgFmt = `distroless`
+	}
+	defer metrics.ObserveListFeaturesTime(pkgFmt, "all", time.Now())
+
 	// The database is actually an RFC822-like message with "\n\n"
 	// separators, so don't be alarmed by the usage of the "net/mail"
 	// package here.
