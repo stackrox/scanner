@@ -142,16 +142,17 @@ type RHELv2Vulnerability struct {
 	CPEs         []string             `json:"cpes" hash:"set"`
 	PackageInfos []*RHELv2PackageInfo `json:"package_info" hash:"set"`
 	SecurityData *SecurityData        `json:"security_data"`
+	Status       string               `json:"status"`
 }
 
+// SecurityData defines the object for status for rhelv2 CVEs
 type SecurityData struct {
-	ThreatSeverity string 					`json:"threat_severity"`
-	PackageState []SecurityDataPackageState `json:"package_state"`
+	ThreatSeverity string                     `json:"threat_severity"`
+	PackageState   []SecurityDataPackageState `json:"package_state"`
 }
 
-// ['Affected','Fix deferred','New','Not affected','Will not fix', 'Out of support scope'].
+// SecurityDataPackageState defines the state on a per package basis
 type SecurityDataPackageState struct {
-	Product  string `json:"product_name"`
 	Package  string `json:"package_name"`
 	CPE      string `json:"cpe"`
 	FixState string `json:"fix_state"`

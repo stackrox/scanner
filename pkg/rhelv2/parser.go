@@ -118,7 +118,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 
 		var securityData *database.SecurityData
 		if strings.HasPrefix(name, "CVE-") {
-			resp, err := http.Get(securityDataURL+"/"+name)
+			resp, err := http.Get(securityDataURL + "/" + name)
 			if err != nil {
 				return nil, errors.Wrapf(err, "getting security data for %s", name)
 			}
@@ -131,16 +131,16 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 		}
 
 		return &database.RHELv2Vulnerability{
-			Name:        name,
-			Title:       def.Title,
-			Description: def.Description,
-			Issued:      def.Advisory.Issued.Date,
-			Updated:     def.Advisory.Updated.Date,
-			Link:        link,
-			Severity:    def.Advisory.Severity,
-			CVSSv3:      cvss3Str,
-			CVSSv2:      cvss2Str,
-			CPEs:        cpes,
+			Name:         name,
+			Title:        def.Title,
+			Description:  def.Description,
+			Issued:       def.Advisory.Issued.Date,
+			Updated:      def.Advisory.Updated.Date,
+			Link:         link,
+			Severity:     def.Advisory.Severity,
+			CVSSv3:       cvss3Str,
+			CVSSv2:       cvss2Str,
+			CPEs:         cpes,
 			SecurityData: securityData,
 		}, nil
 	}

@@ -213,13 +213,13 @@ const (
 			name,
 			package_name, package_module, package_arch,
 			cpe,
-			fixed_in_version, arch_operation
+			fixed_in_version, arch_operation, status
 		) VALUES (
 			$1,
 			$2,
 			$3, $4, $5,
 			$6,
-			$7, $8
+			$7, $8, $9
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
@@ -238,7 +238,8 @@ const (
 			vuln_package.package_name,
 			vuln_package.package_arch,
 			vuln_package.fixed_in_version,
-			vuln_package.arch_operation
+			vuln_package.arch_operation,
+			vuln_package.status
 		FROM
 			vuln_package
 			LEFT JOIN vuln ON

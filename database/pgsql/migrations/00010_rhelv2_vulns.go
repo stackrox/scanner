@@ -42,6 +42,7 @@ func init() {
 			cpe              TEXT,
 			fixed_in_version TEXT,
 			arch_operation   TEXT,
+			status           TEXT,
 			UNIQUE (hash)
 		);
 		CREATE INDEX IF NOT EXISTS vuln_package_lookup_idx on vuln_package (package_name, package_module, cpe);`,
