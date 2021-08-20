@@ -27,6 +27,7 @@ type FileFormatWrapper struct {
 func Fetch() (map[string]*FileFormatWrapper, error) {
 	r, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: nvdEnricherRepo,
+		ReferenceName: "ross/08192021-updates",
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "running git clone")
