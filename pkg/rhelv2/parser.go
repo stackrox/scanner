@@ -126,7 +126,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 
 			securityData = &database.SecurityData{}
 			if err := json.NewDecoder(resp.Body).Decode(securityData); err != nil {
-				return nil, err
+				return nil, errors.Wrapf(err, "could not parse cve %s", name)
 			}
 		}
 
