@@ -28,6 +28,8 @@ const (
 
 	// Repo2CPEMappingURL is the URL with a mapping file provided by Red Hat.
 	Repo2CPEMappingURL = `https://www.redhat.com/security/data/metrics/repository-to-cpe.json`
+
+	securityDataURL= `https://access.redhat.com/hydra/rest/securitydata/cve/`
 )
 
 var (

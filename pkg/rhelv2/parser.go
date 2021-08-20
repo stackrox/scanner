@@ -6,10 +6,13 @@
 package rhelv2
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
+	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/quay/claircore/pkg/cpe"
@@ -113,6 +116,20 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			log.Warnf("Unable to determine link for vuln %q in %s", def.Title, uri)
 		}
 
+		var securityData *database.SecurityData
+		if strings.HasPrefix(name, "CVE-") {
+			resp, err := http.Get(securityDataURL+"/"+name)
+			if err != nil {
+				return nil, errors.Wrapf(err, "getting security data for %s", name)
+			}
+			defer resp.Body.Close()
+
+			securityData = &database.SecurityData{}
+			if err := json.NewDecoder(resp.Body).Decode(securityData); err != nil {
+				return nil, err
+			}
+		}
+
 		return &database.RHELv2Vulnerability{
 			Name:        name,
 			Title:       def.Title,
@@ -124,6 +141,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			CVSSv3:      cvss3Str,
 			CVSSv2:      cvss2Str,
 			CPEs:        cpes,
+			SecurityData: securityData,
 		}, nil
 	}
 	vulns, err := ovalutil.RPMDefsToVulns(&root, protoVuln)

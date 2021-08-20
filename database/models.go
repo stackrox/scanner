@@ -141,6 +141,20 @@ type RHELv2Vulnerability struct {
 	CVSSv2       string               `json:"cvssv2,omitempty"`
 	CPEs         []string             `json:"cpes" hash:"set"`
 	PackageInfos []*RHELv2PackageInfo `json:"package_info" hash:"set"`
+	SecurityData *SecurityData        `json:"security_data"`
+}
+
+type SecurityData struct {
+	ThreatSeverity string 					`json:"threat_severity"`
+	PackageState []SecurityDataPackageState `json:"package_state"`
+}
+
+// ['Affected','Fix deferred','New','Not affected','Will not fix', 'Out of support scope'].
+type SecurityDataPackageState struct {
+	Product  string `json:"product_name"`
+	Package  string `json:"package_name"`
+	CPE      string `json:"cpe"`
+	FixState string `json:"fix_state"`
 }
 
 // RHELv2PackageInfo defines all the data necessary for fully define a RHELv2 package.

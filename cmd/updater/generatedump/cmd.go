@@ -15,8 +15,6 @@ import (
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"github.com/stackrox/scanner/pkg/rhelv2"
 	"github.com/stackrox/scanner/pkg/vulndump"
-	"github.com/stackrox/scanner/pkg/vulnloader"
-
 	// Needed to register all vuln loaders.
 	_ "github.com/stackrox/scanner/pkg/vulnloader/all"
 )
@@ -46,12 +44,12 @@ func generateDumpWithAllVulns(outFile string) error {
 		_ = os.RemoveAll(dumpDir)
 	}()
 
-	for name, loader := range vulnloader.Loaders() {
-		log.Infof("Downloading %s...", name)
-		if err := loader.DownloadFeedsToPath(dumpDir); err != nil {
-			return errors.Wrapf(err, "downloading %s", name)
-		}
-	}
+	//for name, loader := range vulnloader.Loaders() {
+	//	log.Infof("Downloading %s...", name)
+	//	if err := loader.DownloadFeedsToPath(dumpDir); err != nil {
+	//		return errors.Wrapf(err, "downloading %s", name)
+	//	}
+	//}
 
 	log.Info("Fetching RHEL OVAL v2 vulns...")
 	nRHELVulns, err := rhelv2.UpdateV2(dumpDir)
@@ -60,18 +58,19 @@ func generateDumpWithAllVulns(outFile string) error {
 	}
 	log.Infof("Finished fetching RHEL OVAL v2 vulns (total: %d)", nRHELVulns)
 
-	log.Info("Fetching OS vulns...")
-	fetchedVulns, err := fetchVulns(emptyDataStore{}, dumpDir)
-	if err != nil {
-		return errors.Wrap(err, "fetching vulns")
-	}
-	log.Infof("Finished fetching OS vulns (total: %d)", len(fetchedVulns))
+	//log.Info("Fetching OS vulns...")
+	//fetchedVulns, err := fetchVulns(emptyDataStore{}, dumpDir)
+	//if err != nil {
+	//	return errors.Wrap(err, "fetching vulns")
+	//}
+	//log.Infof("Finished fetching OS vulns (total: %d)", len(fetchedVulns))
 
-	log.Info("Writing JSON file for updated OS vulns...")
-	err = vulndump.WriteOSVulns(dumpDir, fetchedVulns)
-	if err != nil {
-		return err
-	}
+	//log.Info("Writing JSON file for updated OS vulns...")
+	//err = vulndump.WriteOSVulns(dumpDir, fetchedVulns)
+	//if err != nil {
+	//	return err
+	//}
+
 
 	log.Info("Writing manifest file...")
 	err = vulndump.WriteManifestFile(dumpDir, vulndump.Manifest{
