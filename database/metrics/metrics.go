@@ -25,7 +25,7 @@ var (
 	promQueryDurationMilliseconds = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "clair_pgsql_query_duration_milliseconds",
 		Help:    "Time it takes to execute the database query.",
-		Buckets: []float64{1, 5, 10, 25, 50, 100, 200, 500, 1000},
+		Buckets: []float64{1, 5, 10, 25, 50, 100, 200, 500, 1000, 2000, 5000, 10000},
 	}, []string{"query", "subquery"})
 
 	promConcurrentLockVAFV = prometheus.NewGauge(prometheus.GaugeOpts{
