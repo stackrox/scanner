@@ -129,13 +129,10 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			if err != nil {
 				return nil, errors.Wrapf(err, "error reading body for %s", name)
 			}
-			if json.Valid(data) {
-				securityData = &database.SecurityData{}
-				if err := json.Unmarshal(data, securityData); err != nil {
-					return nil, errors.Wrapf(err, "could not parse cve %s", name)
-				}
-			} else {
+			securityData = &database.SecurityData{}
+			if err := json.Unmarshal(data, securityData); err != nil {
 				log.Warnf("could not decode valid security data for %s: %s", name, data)
+				securityData = nil
 			}
 		}
 
