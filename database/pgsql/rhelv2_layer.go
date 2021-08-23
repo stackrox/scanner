@@ -174,6 +174,8 @@ func (pgSQL *pgSQL) populatePackages(tx *sql.Tx, layers []*database.RHELv2Layer)
 // getPackagesByLayer retrieves the packages for the given layer.
 // Upon error, the transaction is NOT rolled back. That is up to the caller.
 func (pgSQL *pgSQL) getPackagesByLayer(tx *sql.Tx, layer *database.RHELv2Layer) error {
+	defer metrics.ObserveQueryTime("getRHELv2Layers", "packagesByLayer", time.Now())
+
 	rows, err := tx.Query(searchRHELv2Package, layer.Hash)
 	if err != nil {
 		return err
