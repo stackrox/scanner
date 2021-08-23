@@ -27,7 +27,6 @@ type FileFormatWrapper struct {
 func Fetch() (map[string]*FileFormatWrapper, error) {
 	r, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: nvdEnricherRepo,
-		ReferenceName: "ross/08192021-updates",
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "running git clone")
@@ -36,6 +35,20 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 	w, err := r.Worktree()
 	if err != nil {
 		return nil, errors.Wrap(err, "getting git worktree")
+	}
+	
+	err = r.Fetch(&git.FetchOptions{
+		RefSpecs: []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = w.Checkout(&git.CheckoutOptions{
+		Branch: "refs/heads/ross/08192021-updates",
+	})
+	if err != nil {
+		panic(err)
 	}
 
 	files, err := w.Filesystem.ReadDir("cves")
