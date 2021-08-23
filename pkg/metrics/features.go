@@ -14,6 +14,10 @@ var (
 	}, []string{"packageformat", "step"})
 )
 
+func init() {
+	prometheus.MustRegister(listFeaturesDurationMilliseconds)
+}
+
 // ObserveListFeaturesTime observes `ListFeatures` for the given package format and sub-step from the given start time.
 func ObserveListFeaturesTime(packageformat, step string, start time.Time) {
 	listFeaturesDurationMilliseconds.
