@@ -65,7 +65,7 @@ func init() {
 // https://github.com/quay/claircore
 ///////////////////////////////////////////////////
 
-func (l lister) parseComponent(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) error {
+func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) error {
 	pkgFmt := `dpkg`
 	if distroless {
 		pkgFmt = `distroless`
@@ -221,7 +221,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
-		if err := l.parseComponent(files, f.Contents, packagesMap, removedPackages, false); err != nil {
+		if err := l.parseComponents(files, f.Contents, packagesMap, removedPackages, false); err != nil {
 			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", statusFile)
 		}
 	}
@@ -230,7 +230,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		if strings.HasPrefix(filename, statusDir) {
-			if err := l.parseComponent(files, append(file.Contents, '\n'), packagesMap, removedPackages, true); err != nil {
+			if err := l.parseComponents(files, append(file.Contents, '\n'), packagesMap, removedPackages, true); err != nil {
 				return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", filename)
 			}
 		}
