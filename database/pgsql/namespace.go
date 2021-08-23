@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/pkg/commonerr"
 )
 
@@ -28,15 +29,15 @@ func (pgSQL *pgSQL) insertNamespace(namespace database.Namespace) (int, error) {
 	}
 
 	if pgSQL.cache != nil {
-		promCacheQueriesTotal.WithLabelValues("namespace").Inc()
+		metrics.IncCacheQueries("namespace")
 		if id, found := pgSQL.cache.Get("namespace:" + namespace.Name); found {
-			promCacheHitsTotal.WithLabelValues("namespace").Inc()
+			metrics.IncCacheHits("namespace")
 			return id.(int), nil
 		}
 	}
 
-	// We do `defer observeQueryTime` here because we don't want to observe cached namespaces.
-	defer observeQueryTime("insertNamespace", "all", time.Now())
+	// We do `defer metrics.ObserveQueryTime` here because we don't want to observe cached namespaces.
+	defer metrics.ObserveQueryTime("insertNamespace", "all", time.Now())
 
 	var id int
 	err := pgSQL.QueryRow(insertNamespace, namespace.Name, namespace.VersionFormat).Scan(&id)
