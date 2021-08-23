@@ -34,8 +34,7 @@ var (
 	})
 )
 
-// MustRegisterAll registers all prometheus metrics and panics upon error.
-func MustRegisterAll() {
+func init() {
 	prometheus.MustRegister(
 		promErrorsTotal,
 		promCacheHitsTotal,
