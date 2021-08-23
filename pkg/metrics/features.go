@@ -10,7 +10,7 @@ var (
 	listFeaturesDurationMilliseconds = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "list_features_duration_millis",
 		Help:    "Time it takes to list all the features in a layer.",
-		Buckets: []float64{1, 10, 100, 500, 1000, 5000, 10000, 20000},
+		Buckets: []float64{1, 10, 100, 500, 1000},
 	}, []string{"packageformat", "step"})
 )
 
