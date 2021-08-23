@@ -9,13 +9,17 @@ import (
 	"context"
 	"database/sql"
 	"sort"
+	"time"
 
 	"github.com/lib/pq"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/database/metrics"
 )
 
 func (pgSQL *pgSQL) InsertRHELv2Layer(layer *database.RHELv2Layer) error {
+	defer metrics.ObserveQueryTime("insertRHELv2Layer", "all", time.Now())
+
 	tx, err := pgSQL.Begin()
 	if err != nil {
 		return handleError("InsertRHELv2Layer.Begin()", err)
@@ -40,6 +44,8 @@ func (pgSQL *pgSQL) InsertRHELv2Layer(layer *database.RHELv2Layer) error {
 }
 
 func (pgSQL *pgSQL) insertRHELv2Layer(tx *sql.Tx, layer *database.RHELv2Layer) error {
+	defer metrics.ObserveQueryTime("insertRHELv2Layer", "layer", time.Now())
+
 	_, err := tx.Exec(insertRHELv2Layer, layer.Hash, layer.ParentHash, layer.Dist, pq.Array(layer.CPEs))
 	return err
 }
@@ -60,6 +66,8 @@ func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*datab
 		}
 		return a.Arch < b.Arch
 	})
+
+	defer metrics.ObserveQueryTime("insertRHELv2Layer", "packages", time.Now())
 
 	for _, pkg := range pkgs {
 		if pkg.Name == "" {
@@ -94,6 +102,8 @@ func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*datab
 }
 
 func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, error) {
+	defer metrics.ObserveQueryTime("getRHELv2Layers", "all", time.Now())
+
 	tx, err := pgSQL.BeginTx(context.Background(), &sql.TxOptions{
 		ReadOnly: true,
 	})
@@ -128,11 +138,9 @@ func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, 
 		return nil, err
 	}
 
-	for _, layer := range layers {
-		if err := pgSQL.getPackagesByLayer(tx, layer); err != nil {
-			utils.IgnoreError(tx.Rollback)
-			return nil, err
-		}
+	if err := pgSQL.populatePackages(tx, layers); err != nil {
+		utils.IgnoreError(tx.Rollback)
+		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -140,7 +148,7 @@ func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, 
 		return nil, handleError("GetRHELv2Layers.Commit()", err)
 	}
 
-	// layers is in order from highest layer to lowest.
+	// layers is in order from the highest layer to lowest.
 	// This may be counterintuitive, so reverse it.
 	for left, right := 0, len(layers)-1; left < right; left, right = left+1, right-1 {
 		layers[left], layers[right] = layers[right], layers[left]
@@ -149,7 +157,25 @@ func (pgSQL *pgSQL) GetRHELv2Layers(layerHash string) ([]*database.RHELv2Layer, 
 	return layers, nil
 }
 
+// populatePackages populates the packages for each layer.
+// Upon error, the transaction is NOT rolled back. That is up to the caller.
+func (pgSQL *pgSQL) populatePackages(tx *sql.Tx, layers []*database.RHELv2Layer) error {
+	defer metrics.ObserveQueryTime("getRHELv2Layers", "packages", time.Now())
+
+	for _, layer := range layers {
+		if err := pgSQL.getPackagesByLayer(tx, layer); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// getPackagesByLayer retrieves the packages for the given layer.
+// Upon error, the transaction is NOT rolled back. That is up to the caller.
 func (pgSQL *pgSQL) getPackagesByLayer(tx *sql.Tx, layer *database.RHELv2Layer) error {
+	defer metrics.ObserveQueryTime("getRHELv2Layers", "packagesByLayer", time.Now())
+
 	rows, err := tx.Query(searchRHELv2Package, layer.Hash)
 	if err != nil {
 		return err
