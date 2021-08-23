@@ -35,7 +35,7 @@ type genesisManifest struct {
 func getRelevantDownloadURL(config Config, centralEndpoint string) (downloadURL string, isCentral bool, err error) {
 	if config.FetchFromCentral {
 		if centralEndpoint == "" {
-			centralEndpoint = "https://central.stackrox"
+			centralEndpoint = "https://central.stackrox.svc"
 		}
 		centralEndpoint = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 		return fmt.Sprintf("%s/%s", centralEndpoint, apiPathInCentral), true, nil
