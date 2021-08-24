@@ -6,19 +6,19 @@ var (
 	fileCountPerLayer = prometheus.NewHistogram(prometheus.HistogramOpts{
 		Name:    "tar_file_count_per_layer",
 		Help:    "Number of files in an image layer",
-		Buckets: []float64{50, 100, 250, 500, 1000},
+		Buckets: []float64{50, 100, 500, 1000},
 	})
 
 	matchedFileCountPerLayer = prometheus.NewHistogram(prometheus.HistogramOpts{
 		Name:    "tar_matched_file_count_per_layer",
 		Help:    "Number of matched files in an image layer",
-		Buckets: []float64{50, 100, 250, 500, 1000},
+		Buckets: []float64{50, 100, 500, 1000},
 	})
 
 	extractedContentBytesPerLayer = prometheus.NewHistogram(prometheus.HistogramOpts{
 		Name:    "tar_extracted_contents_bytes_per_layer",
 		Help:    "Number of file contents (in bytes) extracted from an image layer",
-		Buckets: []float64{64, 128, 256, 512, 1024},
+		Buckets: []float64{64, 512, 1024, 4096},
 	})
 )
 
