@@ -31,6 +31,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/matcher"
+	"github.com/stackrox/scanner/pkg/metrics"
 )
 
 const (
@@ -88,6 +89,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	}
 	defer tr.Close()
 
+	// Telemetry variables.
+	var numFiles, numMatchedFiles, numExtractedContentBytes int
+
 	// For each element in the archive
 	for {
 		hdr, err := tr.Next()
@@ -97,6 +101,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		if err != nil {
 			return data, errors.Wrap(err, "could not advance in the tar archive")
 		}
+		numFiles++
 
 		// Get element filename
 		filename := strings.TrimPrefix(hdr.Name, "./")
@@ -105,6 +110,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		if !match {
 			continue
 		}
+		numMatchedFiles++
 
 		// File size limit
 		if extractContents && hdr.Size > maxExtractableFileSize {
@@ -140,6 +146,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 				Contents:   d,
 				Executable: executable,
 			}
+			numExtractedContentBytes += len(d)
 		}
 		if hdr.Typeflag == tar.TypeDir {
 			// Do not bother saving the contents,
@@ -148,6 +155,10 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			data[filename] = FileData{}
 		}
 	}
+
+	metrics.ObserveFileCount(numFiles)
+	metrics.ObserveMatchedFileCount(numMatchedFiles)
+	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
 
 	return data, nil
 }
