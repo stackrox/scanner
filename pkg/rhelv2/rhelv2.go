@@ -41,12 +41,28 @@ var (
 	// Limits to 10 ops/second.
 	// Red Hat OVAL v2 feed has a rate limit of ~12 requests/second.
 	rl = ratelimit.New(10)
+
+	redhatAdvisoryPrefixes = []string{
+		"RHSA-",
+		"RHBA-",
+		"RHEA-",
+	}
 )
 
 func init() {
 	var err error
 	u, err = url.Parse(PulpManifest)
 	utils.Must(err)
+}
+
+// IsRedHatAdvisory returns if the passed vulnerability is a Red Hat advisory
+func IsRedHatAdvisory(cve string) bool {
+	for _, prefix := range redhatAdvisoryPrefixes {
+		if strings.HasPrefix(cve, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 // UpdateV2 reads the RHEL OVAL v2 feeds and writes them into a known directory.

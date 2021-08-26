@@ -120,7 +120,7 @@ func (u *Updater) doUpdate(mode updateMode) error {
 	if mode == updateApplicationCachesAndPostgres {
 		db = u.db
 	}
-	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, db, u.interval, podName, u.caches, u.repoToCPE); err != nil {
+	if err := vulndump.UpdateFromVulnDump(diffDumpOutputPath, db, u.interval, u.lastUpdatedTime, podName, u.caches, u.repoToCPE); err != nil {
 		return errors.Wrap(err, "updating from vuln dump")
 	}
 	if mode == updateApplicationCachesAndPostgres {

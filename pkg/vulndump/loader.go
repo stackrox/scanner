@@ -200,7 +200,7 @@ func loadOSVulns(zipR *zip.ReadCloser, db database.Datastore) error {
 	return nil
 }
 
-func loadRHELv2Vulns(db database.Datastore, zipR *zip.ReadCloser, repoToCPE *repo2cpe.Mapping) error {
+func loadRHELv2Vulns(db database.Datastore, zipR *zip.ReadCloser, repoToCPE *repo2cpe.Mapping, lastUpdateTime time.Time) error {
 	log.Info("Loading RHELv2 vulns...")
 	if repoToCPE != nil {
 		if err := repoToCPE.LoadFromZip(zipR, RHELv2DirName); err != nil {
@@ -215,7 +215,7 @@ func loadRHELv2Vulns(db database.Datastore, zipR *zip.ReadCloser, repoToCPE *rep
 	log.Info("Done loading RHELv2 vulns")
 
 	for _, r := range rhelv2Readers {
-		if err := insertRHELv2Vulns(db, r); err != nil {
+		if err := insertRHELv2Vulns(db, r, lastUpdateTime); err != nil {
 			return errors.Wrap(err, "inserting RHELv2 vulns into DB")
 		}
 	}
@@ -227,7 +227,7 @@ func loadRHELv2Vulns(db database.Datastore, zipR *zip.ReadCloser, repoToCPE *rep
 // insertRHELv2Vulns inserts the RHELv2 vulns from the given io.ReadCloser
 // into the DB.
 // The given reader is closed upon return.
-func insertRHELv2Vulns(db database.Datastore, r *ziputil.ReadCloser) error {
+func insertRHELv2Vulns(db database.Datastore, r *ziputil.ReadCloser, lastUpdateTime time.Time) error {
 	defer utils.IgnoreError(r.Close)
 
 	var vulns RHELv2
@@ -235,7 +235,7 @@ func insertRHELv2Vulns(db database.Datastore, r *ziputil.ReadCloser) error {
 		return errors.Wrapf(err, "decoding JSON from %s", r.Name)
 	}
 
-	if err := db.InsertRHELv2Vulnerabilities(vulns.Vulns); err != nil {
+	if err := db.InsertRHELv2Vulnerabilities(vulns.Vulns, lastUpdateTime); err != nil {
 		return errors.Wrapf(err, "inserting RHELv2 vulns from %s into the DB", r.Name)
 	}
 	log.Debugf("Done inserting vulns from %q into DB", r.Name)
@@ -261,7 +261,7 @@ func loadApplicationUpdater(cache cache.Cache, manifest *Manifest, zipR *zip.Rea
 
 // UpdateFromVulnDump updates the definitions (both in the DB and in the Application Caches) from the given zip file.
 // Check the well_known_names.go file for the manifest of the ZIP file.
-func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval time.Duration, instanceName string, caches []cache.Cache, repoToCPE *repo2cpe.Mapping) error {
+func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval time.Duration, lastUpdateTime time.Time, instanceName string, caches []cache.Cache, repoToCPE *repo2cpe.Mapping) error {
 	log.Infof("Attempting to update from vuln dump at %q", zipPath)
 
 	if filepath.Ext(zipPath) != ".zip" {
@@ -287,7 +287,7 @@ func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval ti
 			return errors.Wrap(err, "error beginning vuln loading")
 		}
 		if performUpdate {
-			if err := loadRHELv2Vulns(db, zipR, repoToCPE); err != nil {
+			if err := loadRHELv2Vulns(db, zipR, repoToCPE, lastUpdateTime); err != nil {
 				_ = finishFn(err)
 				return errors.Wrap(err, "error loading RHEL vulns")
 			}

@@ -139,7 +139,7 @@ type Datastore interface {
 
 	// InsertRHELv2Vulnerabilities stores the given RHELv2 vulnerabilities into
 	// the database.
-	InsertRHELv2Vulnerabilities(vulnerabilities []*RHELv2Vulnerability) error
+	InsertRHELv2Vulnerabilities(vulnerabilities []*RHELv2Vulnerability, lastUpdateTime time.Time) error
 
 	// GetRHELv2Layers retrieves the corresponding layers for the image
 	// represented by the given layer.

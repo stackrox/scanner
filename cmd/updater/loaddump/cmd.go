@@ -40,7 +40,7 @@ func Command() *cobra.Command {
 		log.Info("Successfully opened DB")
 
 		log.Info("Updating DB with vuln dump")
-		err = vulndump.UpdateFromVulnDump(dumpFile, db, 1*time.Hour, "updater", nil, nil)
+		err = vulndump.UpdateFromVulnDump(dumpFile, db, 1*time.Hour, time.Time{}, "updater", nil, nil)
 		if err != nil {
 			return errors.Wrap(err, "updating DB from dump")
 		}
