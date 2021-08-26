@@ -15,6 +15,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -25,6 +26,7 @@ import (
 	"github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -57,6 +59,8 @@ const (
 
 	dbPath           = `var/lib/rpm/Packages`
 	contentManifests = `root/buildinfo/content_manifests`
+
+	pkgFmt = `rpmv2`
 )
 
 var contentManifestPattern = regexp.MustCompile(`^root/buildinfo/content_manifests/.*\.json$`)
@@ -92,6 +96,8 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 		return nil, cpes, nil
 	}
 
+	defer metrics.ObserveListFeaturesTime(pkgFmt, "all", time.Now())
+
 	// Write the required "Packages" file to disk
 	tmpDir, err := os.MkdirTemp("", "rpm")
 	if err != nil {
@@ -107,6 +113,8 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 		log.WithError(err).Error("could not create temporary file for RPM detection")
 		return nil, nil, commonerr.ErrFilesystem
 	}
+
+	defer metrics.ObserveListFeaturesTime(pkgFmt, "cli+parse", time.Now())
 
 	cmd := exec.Command("rpm",
 		`--dbpath`, tmpDir,
@@ -205,8 +213,10 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 }
 
 func getCPEsUsingEmbeddedContentSets(files tarutil.FilesMap) ([]string, error) {
+	defer metrics.ObserveListFeaturesTime(pkgFmt, "cpes", time.Now())
+
 	// Get CPEs using embedded content-set files.
-	// The files is be stored in /root/buildinfo/content_manifests/ and will need to
+	// The files are stored in /root/buildinfo/content_manifests/ and will need to
 	// be translated using mapping file provided by Red Hat's PST team.
 	contents := getContentManifestFileContents(files)
 	if contents == nil {

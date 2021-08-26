@@ -40,8 +40,6 @@ const (
 )
 
 func init() {
-	metrics.MustRegisterAll()
-
 	database.Register("pgsql", openDatabase)
 }
 

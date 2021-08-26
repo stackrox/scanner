@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -31,6 +32,7 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -59,6 +61,9 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		return []database.FeatureVersion{}, nil
 	}
 
+	pkgFmt := `rpm`
+	defer metrics.ObserveListFeaturesTime(pkgFmt, "all", time.Now())
+
 	// Write the required "Packages" file to disk
 	tmpDir, err := os.MkdirTemp("", "rpm")
 	defer func() {
@@ -80,6 +85,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	if features.ActiveVulnMgmt.Enabled() {
 		qf = queryFmtActiveVulnMgmt
 	}
+	defer metrics.ObserveListFeaturesTime(pkgFmt, "cli+parse", time.Now())
 	cmd := exec.Command("rpm", "--dbpath", tmpDir, "-qa", "--qf", qf)
 	r, err := cmd.StdoutPipe()
 	if err != nil {
