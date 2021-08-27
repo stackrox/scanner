@@ -15,12 +15,13 @@ import (
 	"github.com/quay/claircore/pkg/cpe"
 	"github.com/quay/goval-parser/oval"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
 )
 
-func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
+func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	var root oval.Root
 	if err := xml.NewDecoder(r).Decode(&root); err != nil {
 		return nil, fmt.Errorf("rhelv2: unable to decode OVAL document at %s: %w", uri, err)
@@ -45,7 +46,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			// Work around having empty entries. This seems to be some issue
 			// with the tool used to produce the database but only seems to
 			// appear sometimes, like RHSA-2018:3140 in the rhel-7-alt database.
-			if affected == "" {
+			if affected == "" || !cpeSet.Contains(affected) {
 				continue
 			}
 
