@@ -93,12 +93,13 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 		baseCPEs := set.NewStringSet(matchingBaseVuln.CPEs...)
 		headCPEs := set.NewStringSet(headVuln.CPEs...)
 		if !cfg.RemovedUnusedRHELv2CPEs {
+			// There were no CVEs added for previous scanners
+			headVuln.SubCVEs = nil
+
 			if len(headCPEs.Difference(baseCPEs)) > 0 {
 				filtered = append(filtered, headVuln)
 				continue
 			}
-			// There were no CVEs added for previous scanners
-			headVuln.CVEs = nil
 		} else if !headCPEs.Equal(baseCPEs) {
 			filtered = append(filtered, headVuln)
 			continue

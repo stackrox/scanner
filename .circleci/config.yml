@@ -415,6 +415,7 @@ commands:
 
       - run:
           name: Run sanity tests
+          no_output_timeout: 20m
           command: |
             make e2e-tests
 

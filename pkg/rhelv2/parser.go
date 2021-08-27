@@ -135,7 +135,7 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 			CVSSv3:      cvss3Str,
 			CVSSv2:      cvss2Str,
 			CPEs:        cpes,
-			CVEs:        subCVEs,
+			SubCVEs:     subCVEs,
 		}, nil
 	}
 	vulns, err := ovalutil.RPMDefsToVulns(&root, protoVuln)
