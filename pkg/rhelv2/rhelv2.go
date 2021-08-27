@@ -241,5 +241,9 @@ func updateRepoToCPE(outputDir string) (*repo2cpe.RHELv2MappingFile, error) {
 	}
 	defer utils.IgnoreError(outF.Close)
 
-	return &mapping, json.NewEncoder(outF).Encode(&mapping)
+	if err := json.NewEncoder(outF).Encode(&mapping); err != nil {
+		return nil, errors.Wrapf(err, "encoding mapping")
+	}
+
+	return &mapping, nil
 }

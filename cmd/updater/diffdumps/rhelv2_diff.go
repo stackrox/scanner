@@ -98,7 +98,7 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 				continue
 			}
 			// There were no CVEs added for previous scanners
-			matchingBaseVuln.CVEs = nil
+			headVuln.CVEs = nil
 		} else if !headCPEs.Equal(baseCPEs) {
 			filtered = append(filtered, headVuln)
 			continue

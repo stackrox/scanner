@@ -37,6 +37,10 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 		if err != nil {
 			return nil, err
 		}
+		name := name(def)
+		if name == "" {
+			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
+		}
 
 		// Red Hat OVAL v2 data include information about vulnerabilities,
 		// that actually don't affect the package in any way. Storing them
@@ -100,7 +104,9 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 					cvss2.vector = vector
 				}
 			}
-			subCVEs = append(subCVEs, cve.CveID)
+			if IsRedHatAdvisory(name) {
+				subCVEs = append(subCVEs, cve.CveID)
+			}
 		}
 
 		var cvss3Str, cvss2Str string
@@ -111,10 +117,6 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 			cvss2Str = fmt.Sprintf("%.1f/%s", cvss2.score, cvss2.vector)
 		}
 
-		name := name(def)
-		if name == "" {
-			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
-		}
 		link := link(def)
 		if link == "" {
 			// Log as a warning, as this is not critical, but it is good to know.
