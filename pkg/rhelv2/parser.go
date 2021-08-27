@@ -45,11 +45,6 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 			return nil, nil
 		}
 
-		name := name(def)
-		if name == "" {
-			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
-		}
-
 		cpes := make([]string, 0, len(def.Advisory.AffectedCPEList))
 
 		for _, affected := range def.Advisory.AffectedCPEList {
@@ -71,6 +66,11 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 
 		if len(cpes) == 0 {
 			return nil, nil
+		}
+
+		name := name(def)
+		if name == "" {
+			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
 		}
 
 		var cvss3, cvss2 struct {
