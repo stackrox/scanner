@@ -27,7 +27,7 @@ spec:
                 fieldPath: metadata.name
           - name: ROX_SKIP_PEER_VALIDATION
             value: "true"
-          - name: ROX_ACTIVE_VULN_MGMT
+          - name: ROX_ACTIVE_VULN_MANAGEMENT
             value: "true"
           resources:
             limits:
