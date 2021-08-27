@@ -37,16 +37,17 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 		if err != nil {
 			return nil, err
 		}
-		name := name(def)
-		if name == "" {
-			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
-		}
 
 		// Red Hat OVAL v2 data include information about vulnerabilities,
 		// that actually don't affect the package in any way. Storing them
 		// would increase number of records in DB without adding any value.
 		if defType == ovalutil.UnaffectedDefinition {
 			return nil, nil
+		}
+
+		name := name(def)
+		if name == "" {
+			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
 		}
 
 		cpes := make([]string, 0, len(def.Advisory.AffectedCPEList))
