@@ -675,6 +675,9 @@ jobs:
           paths:
             - diff-dumps
 
+      - store_artifacts:
+          path: /tmp/diff-dumps
+
   upload-diff-dumps-and-offline-dumps:
     <<: *defaults
     steps:
