@@ -16,6 +16,7 @@ import (
 	"github.com/quay/claircore/rhel/pulp"
 	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/vulndump"
@@ -41,6 +42,12 @@ var (
 	// Limits to 10 ops/second.
 	// Red Hat OVAL v2 feed has a rate limit of ~12 requests/second.
 	rl = ratelimit.New(10)
+
+	redhatAdvisoryPrefixes = []string{
+		"RHSA-",
+		"RHBA-",
+		"RHEA-",
+	}
 )
 
 func init() {
@@ -49,10 +56,25 @@ func init() {
 	utils.Must(err)
 }
 
+// IsRedHatAdvisory returns if the passed vulnerability is a Red Hat advisory
+func IsRedHatAdvisory(cve string) bool {
+	for _, prefix := range redhatAdvisoryPrefixes {
+		if strings.HasPrefix(cve, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 // UpdateV2 reads the RHEL OVAL v2 feeds and writes them into a known directory.
 func UpdateV2(outputDir string) (int, error) {
-	if err := updateRepoToCPE(outputDir); err != nil {
+	repoToCPE, err := updateRepoToCPE(outputDir)
+	if err != nil {
 		return 0, err
+	}
+	cpes := set.NewStringSet()
+	for _, v := range repoToCPE.Data {
+		cpes.AddAll(v.CPEs...)
 	}
 
 	// No context needed as the client has a 20 second timeout.
@@ -142,7 +164,7 @@ func UpdateV2(outputDir string) (int, error) {
 				respC <- &response{err: err}
 			}
 
-			vulns, err := parse(uri.String(), r)
+			vulns, err := parse(cpes, uri.String(), r)
 			if err != nil {
 				respC <- &response{err: err}
 				return
@@ -184,10 +206,10 @@ func UpdateV2(outputDir string) (int, error) {
 	return nRHELv2Vulns, errorList.ToError()
 }
 
-func updateRepoToCPE(outputDir string) error {
+func updateRepoToCPE(outputDir string) (*repo2cpe.RHELv2MappingFile, error) {
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, Repo2CPEMappingURL, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := client.Do(req)
@@ -195,29 +217,29 @@ func updateRepoToCPE(outputDir string) error {
 		defer utils.IgnoreError(resp.Body.Close)
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return errors.Errorf("received status code %q querying mapping url", resp.StatusCode)
+		return nil, errors.Errorf("received status code %q querying mapping url", resp.StatusCode)
 	}
 
 	// We could just copy the contents over, but this acts a sanity check to ensure it is in the form we expect.
 	var mapping repo2cpe.RHELv2MappingFile
 	err = json.NewDecoder(resp.Body).Decode(&mapping)
 	if err != nil {
-		return errors.Wrap(err, "failed to decode mapping file")
+		return nil, errors.Wrap(err, "failed to decode mapping file")
 	}
 
 	rhelV2Dir := filepath.Join(outputDir, vulndump.RHELv2DirName)
 	if err := os.MkdirAll(rhelV2Dir, 0755); err != nil {
-		return errors.Wrapf(err, "creating subdir for %s", vulndump.RHELv2DirName)
+		return nil, errors.Wrapf(err, "creating subdir for %s", vulndump.RHELv2DirName)
 	}
 
 	outF, err := os.Create(filepath.Join(rhelV2Dir, repo2cpe.RHELv2CPERepoName))
 	if err != nil {
-		return errors.Wrapf(err, "failed to create file %s", repo2cpe.RHELv2CPERepoName)
+		return nil, errors.Wrapf(err, "failed to create file %s", repo2cpe.RHELv2CPERepoName)
 	}
 	defer utils.IgnoreError(outF.Close)
 
-	return json.NewEncoder(outF).Encode(&mapping)
+	return &mapping, json.NewEncoder(outF).Encode(&mapping)
 }

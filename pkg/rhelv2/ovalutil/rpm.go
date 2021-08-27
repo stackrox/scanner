@@ -44,12 +44,17 @@ var (
 // defining how a vulnerability should be parsed
 type ProtoVulnFunc func(def oval.Definition) (*database.RHELv2Vulnerability, error)
 
+type criterionWithModule struct {
+	*oval.Criterion
+	module string
+}
+
 // RPMDefsToVulns iterates over the definitions in an oval root and assumes RPMInfo objects and states.
 //
 // Each Criterion encountered with an EVR string will be translated into a database.RHELv2Vulnerability
 func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv2Vulnerability, error) {
 	vulns := make([]*database.RHELv2Vulnerability, 0, 10000)
-	var cris []*oval.Criterion
+	var cris []*criterionWithModule
 	for _, def := range root.Definitions.Definitions {
 		// create our prototype vulnerability
 		vuln, err := protoVuln(def)
@@ -61,16 +66,12 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			continue
 		}
 		// recursively collect criterions for this definition
+
 		cris := cris[:0]
-		walkCriterion(&def.Criteria, &cris)
-		enabledModules := getEnabledModules(cris)
-		if len(enabledModules) == 0 {
-			// add default empty module
-			enabledModules = append(enabledModules, "")
-		}
+		walkCriterion("", &def.Criteria, &cris)
 		// unpack criterions into vulnerabilities
 		for _, criterion := range cris {
-			// if test object is not rmpinfo_test the provided test is not
+			// if test object is not rpminfo_test the provided test is not
 			// associated with a package. this criterion will be skipped.
 			test, err := coreovalutil.TestLookup(root, criterion.TestRef, func(kind string) bool {
 				return kind == "rpminfo_test"
@@ -114,9 +115,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				}
 			}
 
-			pkgInfo := &database.RHELv2PackageInfo{
-				Packages: make([]*database.RHELv2Package, 0, len(enabledModules)),
-			}
+			pkgInfo := &database.RHELv2PackageInfo{}
 			if state != nil {
 				pkgInfo.FixedInVersion = state.EVR.Body
 				if state.Arch != nil {
@@ -129,18 +128,16 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				// If FixedInVersion is not defined, we keep the title empty to reduce the scale of the database.
 				vuln.Title = ""
 			}
-			for _, module := range enabledModules {
-				pkg := &database.RHELv2Package{
-					// object.Name will never be empty.
-					Name:   object.Name,
-					Module: module,
-				}
-				if state != nil && state.Arch != nil {
-					pkg.Arch = state.Arch.Body
-				}
-
-				pkgInfo.Packages = append(pkgInfo.Packages, pkg)
+			pkg := &database.RHELv2Package{
+				// object.Name will never be empty.
+				Name:   object.Name,
+				Module: criterion.module,
 			}
+			if state != nil && state.Arch != nil {
+				pkg.Arch = state.Arch.Body
+			}
+
+			pkgInfo.Packages = append(pkgInfo.Packages, pkg)
 
 			vuln.PackageInfos = append(vuln.PackageInfos, pkgInfo)
 		}
@@ -165,31 +162,31 @@ func mapArchOp(op oval.Operation) archop.ArchOp {
 }
 
 // walkCriterion recursively extracts Criterions from a root Criteria node in a depth
-// first manor.
+// first manner.
 //
 // a pointer to a slice header is modified in place when appending
-func walkCriterion(node *oval.Criteria, cris *[]*oval.Criterion) {
-	// recursive to leaves
-	for _, criteria := range node.Criterias {
-		walkCriterion(&criteria, cris)
-	}
+func walkCriterion(module string, node *oval.Criteria, cris *[]*criterionWithModule) {
 	// search for criterions at current node
 	for _, criterion := range node.Criterions {
 		c := criterion
-		*cris = append(*cris, &c)
+		if foundModule, ok := moduleFromCriterion(&c); ok {
+			module = foundModule
+		}
+		*cris = append(*cris, &criterionWithModule{Criterion: &c, module: module})
+	}
+
+	// recursive to leaves
+	for _, criteria := range node.Criterias {
+		walkCriterion(module, &criteria, cris)
 	}
 }
 
-func getEnabledModules(cris []*oval.Criterion) []string {
-	var enabledModules []string
-	for _, criterion := range cris {
-		matches := moduleCommentRegex.FindStringSubmatch(criterion.Comment)
-		if len(matches) > 2 && matches[2] != "" {
-			moduleNameStream := matches[2]
-			enabledModules = append(enabledModules, moduleNameStream)
-		}
+func moduleFromCriterion(criterion *oval.Criterion) (string, bool) {
+	matches := moduleCommentRegex.FindStringSubmatch(criterion.Comment)
+	if len(matches) > 2 && matches[2] != "" {
+		return matches[2], true
 	}
-	return enabledModules
+	return "", false
 }
 
 func rpmObjectLookup(root *oval.Root, ref string) (*oval.RPMInfoObject, error) {

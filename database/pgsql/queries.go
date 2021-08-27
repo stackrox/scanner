@@ -312,6 +312,8 @@ const (
 		WHERE
 			rhelv2_package_scanartifact.layer_id = rhelv2_layer.id;`
 
+	deleteStaleRHELv2CVEs = `DELETE FROM vuln_package WHERE name = ANY($1::text[]) and package_name = ANY($2::text[]) and cpe = ANY($3::text[]) and package_module = $4;`
+
 	///////////////////////////////////////////////////
 	// END
 	// Influenced by ClairCore under Apache 2.0 License
