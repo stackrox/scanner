@@ -308,6 +308,7 @@ type config struct {
 	UseDPKGParserForAlpine     bool `json:"useDPKGParserForAlpine"`
 	// SkipRHELv2TitleComparison need only be set when SkipRHELv2Vulns is NOT set.
 	SkipRHELv2TitleComparison bool `json:"skipRHELv2TitleComparison"`
+	RemovedUnusedRHELv2CPEs   bool `json:"removedUnusedRHELv2CPEs"`
 }
 
 // Command defines the diff-dumps command.

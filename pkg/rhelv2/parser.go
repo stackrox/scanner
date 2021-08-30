@@ -15,12 +15,18 @@ import (
 	"github.com/quay/claircore/pkg/cpe"
 	"github.com/quay/goval-parser/oval"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/cpeutils"
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
 )
 
-func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
+func isValidCPE(cpeSet set.StringSet, cpe string) bool {
+	return cpeutils.IsOpenShiftCPE(cpe) || cpeSet.Contains(cpe)
+}
+
+func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	var root oval.Root
 	if err := xml.NewDecoder(r).Decode(&root); err != nil {
 		return nil, fmt.Errorf("rhelv2: unable to decode OVAL document at %s: %w", uri, err)
@@ -45,7 +51,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			// Work around having empty entries. This seems to be some issue
 			// with the tool used to produce the database but only seems to
 			// appear sometimes, like RHSA-2018:3140 in the rhel-7-alt database.
-			if affected == "" {
+			if affected == "" || !isValidCPE(cpeSet, affected) {
 				continue
 			}
 
@@ -62,6 +68,11 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			return nil, nil
 		}
 
+		name := name(def)
+		if name == "" {
+			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
+		}
+
 		var cvss3, cvss2 struct {
 			score  float64
 			vector string
@@ -69,6 +80,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 		// For CVEs, there will only be 1 element in this slice.
 		// For RHSAs, RHBAs, etc, there will typically be 1 or more.
 		// As we have done in the past, we will take the maximum score.
+		var subCVEs []string
 		for _, cve := range def.Advisory.Cves {
 			if cve.Cvss3 != "" {
 				scoreStr, vector := stringutils.Split2(cve.Cvss3, "/")
@@ -93,6 +105,9 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 					cvss2.vector = vector
 				}
 			}
+			if IsRedHatAdvisory(name) {
+				subCVEs = append(subCVEs, cve.CveID)
+			}
 		}
 
 		var cvss3Str, cvss2Str string
@@ -103,10 +118,6 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			cvss2Str = fmt.Sprintf("%.1f/%s", cvss2.score, cvss2.vector)
 		}
 
-		name := name(def)
-		if name == "" {
-			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
-		}
 		link := link(def)
 		if link == "" {
 			// Log as a warning, as this is not critical, but it is good to know.
@@ -124,6 +135,7 @@ func parse(uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 			CVSSv3:      cvss3Str,
 			CVSSv2:      cvss2Str,
 			CPEs:        cpes,
+			SubCVEs:     subCVEs,
 		}, nil
 	}
 	vulns, err := ovalutil.RPMDefsToVulns(&root, protoVuln)

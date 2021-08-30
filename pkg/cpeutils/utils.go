@@ -27,3 +27,8 @@ func compareAttributes(c1, c2 wfn.AttributesWithFixedIn) int {
 	}
 	return strings.Compare(c1.Version, c2.Version)
 }
+
+// IsOpenShiftCPE returns if the passed CPE is a known OpenShift CPE
+func IsOpenShiftCPE(cpe string) bool {
+	return strings.HasPrefix(cpe, "cpe:/a:redhat:openshift:")
+}

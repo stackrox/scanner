@@ -11,6 +11,7 @@ import (
 	"github.com/mitchellh/hashstructure"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
@@ -87,6 +88,23 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 			headVuln.Title = ""
 		}
 
+		// If we did not remove the unused RHEL CPEs then we just want to check that no new CPEs were added
+		// otherwise, we can do a set match
+		baseCPEs := set.NewStringSet(matchingBaseVuln.CPEs...)
+		headCPEs := set.NewStringSet(headVuln.CPEs...)
+		if !cfg.RemovedUnusedRHELv2CPEs {
+			// There were no CVEs added for previous scanners
+			headVuln.SubCVEs = nil
+
+			if len(headCPEs.Difference(baseCPEs)) > 0 {
+				filtered = append(filtered, headVuln)
+				continue
+			}
+		} else if !headCPEs.Equal(baseCPEs) {
+			filtered = append(filtered, headVuln)
+			continue
+		}
+
 		headHash, err := vulnHash(headVuln)
 		if err != nil {
 			log.Warnf("Unable to hash new vuln %s. Skipping head vuln...", headVuln.Name)
@@ -135,6 +153,7 @@ func generateRHELv2VulnsDiff(cfg config, outputDir string, baseLastModifiedTime 
 	// Let's us know if the base dump had RHELv2 data.
 	rhelExists := len(baseFiles) > 0
 
+	// Get RHEL Repo to CPE file
 	repoToCPEFile := filepath.Join(vulndump.RHELv2DirName, repo2cpe.RHELv2CPERepoName)
 	for _, headF := range headZipR.File {
 		name := headF.Name
