@@ -206,6 +206,14 @@
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210804010436.zip",
       "timestamp": "2021-08-04T01:04:36.661707152Z",
       "diffLocation": "gs://definitions.stackrox.io/78840b85-e4d9-4bf1-af37-f4c83b9be69d/diff.zip"
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20210830210415.zip",
+      "timestamp": "2021-08-30T21:04:15.756573891Z",
+      "diffLocation": "gs://definitions.stackrox.io/d0711bbc-9227-4cb5-85ef-76dabf202da3/diff.zip",
+      "config": {
+        "removedUnusedRHELv2CPEs": true
+      }
     }
   ]
 }
