@@ -402,8 +402,8 @@ commands:
                 ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_db_image}"
 
                 # Retag as -rhel for historical reasons
-                stackrox_io_scanner_rhel_image="stackrox.io/${scanner_image_name}:${tag}"
-                stackrox_io_scanner_db_rhel_image="stackrox.io/${db_image_name}:${tag}"
+                stackrox_io_scanner_rhel_image="stackrox.io/${scanner_image_name}-rhel:${tag}"
+                stackrox_io_scanner_db_rhel_image="stackrox.io/${db_image_name}-rhel:${tag}"
 
                 docker tag "${stackrox_io_scanner_image}" "${stackrox_io_scanner_rhel_image}"
                 docker tag "${stackrox_io_scanner_db_image}" "${stackrox_io_scanner_db_rhel_image}"
