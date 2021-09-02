@@ -297,9 +297,6 @@ commands:
     parameters:
       make-image-target:
         type: string
-      image-name-suffix:
-        type: string
-        default: ""
 
     steps:
       - checkout
@@ -340,8 +337,8 @@ commands:
           name: Push images
           command: |
             tag="$(./get-tag)"
-            scanner_image_name="scanner<< parameters.image-name-suffix >>"
-            db_image_name="scanner-db<< parameters.image-name-suffix >>"
+            scanner_image_name="scanner"
+            db_image_name="scanner-db"
 
             gcr_scanner_image="us.gcr.io/stackrox-ci/${scanner_image_name}:${tag}"
             gcr_db_image="us.gcr.io/stackrox-ci/${db_image_name}:${tag}"
@@ -356,9 +353,19 @@ commands:
             docker tag "${gcr_scanner_image}" "${dockerhub_scanner_image}"
             ./scripts/push-as-manifest-list.sh "${dockerhub_scanner_image}"
 
+            # Retag as -rhel for historical reasons
+            dockerhub_scanner_rhel_image="stackrox/${scanner_image_name}-rhel:${tag}"
+            docker tag "${dockerhub_scanner_image}" "${dockerhub_scanner_rhel_image}"
+            ./scripts/push-as-manifest-list.sh "${dockerhub_scanner_rhel_image}"
+
             dockerhub_db_image="stackrox/${db_image_name}:${tag}"
             docker tag "${gcr_db_image}" "${dockerhub_db_image}"
             ./scripts/push-as-manifest-list.sh "${dockerhub_db_image}"
+
+            # Retag as -rhel for historical reasons
+            dockerhub_db_rhel_image="stackrox/${db_image_name}-rhel:${tag}"
+            docker tag "${dockerhub_db_image}" "${dockerhub_db_rhel_image}"
+            ./scripts/push-as-manifest-list.sh "${dockerhub_db_rhel_image}"
 
             # Retag for quay.io
 
@@ -369,9 +376,18 @@ commands:
             docker tag "${gcr_scanner_image}" "${quay_scanner_image}"
             ./scripts/push-as-manifest-list.sh "${quay_scanner_image}"
 
+            # Retag as -rhel for historical reasons
+            quay_scanner_rhel_image="quay.io/$QUAY_REPO/${scanner_image_name}-rhel:${tag}"
+            docker tag "${quay_scanner_image}" "${quay_scanner_rhel_image}"
+            ./scripts/push-as-manifest-list.sh "${quay_scanner_rhel_image}"
+
             quay_db_image="quay.io/$QUAY_REPO/${db_image_name}:${tag}"
             docker tag "${gcr_db_image}" "${quay_db_image}"
             ./scripts/push-as-manifest-list.sh "${quay_db_image}"
+
+            quay_db_rhel_image="quay.io/$QUAY_REPO/${db_image_name}-rhel:${tag}"
+            docker tag "${quay_db_image}" "${quay_db_rhel_image}"
+            ./scripts/push-as-manifest-list.sh "${quay_db_rhel_image}"
 
             if [[ -n "$CIRCLE_TAG" ]]; then
                 docker login -u "$STACKROX_IO_PUSH_USERNAME" -p "$STACKROX_IO_PUSH_PASSWORD" stackrox.io
@@ -384,6 +400,16 @@ commands:
 
                 ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_image}"
                 ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_db_image}"
+
+                # Retag as -rhel for historical reasons
+                stackrox_io_scanner_rhel_image="stackrox.io/${scanner_image_name}-rhel:${tag}"
+                stackrox_io_scanner_db_rhel_image="stackrox.io/${db_image_name}-rhel:${tag}"
+
+                docker tag "${stackrox_io_scanner_image}" "${stackrox_io_scanner_rhel_image}"
+                docker tag "${stackrox_io_scanner_db_image}" "${stackrox_io_scanner_db_rhel_image}"
+
+                ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_rhel_image}"
+                ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_db_rhel_image}"
             fi
   run-e2e-tests:
     parameters:
@@ -404,11 +430,7 @@ commands:
       - run:
           name: Deploy into the cluster
           command: |
-            if [[ "<< parameters.cluster-id >>" == "rhel" ]]; then
-              make deploy-rhel
-            else
-              make deploy
-            fi
+            make deploy
 
       - wait-for-scanner-and-pf:
           condition: Ready
@@ -744,39 +766,18 @@ jobs:
       - build-and-push-image:
           make-image-target: image
 
-  build-rhel:
-    <<: *defaults
-    steps:
-      - build-and-push-image:
-          make-image-target: image-rhel
-          image-name-suffix: "-rhel"
-
   provision-cluster:
     <<: *defaults
     steps:
       - checkout
       - setup_remote_docker
       - provision-gke-cluster:
-          cluster-id: alpine
+          cluster-id: rhel
 
   e2e-tests:
     <<: *defaults
     steps:
       - run-e2e-tests:
-          cluster-id: alpine
-
-  e2e-tests-rhel:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          cluster-id: rhel
-
-  provision-cluster-rhel:
-    <<: *defaults
-    steps:
-      - checkout
-      - setup_remote_docker
-      - provision-gke-cluster:
           cluster-id: rhel
 
   sanity-check-vuln-updates:
@@ -842,15 +843,6 @@ workflows:
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
-      - build-rhel:
-          <<: *runOnAllTags
-          context:
-          - docker-io-and-stackrox-io-push
-          - quay-cgorman1-readwrite
-          - quay-cgorman1-readonly
-          requires:
-            - create-postgres-dump-from-genesis-dump
-            - upload-dumps-for-embedding-into-image
       - provision-cluster:
           <<: *runOnAllTagsWithQuayPullCtx
           requires:
@@ -908,20 +900,7 @@ workflows:
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
-    - build-rhel:
-        <<: *runOnAllTags
-        context:
-          - docker-io-and-stackrox-io-push
-          - quay-cgorman1-readonly
-          - quay-cgorman1-readwrite
-        requires:
-          - create-postgres-dump-from-genesis-dump
-          - upload-dumps-for-embedding-into-image
     - provision-cluster:
-        <<: *runOnAllTagsWithQuayPullCtx
-        requires:
-          - create-postgres-dump-from-genesis-dump
-    - provision-cluster-rhel:
         <<: *runOnAllTagsWithQuayPullCtx
         requires:
           - create-postgres-dump-from-genesis-dump
@@ -930,8 +909,3 @@ workflows:
         requires:
           - build
           - provision-cluster
-    - e2e-tests-rhel:
-        <<: *runOnAllTagsWithRedHatCtx
-        requires:
-          - build-rhel
-          - provision-cluster-rhel
