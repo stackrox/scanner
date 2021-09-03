@@ -1,9 +1,0 @@
-#!/bin/sh
-
-set -e
-
-if [ -n "$CI" ] && [ -n "$CIRCLE_TAG" ]; then
-  echo "$CIRCLE_TAG"
-else
-  git describe --tags --abbrev=10 --dirty
-fi

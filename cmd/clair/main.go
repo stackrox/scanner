@@ -47,6 +47,7 @@ import (
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
+	"github.com/stackrox/scanner/pkg/version"
 	"golang.org/x/sys/unix"
 
 	// Register database driver.
@@ -220,6 +221,8 @@ func main() {
 	if *flagInsecureTLS {
 		imagefmt.SetInsecureTLS(*flagInsecureTLS)
 	}
+
+	log.Infof("Running Scanner version: %s", version.Version)
 
 	Boot(config)
 }

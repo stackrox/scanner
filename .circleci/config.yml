@@ -336,7 +336,7 @@ commands:
       - run:
           name: Push images
           command: |
-            tag="$(./get-tag)"
+            tag="$(make tag)"
             scanner_image_name="scanner"
             db_image_name="scanner-db"
 
