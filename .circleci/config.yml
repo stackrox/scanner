@@ -336,7 +336,7 @@ commands:
       - run:
           name: Push images
           command: |
-            tag="$(make tag)"
+            tag="$(make --quiet --no-print-directory tag)"
             scanner_image_name="scanner"
             db_image_name="scanner-db"
 
