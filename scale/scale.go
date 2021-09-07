@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
-	v1 "github.com/stackrox/scanner/api/v1"
 	"os"
 	"sync"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/fixtures"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/rox/pkg/urlfmt"
+	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 )
