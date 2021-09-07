@@ -209,6 +209,11 @@ db-integration-tests: deps
 	@echo "+ $@"
 	go test -tags db_integration -count=1 ./database/pgsql
 
+.PHONY: scale-tests
+scale-tests: deps
+	@echo "+ $@"
+	go run ./scale/...
+
 ####################
 ## Generated Srcs ##
 ####################
