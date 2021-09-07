@@ -516,6 +516,8 @@ commands:
 
     steps:
       - checkout
+      - check-label-to-run:
+          label: scale-tests
       - setup_remote_docker
       - setup-gcp
 
@@ -866,9 +868,9 @@ jobs:
   provision-scale-cluster:
     <<: *defaults
     steps:
+      - checkout
       - check-label-to-run:
           label: scale-tests
-      - checkout
       - setup_remote_docker
       - provision-gke-cluster:
           cluster-id: rhel-scale
@@ -882,8 +884,6 @@ jobs:
   scale-tests:
     <<: *defaults
     steps:
-      - check-label-to-run:
-          label: scale-tests
       - run-scale-tests:
           cluster-id: rhel-scale
 
