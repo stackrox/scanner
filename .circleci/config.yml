@@ -543,6 +543,10 @@ commands:
             make scale-tests
             zip -r /tmp/pprof.zip /tmp/pprof
 
+      - store_artifacts:
+          path: /tmp/pprof.zip
+          destination: pprof.zip
+
       - run:
           name: Collect k8s logs
           command: |
