@@ -1,14 +1,17 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/fixtures"
+	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/rox/pkg/sync"
 	"github.com/stackrox/rox/pkg/urlfmt"
@@ -20,6 +23,8 @@ import (
 
 const (
 	scannerHTTPEndpointEnv = "SCANNER_ENDPOINT"
+	dialerTimeout          = 2 * time.Second
+	clientTimeout          = 5 * time.Minute
 
 	registry = "https://registry-1.docker.io"
 
@@ -34,7 +39,15 @@ func main() {
 	logrus.Infof("pprof output will be written to %s", dir)
 
 	endpoint := urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
-	cli := client.New(endpoint, true)
+	dialer := &net.Dialer{Timeout: dialerTimeout}
+	cli := client.NewWithClient(endpoint, &http.Client{
+		Timeout: clientTimeout,
+		Transport: &http.Transport{
+			DialContext:     dialer.DialContext,
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			Proxy:           proxy.TransportFunc,
+		},
+	})
 
 	go profileForever(cli.GetHTTPClient(), endpoint, dir)
 
