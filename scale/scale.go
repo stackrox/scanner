@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/stackrox/rox/pkg/utils"
 	"io"
 	"net/http"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/rox/pkg/sync"
 	"github.com/stackrox/rox/pkg/urlfmt"
+	"github.com/stackrox/rox/pkg/utils"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
@@ -31,6 +31,7 @@ func main() {
 		logrus.Fatal("must specify the directory into which to write profiles via a single argument")
 	}
 	dir := os.Args[1]
+	logrus.Infof("pprof output will be written to %s", dir)
 
 	endpoint := urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 	cli := client.New(endpoint, true)
