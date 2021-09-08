@@ -212,7 +212,7 @@ db-integration-tests: deps
 .PHONY: scale-tests
 scale-tests: deps
 	@echo "+ $@"
-	go run ./scale/...
+	go run ./scale/... /tmp/pprof
 
 ####################
 ## Generated Srcs ##

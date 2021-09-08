@@ -536,10 +536,12 @@ commands:
           condition: Ready
 
       - run:
-          name: Run scale tests
+          name: Run scale tests and collect profile
           no_output_timeout: 20m
           command: |
+            mkdir /tmp/pprof
             make scale-tests
+            zip -r /tmp/pprof.zip /tmp/pprof
 
       - run:
           name: Collect k8s logs

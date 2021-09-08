@@ -1704,8 +1704,8 @@ github.com/stackrox/rox v0.0.0-20200813232042-403e0ab8a77e/go.mod h1:X/6FdUgnl7z
 github.com/stackrox/rox v0.0.0-20200902200840-183e12662c50/go.mod h1:U3X7wnmLK3TQbM0jAf5SvKLnVsq/neyQNTEc23X8zkY=
 github.com/stackrox/rox v0.0.0-20201222223839-042406f3664c/go.mod h1:i2w/bSJhyytJ8xQNcjBIHZWyLhoI4BgZ/1BfgFgGv54=
 github.com/stackrox/rox v0.0.0-20210604075136-10ae82b81f29/go.mod h1:zVhifB3UTVZsqW0DiA3rdBJLTEjvghZyfw2Y7S2JI9E=
-github.com/stackrox/rox v0.0.0-20210908002926-60597ae42124 h1:dTa5YWGVYKBBQ6NwW+OiyfwHJhnC7xQj4LSX9epJ4vo=
-github.com/stackrox/rox v0.0.0-20210908002926-60597ae42124/go.mod h1:QreqFuL6XXuJw2YWKD5iv9g4bPhJ4fcSO/6Sh21QtoI=
+github.com/stackrox/rox v0.0.0-20210908185106-4a4bf716911a h1:HRax/yG1zDwx3qTEWoFutSeMqA3dAS71P/L3wM0NGYY=
+github.com/stackrox/rox v0.0.0-20210908185106-4a4bf716911a/go.mod h1:QreqFuL6XXuJw2YWKD5iv9g4bPhJ4fcSO/6Sh21QtoI=
 github.com/stackrox/scanner v0.0.0-20191202203519-a2a15f33f41a/go.mod h1:2GKn2VH/P+4lsFJG8NlpTdgrU+nelhk8Ogtdx6XjaI0=
 github.com/stackrox/scanner v0.0.0-20200828185353-f2362ea7df99/go.mod h1:9EZi1lP1jHMkAdDEQKymiBSqH5Auma8DZiWcUrh7L0U=
 github.com/stackrox/scanner v0.0.0-20201218051228-bb42033af91b/go.mod h1:EQhODmCL9hcTgyjvh8YovNfn3cFNlUSAFCMl+34aezk=

@@ -1,7 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"github.com/stackrox/rox/pkg/utils"
+	"io"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/fixtures"
@@ -21,12 +26,16 @@ const (
 	maxConcurrentScans = 4
 )
 
-func getScannerHTTPEndpoint() string {
-	return urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
-}
-
 func main() {
-	cli := client.New(getScannerHTTPEndpoint(), true)
+	if len(os.Args[1:]) != 1 {
+		logrus.Fatal("must specify the directory into which to write profiles via a single argument")
+	}
+	dir := os.Args[1]
+
+	endpoint := urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
+	cli := client.New(endpoint, true)
+
+	go profileForever(cli.GetHTTPClient(), endpoint, dir)
 
 	var wg sync.WaitGroup
 	imagesC := make(chan fixtures.ImageAndID)
@@ -78,4 +87,33 @@ func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 	}
 
 	logrus.WithField("image", image.FullName()).Info("Successfully scanned image")
+}
+
+func profileForever(cli *http.Client, endpoint, dir string) {
+	heapReq, heapErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/debug/heap", endpoint), nil)
+	cpuReq, cpuErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/debug/pprof/profile", endpoint), nil)
+	goroutineReq, goroutineErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/debug/goroutine", endpoint), nil)
+	utils.CrashOnError(heapErr, cpuErr, goroutineErr)
+
+	//	Representation of: Mon Jan 2 15:04:05 -0700 MST 2006
+	layout := "2006-01-02-15-04-05"
+	for {
+		heapResp, heapErr := cli.Do(heapReq)
+		cpuResp, cpuErr := cli.Do(cpuReq)
+		goroutineResp, goroutineErr := cli.Do(goroutineReq)
+		utils.CrashOnError(heapErr, cpuErr, goroutineErr)
+
+		now := time.Now()
+		heapF, heapErr := os.Create(fmt.Sprintf("%s/heap_%s.tar.gz", dir, now.Format(layout)))
+		cpuF, cpuErr := os.Create(fmt.Sprintf("%s/cpu_%s.tar.gz", dir, now.Format(layout)))
+		goroutineF, goroutineErr := os.Create(fmt.Sprintf("%s/goroutine_%s.tar.gz", dir, now.Format(layout)))
+		utils.CrashOnError(heapErr, cpuErr, goroutineErr)
+
+		_, heapErr = io.Copy(heapF, heapResp.Body)
+		_, cpuErr = io.Copy(cpuF, cpuResp.Body)
+		_, goroutineErr = io.Copy(goroutineF, goroutineResp.Body)
+		utils.CrashOnError(heapErr, cpuErr, goroutineErr)
+
+		time.Sleep(30 * time.Second)
+	}
 }
