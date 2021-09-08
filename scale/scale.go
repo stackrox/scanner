@@ -40,16 +40,17 @@ func main() {
 
 	endpoint := urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 	dialer := &net.Dialer{Timeout: dialerTimeout}
-	cli := client.NewWithClient(endpoint, &http.Client{
+	httpClient := &http.Client{
 		Timeout: clientTimeout,
 		Transport: &http.Transport{
 			DialContext:     dialer.DialContext,
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			Proxy:           proxy.TransportFunc,
 		},
-	})
+	}
+	cli := client.NewWithClient(endpoint, httpClient)
 
-	go profileForever(cli.GetHTTPClient(), endpoint, dir)
+	go profileForever(httpClient, endpoint, dir)
 
 	var wg sync.WaitGroup
 	imagesC := make(chan fixtures.ImageAndID)

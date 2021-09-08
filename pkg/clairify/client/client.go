@@ -58,11 +58,6 @@ func NewWithClient(endpoint string, client *http.Client) *Clairify {
 	}
 }
 
-// GetHTTPClient returns the HTTP client used by the Clairify client.
-func (c *Clairify) GetHTTPClient() *http.Client {
-	return c.client
-}
-
 func (c *Clairify) sendRequest(request *http.Request, timeout time.Duration) ([]byte, error) {
 	request.Header.Set("Content-Type", "application/json")
 	ctx, cancel := context.WithTimeout(request.Context(), timeout)
