@@ -110,7 +110,7 @@ func profileForever(cli *http.Client, endpoint, dir string) {
 	goroutineReq, goroutineErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/debug/goroutine", endpoint), nil)
 	utils.CrashOnError(heapErr, cpuErr, goroutineErr)
 
-	//	Representation of: Mon Jan 2 15:04:05 -0700 MST 2006
+	// Representation of: Mon Jan 2 15:04:05 -0700 MST 2006
 	layout := "2006-01-02-15-04-05"
 	for {
 		heapResp, heapErr := cli.Do(heapReq)
