@@ -12,7 +12,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/fixtures"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
-	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/rox/pkg/sync"
 	"github.com/stackrox/rox/pkg/urlfmt"
 	"github.com/stackrox/rox/pkg/utils"
@@ -22,7 +21,8 @@ import (
 )
 
 const (
-	scannerHTTPEndpointEnv = "SCANNER_ENDPOINT"
+	scannerHTTPEndpoint = "localhost:8080"
+	scannerGRPCEndpoint = "localhost:8443"
 	dialerTimeout          = 2 * time.Second
 	clientTimeout          = 5 * time.Minute
 
@@ -38,7 +38,6 @@ func main() {
 	dir := os.Args[1]
 	logrus.Infof("pprof output will be written to %s", dir)
 
-	endpoint := urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 	dialer := &net.Dialer{Timeout: dialerTimeout}
 	httpClient := &http.Client{
 		Timeout: clientTimeout,
@@ -48,12 +47,14 @@ func main() {
 			Proxy:           proxy.TransportFunc,
 		},
 	}
-	cli := client.NewWithClient(endpoint, httpClient)
 
 	// stopC signals when the profiler should terminate
 	// and also indicates when the profiler has terminated.
 	stopC := make(chan struct{}, 1)
-	go profileForever(httpClient, endpoint, dir, stopC)
+	go profileForever(httpClient, dir, stopC)
+
+	endpoint := urlfmt.FormatURL(scannerHTTPEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
+	cli := client.NewWithClient(endpoint, httpClient)
 
 	var wg sync.WaitGroup
 	imagesC := make(chan fixtures.ImageAndID)
@@ -121,7 +122,9 @@ func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 // The stopC channel signals the profiler should terminate gracefully.
 //
 // This function writes to the stopC channel to indicate when it has terminated gracefully.
-func profileForever(cli *http.Client, endpoint, dir string, stopC chan struct{}) {
+func profileForever(cli *http.Client, dir string, stopC chan struct{}) {
+	endpoint := urlfmt.FormatURL(scannerGRPCEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
+
 	heapReq, heapErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/debug/heap", endpoint), nil)
 	cpuReq, cpuErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/debug/pprof/profile", endpoint), nil)
 	goroutineReq, goroutineErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/debug/goroutine", endpoint), nil)
