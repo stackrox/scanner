@@ -43,7 +43,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
 	github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab
-	github.com/stackrox/rox v0.0.0-20210908185106-4a4bf716911a
+	github.com/stackrox/rox v0.0.0-20210909221708-9d756514a39d
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
