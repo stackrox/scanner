@@ -529,8 +529,7 @@ commands:
 
       - run:
           name: Deploy into the cluster
-          command: |
-            make deploy
+          command: make deploy
 
       - wait-for-scanner-and-pf:
           condition: Ready
@@ -538,10 +537,7 @@ commands:
       - run:
           name: Run scale tests and collect profile
           no_output_timeout: 20m
-          command: |
-            mkdir /tmp/pprof
-            make scale-tests
-            zip -r /tmp/pprof.zip /tmp/pprof
+          command: make scale-tests
 
       - store_artifacts:
           path: /tmp/pprof.zip

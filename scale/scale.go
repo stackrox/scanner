@@ -156,11 +156,6 @@ func profileForever(cli *http.Client, dir string, stopC chan struct{}) {
 		_, goroutineErr = io.Copy(goroutineF, goroutineResp.Body)
 		utils.CrashOnError(heapErr, cpuErr, goroutineErr)
 
-		f, _ := heapF.Stat()
-		g, _ := cpuF.Stat()
-		h, _ := goroutineF.Stat()
-		logrus.Infof("File sizes: %d %d %d", f.Size(), g.Size(), h.Size())
-
 		utils.IgnoreError(heapF.Close)
 		utils.IgnoreError(cpuF.Close)
 		utils.IgnoreError(goroutineF.Close)

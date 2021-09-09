@@ -212,7 +212,9 @@ db-integration-tests: deps
 .PHONY: scale-tests
 scale-tests: deps
 	@echo "+ $@"
+	mkdir /tmp/pprof
 	go run ./scale/... /tmp/pprof
+	zip -r /tmp/pprof.zip /tmp/pprof
 
 ####################
 ## Generated Srcs ##
@@ -239,7 +241,7 @@ clean-proto-generated-srcs:
 ## Clean ##
 ###########
 .PHONY: clean
-clean: clean-image clean-helm-rendered clean-proto-generated-srcs
+clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof
 	@echo "+ $@"
 
 .PHONY: clean-image
@@ -251,3 +253,9 @@ clean-image:
 clean-helm-rendered:
 	@echo "+ $@"
 	git clean -xdf rendered-chart
+
+.PHONY: clean-pprof
+clean-pprof:
+	@echo "+ $@"
+	rm /tmp/pprof.zip || true
+	rm -rf /tmp/pprof
