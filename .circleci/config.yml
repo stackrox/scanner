@@ -617,6 +617,7 @@ commands:
             curl localhost:9090/metrics > /tmp/metrics/metrics.prom
       - store_artifacts:
           path: /tmp/metrics
+          destination: metrics
 
 jobs:
   unit-tests:
