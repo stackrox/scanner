@@ -23,8 +23,8 @@ import (
 const (
 	scannerHTTPEndpoint = "localhost:8080"
 	scannerGRPCEndpoint = "localhost:8443"
-	dialerTimeout          = 2 * time.Second
-	clientTimeout          = 5 * time.Minute
+	dialerTimeout       = 2 * time.Second
+	clientTimeout       = 5 * time.Minute
 
 	registry = "https://registry-1.docker.io"
 
