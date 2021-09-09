@@ -50,7 +50,10 @@ func main() {
 	}
 	cli := client.NewWithClient(endpoint, httpClient)
 
-	go profileForever(httpClient, endpoint, dir)
+	// stopC signals when the profiler should terminate
+	// and also indicates when the profiler has terminated.
+	stopC := make(chan struct{}, 1)
+	go profileForever(httpClient, endpoint, dir, stopC)
 
 	var wg sync.WaitGroup
 	imagesC := make(chan fixtures.ImageAndID)
@@ -65,14 +68,23 @@ func main() {
 		}(imagesC)
 	}
 
+	// TODO: Test with all or almost all images.
 	for _, image := range fixtures.ImageNames[:24] {
 		imagesC <- image
 	}
+	// Signal there are no more images to scan.
 	close(imagesC)
 
+	// Wait for the scan goroutines to terminate.
 	wg.Wait()
+	// Signal the profiler to terminate.
+	stopC <- struct{}{}
+
+	// Wait for profiler to terminate gracefully.
+	<-stopC
 }
 
+// scanImage scans the given image with the client Clairify client.
 func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 	for _, b := range []bool{false, true} {
 		req := &types.ImageRequest{Image: image.FullName(), Registry: registry, UncertifiedRHELScan: b}
@@ -104,7 +116,12 @@ func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 	logrus.WithField("image", image.FullName()).Info("Successfully scanned image")
 }
 
-func profileForever(cli *http.Client, endpoint, dir string) {
+// profileForever queries the scanner at the given endpoint with the given client
+// and saves the contents in the given directory.
+// The stopC channel signals the profiler should terminate gracefully.
+//
+// This function writes to the stopC channel to indicate when it has terminated gracefully.
+func profileForever(cli *http.Client, endpoint, dir string, stopC chan struct{}) {
 	heapReq, heapErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/debug/heap", endpoint), nil)
 	cpuReq, cpuErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/debug/pprof/profile", endpoint), nil)
 	goroutineReq, goroutineErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/debug/goroutine", endpoint), nil)
@@ -113,6 +130,13 @@ func profileForever(cli *http.Client, endpoint, dir string) {
 	// Representation of: Mon Jan 2 15:04:05 -0700 MST 2006
 	layout := "2006-01-02-15-04-05"
 	for {
+		select {
+		case <-stopC:
+			stopC <- struct{}{}
+			return
+		default:
+		}
+
 		heapResp, heapErr := cli.Do(heapReq)
 		cpuResp, cpuErr := cli.Do(cpuReq)
 		goroutineResp, goroutineErr := cli.Do(goroutineReq)
