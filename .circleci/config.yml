@@ -1026,7 +1026,8 @@ workflows:
     - provision-scale-cluster:
         <<: *runOnAllTagsWithQuayPullCtx
         requires:
-          - create-postgres-dump-from-genesis-dump
+          # Build may take a while, so only run this after the build, so we can maximize the amount of time the tests may run.
+          - build
     - scale-tests:
         <<: *runOnAllTagsWithRedHatCtx
         requires:
