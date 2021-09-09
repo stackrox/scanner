@@ -28,7 +28,7 @@ const (
 
 	registry = "https://registry-1.docker.io"
 
-	maxConcurrentScans = 4
+	maxConcurrentScans = 6
 )
 
 func main() {
@@ -65,7 +65,7 @@ func main() {
 		}(imagesC)
 	}
 
-	for _, image := range fixtures.ImageNames {
+	for _, image := range fixtures.ImageNames[:24] {
 		imagesC <- image
 	}
 	close(imagesC)
