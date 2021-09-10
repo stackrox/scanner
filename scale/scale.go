@@ -69,8 +69,7 @@ func main() {
 		}(imagesC)
 	}
 
-	// TODO: Test with all or almost all images.
-	for _, image := range fixtures.ImageNames[1500:] {
+	for _, image := range fixtures.ImageNames[:2000] {
 		imagesC <- image
 	}
 	// Signal there are no more images to scan.
