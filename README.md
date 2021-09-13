@@ -29,14 +29,14 @@ Only major, breaking changes will merit a bump to the major version, but this is
 
 Note: There is no genesis-dump update for patch releases (unless the patch, itself, requires it)
 
-## How to Build
+## Building
 
 ### Prerequisites
 
-  * [Make](https://www.gnu.org/software/make/)
-  * [Go](https://golang.org/dl/)
+* [Make](https://www.gnu.org/software/make/)
+* [Go](https://golang.org/dl/)
     * Get the version specified in [go.mod](go.mod)
-  * Various tools that can be installed with `make reinstall-dev-tools`.
+* Various tools that can be installed with `make reinstall-dev-tools`.
     * Running the reinstall is especially important to do if you tend to switch between this and rox.
 
 ### Steps
@@ -52,3 +52,44 @@ $ make image
 ```
 
 For any other time, just run `make image`.
+
+## Testing
+
+There are various unit tests and bench tests scattered around the codebase.
+
+On top of that, there are E2E tests defined in the `e2etests/` directory,
+and there are some DB integration tests defined in `database/psql`.
+
+### Unit Tests
+
+To run these, simply run `make unit-tests`
+
+### Bench Tests
+
+There are several ways to run benchmarks. For the best results, run these tests via
+the command line, as you will have more control over the settings.
+
+To run go benchmarks, run the following:
+
+```
+// Run all benchmarks
+$ go test -run=^$ -bench=. ./...
+
+// Only run a specific benchmark for 2 minutes
+$ go test -run=^$ -bench=^BenchmarkSpecific$ -benchtime=2m ./<PATH_TO_DIRECTORY_WITH_TEST>
+
+// Gather profiles for specific benchmark
+$ go test -run=^$ -bench=^BenchmarkSpecific$ -benchmem -memprofile memprofile.out -cpuprofile cpuprofile.out ./<PATH_TO_DIRECTORY_WITH_TEST>
+```
+
+### E2E Tests
+
+E2E tests run in CI upon every commit. Sometimes,
+changes are made which affect the genesis dumps. To test these,
+simple add the `generate-dumps-on-pr` label to your PR.
+
+### DB Integration Tests
+
+DB integration tests also run in CI upon every commit.
+However, to test these locally, be sure to [install PostgreSQL 12](https://postgresapp.com/downloads.html)
+and run it prior to running the tests.
