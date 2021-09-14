@@ -6,14 +6,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-type layerDownloadReadCloser struct {
+// LayerDownloadReadCloser defines an image layer io.ReadCloser which downloads the layer(s) as needed.
+type LayerDownloadReadCloser struct {
 	io.ReadCloser
-	downloader func() (io.ReadCloser, error)
+	Downloader func() (io.ReadCloser, error)
 }
 
-func (l *layerDownloadReadCloser) Read(p []byte) (int, error) {
+// Read reads from the reader.
+func (l *LayerDownloadReadCloser) Read(p []byte) (int, error) {
 	if l.ReadCloser == nil {
-		readCloser, err := l.downloader()
+		readCloser, err := l.Downloader()
 		if err != nil {
 			return 0, errors.Wrap(err, "error downloading layer")
 		}
@@ -22,7 +24,8 @@ func (l *layerDownloadReadCloser) Read(p []byte) (int, error) {
 	return l.ReadCloser.Read(p)
 }
 
-func (l *layerDownloadReadCloser) Close() error {
+// Close closes the reader.
+func (l *LayerDownloadReadCloser) Close() error {
 	if l.ReadCloser != nil {
 		return l.ReadCloser.Close()
 	}
