@@ -30,8 +30,8 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	var prevLineage, lineage string
 	h := sha256.New()
 	for _, layer := range layers {
-		layerReadCloser := &layerDownloadReadCloser{
-			downloader: func() (io.ReadCloser, error) {
+		layerReadCloser := &LayerDownloadReadCloser{
+			Downloader: func() (io.ReadCloser, error) {
 				return registry.DownloadLayer(image.Remote, digest.Digest(layer))
 			},
 		}
@@ -79,7 +79,7 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 // process fetches and analyzes the layers for the requested image returning the image digest, the lineage of the last layer and the last layer digest
 func process(storage database.Datastore, image *types.Image, reg types.Registry, uncertifiedRHEL bool) (string, string, string, error) {
 	logrus.Debugf("Processing image %s", image)
-	digest, layers, err := fetchLayers(reg, image)
+	digest, layers, err := FetchLayers(reg, image)
 	if err != nil {
 		return digest, "", "", err
 	}
@@ -209,7 +209,8 @@ func handleManifest(reg types.Registry, manifestType, remote, ref string) (diges
 	}
 }
 
-func fetchLayers(reg types.Registry, image *types.Image) (string, []string, error) {
+// FetchLayers downloads the layers for the given image.
+func FetchLayers(reg types.Registry, image *types.Image) (string, []string, error) {
 	ref := image.Tag
 	if image.SHA != "" {
 		ref = image.SHA
