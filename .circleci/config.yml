@@ -529,7 +529,9 @@ commands:
 
       - run:
           name: Deploy into the cluster
-          command: make deploy
+          command: |
+            cci-export LOGLEVEL "INFO"
+            make deploy
 
       - wait-for-scanner-and-pf:
           condition: Ready
