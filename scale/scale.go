@@ -91,7 +91,7 @@ func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 
 		img, err := cli.AddImage("", "", req)
 		if err != nil {
-			logrus.WithField("image", image.FullName()).WithError(err).Error("Fatal: unable to scan image")
+			logrus.WithField("image", image.FullName()).WithError(err).Error("Unable to scan image")
 			return
 		}
 
@@ -99,7 +99,7 @@ func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 			UncertifiedRHELResults: b,
 		})
 		if err != nil {
-			logrus.WithField("image", image.FullName()).WithError(err).Error("Fatal: unable to retrieve scan results")
+			logrus.WithField("image", image.FullName()).WithError(err).Error("Unable to retrieve scan results")
 			return
 		}
 
