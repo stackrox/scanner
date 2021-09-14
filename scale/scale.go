@@ -69,7 +69,7 @@ func main() {
 		}(imagesC)
 	}
 
-	for _, image := range fixtures.ImageNames[:1900] {
+	for _, image := range fixtures.ImageNames[:1800] {
 		imagesC <- image
 	}
 	// Signal there are no more images to scan.
