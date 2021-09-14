@@ -15,6 +15,8 @@ import (
 )
 
 var (
+	// images is a slice of known images with a high number of components.
+	// Benchmark tests should not be limited to just these.
 	images = []string{
 		"centos/nodejs-8-centos7@sha256:3dfd54c57b791d0b8fc4b4670144920e7ad0c1b0bd7a501375af8421d19df90c",
 		"splunk/k8s-metrics@sha256:ceb6fdce55ad85055775337960a84faa06d669f08890574e1d7b67b55d4843db",
@@ -26,7 +28,9 @@ var (
 		"cftoolsmiths/deploy-pcf@sha256:fd3e43a69cff154a9b0758ffb60eb574b0c8d4790e88819eadaa73468bc4286e",
 	}
 
-	image = images[5]
+	// image is the image used for testing.
+	// It may be something in the slice above, or any image one would want to test.
+	image = images[0]
 )
 
 func BenchmarkDetectContentNoActiveVulnMgmt(b *testing.B) {
