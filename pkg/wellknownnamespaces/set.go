@@ -6,7 +6,6 @@ var (
 	// KnownStaleNamespaces is the set of base namespaces we know have stale vulnerabilities.
 	KnownStaleNamespaces = set.NewFrozenStringSet(
 		"debian:8",
-		"oracle:5",
 		"ubuntu:12.10",
 		"ubuntu:13.04",
 		"ubuntu:14.10",
@@ -47,9 +46,6 @@ var (
 		"debian:10",
 		"debian:11",
 		"debian:unstable",
-		"oracle:6",
-		"oracle:7",
-		"oracle:8",
 		"rhel:6",
 		"rhel:7",
 		"rhel:8",
