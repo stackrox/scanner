@@ -22,7 +22,9 @@ ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
     POSTGRES_PASSWORD_FILE="/run/secrets/stackrox.io/secrets/password"
 
 COPY signatures/RPM-GPG-KEY-PGDG-12 /
+# For backwards compatibility, this script will remain
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
+COPY scripts/docker-preload.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/postgres.rpm /bundle/postgres-libs.rpm /bundle/postgres-server.rpm /tmp/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
