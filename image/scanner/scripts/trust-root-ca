@@ -3,13 +3,5 @@
 set -e
 
 CA_PATH="/run/secrets/stackrox.io/certs/ca.pem"
-
-if [ -f /etc/redhat-release ]; then
-  # On RHEL
-  cp "${CA_PATH}" /etc/pki/ca-trust/source/anchors/root-ca.pem
-  update-ca-trust
-else
-  # On Alpine
-  cp "${CA_PATH}" /etc/ssl/certs/root-ca.pem
-  update-ca-certificates
-fi
+cp "${CA_PATH}" /etc/pki/ca-trust/source/anchors/root-ca.pem
+update-ca-trust

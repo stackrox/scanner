@@ -157,18 +157,14 @@ else
 	docker run $(BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(BUILD_IMAGE) $(BUILD_CMD)
 endif
 
-.PHONY: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
-$(CURDIR)/image/scanner/rhel/bundle.tar.gz: build
-	$(CURDIR)/image/scanner/rhel/create-bundle.sh $(CURDIR)/image/scanner $(CURDIR)/image/scanner/rhel
-
 .PHONY: $(CURDIR)/image/db/rhel/bundle.tar.gz
 $(CURDIR)/image/db/rhel/bundle.tar.gz:
 	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $(CURDIR)/image/db/rhel
 
 .PHONY: scanner-image
-scanner-image: scanner-build-dockerized $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image: scanner-build-dockerized
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
+	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/Dockerfile image/scanner
 
 .PHONY: db-image
 db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz

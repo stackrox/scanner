@@ -2,32 +2,31 @@ ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8/ubi
 ARG BASE_TAG=8.4
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
-
-COPY bundle.tar.gz /
-WORKDIR /bundle
-RUN tar -xzf /bundle.tar.gz
-
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
-LABEL name="scanner-rhel" \
+LABEL name="scanner" \
       vendor="StackRox" \
       maintainer="support@stackrox.com" \
       summary="Image scanner for the StackRox Kubernetes Security Platform" \
       description="This image supports image scanning in the StackRox Kubernetes Security Platform."
 
-ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
-ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
-ENV REPO_TO_CPE_DIR="/repo2cpe"
-
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-COPY scripts /
+ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
+RUN mkdir -p "${NVD_DEFINITIONS_DIR}"
+COPY ./dump/nvd/*.json "${NVD_DEFINITIONS_DIR}/"
 
-COPY --from=extracted_bundle /bundle/genesis_manifests.json /bundle/scanner ./
-COPY --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
-COPY --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
-COPY --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
+ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
+RUN mkdir -p "${K8S_DEFINITIONS_DIR}"
+COPY ./dump/k8s/*.yaml "${K8S_DEFINITIONS_DIR}/"
+
+ENV REPO_TO_CPE_DIR="/repo2cpe"
+RUN mkdir -p "${REPO_TO_CPE_DIR}"
+COPY ./dump/rhelv2/repository-to-cpe.json "${REPO_TO_CPE_DIR}/"
+
+COPY ./dump/genesis_manifests.json /
+COPY ./scripts/* /
+COPY ./bin/scanner /
 
 RUN dnf upgrade -y && \
     dnf install -y ca-certificates xz && \
@@ -49,5 +48,3 @@ RUN dnf upgrade -y && \
 ENTRYPOINT ["/entrypoint.sh"]
 
 USER 4000:4000
-
-HEALTHCHECK CMD curl --insecure --fail https://127.0.0.1:8080/clarify/ping
