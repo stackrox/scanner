@@ -1854,7 +1854,7 @@ func TestImageSanity(t *testing.T) {
 						},
 					},
 					AddedBy: "sha256:7731472c3f2a25edbb9c085c78f42ec71259f2b83485aa60648276d408865839",
-					FixedBy: "2.12.5-r0",
+					FixedBy: "2.12.6-r0",
 				},
 				{
 					Name:          "busybox",
