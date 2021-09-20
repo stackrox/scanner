@@ -65,8 +65,6 @@ func TestGRPCGetOpenShiftVulnerabilities(t *testing.T) {
 				} else if strings.HasPrefix(vuln.Name, "CVE-") {
 					assert.Empty(t, vuln.FixedBy)
 				}
-				assert.NotEmpty(t, vuln.Severity)
-				assert.NotEmpty(t, vuln.Link)
 				assert.True(t, vuln.MetadataV2.CvssV2 != nil || vuln.MetadataV2.CvssV3 != nil)
 				vulnNameMap[vuln.Name] = vuln
 			}
