@@ -108,17 +108,27 @@ commands:
             fi
 
   check-label-to-run:
-    description: Run on master or tags, but skip on PRs unless the given label is provided
+    description: Run on master, but skip on PRs and tags unless the given label is provided
     parameters:
       label:
         type: string
+      runOnTag:
+        type: boolean
+        default: false
     steps:
       - run:
           name: Determine whether to run step
           command: |
             set +e
-            if [[ "${CIRCLE_BRANCH}" == "master" || -n "${CIRCLE_TAG}" ]]; then
-              echo "On master or tag, running the step"
+            if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
+              echo "On master, running the step"
+            else if [[ -n "${CIRCLE_TAG}" ]]; then
+              if [[ "<< parameters.runOnTag >>" == "true" ]]; then
+                echo "On tag ${CIRCLE_TAG} with runOnTag set to true, running the step"
+              else
+                echo "On tag ${CIRCLE_TAG} with runOnTag set to false, halting the step"
+                circleci step halt
+              fi
             else
               .circleci/pr_has_label.sh "<< parameters.label >>"
               if [[ $? -eq 1 ]]; then
@@ -650,6 +660,7 @@ jobs:
       - checkout
       - check-label-to-run:
           label: generate-dumps-on-pr
+          runOnTag: true
       - run:
           name: Build updater, and persist to workspace
           command: |
@@ -688,6 +699,7 @@ jobs:
       - checkout
       - check-label-to-run:
           label: generate-dumps-on-pr
+          runOnTag: true
       - setup_remote_docker
       - attach_workspace:
           at: /tmp
@@ -732,6 +744,7 @@ jobs:
       - checkout
       - check-label-to-run:
           label: generate-dumps-on-pr
+          runOnTag: false
 
       - setup-gcp
       - attach_workspace:
@@ -748,7 +761,7 @@ jobs:
           name: Upload to Google Storage
           command: |
             cmd=()
-            if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
+            if [[ "${CIRCLE_BRANCH}" != "master" ]]; then
               cmd+=(echo "Would do")
             fi
             "${cmd[@]}" gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
@@ -762,6 +775,7 @@ jobs:
       - checkout
       - check-label-to-run:
           label: generate-dumps-on-pr
+          runOnTag: false
       - setup-gcp
       - attach_workspace:
           at: /tmp
@@ -802,6 +816,7 @@ jobs:
       - checkout
       - check-label-to-run:
           label: generate-dumps-on-pr
+          runOnTag: false
       - setup-gcp:
           service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
       - attach_workspace:
