@@ -122,7 +122,7 @@ commands:
             set +e
             if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
               echo "On master, running the step"
-            else if [[ -n "${CIRCLE_TAG}" ]]; then
+            elif [[ -n "${CIRCLE_TAG}" ]]; then
               if [[ "<< parameters.runOnTag >>" == "true" ]]; then
                 echo "On tag ${CIRCLE_TAG} with runOnTag set to true, running the step"
               else
