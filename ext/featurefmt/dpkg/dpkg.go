@@ -227,7 +227,8 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	for filename, file := range files {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
-		if strings.HasPrefix(filename, statusDir) {
+		// The var/lib/dpkg/status.d directory holds the files which define packages.
+		if strings.HasPrefix(filename, statusDir) && filename != statusDir {
 			if err := l.parseComponents(files, append(file.Contents, '\n'), packagesMap, removedPackages, true); err != nil {
 				return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", filename)
 			}

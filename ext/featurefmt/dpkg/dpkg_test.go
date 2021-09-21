@@ -61,6 +61,7 @@ func TestDpkgFeatureDetection(t *testing.T) {
 			},
 			Files: tarutil.FilesMap{
 				"var/lib/dpkg/status":           tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
+				"var/lib/dpkg/status.d":         tarutil.FileData{},
 				"var/lib/dpkg/status.d/base":    tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
 				"var/lib/dpkg/status.d/netbase": tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase")},
 			},
@@ -110,6 +111,7 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 			},
 			Files: tarutil.FilesMap{
 				"var/lib/dpkg/status":                       tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
+				"var/lib/dpkg/status.d":                     tarutil.FileData{},
 				"var/lib/dpkg/status.d/base":                tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
 				"var/lib/dpkg/info/base-files.list":         tarutil.FileData{Contents: []byte{}},
 				"var/lib/dpkg/status.d/netbase":             tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase")},
