@@ -90,6 +90,8 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 			if checkProvidedExecutables {
 				assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
 			}
+			feature.ProvidedExecutables = nil
+			matching.ProvidedExecutables = nil
 
 			if !checkContainsOnly {
 				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
@@ -117,6 +119,11 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 					assert.True(t, foundMatch)
 				}
 			}
+			feature.Vulnerabilities = nil
+			matching.Vulnerabilities = nil
+
+			// Ensure the parts of the feature aside from the provided executables and vulnerabilities are equal, too.
+			assert.Equal(t, feature, matching)
 		})
 	}
 
