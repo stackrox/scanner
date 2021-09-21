@@ -124,7 +124,7 @@ commands:
           command: |
             set +e
             if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
-              if [[ "<< parameters.runOnTag >>" == "true" ]]; then
+              if [[ "<< parameters.runOnMaster >>" == "true" ]]; then
                 echo "On master, running the step"
               else
                 echo "On master, but not running the step"
