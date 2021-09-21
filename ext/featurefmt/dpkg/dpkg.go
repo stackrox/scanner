@@ -89,7 +89,7 @@ func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap
 			version := line[len("Version: "):]
 			err := versionfmt.Valid(dpkg.ParserName, version)
 			if err != nil {
-				log.WithError(err).WithFields(map[string]interface{}{"name": pkgMetadata.name, "version": pkgMetadata.version}).Warning("could not parse package version. skipping")
+				log.WithError(err).WithFields(map[string]interface{}{"name": pkgMetadata.name, "version": version}).Warning("could not parse package version. skipping")
 				continue
 			}
 			pkgMetadata.version = version
@@ -112,13 +112,14 @@ func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap
 			}
 
 			pkgMetadata.sourceName = md["name"]
+			// It is assumed the version has already been determined at this point.
 			pkgMetadata.sourceVersion = pkgMetadata.version
 
 			if md["version"] != "" {
 				version := md["version"]
 				err := versionfmt.Valid(dpkg.ParserName, version)
 				if err != nil {
-					log.WithError(err).WithFields(log.Fields{"name": pkgMetadata.sourceName, "version": version}).Warning("could not parse source package version. skipping")
+					log.WithError(err).WithFields(log.Fields{"name": pkgMetadata.name, "source name": pkgMetadata.sourceName, "version": version}).Warning("could not parse source package version. skipping")
 					continue
 				}
 
