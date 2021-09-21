@@ -370,35 +370,6 @@ type Vulnerability struct {
 	Severity      string                 `json:"Severity,omitempty"`
 	Metadata      map[string]interface{} `json:"Metadata,omitempty"`
 	FixedBy       string                 `json:"FixedBy,omitempty"`
-	FixedIn       []Feature              `json:"FixedIn,omitempty"`
-}
-
-// DatabaseModel returns the database.Vulnerability based on the caller Vulnerability.
-func (v Vulnerability) DatabaseModel() (database.Vulnerability, error) {
-	severity, err := database.NewSeverity(v.Severity)
-	if err != nil {
-		return database.Vulnerability{}, err
-	}
-
-	var dbFeatures []database.FeatureVersion
-	for _, feature := range v.FixedIn {
-		dbFeature, err := feature.DatabaseModel()
-		if err != nil {
-			return database.Vulnerability{}, err
-		}
-
-		dbFeatures = append(dbFeatures, dbFeature)
-	}
-
-	return database.Vulnerability{
-		Name:        v.Name,
-		Namespace:   database.Namespace{Name: v.NamespaceName},
-		Description: v.Description,
-		Link:        v.Link,
-		Severity:    severity,
-		Metadata:    v.Metadata,
-		FixedIn:     dbFeatures,
-	}, nil
 }
 
 // Feature is a scanned package in an image.

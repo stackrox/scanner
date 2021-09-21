@@ -96,7 +96,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 					matchingBytes, _ := json.MarshalIndent(matching.Vulnerabilities, "", "  ")
 					featureVulnsBytes, _ := json.MarshalIndent(feature.Vulnerabilities, "", "  ")
 					fmt.Printf("Matching: %s\n", matchingBytes)
-					fmt.Printf("Feature: %s\n", featureVulnsBytes)
+					fmt.Printf("Expected Feature: %s\n", featureVulnsBytes)
 				}
 
 				require.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
