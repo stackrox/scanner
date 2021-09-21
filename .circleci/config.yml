@@ -112,6 +112,9 @@ commands:
     parameters:
       label:
         type: string
+      runOnMaster:
+        type: boolean
+        default: true
       runOnTag:
         type: boolean
         default: false
@@ -121,7 +124,12 @@ commands:
           command: |
             set +e
             if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
-              echo "On master, running the step"
+              if [[ "<< parameters.runOnTag >>" == "true" ]]; then
+                echo "On master, running the step"
+              else
+                echo "On master, but not running the step"
+                circleci step halt
+              fi
             elif [[ -n "${CIRCLE_TAG}" ]]; then
               if [[ "<< parameters.runOnTag >>" == "true" ]]; then
                 echo "On tag ${CIRCLE_TAG} with runOnTag set to true, running the step"
@@ -528,6 +536,7 @@ commands:
       - checkout
       - check-label-to-run:
           label: scale-tests
+          runOnMaster: false
       - setup_remote_docker
       - setup-gcp
 
@@ -891,6 +900,7 @@ jobs:
       - checkout
       - check-label-to-run:
           label: scale-tests
+          runOnMaster: false
       - setup_remote_docker
       - provision-gke-cluster:
           cluster-id: rhel-scale
