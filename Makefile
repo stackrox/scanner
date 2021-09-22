@@ -204,7 +204,7 @@ unit-tests: deps
 .PHONY: e2e-tests
 e2e-tests: deps
 	@echo "+ $@"
-	go test -tags e2e -count=1 ./e2etests/...
+	go test -tags e2e -count=1 -timeout=20m ./e2etests/...
 
 .PHONY: db-integration-tests
 db-integration-tests: deps
