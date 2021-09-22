@@ -877,7 +877,12 @@ jobs:
       - run:
           name: Push offline dump to a public bucket
           command: |
-            "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/scanner-vuln-updates.zip
+            cd /tmp/offline-dump
+            cmd=()
+            #  if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
+            #    cmd+=(echo "Would do")
+            #  fi
+            "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
 
   build:
     <<: *defaults
