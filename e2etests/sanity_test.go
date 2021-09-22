@@ -123,7 +123,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 			matching.Vulnerabilities = nil
 
 			// Ensure the parts of the feature aside from the provided executables and vulnerabilities are equal, too.
-			assert.Equal(t, feature, matching)
+			assert.Equal(t, feature, *matching)
 		})
 	}
 
@@ -189,7 +189,8 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "0.0~r131-2ubuntu2+esm1",
 						},
 					},
-					AddedBy: "sha256:92473f7ef45574f608989888a6cfc8187d3a1425e3a63f974434acab03fed068",
+					AddedBy: "sha256:58690f9b18fca6469a14da4e212c96849469f9b1be6661d2342a4bf01774aa50",
+					FixedBy: "0.0~r131-2ubuntu2+esm1",
 				},
 			},
 		},
@@ -383,6 +384,7 @@ func TestImageSanity(t *testing.T) {
 						},
 					},
 					AddedBy: "sha256:9f0706ba7422412cd468804fee456786f88bed94bf9aea6dde2a47f770d19d27",
+					FixedBy: "1.0.9.8.6",
 				},
 			},
 		},
@@ -548,6 +550,7 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
 					Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/",
 					AddedBy:       "sha256:b48f8e1b0b06887c382543e23275911a388c1010e3436dc9b708ef29885bb594",
+					FixedBy:       "3.1.15",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:        "CVE-2020-1108",
@@ -892,6 +895,7 @@ func TestImageSanity(t *testing.T) {
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
 					Location: "usr/share/dotnet/shared/Microsoft.AspNetCore.App/3.1.0/",
+					FixedBy:  "3.1.11",
 				},
 				{
 					Name:          "microsoft.netcore.app",
@@ -1126,6 +1130,7 @@ func TestImageSanity(t *testing.T) {
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
 					Location: "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.0/",
+					FixedBy:  "3.1.15",
 				},
 			},
 		},
@@ -1371,6 +1376,7 @@ func TestImageSanity(t *testing.T) {
 					},
 					AddedBy:  "sha256:36e8e9714b9a509fae9e515ff16237928c3d809f5ae228b14d2f7d7605c02623",
 					Location: "jars/jackson-databind-2.9.10.4.jar",
+					FixedBy:  "2.9.10.8",
 				},
 			},
 			unexpectedFeatures: []v1.Feature{
@@ -1426,6 +1432,7 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "rh-maven35-log4j12",
+					NamespaceName: "rhel:7",
 					VersionFormat: "rpm",
 					Version:       "1.2.17-19.2.el7.noarch",
 					// This feature provides several JAR files, but they are either not executable or they are symlinks.
@@ -1434,6 +1441,7 @@ func TestImageSanity(t *testing.T) {
 				},
 				{
 					Name:          "rh-maven35-jackson-databind",
+					NamespaceName: "rhel:7",
 					VersionFormat: "rpm",
 					Version:       "2.7.6-2.10.el7.noarch",
 					// This feature provides a JAR file that is not executable.
@@ -1465,9 +1473,11 @@ func TestImageSanity(t *testing.T) {
 						},
 					},
 					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+					FixedBy: "2.7.6-2.11.el7",
 				},
 				{
 					Name:                "vim-minimal",
+					NamespaceName:       "rhel:7",
 					VersionFormat:       "rpm",
 					Version:             "2:7.4.629-6.el7.x86_64",
 					ProvidedExecutables: []string{"/usr/bin/vi"},
@@ -1517,12 +1527,14 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "rh-maven35-log4j12",
+					NamespaceName: "rhel:7",
 					VersionFormat: "rpm",
 					Version:       "1.2.17-19.2.el7.noarch",
 					AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
 					Name:          "rh-maven35-jackson-databind",
+					NamespaceName: "rhel:7",
 					VersionFormat: "rpm",
 					Version:       "2.7.6-2.10.el7.noarch",
 					Vulnerabilities: []v1.Vulnerability{
@@ -1552,9 +1564,11 @@ func TestImageSanity(t *testing.T) {
 						},
 					},
 					AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+					FixedBy: "2.7.6-2.11.el7",
 				},
 				{
 					Name:          "vim-minimal",
+					NamespaceName: "rhel:7",
 					VersionFormat: "rpm",
 					Version:       "2:7.4.629-6.el7.x86_64",
 					Vulnerabilities: []v1.Vulnerability{
@@ -1603,6 +1617,7 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "nodejs-full-i18n",
+					NamespaceName: "rhel:8",
 					VersionFormat: "rpm",
 					Version:       "1:10.21.0-3.module+el8.2.0+7071+d2377ea3.x86_64",
 					Vulnerabilities: []v1.Vulnerability{
@@ -1660,6 +1675,7 @@ func TestImageSanity(t *testing.T) {
 				},
 				{
 					Name:          "freetype",
+					NamespaceName: "rhel:8",
 					VersionFormat: "rpm",
 					Version:       "2.9.1-4.el8.x86_64",
 					Vulnerabilities: []v1.Vulnerability{
@@ -1693,6 +1709,7 @@ func TestImageSanity(t *testing.T) {
 				},
 				{
 					Name:          "libsolv",
+					NamespaceName: "rhel:8",
 					VersionFormat: "rpm",
 					Version:       "0.7.7-1.el8.x86_64",
 					Vulnerabilities: []v1.Vulnerability{
@@ -1721,7 +1738,7 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "0:0.7.11-1.el8",
 						},
 					},
-					AddedBy: "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
+					AddedBy: "sha256:ec1681b6a383e4ecedbeddd5abc596f3de835aed6db39a735f62395c8edbff30",
 					FixedBy: "0.7.11-1.el8",
 				},
 			},
@@ -1753,8 +1770,10 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "jq",
+					NamespaceName: "alpine:v3.13",
 					VersionFormat: "apk",
 					Version:       "1.6-r1",
+					AddedBy:       "sha256:51c25658727f8bc3a4ef7c039257e136d23995bfdcfdc52dfb24104b5dc64720",
 				},
 			},
 		},
@@ -1768,8 +1787,10 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "fipscheck",
+					NamespaceName: "centos:7",
 					VersionFormat: "rpm",
 					Version:       "1.4.1-5.el7",
+					AddedBy:       "sha256:1de5db95c59529b8423a336fac27e0bf8a9f4fced0fcc32377c9170ab481a8e9",
 				},
 			},
 		},
@@ -1784,8 +1805,10 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "p11-kit",
+					NamespaceName: "centos:7",
 					VersionFormat: "rpm",
 					Version:       "0.23.5-3.el7",
+					AddedBy:       "sha256:f9ce27a295e879233c8fbbf9ab67944a10e1ce80da69e46f87c583082a1ff3bb",
 				},
 			},
 		},
@@ -1808,6 +1831,7 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apk-tools",
+					NamespaceName: "alpine:v3.13",
 					VersionFormat: "apk",
 					Version:       "2.12.0-r4",
 					Vulnerabilities: []v1.Vulnerability{
@@ -1860,12 +1884,12 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "2.12.6-r0",
 						},
 					},
-					AddedBy: "sha256:7731472c3f2a25edbb9c085c78f42ec71259f2b83485aa60648276d408865839",
-					// TODO: Fix with FixedBy: "2.12.6-r0"
-					FixedBy: "2.12.5-r0",
+					AddedBy: "sha256:596ba82af5aaa3e2fd9d6f955b8b94f0744a2b60710e3c243ba3e4a467f051d1",
+					FixedBy: "2.12.6-r0",
 				},
 				{
 					Name:          "busybox",
+					NamespaceName: "alpine:v3.13",
 					VersionFormat: "apk",
 					Version:       "1.32.1-r0",
 					Vulnerabilities: []v1.Vulnerability{
@@ -1894,7 +1918,7 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "1.32.1-r4",
 						},
 					},
-					AddedBy: "sha256:7731472c3f2a25edbb9c085c78f42ec71259f2b83485aa60648276d408865839",
+					AddedBy: "sha256:596ba82af5aaa3e2fd9d6f955b8b94f0744a2b60710e3c243ba3e4a467f051d1",
 					FixedBy: "1.32.1-r4",
 				},
 			},
@@ -1906,6 +1930,7 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apk-tools",
+					NamespaceName: "alpine:v3.14",
 					VersionFormat: "apk",
 					Version:       "2.12.5-r1",
 					Vulnerabilities: []v1.Vulnerability{
@@ -1934,11 +1959,15 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "2.12.6-r0",
 						},
 					},
+					AddedBy: "sha256:5843afab387455b37944e709ee8c78d7520df80f8d01cf7f861aae63beeddb6b",
+					FixedBy: "2.12.6-r0",
 				},
 				{
 					Name:          "busybox",
+					NamespaceName: "alpine:v3.14",
 					VersionFormat: "apk",
 					Version:       "1.33.1-r2",
+					AddedBy:       "sha256:5843afab387455b37944e709ee8c78d7520df80f8d01cf7f861aae63beeddb6b",
 				},
 			},
 		},
@@ -1955,14 +1984,17 @@ func TestImageSanity(t *testing.T) {
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "dash",
+					NamespaceName: "debian:11",
 					VersionFormat: "dpkg",
 					Version:       "0.5.11+git20200708+dd9ef66-5",
 					ProvidedExecutables: []string{
 						"/bin/dash",
 					},
+					AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
 				},
 				{
 					Name:          "diffutils",
+					NamespaceName: "debian:11",
 					VersionFormat: "dpkg",
 					Version:       "1:3.7-5",
 					ProvidedExecutables: []string{
@@ -1971,6 +2003,7 @@ func TestImageSanity(t *testing.T) {
 						"/usr/bin/diff3",
 						"/usr/bin/sdiff",
 					},
+					AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
 				},
 			},
 		},
