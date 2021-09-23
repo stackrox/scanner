@@ -880,6 +880,19 @@ jobs:
             fi
             "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 
+      - setup-gcp:
+          service-account-env: GCP_SERVICE_ACCOUNT_CREDS
+
+      - run:
+          name: Push offline dump to a public bucket
+          command: |
+            cd /tmp/offline-dump
+            cmd=()
+            if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
+              cmd+=(echo "Would do")
+            fi
+            "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
+
   build:
     <<: *defaults
     steps:
@@ -963,7 +976,10 @@ workflows:
           requires:
             - generate-genesis-dump
       - upload-diff-dumps-and-offline-dumps:
-          <<: *runOnAllTagsWithQuayPullCtx
+          <<: *runOnAllTags
+          context:
+            - quay-cgorman1-readonly
+            - scanner-support
           requires:
             - create-diff-dumps
       - unit-tests:
@@ -973,10 +989,9 @@ workflows:
       - build:
           <<: *runOnAllTags
           context:
-          - docker-io-and-stackrox-io-push
-          - quay-cgorman1-readwrite
-          - quay-cgorman1-readonly
-
+            - docker-io-and-stackrox-io-push
+            - quay-cgorman1-readwrite
+            - quay-cgorman1-readonly
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
@@ -1021,7 +1036,10 @@ workflows:
         requires:
           - generate-genesis-dump
     - upload-diff-dumps-and-offline-dumps:
-        <<: *runOnAllTagsWithQuayPullCtx
+        <<: *runOnAllTags
+        context:
+          - quay-cgorman1-readonly
+          - scanner-support
         requires:
           - create-diff-dumps
     - unit-tests:
