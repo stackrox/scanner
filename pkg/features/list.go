@@ -5,5 +5,5 @@ var (
 	ContinueUnknownOS = registerFeature("Enable continuation upon detecting unknown OS", "ROX_CONTINUE_UNKNOWN_OS", true)
 
 	// ActiveVulnMgmt defines if features related to Active Vuln Management should be enabled.
-	ActiveVulnMgmt = registerFeature("Enable features related to Active Vulnerability Management", "ROX_ACTIVE_VULN_MANAGEMENT", false)
+	ActiveVulnMgmt = registerFeature("Enable features related to Active Vulnerability Management", "ROX_ACTIVE_VULN_MANAGEMENT", true)
 )
