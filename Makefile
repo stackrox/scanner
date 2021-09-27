@@ -168,7 +168,7 @@ $(CURDIR)/image/db/rhel/bundle.tar.gz:
 	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $(CURDIR)/image/db/rhel
 
 .PHONY: scanner-image
-scanner-image: scanner-build-dockerized $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
@@ -191,6 +191,11 @@ deploy-dockerhub: clean-helm-rendered
 	kubectl create namespace stackrox || true
 	helm template scanner chart/ --set tag=$(TAG),logLevel=$(LOGLEVEL),updateInterval=2m,scannerImage=stackrox/scanner,scannerDBImage=stackrox/scanner-db --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
+
+.PHONY: ossls-notice
+ossls-notice: deps
+	ossls version
+	ossls audit --export image/scanner/rhel/THIRD_PARTY_NOTICES
 
 ###########
 ## Tests ##
