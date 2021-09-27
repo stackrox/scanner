@@ -29,6 +29,8 @@ COPY --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITION
 COPY --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
 COPY --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 
+COPY ./THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
+
 RUN dnf upgrade -y && \
     dnf install -y ca-certificates xz && \
     dnf clean all && \
