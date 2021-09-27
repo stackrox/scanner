@@ -195,7 +195,7 @@ deploy-dockerhub: clean-helm-rendered
 .PHONY: ossls-notice
 ossls-notice: deps
 	ossls version
-	ossls audit --export image/THIRD_PARTY_NOTICES
+	ossls audit --export image/rhel/THIRD_PARTY_NOTICES
 
 ###########
 ## Tests ##
