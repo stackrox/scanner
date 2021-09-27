@@ -343,6 +343,8 @@ commands:
             unzip -d image/scanner/dump /tmp/k8s-definitions.zip
             unzip -d image/scanner/dump /tmp/repo2cpe.zip
 
+      - install-ossls
+
       - run:
           name: Build images
           command: make << parameters.make-image-target >>
