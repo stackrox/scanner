@@ -60,12 +60,11 @@ var (
 		" Client is installed",
 		" Workstation is installed",
 		" ComputeNode is installed",
+		"Red Hat Enterprise Linux must be installed",
 	}
 
 	cveIDRegexp  = regexp.MustCompile(`^oval:com\.redhat\.cve:def:(\d+)$`)
 	rhsaIDRegexp = regexp.MustCompile(`^oval:com\.redhat\.rhsa:def:(\d+)$`)
-
-	ignoredCriterion = "Red Hat Enterprise Linux must be installed"
 )
 
 type oval struct {
@@ -365,10 +364,6 @@ func toFeatureVersions(criteria criteria, osVersion string) []database.FeatureVe
 
 	possibilities := getPossibilities(criteria)
 	for _, criterions := range possibilities {
-		if len(criterions) == 1 && criterions[0].Comment == ignoredCriterion {
-			continue
-		}
-
 		var featureVersion database.FeatureVersion
 		featureVersion.Version = versionfmt.MaxVersion
 
