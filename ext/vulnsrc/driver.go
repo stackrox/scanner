@@ -20,6 +20,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 )
 
@@ -32,6 +33,9 @@ var (
 
 	updatersM sync.RWMutex
 	updaters  = make(map[string]Updater)
+
+	// Re-enable Debian once it resolves it's upstream issues
+	ignoredUpdaters = set.NewStringSet("debian")
 )
 
 // UpdateResponse represents the sum of results of an update.
@@ -65,6 +69,10 @@ type Updater interface {
 func RegisterUpdater(name string, u Updater) {
 	if name == "" {
 		panic("vulnsrc: could not register an Updater with an empty name")
+	}
+
+	if ignoredUpdaters.Contains(name) {
+		return
 	}
 
 	if u == nil {
