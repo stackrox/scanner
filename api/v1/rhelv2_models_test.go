@@ -9,7 +9,6 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/env"
-	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stackrox/scanner/pkg/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -51,9 +50,7 @@ func newMockRHELv2Datastore() *mockRHELv2Datastore {
 }
 
 func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
+	t.Setenv(env.LanguageVulns.EnvVar(), "false")
 
 	now := time.Now()
 	db := newMockRHELv2Datastore()
