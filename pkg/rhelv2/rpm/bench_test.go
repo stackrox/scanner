@@ -8,6 +8,7 @@ import (
 
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,9 +20,11 @@ func BenchmarkListFeaturesNoActiveVulnMgmt(b *testing.B) {
 	manifest, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/test.json"))
 	require.NoError(b, err)
 
+	envIsolator := testutils.NewEnvIsolator(b)
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	b.Setenv("REPO_TO_CPE_DIR", cpesDir)
-	b.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
+	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
+	envIsolator.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
+	defer envIsolator.RestoreAll()
 
 	filemap := tarutil.FilesMap{
 		"var/lib/rpm/Packages":                       tarutil.FileData{Contents: d},
@@ -42,9 +45,11 @@ func BenchmarkListFeatures(b *testing.B) {
 	manifest, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/test.json"))
 	require.NoError(b, err)
 
+	envIsolator := testutils.NewEnvIsolator(b)
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	b.Setenv("REPO_TO_CPE_DIR", cpesDir)
-	b.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
+	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
+	envIsolator.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
+	defer envIsolator.RestoreAll()
 
 	filemap := tarutil.FilesMap{
 		"var/lib/rpm/Packages":                       tarutil.FileData{Contents: d},
