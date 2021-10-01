@@ -5,17 +5,13 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMapping(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
 	_, filename, _, _ := runtime.Caller(0)
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
+	t.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
 	repos := []string{
 		"3scale-amp-2-rpms-for-rhel-8-x86_64-debug-rpms",
