@@ -10,6 +10,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -69,8 +70,10 @@ func TestRPMFeatureDetection(t *testing.T) {
 	manifest, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/test.json"))
 	require.NoError(t, err)
 
+	envIsolator := testutils.NewEnvIsolator(t)
+	defer envIsolator.RestoreAll()
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	t.Setenv("REPO_TO_CPE_DIR", cpesDir)
+	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
 	pkgs, cpes, err := ListFeaturesTest(tarutil.FilesMap{
 		"var/lib/rpm/Packages":                       tarutil.FileData{Contents: d},
@@ -83,7 +86,9 @@ func TestRPMFeatureDetection(t *testing.T) {
 }
 
 func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
-	t.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
+	env := envisolator.NewEnvIsolator(t)
+	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
+	defer env.RestoreAll()
 
 	sampleExpectedPkgs := []*database.RHELv2Package{
 		{
@@ -136,8 +141,10 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 	manifest, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/test.json"))
 	require.NoError(t, err)
 
+	envIsolator := testutils.NewEnvIsolator(t)
+	defer envIsolator.RestoreAll()
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	t.Setenv("REPO_TO_CPE_DIR", cpesDir)
+	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
 	pkgs, cpes, err := ListFeaturesTest(tarutil.FilesMap{
 		"var/lib/rpm/Packages":                       tarutil.FileData{Contents: d},
