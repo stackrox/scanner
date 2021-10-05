@@ -45,7 +45,7 @@ func generateTestConfig(testName string, loadFixture bool) database.RegistrableC
 		fixturePath = filepath.Join(filepath.Dir(filename)) + "/testdata/data.sql"
 	}
 
-	source := fmt.Sprintf("postgresql://postgres@127.0.0.1:5432/%s?sslmode=disable", dbName)
+	source := fmt.Sprintf("postgresql://postgres@127.0.0.1:5432/%s password=stackroxiscool", dbName)
 	if sourceEnv := os.Getenv("CLAIR_TEST_PGSQL"); sourceEnv != "" {
 		source = fmt.Sprintf(sourceEnv, dbName)
 	}
