@@ -214,6 +214,14 @@
       "config": {
         "removedUnusedRHELv2CPEs": true
       }
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20211006150438.zip",
+      "timestamp": "2021-10-06T15:04:38.841552774Z",
+      "diffLocation": "gs://definitions.stackrox.io/5ca69bf7-08ab-4f17-9e4f-e342a020d977/diff.zip",
+      "config": {
+        "removedUnusedRHELv2CPEs": true
+      }
     }
   ]
 }
