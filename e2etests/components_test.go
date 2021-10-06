@@ -97,7 +97,7 @@ func TestRemovedComponents(t *testing.T) {
 		t.Run(c.distro, func(t *testing.T) {
 			var scanResp *v1.ScanImageResponse
 			if inCIRun {
-				scanResp = scanQuayStackRoxImage(client, fmt.Sprintf("quay.io/cgorman1/qa:%s-package-removal", c.distro), true, t)
+				scanResp = scanQuayStackRoxImage(client, fmt.Sprintf("quay.io/rhacs-eng/qa:%s-package-removal", c.distro), true, t)
 			} else {
 				scanResp = scanDockerIOStackRoxImage(client, fmt.Sprintf("stackrox/vuln-images:%s-package-removal", c.distro), true, t)
 			}

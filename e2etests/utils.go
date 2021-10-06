@@ -97,8 +97,8 @@ func scanQuayStackRoxImage(client v1.ImageScanServiceClient, imageName string, u
 		Image: imageName,
 		Registry: &v1.ScanImageRequest_RegistryData{
 			Url:      "https://quay.io",
-			Username: os.Getenv("QUAY_CGORMAN1_RO_USER"),
-			Password: os.Getenv("QUAY_CGORMAN1_RO_PASSWORD"),
+			Username: os.Getenv("QUAY_RHACS_ENG_RO_USER"),
+			Password: os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		},
 		UncertifiedRHEL: uncertifiedRHEL,
 	}, t)
