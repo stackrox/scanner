@@ -48,8 +48,4 @@ RUN dnf upgrade -y && \
     chown -R 4000:4000 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl && \
     chmod +rx /scanner
 
-ENTRYPOINT ["/entrypoint.sh"]
-
 USER 4000:4000
-
-HEALTHCHECK CMD curl --insecure --fail https://127.0.0.1:8080/clarify/ping
