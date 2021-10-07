@@ -15,6 +15,11 @@ dir="$3"
 
 [[ -n "${image}" && -n "${dockerfile}" && -n "${dir}" ]] || die "Usage $0 <image> <dockerfile_path> <dir>"
 
+if [[ -n "${CI}" ]]; then
+  docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
+  docker login -u  "${QUAY_CGORMAN1_RW_USER}" -p "${QUAY_CGORMAN1_RW_PASSWORD}" quay.io
+fi
+
 echo "Potentially pulling image ${image}"
 docker_pull_output="$(docker pull "${image}" 2>&1)"
 if [[ "$?" -eq 0 ]]; then
@@ -29,8 +34,6 @@ set -e
 echo "Building the image since it doesn't exist"
 docker build -t "${image}" -f "${dockerfile}" "${dir}"
 if [[ -n "${CI}" ]]; then
-  docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
-  docker login -u  "${QUAY_CGORMAN1_RW_USER}" -p "${QUAY_CGORMAN1_RW_PASSWORD}" quay.io
   docker push "${image}" | cat
 
   if [[ $image == docker* || $image == stackrox* ]]; then
