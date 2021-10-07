@@ -373,19 +373,9 @@ commands:
             docker tag "${gcr_scanner_image}" "${dockerhub_scanner_image}"
             ./scripts/push-as-manifest-list.sh "${dockerhub_scanner_image}"
 
-            # Retag as -rhel for historical reasons
-            dockerhub_scanner_rhel_image="stackrox/${scanner_image_name}-rhel:${tag}"
-            docker tag "${dockerhub_scanner_image}" "${dockerhub_scanner_rhel_image}"
-            ./scripts/push-as-manifest-list.sh "${dockerhub_scanner_rhel_image}"
-
             dockerhub_db_image="stackrox/${db_image_name}:${tag}"
             docker tag "${gcr_db_image}" "${dockerhub_db_image}"
             ./scripts/push-as-manifest-list.sh "${dockerhub_db_image}"
-
-            # Retag as -rhel for historical reasons
-            dockerhub_db_rhel_image="stackrox/${db_image_name}-rhel:${tag}"
-            docker tag "${dockerhub_db_image}" "${dockerhub_db_rhel_image}"
-            ./scripts/push-as-manifest-list.sh "${dockerhub_db_rhel_image}"
 
             # Retag for quay.io
 
@@ -396,18 +386,9 @@ commands:
             docker tag "${gcr_scanner_image}" "${quay_scanner_image}"
             ./scripts/push-as-manifest-list.sh "${quay_scanner_image}"
 
-            # Retag as -rhel for historical reasons
-            quay_scanner_rhel_image="quay.io/$QUAY_REPO/${scanner_image_name}-rhel:${tag}"
-            docker tag "${quay_scanner_image}" "${quay_scanner_rhel_image}"
-            ./scripts/push-as-manifest-list.sh "${quay_scanner_rhel_image}"
-
             quay_db_image="quay.io/$QUAY_REPO/${db_image_name}:${tag}"
             docker tag "${gcr_db_image}" "${quay_db_image}"
             ./scripts/push-as-manifest-list.sh "${quay_db_image}"
-
-            quay_db_rhel_image="quay.io/$QUAY_REPO/${db_image_name}-rhel:${tag}"
-            docker tag "${quay_db_image}" "${quay_db_rhel_image}"
-            ./scripts/push-as-manifest-list.sh "${quay_db_rhel_image}"
 
             if [[ -n "$CIRCLE_TAG" ]]; then
                 docker login -u "$STACKROX_IO_PUSH_USERNAME" -p "$STACKROX_IO_PUSH_PASSWORD" stackrox.io
