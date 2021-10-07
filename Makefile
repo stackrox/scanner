@@ -21,7 +21,7 @@ BUILD_DIR_HASH := $(shell git ls-files -sm build | git hash-object --stdin)
 BUILD_IMAGE := stackrox/scanner:builder-$(BUILD_DIR_HASH)
 
 ifdef CI
-    QUAY_REPO := cgorman1
+    QUAY_REPO := "rhacs-eng"
     BUILD_IMAGE := quay.io/$(QUAY_REPO)/scanner:builder-$(BUILD_DIR_HASH)
 endif
 
