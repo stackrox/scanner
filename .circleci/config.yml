@@ -4,7 +4,7 @@ version: 2.1
 defaultImage: &defaultImage
   image: quay.io/rhacs-eng/apollo-ci:0.3.18
   auth:
-    username: $QUAY_RHACS_ENG_RO_USER
+    username: $QUAY_RHACS_ENG_RO_USERNAME
     password: $QUAY_RHACS_ENG_RO_PASSWORD
 
 defaultWorkingDirectory: &defaultWorkingDirectory '/go/src/github.com/stackrox/scanner'
@@ -389,7 +389,7 @@ commands:
 
             # Retag for quay.io
 
-            docker login -u "$QUAY_RHACS_ENG_RW_USER" -p "$QUAY_RHACS_ENG_RW_PASSWORD" quay.io
+            docker login -u "$QUAY_RHACS_ENG_RW_USERNAME" -p "$QUAY_RHACS_ENG_RW_PASSWORD" quay.io
 
             QUAY_REPO="rhacs-eng"
             quay_scanner_image="quay.io/$QUAY_REPO/${scanner_image_name}:${tag}"
