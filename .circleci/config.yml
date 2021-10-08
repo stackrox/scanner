@@ -761,6 +761,8 @@ jobs:
           command: |
             echo "On master or tag, uploading pg dump result to GCS"
             gsutil cp /tmp/postgres/pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
+            # For downstream builds on Red Hat infra.
+            gsutil cp /tmp/postgres/pg-definitions.sql.gz gs://definitions.stackrox.io/scanner-dump
 
   upload-dumps-for-embedding-into-image:
     <<: *defaults
@@ -791,6 +793,13 @@ jobs:
             "${cmd[@]}" gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
             "${cmd[@]}" gsutil cp k8s-definitions.zip gs://stackrox-scanner-ci-vuln-dump
             "${cmd[@]}" gsutil cp repo2cpe.zip gs://stackrox-scanner-ci-vuln-dump
+            # Copy definitions files to be embedded in the downstream builds on Red Hat infrastructure.
+            # See usage in distgit/containers/rhacs-scanner/pre-build-script in branches of
+            # https://code.engineering.redhat.com/gerrit/gitweb?p=rhacs.git;a=summary
+            # TODO: pair the below commands with "${cmd[@]}" before merging this.
+            gsutil cp nvd-definitions.zip gs://definitions.stackrox.io/scanner-dump
+            gsutil cp k8s-definitions.zip gs://definitions.stackrox.io/scanner-dump
+            gsutil cp repo2cpe.zip gs://definitions.stackrox.io/scanner-dump
 
   create-diff-dumps:
     <<: *defaults
