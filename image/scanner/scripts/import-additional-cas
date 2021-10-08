@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -euo pipefail
 
 if [ -d /usr/local/share/ca-certificates -a "$(find /usr/local/share/ca-certificates -name '*.crt' -maxdepth 1 | wc -l)" -gt 0 ]; then
   if [ -f /etc/redhat-release ]; then
