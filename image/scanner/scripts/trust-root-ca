@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -euo pipefail
 
 CA_PATH="/run/secrets/stackrox.io/certs/ca.pem"
 
