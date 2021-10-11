@@ -761,8 +761,6 @@ jobs:
           command: |
             echo "On master or tag, uploading pg dump result to GCS"
             gsutil cp /tmp/postgres/pg-definitions.sql.gz gs://stackrox-scanner-ci-vuln-dump
-            # For downstream builds on Red Hat infra.
-            gsutil cp /tmp/postgres/pg-definitions.sql.gz gs://definitions.stackrox.io/scanner-dump
 
   upload-dumps-for-embedding-into-image:
     <<: *defaults
@@ -793,13 +791,37 @@ jobs:
             "${cmd[@]}" gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
             "${cmd[@]}" gsutil cp k8s-definitions.zip gs://stackrox-scanner-ci-vuln-dump
             "${cmd[@]}" gsutil cp repo2cpe.zip gs://stackrox-scanner-ci-vuln-dump
-            # Copy definitions files to be embedded in the downstream builds on Red Hat infrastructure.
-            # See usage in distgit/containers/rhacs-scanner/pre-build-script in branches of
-            # https://code.engineering.redhat.com/gerrit/gitweb?p=rhacs.git;a=summary
-            # TODO: pair the below commands with "${cmd[@]}" before merging this.
-            gsutil cp nvd-definitions.zip gs://definitions.stackrox.io/scanner-dump
-            gsutil cp k8s-definitions.zip gs://definitions.stackrox.io/scanner-dump
-            gsutil cp repo2cpe.zip gs://definitions.stackrox.io/scanner-dump
+
+  # Copy definitions files to be available in the publicly-accessible bucket for embedding in the downstream builds on
+  # the Red Hat infrastructure. See usage in distgit/containers/rhacs-scanner/pre-build-script
+  # and in distgit/containers/rhacs-scanner-db/pre-build-script
+  # in branches of https://code.engineering.redhat.com/gerrit/gitweb?p=rhacs.git;a=summary
+  upload-dumps-for-downstream-builds:
+    <<: *defaults
+    steps:
+      - checkout
+      - check-label-to-run:
+          label: generate-dumps-on-pr
+      - setup-gcp
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Upload dumps to Google Storage
+          command: |
+            if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
+              # On master branch we upload production dumps therefore we use the latest tag as a version.
+              # The following command will output only the latest tag like `2.20.0` but not `2.20.0-3-g74ff9abf69-dirty`.
+              scanner_version="$(git describe --tags --abbrev=0)"
+            else
+              # For other cases (e.g. PR with the expected label) use the tag that makefile returns to avoid overwriting
+              # the production dumps.
+              scanner_version="$(make --quiet --no-print-directory tag)"
+            fi
+            destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}"
+            gsutil cp nvd-definitions.zip "$destination"
+            gsutil cp k8s-definitions.zip "$destination"
+            gsutil cp repo2cpe.zip "$destination"
+            gsutil cp /tmp/postgres/pg-definitions.sql.gz "$destination"
 
   create-diff-dumps:
     <<: *defaults
