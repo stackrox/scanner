@@ -808,7 +808,8 @@ jobs:
       - checkout
       - check-label-to-run:
           label: generate-dumps-on-pr
-      - setup-gcp
+      - setup-gcp:
+          service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
       - attach_workspace:
           at: /tmp
       - run:
