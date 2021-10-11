@@ -808,6 +808,7 @@ jobs:
       - run:
           name: Upload dumps to Google Storage
           command: |
+            set -x
             if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
               # On master branch we upload production dumps therefore we use the latest tag as a version.
               # The following command will output only the latest tag like `2.20.0` but not `2.20.0-3-g74ff9abf69-dirty`.
