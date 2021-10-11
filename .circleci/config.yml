@@ -824,7 +824,7 @@ jobs:
               # the production dumps.
               scanner_version="$(make --quiet --no-print-directory tag)"
             fi
-            destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}"
+            destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}/"
             gsutil cp /tmp/vuln-dump/nvd-definitions.zip "$destination"
             gsutil cp /tmp/vuln-dump/k8s-definitions.zip "$destination"
             gsutil cp /tmp/vuln-dump/repo2cpe.zip "$destination"
