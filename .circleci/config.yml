@@ -777,9 +777,15 @@ jobs:
       - run:
           name: Generate dumps
           command: |
-            zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out nvd-definitions.zip
-            zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out k8s-definitions.zip
-            zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out repo2cpe.zip
+            mkdir -p /tmp/vuln-dump
+            zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/vuln-dump/nvd-definitions.zip
+            zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/vuln-dump/k8s-definitions.zip
+            zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/vuln-dump/repo2cpe.zip
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - vuln-dump
 
       - run:
           name: Upload to Google Storage
@@ -788,9 +794,9 @@ jobs:
             if [[ "${CIRCLE_BRANCH}" != "master" ]]; then
               cmd+=(echo "Would do")
             fi
-            "${cmd[@]}" gsutil cp nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
-            "${cmd[@]}" gsutil cp k8s-definitions.zip gs://stackrox-scanner-ci-vuln-dump
-            "${cmd[@]}" gsutil cp repo2cpe.zip gs://stackrox-scanner-ci-vuln-dump
+            "${cmd[@]}" gsutil cp /tmp/vuln-dump/nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+            "${cmd[@]}" gsutil cp /tmp/vuln-dump/k8s-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+            "${cmd[@]}" gsutil cp /tmp/vuln-dump/repo2cpe.zip gs://stackrox-scanner-ci-vuln-dump
 
   # Copy definitions files to be available in the publicly-accessible bucket for embedding in the downstream builds on
   # the Red Hat infrastructure. See usage in distgit/containers/rhacs-scanner/pre-build-script
@@ -819,9 +825,9 @@ jobs:
               scanner_version="$(make --quiet --no-print-directory tag)"
             fi
             destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}"
-            gsutil cp nvd-definitions.zip "$destination"
-            gsutil cp k8s-definitions.zip "$destination"
-            gsutil cp repo2cpe.zip "$destination"
+            gsutil cp /tmp/vuln-dump/nvd-definitions.zip "$destination"
+            gsutil cp /tmp/vuln-dump/k8s-definitions.zip "$destination"
+            gsutil cp /tmp/vuln-dump/repo2cpe.zip "$destination"
             gsutil cp /tmp/postgres/pg-definitions.sql.gz "$destination"
 
   create-diff-dumps:
