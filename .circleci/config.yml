@@ -821,8 +821,9 @@ jobs:
               # The following command will output only the latest tag like `2.20.0` but not `2.20.0-3-g74ff9abf69-dirty`.
               scanner_version="$(git describe --tags --abbrev=0)"
             else
-              # For other cases (e.g. PR with the expected label) use the tag that makefile returns to avoid overwriting
-              # the production dumps.
+              # For other cases (e.g. PR with the expected label) use the tag that the makefile returns to avoid
+              # overwriting the production dumps. Most likely these uploads will be of no use but at least we can test
+              # the procedure of the upload itself, if needed.
               scanner_version="$(make --quiet --no-print-directory tag)"
             fi
             destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}/"
