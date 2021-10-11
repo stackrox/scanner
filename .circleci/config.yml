@@ -1028,6 +1028,11 @@ workflows:
             - scanner-support
           requires:
             - create-diff-dumps
+      - upload-dumps-for-downstream-builds:
+          <<: *runOnAllTags
+          requires:
+            - create-postgres-dump-from-genesis-dump
+            - upload-dumps-for-embedding-into-image
       - unit-tests:
           <<: *runOnAllTagsWithQuayPullCtx
       - style-checks:
@@ -1088,6 +1093,11 @@ workflows:
           - scanner-support
         requires:
           - create-diff-dumps
+    - upload-dumps-for-downstream-builds:
+        <<: *runOnAllTags
+        requires:
+          - create-postgres-dump-from-genesis-dump
+          - upload-dumps-for-embedding-into-image
     - unit-tests:
         <<: *runOnAllTagsWithQuayPullCtx
     - style-checks:
