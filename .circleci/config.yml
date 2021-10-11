@@ -1030,7 +1030,7 @@ workflows:
           requires:
             - create-diff-dumps
       - upload-dumps-for-downstream-builds:
-          <<: *runOnAllTags
+          <<: *runOnAllTagsWithQuayPullCtx
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
@@ -1095,7 +1095,7 @@ workflows:
         requires:
           - create-diff-dumps
     - upload-dumps-for-downstream-builds:
-        <<: *runOnAllTags
+        <<: *runOnAllTagsWithQuayPullCtx
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
