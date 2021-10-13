@@ -847,7 +847,7 @@ jobs:
             "${cmd[@]}" gsutil cp /tmp/postgres/pg-definitions.sql.gz "$destination"
             # Note that we include genesis manifests for the downstream to avoid the situation when dumps taken from
             # GCloud are older than manifests taken from the source code repo.
-            "${cmd[@]}" gsutil cp /tmp/image/scanner/dump/genesis_manifests.json "$destination"
+            "${cmd[@]}" gsutil cp image/scanner/dump/genesis_manifests.json "$destination"
 
   create-diff-dumps:
     <<: *defaults
