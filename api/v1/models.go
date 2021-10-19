@@ -340,11 +340,6 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 		vuln := VulnerabilityFromDatabaseModel(dbVuln)
 		feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
 
-		// If at least one vulnerability is not fixable, then we mark it the component as not fixable.
-		if vuln.FixedBy == "" {
-			continue
-		}
-
 		higherVersion, err := versionfmt.GetHigherVersion(versionFormat, vuln.FixedBy, allVulnsFixedBy)
 		if err != nil {
 			log.Errorf("comparing feature versions for %s: %v", feature.Name, err)
