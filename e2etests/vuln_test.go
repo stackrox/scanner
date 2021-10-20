@@ -288,7 +288,6 @@ func TestDistrolessVulnImages(t *testing.T) {
 					{name: "CVE-2019-1010024"},
 					{name: "CVE-2018-6485"},
 					{name: "CVE-2019-9169"},
-					{name: "CVE-2010-4052"},
 					{name: "CVE-2015-8985"},
 					{name: "CVE-2016-10228"},
 					{name: "CVE-2019-1010022"},
