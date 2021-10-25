@@ -4,6 +4,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/stackrox/scanner/cpe/attributes/golang"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/wfn"
 	log "github.com/sirupsen/logrus"
@@ -28,6 +29,7 @@ var attributeGetter = map[component.SourceType]func(c *component.Component) []*w
 	component.GemSourceType:               ruby.GetRubyAttributes,
 	component.NPMSourceType:               node.GetNodeAttributes,
 	component.DotNetCoreRuntimeSourceType: dotnetcoreruntime.GetDotNetCoreRuntimeAttributes,
+	component.GolangModuleSourceType:      golang.GetGolangAttributes,
 }
 
 type nameVersion struct {
