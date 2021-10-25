@@ -12,7 +12,7 @@ const (
 	NPMSourceType
 	PythonSourceType
 	DotNetCoreRuntimeSourceType
-	GolangModuleSourceType
+	GolangSourceType
 
 	SentinelEndSourceType
 )

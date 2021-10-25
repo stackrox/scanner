@@ -12,7 +12,7 @@ func componentForModule(filePath string, mod *buildinfo.Module) *component.Compo
 	comp := &component.Component{
 		Name:       mod.Path,
 		Version:    mod.Version,
-		SourceType: component.GolangModuleSourceType,
+		SourceType: component.GolangSourceType,
 		Location:   filePath,
 	}
 	if mod.Replace != nil {
@@ -35,7 +35,7 @@ func analyzeGoBinary(filePath string, contents []byte) []*component.Component {
 	components = append(components, &component.Component{
 		Name:       "golang",
 		Version:    bi.GoVersion,
-		SourceType: component.GolangModuleSourceType,
+		SourceType: component.GolangSourceType,
 		Location:   filePath,
 	})
 

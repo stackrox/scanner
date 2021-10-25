@@ -14,7 +14,7 @@ func _() {
 	_ = x[NPMSourceType-3]
 	_ = x[PythonSourceType-4]
 	_ = x[DotNetCoreRuntimeSourceType-5]
-	_ = x[GolangModuleSourceType-6]
+	_ = x[GolangSourceType-6]
 	_ = x[SentinelEndSourceType-7]
 }
 
