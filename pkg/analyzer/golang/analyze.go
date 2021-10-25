@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/analyzer/golang/internal/buildinfo"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -28,6 +29,7 @@ func componentForModule(filePath string, mod *buildinfo.Module) *component.Compo
 func analyzeGoBinary(filePath string, contents []byte) []*component.Component {
 	bi, err := buildinfo.Read(bytes.NewReader(contents))
 	if err != nil {
+		log.Warnf("Could not read buildinfo from %s: %v", filePath, err)
 		return nil
 	}
 
@@ -43,5 +45,6 @@ func analyzeGoBinary(filePath string, contents []byte) []*component.Component {
 	for _, dep := range bi.Deps {
 		components = append(components, componentForModule(filePath, dep))
 	}
+	log.Infof("Extracted %d Go components from %s", len(components), filePath)
 	return components
 }
