@@ -14,7 +14,7 @@ func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) (matches bool
 	if fileInfo.IsDir() {
 		return false, false
 	}
-	return fileInfo.Mode().Perm()&0111 != 0, false
+	return fileInfo.Mode().Perm()&0111 != 0, true
 }
 
 func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
