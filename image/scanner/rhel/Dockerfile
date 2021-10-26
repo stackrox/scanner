@@ -37,15 +37,15 @@ RUN dnf upgrade -y && \
     rm -rf /var/cache/dnf && \
     # (Optional) Remove line below to keep package management utilities
     rpm -e subscription-manager yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \
-    chown -R 4000:4000 "${NVD_DEFINITIONS_DIR}" && \
-    chown -R 4000:4000 "${K8S_DEFINITIONS_DIR}" && \
-    chown -R 4000:4000 "${REPO_TO_CPE_DIR}" && \
-    chown -R 4000:4000 /tmp && \
+    chown -R 65534:65534 "${NVD_DEFINITIONS_DIR}" && \
+    chown -R 65534:65534 "${K8S_DEFINITIONS_DIR}" && \
+    chown -R 65534:65534 "${REPO_TO_CPE_DIR}" && \
+    chown -R 65534:65534 /tmp && \
     # The contents of paths mounted as emptyDir volumes in Kubernetes are saved
     # by the script `save-dir-contents` during the image build. The directory
     # contents are then restored by the script `restore-all-dir-contents`
     # during the container start.
-    chown -R 4000:4000 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl && \
+    chown -R 65534:65534 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl && \
     chmod +rx /scanner
 
 ENTRYPOINT ["/entrypoint.sh"]
