@@ -17,7 +17,7 @@ dir="$3"
 
 if [[ -n "${CI}" ]]; then
   docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
-  docker login -u  "${QUAY_RHACS_ENG_RW_USER}" -p "${QUAY_RHACS_ENG_RW_PASSWORD}" quay.io
+  docker login -u  "${QUAY_RHACS_ENG_RW_USERNAME}" -p "${QUAY_RHACS_ENG_RW_PASSWORD}" quay.io
 fi
 
 echo "Potentially pulling image ${image}"
