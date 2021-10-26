@@ -10,16 +10,16 @@ import (
 )
 
 var (
-	analyzers = []analyzer.Analyzer{
-		dotnetcoreruntime.Analyzer(),
-		gem.Analyzer(),
-		java.Analyzer(),
-		npm.Analyzer(),
-		python.Analyzer(),
+	analyzerFactories = []analyzer.Factory{
+		dotnetcoreruntime.Analyzer,
+		gem.Analyzer,
+		java.Analyzer,
+		npm.Analyzer,
+		python.Analyzer,
 	}
 )
 
-// Analyzers returns all the application-level analyzers.
-func Analyzers() []analyzer.Analyzer {
-	return analyzers
+// AnalyzerFactories returns all the application-level analyzerFactories.
+func AnalyzerFactories() []analyzer.Factory {
+	return analyzerFactories
 }

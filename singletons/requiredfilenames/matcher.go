@@ -3,12 +3,13 @@ package requiredfilenames
 import (
 	"sync"
 
+	"github.com/stackrox/scanner/pkg/analyzer"
+
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/featurefmt/dpkg"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/matcher"
-	"github.com/stackrox/scanner/singletons/analyzers"
 )
 
 var (
@@ -23,14 +24,9 @@ func SingletonMatcher() matcher.Matcher {
 		clairMatcher := matcher.NewPrefixAllowlistMatcher(allFileNames...)
 		whiteoutMatcher := matcher.NewWhiteoutMatcher()
 
-		allAnalyzers := analyzers.Analyzers()
-
 		// Allocate extra spaces for the feature-flagged matchers.
-		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+4)
+		allMatchers := make([]matcher.Matcher, 0, 4)
 		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
-		for _, a := range allAnalyzers {
-			allMatchers = append(allMatchers, a)
-		}
 
 		if features.ActiveVulnMgmt.Enabled() {
 			dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp)
@@ -44,7 +40,19 @@ func SingletonMatcher() matcher.Matcher {
 			allMatchers = append(allMatchers, dpkgFilenamesMatcher, executableMatcher)
 		}
 
-		instance = matcher.NewOrMatcher(allMatchers...)
+		instance = matcher.NewCombinedMatcher(allMatchers...)
 	})
 	return instance
+}
+
+// MatcherForAnalyzers returns a matcher that takes all the analyzers as well as the default
+// matchers into account.
+func MatcherForAnalyzers(analyzers ...analyzer.Analyzer) matcher.Matcher {
+	allMatchers := make([]matcher.Matcher, 0, len(analyzers)+1)
+	for _, a := range analyzers {
+		allMatchers = append(allMatchers, a)
+	}
+	allMatchers = append(allMatchers, SingletonMatcher())
+
+	return matcher.NewCombinedMatcher(allMatchers...)
 }

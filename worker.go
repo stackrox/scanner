@@ -163,7 +163,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 	return datastore.InsertLayerComponents(layer.Name, lineage, languageComponents, removedFiles, opts)
 }
 
-func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, analyzers []analyzer.Analyzer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
 	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
 
 	distroless := isDistroless(files) || (parent != nil && parent.Distroless)
@@ -201,7 +201,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	if !env.LanguageVulns.Enabled() {
 		return namespace, distroless, featureVersions, rhelfeatures, nil, nil, nil
 	}
-	allComponents, err := languageAnalyzerFunc(files, analyzers.Analyzers())
+	allComponents, err := languageAnalyzerFunc(files, analyzers)
 	if err != nil {
 		log.WithError(err).Errorf("Failed to analyze image: %s", name)
 	}
@@ -231,12 +231,14 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 
 // DetectContentFromReader detects scanning content in the given reader.
 func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
-	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.SingletonMatcher())
+	as := analyzer.InstantiateAll(analyzers.AnalyzerFactories()...)
+
+	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.MatcherForAnalyzers(as...))
 	if err != nil {
 		return nil, false, nil, nil, nil, nil, err
 	}
 
-	return detectFromFiles(files, name, parent, uncertifiedRHEL)
+	return detectFromFiles(files, name, parent, as, uncertifiedRHEL)
 }
 
 func isDistroless(filesMap tarutil.FilesMap) bool {

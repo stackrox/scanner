@@ -30,6 +30,7 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
 )
@@ -92,6 +93,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	// Telemetry variables.
 	var numFiles, numMatchedFiles, numExtractedContentBytes int
 
+	var buf []byte
+
 	// For each element in the archive
 	for {
 		hdr, err := tr.Next()
@@ -106,7 +109,14 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		// Get element filename
 		filename := strings.TrimPrefix(hdr.Name, "./")
 
-		match, extractContents := filenameMatcher.Match(filename, hdr.FileInfo())
+		var contents io.ReaderAt
+		if hdr.FileInfo().Mode().IsRegular() {
+			contents = ioutils.NewLazyReaderAtWithBuffer(tr, hdr.Size, buf)
+		} else {
+			contents = bytes.NewReader(nil)
+		}
+
+		match, extractContents := filenameMatcher.Match(filename, hdr.FileInfo(), contents)
 		if !match {
 			continue
 		}
@@ -120,9 +130,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 		// Extract the element
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
-			executable, _ := executableMatcher.Match(filename, hdr.FileInfo())
+			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
 
-			if !extractContents {
+			if !extractContents || hdr.Typeflag != tar.TypeReg {
 				data[filename] = FileData{
 					Contents:   nil, // Making this explicit.
 					Executable: executable,
@@ -130,7 +140,11 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 				continue
 			}
 
-			d, _ := io.ReadAll(tr)
+			d := make([]byte, hdr.Size)
+			if nRead, err := contents.ReadAt(d, 0); err != nil {
+				log.Errorf("error reading %q: %v", hdr.Name, err)
+				d = d[:nRead]
+			}
 			if len(d) != 0 && javaArchiveRegex.MatchString(hdr.Name) {
 				newData, err := rewriteArchive(d)
 				if err != nil {

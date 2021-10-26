@@ -12,6 +12,18 @@ type Analyzer interface {
 	matcher.Matcher
 }
 
+// Factory is a function that creates a new (potentially stateful) analyzer.
+type Factory func() Analyzer
+
+// InstantiateAll instantiates all analyzers from the list of factories.
+func InstantiateAll(factories ...Factory) []Analyzer {
+	result := make([]Analyzer, 0, len(factories))
+	for _, factory := range factories {
+		result = append(result, factory())
+	}
+	return result
+}
+
 // Analyze analyzes images and extracts the components present in them.
 func Analyze(filesMap tarutil.FilesMap, analyzers []Analyzer) ([]*component.Component, error) {
 	var allComponents []*component.Component

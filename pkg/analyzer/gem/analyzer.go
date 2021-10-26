@@ -1,6 +1,7 @@
 package gem
 
 import (
+	"io"
 	"os"
 	"regexp"
 
@@ -16,7 +17,7 @@ var (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, _ os.FileInfo) (matches bool, extract bool) {
+func (a analyzerImpl) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
 	return match(fullPath), true
 }
 

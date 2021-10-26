@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -15,14 +16,14 @@ type Matcher interface {
 	// matches.
 	// The first return indicates if it matches.
 	// The second return indicates if the contents of the file should be saved (if the first value is true).
-	Match(fullPath string, fileInfo os.FileInfo) (matches bool, extract bool)
+	Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (matches bool, extract bool)
 }
 
 type allowlistMatcher struct {
 	allowlist []string
 }
 
-func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo) (matches bool, extract bool) {
+func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
 	for _, s := range w.allowlist {
 		if strings.HasPrefix(fullPath, s) {
 			return true, true
@@ -39,7 +40,7 @@ func NewPrefixAllowlistMatcher(allowlist ...string) Matcher {
 
 type whiteoutMatcher struct{}
 
-func (w *whiteoutMatcher) Match(fullPath string, _ os.FileInfo) (matches bool, extract bool) {
+func (w *whiteoutMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
 	basePath := filepath.Base(fullPath)
 	return strings.HasPrefix(basePath, whiteout.Prefix), false
 }
@@ -52,7 +53,7 @@ func NewWhiteoutMatcher() Matcher {
 
 type executableMatcher struct{}
 
-func (e *executableMatcher) Match(_ string, fi os.FileInfo) (matches bool, extract bool) {
+func (e *executableMatcher) Match(_ string, fi os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
 	return fi.Mode().IsRegular() && fi.Mode()&0111 != 0, false
 }
 
@@ -65,7 +66,7 @@ type regexpMatcher struct {
 	expr *regexp.Regexp
 }
 
-func (r *regexpMatcher) Match(fullPath string, _ os.FileInfo) (matches bool, extract bool) {
+func (r *regexpMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
 	return r.expr.MatchString(fullPath), true
 }
 
@@ -76,20 +77,25 @@ func NewRegexpMatcher(expr *regexp.Regexp) Matcher {
 	}
 }
 
-type orMatcher struct {
+type combinedMatcher struct {
 	matchers []Matcher
 }
 
-func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo) (matches bool, extract bool) {
+func (o *combinedMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (bool, bool) {
+	matches := false
+	extractable := false
 	for _, subMatcher := range o.matchers {
-		if matches, extractable := subMatcher.Match(fullPath, fileInfo); matches {
-			return true, extractable
+		if subMatches, subExtractable := subMatcher.Match(fullPath, fileInfo, contents); subMatches {
+			if subExtractable {
+				extractable = true
+			}
+			matches = true
 		}
 	}
-	return false, false
+	return matches, extractable
 }
 
-// NewOrMatcher returns a matcher that matches if and only if any of the passed submatchers does.
-func NewOrMatcher(subMatchers ...Matcher) Matcher {
-	return &orMatcher{matchers: subMatchers}
+// NewCombinedMatcher returns a matcher that matches if and only if any of the passed submatchers does.
+func NewCombinedMatcher(subMatchers ...Matcher) Matcher {
+	return &combinedMatcher{matchers: subMatchers}
 }

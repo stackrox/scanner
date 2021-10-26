@@ -1,6 +1,7 @@
 package dotnetcoreruntime
 
 import (
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -30,7 +31,7 @@ var (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) (matches bool, extract bool) {
+func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
 	return fileInfo.IsDir() && dotNetCorePattern.MatchString(fullPath), false
 }
 
