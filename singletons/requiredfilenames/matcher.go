@@ -3,10 +3,10 @@ package requiredfilenames
 import (
 	"sync"
 
-	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/featurefmt/dpkg"
 	"github.com/stackrox/scanner/ext/featurens"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/matcher"
 )
