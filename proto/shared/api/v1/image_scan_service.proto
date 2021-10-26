@@ -64,6 +64,7 @@ enum SourceType {
     NPM               = 3;
     GEM               = 4;
     DOTNETCORERUNTIME = 5;
+    GOLANG            = 6;
 }
 
 message LanguageLevelComponent {

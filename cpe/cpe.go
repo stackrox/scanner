@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/attributes/dotnetcoreruntime"
+	"github.com/stackrox/scanner/cpe/attributes/golang"
 	"github.com/stackrox/scanner/cpe/attributes/java"
 	"github.com/stackrox/scanner/cpe/attributes/node"
 	"github.com/stackrox/scanner/cpe/attributes/python"
@@ -28,6 +29,7 @@ var attributeGetter = map[component.SourceType]func(c *component.Component) []*w
 	component.GemSourceType:               ruby.GetRubyAttributes,
 	component.NPMSourceType:               node.GetNodeAttributes,
 	component.DotNetCoreRuntimeSourceType: dotnetcoreruntime.GetDotNetCoreRuntimeAttributes,
+	component.GolangSourceType:            golang.GetGolangAttributes,
 }
 
 type nameVersion struct {

@@ -4,6 +4,7 @@ import (
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/analyzer/dotnetcoreruntime"
 	"github.com/stackrox/scanner/pkg/analyzer/gem"
+	"github.com/stackrox/scanner/pkg/analyzer/golang"
 	"github.com/stackrox/scanner/pkg/analyzer/java"
 	"github.com/stackrox/scanner/pkg/analyzer/npm"
 	"github.com/stackrox/scanner/pkg/analyzer/python"
@@ -16,6 +17,7 @@ var (
 		java.Analyzer,
 		npm.Analyzer,
 		python.Analyzer,
+		golang.Analyzer,
 	}
 )
 
