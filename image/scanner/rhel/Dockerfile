@@ -50,6 +50,6 @@ RUN dnf upgrade -y && \
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-USER 4000:4000
+USER 65534:65534
 
 HEALTHCHECK CMD curl --insecure --fail https://127.0.0.1:8080/clarify/ping
