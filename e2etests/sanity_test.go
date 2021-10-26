@@ -1974,7 +1974,7 @@ func TestImageSanity(t *testing.T) {
 		{
 			image:    "quay.io/rhacs-eng/qa:debian-package-removal",
 			registry: "https://quay.io",
-			username: os.Getenv("QUAY_RHACS_ENG_RO_USER"),
+			username: os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 			password: os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 			source:   "NVD",
 			// Ensure we find the executable files for packages added in a layer lower than the latest
@@ -2012,7 +2012,7 @@ func TestImageSanity(t *testing.T) {
 			if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
 				testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
 				testCase.registry = "https://quay.io"
-				testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USER")
+				testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
 				testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
 			}
 			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.checkProvidedExecutables, testCase.expectedFeatures, testCase.unexpectedFeatures)
