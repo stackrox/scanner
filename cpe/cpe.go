@@ -68,7 +68,7 @@ func getFeaturesFromMatchResults(layer string, matchResults []match.Result) []da
 			continue
 		}
 		cpe := m.CPE
-		nvl := getNameVersionFromCPE(cpe.Attributes).at(m.Component.Location)
+		nvl := getNameVersionFromCPE(cpe.Attributes).at("")
 
 		vulnSet, ok := featuresToVulns[nvl]
 		if !ok {
