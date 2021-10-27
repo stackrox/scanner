@@ -10,6 +10,7 @@ ALL_PROTOS_REL = $(ALL_PROTOS:$(PROTO_BASE_PATH)/%=%)
 SERVICE_PROTOS_REL = $(SERVICE_PROTOS:$(PROTO_BASE_PATH)/%=%)
 
 API_SERVICE_PROTOS = $(filter api/v1/%, $(SERVICE_PROTOS_REL))
+STORAGE_PROTOS = $(filter storage/%, $(ALL_PROTOS_REL))
 
 GENERATED_BASE_PATH = $(BASE_PATH)/generated
 GENERATED_DOC_PATH = image/docs
@@ -17,7 +18,7 @@ MERGED_API_SWAGGER_SPEC = $(GENERATED_DOC_PATH)/api/v1/swagger.json
 GENERATED_API_DOCS = $(GENERATED_DOC_PATH)/api/v1/reference
 GENERATED_PB_SRCS = $(ALL_PROTOS_REL:%.proto=$(GENERATED_BASE_PATH)/%.pb.go)
 GENERATED_API_GW_SRCS = $(SERVICE_PROTOS_REL:%.proto=$(GENERATED_BASE_PATH)/%.pb.gw.go)
-GENERATED_API_SWAGGER_SPECS = $(API_SERVICE_PROTOS:%.proto=$(GENERATED_DOC_PATH)/%.swagger.json)
+GENERATED_API_SWAGGER_SPECS = $(API_SERVICE_PROTOS:%.proto=$(GENERATED_BASE_PATH)/%.swagger.json)
 
 ##############
 ## Protobuf ##
@@ -32,24 +33,61 @@ ifeq ($(UNAME_S),Darwin)
 PROTOC_ARCH = osx
 endif
 
-PROTOC_ZIP := protoc-$(PROTOC_VERSION)-$(PROTOC_ARCH)-x86_64.zip
-PROTOC_FILE := $(BASE_PATH)/$(PROTOC_ZIP)
+PROTO_PRIVATE_DIR := $(BASE_PATH)/.proto
 
-PROTOC_TMP := $(BASE_PATH)/protoc-tmp
+PROTOC_DIR := $(PROTO_PRIVATE_DIR)/protoc-$(PROTOC_ARCH)-$(PROTOC_VERSION)
 
-PROTOC := $(PROTOC_TMP)/bin/protoc
+PROTOC := $(PROTOC_DIR)/bin/protoc
 
-PROTOC_INCLUDES := $(PROTOC_TMP)/include/google
+PROTOC_DOWNLOADS_DIR := $(PROTO_PRIVATE_DIR)/.downloads
 
-PROTOC_GEN_GO_BIN := $(GOPATH)/bin/protoc-gen-gofast
+PROTO_GOBIN := $(PROTO_PRIVATE_DIR)/bin
 
-$(PROTOC_GEN_GO_BIN):
+$(PROTOC_DOWNLOADS_DIR):
 	@echo "+ $@"
-	@rm -rf $(GOPATH)/src/github.com/gogo/protobuf
-	mkdir -p $(GOPATH)/src/github.com/gogo
-	git clone https://github.com/connorgorman/protobuf.git $(GOPATH)/src/github.com/gogo/protobuf
-	cd $(GOPATH)/src/github.com/gogo/protobuf && git checkout 1.3.2-rox && cd -
-	GO111MODULE=off go install github.com/gogo/protobuf/protoc-gen-gofast/...
+	@mkdir -p "$@"
+
+$(PROTO_GOBIN):
+	@echo "+ $@"
+	@mkdir -p "$@"
+
+PROTOC_ZIP := protoc-$(PROTOC_VERSION)-$(PROTOC_ARCH)-x86_64.zip
+PROTOC_FILE := $(PROTOC_DOWNLOADS_DIR)/$(PROTOC_ZIP)
+
+$(PROTOC_FILE): $(PROTOC_DOWNLOADS_DIR)
+	@echo "+ $@"
+	@wget -q "https://github.com/protocolbuffers/protobuf/releases/download/v$(PROTOC_VERSION)/$(PROTOC_ZIP)" -O "$@"
+
+.PRECIOUS: $(PROTOC_FILE)
+
+$(PROTOC):
+	@echo "+ $@"
+	@$(MAKE) "$(PROTOC_FILE)"
+	@mkdir -p "$(PROTOC_DIR)"
+	@unzip -q -o -d "$(PROTOC_DIR)" "$(PROTOC_FILE)"
+	@test -x "$@"
+
+
+PROTOC_INCLUDES := $(PROTOC_DIR)/include/google
+
+PROTOC_GEN_GO_BIN := $(PROTO_GOBIN)/protoc-gen-gofast
+
+MODFILE_DIR := $(PROTO_PRIVATE_DIR)/modules
+
+$(MODFILE_DIR)/%/UPDATE_CHECK: go.sum
+	@echo "+ Checking if $* is up-to-date"
+	@mkdir -p $(dir $@)
+	@go list -m -json $* | jq '.Dir' >"$@.tmp"
+	@(cmp -s "$@.tmp" "$@" && rm "$@.tmp") || mv "$@.tmp" "$@"
+
+$(PROTOC_GEN_GO_BIN): $(MODFILE_DIR)/github.com/gogo/protobuf/UPDATE_CHECK $(PROTO_GOBIN)
+	@echo "+ $@"
+	@GOBIN=$(PROTO_GOBIN) go install github.com/gogo/protobuf/$(notdir $@)
+
+PROTOC_GEN_LINT := $(PROTO_GOBIN)/protoc-gen-lint
+$(PROTOC_GEN_LINT): $(MODFILE_DIR)/github.com/ckaznocha/protoc-gen-lint/UPDATE_CHECK $(PROTO_GOBIN)
+	@echo "+ $@"
+	@GOBIN=$(PROTO_GOBIN) go install github.com/ckaznocha/protoc-gen-lint
 
 GOGO_M_STR := Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types
 
@@ -57,6 +95,10 @@ GOGO_M_STR := Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,Mgoogle/
 # to import the go source for proto file $(BASE_PATH)/<path>/*.proto to
 # "github.com/stackrox/rox/generated/<path>".
 M_ARGS = $(foreach proto,$(ALL_PROTOS_REL),M$(proto)=github.com/stackrox/scanner/generated/$(patsubst %/,%,$(dir $(proto))))
+# This is the M_ARGS used for the grpc-gateway invocation. We only map the storage protos, because
+# - the gateway code produces no output (possibly because of a bug) if we pass M_ARGS_STR to it.
+# - the gateway code doesn't need access to anything outside api/v1 except storage. In particular, it should NOT import internalapi protos.
+GATEWAY_M_ARGS = $(foreach proto,$(STORAGE_PROTOS),M$(proto)=github.com/stackrox/scanner/generated/$(patsubst %/,%,$(dir $(proto))))
 
 # Hack: there's no straightforward way to escape a comma in a $(subst ...) command, so we have to resort to this little
 # trick.
@@ -65,38 +107,21 @@ space := $(null) $(null)
 comma := ,
 
 M_ARGS_STR := $(subst $(space),$(comma),$(strip $(M_ARGS)))
+GATEWAY_M_ARGS_STR := $(subst $(space),$(comma),$(strip $(GATEWAY_M_ARGS)))
 
-$(GOPATH)/src/github.com/golang/protobuf/protoc-gen-go:
-	@echo "+ $@"
-# keep in sync with Gopkg.toml
-	@$(BASE_PATH)/scripts/go-get-version.sh github.com/golang/protobuf/protoc-gen-go v1.3.1
 
-$(PROTOC_FILE):
-	@echo "+ $@"
-	@wget -q https://github.com/google/protobuf/releases/download/v$(PROTOC_VERSION)/$(PROTOC_ZIP) -O $(PROTOC_FILE)
+$(PROTOC_INCLUDES): $(PROTOC)
 
-$(PROTOC_INCLUDES): $(PROTOC_TMP)
-	@echo "+ $@"
-	@touch $@
-
-$(PROTOC): $(PROTOC_TMP)
-	@echo "+ $@"
-	@touch $@
-
-$(PROTOC_TMP): $(PROTOC_FILE)
-	@echo "+ $@"
-	@mkdir $(PROTOC_TMP)
-	@unzip -q -d $(PROTOC_TMP) $(PROTOC_FILE)
+GOGO_DIR = $(shell go list -f '{{.Dir}}' -m github.com/gogo/protobuf)
+GRPC_GATEWAY_DIR = $(shell go list -f '{{.Dir}}' -m github.com/grpc-ecosystem/grpc-gateway)
 
 .PHONY: proto-fmt
-proto-fmt:
-	@go get github.com/ckaznocha/protoc-gen-lint
+proto-fmt: $(PROTOC_GEN_LINT)
 	@echo "Checking for proto style errors"
-	@$(PROTOC) \
+	@PATH=$(PROTO_GOBIN) $(PROTOC) \
 		-I$(PROTOC_INCLUDES) \
-		-I$(GOPATH)/src \
-		-I$(GOPATH)/src/github.com/gogo/protobuf/protobuf \
-		-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+		-I$(GOGO_DIR)/protobuf \
+		-I$(GRPC_GATEWAY_DIR)/third_party/googleapis \
 		--lint_out=. \
 		--proto_path=$(PROTO_BASE_PATH) \
 		$(ALL_PROTOS)
@@ -139,13 +164,17 @@ printprotos:
 ## Generate gRPC proto messages, services, and gateways for the API. ##
 #######################################################################
 
-PROTOC_GEN_GRPC_GATEWAY := $(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway
+PROTOC_GEN_GRPC_GATEWAY := $(PROTO_GOBIN)/protoc-gen-grpc-gateway
 
-$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway:
+$(PROTOC_GEN_GRPC_GATEWAY): $(MODFILE_DIR)/github.com/grpc-ecosystem/grpc-gateway/UPDATE_CHECK $(PROTO_GOBIN)
 	@echo "+ $@"
-# keep in sync with Gopkg.toml
-	@$(BASE_PATH)/scripts/go-get-version.sh github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway/... v1.11.3
-	@$(BASE_PATH)/scripts/go-get-version.sh github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/... v1.11.3
+	@GOBIN=$(PROTO_GOBIN) go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+
+PROTOC_GEN_SWAGGER := $(PROTO_GOBIN)/protoc-gen-swagger
+
+$(PROTOC_GEN_SWAGGER): $(MODFILE_DIR)/github.com/grpc-ecosystem/grpc-gateway/UPDATE_CHECK $(PROTO_GOBIN)
+	@echo "+ $@"
+	@GOBIN=$(PROTO_GOBIN) go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 
 $(GENERATED_DOC_PATH):
 	@echo "+ $@"
@@ -157,12 +186,12 @@ $(GENERATED_DOC_PATH):
 $(GENERATED_BASE_PATH)/%.pb.go: $(PROTO_BASE_PATH)/%.proto $(PROTO_DEPS) $(PROTOC_GEN_GRPC_GATEWAY) $(PROTOC_GEN_GO_BIN) $(ALL_PROTOS)
 	@echo "+ $@"
 	@mkdir -p $(dir $@)
-	@$(PROTOC) \
-		-I=$(GOPATH)/src/github.com/gogo \
+	@PATH=$(PROTO_GOBIN) $(PROTOC) \
+		-I$(GOGO_DIR) \
 		-I$(PROTOC_INCLUDES) \
-		-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+		-I$(GRPC_GATEWAY_DIR)/third_party/googleapis \
 		--proto_path=$(PROTO_BASE_PATH) \
-		--gofast_out=$(GOGO_M_STR),$(M_ARGS_STR),plugins=grpc:$(GENERATED_BASE_PATH) \
+		--gofast_out=$(GOGO_M_STR:%=%,)$(M_ARGS_STR:%=%,)plugins=grpc:$(GENERATED_BASE_PATH) \
 		$(dir $<)/*.proto
 
 # Generate all of the reverse-proxies (gRPC-Gateways) with one invocation of
@@ -171,31 +200,32 @@ $(GENERATED_BASE_PATH)/%.pb.go: $(PROTO_BASE_PATH)/%.proto $(PROTO_DEPS) $(PROTO
 $(GENERATED_BASE_PATH)/%_service.pb.gw.go: $(PROTO_BASE_PATH)/%_service.proto $(GENERATED_BASE_PATH)/%_service.pb.go $(ALL_PROTOS)
 	@echo "+ $@"
 	@mkdir -p $(dir $@)
-	@$(PROTOC) \
+	@PATH=$(PROTO_GOBIN) $(PROTOC) \
 		-I$(PROTOC_INCLUDES) \
-		-I=$(GOPATH)/src/github.com/gogo \
-		-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+		-I$(GOGO_DIR) \
+		-I$(GRPC_GATEWAY_DIR)/third_party/googleapis \
 		--proto_path=$(PROTO_BASE_PATH) \
-		--grpc-gateway_out=allow_colon_final_segments=true,logtostderr=true:$(GENERATED_BASE_PATH) \
+		--grpc-gateway_out=$(GATEWAY_M_ARGS_STR:%=%,)allow_colon_final_segments=true,logtostderr=true:$(GENERATED_BASE_PATH) \
 		$(dir $<)/*.proto
 
 # Generate all of the swagger specifications with one invocation of protoc
 # when any of the .swagger.json sources don't exist or when any of the
 # .proto files change.
-$(GENERATED_DOC_PATH)/%.swagger.json: $(PROTO_BASE_PATH)/%.proto $(PROTO_DEPS) $(PROTOC_GEN_GRPC_GATEWAY) $(GENERATED_DOC_PATH) $(ALL_PROTOS)
+$(GENERATED_BASE_PATH)/%.swagger.json: $(PROTO_BASE_PATH)/%.proto $(PROTO_DEPS) $(PROTOC_GEN_GRPC_GATEWAY) $(PROTOC_GEN_SWAGGER) $(ALL_PROTOS)
 	@echo "+ $@"
-	@$(PROTOC) \
-		-I=$(GOPATH)/src/github.com/gogo \
+	@PATH=$(PROTO_GOBIN) $(PROTOC) \
+		-I$(GOGO_DIR) \
 		-I$(PROTOC_INCLUDES) \
-		-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+		-I$(GRPC_GATEWAY_DIR)/third_party/googleapis \
 		--proto_path=$(PROTO_BASE_PATH) \
-		--swagger_out=logtostderr=true,json_names_for_fields=true:$(GENERATED_DOC_PATH) \
+		--swagger_out=logtostderr=true,json_names_for_fields=true:$(GENERATED_BASE_PATH) \
 		$(dir $<)/*.proto
 
 # Generate the docs from the merged swagger specs.
 $(MERGED_API_SWAGGER_SPEC): $(BASE_PATH)/scripts/mergeswag.sh $(GENERATED_API_SWAGGER_SPECS)
 	@echo "+ $@"
-	$(BASE_PATH)/scripts/mergeswag.sh $(GENERATED_DOC_PATH)/api/v1
+	@mkdir -p "$(dir $@)"
+	$(BASE_PATH)/scripts/mergeswag.sh "$(GENERATED_BASE_PATH)/api/v1" >"$@"
 
 # Generate the docs from the merged swagger specs.
 $(GENERATED_API_DOCS): $(MERGED_API_SWAGGER_SPEC) $(PROTOC_GEN_GRPC_GATEWAY)
@@ -208,10 +238,6 @@ $(GENERATED_API_DOCS): $(MERGED_API_SWAGGER_SPEC) $(PROTOC_GEN_GRPC_GATEWAY)
 .PHONY: clean-proto-deps
 clean-proto-deps:
 	@echo "+ $@"
-	rm -rf $(GOPATH)/src/github.com/gogo
-	rm -rf $(GOPATH)/src/github.com/grpc-ecosystem
-	rm -rf $(GOPATH)/src/github.com/golang/protobuf
-	rm -rf $(GOPATH)/src/google.golang.org
-	rm -rf $(PROTOC_TMP)
 	rm -f $(PROTOC_FILE)
-	rm -f $(GOPATH)/bin/protoc-gen-*
+	rm -rf $(PROTOC_DIR)
+	rm -f $(PROTO_GOBIN)
