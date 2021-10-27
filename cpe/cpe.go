@@ -51,7 +51,7 @@ type nameVersionLocation struct {
 func getNameVersionFromCPE(attr *wfn.Attributes) nameVersion {
 	tmpName := strings.ReplaceAll(attr.Product, `\-`, "-")
 	return nameVersion{
-		name:    strings.ReplaceAll(tmpName, `\.`, "."),
+		name:    strings.ReplaceAll(strings.ReplaceAll(tmpName, `\.`, "."), `\/`, "/"),
 		version: strings.ReplaceAll(attr.Version, `\.`, "."),
 	}
 }
