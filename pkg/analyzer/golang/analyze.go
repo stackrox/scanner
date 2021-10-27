@@ -15,7 +15,7 @@ func componentForModule(filePath string, mod *buildinfo.Module) *component.Compo
 		Name:       mod.Path,
 		Version:    strings.TrimPrefix(mod.Version, "v"),
 		SourceType: component.GolangSourceType,
-		Location:   filePath,
+		Location:   fmt.Sprintf("%s[dep:%s]", filePath, mod.Path),
 	}
 	if mod.Replace != nil {
 		if mod.Replace.Path == mod.Path {
