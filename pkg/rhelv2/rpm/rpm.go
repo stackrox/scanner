@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -86,7 +87,7 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, 
 }
 
 func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Package, []string, error) {
-	if true {
+	if runtime.GOOS != "linux" { // to allow localdev
 		return nil, nil, nil
 	}
 	cpes, err := getCPEsUsingEmbeddedContentSets(files)
