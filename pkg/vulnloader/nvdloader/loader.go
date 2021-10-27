@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
@@ -34,7 +33,7 @@ type loader struct{}
 // If this function is successful, it will fill the directory with
 // one json file for each year of NVD data.
 func (l *loader) DownloadFeedsToPath(outputDir string) error {
-	// FetchDotnet NVD enrichment data from curated repos
+	// Fetch NVD enrichment data from curated repos
 	enrichmentMap := make(map[string][]*FileFormatWrapper)
 	err := FetchDotnet(enrichmentMap)
 	if err != nil {
@@ -74,20 +73,7 @@ func downloadFeedForYear(enrichmentMap map[string][]*FileFormatWrapper, outputDi
 	}
 
 	for _, item := range dump.CVEItems {
-		var lastModified string
-		for _, enrichedEntry := range enrichmentMap[item.CVE.CVEDataMeta.ID] {
-			// Add the CPE matches instead of removing for backwards compatibility purposes
-			item.Configurations.Nodes = append(item.Configurations.Nodes, &schema.NVDCVEFeedJSON10DefNode{
-				CPEMatch: enrichedEntry.AffectedPackages,
-				Operator: "OR",
-			})
-			if enrichedEntry.LastUpdated > lastModified {
-				lastModified = enrichedEntry.LastUpdated
-			}
-		}
-		if lastModified != "" {
-			item.LastModifiedDate = lastModified
-		}
+		EnrichCVEItem(item, enrichmentMap)
 	}
 
 	outF, err := os.Create(filepath.Join(outputDir, fmt.Sprintf("%d.json", year)))

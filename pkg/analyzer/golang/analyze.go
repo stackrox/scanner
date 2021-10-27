@@ -13,15 +13,15 @@ import (
 func componentForModule(filePath string, mod *buildinfo.Module) *component.Component {
 	comp := &component.Component{
 		Name:       mod.Path,
-		Version:    mod.Version,
+		Version:    strings.TrimPrefix(mod.Version, "v"),
 		SourceType: component.GolangSourceType,
 		Location:   filePath,
 	}
 	if mod.Replace != nil {
 		if mod.Replace.Path == mod.Path {
-			comp.Version = mod.Replace.Version
+			comp.Version = strings.TrimPrefix(mod.Replace.Version, "v")
 		} else {
-			comp.Version = fmt.Sprintf("%s@%s", mod.Replace.Version, mod.Replace.Path)
+			comp.Version = fmt.Sprintf("%s@%s", strings.TrimPrefix(mod.Replace.Version, "v"), mod.Replace.Path)
 		}
 	}
 	return comp

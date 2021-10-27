@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-
 	"github.com/stackrox/rox/pkg/utils"
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/cpe"

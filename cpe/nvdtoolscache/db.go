@@ -28,8 +28,8 @@ var (
 	cveToProductBucket = []byte("stackrox-cve-to-product")
 )
 
-func newWithDB(db *bbolt.DB) Cache {
-	return &cacheImpl{DB: db, dir: vulndump.NVDDirName}
+func newWithDB(db *bbolt.DB, enrichmentMap map[string][]*nvdloader.FileFormatWrapper) Cache {
+	return &cacheImpl{DB: db, dir: vulndump.NVDDirName, enrichmentMap: enrichmentMap}
 }
 
 func initializeDB(db *bbolt.DB) error {
@@ -40,7 +40,7 @@ func initializeDB(db *bbolt.DB) error {
 }
 
 // New returns a new NVD vulnerability cache.
-func New() (Cache, error) {
+func New(enrichmentMap map[string][]*nvdloader.FileFormatWrapper) (Cache, error) {
 	opts := bbolt.Options{
 		NoFreelistSync: true,
 		FreelistType:   bbolt.FreelistMapType,
@@ -53,7 +53,7 @@ func New() (Cache, error) {
 	if err := initializeDB(db); err != nil {
 		return nil, err
 	}
-	return newWithDB(db), nil
+	return newWithDB(db, enrichmentMap), nil
 }
 
 type cacheImpl struct {
@@ -62,6 +62,7 @@ type cacheImpl struct {
 	dir             string
 	updateLock      sync.Mutex
 	lastUpdatedTime time.Time
+	enrichmentMap   map[string][]*nvdloader.FileFormatWrapper
 }
 
 func (c *cacheImpl) Dir() string {

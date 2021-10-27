@@ -20,13 +20,15 @@ func GetGolangAttributes(c *component.Component) []*wfn.Attributes {
 		}
 	}
 
-	return []*wfn.Attributes{
+	attrs := []*wfn.Attributes{
 		{
 			Part:    "a",
-			Product: c.Name,
+			Product: strings.ReplaceAll(escapePeriod(c.Name), "/", `\/`),
 			Version: escapePeriod(c.Version),
 		},
 	}
+
+	return attrs
 }
 
 func escapePeriod(str string) string {

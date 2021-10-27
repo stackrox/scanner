@@ -151,6 +151,7 @@ func (c *cacheImpl) handleReader(r *ziputil.ReadCloser) (int, error) {
 		if cve == nil || cve.Configurations == nil {
 			continue
 		}
+		nvdloader.EnrichCVEItem(cve, c.enrichmentMap)
 		if !isValidCVE(cve) {
 			continue
 		}

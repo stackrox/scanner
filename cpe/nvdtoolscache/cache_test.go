@@ -48,7 +48,7 @@ func TestCache(t *testing.T) {
 	}()
 
 	// Initialize cache.
-	cache := newWithDB(db)
+	cache := newWithDB(db, nil)
 	require.NoError(t, cache.LoadFromDirectory("./testdata/before"))
 
 	vuln := mustGetVulnForProduct(t, cache, `yargs\-parser`)
@@ -86,7 +86,7 @@ func TestGetVulnsForComponent(t *testing.T) {
 	}()
 
 	// Initialize cache.
-	cache := newWithDB(db)
+	cache := newWithDB(db, nil)
 	require.NoError(t, cache.LoadFromDirectory("./testdata/before"))
 
 	vuln := mustGetVulnForComponent(t, cache, `yargs`, `yargs-parser`, `12.0.0`)
