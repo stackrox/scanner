@@ -19,6 +19,7 @@ LABEL name="scanner-rhel" \
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
+ENV GHSA_GOLANG_DIR="/ghsa-go"
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -28,6 +29,7 @@ COPY --from=extracted_bundle /bundle/genesis_manifests.json /bundle/scanner ./
 COPY --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
 COPY --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
 COPY --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
+COPY --from=extracted_bundle "/bundle${GHSA_GOLANG_DIR}/" ".${GHSA_GOLANG_DIR}/"
 
 COPY ./THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 

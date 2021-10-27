@@ -4,6 +4,7 @@
 NVD_DEFINITIONS_DIR="/nvd_definitions"
 K8S_DEFINITIONS_DIR="/k8s_definitions"
 REPO_TO_CPE_DIR="/repo2cpe"
+GHSA_GOLANG_DIR="/ghsa-go"
 
 set -euo pipefail
 
@@ -29,6 +30,7 @@ bundle_root="$(mktemp -d)"
 mkdir -p "${bundle_root}/${NVD_DEFINITIONS_DIR}"
 mkdir -p "${bundle_root}/${K8S_DEFINITIONS_DIR}"
 mkdir -p "${bundle_root}/${REPO_TO_CPE_DIR}"
+mkdir -p "${bundle_root}/${GHSA_GOLANG_DIR}"
 chmod -R 755 "${bundle_root}"
 
 # =============================================================================
@@ -51,6 +53,7 @@ cp -p "${INPUT_ROOT}/dump/genesis_manifests.json" "${bundle_root}/"
 cp -p "${INPUT_ROOT}/dump/nvd/"*.json "${bundle_root}/${NVD_DEFINITIONS_DIR}"
 cp -p "${INPUT_ROOT}/dump/k8s/"*.yaml "${bundle_root}/${K8S_DEFINITIONS_DIR}"
 cp -p "${INPUT_ROOT}/dump/rhelv2/repository-to-cpe.json" "${bundle_root}/${REPO_TO_CPE_DIR}"
+cp -p "${INPUT_ROOT}/static-dump/ghsa-go/"*.yaml "${bundle_root}/${GHSA_GOLANG_DIR}"
 
 # =============================================================================
 
