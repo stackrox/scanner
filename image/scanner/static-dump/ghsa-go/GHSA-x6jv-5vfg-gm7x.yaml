@@ -1,0 +1,23 @@
+description: Improper configuration will cause ServiceComb ServiceCenter Directory
+  Traversal problem in ServcieCenter 1.x.x versions and fixed in 2.0.0.
+ghsaId: GHSA-x6jv-5vfg-gm7x
+identifiers:
+- type: GHSA
+  value: GHSA-x6jv-5vfg-gm7x
+- type: CVE
+  value: CVE-2021-21501
+permalink: https://github.com/advisories/GHSA-x6jv-5vfg-gm7x
+publishedAt: "2021-09-01T18:35:52Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-21501
+- url: https://github.com/advisories/GHSA-x6jv-5vfg-gm7x
+summary: Path traversal in ServcieCenter
+updatedAt: "2021-09-01T18:35:52Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 2.0.0
+  package:
+    name: github.com/apache/servicecomb-service-center
+  severity: HIGH
+  updatedAt: "2021-08-30T19:32:49Z"
+  vulnerableVersionRange: < 2.0.0

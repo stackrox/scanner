@@ -36,6 +36,18 @@ type nameVersion struct {
 	name, version string
 }
 
+func (n nameVersion) at(location string) nameVersionLocation {
+	return nameVersionLocation{
+		nameVersion: n,
+		location:    location,
+	}
+}
+
+type nameVersionLocation struct {
+	nameVersion
+	location string
+}
+
 func getNameVersionFromCPE(attr *wfn.Attributes) nameVersion {
 	tmpName := strings.ReplaceAll(attr.Product, `\-`, "-")
 	return nameVersion{
@@ -49,37 +61,37 @@ func getFeaturesFromMatchResults(layer string, matchResults []match.Result) []da
 		return nil
 	}
 
-	featuresMap := make(map[nameVersion]*database.FeatureVersion)
-	featuresToVulns := make(map[nameVersion]set.StringSet)
+	featuresMap := make(map[nameVersionLocation]*database.FeatureVersion)
+	featuresToVulns := make(map[nameVersionLocation]set.StringSet)
 	for _, m := range matchResults {
 		if m.CPE.Attributes == nil {
 			continue
 		}
 		cpe := m.CPE
-		nameVersion := getNameVersionFromCPE(cpe.Attributes)
+		nvl := getNameVersionFromCPE(cpe.Attributes).at(m.Component.Location)
 
-		vulnSet, ok := featuresToVulns[nameVersion]
+		vulnSet, ok := featuresToVulns[nvl]
 		if !ok {
 			vulnSet = set.NewStringSet()
-			featuresToVulns[nameVersion] = vulnSet
+			featuresToVulns[nvl] = vulnSet
 		}
 		if !vulnSet.Add(m.CVE.ID()) {
 			continue
 		}
-		feature, ok := featuresMap[nameVersion]
+		feature, ok := featuresMap[nvl]
 		if !ok {
 			feature = &database.FeatureVersion{
 				Feature: database.Feature{
-					Name:       nameVersion.name,
+					Name:       nvl.name,
 					SourceType: m.Component.SourceType.String(),
 					Location:   m.Component.Location,
 				},
-				Version: nameVersion.version,
+				Version: nvl.version,
 				AddedBy: database.Layer{
 					Name: layer,
 				},
 			}
-			featuresMap[nameVersion] = feature
+			featuresMap[nvl] = feature
 		}
 		m.Vuln.FixedBy = cpe.FixedIn
 		feature.AffectedBy = append(feature.AffectedBy, *m.Vuln)

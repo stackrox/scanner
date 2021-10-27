@@ -1,0 +1,50 @@
+description: |-
+  ## Impact
+
+  A bug was found in containerd where pulling and extracting a specially-crafted container image can result in Unix file permission changes for existing files in the host’s filesystem.  Changes to file permissions can deny access to the expected owner of the file, widen access to others, or set extended bits like setuid, setgid, and sticky.  This bug does not directly allow files to be read, modified, or executed without an additional cooperating process.
+
+  ## Patches
+
+  This bug has been fixed in containerd 1.5.4 and 1.4.8.  Users should update to these versions as soon as they are released.  Running containers do not need to be restarted.
+
+  ## Workarounds
+
+  Ensure you only pull images from trusted sources.
+
+  Linux security modules (LSMs) like SELinux and AppArmor can limit the files potentially affected by this bug through policies and profiles that prevent containerd from interacting with unexpected files.
+
+  ## For more information
+
+  If you have any questions or comments about this advisory:
+
+  * [Open an issue](https://github.com/containerd/containerd/issues/new/choose)
+  * Email us at security@containerd.io if you think you’ve found a security bug.
+ghsaId: GHSA-c72p-9xmj-rx3w
+identifiers:
+- type: GHSA
+  value: GHSA-c72p-9xmj-rx3w
+- type: CVE
+  value: CVE-2021-32760
+permalink: https://github.com/advisories/GHSA-c72p-9xmj-rx3w
+publishedAt: "2021-07-26T21:17:45Z"
+references:
+- url: https://github.com/containerd/containerd/security/advisories/GHSA-c72p-9xmj-rx3w
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-32760
+- url: https://github.com/advisories/GHSA-c72p-9xmj-rx3w
+summary: Archive package allows chmod of file outside of unpack target directory
+updatedAt: "2021-10-21T13:16:23Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.5.4
+  package:
+    name: github.com/containerd/containerd
+  severity: MODERATE
+  updatedAt: "2021-07-22T20:21:15Z"
+  vulnerableVersionRange: '>= 1.5.0, < 1.5.4'
+- firstPatchedVersion:
+    identifier: 1.4.8
+  package:
+    name: github.com/containerd/containerd
+  severity: MODERATE
+  updatedAt: "2021-07-22T20:21:15Z"
+  vulnerableVersionRange: < 1.4.8

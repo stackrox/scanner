@@ -1,0 +1,33 @@
+description: In `cloudflared` versions < 2020.8.1 on Windows, if an administrator
+  has started `cloudflared` and set it to read configuration files from a certain
+  directory, an unprivileged user can exploit a misconfiguration in order to escalate
+  privileges and execute system-level commands. The misconfiguration was due to the
+  way that `cloudflared` reads its configuration file. One of the locations that `cloudflared`
+  reads from (C:\etc\) is not a secure by default directory due to the fact that Windows
+  does not enforce access controls on this directory without further controls applied.
+  A malformed config.yaml file can be written by any user. Upon reading this config,
+  `cloudflared` would output an error message to a log file defined in the malformed
+  config. The user-controlled log file location could be set to a specific location
+  that Windows will execute when any user logs in.
+ghsaId: GHSA-hgwp-4vp4-qmm2
+identifiers:
+- type: GHSA
+  value: GHSA-hgwp-4vp4-qmm2
+- type: CVE
+  value: CVE-2020-24356
+permalink: https://github.com/advisories/GHSA-hgwp-4vp4-qmm2
+publishedAt: "2021-05-24T16:56:35Z"
+references:
+- url: https://github.com/cloudflare/cloudflared/security/advisories/GHSA-hgwp-4vp4-qmm2
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-24356
+- url: https://github.com/advisories/GHSA-hgwp-4vp4-qmm2
+summary: Local Privilege Escalation in cloudflared
+updatedAt: "2021-08-02T15:19:49Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 2020.8.1
+  package:
+    name: github.com/cloudflare/cloudflared
+  severity: HIGH
+  updatedAt: "2021-05-24T16:52:03Z"
+  vulnerableVersionRange: < 2020.8.1

@@ -1,0 +1,62 @@
+description: |-
+  (This advisory is canonically https://advisories.nats.io/CVE/CVE-2020-26892.txt )
+
+  ## Problem Description
+
+  NATS nats-server through 2020-10-07 has Incorrect Access Control because of how expired credentials are handled.
+
+  The NATS accounts system has expiration timestamps on credentials; the <https://github.com/nats-io/jwt> library had an API which encouraged misuse and an `IsRevoked()` method which misused its own API.
+
+  A new `IsClaimRevoked()` method has correct handling and the nats-server has been updated to use this.  The old `IsRevoked()` method now always returns true and other client code will have to be updated to avoid calling it.
+
+  The CVE identifier should cover any application using the old JWT API, where the nats-server is one of those applications.
+
+
+  ## Affected versions
+
+  #### JWT library
+
+   * all versions prior to 1.1.0
+   * fixed after nats-io/jwt PR 103 landed (2020-10-06)
+
+  #### NATS Server
+
+   * Version 2 prior to 2.1.9
+     + 2.0.0 through and including 2.1.8 are vulnerable.
+   * fixed with nats-io/nats-server PRs 1632, 1635, 1645
+
+
+  ## Impact
+
+  Time-based credential expiry did not work.
+
+
+  ## Workaround
+
+  Have credentials which only expire after fixes can be deployed.
+
+
+  ## Solution
+
+  Upgrade the JWT dependency in any application using it.
+
+  Upgrade the NATS server if using NATS Accounts.
+ghsaId: GHSA-2c64-vj8g-vwrq
+identifiers:
+- type: GHSA
+  value: GHSA-2c64-vj8g-vwrq
+permalink: https://github.com/advisories/GHSA-2c64-vj8g-vwrq
+publishedAt: "2021-05-21T16:11:49Z"
+references:
+- url: https://github.com/nats-io/nats-server/security/advisories/GHSA-2c64-vj8g-vwrq
+- url: https://github.com/advisories/GHSA-2c64-vj8g-vwrq
+summary: Incorrect handling of credential expiry by NATS Server
+updatedAt: "2021-05-21T16:11:49Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 2.1.9
+  package:
+    name: github.com/nats-io/nats-server/v2
+  severity: HIGH
+  updatedAt: "2021-05-21T16:10:49Z"
+  vulnerableVersionRange: < 2.1.9

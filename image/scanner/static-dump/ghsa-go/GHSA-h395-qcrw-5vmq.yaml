@@ -1,0 +1,24 @@
+description: This affects all versions of package github.com/gin-gonic/gin under 1.7.0.
+  When gin is exposed directly to the internet, a client's IP can be spoofed by setting
+  the X-Forwarded-For header.
+ghsaId: GHSA-h395-qcrw-5vmq
+identifiers:
+- type: GHSA
+  value: GHSA-h395-qcrw-5vmq
+- type: CVE
+  value: CVE-2020-28483
+permalink: https://github.com/advisories/GHSA-h395-qcrw-5vmq
+publishedAt: "2021-06-23T17:53:21Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-28483
+- url: https://github.com/advisories/GHSA-h395-qcrw-5vmq
+summary: Inconsistent Interpretation of HTTP Requests in github.com/gin-gonic/gin
+updatedAt: "2021-06-23T17:53:21Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.7.0
+  package:
+    name: github.com/gin-gonic/gin
+  severity: HIGH
+  updatedAt: "2021-05-12T21:46:51Z"
+  vulnerableVersionRange: < 1.7.0

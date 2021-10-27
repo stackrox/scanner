@@ -1,0 +1,37 @@
+description: "### Impact\n\nA DoS vulnerability can make a LES server crash via malicious
+  `GetProofsV2` request from a connected LES client.\n\n### Patches\n\nThe vulnerability
+  was patched in https://github.com/ethereum/go-ethereum/pull/21896. \n\n### Workarounds\n\nThis
+  vulnerability only concerns users explicitly enabling `les` server; disabling `les`
+  prevents the exploit. \nIt can also be patched by manually applying the patch in
+  https://github.com/ethereum/go-ethereum/pull/21896. \n\n\n### For more information\nIf
+  you have any questions or comments about this advisory:\n* Open an issue in [go-ethereum](https://github.com/ethereum/go-ethereum)\n*
+  Email us at [security@ethereum.org](mailto:security@ethereum.org)"
+ghsaId: GHSA-r33q-22hv-j29q
+identifiers:
+- type: GHSA
+  value: GHSA-r33q-22hv-j29q
+- type: CVE
+  value: CVE-2020-26264
+permalink: https://github.com/advisories/GHSA-r33q-22hv-j29q
+publishedAt: "2021-06-29T21:14:07Z"
+references:
+- url: https://github.com/ethereum/go-ethereum/security/advisories/GHSA-r33q-22hv-j29q
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-26264
+- url: https://github.com/advisories/GHSA-r33q-22hv-j29q
+summary: Denial of service in github.com/ethereum/go-ethereum
+updatedAt: "2021-06-29T21:14:07Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.9.25
+  package:
+    name: github.com/ethereum/go-ethereum/les
+  severity: MODERATE
+  updatedAt: "2021-05-21T21:45:24Z"
+  vulnerableVersionRange: < 1.9.25
+- firstPatchedVersion:
+    identifier: 1.9.25
+  package:
+    name: github.com/ethereum/go-ethereum
+  severity: MODERATE
+  updatedAt: "2021-05-21T21:45:23Z"
+  vulnerableVersionRange: < 1.9.25

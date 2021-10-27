@@ -1,0 +1,24 @@
+description: HashiCorp Consul and Consul Enterprise 1.4.1 through 1.6.2 did not uniformly
+  enforce ACLs across all API endpoints, resulting in potential unintended information
+  disclosure. Fixed in 1.6.3.
+ghsaId: GHSA-r9w6-rhh9-7v53
+identifiers:
+- type: GHSA
+  value: GHSA-r9w6-rhh9-7v53
+- type: CVE
+  value: CVE-2020-7955
+permalink: https://github.com/advisories/GHSA-r9w6-rhh9-7v53
+publishedAt: "2021-07-28T17:57:57Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-7955
+- url: https://github.com/advisories/GHSA-r9w6-rhh9-7v53
+summary: Incorrect Authorization in HashiCorp Consul
+updatedAt: "2021-07-28T17:57:57Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.6.3
+  package:
+    name: github.com/hashicorp/consul
+  severity: MODERATE
+  updatedAt: "2021-07-27T15:08:02Z"
+  vulnerableVersionRange: '>= 1.4.1, <= 1.6.2'

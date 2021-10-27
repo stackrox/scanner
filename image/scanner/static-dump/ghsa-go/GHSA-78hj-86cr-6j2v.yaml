@@ -1,0 +1,23 @@
+description: Lightning Network Daemon (lnd) before 0.7 allows attackers to trigger
+  loss of funds because of Incorrect Access Control.
+ghsaId: GHSA-78hj-86cr-6j2v
+identifiers:
+- type: GHSA
+  value: GHSA-78hj-86cr-6j2v
+- type: CVE
+  value: CVE-2019-12999
+permalink: https://github.com/advisories/GHSA-78hj-86cr-6j2v
+publishedAt: "2021-05-18T15:30:22Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2019-12999
+- url: https://github.com/advisories/GHSA-78hj-86cr-6j2v
+summary: Improper Access Control in Lightning Network Daemon
+updatedAt: "2021-05-18T15:30:22Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.7.1-beta
+  package:
+    name: github.com/lightningnetwork/lnd
+  severity: HIGH
+  updatedAt: "2021-05-17T21:56:39Z"
+  vulnerableVersionRange: <= 0.7.0

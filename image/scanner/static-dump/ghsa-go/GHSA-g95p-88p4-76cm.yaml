@@ -1,0 +1,23 @@
+description: Gitea 1.12.x and 1.13.x before 1.13.4 allows XSS via certain issue data
+  in some situations.
+ghsaId: GHSA-g95p-88p4-76cm
+identifiers:
+- type: GHSA
+  value: GHSA-g95p-88p4-76cm
+- type: CVE
+  value: CVE-2021-28378
+permalink: https://github.com/advisories/GHSA-g95p-88p4-76cm
+publishedAt: "2021-09-27T20:17:39Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-28378
+- url: https://github.com/advisories/GHSA-g95p-88p4-76cm
+summary: Cross-site Scripting in Gitea
+updatedAt: "2021-09-27T20:17:39Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.13.4
+  package:
+    name: code.gitea.io/gitea
+  severity: MODERATE
+  updatedAt: "2021-09-27T20:17:32Z"
+  vulnerableVersionRange: < 1.13.4

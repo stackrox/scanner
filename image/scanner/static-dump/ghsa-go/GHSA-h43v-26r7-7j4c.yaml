@@ -1,0 +1,23 @@
+description: HashiCorp Nomad and Nomad Enterprise before 0.10.3 allow unbounded resource
+  usage.
+ghsaId: GHSA-h43v-26r7-7j4c
+identifiers:
+- type: GHSA
+  value: GHSA-h43v-26r7-7j4c
+- type: CVE
+  value: CVE-2020-7218
+permalink: https://github.com/advisories/GHSA-h43v-26r7-7j4c
+publishedAt: "2021-05-18T18:20:19Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-7218
+- url: https://github.com/advisories/GHSA-h43v-26r7-7j4c
+summary: Allocation of Resources Without Limits or Throttling in HashiCorp Nomad
+updatedAt: "2021-07-28T18:15:51Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.10.3
+  package:
+    name: github.com/hashicorp/nomad/command/agent
+  severity: HIGH
+  updatedAt: "2021-05-13T15:03:57Z"
+  vulnerableVersionRange: < 0.10.3

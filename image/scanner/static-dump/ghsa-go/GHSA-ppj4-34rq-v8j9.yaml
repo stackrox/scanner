@@ -1,0 +1,23 @@
+description: GJSON before 1.9.3 allows a ReDoS (regular expression denial of service)
+  attack.
+ghsaId: GHSA-ppj4-34rq-v8j9
+identifiers:
+- type: GHSA
+  value: GHSA-ppj4-34rq-v8j9
+- type: CVE
+  value: CVE-2021-42836
+permalink: https://github.com/advisories/GHSA-ppj4-34rq-v8j9
+publishedAt: "2021-10-25T19:43:15Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-42836
+- url: https://github.com/advisories/GHSA-ppj4-34rq-v8j9
+summary: regular expression denial of service in gjson
+updatedAt: "2021-10-25T19:43:15Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.9.3
+  package:
+    name: github.com/tidwall/gjson
+  severity: MODERATE
+  updatedAt: "2021-10-25T18:27:21Z"
+  vulnerableVersionRange: < 1.9.3

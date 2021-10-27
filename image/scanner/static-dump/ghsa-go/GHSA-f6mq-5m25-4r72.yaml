@@ -1,0 +1,25 @@
+description: Specific cstrings input may not be properly validated in the MongoDB
+  Go Driver when marshalling Go objects into BSON. A malicious user could use a Go
+  object with specific string to potentially inject additional fields into marshalled
+  documents. This issue affects all MongoDB GO Drivers up to (and including) 1.5.0.
+ghsaId: GHSA-f6mq-5m25-4r72
+identifiers:
+- type: GHSA
+  value: GHSA-f6mq-5m25-4r72
+- type: CVE
+  value: CVE-2021-20329
+permalink: https://github.com/advisories/GHSA-f6mq-5m25-4r72
+publishedAt: "2021-06-15T16:08:16Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-20329
+- url: https://github.com/advisories/GHSA-f6mq-5m25-4r72
+summary: Improper Validation of Specified Type of Input
+updatedAt: "2021-06-24T13:04:10Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.5.1
+  package:
+    name: go.mongodb.org/mongo-driver
+  severity: MODERATE
+  updatedAt: "2021-06-15T16:08:06Z"
+  vulnerableVersionRange: < 1.5.1

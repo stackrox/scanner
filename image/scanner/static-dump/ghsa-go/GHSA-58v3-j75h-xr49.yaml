@@ -1,0 +1,25 @@
+description: libseccomp-golang 0.9.0 and earlier incorrectly generates BPFs that OR
+  multiple arguments rather than ANDing them. A process running under a restrictive
+  seccomp filter that specified multiple syscall arguments could bypass intended access
+  restrictions by specifying a single matching argument.
+ghsaId: GHSA-58v3-j75h-xr49
+identifiers:
+- type: GHSA
+  value: GHSA-58v3-j75h-xr49
+- type: CVE
+  value: CVE-2017-18367
+permalink: https://github.com/advisories/GHSA-58v3-j75h-xr49
+publishedAt: "2021-05-18T15:44:30Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2017-18367
+- url: https://github.com/advisories/GHSA-58v3-j75h-xr49
+summary: Improper Input Validation in libseccomp-golang
+updatedAt: "2021-05-18T15:44:30Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.9.1
+  package:
+    name: github.com/seccomp/libseccomp-golang
+  severity: HIGH
+  updatedAt: "2021-05-17T15:26:36Z"
+  vulnerableVersionRange: < 0.9.1

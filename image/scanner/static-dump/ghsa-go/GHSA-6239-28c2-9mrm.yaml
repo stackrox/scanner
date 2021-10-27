@@ -1,0 +1,32 @@
+description: HashiCorp Vault and Vault Enterprise’s UI erroneously cached and exposed
+  user-viewed secrets between sessions in a single shared browser. Fixed in 1.8.0
+  and pending 1.7.4 / 1.6.6 releases.
+ghsaId: GHSA-6239-28c2-9mrm
+identifiers:
+- type: GHSA
+  value: GHSA-6239-28c2-9mrm
+- type: CVE
+  value: CVE-2021-38554
+permalink: https://github.com/advisories/GHSA-6239-28c2-9mrm
+publishedAt: "2021-08-30T17:22:38Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-38554
+- url: https://github.com/advisories/GHSA-6239-28c2-9mrm
+summary: Improper Removal of Sensitive Information Before Storage or Transfer in HashiCorp
+  Vault
+updatedAt: "2021-10-21T14:19:31Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.7.4
+  package:
+    name: github.com/hashicorp/vault
+  severity: MODERATE
+  updatedAt: "2021-08-30T17:14:06Z"
+  vulnerableVersionRange: '>= 1.7.0, < 1.7.4'
+- firstPatchedVersion:
+    identifier: 1.6.6
+  package:
+    name: github.com/hashicorp/vault
+  severity: MODERATE
+  updatedAt: "2021-08-30T17:14:06Z"
+  vulnerableVersionRange: < 1.6.6

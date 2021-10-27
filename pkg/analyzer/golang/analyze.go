@@ -3,6 +3,7 @@ package golang
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/analyzer/golang/internal/buildinfo"
@@ -29,14 +30,13 @@ func componentForModule(filePath string, mod *buildinfo.Module) *component.Compo
 func analyzeGoBinary(filePath string, contents io.ReaderAt) []*component.Component {
 	bi, err := buildinfo.Read(contents)
 	if err != nil {
-		log.Warnf("Could not read buildinfo from %s: %v", filePath, err)
 		return nil
 	}
 
 	var components []*component.Component
 	components = append(components, &component.Component{
 		Name:       "golang",
-		Version:    bi.GoVersion,
+		Version:    strings.TrimPrefix(bi.GoVersion, "go"),
 		SourceType: component.GolangSourceType,
 		Location:   filePath,
 	})

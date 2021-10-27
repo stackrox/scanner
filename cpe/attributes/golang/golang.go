@@ -1,15 +1,10 @@
 package golang
 
 import (
-	"regexp"
 	"strings"
 
 	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/stackrox/scanner/pkg/component"
-)
-
-var (
-	packageNameRegex = regexp.MustCompile(`^.*/([^/]+(?:/v\d+)?)$`)
 )
 
 // GetGolangAttributes returns the attributes from the given Golang component.
@@ -25,19 +20,10 @@ func GetGolangAttributes(c *component.Component) []*wfn.Attributes {
 		}
 	}
 
-	pkgNameMatches := packageNameRegex.FindStringSubmatch(c.Name)
-	if len(pkgNameMatches) != 2 {
-		return nil
-	}
-
-	pkgName := pkgNameMatches[1]
-	pkgVendor := "golang:" + strings.TrimSuffix(c.Name, "/"+pkgName)
-
 	return []*wfn.Attributes{
 		{
 			Part:    "a",
-			Vendor:  pkgVendor,
-			Product: pkgName,
+			Product: c.Name,
 			Version: escapePeriod(c.Version),
 		},
 	}

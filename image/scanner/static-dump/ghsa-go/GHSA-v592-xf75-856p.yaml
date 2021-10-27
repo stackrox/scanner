@@ -1,0 +1,37 @@
+description: "### Impact\nAn ethash mining DAG generation flaw in Geth could cause
+  miners to erroneously calculate PoW in an upcoming epoch (estimated early January,
+  2021). This happened on the ETC chain on 2020-11-06. This issue is relevant only
+  for miners, non-mining nodes are unaffected.\n\n### Patches\nThis issue is also
+  fixed as of 1.9.24. Thanks to @slavikus for bringing the issue to our attention
+  and writing the fix. \n\n### For more information\nIf you have any questions or
+  comments about this advisory:\n* Open an issue in [go-ethereum](https://github.com/ethereum/go-ethereum)\n*
+  Email us at [security@ethereum.org](mailto:security@ethereum.org)"
+ghsaId: GHSA-v592-xf75-856p
+identifiers:
+- type: GHSA
+  value: GHSA-v592-xf75-856p
+- type: CVE
+  value: CVE-2020-26240
+permalink: https://github.com/advisories/GHSA-v592-xf75-856p
+publishedAt: "2021-06-29T21:12:56Z"
+references:
+- url: https://github.com/ethereum/go-ethereum/security/advisories/GHSA-v592-xf75-856p
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-26240
+- url: https://github.com/advisories/GHSA-v592-xf75-856p
+summary: Erroneous Proof of Work calculation in geth
+updatedAt: "2021-06-29T21:12:56Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.9.24
+  package:
+    name: github.com/ethereum/go-ethereum/consensus
+  severity: MODERATE
+  updatedAt: "2021-05-21T21:52:59Z"
+  vulnerableVersionRange: < 1.9.24
+- firstPatchedVersion:
+    identifier: 1.9.24
+  package:
+    name: github.com/ethereum/go-ethereum
+  severity: MODERATE
+  updatedAt: "2021-05-21T21:52:59Z"
+  vulnerableVersionRange: < 1.9.24

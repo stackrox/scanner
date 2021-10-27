@@ -1,0 +1,25 @@
+description: When using the Azure backend with a shared access signature (SAS), Terraform
+  versions prior to 0.12.17 may transmit the token and state snapshot using cleartext
+  HTTP.
+ghsaId: GHSA-h3p9-wrgx-82cm
+identifiers:
+- type: GHSA
+  value: GHSA-h3p9-wrgx-82cm
+- type: CVE
+  value: CVE-2019-19316
+permalink: https://github.com/advisories/GHSA-h3p9-wrgx-82cm
+publishedAt: "2021-05-18T18:18:50Z"
+references:
+- url: https://github.com/hashicorp/terraform/security/advisories/GHSA-4rvg-555h-r626
+- url: https://nvd.nist.gov/vuln/detail/CVE-2019-19316
+- url: https://github.com/advisories/GHSA-h3p9-wrgx-82cm
+summary: Use of a Broken or Risky Cryptographic Algorithm in Terraform
+updatedAt: "2021-07-28T16:28:51Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.12.17
+  package:
+    name: github.com/hashicorp/terraform/backend/remote-state/azure
+  severity: HIGH
+  updatedAt: "2021-05-13T15:15:38Z"
+  vulnerableVersionRange: < 0.12.17

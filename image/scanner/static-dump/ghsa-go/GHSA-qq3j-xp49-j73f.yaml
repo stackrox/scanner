@@ -1,0 +1,38 @@
+description: "The Helm core maintainers have identified an information disclosure\nvulnerability
+  in Helm 3.0.0-3.2.3. \n\n### Impact\n\nA traversal attack is possible when installing
+  Helm plugins from a tar\narchive over HTTP.  It is possible for a malicious plugin
+  author to inject a relative\npath into a plugin archive, and copy a file outside
+  of the intended directory.\n\nTraversal Attacks are a form of a Directory Traversal
+  that can be exploited by\nextracting files from an archive. The premise of the Directory
+  Traversal\nvulnerability is that an attacker can gain access to parts of the file
+  system\noutside of the target folder in which they should reside. The attacker can\nthen
+  overwrite executable files and either invoke them remotely or wait for\nthe system
+  or user to call them, thus achieving Remote Command Execution on\nthe victim's machine.
+  The vulnerability can also cause damage by overwriting\nconfiguration files or other
+  sensitive resources, and can be exploited on both\nclient (user) machines and servers.\n\nhttps://snyk.io/research/zip-slip-vulnerability\n\n###
+  Patches\n\nThis issue has been fixed in Helm 3.2.4 \n\n### For more information\nIf
+  you have any questions or comments about this advisory:\n* Open an issue in [the
+  Helm repository](https://github.com/helm/helm/issues)\n* For security-specific issues,
+  email us at [cncf-helm-security@lists.cncf.io](mailto:cncf-helm-security@lists.cncf.io)"
+ghsaId: GHSA-qq3j-xp49-j73f
+identifiers:
+- type: GHSA
+  value: GHSA-qq3j-xp49-j73f
+- type: CVE
+  value: CVE-2020-4053
+permalink: https://github.com/advisories/GHSA-qq3j-xp49-j73f
+publishedAt: "2021-06-23T18:14:36Z"
+references:
+- url: https://github.com/helm/helm/security/advisories/GHSA-qq3j-xp49-j73f
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-4053
+- url: https://github.com/advisories/GHSA-qq3j-xp49-j73f
+summary: Plugin archive directory traversal in Helm
+updatedAt: "2021-06-23T18:14:36Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 3.2.4
+  package:
+    name: helm.sh/helm/v3/pkg/plugin/installer
+  severity: LOW
+  updatedAt: "2021-05-24T20:57:17Z"
+  vulnerableVersionRange: '>= 3.0.0, < 3.2.4'

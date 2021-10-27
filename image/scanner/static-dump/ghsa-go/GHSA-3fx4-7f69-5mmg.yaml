@@ -1,0 +1,24 @@
+description: go-jose before 1.0.5 suffers from a CBC-HMAC integer overflow on 32-bit
+  architectures. An integer overflow could lead to authentication bypass for CBC-HMAC
+  encrypted ciphertexts on 32-bit architectures.
+ghsaId: GHSA-3fx4-7f69-5mmg
+identifiers:
+- type: GHSA
+  value: GHSA-3fx4-7f69-5mmg
+- type: CVE
+  value: CVE-2016-9123
+permalink: https://github.com/advisories/GHSA-3fx4-7f69-5mmg
+publishedAt: "2021-06-23T17:14:12Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2016-9123
+- url: https://github.com/advisories/GHSA-3fx4-7f69-5mmg
+summary: Integer Overflow in go-jose
+updatedAt: "2021-06-23T17:14:12Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.0.5
+  package:
+    name: github.com/square/go-jose
+  severity: HIGH
+  updatedAt: "2021-05-20T16:26:08Z"
+  vulnerableVersionRange: < 1.0.5

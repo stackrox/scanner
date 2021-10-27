@@ -1,0 +1,21 @@
+description: This affects all versions up to and including 0.6.0 of package github.com/russellhaering/gosaml2.
+  There is a crash on nil-pointer dereference caused by sending malformed XML signatures.
+ghsaId: GHSA-gq5r-cc4w-g8xf
+identifiers:
+- type: GHSA
+  value: GHSA-gq5r-cc4w-g8xf
+- type: CVE
+  value: CVE-2020-7731
+permalink: https://github.com/advisories/GHSA-gq5r-cc4w-g8xf
+publishedAt: "2021-06-23T17:25:08Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-7731
+- url: https://github.com/advisories/GHSA-gq5r-cc4w-g8xf
+summary: Denial of Service (DoS)
+updatedAt: "2021-06-23T17:25:08Z"
+vulnerabilities:
+- package:
+    name: github.com/russellhaering/gosaml2
+  severity: HIGH
+  updatedAt: "2021-05-20T21:39:23Z"
+  vulnerableVersionRange: <= 0.6.0

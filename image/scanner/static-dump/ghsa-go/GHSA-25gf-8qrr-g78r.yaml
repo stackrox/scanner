@@ -1,0 +1,24 @@
+description: HashiCorp Consul before 1.10.1 (and Consul Enterprise) has Missing SSL
+  Certificate Validation. xds does not ensure that the Subject Alternative Name of
+  an upstream is validated.
+ghsaId: GHSA-25gf-8qrr-g78r
+identifiers:
+- type: GHSA
+  value: GHSA-25gf-8qrr-g78r
+- type: CVE
+  value: CVE-2021-32574
+permalink: https://github.com/advisories/GHSA-25gf-8qrr-g78r
+publishedAt: "2021-07-19T21:21:03Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-32574
+- url: https://github.com/advisories/GHSA-25gf-8qrr-g78r
+summary: Missing SSL Certificate Validation in Hashicorp Consul
+updatedAt: "2021-07-29T14:53:58Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.10.1
+  package:
+    name: github.com/hashicorp/consul
+  severity: HIGH
+  updatedAt: "2021-07-19T17:36:43Z"
+  vulnerableVersionRange: < 1.10.1

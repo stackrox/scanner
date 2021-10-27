@@ -1,0 +1,37 @@
+description: |
+  ### Impact
+  Authenticated attackers posing as functionaries (i.e., within a trusted set of users for a layout) are able to create attestations that may bypass DISALLOW rules in the same layout. An attacker with access to trusted private keys, may issue an attestation that contains a disallowed artifact by including path traversal semantics (e.g., foo vs dir/../foo).
+
+  ### Patches
+  The problem has been fixed in version 0.3.0.
+
+  ### Workarounds
+  Exploiting this vulnerability is dependent on the specific policy applied.
+
+  ### For more information
+  If you have any questions or comments about this advisory:
+  * Open an issue in [in-toto-golang](http://github.com/in-toto/in-toto-golang)
+  * Email us at [in-toto-public](mailto:in-toto-public@googlegroups.com)
+  * If this is a sensitive security-relevant disclosure, please send a PGP encrypted email to santiagotorres@purdue.edu or jcappos@nyu.edu
+ghsaId: GHSA-vrxp-mg9f-hwf3
+identifiers:
+- type: GHSA
+  value: GHSA-vrxp-mg9f-hwf3
+- type: CVE
+  value: CVE-2021-41087
+permalink: https://github.com/advisories/GHSA-vrxp-mg9f-hwf3
+publishedAt: "2021-09-22T20:37:09Z"
+references:
+- url: https://github.com/in-toto/in-toto-golang/security/advisories/GHSA-vrxp-mg9f-hwf3
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-41087
+- url: https://github.com/advisories/GHSA-vrxp-mg9f-hwf3
+summary: Improperly Implemented path matching for in-toto-golang
+updatedAt: "2021-10-06T13:07:33Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.3.0
+  package:
+    name: github.com/in-toto/in-toto-golang
+  severity: MODERATE
+  updatedAt: "2021-09-22T13:53:54Z"
+  vulnerableVersionRange: <= 0.2.0

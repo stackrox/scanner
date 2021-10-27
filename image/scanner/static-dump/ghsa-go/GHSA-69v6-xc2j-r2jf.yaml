@@ -1,0 +1,39 @@
+description: "### Impact\nThis is a Consensus vulnerability, which can be used to
+  cause a chain-split where vulnerable nodes reject the canonical chain. \n\nGeth’s
+  pre-compiled `dataCopy` (at `0x00...04`) contract did a shallow copy on invocation.
+  An attacker could deploy a contract that \n\n- writes `X` to an EVM memory region
+  `R`,\n- calls `0x00..04` with `R` as an argument,\n- overwrites `R` to `Y`,\n- and
+  finally invokes the `RETURNDATACOPY` opcode.\n\nWhen this contract is invoked, a
+  consensus-compliant node would push `X` on the EVM stack, whereas Geth would push
+  `Y`.\n\n### For more information\nIf you have any questions or comments about this
+  advisory:\n* Open an issue in [go-ethereum](https://github.com/ethereum/go-ethereum)\n*
+  Email us at [security@ethereum.org](mailto:security@ethereum.org)"
+ghsaId: GHSA-69v6-xc2j-r2jf
+identifiers:
+- type: GHSA
+  value: GHSA-69v6-xc2j-r2jf
+- type: CVE
+  value: CVE-2020-26241
+permalink: https://github.com/advisories/GHSA-69v6-xc2j-r2jf
+publishedAt: "2021-06-29T21:13:01Z"
+references:
+- url: https://github.com/ethereum/go-ethereum/security/advisories/GHSA-69v6-xc2j-r2jf
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-26241
+- url: https://github.com/advisories/GHSA-69v6-xc2j-r2jf
+summary: Shallow copy bug in geth
+updatedAt: "2021-06-29T21:13:01Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.19.7
+  package:
+    name: github.com/ethereum/go-ethereum/core/vm
+  severity: MODERATE
+  updatedAt: "2021-05-21T21:51:50Z"
+  vulnerableVersionRange: < 1.19.7
+- firstPatchedVersion:
+    identifier: 1.9.17
+  package:
+    name: github.com/ethereum/go-ethereum
+  severity: MODERATE
+  updatedAt: "2021-05-21T21:51:50Z"
+  vulnerableVersionRange: '>= 1.9.7, < 1.9.17'

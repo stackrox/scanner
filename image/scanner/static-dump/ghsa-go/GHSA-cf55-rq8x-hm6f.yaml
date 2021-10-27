@@ -1,0 +1,23 @@
+description: Dutchcoders transfer.sh before 1.2.4 allows Directory Traversal for deleting
+  files.
+ghsaId: GHSA-cf55-rq8x-hm6f
+identifiers:
+- type: GHSA
+  value: GHSA-cf55-rq8x-hm6f
+- type: CVE
+  value: CVE-2021-33497
+permalink: https://github.com/advisories/GHSA-cf55-rq8x-hm6f
+publishedAt: "2021-06-29T21:25:33Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-33497
+- url: https://github.com/advisories/GHSA-cf55-rq8x-hm6f
+summary: Path Traversal in Dutchcoders transfer.sh
+updatedAt: "2021-06-29T21:25:33Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.2.4
+  package:
+    name: github.com/dutchcoders/transfer.sh
+  severity: CRITICAL
+  updatedAt: "2021-05-28T18:00:49Z"
+  vulnerableVersionRange: < 1.2.4

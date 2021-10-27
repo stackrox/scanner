@@ -1,0 +1,25 @@
+description: An insufficient JWT validation vulnerability was found in Kiali versions
+  0.4.0 to 1.15.0 and was fixed in Kiali version 1.15.1, wherein a remote attacker
+  could abuse this flaw by stealing a valid JWT cookie and using that to spoof a user
+  session, possibly gaining privileges to view and alter the Istio configuration.
+ghsaId: GHSA-465w-gg5p-85c9
+identifiers:
+- type: GHSA
+  value: GHSA-465w-gg5p-85c9
+- type: CVE
+  value: CVE-2020-1762
+permalink: https://github.com/advisories/GHSA-465w-gg5p-85c9
+publishedAt: "2021-05-18T21:09:01Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-1762
+- url: https://github.com/advisories/GHSA-465w-gg5p-85c9
+summary: Insufficient Session Expiration in Kiali
+updatedAt: "2021-05-18T21:09:01Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.15.1
+  package:
+    name: github.com/kiali/kiali
+  severity: HIGH
+  updatedAt: "2021-05-18T20:45:56Z"
+  vulnerableVersionRange: '>= 0.4.0, < 1.15.1'

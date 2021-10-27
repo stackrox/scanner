@@ -1,0 +1,24 @@
+description: A denial of service flaw was found in miekg-dns before 1.0.4. A remote
+  attacker could use carefully timed TCP packets to block the DNS server from accepting
+  new connections.
+ghsaId: GHSA-p55x-7x9v-q8m4
+identifiers:
+- type: GHSA
+  value: GHSA-p55x-7x9v-q8m4
+- type: CVE
+  value: CVE-2017-15133
+permalink: https://github.com/advisories/GHSA-p55x-7x9v-q8m4
+publishedAt: "2021-06-29T21:45:07Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2017-15133
+- url: https://github.com/advisories/GHSA-p55x-7x9v-q8m4
+summary: Denial of Service in miekg-dns
+updatedAt: "2021-06-29T21:45:07Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.0.4
+  package:
+    name: github.com/miekg/dns
+  severity: HIGH
+  updatedAt: "2021-05-20T20:59:20Z"
+  vulnerableVersionRange: < 1.0.4

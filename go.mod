@@ -28,6 +28,7 @@ require (
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
 	github.com/knqyf263/go-rpm-version v0.0.0-20170716094938-74609b86c936
 	github.com/lib/pq v1.9.0
+	github.com/machinebox/graphql v0.2.2
 	github.com/mailru/easyjson v0.7.7
 	github.com/mholt/archiver/v3 v3.5.0
 	github.com/mitchellh/hashstructure v1.1.0

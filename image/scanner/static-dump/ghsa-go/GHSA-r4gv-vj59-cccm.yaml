@@ -1,0 +1,35 @@
+description: |-
+  ### Impact
+  Control characters are not escaped from console output. This can result in hiding input from the user which could result in the user taking an unknown, malicious action.
+
+  ### Patches
+  <!-- _Has the problem been patched? What versions should users upgrade to?_  -->
+
+  - Patched via https://github.com/ipfs/go-ipfs/pull/7831 in v0.8.0
+
+  ### For more information
+  If you have any questions or comments about this advisory:
+  * Open an issue in [go-ipfs](http://github.com/ipfs/go-ipfs)
+  * Email us at [security@ipfs.io](mailto:security@ipfs.io)
+ghsaId: GHSA-r4gv-vj59-cccm
+identifiers:
+- type: GHSA
+  value: GHSA-r4gv-vj59-cccm
+- type: CVE
+  value: CVE-2020-26283
+permalink: https://github.com/advisories/GHSA-r4gv-vj59-cccm
+publishedAt: "2021-06-23T17:27:27Z"
+references:
+- url: https://github.com/ipfs/go-ipfs/security/advisories/GHSA-r4gv-vj59-cccm
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-26283
+- url: https://github.com/advisories/GHSA-r4gv-vj59-cccm
+summary: 'Control character injection in console output in github.com/ipfs/go-ipfs '
+updatedAt: "2021-06-23T17:27:27Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.8.0
+  package:
+    name: github.com/ipfs/go-ipfs
+  severity: MODERATE
+  updatedAt: "2021-05-21T18:06:40Z"
+  vulnerableVersionRange: < 0.8.0

@@ -1,0 +1,24 @@
+description: HashiCorp Nomad and Nomad Enterprise up to 0.10.2 incorrectly validated
+  role/region associated with TLS certificates used for mTLS RPC, and were susceptible
+  to privilege escalation. Fixed in 0.10.3.
+ghsaId: GHSA-cj2h-ww36-v932
+identifiers:
+- type: GHSA
+  value: GHSA-cj2h-ww36-v932
+- type: CVE
+  value: CVE-2020-7956
+permalink: https://github.com/advisories/GHSA-cj2h-ww36-v932
+publishedAt: "2021-05-18T18:20:26Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-7956
+- url: https://github.com/advisories/GHSA-cj2h-ww36-v932
+summary: Improper Certificate Validation in HashiCorp Nomad
+updatedAt: "2021-05-18T18:20:26Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.10.3
+  package:
+    name: github.com/hashicorp/nomad
+  severity: HIGH
+  updatedAt: "2021-05-13T14:53:36Z"
+  vulnerableVersionRange: < 0.10.3

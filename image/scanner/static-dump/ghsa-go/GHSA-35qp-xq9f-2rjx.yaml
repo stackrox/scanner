@@ -1,0 +1,31 @@
+description: HashiCorp Nomad and Nomad Enterprise up to 0.12.9 exec and java task
+  drivers can access processes associated with other tasks on the same node. Fixed
+  in 0.12.10, and 1.0.3.
+ghsaId: GHSA-35qp-xq9f-2rjx
+identifiers:
+- type: GHSA
+  value: GHSA-35qp-xq9f-2rjx
+- type: CVE
+  value: CVE-2021-3283
+permalink: https://github.com/advisories/GHSA-35qp-xq9f-2rjx
+publishedAt: "2021-06-24T20:28:28Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-3283
+- url: https://github.com/advisories/GHSA-35qp-xq9f-2rjx
+summary: Improper Privilege Management in HashiCorp Nomad
+updatedAt: "2021-06-24T20:28:28Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.12.10
+  package:
+    name: github.com/hashicorp/nomad
+  severity: HIGH
+  updatedAt: "2021-05-12T21:38:08Z"
+  vulnerableVersionRange: < 0.12.10
+- firstPatchedVersion:
+    identifier: 1.0.3
+  package:
+    name: github.com/hashicorp/nomad
+  severity: HIGH
+  updatedAt: "2021-05-12T21:38:08Z"
+  vulnerableVersionRange: '>= 1.0.0, < 1.0.3'

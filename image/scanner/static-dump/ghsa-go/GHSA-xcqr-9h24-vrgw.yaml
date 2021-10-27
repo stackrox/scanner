@@ -1,0 +1,24 @@
+description: As of v1.5.0, the Argo API does not implement anti-automation measures
+  such as rate limiting, account lockouts, or other anti-bruteforce measures. Attackers
+  can submit an unlimited number of authentication attempts without consequence.
+ghsaId: GHSA-xcqr-9h24-vrgw
+identifiers:
+- type: GHSA
+  value: GHSA-xcqr-9h24-vrgw
+- type: CVE
+  value: CVE-2020-8827
+permalink: https://github.com/advisories/GHSA-xcqr-9h24-vrgw
+publishedAt: "2021-07-26T21:19:37Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-8827
+- url: https://github.com/advisories/GHSA-xcqr-9h24-vrgw
+summary: Improper Restriction of Excessive Authentication Attempts in Argo API
+updatedAt: "2021-07-26T21:19:37Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.5.1
+  package:
+    name: github.com/argoproj/argo-cd/util/cache
+  severity: HIGH
+  updatedAt: "2021-07-26T21:13:32Z"
+  vulnerableVersionRange: < 1.5.1

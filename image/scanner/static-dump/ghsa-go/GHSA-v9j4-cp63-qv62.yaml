@@ -1,0 +1,21 @@
+description: unarr.go in go-unarr (aka Go bindings for unarr) 0.1.1 allows Directory
+  Traversal via ../ in a pathname within a TAR archive.
+ghsaId: GHSA-v9j4-cp63-qv62
+identifiers:
+- type: GHSA
+  value: GHSA-v9j4-cp63-qv62
+- type: CVE
+  value: CVE-2021-38197
+permalink: https://github.com/advisories/GHSA-v9j4-cp63-qv62
+publishedAt: "2021-09-01T18:32:02Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-38197
+- url: https://github.com/advisories/GHSA-v9j4-cp63-qv62
+summary: Tarslip in go-unarr
+updatedAt: "2021-09-01T18:32:02Z"
+vulnerabilities:
+- package:
+    name: github.com/gen2brain/go-unarr
+  severity: CRITICAL
+  updatedAt: "2021-08-30T21:25:00Z"
+  vulnerableVersionRange: <= 0.1.1

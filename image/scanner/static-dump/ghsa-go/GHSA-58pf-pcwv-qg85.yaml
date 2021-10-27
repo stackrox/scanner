@@ -1,0 +1,22 @@
+description: This affects all versions of package github.com/u-root/u-root/pkg/uzip.
+  It is vulnerable to both leading and non-leading relative path traversal attacks
+  in zip file extraction.
+ghsaId: GHSA-58pf-pcwv-qg85
+identifiers:
+- type: GHSA
+  value: GHSA-58pf-pcwv-qg85
+- type: CVE
+  value: CVE-2020-7665
+permalink: https://github.com/advisories/GHSA-58pf-pcwv-qg85
+publishedAt: "2021-05-18T21:08:28Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-7665
+- url: https://github.com/advisories/GHSA-58pf-pcwv-qg85
+summary: Path traversal
+updatedAt: "2021-05-18T21:08:28Z"
+vulnerabilities:
+- package:
+    name: github.com/u-root/u-root
+  severity: MODERATE
+  updatedAt: "2021-05-18T20:51:25Z"
+  vulnerableVersionRange: <= 7.0.0

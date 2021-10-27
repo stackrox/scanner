@@ -1,0 +1,46 @@
+description: A security issue was discovered in Kubernetes where a user may be able
+  to redirect pod traffic to private networks on a Node. Kubernetes already prevents
+  creation of Endpoint IPs in the localhost or link-local range, but the same validation
+  was not performed on EndpointSlice IPs.
+ghsaId: GHSA-mfv7-gq43-w965
+identifiers:
+- type: GHSA
+  value: GHSA-mfv7-gq43-w965
+- type: CVE
+  value: CVE-2021-25737
+permalink: https://github.com/advisories/GHSA-mfv7-gq43-w965
+publishedAt: "2021-09-07T23:09:24Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-25737
+- url: https://github.com/advisories/GHSA-mfv7-gq43-w965
+summary: Incomplete List of Disallowed Inputs in Kubernetes
+updatedAt: "2021-10-05T16:03:50Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.21.1
+  package:
+    name: k8s.io/kubernetes
+  severity: MODERATE
+  updatedAt: "2021-09-07T18:59:17Z"
+  vulnerableVersionRange: = 1.21.0
+- firstPatchedVersion:
+    identifier: 1.20.7
+  package:
+    name: k8s.io/kubernetes
+  severity: MODERATE
+  updatedAt: "2021-09-07T18:59:17Z"
+  vulnerableVersionRange: '>= 1.20.0, < 1.20.7'
+- firstPatchedVersion:
+    identifier: 1.19.11
+  package:
+    name: k8s.io/kubernetes
+  severity: MODERATE
+  updatedAt: "2021-09-07T18:59:17Z"
+  vulnerableVersionRange: '>= 1.19.0, < 1.19.11'
+- firstPatchedVersion:
+    identifier: 1.18.19
+  package:
+    name: k8s.io/kubernetes
+  severity: MODERATE
+  updatedAt: "2021-09-07T18:59:17Z"
+  vulnerableVersionRange: '>= 1.16.0, < 1.18.19'

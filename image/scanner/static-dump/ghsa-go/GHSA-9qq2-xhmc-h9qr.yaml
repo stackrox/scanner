@@ -1,0 +1,27 @@
+description: An issue was discovered in Rancher 2 through 2.1.5. Any project member
+  with access to the default namespace can mount the netes-default service account
+  in a pod, and then use that pod to execute administrative privileged commands against
+  the k8s cluster. This could be mitigated by isolating the default namespace in a
+  separate project, where only cluster admins can be given permissions to access.
+  As of 2018-12-20, this bug affected ALL clusters created or imported by Rancher.
+ghsaId: GHSA-9qq2-xhmc-h9qr
+identifiers:
+- type: GHSA
+  value: GHSA-9qq2-xhmc-h9qr
+- type: CVE
+  value: CVE-2018-20321
+permalink: https://github.com/advisories/GHSA-9qq2-xhmc-h9qr
+publishedAt: "2021-06-23T17:57:10Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2018-20321
+- url: https://github.com/advisories/GHSA-9qq2-xhmc-h9qr
+summary: Access Control Bypass
+updatedAt: "2021-06-23T17:57:10Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 2.1.6
+  package:
+    name: github.com/rancher/rancher
+  severity: HIGH
+  updatedAt: "2021-06-23T17:56:59Z"
+  vulnerableVersionRange: '>= 2.0.0, < 2.1.6'

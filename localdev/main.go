@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/stackrox/rox/pkg/utils"
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/cpe"
@@ -67,12 +69,12 @@ func filterComponentsByName(components []*component.Component, name string) []*c
 	return filtered
 }
 
-func analyzeLocalImage(path string) {
+func analyzeLocalImage(path string) error {
 	fmt.Println(path)
 	// Get local .tar.gz path
 	f, err := os.Open(path)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	// Extract
@@ -80,11 +82,11 @@ func analyzeLocalImage(path string) {
 	tarutil.SetMaxExtractableFileSize(1024 * 1024 * 1024)
 	filemap, err := tarutil.ExtractFiles(f, &matcher)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if _, ok := filemap["manifest.json"]; !ok {
-		panic("malformed .tar does not contain manifest.json")
+		return errors.New("malformed .tar does not contain manifest.json")
 	}
 
 	var configs []Config
@@ -92,7 +94,7 @@ func analyzeLocalImage(path string) {
 		panic(err)
 	}
 	if len(configs) == 0 {
-		panic("no configs found in tar")
+		return errors.New("no configs found in tar")
 	}
 	config := configs[0]
 
@@ -102,7 +104,7 @@ func analyzeLocalImage(path string) {
 		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l].Contents))
 		files, err := imagefmt.ExtractFromReader(layerTarReader, "Docker", requiredfilenames.SingletonMatcher())
 		if err != nil {
-			panic(err)
+			return err
 		}
 		namespace = clair.DetectNamespace(l, files, nil, false)
 		if namespace != nil {
@@ -115,8 +117,7 @@ func analyzeLocalImage(path string) {
 		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l].Contents))
 		_, _, _, rhelv2Components, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace}, false)
 		if err != nil {
-			fmt.Println(err.Error())
-			return
+			return err
 		}
 
 		if rhelv2Components != nil {
@@ -147,25 +148,59 @@ func analyzeLocalImage(path string) {
 		}
 	}
 	fmt.Printf("\n%0.4f seconds took Checking for vulns\n", total.Seconds())
+	return nil
+}
+
+func main() {
+	if err := mainCmd(); err != nil {
+		panic(err)
+	}
 }
 
 // Assumes Working Directory is the repo's top-level directory (scanner/).
-func main() {
+func mainCmd() error {
 	nvdtoolscache.BoltPath = "/tmp/temp.db"
 	nvdPath, err := filepath.Abs("image/scanner/dump/nvd")
 	if err != nil {
-		panic(err)
+		return err
 	}
 	utils.Must(os.Setenv("NVD_DEFINITIONS_DIR", nvdPath))
 	nvdtoolscache.Singleton()
 
-	path := "TODO: Absolute path to local image tar.gz files"
+	paths := os.Args[1:]
+	if len(paths) == 0 {
+		return errors.New("no files specified")
+	}
 
-	fis, err := os.ReadDir(path)
+	for _, path := range paths {
+		if err := process(path); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func process(filePath string) error {
+	st, err := os.Stat(filePath)
 	if err != nil {
-		panic(err)
+		return errors.Wrapf(err, "stat'ing %s", filePath)
 	}
-	for _, fi := range fis {
-		analyzeLocalImage(filepath.Join(path, fi.Name()))
+
+	if !st.IsDir() {
+		return analyzeLocalImage(filePath)
 	}
+
+	entries, err := os.ReadDir(filePath)
+	if err != nil {
+		return err
+	}
+
+	for _, e := range entries {
+		if err := process(filepath.Join(filePath, e.Name())); err != nil {
+			return err
+		}
+	}
+
+	return err
 }

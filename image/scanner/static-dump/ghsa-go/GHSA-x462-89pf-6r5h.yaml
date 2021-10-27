@@ -1,0 +1,54 @@
+description: |-
+  ### Impact
+
+  1. `syncthing` can be caused to crash and exit if sent a malformed relay
+     protocol message message with a negative length field.
+
+  2. The relay server `strelaysrv` can be caused to crash and exit if sent
+     a malformed relay protocol message with a negative length field.
+
+  At no point is sensitive data exposed or liable to be altered due to this
+  issue. Sensitive data is never exposed to relay operators. Syncthing itself
+  would need to be lured to connect to a malicious relay server in order to
+  exploit the issue.
+
+  ### Patches
+
+  Fixed in version 1.15.0.
+
+  ### Workarounds
+
+  1. No known workaround for `strelaysrv`.
+
+  2. `syncthing` can be configured to not use relays, or to only use specific,
+     trusted relays. If Syncthing is used in a closed environment or with
+     relaying disabled, i.e., it does not communicate with unknown relays,
+     Syncthing is not vulnerable.
+
+  ### For more information
+
+  If you have any questions or comments about this advisory, please discuss it [on the forum](https://forum.syncthing.net/).
+
+  Thanks to Wojciech Paciorek for discovering and reporting this issue.
+ghsaId: GHSA-x462-89pf-6r5h
+identifiers:
+- type: GHSA
+  value: GHSA-x462-89pf-6r5h
+- type: CVE
+  value: CVE-2021-21404
+permalink: https://github.com/advisories/GHSA-x462-89pf-6r5h
+publishedAt: "2021-05-21T16:23:17Z"
+references:
+- url: https://github.com/syncthing/syncthing/security/advisories/GHSA-x462-89pf-6r5h
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-21404
+- url: https://github.com/advisories/GHSA-x462-89pf-6r5h
+summary: Crash due to malformed relay protocol message
+updatedAt: "2021-05-21T16:23:17Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.15.0
+  package:
+    name: github.com/syncthing/syncthing
+  severity: LOW
+  updatedAt: "2021-05-20T20:52:27Z"
+  vulnerableVersionRange: < 1.15.0

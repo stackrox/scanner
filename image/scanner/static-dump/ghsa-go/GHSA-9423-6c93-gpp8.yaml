@@ -1,0 +1,25 @@
+description: The CPIO extraction functionality doesn't sanitize the paths of the archived
+  files for leading and non-leading ".." which leads in file extraction outside of
+  the current directory. Note, the fixing commit was applied to all affected versions
+  which were re-released.
+ghsaId: GHSA-9423-6c93-gpp8
+identifiers:
+- type: GHSA
+  value: GHSA-9423-6c93-gpp8
+- type: CVE
+  value: CVE-2020-7667
+permalink: https://github.com/advisories/GHSA-9423-6c93-gpp8
+publishedAt: "2021-06-23T17:13:29Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-7667
+- url: https://github.com/advisories/GHSA-9423-6c93-gpp8
+summary: Arbitrary File Write via Archive Extraction (Zip Slip)
+updatedAt: "2021-07-29T18:54:58Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.1.0
+  package:
+    name: github.com/sassoftware/go-rpmutils/cpio
+  severity: HIGH
+  updatedAt: "2021-05-12T14:56:05Z"
+  vulnerableVersionRange: < 0.1.0

@@ -86,6 +86,9 @@ func ListFeatures(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, 
 }
 
 func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Package, []string, error) {
+	if true {
+		return nil, nil, nil
+	}
 	cpes, err := getCPEsUsingEmbeddedContentSets(files)
 	if err != nil {
 		return nil, nil, err

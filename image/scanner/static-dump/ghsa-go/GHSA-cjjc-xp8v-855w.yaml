@@ -1,0 +1,57 @@
+description: |-
+  The Helm core maintainers have identified a high severity security vulnerability in Go's `crypto` package affecting all versions prior to Helm 2.16.8 and Helm 3.1.0.
+
+  Thanks to @ravin9249 for identifying the vulnerability.
+
+  ### Impact
+
+  Go before 1.12.16 and 1.13.x before 1.13.7 (and the `crypto/cryptobyte` package before 0.0.0-20200124225646-8b5121be2f68 for Go) allows attacks on clients resulting in a panic via a malformed X.509 certificate. This may allow a remote attacker to cause a denial of service.
+
+  ### Patches
+
+  A patch to compile Helm against Go 1.14.4 has been provided for Helm 2 and is available in Helm 2.16.8. Helm 3.1.0 and newer are compiled against Go 1.13.7+.
+
+  ### Workarounds
+
+  No workaround is available. Users are urged to upgrade.
+
+  ### References
+
+  - https://nvd.nist.gov/vuln/detail/CVE-2020-7919
+  - https://github.com/helm/helm/pull/8288
+
+  ### For more information
+
+  If you have any questions or comments about this advisory:
+
+  * Open an issue in [the Helm repository](https://github.com/helm/helm/issues)
+  * For security-specific issues, email us at <cncf-helm-security@lists.cncf.io>
+ghsaId: GHSA-cjjc-xp8v-855w
+identifiers:
+- type: GHSA
+  value: GHSA-cjjc-xp8v-855w
+- type: CVE
+  value: CVE-2020-7919
+permalink: https://github.com/advisories/GHSA-cjjc-xp8v-855w
+publishedAt: "2021-06-23T18:02:39Z"
+references:
+- url: https://github.com/helm/helm/security/advisories/GHSA-cjjc-xp8v-855w
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-7919
+- url: https://github.com/advisories/GHSA-cjjc-xp8v-855w
+summary: Panic in malformed cerftificate
+updatedAt: "2021-10-06T21:23:32Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 3.1.0
+  package:
+    name: github.com/helm/helm/v3
+  severity: HIGH
+  updatedAt: "2021-06-23T18:02:28Z"
+  vulnerableVersionRange: '>= 3.0.0, < 3.1.0'
+- firstPatchedVersion:
+    identifier: 2.16.8
+  package:
+    name: github.com/helm/helm
+  severity: HIGH
+  updatedAt: "2021-06-18T22:07:34Z"
+  vulnerableVersionRange: '>= 2.0.0, < 2.16.8'

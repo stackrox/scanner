@@ -1,0 +1,25 @@
+description: A path traversal flaw was found in Buildah in versions before 1.14.5.
+  This flaw allows an attacker to trick a user into building a malicious container
+  image hosted on an HTTP(s) server and then write files to the user's system anywhere
+  that the user has permissions.
+ghsaId: GHSA-fx8w-mjvm-hvpc
+identifiers:
+- type: GHSA
+  value: GHSA-fx8w-mjvm-hvpc
+- type: CVE
+  value: CVE-2020-10696
+permalink: https://github.com/advisories/GHSA-fx8w-mjvm-hvpc
+publishedAt: "2021-05-18T18:32:41Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-10696
+- url: https://github.com/advisories/GHSA-fx8w-mjvm-hvpc
+summary: Path Traversal in Buildah
+updatedAt: "2021-05-18T18:32:41Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.14.4
+  package:
+    name: github.com/containers/buildah/imagebuildah
+  severity: HIGH
+  updatedAt: "2021-05-07T17:31:17Z"
+  vulnerableVersionRange: < 1.14.4

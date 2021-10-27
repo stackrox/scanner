@@ -1,0 +1,27 @@
+description: Go JOSE before 1.1.0 suffers from multiple signatures exploitation. The
+  go-jose library supports messages with multiple signatures. However, when validating
+  a signed message the API did not indicate which signature was valid, which could
+  potentially lead to confusion. For example, users of the library might mistakenly
+  read protected header values from an attached signature that was different from
+  the one originally validated.
+ghsaId: GHSA-77gc-fj98-665h
+identifiers:
+- type: GHSA
+  value: GHSA-77gc-fj98-665h
+- type: CVE
+  value: CVE-2016-9122
+permalink: https://github.com/advisories/GHSA-77gc-fj98-665h
+publishedAt: "2021-05-18T19:15:09Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2016-9122
+- url: https://github.com/advisories/GHSA-77gc-fj98-665h
+summary: Signature Validation Bypass
+updatedAt: "2021-05-18T19:15:09Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.1.0
+  package:
+    name: gopkg.in/square/go-jose.v1
+  severity: HIGH
+  updatedAt: "2021-05-12T18:06:42Z"
+  vulnerableVersionRange: < 1.1.0

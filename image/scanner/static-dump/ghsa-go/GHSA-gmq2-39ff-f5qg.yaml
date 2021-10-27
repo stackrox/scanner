@@ -1,0 +1,43 @@
+description: |-
+  ### Impact
+  Processes using tableflip may encounter hung goroutines in the parent process, after a failed upgrade.
+
+  The Go runtime has annoying behaviour around setting and clearing
+  O_NONBLOCK: exec.Cmd.Start() ends up calling os.File.Fd() for any
+  file in exec.Cmd.ExtraFiles. os.File.Fd() disables both the use
+  of the runtime poller for the file and clears O_NONBLOCK from
+  the underlying open file descriptor.
+
+  This can lead to goroutines hanging in a parent process, after at least
+  one failed upgrade. The bug manifests in goroutines which rely on
+  either a deadline or interruption via Close() to be unblocked being stuck
+  in read or accept like syscalls. As far as I can tell we've not experienced
+  this problem in production, so it's most likely quite rare.
+
+  ### Patches
+  The problem has been fixed in v1.2.2.
+
+  ### Workarounds
+  None.
+
+  ### References
+  * https://github.com/cloudflare/tableflip/commit/cae714b289e199db5da5f08af861ea65be6232c0
+ghsaId: GHSA-gmq2-39ff-f5qg
+identifiers:
+- type: GHSA
+  value: GHSA-gmq2-39ff-f5qg
+permalink: https://github.com/advisories/GHSA-gmq2-39ff-f5qg
+publishedAt: "2021-05-21T16:25:48Z"
+references:
+- url: https://github.com/cloudflare/tableflip/security/advisories/GHSA-gmq2-39ff-f5qg
+- url: https://github.com/advisories/GHSA-gmq2-39ff-f5qg
+summary: A failed upgrade may lead to hung goroutines
+updatedAt: "2021-05-21T16:25:48Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.2.2
+  package:
+    name: github.com/cloudflare/tableflip
+  severity: LOW
+  updatedAt: "2021-05-21T14:40:37Z"
+  vulnerableVersionRange: < 1.2.1

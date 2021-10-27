@@ -1,0 +1,66 @@
+description: |-
+  #### Summary
+  In SPIRE 0.8.1 through 0.8.4 and before versions 0.9.4, 0.10.2, 0.11.3 and 0.12.1, specially crafted requests to the FetchX509SVID RPC of SPIRE Server’s Legacy Node API can result in the possible issuance of an X.509 certificate with a URI SAN for a SPIFFE ID that the agent is not authorized to distribute. Proper controls are in place to require that the caller presents a valid agent certificate that is already authorized to issue at least one SPIFFE ID, and the requested SPIFFE ID belongs to the same trust domain, prior to being able to trigger this vulnerability. This issue has been fixed in SPIRE versions 0.8.5, 0.9.4, 0.10.2, 0.11.3 and 0.12.1.
+
+  #### What are the changes introduced by the patched versions?
+  The changes introduced to address this issue are related to enforcing that the FetchX509SVID RPC of SPIRE Server’s Legacy Node API only issues X.509 certificates with SPIFFE IDs that the agent is authorized to distribute.
+
+  The patched version also includes a back-ported change that improves the handling of file descriptors related to workload attestation in SPIRE Agent.
+
+  There are no changes in the expected behavior of SPIRE.
+
+  #### Should I upgrade SPIRE?
+  All SPIRE users running affected versions are advised to upgrade to the corresponding patched version.
+
+  #### Workarounds
+  No workarounds have been identified for this vulnerability.
+ghsaId: GHSA-h746-rm5q-8mgq
+identifiers:
+- type: GHSA
+  value: GHSA-h746-rm5q-8mgq
+- type: CVE
+  value: CVE-2021-27098
+permalink: https://github.com/advisories/GHSA-h746-rm5q-8mgq
+publishedAt: "2021-05-21T14:31:11Z"
+references:
+- url: https://github.com/spiffe/spire/security/advisories/GHSA-h746-rm5q-8mgq
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-27098
+- url: https://github.com/advisories/GHSA-h746-rm5q-8mgq
+summary: Legacy Node API Allows Impersonation in github.com/spiffe/spire/pkg/server/endpoints/node
+updatedAt: "2021-05-21T14:31:11Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.12.1
+  package:
+    name: github.com/spiffe/spire/pkg/server/endpoints/node
+  severity: HIGH
+  updatedAt: "2021-05-21T14:29:24Z"
+  vulnerableVersionRange: '>= 0.12.0, < 0.12.1'
+- firstPatchedVersion:
+    identifier: 0.11.3
+  package:
+    name: github.com/spiffe/spire/pkg/server/endpoints/node
+  severity: HIGH
+  updatedAt: "2021-05-21T14:29:24Z"
+  vulnerableVersionRange: '>= 0.11.0, < 0.11.3'
+- firstPatchedVersion:
+    identifier: 0.10.2
+  package:
+    name: github.com/spiffe/spire/pkg/server/endpoints/node
+  severity: HIGH
+  updatedAt: "2021-05-21T14:29:24Z"
+  vulnerableVersionRange: '>= 0.10.0, < 0.10.2'
+- firstPatchedVersion:
+    identifier: 0.9.4
+  package:
+    name: github.com/spiffe/spire/pkg/server/endpoints/node
+  severity: HIGH
+  updatedAt: "2021-05-21T14:29:24Z"
+  vulnerableVersionRange: '>= 0.9.0, < 0.9.4'
+- firstPatchedVersion:
+    identifier: 0.8.5
+  package:
+    name: github.com/spiffe/spire/pkg/server/endpoints/node
+  severity: HIGH
+  updatedAt: "2021-05-21T14:29:24Z"
+  vulnerableVersionRange: '>= 0.8.1, < 0.8.5'

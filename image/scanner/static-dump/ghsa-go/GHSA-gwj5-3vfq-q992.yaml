@@ -1,0 +1,67 @@
+description: |-
+  (This advisory is canonically <https://advisories.nats.io/CVE/CVE-2020-28466.txt>)
+
+  ## Problem Description
+
+  An export/import cycle between accounts could crash the nats-server, after consuming CPU and memory.
+
+  This issue was fixed publicly in <https://github.com/nats-io/nats-server/pull/1731> in November 2020.
+
+  The need to call this out as a security issue was highlighted by `snyk.io` and we are grateful for their assistance in doing so.
+
+  Organizations which run a NATS service providing access to accounts run by untrusted third parties are affected.
+  See below for an important caveat if running such a service.
+
+
+  ## Affected versions
+
+  #### NATS Server
+
+   * Version 2 prior to 2.2.0
+     + 2.0.0 through and including 2.1.9 are vulnerable.
+   * fixed with nats-io/nats-server PR 1731, commit 2e3c226729
+
+
+  ## Impact
+
+  The nats-server could be killed, after consuming resources.
+
+
+  ## Workaround
+
+  The import cycle requires at least two accounts to work; if you have open account sign-up, then restricting new account sign-up might hinder an attacker.
+
+
+  ## Solution
+
+  Upgrade the nats-server.
+
+
+  ## Caveat on NATS with untrusted users
+
+  Running a NATS service which is exposed to untrusted users presents a heightened risk.
+
+  Any remote execution flaw or equivalent seriousness, or denial-of-service by unauthenticated users, will lead to prompt releases by the NATS maintainers.
+
+  Fixes for denial of service issues with no threat of remote execution, when limited to account holders, are likely to just be committed to the main development branch with no special attention.
+
+  Those who are running such services are encouraged to build regularly from git.
+ghsaId: GHSA-gwj5-3vfq-q992
+identifiers:
+- type: GHSA
+  value: GHSA-gwj5-3vfq-q992
+permalink: https://github.com/advisories/GHSA-gwj5-3vfq-q992
+publishedAt: "2021-05-21T16:22:16Z"
+references:
+- url: https://github.com/nats-io/nats-server/security/advisories/GHSA-gwj5-3vfq-q992
+- url: https://github.com/advisories/GHSA-gwj5-3vfq-q992
+summary: Import loops in account imports, nats-server DoS
+updatedAt: "2021-05-21T16:22:16Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 2.2.0
+  package:
+    name: github.com/nats-io/nats-server/v2
+  severity: LOW
+  updatedAt: "2021-05-21T16:14:32Z"
+  vulnerableVersionRange: < 2.2.0

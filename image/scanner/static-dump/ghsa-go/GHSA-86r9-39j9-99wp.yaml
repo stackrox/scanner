@@ -1,0 +1,26 @@
+description: go-jose before 1.0.4 suffers from an invalid curve attack for the ECDH-ES
+  algorithm. When deriving a shared key using ECDH-ES for an encrypted message, go-jose
+  neglected to check that the received public key on a message is on the same curve
+  as the static private key of the receiver, thus making it vulnerable to an invalid
+  curve attack.
+ghsaId: GHSA-86r9-39j9-99wp
+identifiers:
+- type: GHSA
+  value: GHSA-86r9-39j9-99wp
+- type: CVE
+  value: CVE-2016-9121
+permalink: https://github.com/advisories/GHSA-86r9-39j9-99wp
+publishedAt: "2021-06-23T17:17:52Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2016-9121
+- url: https://github.com/advisories/GHSA-86r9-39j9-99wp
+summary: Elliptic Curve Key Disclosure in go-jose
+updatedAt: "2021-06-23T17:17:52Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.0.4
+  package:
+    name: gopkg.in/square/go-jose.v1
+  severity: CRITICAL
+  updatedAt: "2021-05-20T16:54:52Z"
+  vulnerableVersionRange: < 1.0.4

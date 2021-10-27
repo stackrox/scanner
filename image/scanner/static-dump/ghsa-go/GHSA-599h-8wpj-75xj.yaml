@@ -1,0 +1,25 @@
+description: The package github.com/tyktechnologies/tyk-identity-broker before 1.1.1
+  are vulnerable to Authentication Bypass via the Go XML parser which can cause SAML
+  authentication bypass. This is because the XML parser doesn’t guarantee integrity
+  in the XML round-trip (encoding/decoding XML data).
+ghsaId: GHSA-599h-8wpj-75xj
+identifiers:
+- type: GHSA
+  value: GHSA-599h-8wpj-75xj
+- type: CVE
+  value: CVE-2021-23365
+permalink: https://github.com/advisories/GHSA-599h-8wpj-75xj
+publishedAt: "2021-06-23T17:23:30Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-23365
+- url: https://github.com/advisories/GHSA-599h-8wpj-75xj
+summary: Authentication Bypass in tyk-identity-broker
+updatedAt: "2021-06-23T17:23:30Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.1.1
+  package:
+    name: github.com/tyktechnologies/tyk-identity-broker
+  severity: CRITICAL
+  updatedAt: "2021-05-20T21:24:50Z"
+  vulnerableVersionRange: < 1.1.1

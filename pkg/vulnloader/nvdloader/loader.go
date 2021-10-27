@@ -34,8 +34,9 @@ type loader struct{}
 // If this function is successful, it will fill the directory with
 // one json file for each year of NVD data.
 func (l *loader) DownloadFeedsToPath(outputDir string) error {
-	// Fetch NVD enrichment data from curated repos
-	enrichmentMap, err := Fetch()
+	// FetchDotnet NVD enrichment data from curated repos
+	enrichmentMap := make(map[string][]*FileFormatWrapper)
+	err := FetchDotnet(enrichmentMap)
 	if err != nil {
 		return errors.Wrap(err, "could not fetch NVD enrichment sources")
 	}
@@ -53,7 +54,7 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 	return nil
 }
 
-func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir string, year int) error {
+func downloadFeedForYear(enrichmentMap map[string][]*FileFormatWrapper, outputDir string, year int) error {
 	url := jsonFeedURLForYear(year)
 	resp, err := client.Get(url)
 	if err != nil {
@@ -73,13 +74,19 @@ func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir 
 	}
 
 	for _, item := range dump.CVEItems {
-		if enrichedEntry, ok := enrichmentMap[item.CVE.CVEDataMeta.ID]; ok {
+		var lastModified string
+		for _, enrichedEntry := range enrichmentMap[item.CVE.CVEDataMeta.ID] {
 			// Add the CPE matches instead of removing for backwards compatibility purposes
 			item.Configurations.Nodes = append(item.Configurations.Nodes, &schema.NVDCVEFeedJSON10DefNode{
 				CPEMatch: enrichedEntry.AffectedPackages,
 				Operator: "OR",
 			})
-			item.LastModifiedDate = enrichedEntry.LastUpdated
+			if enrichedEntry.LastUpdated > lastModified {
+				lastModified = enrichedEntry.LastUpdated
+			}
+		}
+		if lastModified != "" {
+			item.LastModifiedDate = lastModified
 		}
 	}
 

@@ -1,0 +1,25 @@
+description: golang.org/x/crypto before v0.0.0-20200220183623-bac4c82f6975 for Go
+  allows a panic during signature verification in the golang.org/x/crypto/ssh package.
+  A client can attack an SSH server that accepts public keys. Also, a server can attack
+  any SSH client.
+ghsaId: GHSA-ffhg-7mh4-33c4
+identifiers:
+- type: GHSA
+  value: GHSA-ffhg-7mh4-33c4
+- type: CVE
+  value: CVE-2020-9283
+permalink: https://github.com/advisories/GHSA-ffhg-7mh4-33c4
+publishedAt: "2021-05-18T15:29:31Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-9283
+- url: https://github.com/advisories/GHSA-ffhg-7mh4-33c4
+summary: Improper Verification of Cryptographic Signature
+updatedAt: "2021-05-18T15:29:31Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.0.0-20200220183623-bac4c82f6975
+  package:
+    name: golang.org/x/crypto
+  severity: MODERATE
+  updatedAt: "2021-05-17T22:02:31Z"
+  vulnerableVersionRange: <= 0.0.0-20200220183622

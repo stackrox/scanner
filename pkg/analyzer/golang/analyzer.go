@@ -14,7 +14,7 @@ type analyzerImpl struct {
 }
 
 func (a *analyzerImpl) Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (matches bool, extract bool) {
-	if fileInfo.Mode().IsRegular() || fileInfo.Mode().Perm()&0111 == 0 {
+	if !fileInfo.Mode().IsRegular() || fileInfo.Mode().Perm()&0111 == 0 {
 		return false, false
 	}
 

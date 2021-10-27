@@ -1,0 +1,23 @@
+description: In Gogs 0.11.91, MakeEmailPrimary in models/user_mail.go lacks a "not
+  the owner of the email" check.
+ghsaId: GHSA-4c7m-vv47-7c69
+identifiers:
+- type: GHSA
+  value: GHSA-4c7m-vv47-7c69
+- type: CVE
+  value: CVE-2020-14958
+permalink: https://github.com/advisories/GHSA-4c7m-vv47-7c69
+publishedAt: "2021-05-18T20:33:05Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-14958
+- url: https://github.com/advisories/GHSA-4c7m-vv47-7c69
+summary: Insecure Permissions in Gogs
+updatedAt: "2021-05-18T20:33:05Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.12.0
+  package:
+    name: gogs.io/gogs
+  severity: MODERATE
+  updatedAt: "2021-05-18T20:32:58Z"
+  vulnerableVersionRange: < 0.12.0

@@ -1,0 +1,22 @@
+description: A security issue was discovered with Kubernetes that could enable users
+  to send network traffic to locations they would otherwise not have access to via
+  a confused deputy attack.
+ghsaId: GHSA-vw47-mr44-3jf9
+identifiers:
+- type: GHSA
+  value: GHSA-vw47-mr44-3jf9
+- type: CVE
+  value: CVE-2021-25740
+permalink: https://github.com/advisories/GHSA-vw47-mr44-3jf9
+publishedAt: "2021-09-21T18:28:30Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-25740
+- url: https://github.com/advisories/GHSA-vw47-mr44-3jf9
+summary: Confused Deputy in Kubernetes
+updatedAt: "2021-10-04T14:15:52Z"
+vulnerabilities:
+- package:
+    name: k8s.io/kubernetes
+  severity: LOW
+  updatedAt: "2021-09-21T14:54:49Z"
+  vulnerableVersionRange: <= 1.22.2

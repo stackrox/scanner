@@ -1,0 +1,23 @@
+description: The Library API in buger jsonparser through 2019-12-04 allows attackers
+  to cause a denial of service (infinite loop) via a Delete call.
+ghsaId: GHSA-rmh2-65xw-9m6q
+identifiers:
+- type: GHSA
+  value: GHSA-rmh2-65xw-9m6q
+- type: CVE
+  value: CVE-2020-10675
+permalink: https://github.com/advisories/GHSA-rmh2-65xw-9m6q
+publishedAt: "2021-05-18T18:26:25Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-10675
+- url: https://github.com/advisories/GHSA-rmh2-65xw-9m6q
+summary: Infinite Loop in jsonparser
+updatedAt: "2021-05-18T18:26:25Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.0.0
+  package:
+    name: github.com/buger/jsonparser
+  severity: MODERATE
+  updatedAt: "2021-05-18T18:25:50Z"
+  vulnerableVersionRange: < 1.0.0

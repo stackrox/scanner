@@ -1,0 +1,28 @@
+description: "### Impact\n\nA vulnerable node is susceptible to crash when processing
+  a maliciously crafted message from a peer. \nFurther details will be released at
+  a later point in time, in accordance with our official disclosure [policy](https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities)\n\n###
+  Patches\n\nGeth v1.10.9 contains patches to the vulnerability.\n\n### Workarounds\n\nAt
+  the moment no workaround has been released, all users are advised to upgrade to
+  the latest version of go-ethereum. "
+ghsaId: GHSA-59hh-656j-3p7v
+identifiers:
+- type: GHSA
+  value: GHSA-59hh-656j-3p7v
+- type: CVE
+  value: CVE-2021-41173
+permalink: https://github.com/advisories/GHSA-59hh-656j-3p7v
+publishedAt: "2021-10-25T19:42:57Z"
+references:
+- url: https://github.com/ethereum/go-ethereum/security/advisories/GHSA-59hh-656j-3p7v
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-41173
+- url: https://github.com/advisories/GHSA-59hh-656j-3p7v
+summary: 'DoS via maliciously crafted p2p message '
+updatedAt: "2021-10-25T19:42:57Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.10.9
+  package:
+    name: github.com/ethereum/go-ethereum
+  severity: MODERATE
+  updatedAt: "2021-10-25T18:23:12Z"
+  vulnerableVersionRange: < 1.10.9

@@ -1,0 +1,24 @@
+description: HashiCorp Vault and Vault Enterprise 1.4.0 through 1.7.3 initialized
+  an underlying database file associated with the Integrated Storage feature with
+  excessively broad filesystem permissions. Fixed in Vault and Vault Enterprise 1.8.0.
+ghsaId: GHSA-23fq-q7hc-993r
+identifiers:
+- type: GHSA
+  value: GHSA-23fq-q7hc-993r
+- type: CVE
+  value: CVE-2021-38553
+permalink: https://github.com/advisories/GHSA-23fq-q7hc-993r
+publishedAt: "2021-08-30T17:22:53Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-38553
+- url: https://github.com/advisories/GHSA-23fq-q7hc-993r
+summary: Improper Preservation of Permissions in HashiCorp Vault
+updatedAt: "2021-08-30T17:22:53Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.8.0
+  package:
+    name: github.com/hashicorp/vault/
+  severity: CRITICAL
+  updatedAt: "2021-08-30T17:16:43Z"
+  vulnerableVersionRange: '>= 1.4.0, < 1.8.0'

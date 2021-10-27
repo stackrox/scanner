@@ -1,0 +1,49 @@
+description: Improper input validation in the Kubernetes API server in versions v1.0-1.12
+  and versions prior to v1.13.12, v1.14.8, v1.15.5, and v1.16.2 allows authorized
+  users to send malicious YAML or JSON payloads, causing the API server to consume
+  excessive CPU or memory, potentially crashing and becoming unavailable. Prior to
+  v1.14.0, default RBAC policy authorized anonymous users to submit requests that
+  could trigger this vulnerability. Clusters upgraded from a version prior to v1.14.0
+  keep the more permissive policy by default for backwards compatibility.
+ghsaId: GHSA-pmqp-h87c-mr78
+identifiers:
+- type: GHSA
+  value: GHSA-pmqp-h87c-mr78
+- type: CVE
+  value: CVE-2019-11253
+permalink: https://github.com/advisories/GHSA-pmqp-h87c-mr78
+publishedAt: "2021-05-18T15:38:48Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2019-11253
+- url: https://github.com/advisories/GHSA-pmqp-h87c-mr78
+summary: XML Entity Expansion and Improper Input Validation in Kubernetes API server
+updatedAt: "2021-05-18T15:38:48Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.16.2
+  package:
+    name: k8s.io/kubernetes/pkg/apiserver
+  severity: HIGH
+  updatedAt: "2021-05-17T21:06:34Z"
+  vulnerableVersionRange: '>= 1.16.0, < 1.16.2'
+- firstPatchedVersion:
+    identifier: 1.15.5
+  package:
+    name: k8s.io/kubernetes/pkg/apiserver
+  severity: HIGH
+  updatedAt: "2021-05-17T21:06:34Z"
+  vulnerableVersionRange: '>= 1.15.0, < 1.15.5'
+- firstPatchedVersion:
+    identifier: 1.14.8
+  package:
+    name: k8s.io/kubernetes/pkg/apiserver
+  severity: HIGH
+  updatedAt: "2021-05-17T21:06:34Z"
+  vulnerableVersionRange: '>= 1.14.0, < 1.14.8'
+- firstPatchedVersion:
+    identifier: 1.13.12
+  package:
+    name: k8s.io/kubernetes/pkg/apiserver
+  severity: HIGH
+  updatedAt: "2021-05-17T21:06:34Z"
+  vulnerableVersionRange: '>= 1.0.0, < 1.13.12'

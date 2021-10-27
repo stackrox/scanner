@@ -1,0 +1,26 @@
+description: An authenticated Apache Traffic Control Traffic Ops user with Portal-level
+  privileges can send a request with a specially-crafted email subject to the /deliveryservices/request
+  Traffic Ops endpoint to send an email, from the Traffic Ops server, with an arbitrary
+  body to an arbitrary email address. Apache Traffic Control 5.1.x users should upgrade
+  to 5.1.3 or 6.0.0. 4.1.x users should upgrade to 5.1.3.
+ghsaId: GHSA-gw97-f6h8-gm94
+identifiers:
+- type: GHSA
+  value: GHSA-gw97-f6h8-gm94
+- type: CVE
+  value: CVE-2021-42009
+permalink: https://github.com/advisories/GHSA-gw97-f6h8-gm94
+publishedAt: "2021-10-13T18:55:04Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-42009
+- url: https://github.com/advisories/GHSA-gw97-f6h8-gm94
+summary: Email relay in Apache Traffic Control
+updatedAt: "2021-10-20T17:07:21Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 5.1.3
+  package:
+    name: github.com/apache/trafficcontrol
+  severity: MODERATE
+  updatedAt: "2021-10-13T17:43:06Z"
+  vulnerableVersionRange: < 5.1.3

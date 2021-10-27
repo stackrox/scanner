@@ -1,0 +1,39 @@
+description: "Envoy, which Pomerium is based on, incorrectly handles resetting of
+  HTTP/2 streams with excessive complexity.  This can lead to high CPU utilization
+  when a large number of streams are reset.  \n\n### Impact\n\nThis can result in
+  a DoS condition.\n\n### Patches\nPomerium versions 0.14.8 and 0.15.1 contain an
+  upgraded envoy binary with this vulnerability patched.\n\n### Workarounds\nN/A\n\n###
+  References\n[envoy GSA](https://github.com/envoyproxy/envoy/security/advisories/GHSA-3xh3-33v5-chcc)\n[envoy
+  CVE](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-32778)\n[envoy announcement](https://groups.google.com/g/envoy-announce/c/5xBpsEZZDfE/m/wD05NZBbAgAJ)\n\n###
+  For more information\nIf you have any questions or comments about this advisory:\n*
+  Open an issue in [pomerium/pomerium](https://github.com/pomerium/pomerium/issues)\n*
+  Email us at [security@pomerium.com](mailto:security@pomerium.com)\n"
+ghsaId: GHSA-5wjf-62hw-q78r
+identifiers:
+- type: GHSA
+  value: GHSA-5wjf-62hw-q78r
+- type: CVE
+  value: CVE-2021-39204
+permalink: https://github.com/advisories/GHSA-5wjf-62hw-q78r
+publishedAt: "2021-09-10T17:54:13Z"
+references:
+- url: https://github.com/envoyproxy/envoy/security/advisories/GHSA-3xh3-33v5-chcc
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-39204
+- url: https://github.com/advisories/GHSA-5wjf-62hw-q78r
+summary: Excessive CPU usage
+updatedAt: "2021-09-13T19:57:44Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.15.1
+  package:
+    name: github.com/pomerium/pomerium
+  severity: HIGH
+  updatedAt: "2021-09-10T16:33:47Z"
+  vulnerableVersionRange: = 0.15.0
+- firstPatchedVersion:
+    identifier: 0.14.8
+  package:
+    name: github.com/pomerium/pomerium
+  severity: HIGH
+  updatedAt: "2021-09-10T16:33:47Z"
+  vulnerableVersionRange: < 0.14.8

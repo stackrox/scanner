@@ -1,0 +1,31 @@
+description: HashiCorp Consul and Consul Enterprise did not appropriately enforce
+  scope for local tokens issued by a primary data center, where replication to a secondary
+  data center was not enabled. Introduced in 1.4.0, fixed in 1.6.6 and 1.7.4.
+ghsaId: GHSA-p2j5-3f4c-224r
+identifiers:
+- type: GHSA
+  value: GHSA-p2j5-3f4c-224r
+- type: CVE
+  value: CVE-2020-13170
+permalink: https://github.com/advisories/GHSA-p2j5-3f4c-224r
+publishedAt: "2021-05-18T18:21:21Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-13170
+- url: https://github.com/advisories/GHSA-p2j5-3f4c-224r
+summary: "Improper Input Validation\tin HashiCorp Consul"
+updatedAt: "2021-05-18T18:21:21Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.7.4
+  package:
+    name: github.com/hashicorp/consul/agent
+  severity: MODERATE
+  updatedAt: "2021-05-12T22:02:00Z"
+  vulnerableVersionRange: '>= 1.7.0, < 1.7.4'
+- firstPatchedVersion:
+    identifier: 1.6.6
+  package:
+    name: github.com/hashicorp/consul/agent
+  severity: MODERATE
+  updatedAt: "2021-05-12T22:02:00Z"
+  vulnerableVersionRange: '>= 1.6.0-beta1, < 1.6.6'

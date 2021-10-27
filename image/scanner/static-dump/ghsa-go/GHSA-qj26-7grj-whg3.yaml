@@ -1,0 +1,25 @@
+description: The pam_fscrypt module in fscrypt before 0.2.4 may incorrectly restore
+  primary and supplementary group IDs to the values associated with the root user,
+  which allows attackers to gain privileges via a successful login through certain
+  applications that use Linux-PAM (aka pam).
+ghsaId: GHSA-qj26-7grj-whg3
+identifiers:
+- type: GHSA
+  value: GHSA-qj26-7grj-whg3
+- type: CVE
+  value: CVE-2018-6558
+permalink: https://github.com/advisories/GHSA-qj26-7grj-whg3
+publishedAt: "2021-06-23T17:18:49Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2018-6558
+- url: https://github.com/advisories/GHSA-qj26-7grj-whg3
+summary: Privilege Escalation in fscrypt
+updatedAt: "2021-06-23T17:18:49Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.2.4
+  package:
+    name: github.com/google/fscrypt/security
+  severity: MODERATE
+  updatedAt: "2021-05-20T21:04:59Z"
+  vulnerableVersionRange: < 0.2.4

@@ -1,0 +1,24 @@
+description: InfluxDB before 1.7.6 has an authentication bypass vulnerability in the
+  authenticate function in services/httpd/handler.go because a JWT token may have
+  an empty SharedSecret (aka shared secret).
+ghsaId: GHSA-2rmp-fw5r-j5qv
+identifiers:
+- type: GHSA
+  value: GHSA-2rmp-fw5r-j5qv
+- type: CVE
+  value: CVE-2019-20933
+permalink: https://github.com/advisories/GHSA-2rmp-fw5r-j5qv
+publishedAt: "2021-05-18T18:22:05Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2019-20933
+- url: https://github.com/advisories/GHSA-2rmp-fw5r-j5qv
+summary: Improper Authentication in InfluxDB
+updatedAt: "2021-05-18T18:22:05Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.7.6
+  package:
+    name: github.com/influxdata/influxdb/services/httpd
+  severity: CRITICAL
+  updatedAt: "2021-05-12T21:55:56Z"
+  vulnerableVersionRange: < 1.7.6

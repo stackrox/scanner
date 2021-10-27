@@ -1,0 +1,32 @@
+description: Cloud Native Computing Foundation Harbor prior to 1.8.6 and 1.9.3 allows
+  SQL Injection via user-groups in the VMware Harbor Container Registry for the Pivotal
+  Platform.
+ghsaId: GHSA-jr34-mff8-pc6f
+identifiers:
+- type: GHSA
+  value: GHSA-jr34-mff8-pc6f
+- type: CVE
+  value: CVE-2019-19029
+permalink: https://github.com/advisories/GHSA-jr34-mff8-pc6f
+publishedAt: "2021-05-18T18:27:36Z"
+references:
+- url: https://github.com/goharbor/harbor/security/advisories/GHSA-qcfv-8v29-469w
+- url: https://nvd.nist.gov/vuln/detail/CVE-2019-19029
+- url: https://github.com/advisories/GHSA-jr34-mff8-pc6f
+summary: SQL Injection in Cloud Native Computing Foundation Harbor
+updatedAt: "2021-05-18T18:27:36Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.9.3
+  package:
+    name: github.com/goharbor/harbor
+  severity: MODERATE
+  updatedAt: "2021-05-04T22:00:21Z"
+  vulnerableVersionRange: '>= 1.9.0, < 1.9.3'
+- firstPatchedVersion:
+    identifier: 1.8.6
+  package:
+    name: github.com/goharbor/harbor
+  severity: MODERATE
+  updatedAt: "2021-05-04T22:00:21Z"
+  vulnerableVersionRange: '>= 1.7.0, < 1.8.6'

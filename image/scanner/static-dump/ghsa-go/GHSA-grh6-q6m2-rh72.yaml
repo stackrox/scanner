@@ -1,0 +1,25 @@
+description: Rootless containers run with Podman, receive all traffic with a source
+  IP address of 127.0.0.1 (including from remote hosts). This impacts containerized
+  applications that trust localhost (127.0.01) connections by default and do not require
+  authentication. This issue affects Podman versions from 1.8.0 to 3.0.0.
+ghsaId: GHSA-grh6-q6m2-rh72
+identifiers:
+- type: GHSA
+  value: GHSA-grh6-q6m2-rh72
+- type: CVE
+  value: CVE-2021-20199
+permalink: https://github.com/advisories/GHSA-grh6-q6m2-rh72
+publishedAt: "2021-05-18T21:07:49Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-20199
+- url: https://github.com/advisories/GHSA-grh6-q6m2-rh72
+summary: Origin Validation Error
+updatedAt: "2021-05-18T21:07:49Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 3.0.0
+  package:
+    name: github.com/containers/podman/v3
+  severity: MODERATE
+  updatedAt: "2021-05-18T21:02:36Z"
+  vulnerableVersionRange: < 3.0.0

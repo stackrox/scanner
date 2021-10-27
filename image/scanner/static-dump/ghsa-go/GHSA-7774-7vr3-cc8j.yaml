@@ -1,0 +1,50 @@
+description: "### Impact\nAccording to [RFC 4343](https://datatracker.ietf.org/doc/html/rfc4343),
+  Istio authorization policy should compare the hostname in the HTTP Host header in
+  a case insensitive way, but currently the comparison is case sensitive.  The Envoy
+  proxy will route the request hostname in a case-insensitive way which means the
+  authorization policy could be bypassed.\n \nAs an example, the user may have an
+  authorization policy that rejects request with hostname \"httpbin.foo\" for some
+  source IPs, but the attacker can bypass this by sending the request with hostname
+  \"Httpbin.Foo\".\n\n### Patches\n* Istio 1.11.1 and above\n* Istio 1.10.4 and above\n*
+  Istio 1.9.8 and above\n\n### Workarounds\nA Lua filter may be written to normalize
+  Host header before the authorization check.  This is similar to the Path normalization
+  presented in the [Security Best Practices](https://istio.io/latest/docs/ops/best-practices/security/#case-normalization)
+  guide.\n\n### References\nMore details can be found in the [Istio Security Bulletin](https://istio.io/latest/news/security/istio-security-2021-008)\n\n###
+  For more information\nIf you have any questions or comments about this advisory,
+  please email us at istio-security-vulnerability-reports@googlegroups.com\n"
+ghsaId: GHSA-7774-7vr3-cc8j
+identifiers:
+- type: GHSA
+  value: GHSA-7774-7vr3-cc8j
+- type: CVE
+  value: CVE-2021-39155
+permalink: https://github.com/advisories/GHSA-7774-7vr3-cc8j
+publishedAt: "2021-08-30T16:15:56Z"
+references:
+- url: https://github.com/istio/istio/security/advisories/GHSA-7774-7vr3-cc8j
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-39155
+- url: https://github.com/advisories/GHSA-7774-7vr3-cc8j
+summary: Authorization Policy Bypass Due to Case Insensitive Host Comparison
+updatedAt: "2021-08-30T16:15:56Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.11.1
+  package:
+    name: Istio.io/isio
+  severity: HIGH
+  updatedAt: "2021-08-25T22:29:16Z"
+  vulnerableVersionRange: = 1.11.0
+- firstPatchedVersion:
+    identifier: 1.10.4
+  package:
+    name: Istio.io/isio
+  severity: HIGH
+  updatedAt: "2021-08-25T22:29:16Z"
+  vulnerableVersionRange: '>= 1.10.0, < 1.10.4'
+- firstPatchedVersion:
+    identifier: 1.9.8
+  package:
+    name: Istio.io/isio
+  severity: HIGH
+  updatedAt: "2021-08-25T22:29:16Z"
+  vulnerableVersionRange: < 1.9.8

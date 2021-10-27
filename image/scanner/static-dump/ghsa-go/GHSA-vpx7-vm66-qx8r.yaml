@@ -1,0 +1,24 @@
+description: The ExtractTo function doesn't securely escape file paths in zip archives
+  which include leading or non-leading "..". This allows an attacker to add or replace
+  files system-wide.
+ghsaId: GHSA-vpx7-vm66-qx8r
+identifiers:
+- type: GHSA
+  value: GHSA-vpx7-vm66-qx8r
+- type: CVE
+  value: CVE-2020-7664
+permalink: https://github.com/advisories/GHSA-vpx7-vm66-qx8r
+publishedAt: "2021-05-18T20:31:06Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-7664
+- url: https://github.com/advisories/GHSA-vpx7-vm66-qx8r
+summary: Path Traversal in github.com/unknwon/cae/zip
+updatedAt: "2021-07-29T18:54:26Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.0.1
+  package:
+    name: github.com/unknwon/cae/zip
+  severity: HIGH
+  updatedAt: "2021-05-12T20:27:31Z"
+  vulnerableVersionRange: < 1.0.1

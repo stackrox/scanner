@@ -1,0 +1,42 @@
+description: |-
+  ### Impact
+
+  The function readUvarint used to read the xz container format may not terminate a loop provide malicous input.
+
+  ### Patches
+
+  The problem has been fixed in release v0.5.8.
+
+  ### Workarounds
+
+  Limit the size of the compressed file input to a reasonable size for your use case.
+
+  ### References
+
+  The standard library had recently the same issue and got the [CVE-2020-16845](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-16845) allocated.
+
+  ### For more information
+  If you have any questions or comments about this advisory:
+  * Open an issue in [xz](https://github.com/ulikunitz/xz/issues).
+ghsaId: GHSA-25xm-hr59-7c27
+identifiers:
+- type: GHSA
+  value: GHSA-25xm-hr59-7c27
+- type: CVE
+  value: CVE-2021-29482
+permalink: https://github.com/advisories/GHSA-25xm-hr59-7c27
+publishedAt: "2021-05-25T18:39:37Z"
+references:
+- url: https://github.com/ulikunitz/xz/security/advisories/GHSA-25xm-hr59-7c27
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-29482
+- url: https://github.com/advisories/GHSA-25xm-hr59-7c27
+summary: Release v0.5.8 of github.com/ulikunitz/xz fixes readUvarint denial of service
+updatedAt: "2021-05-25T18:39:37Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.5.8
+  package:
+    name: github.com/ulikunitz/xz
+  severity: HIGH
+  updatedAt: "2021-05-24T17:52:22Z"
+  vulnerableVersionRange: < 0.5.8

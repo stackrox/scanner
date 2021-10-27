@@ -1,0 +1,46 @@
+description: |-
+  ### Impact
+
+  Anyone using storage.blob.s3 introduced in 0.5.0 with storage.imapsql.
+  ```
+  storage.imapsql local_mailboxes {
+    ...
+    msg_store s3 {
+      ...
+    }
+  }
+  ```
+
+  ### Patches
+
+  The relevant commit is pushed to master and will be included in the 0.5.1 release.
+
+  No special handling of the issue has been done due to the small amount of affected users.
+
+  ### Workarounds
+
+  None.
+
+  ### References
+
+  * Original report: https://github.com/foxcpp/maddy/issues/395
+  * Fix: https://github.com/foxcpp/maddy/commit/07c8495ee4394fabbf5aac4df8aebeafb2fb29d8
+ghsaId: GHSA-m6m5-pp4g-fcc8
+identifiers:
+- type: GHSA
+  value: GHSA-m6m5-pp4g-fcc8
+permalink: https://github.com/advisories/GHSA-m6m5-pp4g-fcc8
+publishedAt: "2021-10-06T17:47:35Z"
+references:
+- url: https://github.com/foxcpp/maddy/security/advisories/GHSA-m6m5-pp4g-fcc8
+- url: https://github.com/advisories/GHSA-m6m5-pp4g-fcc8
+summary: S3 storage write is not aborted on errors leading to unbounded memory usage
+updatedAt: "2021-10-06T17:47:35Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.5.1
+  package:
+    name: github.com/foxcpp/maddy
+  severity: HIGH
+  updatedAt: "2021-10-06T16:48:50Z"
+  vulnerableVersionRange: < 0.5.1

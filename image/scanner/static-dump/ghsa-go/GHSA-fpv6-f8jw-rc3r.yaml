@@ -1,0 +1,42 @@
+description: |-
+  ### Impact
+
+  Elvish's backend for the experimental web UI (started by `elvish -web`) hosts an endpoint that allows executing the code sent from the web UI.
+
+  The backend does not check the origin of requests correctly. As a result, if the user has the web UI backend open and visits a compromised or malicious website, the website can send arbitrary code to the endpoint in localhost.
+
+  ### Patches
+
+  All Elvish releases since 0.14.0 no longer include the experimental web UI, although it is still possible for the user to build a version from source that includes it.
+
+  The issue can be patched for previous versions by removing the web UI (found in web, pkg/web or pkg/prog/web, depending on the exact version).
+
+  ### Workarounds
+
+  Do not use the experimental web UI.
+
+  ### For more information
+
+  If you have any questions or comments about this advisory, please email xiaqqaix@gmail.com.
+ghsaId: GHSA-fpv6-f8jw-rc3r
+identifiers:
+- type: GHSA
+  value: GHSA-fpv6-f8jw-rc3r
+- type: CVE
+  value: CVE-2021-41088
+permalink: https://github.com/advisories/GHSA-fpv6-f8jw-rc3r
+publishedAt: "2021-09-23T23:17:33Z"
+references:
+- url: https://github.com/elves/elvish/security/advisories/GHSA-fpv6-f8jw-rc3r
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-41088
+- url: https://github.com/advisories/GHSA-fpv6-f8jw-rc3r
+summary: Remote code execution via the web UI backend
+updatedAt: "2021-09-24T13:05:43Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.14.0
+  package:
+    name: github.com/elves/elvish
+  severity: MODERATE
+  updatedAt: "2021-09-23T21:06:47Z"
+  vulnerableVersionRange: < 0.14.0

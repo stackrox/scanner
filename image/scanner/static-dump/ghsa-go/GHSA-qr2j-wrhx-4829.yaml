@@ -1,0 +1,23 @@
+description: In Go Ethereum (aka geth) before 1.8.14, TraceChain in eth/api_tracer.go
+  does not verify that the end block is after the start block.
+ghsaId: GHSA-qr2j-wrhx-4829
+identifiers:
+- type: GHSA
+  value: GHSA-qr2j-wrhx-4829
+- type: CVE
+  value: CVE-2018-16733
+permalink: https://github.com/advisories/GHSA-qr2j-wrhx-4829
+publishedAt: "2021-05-18T18:38:06Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2018-16733
+- url: https://github.com/advisories/GHSA-qr2j-wrhx-4829
+summary: Improper Input Validation
+updatedAt: "2021-05-18T18:38:06Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.8.14
+  package:
+    name: github.com/ethereum/go-ethereum/eth
+  severity: MODERATE
+  updatedAt: "2021-05-12T18:10:24Z"
+  vulnerableVersionRange: < 1.8.14

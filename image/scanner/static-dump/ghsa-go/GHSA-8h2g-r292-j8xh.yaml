@@ -1,0 +1,24 @@
+description: In HashiCorp Consul before 1.10.1 (and Consul Enterprise), xds can generate
+  a situation where a single L7 deny intention (with a default deny policy) results
+  in an allow action.
+ghsaId: GHSA-8h2g-r292-j8xh
+identifiers:
+- type: GHSA
+  value: GHSA-8h2g-r292-j8xh
+- type: CVE
+  value: CVE-2021-36213
+permalink: https://github.com/advisories/GHSA-8h2g-r292-j8xh
+publishedAt: "2021-07-19T21:21:12Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-36213
+- url: https://github.com/advisories/GHSA-8h2g-r292-j8xh
+summary: L7 deny intention results in an allow action
+updatedAt: "2021-10-05T17:32:02Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.10.1
+  package:
+    name: github.com/hashicorp/consul
+  severity: HIGH
+  updatedAt: "2021-07-19T17:33:14Z"
+  vulnerableVersionRange: < 1.10.1

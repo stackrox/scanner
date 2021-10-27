@@ -1,0 +1,23 @@
+description: cmd/evm/runner.go in Go Ethereum (aka geth) allows attackers to cause
+  a denial of service (SEGV) via crafted bytecode.
+ghsaId: GHSA-9h4h-8w5p-f28w
+identifiers:
+- type: GHSA
+  value: GHSA-9h4h-8w5p-f28w
+- type: CVE
+  value: CVE-2018-19184
+permalink: https://github.com/advisories/GHSA-9h4h-8w5p-f28w
+publishedAt: "2021-06-29T21:23:15Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2018-19184
+- url: https://github.com/advisories/GHSA-9h4h-8w5p-f28w
+summary: Denial of Service in geth
+updatedAt: "2021-06-29T21:23:15Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.8.14
+  package:
+    name: github.com/ethereum/go-ethereum/cmd/evm
+  severity: HIGH
+  updatedAt: "2021-05-20T18:58:41Z"
+  vulnerableVersionRange: < 1.8.14

@@ -1,0 +1,24 @@
+description: Cross-site scripting (XSS) vulnerability in models/issue.go in Gogs (aka
+  Go Git Service) 0.3.1-9 through 0.5.x before 0.5.8 allows remote attackers to inject
+  arbitrary web script or HTML via the text parameter to api/v1/markdown.
+ghsaId: GHSA-9hx4-qm7h-x84j
+identifiers:
+- type: GHSA
+  value: GHSA-9hx4-qm7h-x84j
+- type: CVE
+  value: CVE-2014-8683
+permalink: https://github.com/advisories/GHSA-9hx4-qm7h-x84j
+publishedAt: "2021-06-29T18:32:53Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2014-8683
+- url: https://github.com/advisories/GHSA-9hx4-qm7h-x84j
+summary: Cross-site Scripting in Gogs
+updatedAt: "2021-06-29T18:32:53Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.5.8
+  package:
+    name: gogs.io/gogs
+  severity: MODERATE
+  updatedAt: "2021-06-29T18:31:35Z"
+  vulnerableVersionRange: '>= 0.3.1, < 0.5.8'

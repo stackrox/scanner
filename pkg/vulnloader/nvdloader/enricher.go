@@ -23,25 +23,24 @@ type FileFormatWrapper struct {
 	types.FileFormat
 }
 
-// Fetch fetches .NET and ASP.NET vulnerabilities from their source.
-func Fetch() (map[string]*FileFormatWrapper, error) {
+// FetchDotnet fetches .NET and ASP.NET vulnerabilities from their source.
+func FetchDotnet(enrichmentMap map[string][]*FileFormatWrapper) error {
 	r, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: nvdEnricherRepo,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "running git clone")
+		return errors.Wrap(err, "running git clone")
 	}
 
 	w, err := r.Worktree()
 	if err != nil {
-		return nil, errors.Wrap(err, "getting git worktree")
+		return errors.Wrap(err, "getting git worktree")
 	}
 
 	files, err := w.Filesystem.ReadDir("cves")
 	if err != nil {
-		return nil, errors.Wrap(err, "reading cve dir")
+		return errors.Wrap(err, "reading cve dir")
 	}
-	resultMap := make(map[string]*FileFormatWrapper)
 	for _, file := range files {
 		if filepath.Ext(file.Name()) != ".yaml" {
 			continue
@@ -53,32 +52,32 @@ func Fetch() (map[string]*FileFormatWrapper, error) {
 			Order:    git.LogOrderCommitterTime,
 		})
 		if err != nil {
-			return nil, errors.Wrapf(err, "running git log for file: %v", path)
+			return errors.Wrapf(err, "running git log for file: %v", path)
 		}
 		c, err := iter.Next()
 		if err != nil {
-			return nil, errors.Wrapf(err, "getting the latest commit for file: %v", path)
+			return errors.Wrapf(err, "getting the latest commit for file: %v", path)
 		}
 		if c == nil || c.Committer.When.IsZero() {
-			return nil, errors.Errorf("latest found commit for %v is nil or does not have valid time", path)
+			return errors.Errorf("latest found commit for %v is nil or does not have valid time", path)
 		}
 
 		file, err := w.Filesystem.Open(path)
 		if err != nil {
-			return nil, errors.Wrapf(err, "opening file: %v", path)
+			return errors.Wrapf(err, "opening file: %v", path)
 		}
 		data, err := io.ReadAll(file)
 		if err != nil {
-			return nil, errors.Wrapf(err, "reading file: %v", path)
+			return errors.Wrapf(err, "reading file: %v", path)
 		}
 		var ff types.FileFormat
 		if err := yaml.Unmarshal(data, &ff); err != nil {
-			return nil, errors.Wrapf(err, "unmarshalling file: %v", path)
+			return errors.Wrapf(err, "unmarshalling file: %v", path)
 		}
-		resultMap[ff.ID] = &FileFormatWrapper{
+		enrichmentMap[ff.ID] = append(enrichmentMap[ff.ID], &FileFormatWrapper{
 			LastUpdated: c.Committer.When.Format(vulndb.TimeLayout),
 			FileFormat:  ff,
-		}
+		})
 	}
-	return resultMap, nil
+	return nil
 }

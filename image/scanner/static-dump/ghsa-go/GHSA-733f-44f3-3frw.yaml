@@ -1,0 +1,23 @@
+description: macaron before 1.3.7 has an open redirect in the static handler, as demonstrated
+  by the http://127.0.0.1:4000//example.com/ URL.
+ghsaId: GHSA-733f-44f3-3frw
+identifiers:
+- type: GHSA
+  value: GHSA-733f-44f3-3frw
+- type: CVE
+  value: CVE-2020-12666
+permalink: https://github.com/advisories/GHSA-733f-44f3-3frw
+publishedAt: "2021-05-18T21:08:35Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-12666
+- url: https://github.com/advisories/GHSA-733f-44f3-3frw
+summary: Open redirect
+updatedAt: "2021-05-18T21:08:35Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.3.7
+  package:
+    name: gopkg.in/macaron.v1
+  severity: MODERATE
+  updatedAt: "2021-05-18T20:50:17Z"
+  vulnerableVersionRange: < 1.3.7

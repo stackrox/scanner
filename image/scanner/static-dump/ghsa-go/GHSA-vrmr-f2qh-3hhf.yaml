@@ -1,0 +1,25 @@
+description: WAL-G before 1.1, when a non-libsodium build (e.g., one of the official
+  binary releases published as GitHub Releases) is used, silently ignores the libsodium
+  encryption key and uploads cleartext backups. This is arguably a Principle of Least
+  Surprise violation because "the user likely wanted to encrypt all file activity."
+ghsaId: GHSA-vrmr-f2qh-3hhf
+identifiers:
+- type: GHSA
+  value: GHSA-vrmr-f2qh-3hhf
+- type: CVE
+  value: CVE-2021-38599
+permalink: https://github.com/advisories/GHSA-vrmr-f2qh-3hhf
+publishedAt: "2021-09-02T17:17:16Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-38599
+- url: https://github.com/advisories/GHSA-vrmr-f2qh-3hhf
+summary: Improper use of cryptographic key in wal-g
+updatedAt: "2021-09-02T17:17:16Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: "1.1"
+  package:
+    name: github.com/wal-g/wal-g
+  severity: HIGH
+  updatedAt: "2021-08-30T17:30:36Z"
+  vulnerableVersionRange: < 1.1

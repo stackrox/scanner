@@ -1,0 +1,23 @@
+description: The package `github.com/pires/go-proxyproto` before 0.6.0 are vulnerable
+  to Denial of Service (DoS) via creating connections without the proxy protocol header.
+ghsaId: GHSA-xcf7-q56x-78gh
+identifiers:
+- type: GHSA
+  value: GHSA-xcf7-q56x-78gh
+- type: CVE
+  value: CVE-2021-23409
+permalink: https://github.com/advisories/GHSA-xcf7-q56x-78gh
+publishedAt: "2021-07-26T21:23:49Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-23409
+- url: https://github.com/advisories/GHSA-xcf7-q56x-78gh
+summary: Connection descriptor exhaustion in proxyproto
+updatedAt: "2021-07-26T21:23:49Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.6.0
+  package:
+    name: github.com/pires/go-proxyproto
+  severity: HIGH
+  updatedAt: "2021-07-26T17:31:54Z"
+  vulnerableVersionRange: < 0.6.0

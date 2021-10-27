@@ -1,0 +1,23 @@
+description: GJSON before 1.6.4 allows attackers to cause a denial of service via
+  crafted JSON.
+ghsaId: GHSA-w942-gw6m-p62c
+identifiers:
+- type: GHSA
+  value: GHSA-w942-gw6m-p62c
+- type: CVE
+  value: CVE-2020-35380
+permalink: https://github.com/advisories/GHSA-w942-gw6m-p62c
+publishedAt: "2021-06-23T17:53:05Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-35380
+- url: https://github.com/advisories/GHSA-w942-gw6m-p62c
+summary: Denial of service in GJSON
+updatedAt: "2021-06-23T17:53:05Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.6.4
+  package:
+    name: github.com/tidwall/gjson
+  severity: HIGH
+  updatedAt: "2021-05-12T21:50:06Z"
+  vulnerableVersionRange: < 1.6.4

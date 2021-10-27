@@ -1,0 +1,46 @@
+description: HashiCorp Vault and Vault Enterprise versions 0.7.1 and newer, when configured
+  with the AWS IAM auth method, may be vulnerable to authentication bypass. Fixed
+  in 1.2.5, 1.3.8, 1.4.4, and 1.5.1..
+ghsaId: GHSA-fp52-qw33-mfmw
+identifiers:
+- type: GHSA
+  value: GHSA-fp52-qw33-mfmw
+- type: CVE
+  value: CVE-2020-16250
+permalink: https://github.com/advisories/GHSA-fp52-qw33-mfmw
+publishedAt: "2021-08-02T17:11:41Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-16250
+- url: https://github.com/advisories/GHSA-fp52-qw33-mfmw
+summary: Authentication Bypass by Spoofing and Insufficient Verification of Data Authenticity
+  in Hashicorp Vault
+updatedAt: "2021-08-02T17:11:41Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.4.4
+  package:
+    name: github.com/hashicorp/vault
+  severity: CRITICAL
+  updatedAt: "2021-08-02T17:11:23Z"
+  vulnerableVersionRange: '>= 1.4.0, < 1.4.4'
+- firstPatchedVersion:
+    identifier: 1.3.8
+  package:
+    name: github.com/hashicorp/vault
+  severity: CRITICAL
+  updatedAt: "2021-08-02T17:11:23Z"
+  vulnerableVersionRange: '>= 1.3.0, < 1.3.8'
+- firstPatchedVersion:
+    identifier: 1.2.5
+  package:
+    name: github.com/hashicorp/vault
+  severity: CRITICAL
+  updatedAt: "2021-08-02T17:11:23Z"
+  vulnerableVersionRange: '>= 0.8.1, < 1.2.5'
+- firstPatchedVersion:
+    identifier: 1.5.1
+  package:
+    name: github.com/hashicorp/vault
+  severity: CRITICAL
+  updatedAt: "2021-08-02T17:09:18Z"
+  vulnerableVersionRange: '>= 1.5.0, < 1.5.1'

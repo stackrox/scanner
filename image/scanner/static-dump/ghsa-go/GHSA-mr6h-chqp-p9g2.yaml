@@ -1,0 +1,24 @@
+description: SQL injection vulnerability in the GetIssues function in models/issue.go
+  in Gogs (aka Go Git Service) 0.3.1-9 through 0.5.6.x before 0.5.6.1025 Beta allows
+  remote attackers to execute arbitrary SQL commands via the label parameter to user/repos/issues.
+ghsaId: GHSA-mr6h-chqp-p9g2
+identifiers:
+- type: GHSA
+  value: GHSA-mr6h-chqp-p9g2
+- type: CVE
+  value: CVE-2014-8681
+permalink: https://github.com/advisories/GHSA-mr6h-chqp-p9g2
+publishedAt: "2021-06-29T18:32:44Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2014-8681
+- url: https://github.com/advisories/GHSA-mr6h-chqp-p9g2
+summary: SQL Injection in gogs.io/gogs
+updatedAt: "2021-06-29T18:32:44Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.5.8
+  package:
+    name: gogs.io/gogs
+  severity: MODERATE
+  updatedAt: "2021-06-29T18:32:14Z"
+  vulnerableVersionRange: '>= 0.3.1, < 0.5.8'

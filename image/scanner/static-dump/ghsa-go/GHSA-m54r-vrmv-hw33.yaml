@@ -1,0 +1,55 @@
+description: |-
+  ### Impact
+
+  Security researchers at Trail of Bits discovered that plugin names are not sanitized properly. As a result, a malicious plugin author could use characters in a plugin name that would result in unexpected behavior, such as duplicating the name of another plugin or spoofing the output to `helm --help`.
+
+  ### Patches
+
+  This issue has been patched in Helm 3.3.2.
+
+  ### Workarounds
+
+  Do not install untrusted Helm plugins. Examine the `name` field in the `plugin.yaml` file for a plugin, looking for characters outside of the [a-zA-Z0-9._-] range.
+ghsaId: GHSA-m54r-vrmv-hw33
+identifiers:
+- type: GHSA
+  value: GHSA-m54r-vrmv-hw33
+- type: CVE
+  value: CVE-2020-15186
+permalink: https://github.com/advisories/GHSA-m54r-vrmv-hw33
+publishedAt: "2021-05-24T16:57:12Z"
+references:
+- url: https://github.com/helm/helm/security/advisories/GHSA-m54r-vrmv-hw33
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-15186
+- url: https://github.com/advisories/GHSA-m54r-vrmv-hw33
+summary: Improper Sanitizing of plugin names in helm
+updatedAt: "2021-05-24T16:57:12Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 3.3.2
+  package:
+    name: helm.sh/helm/v3/pkg/plugin
+  severity: LOW
+  updatedAt: "2021-05-24T16:45:43Z"
+  vulnerableVersionRange: '>= 3.0.0, < 3.3.2'
+- firstPatchedVersion:
+    identifier: 2.16.11
+  package:
+    name: helm.sh/helm/v3/pkg/plugin
+  severity: LOW
+  updatedAt: "2021-05-24T16:45:43Z"
+  vulnerableVersionRange: '>= 2.0.0, < 2.16.11'
+- firstPatchedVersion:
+    identifier: 2.16.11
+  package:
+    name: helm.sh/helm
+  severity: LOW
+  updatedAt: "2021-05-24T16:45:43Z"
+  vulnerableVersionRange: < 2.16.11
+- firstPatchedVersion:
+    identifier: 3.3.2
+  package:
+    name: helm.sh/helm/v3
+  severity: LOW
+  updatedAt: "2021-05-24T16:45:43Z"
+  vulnerableVersionRange: '>= 3.0.0, < 3.3.2'

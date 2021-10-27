@@ -1,0 +1,23 @@
+description: GJSON <1.6.5 allows attackers to cause a denial of service (remote) via
+  crafted JSON.
+ghsaId: GHSA-wjm3-fq3r-5x46
+identifiers:
+- type: GHSA
+  value: GHSA-wjm3-fq3r-5x46
+- type: CVE
+  value: CVE-2020-36066
+permalink: https://github.com/advisories/GHSA-wjm3-fq3r-5x46
+publishedAt: "2021-05-18T21:07:54Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-36066
+- url: https://github.com/advisories/GHSA-wjm3-fq3r-5x46
+summary: Denial of service
+updatedAt: "2021-05-18T21:07:54Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.6.5
+  package:
+    name: github.com/tidwall/gjson
+  severity: MODERATE
+  updatedAt: "2021-05-18T21:00:39Z"
+  vulnerableVersionRange: < 1.6.5

@@ -1,0 +1,24 @@
+description: The miekg Go DNS package before 1.1.25, as used in CoreDNS before 1.6.6
+  and other products, improperly generates random numbers because math/rand is used.
+  The TXID becomes predictable, leading to response forgeries.
+ghsaId: GHSA-44r7-7p62-q3fr
+identifiers:
+- type: GHSA
+  value: GHSA-44r7-7p62-q3fr
+- type: CVE
+  value: CVE-2019-19794
+permalink: https://github.com/advisories/GHSA-44r7-7p62-q3fr
+publishedAt: "2021-05-18T21:09:13Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2019-19794
+- url: https://github.com/advisories/GHSA-44r7-7p62-q3fr
+summary: Insecure generation of random numbers
+updatedAt: "2021-05-18T21:09:13Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.1.25
+  package:
+    name: github.com/miekg/dns
+  severity: MODERATE
+  updatedAt: "2021-05-18T20:42:52Z"
+  vulnerableVersionRange: < 1.1.25

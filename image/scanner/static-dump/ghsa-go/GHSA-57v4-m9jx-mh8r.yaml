@@ -1,0 +1,23 @@
+description: A vulnerability was found in OVN Kubernetes in versions up to and including
+  0.3.0 where the Egress Firewall does not reliably apply firewall rules when there
+  is multiple DNS rules. It could lead to potentially lose of confidentiality, integrity
+  or availability of a service.
+ghsaId: GHSA-57v4-m9jx-mh8r
+identifiers:
+- type: GHSA
+  value: GHSA-57v4-m9jx-mh8r
+- type: CVE
+  value: CVE-2021-3499
+permalink: https://github.com/advisories/GHSA-57v4-m9jx-mh8r
+publishedAt: "2021-06-08T23:05:19Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-3499
+- url: https://github.com/advisories/GHSA-57v4-m9jx-mh8r
+summary: Improper Input Validation
+updatedAt: "2021-06-08T23:05:19Z"
+vulnerabilities:
+- package:
+    name: github.com/ovn-org/ovn-kubernetes
+  severity: MODERATE
+  updatedAt: "2021-05-28T21:24:53Z"
+  vulnerableVersionRange: <= 0.3.0

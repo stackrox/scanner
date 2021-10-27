@@ -1,0 +1,24 @@
+description: Traefik 2.x, in certain configurations, allows HTTPS sessions to proceed
+  without mutual TLS verification in a situation where ERR_BAD_SSL_CLIENT_AUTH_CERT
+  should have occurred.
+ghsaId: GHSA-q9mp-79cp-9g8j
+identifiers:
+- type: GHSA
+  value: GHSA-q9mp-79cp-9g8j
+- type: CVE
+  value: CVE-2019-20894
+permalink: https://github.com/advisories/GHSA-q9mp-79cp-9g8j
+publishedAt: "2021-09-02T22:00:09Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2019-20894
+- url: https://github.com/advisories/GHSA-q9mp-79cp-9g8j
+summary: Improper Authentication
+updatedAt: "2021-09-02T22:00:09Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 2.2.2
+  package:
+    name: github.com/traefik/traefik/v2
+  severity: HIGH
+  updatedAt: "2021-08-02T22:18:23Z"
+  vulnerableVersionRange: < 2.2.2

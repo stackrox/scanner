@@ -1,0 +1,36 @@
+description: |
+  ### Impact
+
+  The `siftool new` command and [func siftool.New()](https://pkg.go.dev/github.com/sylabs/sif/pkg/siftool#New) produce predictable UUID identifiers due to insecure randomness in the version of the `github.com/satori/go.uuid` module used as a dependency.
+
+  ### Patches
+  A patch is available in versions 1.2.3 and newer of the module. Users are encouraged to upgrade.
+
+  ### Workarounds
+  Users passing [CreateInfo struct](https://pkg.go.dev/github.com/sylabs/sif/pkg/sif#CreateInfo) should ensure the `ID` field is generated using a version of `github.com/satori/go.uuid` that is not vulnerable to this issue. Unfortunately, the latest tagged release is vulnerable to this issue. One way to obtain a non-vulnerable version is:
+
+  ```
+  go get github.com/satori/go.uuid@75cca531ea763666bc46e531da3b4c3b95f64557
+  ```
+ghsaId: GHSA-4gh8-x3vv-phhg
+identifiers:
+- type: GHSA
+  value: GHSA-4gh8-x3vv-phhg
+- type: CVE
+  value: CVE-2021-29499
+permalink: https://github.com/advisories/GHSA-4gh8-x3vv-phhg
+publishedAt: "2021-05-18T18:30:38Z"
+references:
+- url: https://github.com/sylabs/sif/security/advisories/GHSA-4gh8-x3vv-phhg
+- url: https://nvd.nist.gov/vuln/detail/CVE-2021-29499
+- url: https://github.com/advisories/GHSA-4gh8-x3vv-phhg
+summary: Predictable SIF UUID Identifiers in github.com/sylabs/sif
+updatedAt: "2021-05-18T18:30:38Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 1.2.3
+  package:
+    name: github.com/sylabs/sif
+  severity: HIGH
+  updatedAt: "2021-05-07T21:39:49Z"
+  vulnerableVersionRange: < 1.2.3

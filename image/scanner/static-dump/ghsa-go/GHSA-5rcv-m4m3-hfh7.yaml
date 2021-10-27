@@ -1,0 +1,26 @@
+description: Go version v0.3.3 of the x/text package fixes a vulnerability in encoding/unicode
+  that could lead to the UTF-16 decoder entering an infinite loop, causing the program
+  to crash or run out of memory. An attacker could provide a single byte to a UTF16
+  decoder instantiated with UseBOM or ExpectBOM to trigger an infinite loop if the
+  String function on the Decoder is called, or the Decoder is passed to golang.org/x/text/transform.String.
+ghsaId: GHSA-5rcv-m4m3-hfh7
+identifiers:
+- type: GHSA
+  value: GHSA-5rcv-m4m3-hfh7
+- type: CVE
+  value: CVE-2020-14040
+permalink: https://github.com/advisories/GHSA-5rcv-m4m3-hfh7
+publishedAt: "2021-05-18T18:34:35Z"
+references:
+- url: https://nvd.nist.gov/vuln/detail/CVE-2020-14040
+- url: https://github.com/advisories/GHSA-5rcv-m4m3-hfh7
+summary: Infinite Loop in Go
+updatedAt: "2021-05-18T18:34:35Z"
+vulnerabilities:
+- firstPatchedVersion:
+    identifier: 0.3.3
+  package:
+    name: golang.org/x/text/encoding/unicode
+  severity: HIGH
+  updatedAt: "2021-05-12T14:54:58Z"
+  vulnerableVersionRange: < 0.3.3
