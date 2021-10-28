@@ -13,12 +13,12 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/quay/claircore/rhel/pulp"
 	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
+	"github.com/stackrox/scanner/pkg/rhel/pulp"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"go.uber.org/ratelimit"
 )

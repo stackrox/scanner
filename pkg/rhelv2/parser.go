@@ -12,12 +12,12 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"github.com/quay/claircore/pkg/cpe"
 	"github.com/quay/goval-parser/oval"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/cpe"
 	"github.com/stackrox/scanner/pkg/cpeutils"
 	"github.com/stackrox/scanner/pkg/rhelv2/ovalutil"
 )

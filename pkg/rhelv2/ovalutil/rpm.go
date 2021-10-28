@@ -9,11 +9,11 @@ import (
 	"regexp"
 
 	"github.com/pkg/errors"
-	archop "github.com/quay/claircore"
-	coreovalutil "github.com/quay/claircore/pkg/ovalutil"
 	"github.com/quay/goval-parser/oval"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/archop"
+	coreovalutil "github.com/stackrox/scanner/pkg/ovalutil"
 )
 
 const (

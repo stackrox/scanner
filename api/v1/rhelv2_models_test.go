@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	archop "github.com/quay/claircore"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	"github.com/stackrox/scanner/pkg/archop"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stackrox/scanner/pkg/types"
