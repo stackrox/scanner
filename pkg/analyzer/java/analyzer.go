@@ -19,7 +19,7 @@ func (analyzerImpl) ProcessFile(fullPath string, fi os.FileInfo, contents io.Rea
 	if !match(fullPath) || !fi.Mode().IsRegular() || fi.Size() == 0 {
 		return nil
 	}
-	if !filterComponent(filepath.Base(fullPath)) {
+	if filterComponent(filepath.Base(fullPath)) {
 		return nil
 	}
 
