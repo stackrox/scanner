@@ -3,6 +3,8 @@ package npm
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
@@ -14,14 +16,15 @@ type packageJSON struct {
 	Version string `json:"version"`
 }
 
-func parsePackageJSON(filePath string, contents []byte) *component.Component {
+func parsePackageJSON(filePath string, fi os.FileInfo, contents io.ReaderAt) *component.Component {
 	// If the prefix is a function, then we can ignore it as it will have a different package.json
 	// that is actually in JSON format
-	if bytes.HasPrefix(contents, []byte("function")) {
+	var first7Bytes [7]byte
+	if _, err := contents.ReadAt(first7Bytes[:], 0); err == nil && bytes.Equal(first7Bytes[:], []byte("function")) {
 		return nil
 	}
 	var pkgJSON packageJSON
-	err := json.Unmarshal(contents, &pkgJSON)
+	err := json.NewDecoder(io.NewSectionReader(contents, 0, fi.Size())).Decode(&pkgJSON)
 	if err != nil {
 		logrus.Debugf("Couldn't unmarshal package.json file at %q: %v", filePath, err)
 		return nil

@@ -77,25 +77,20 @@ func NewRegexpMatcher(expr *regexp.Regexp) Matcher {
 	}
 }
 
-type combinedMatcher struct {
+type orMatcher struct {
 	matchers []Matcher
 }
 
-func (o *combinedMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (bool, bool) {
-	matches := false
-	extractable := false
+func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (matches bool, extract bool) {
 	for _, subMatcher := range o.matchers {
-		if subMatches, subExtractable := subMatcher.Match(fullPath, fileInfo, contents); subMatches {
-			if subExtractable {
-				extractable = true
-			}
-			matches = true
+		if matches, extractable := subMatcher.Match(fullPath, fileInfo, contents); matches {
+			return true, extractable
 		}
 	}
-	return matches, extractable
+	return false, false
 }
 
-// NewCombinedMatcher returns a matcher that matches if and only if any of the passed submatchers does.
-func NewCombinedMatcher(subMatchers ...Matcher) Matcher {
-	return &combinedMatcher{matchers: subMatchers}
+// NewOrMatcher returns a matcher that matches if and only if any of the passed submatchers does.
+func NewOrMatcher(subMatchers ...Matcher) Matcher {
+	return &orMatcher{matchers: subMatchers}
 }

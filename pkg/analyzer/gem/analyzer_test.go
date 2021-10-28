@@ -3,12 +3,13 @@ package gem
 import (
 	"testing"
 
+	"github.com/stackrox/scanner/pkg/analyzer/analyzertest"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMatching(t *testing.T) {
 	a := Analyzer()
-	match, extract := a.Match("/usr/local/bundle/specifications/rails-4.2.5.1.gemspec", nil, nil)
-	assert.True(t, match)
-	assert.True(t, extract)
+	f := analyzertest.NewFakeFile("usr/local/bundle/specifications/rails-4.2.5.1.gemspec", []byte(validRailsSpec))
+	cs := a.ProcessFile(f.FullPath(), f.FileInfo(), f.Contents())
+	assert.Len(t, cs, 1)
 }

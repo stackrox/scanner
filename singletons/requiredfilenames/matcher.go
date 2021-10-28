@@ -6,7 +6,6 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/featurefmt/dpkg"
 	"github.com/stackrox/scanner/ext/featurens"
-	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/matcher"
 )
@@ -17,6 +16,7 @@ var (
 )
 
 // SingletonMatcher returns the singleton matcher instance to use.
+// Note: this does not take into account language-level analyzers.
 func SingletonMatcher() matcher.Matcher {
 	once.Do(func() {
 		allFileNames := append(featurefmt.RequiredFilenames(), featurens.RequiredFilenames()...)
@@ -39,19 +39,7 @@ func SingletonMatcher() matcher.Matcher {
 			allMatchers = append(allMatchers, dpkgFilenamesMatcher, executableMatcher)
 		}
 
-		instance = matcher.NewCombinedMatcher(allMatchers...)
+		instance = matcher.NewOrMatcher(allMatchers...)
 	})
 	return instance
-}
-
-// MatcherForAnalyzers returns a matcher that takes all the analyzers as well as the default
-// matchers into account.
-func MatcherForAnalyzers(analyzers ...analyzer.Analyzer) matcher.Matcher {
-	allMatchers := make([]matcher.Matcher, 0, len(analyzers)+1)
-	for _, a := range analyzers {
-		allMatchers = append(allMatchers, a)
-	}
-	allMatchers = append(allMatchers, SingletonMatcher())
-
-	return matcher.NewCombinedMatcher(allMatchers...)
 }

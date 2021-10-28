@@ -6,9 +6,7 @@ import (
 	"strings"
 
 	"github.com/stackrox/scanner/pkg/analyzer"
-	"github.com/stackrox/scanner/pkg/analyzer/internal/common"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 var (
@@ -30,12 +28,15 @@ var (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
-	if fileInfo.IsDir() {
-		return false, false
+func (analyzerImpl) ProcessFile(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) []*component.Component {
+	if fileInfo.IsDir() || !matchSuffix(fullPath) {
+		return nil
 	}
 
-	return matchSuffix(fullPath), true
+	if c := parseMetadataFile(fullPath, fileInfo, contents); c != nil {
+		return []*component.Component{c}
+	}
+	return nil
 }
 
 func matchSuffix(fullPath string) bool {
@@ -45,10 +46,6 @@ func matchSuffix(fullPath string) bool {
 		}
 	}
 	return false
-}
-
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
-	return common.ExtractComponents(fileMap, matchSuffix, parseMetadataFile), nil
 }
 
 // Analyzer returns the Python analyzer.

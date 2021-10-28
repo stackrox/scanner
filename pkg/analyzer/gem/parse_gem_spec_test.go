@@ -3,6 +3,7 @@ package gem
 import (
 	"testing"
 
+	"github.com/stackrox/scanner/pkg/analyzer/analyzertest"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stretchr/testify/assert"
 )
@@ -358,7 +359,8 @@ func TestGemSpecParsing(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.expectedComponent, parseGemSpec(location, []byte(testCase.spec)))
+			f := analyzertest.NewFakeFile(location, []byte(testCase.spec))
+			assert.Equal(t, testCase.expectedComponent, parseGemSpec(location, f.FileInfo(), f.Contents()))
 		})
 	}
 }
