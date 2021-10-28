@@ -3,6 +3,8 @@ package ioutils
 import (
 	"io"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 type lazyReaderAt struct {
@@ -14,14 +16,42 @@ type lazyReaderAt struct {
 	err   error
 }
 
+var (
+	errBufferStolen = errors.New("buffer was stolen")
+)
+
+// LazyReaderAt is a ReaderAt that reads from an underlying reader into a buffer
+// in a lazy fashion.
+type LazyReaderAt interface {
+	io.ReaderAt
+	// StealBuffer steals the underlying buffer from the reader. The length of the buffer
+	// will contain complete contents from the beginning of the reader, while the remaining
+	// capacity is unused.
+	// After calling this function, subsequent calls to it will return nil, and
+	// subsequent calls to `ReadAt` will return an error.
+	// This can be used in conjunction with `NewLazyReaderAtWithBuffer` to recycle a buffer.
+	StealBuffer() []byte
+}
+
 // NewLazyReaderAtWithBuffer returns a ReaderAt that lazily reads from the underlying reader.
-func NewLazyReaderAtWithBuffer(reader io.Reader, size int64, buf []byte) io.ReaderAt {
+func NewLazyReaderAtWithBuffer(reader io.Reader, size int64, buf []byte) LazyReaderAt {
 	return &lazyReaderAt{
 		reader: reader,
 		size:   size,
 
 		buf: buf[:0],
 	}
+}
+
+func (r *lazyReaderAt) StealBuffer() []byte {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	buf := r.buf
+	r.buf = nil
+	r.err = errBufferStolen
+
+	return buf
 }
 
 func (r *lazyReaderAt) ReadAt(p []byte, off int64) (int, error) {

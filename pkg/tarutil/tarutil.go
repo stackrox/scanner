@@ -93,7 +93,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	// Telemetry variables.
 	var numFiles, numMatchedFiles, numExtractedContentBytes int
 
-	var buf []byte
+	var prevLazyReader ioutils.LazyReaderAt
 
 	// For each element in the archive
 	for {
@@ -111,7 +111,13 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 		var contents io.ReaderAt
 		if hdr.FileInfo().Mode().IsRegular() {
-			contents = ioutils.NewLazyReaderAtWithBuffer(tr, hdr.Size, buf)
+			// Recycle the buffer, if possible.
+			var buf []byte
+			if prevLazyReader != nil {
+				buf = prevLazyReader.StealBuffer()
+			}
+			prevLazyReader = ioutils.NewLazyReaderAtWithBuffer(tr, hdr.Size, buf)
+			contents = prevLazyReader
 		} else {
 			contents = bytes.NewReader(nil)
 		}

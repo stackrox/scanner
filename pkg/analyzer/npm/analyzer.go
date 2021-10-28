@@ -9,9 +9,9 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 )
 
-type analysisImpl struct{}
+type analyzerImpl struct{}
 
-func (analysisImpl) ProcessFile(fullPath string, fi os.FileInfo, contents io.ReaderAt) []*component.Component {
+func (analyzerImpl) ProcessFile(fullPath string, fi os.FileInfo, contents io.ReaderAt) []*component.Component {
 	if !match(fullPath) {
 		return nil
 	}
@@ -28,5 +28,5 @@ func match(fullPath string) bool {
 
 // Analyzer returns the NPM analyzer.
 func Analyzer() analyzer.Analyzer {
-	return analysisImpl{}
+	return analyzerImpl{}
 }

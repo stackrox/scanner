@@ -35,7 +35,7 @@ func (analyzerImpl) ProcessFile(fullPath string, fileInfo os.FileInfo, _ io.Read
 		return nil
 	}
 	if c := parseMetadata(fullPath); c != nil {
-		return []*component.Component{}
+		return []*component.Component{c}
 	}
 	return nil
 }

@@ -228,14 +228,16 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	return namespace, distroless, featureVersions, rhelfeatures, languageComponents, removedFiles, nil
 }
 
-type analysingMatcher struct {
+// analyzingMatcher is a Matcher implementation that calls ProcessFile on each analyzer,
+// stores the resulting components, and then delegates to another matcher.
+type analyzingMatcher struct {
 	analyzers []analyzer.Analyzer
 	delegate  matcher.Matcher
 
 	components []*component.Component
 }
 
-func (m *analysingMatcher) Match(filePath string, fi os.FileInfo, contents io.ReaderAt) (bool, bool) {
+func (m *analyzingMatcher) Match(filePath string, fi os.FileInfo, contents io.ReaderAt) (bool, bool) {
 	for _, a := range m.analyzers {
 		m.components = append(m.components, component.FilterToOnlyValid(a.ProcessFile(filePath, fi, contents))...)
 	}
@@ -244,7 +246,7 @@ func (m *analysingMatcher) Match(filePath string, fi os.FileInfo, contents io.Re
 
 // DetectContentFromReader detects scanning content in the given reader.
 func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
-	m := &analysingMatcher{
+	m := &analyzingMatcher{
 		analyzers: analyzers.Analyzers(),
 		delegate:  requiredfilenames.SingletonMatcher(),
 	}

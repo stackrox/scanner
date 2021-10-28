@@ -113,6 +113,7 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) [
 		}
 	}
 
+	var buf []byte
 	for _, subArchiveF := range subArchives {
 		if subArchiveF.CompressedSize64 == 0 {
 			continue
@@ -128,10 +129,11 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) [
 		}
 
 		fi := subArchiveF.FileInfo()
-		contents := ioutils.NewLazyReaderAtWithBuffer(reader, fi.Size(), nil)
+		contents := ioutils.NewLazyReaderAtWithBuffer(reader, fi.Size(), buf)
 
 		subComponents := parseContents(fmt.Sprintf("%s:%s", locationSoFar, subArchiveF.Name), fi, contents)
 		allComponents = append(allComponents, subComponents...)
+		buf = contents.StealBuffer()
 	}
 
 	return allComponents
