@@ -1,3 +1,10 @@
+///////////////////////////////////////////////////
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
+//lint:file-ignore ST1021 This file is copied over from github.com/quay/claircore
+
 //nolint:golint
 package archop
 

@@ -1,3 +1,8 @@
+///////////////////////////////////////////////////
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
 package cpe
 
 import (
@@ -194,21 +199,4 @@ var ErrUnset = errors.New("cpe: wfn is empty")
 
 func (w WFN) String() string {
 	return w.BindFS()
-}
-
-// These functions are defined in the spec to aid in implementation of other
-// algorithms, so they're implemented here in case they're needed.
-
-func (w WFN) get(a Attribute) Value {
-	return w.Attr[int(a)]
-}
-
-func (w WFN) set(a Attribute, v *Value) WFN {
-	r := w
-	if v == nil {
-		r.Attr[int(a)].Kind = ValueUnset
-	} else {
-		r.Attr[int(a)] = *v
-	}
-	return r
 }
