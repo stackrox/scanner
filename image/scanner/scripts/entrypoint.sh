@@ -1,10 +1,6 @@
 #!/bin/sh
 
-set -xeuo pipefail
-
-find /.init-dirs -ls || true
-find /etc/pki/ca-trust -ls || true
-find /etc/ssl/certs -ls || true
+set -euo pipefail
 
 /restore-all-dir-contents
 /import-additional-cas
