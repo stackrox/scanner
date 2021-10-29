@@ -204,9 +204,6 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	if !env.LanguageVulns.Enabled() {
 		return namespace, distroless, featureVersions, rhelfeatures, nil, nil, nil
 	}
-	if len(languageComponents) > 0 {
-		log.WithFields(log.Fields{logLayerName: name, "component count": len(languageComponents)}).Debug("detected components")
-	}
 
 	var removedFiles []string
 	for filePath := range files {
@@ -246,6 +243,11 @@ func (m *analyzingMatcher) Match(filePath string, fi os.FileInfo, contents io.Re
 
 // DetectContentFromReader detects scanning content in the given reader.
 func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+	// Create a "matcher" that actually calls `ProcessFile` on each analyzer, before delegating
+	// to the actual matcher for operating system-level feature extraction.
+	// TODO: this is ugly. A matcher should not have side-effects; but the `analyzingMatcher`s
+	// sole purpose is to have a side effect. The `ExtractFromReader` should be more explicit
+	// about the matcher not just being a matcher.
 	m := &analyzingMatcher{
 		analyzers: analyzers.Analyzers(),
 		delegate:  requiredfilenames.SingletonMatcher(),
@@ -254,6 +256,10 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 	files, err := imagefmt.ExtractFromReader(reader, format, m)
 	if err != nil {
 		return nil, false, nil, nil, nil, nil, err
+	}
+
+	if len(m.components) > 0 {
+		log.WithFields(log.Fields{logLayerName: name, "component count": len(m.components)}).Debug("detected components")
 	}
 
 	return detectFromFiles(files, name, parent, m.components, uncertifiedRHEL)

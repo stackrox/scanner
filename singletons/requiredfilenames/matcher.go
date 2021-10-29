@@ -15,8 +15,11 @@ var (
 	once     sync.Once
 )
 
-// SingletonMatcher returns the singleton matcher instance to use.
-// Note: this does not take into account language-level analyzers.
+// SingletonMatcher returns the singleton matcher instance to use for extracting
+// files to be analyzed for operating system features.
+// Note: language-level analyzers implement a different interface, and do not require
+// extraction of files into a `FileMap`. Therefore, the respective files do not need
+// to be matched here.
 func SingletonMatcher() matcher.Matcher {
 	once.Do(func() {
 		allFileNames := append(featurefmt.RequiredFilenames(), featurens.RequiredFilenames()...)
