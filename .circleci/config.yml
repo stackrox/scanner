@@ -815,11 +815,11 @@ jobs:
 
               scanner_version="$(make --quiet --no-print-directory tag)"
             fi
-            destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}/"
+            destination="gs://definitions.stackrox.io/scanner-data/2.20.0/"
 
             cmd=()
             if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
-              cmd+=(echo "Would do")
+              #cmd+=(echo "Would do")
             fi
 
             "${cmd[@]}" gsutil cp /tmp/vuln-dump/nvd-definitions.zip "$destination"
