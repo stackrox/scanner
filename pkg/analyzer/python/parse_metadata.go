@@ -3,7 +3,6 @@ package python
 import (
 	"bufio"
 	"io"
-	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -20,14 +19,14 @@ var disallowedPkgs = set.NewFrozenStringSet("python")
 // Note that it's possible that the file is not a Python manifest but some other totally random file that
 // happens to have a matching name.
 // In this case, this function will gracefully return `nil`.
-func parseMetadataFile(filePath string, fi os.FileInfo, contents io.ReaderAt) *component.Component {
+func parseMetadataFile(filePath string, contents io.Reader) *component.Component {
 	c := &component.Component{
 		Location:          filePath,
 		SourceType:        component.PythonSourceType,
 		PythonPkgMetadata: &component.PythonPkgMetadata{},
 	}
 
-	scanner := bufio.NewScanner(io.NewSectionReader(contents, 0, fi.Size()))
+	scanner := bufio.NewScanner(contents)
 	for scanner.Scan() {
 		currentLine := scanner.Text()
 		key, value := stringutils.Split2(currentLine, ":")

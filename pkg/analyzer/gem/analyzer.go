@@ -19,7 +19,7 @@ func (analyzerImpl) ProcessFile(fullPath string, fi os.FileInfo, contents io.Rea
 	if !match(fullPath) {
 		return nil
 	}
-	if c := parseGemSpec(fullPath, fi, contents); c != nil {
+	if c := parseGemSpec(fullPath, io.NewSectionReader(contents, 0, fi.Size())); c != nil {
 		return []*component.Component{c}
 	}
 	return nil

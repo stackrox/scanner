@@ -121,7 +121,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 		return nil
 	}
 
-	// AnnotateComponentsWithPackageManagerInfo the content.
+	// Analyze the content.
 	var rhelv2Components *database.RHELv2Components
 	var languageComponents []*component.Component
 	var removedFiles []string

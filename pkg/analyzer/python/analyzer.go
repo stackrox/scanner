@@ -33,7 +33,7 @@ func (analyzerImpl) ProcessFile(fullPath string, fileInfo os.FileInfo, contents 
 		return nil
 	}
 
-	if c := parseMetadataFile(fullPath, fileInfo, contents); c != nil {
+	if c := parseMetadataFile(fullPath, io.NewSectionReader(contents, 0, fileInfo.Size())); c != nil {
 		return []*component.Component{c}
 	}
 	return nil
