@@ -359,7 +359,7 @@ func TestGemSpecParsing(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.expectedComponent, strings.NewReader(testCase.spec))
+			assert.Equal(t, testCase.expectedComponent, parseGemSpec(location, strings.NewReader(testCase.spec)))
 		})
 	}
 }
