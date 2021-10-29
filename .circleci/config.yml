@@ -818,9 +818,6 @@ jobs:
             destination="gs://definitions.stackrox.io/scanner-data/2.20.0/"
 
             cmd=()
-            if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
-              #cmd+=(echo "Would do")
-            fi
 
             "${cmd[@]}" gsutil cp /tmp/vuln-dump/nvd-definitions.zip "$destination"
             "${cmd[@]}" gsutil cp /tmp/vuln-dump/k8s-definitions.zip "$destination"
