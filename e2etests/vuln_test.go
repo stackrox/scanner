@@ -38,7 +38,7 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	if strings.HasPrefix(testCase.image, "docker.io") {
 		_, inCIRun := os.LookupEnv("CI")
 		if inCIRun {
-			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/vuln-images", "quay.io/cgorman1/qa", -1)
+			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/vuln-images", "quay.io/rhacs-eng/qa", -1)
 			scanResp = scanQuayStackRoxImage(client, testCase.image, false, t)
 		} else {
 			scanResp = scanDockerIOStackRoxImage(client, testCase.image, false, t)

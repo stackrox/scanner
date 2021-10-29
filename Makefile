@@ -21,7 +21,7 @@ BUILD_DIR_HASH := $(shell git ls-files -sm build | git hash-object --stdin)
 BUILD_IMAGE := stackrox/scanner:builder-$(BUILD_DIR_HASH)
 
 ifdef CI
-    QUAY_REPO := cgorman1
+    QUAY_REPO := rhacs-eng
     BUILD_IMAGE := quay.io/$(QUAY_REPO)/scanner:builder-$(BUILD_DIR_HASH)
 endif
 
@@ -237,9 +237,15 @@ PROTO_GENERATED_SRCS = $(GENERATED_PB_SRCS) $(GENERATED_API_GW_SRCS)
 
 include make/protogen.mk
 
+.PHONY: clean-obsolete-protos
+clean-obsolete-protos:
+	@echo "+ $@"
+	$(BASE_DIR)/tools/clean_autogen_protos.py --protos $(BASE_DIR)/proto --generated $(BASE_DIR)/generated
+
 proto-generated-srcs: $(PROTO_GENERATED_SRCS)
 	@echo "+ $@"
 	@touch proto-generated-srcs
+	@$(MAKE) clean-obsolete-protos
 
 .PHONY: go-easyjson-srcs
 go-easyjson-srcs: $(EASYJSON_BIN)
