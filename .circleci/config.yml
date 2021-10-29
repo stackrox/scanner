@@ -815,12 +815,9 @@ jobs:
               # changes that the downstream release can be unprepared to deal with.
               scanner_version="latest"
             fi
-            destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}/"
+            destination="gs://definitions.stackrox.io/scanner-data/2.20.1/"
 
             cmd=()
-            if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
-              cmd+=(echo "Would do")
-            fi
 
             "${cmd[@]}" gsutil cp /tmp/vuln-dump/nvd-definitions.zip "$destination"
             "${cmd[@]}" gsutil cp /tmp/vuln-dump/k8s-definitions.zip "$destination"
