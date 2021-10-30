@@ -1,4 +1,8 @@
-SHELL=/bin/bash
+# Store tooling in a location that does not affect the system.
+GOBIN := $(CURDIR)/.gobin
+export GOBIN
+
+SHELL = env GOBIN=$(GOBIN) /bin/bash
 BASE_DIR=$(CURDIR)
 
 TAG := # make sure tag is never injectable as an env var
