@@ -8,10 +8,10 @@ package tools
 
 import (
 	// Tool dependencies, not used anywhere in the code.
-	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
-	_ "honnef.co/go/tools/cmd/staticcheck"
-	_ "github.com/gogo/protobuf/protoc-gen-gofast"
 	_ "github.com/ckaznocha/protoc-gen-lint"
+	_ "github.com/gogo/protobuf/protoc-gen-gofast"
+	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway"
 	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger"
+	_ "honnef.co/go/tools/cmd/staticcheck"
 )

@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	archop "github.com/quay/claircore"
+	"github.com/stackrox/scanner/pkg/archop"
 )
 
 // Model defines the base type for each database entity.

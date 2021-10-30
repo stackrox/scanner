@@ -9,6 +9,7 @@ deps
 proto-generated-srcs
 protoc-*
 /.proto/
+/.gobin/
 
 # nohup output when running port-forwards
 nohup.out

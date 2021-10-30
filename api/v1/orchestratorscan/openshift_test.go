@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	archop "github.com/quay/claircore"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	scannerV1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	"github.com/stackrox/scanner/pkg/archop"
 	"github.com/stretchr/testify/assert"
 )
 
