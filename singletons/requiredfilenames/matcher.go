@@ -24,6 +24,7 @@ func SingletonMatcher() matcher.Matcher {
 
 		allAnalyzers := analyzers.Analyzers()
 
+		// TODO: update once #506 is merged.
 		// Allocate extra spaces for the feature-flagged matchers.
 		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+4)
 		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
