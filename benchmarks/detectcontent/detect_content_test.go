@@ -6,8 +6,6 @@ import (
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/benchmarks"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/pkg/features"
-	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/require"
 
 	// Register the Docker image extractor
@@ -33,19 +31,7 @@ var (
 	image = images[0]
 )
 
-func BenchmarkDetectContentNoActiveVulnMgmt(b *testing.B) {
-	envIsolator := testutils.NewEnvIsolator(b)
-	envIsolator.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
-	defer envIsolator.RestoreAll()
-
-	runBenchmarkDetectContent(b, image)
-}
-
 func BenchmarkDetectContent(b *testing.B) {
-	envIsolator := testutils.NewEnvIsolator(b)
-	envIsolator.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
-	defer envIsolator.RestoreAll()
-
 	runBenchmarkDetectContent(b, image)
 }
 

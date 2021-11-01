@@ -6,7 +6,6 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/featurefmt/dpkg"
 	"github.com/stackrox/scanner/ext/featurens"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/singletons/analyzers"
 )
@@ -32,17 +31,15 @@ func SingletonMatcher() matcher.Matcher {
 			allMatchers = append(allMatchers, a)
 		}
 
-		if features.ActiveVulnMgmt.Enabled() {
-			dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp)
-			// All other matchers take precedence over this matcher.
-			// For example, an executable python file should be matched by
-			// the Python matcher. This matcher should be used for any
-			// remaining executable files which went unmatched otherwise.
-			// Therefore, this matcher MUST be the last matcher.
-			executableMatcher := matcher.NewExecutableMatcher()
+		dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp)
+		// All other matchers take precedence over this matcher.
+		// For example, an executable python file should be matched by
+		// the Python matcher. This matcher should be used for any
+		// remaining executable files which went unmatched otherwise.
+		// Therefore, this matcher MUST be the last matcher.
+		executableMatcher := matcher.NewExecutableMatcher()
 
-			allMatchers = append(allMatchers, dpkgFilenamesMatcher, executableMatcher)
-		}
+		allMatchers = append(allMatchers, dpkgFilenamesMatcher, executableMatcher)
 
 		instance = matcher.NewOrMatcher(allMatchers...)
 	})
