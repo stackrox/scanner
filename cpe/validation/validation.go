@@ -3,6 +3,7 @@ package validation
 import (
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/cpe/match"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -23,4 +24,16 @@ func Register(src component.SourceType, validator Validator) {
 		panic(fmt.Sprintf("%q has already been registered", src))
 	}
 	Validators[src] = validator
+}
+
+// DoesNotMatchLanguage checks if the TargetSW from the resulting CPE matches the language
+// or is empty
+func DoesNotMatchLanguage(res match.Result, lang string) bool {
+	for _, a := range res.CVE.Config() {
+		log.Infof("CPE %s", res.CPE.String())
+		if a.TargetSW != "" && a.TargetSW != lang {
+			return true
+		}
+	}
+	return false
 }

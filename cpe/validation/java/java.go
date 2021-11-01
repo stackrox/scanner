@@ -9,6 +9,9 @@ import (
 type validator struct{}
 
 func (v validator) ValidateResult(result match.Result) bool {
+	if validation.DoesNotMatchLanguage(result, "java") {
+		return false
+	}
 	return true
 }
 
