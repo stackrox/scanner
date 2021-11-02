@@ -3,6 +3,7 @@ package validation
 import (
 	"fmt"
 
+	"github.com/facebookincubator/nvdtools/wfn"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/cpe/match"
 	"github.com/stackrox/scanner/pkg/component"
@@ -31,7 +32,7 @@ func Register(src component.SourceType, validator Validator) {
 func DoesNotMatchLanguage(res match.Result, lang string) bool {
 	for _, a := range res.CVE.Config() {
 		log.Info(a.String())
-		if a.TargetSW != "*" && a.TargetSW != lang {
+		if a.TargetSW != wfn.Any && a.TargetSW != lang {
 			return true
 		}
 	}
