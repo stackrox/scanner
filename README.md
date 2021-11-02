@@ -22,7 +22,7 @@ Only major, breaking changes will merit a bump to the major version, but this is
 1. Add release notes based on the changes between the previous release and this one
 1. Once the latest image is built in CI, update the [SCANNER_VERSION](https://github.com/stackrox/rox/blob/master/SCANNER_VERSION) file in the rox repo
 
-### Creating a new Path Release
+### Creating a new Patch Release
 
 1. Merge any updates into the `master` branch
 1. Once merged, `git cherry-pick` the commit(s) into the relevant release branch(es)
