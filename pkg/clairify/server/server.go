@@ -27,6 +27,7 @@ import (
 	"github.com/stackrox/scanner/pkg/mtls"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"github.com/stackrox/scanner/pkg/updater"
+	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc/codes"
 )
 
@@ -36,6 +37,7 @@ var (
 
 // Server is the HTTP server for Clairify.
 type Server struct {
+	version    string
 	endpoint   string
 	storage    database.Datastore
 	httpServer *http.Server
@@ -44,6 +46,7 @@ type Server struct {
 // New returns a new instantiation of the Server.
 func New(serverEndpoint string, db database.Datastore) *Server {
 	return &Server{
+		version:  version.Version,
 		endpoint: serverEndpoint,
 		storage:  db,
 	}
@@ -88,8 +91,9 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName, lineage string,
 		return
 	}
 	env := &v1.LayerEnvelope{
-		Layer: &layer,
-		Notes: notes,
+		ScannerVersion: s.version,
+		Layer:          &layer,
+		Notes:          notes,
 	}
 
 	bytes, err := json.Marshal(env)
@@ -219,7 +223,8 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	imageEnvelope := types.ImageEnvelope{
-		Image: image,
+		ScannerVersion: s.version,
+		Image:          image,
 	}
 	data, err = json.Marshal(imageEnvelope)
 	if err != nil {
@@ -231,7 +236,18 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 
 // Ping implements a simple handler for verifying that Clairify is up.
 func (s *Server) Ping(w http.ResponseWriter, _ *http.Request) {
-	w.Write([]byte("{}"))
+	pong := types.Pong{
+		ScannerVersion: s.version,
+		Status:         "OK",
+	}
+	data, err := json.Marshal(pong)
+	if err != nil {
+		// Return an error to the user.
+		// Yes, the Scanner is up, but there is a serious problem if we cannot marshal the simple Pong message.
+		clairErrorString(w, http.StatusInternalServerError, "cannot determine scanner version")
+		return
+	}
+	w.Write(data)
 }
 
 // GetVulnDefsMetadata returns vulnerability definitions information.

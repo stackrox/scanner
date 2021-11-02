@@ -14,6 +14,7 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	server "github.com/stackrox/scanner/pkg/scan"
+	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,12 +30,14 @@ type Service interface {
 // NewService returns the service for image scanning
 func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache) Service {
 	return &serviceImpl{
+		version:  version.Version,
 		db:       db,
 		nvdCache: nvdCache,
 	}
 }
 
 type serviceImpl struct {
+	version  string
 	db       database.Datastore
 	nvdCache nvdtoolscache.Cache
 }
@@ -51,6 +54,7 @@ func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.Ge
 		return nil, status.Errorf(codes.Internal, "failed to retrieve components from DB: %v", err)
 	}
 	return &v1.GetLanguageLevelComponentsResponse{
+		ScannerVersion:    s.version,
 		LayerToComponents: convertComponents(components),
 	}, nil
 }
@@ -69,7 +73,8 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 	}
 
 	return &v1.ScanImageResponse{
-		Status: v1.ScanStatus_SUCCEEDED,
+		ScannerVersion: s.version,
+		Status:         v1.ScanStatus_SUCCEEDED,
 		Image: &v1.ImageSpec{
 			Digest: digest,
 			Image:  image.TaggedName(),
@@ -103,7 +108,8 @@ func (s *serviceImpl) getLayer(layerName, lineage string, uncertifiedRHEL bool) 
 	}
 
 	return &v1.GetImageScanResponse{
-		Status: v1.ScanStatus_SUCCEEDED,
+		ScannerVersion: s.version,
+		Status:         v1.ScanStatus_SUCCEEDED,
 		Image: &v1.Image{
 			Features: features,
 		},

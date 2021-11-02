@@ -28,8 +28,9 @@ message ScanImageRequest {
 }
 
 message ScanImageResponse {
-    ScanStatus status = 1;
-    ImageSpec image   = 2;
+    string     scanner_version = 3;
+    ScanStatus status          = 1;
+    ImageSpec  image           = 2;
 }
 
 message ImageSpec {
@@ -80,6 +81,7 @@ message LanguageLevelComponents {
 }
 
 message GetLanguageLevelComponentsResponse {
+    string                                scanner_version     = 2;
     map <string, LanguageLevelComponents> layer_to_components = 1;
 }
 
@@ -91,8 +93,9 @@ enum ScanStatus {
 }
 
 message GetImageScanResponse {
-    ScanStatus status = 1;
-    Image image       = 2;
+    string     scanner_version = 3;
+    ScanStatus status          = 1;
+    Image image                = 2;
 }
 
 // ImageScanService APIs can be used to scan images.

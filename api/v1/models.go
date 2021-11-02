@@ -414,9 +414,10 @@ func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {
 
 // LayerEnvelope envelopes complete scan data to return to the client.
 type LayerEnvelope struct {
-	Layer *Layer `json:"Layer,omitempty"`
-	Notes []Note `json:"Notes,omitempty"`
-	Error *Error `json:"Error,omitempty"`
+	ScannerVersion string `json:"ScannerVersion,omitempty"`
+	Layer          *Layer `json:"Layer,omitempty"`
+	Notes          []Note `json:"Notes,omitempty"`
+	Error          *Error `json:"Error,omitempty"`
 }
 
 // Note defines scanning notes.

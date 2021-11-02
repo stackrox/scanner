@@ -9,7 +9,8 @@ import "shared/api/v1/empty.proto";
 package scannerV1;
 
 message PongMessage {
-    string status = 1;
+    string scanner_version = 2;
+    string status          = 1;
 }
 
 service PingService {
