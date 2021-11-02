@@ -30,8 +30,8 @@ func Register(src component.SourceType, validator Validator) {
 // or is empty
 func DoesNotMatchLanguage(res match.Result, lang string) bool {
 	for _, a := range res.CVE.Config() {
-		log.Infof("CPE %s", res.CPE.String())
-		if a.TargetSW != "" && a.TargetSW != lang {
+		log.Info(a.String())
+		if a.TargetSW != "*" && a.TargetSW != lang {
 			return true
 		}
 	}
