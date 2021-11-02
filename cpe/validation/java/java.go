@@ -9,7 +9,7 @@ import (
 type validator struct{}
 
 func (v validator) ValidateResult(result match.Result) bool {
-	return !validation.DoesNotMatchLanguage(result, "java")
+	return !validation.TargetSWMatches(result, "java")
 }
 
 func init() {

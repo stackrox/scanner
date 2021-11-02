@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/nvdtools/wfn"
-	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/cpe/match"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -27,14 +26,13 @@ func Register(src component.SourceType, validator Validator) {
 	Validators[src] = validator
 }
 
-// DoesNotMatchLanguage checks if the TargetSW from the resulting CPE matches the language
-// or is empty
-func DoesNotMatchLanguage(res match.Result, lang string) bool {
+// TargetSWMatches checks if the TargetSW from the resulting CPE matches the language
+// or matches any language
+func TargetSWMatches(res match.Result, lang string) bool {
 	for _, a := range res.CVE.Config() {
-		log.Info(a.String())
-		if a.TargetSW != wfn.Any && a.TargetSW != lang {
-			return true
+		if a.TargetSW == wfn.Any || a.TargetSW == lang {
+			return false
 		}
 	}
-	return false
+	return true
 }
