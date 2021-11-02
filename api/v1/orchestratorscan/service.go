@@ -130,12 +130,12 @@ func (s *serviceImpl) getOpenShiftVulns(version *openShiftVersion) ([]*database.
 
 // GetOpenShiftVulnerabilities returns Openshift vulnerabilities for requested Openshift version.
 func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.GetOpenShiftVulnerabilitiesRequest) (*v1.GetOpenShiftVulnerabilitiesResponse, error) {
-	v, err := newOpenShiftVersion(req.OpenShiftVersion)
+	version, err := newOpenShiftVersion(req.OpenShiftVersion)
 	if err != nil {
 		return nil, err
 	}
 
-	vulns, err := s.getOpenShiftVulns(v)
+	vulns, err := s.getOpenShiftVulns(version)
 	if err != nil {
 		return nil, err
 	}
@@ -163,14 +163,14 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		}
 
 		// Skip fixed vulns.
-		fixedBy, err := v.GetFixedVersion(vulnPkgInfo.FixedInVersion, vuln.Title)
+		fixedBy, err := version.GetFixedVersion(vulnPkgInfo.FixedInVersion, vuln.Title)
 		if err != nil {
 			// Skip it. The vuln has a fixedBy version but we cannot extract it.
 			log.Errorf("cannot get fix version for vuln %s: %v, Skipping ...", vuln.Name, err)
 			continue
 		}
 
-		if fixedBy != "" && !v.LessThan(rpmVersion.NewVersion(fixedBy)) {
+		if fixedBy != "" && !version.LessThan(rpmVersion.NewVersion(fixedBy)) {
 			log.Debugf("vuln %s has been fixed: %s, Skipping", vuln.Name, fixedBy)
 			continue
 		}

@@ -19,14 +19,18 @@ type Service interface {
 
 // NewService returns a new Ping service.
 func NewService() Service {
-	return &serviceImpl{}
+	return &serviceImpl{
+		version: version.Version,
+	}
 }
 
-type serviceImpl struct{}
+type serviceImpl struct{
+	version string
+}
 
 func (s *serviceImpl) Ping(context.Context, *v1.Empty) (*v1.PongMessage, error) {
 	return &v1.PongMessage{
-		ScannerVersion: version.Version,
+		ScannerVersion: s.version,
 		Status:         "OK",
 	}, nil
 }
