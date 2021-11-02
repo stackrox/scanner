@@ -24,7 +24,7 @@ func NewService() Service {
 	}
 }
 
-type serviceImpl struct{
+type serviceImpl struct {
 	version string
 }
 
