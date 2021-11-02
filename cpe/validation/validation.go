@@ -31,8 +31,8 @@ func Register(src component.SourceType, validator Validator) {
 func TargetSWMatches(res match.Result, lang string) bool {
 	for _, a := range res.CVE.Config() {
 		if a.TargetSW == wfn.Any || a.TargetSW == lang {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
 }
