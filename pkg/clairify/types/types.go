@@ -119,7 +119,7 @@ type Image struct {
 
 // ImageEnvelope is returned from a scan request.
 type ImageEnvelope struct {
-	ScannerVersion string `json:"scanner_version,omitempty"`
+	ScannerVersion string `json:"scannerVersion,omitempty"`
 	Image          *Image `json:"image"`
 }
 
