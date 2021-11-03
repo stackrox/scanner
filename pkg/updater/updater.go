@@ -2,6 +2,8 @@ package updater
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/stackrox/rox/pkg/urlfmt"
 	"io"
 	"net/http"
 	"os"
@@ -31,6 +33,8 @@ const (
 	ifModifiedSinceHeader = "If-Modified-Since"
 
 	defaultTimeout = 5 * time.Minute
+
+	apiPathInCentral = "api/extensions/scannerdefinitions"
 )
 
 var (
@@ -174,9 +178,17 @@ func (u *Updater) Stop() {
 	u.stopSig.Signal()
 }
 
+func getDownloadURL(centralEndpoint string) string {
+	if centralEndpoint == "" {
+		centralEndpoint = "https://central.stackrox.svc"
+	}
+	centralEndpoint = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
+	return fmt.Sprintf("%s/%s", centralEndpoint, apiPathInCentral)
+}
+
 // New returns a new updater instance, and starts running the update daemon.
 func New(config Config, centralEndpoint string, db database.Datastore, repoToCPE *repo2cpe.Mapping, caches ...cache.Cache) (*Updater, error) {
-	downloadURL := getRelevantDownloadURL(centralEndpoint)
+	downloadURL := getDownloadURL(centralEndpoint)
 
 	client := &http.Client{
 		Timeout:   defaultTimeout,
