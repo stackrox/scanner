@@ -74,15 +74,9 @@ func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, url string,
 		// Not modified
 		return false, nil
 	}
-	// If we're fetching from Central, 404s are okay.
-	// TODO: is this still ok?
 	if resp.StatusCode == http.StatusNotFound {
-		log.Info("No vuln dumps were uploaded to Central")
+		log.Info("Central does not have any vuln dumps")
 		return false, nil
-	}
-	// TODO: remove?
-	if resp.StatusCode != http.StatusOK {
-		return false, errors.Errorf("invalid response from google storage; got code %d", resp.StatusCode)
 	}
 	if err := httputil.ResponseToError(resp); err != nil {
 		return false, err
