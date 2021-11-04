@@ -23,28 +23,39 @@ function manual_repro_check {
   gsutil_last_update=$(gsutil stat "$gsutil_url" | sed -Ene 's/^ +Update time: +(.*)/\1/p')
   cloudflare_url="https://definitions.stackrox.io/$diff_id/diff.zip"
   gcs_https_url="https://storage.googleapis.com/definitions.stackrox.io/$diff_id/diff.zip"
+  gcp_cdn_url="https://definitions2.stackrox.io/$diff_id/diff.zip"
   cloudflare_metadata=$(wget -q "$cloudflare_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip)
   gcs_metadata=$(wget -q "$gcs_https_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip)
+  cdn_metadata=$(wget -q "$gcp_cdn_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip)
   cloudflare_url_cache_control=$(curl -s -o /tmp/diff1.zip -v "$cloudflare_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
   gcs_https_url_cache_control=$(curl -s -o /tmp/diff2.zip -v "$gcs_https_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
+  gcp_cdn_url_cache_control=$(curl -s -o /tmp/diff3.zip -v "$gcp_cdn_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
   cloudflare_url_md5sum=$(md5sum /tmp/diff1.zip | awk '{print $1}')
   gcs_https_url_md5sum=$(md5sum /tmp/diff2.zip | awk '{print $1}')
+  gcp_cdn_url_md5sum=$(md5sum /tmp/diff3.zip | awk '{print $1}')
+
 
   cat <<EOF
 -----------------------------------------------------------------------
 diff_id             : $diff_id
-gsutil_url          : $gsutil_url
 gsutil_last_update  : $gsutil_last_update
+
+gsutil_url          : $gsutil_url
 cloudflare_url      : $cloudflare_url
-cloudflare_metadata : $cloudflare_metadata
 gcs_https_url       : $gcs_https_url
+gcp_cdn_url         : $gcp_cdn_url
+
+cloudflare_metadata : $cloudflare_metadata
 gcs_metadata        : $gcs_metadata
+cdn_metadata        : $cdn_metadata
 
 cloudflare_url_cache_control : $cloudflare_url_cache_control
 gcs_https_url_cache_control  : $gcs_https_url_cache_control
+gcp_cdn_url_cache_control    : $gcp_cdn_url_cache_control
 
-cloudflare_url_md5sum : $cloudflare_url_md5sum
-gcs_https_url_md5sum  : $gcs_https_url_md5sum
+cloudflare_url_md5sum     : $cloudflare_url_md5sum
+gcs_https_url_md5sum      : $gcs_https_url_md5sum
+gcp_cdn_url_md5sum        : $gcp_cdn_url_md5sum
 EOF
 }
 
