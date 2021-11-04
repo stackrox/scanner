@@ -3,7 +3,6 @@ package updater
 import (
 	"bytes"
 	"fmt"
-	"github.com/stackrox/rox/pkg/urlfmt"
 	"io"
 	"net/http"
 	"os"
@@ -15,6 +14,7 @@ import (
 	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/rox/pkg/httputil"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
+	"github.com/stackrox/rox/pkg/urlfmt"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/cache"
