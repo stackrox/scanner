@@ -2,7 +2,6 @@ package updater
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -14,7 +13,6 @@ import (
 	"github.com/stackrox/rox/pkg/concurrency"
 	"github.com/stackrox/rox/pkg/httputil"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
-	"github.com/stackrox/rox/pkg/urlfmt"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/cache"
@@ -33,8 +31,6 @@ const (
 	ifModifiedSinceHeader = "If-Modified-Since"
 
 	defaultTimeout = 5 * time.Minute
-
-	apiPathInCentral = "api/extensions/scannerdefinitions"
 )
 
 var (
@@ -172,17 +168,12 @@ func (u *Updater) Stop() {
 	u.stopSig.Signal()
 }
 
-func getDownloadURL(centralEndpoint string) string {
-	if centralEndpoint == "" {
-		centralEndpoint = "https://central.stackrox.svc"
-	}
-	centralEndpoint = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
-	return fmt.Sprintf("%s/%s", centralEndpoint, apiPathInCentral)
-}
-
 // New returns a new updater instance, and starts running the update daemon.
 func New(config Config, centralEndpoint string, db database.Datastore, repoToCPE *repo2cpe.Mapping, caches ...cache.Cache) (*Updater, error) {
-	downloadURL := getDownloadURL(centralEndpoint)
+	downloadURL, err := getRelevantDownloadURL(centralEndpoint)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting relevant download URL")
+	}
 
 	client := &http.Client{
 		Timeout:   defaultTimeout,
