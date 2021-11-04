@@ -70,6 +70,7 @@ func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, url string,
 		return false, errors.Wrap(err, "executing request")
 	}
 	defer utils.IgnoreError(resp.Body.Close)
+	log.Infof("STATUS CODE: %d", resp.StatusCode)
 	if resp.StatusCode == http.StatusNotModified {
 		// Not modified
 		return false, nil
