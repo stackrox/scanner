@@ -17,19 +17,30 @@ function is_mac   { uname | grep -qi 'darwin'; }
 function is_linux { uname | grep -qi 'linux'; }
 
 function manual_repro_check {
-  local diff_id=${1:-e8f8b9ab-6a75-433a-8b86-15586ec41a7b}
+  local diff_id=${1:-0133c2cf-8abe-4d79-9250-9b64b5b3e43e}
 
-  cf_url="https://definitions.stackrox.io/$diff_id/diff.zip"
+  gsutil_url="gs://definitions.stackrox.io/$diff_id/diff.zip"
+  gsutil_last_update=$(gsutil stat "$gsutil_url" | sed -Ene 's/^ +Update time: +(.*)/\1/p')
+  cloudflare_url="https://definitions.stackrox.io/$diff_id/diff.zip"
   gcs_https_url="https://storage.googleapis.com/definitions.stackrox.io/$diff_id/diff.zip"
-  gcs_gs_url="gs://definitions.stackrox.io/$diff_id/diff.zip"
+  cloudflare_metadata=$(wget -q "$cloudflare_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip)
+  gcs_metadata=$(wget -q "$gcs_https_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip)
+  cloudflare_url_cache_control=$(curl -s -o /tmp/diff1.zip -v "$cloudflare_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
+  gcs_https_url_cache_control=$(curl -s -o /tmp/diff2.zip -v "$gcs_https_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
 
-  echo "diff_id => $diff_id"
-  echo "cf_url => $cf_url"
-  wget -q "$cf_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip
-  echo "gcs_https_url => $gcs_https_url"
-  wget -q "$gcs_https_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip
-  echo "gcs_gs_url=> $gcs_gs_url"
-  gsutil stat "$gcs_gs_url" | sed -Ene 's/^ +Update time: +(.*)/\1/p'
+  cat <<EOF
+-----------------------------------------------------------------------
+diff_id             : $diff_id
+gsutil_url          : $gsutil_url
+gsutil_last_update  : $gsutil_last_update
+cloudflare_url      : $cloudflare_url
+cloudflare_metadata : $cloudflare_metadata
+gcs_https_url       : $gcs_https_url
+gcs_metadata        : $gcs_metadata
+
+cloudflare_url_cache_control : $cloudflare_url_cache_control
+gcs_https_url_cache_control  : $gcs_https_url_cache_control
+EOF
 }
 
 function parse_date_to_epoch_sec {
