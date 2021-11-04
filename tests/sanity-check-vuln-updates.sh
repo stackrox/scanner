@@ -27,6 +27,8 @@ function manual_repro_check {
   gcs_metadata=$(wget -q "$gcs_https_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip)
   cloudflare_url_cache_control=$(curl -s -o /tmp/diff1.zip -v "$cloudflare_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
   gcs_https_url_cache_control=$(curl -s -o /tmp/diff2.zip -v "$gcs_https_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
+  cloudflare_url_md5sum=$(md5sum /tmp/diff1.zip | awk '{print $1}')
+  gcs_https_url_md5sum=$(md5sum /tmp/diff2.zip | awk '{print $1}')
 
   cat <<EOF
 -----------------------------------------------------------------------
@@ -40,6 +42,9 @@ gcs_metadata        : $gcs_metadata
 
 cloudflare_url_cache_control : $cloudflare_url_cache_control
 gcs_https_url_cache_control  : $gcs_https_url_cache_control
+
+cloudflare_url_md5sum : $cloudflare_url_md5sum
+gcs_https_url_md5sum  : $gcs_https_url_md5sum
 EOF
 }
 
