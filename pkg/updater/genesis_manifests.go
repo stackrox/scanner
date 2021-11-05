@@ -17,8 +17,6 @@ import (
 const (
 	genesisManifestsLocation = "/genesis_manifests.json"
 
-	gsPrefix = "gs://"
-
 	apiPathInCentral = "api/extensions/scannerdefinitions"
 )
 
@@ -31,6 +29,7 @@ var (
 type knownGenesisDump struct {
 	Timestamp    time.Time `json:"timestamp"`
 	DiffLocation string    `json:"diffLocation"`
+	UUID         string    `json:"uuid"`
 }
 
 type genesisManifest struct {
@@ -68,7 +67,14 @@ func getRelevantDownloadURL(centralEndpoint string) (string, error) {
 		}
 	}
 
-	uuid, err := getUUID(mostRecentGenesisDump.DiffLocation)
+	var uuid string
+	if mostRecentGenesisDump.UUID != "" {
+		uuid = mostRecentGenesisDump.UUID
+		err = validateUUID(uuid)
+	} else {
+		// fallback on legacy diffLocation.
+		uuid, err = getUUID(mostRecentGenesisDump.DiffLocation)
+	}
 	if err != nil {
 		return "", errors.Wrap(err, "getting genesis UUID")
 	}
@@ -83,19 +89,19 @@ func getRelevantDownloadURL(centralEndpoint string) (string, error) {
 	return fullURL, nil
 }
 
-func getUUID(diffLoc string) (string, error) {
-	if strings.HasPrefix(diffLoc, gsPrefix) {
-		// legacy pattern.
-		matches := legacyDiffLocationPattern.FindStringSubmatch(diffLoc)
-		if len(matches) != 2 {
-			return "", errors.Errorf("invalid legacy diff location: %q", diffLoc)
-		}
-		return matches[1], nil
+func validateUUID(uuid string) error {
+	if !uuidPattern.MatchString(uuid) {
+		return errors.Errorf("invalid UUID: %q", uuid)
 	}
 
-	// non-legacy pattern.
-	if !uuidPattern.MatchString(diffLoc) {
-		return "", errors.Errorf("invalid diff location UUID: %q", diffLoc)
+	return nil
+}
+
+func getUUID(diffLoc string) (string, error) {
+	// legacy pattern.
+	matches := legacyDiffLocationPattern.FindStringSubmatch(diffLoc)
+	if len(matches) != 2 {
+		return "", errors.Errorf("invalid legacy diff location: %q", diffLoc)
 	}
-	return diffLoc, nil
+	return matches[1], nil
 }
