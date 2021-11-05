@@ -26,7 +26,7 @@ const (
 var (
 	uuidFmt                   = `[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}`
 	uuidPattern               = regexp.MustCompile(uuidFmt)
-	legacyDiffLocationPattern = regexp.MustCompile(fmt.Sprintf(`gs://definitions.stackrox.io/%s/diff.zip`, uuidFmt))
+	legacyDiffLocationPattern = regexp.MustCompile(fmt.Sprintf(`gs://definitions.stackrox.io/(%s)/diff.zip`, uuidFmt))
 )
 
 type knownGenesisDump struct {
