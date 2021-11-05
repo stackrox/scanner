@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Setup:
-#   pip install --upgrade cryptography gsutil google-cloud
+#   pip install --upgrade cryptography google-cloud-storage
 #   gcloud components update
 #
 # Usage:
@@ -81,23 +81,20 @@ function get_manifest_age_seconds_from_zip {
 
 function run_tests_for_diff_id {
   local diff_id gsutil_last_update
-  local url_gsutil url_cloudflare url_gcs_https url_google_cdn
-  local metadata_cloudflare metadata_gcs_https metadata_google_cdn
-  local cache_control_cloudflare cache_control_gcs_https cache_control_google_cdn
-  local md5sum_cloudflare md5sum_gcs_https md5sum_google_cdn
+  local url_gsutil url_cloudflare url_gcs_https
+  local metadata_cloudflare metadata_gcs_https
+  local cache_control_cloudflare cache_control_gcs_https
+  local md5sum_cloudflare md5sum_gcs_https
 
   diff_id=${1:-0133c2cf-8abe-4d79-9250-9b64b5b3e43e}
 
   url_cloudflare="https://definitions.stackrox.io/$diff_id/diff.zip"
   url_gcs_https="https://storage.googleapis.com/definitions.stackrox.io/$diff_id/diff.zip"
-  url_google_cdn="https://definitions2.stackrox.io/$diff_id/diff.zip"
 
   metadata_cloudflare=$(wget -q "$url_cloudflare" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip) \
     || bash_exit_failure "curl failed on $url_cloudflare"
   metadata_gcs_https=$(wget -q "$url_gcs_https" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip) \
     || bash_exit_failure "curl failed on $url_gcs_https"
-  metadata_google_cdn=$(wget -q "$url_google_cdn" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip) \
-    || bash_exit_failure "curl failed on $url_google_cdn"
 
   cache_control_cloudflare=$(curl -s -H 'Accept-encoding: gzip' -o /tmp/diff1.zip \
     -v "$url_cloudflare" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
@@ -105,13 +102,9 @@ function run_tests_for_diff_id {
   cache_control_gcs_https=$(curl -s -H 'Accept-encoding: gzip' -o /tmp/diff2.zip \
     -v "$url_gcs_https" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
     || bash_exit_failure "curl failed on $url_gcs_https"
-  cache_control_google_cdn=$(curl -s -H 'Accept-encoding: gzip' -o /tmp/diff3.zip \
-    -v "$url_google_cdn" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
-    || bash_exit_failure "curl failed on $url_google_cdn"
 
   md5sum_cloudflare=$(md5sum /tmp/diff1.zip | awk '{print $1}')
   md5sum_gcs_https=$(md5sum /tmp/diff2.zip | awk '{print $1}')
-  md5sum_google_cdn=$(md5sum /tmp/diff3.zip | awk '{print $1}')
   rm -f /tmp/diff{1,2,3}.zip
 
   url_gsutil="gs://definitions.stackrox.io/$diff_id/diff.zip"
@@ -127,19 +120,15 @@ gcs_object_age_seconds   : $gcs_object_age_seconds
 url_gsutil               : $url_gsutil
 url_cloudflare           : $url_cloudflare
 url_gcs_https            : $url_gcs_https
-url_google_cdn           : $url_google_cdn
 
 metadata_cloudflare      : $metadata_cloudflare
 metadata_gcs_https       : $metadata_gcs_https
-metadata_google_cdn      : $metadata_google_cdn
 
 cache_control_cloudflare : $cache_control_cloudflare
 cache_control_gcs_https  : $cache_control_gcs_https
-cache_control_google_cdn : $cache_control_google_cdn
 
 md5sum_cloudflare        : $md5sum_cloudflare
 md5sum_gcs_https         : $md5sum_gcs_https
-md5sum_google_cdn        : $md5sum_google_cdn
 
 EOF
 
@@ -156,10 +145,6 @@ EOF
     testfail "Incorrect gcs cache control setting, expected max-age=3600"
   fi
 
-  if [[ "$cache_control_google_cdn" != "cache-control: public, max-age=3600" ]]; then
-    testfail "Incorrect google cdn cache control setting, expected max-age=3600"
-  fi
-
   # If the gcs object age is over 1h, then the CDN cache should have been invalidated
   # based on the cache-control max-age value. Therefore the checksum should match that
   # from the content pulled directly from the gcs-https endpoint. But the object is
@@ -168,24 +153,6 @@ EOF
     if [[ "$md5sum_cloudflare" != "$md5sum_gcs_https" ]]; then
       testfail "Cloudflare CDN content mistmatch against reference after cache should have been invalidated"
     fi
-    if [[ "$md5sum_google_cdn" != "$md5sum_gcs_https" ]]; then
-      testfail "Google CDN content mistmatch against reference after cache should have been invalidated"
-    fi
-  fi
-
-  # Warn if content from one of the CDNs matches the reference while the other does not
-  if [[ "$md5sum_cloudflare" == "$md5sum_gcs_https" ]] && [[ "$md5sum_google_cdn" != "$md5sum_gcs_https" ]]; then
-    warn "Cloudflare CDN content matches reference but Google CDN content does not"
-  fi
-  if [[ "$md5sum_google_cdn" == "$md5sum_gcs_https" ]] && [[ "$md5sum_cloudflare" != "$md5sum_gcs_https" ]]; then
-    warn "Google CDN content matches reference but Cloudflare CDN content does not"
-  fi
-
-  # If all three md5sums are different then we have a problem
-  if [[ "$md5sum_cloudflare" != "$md5sum_gcs_https" ]] && \
-     [[ "$md5sum_gcs_https" != "$md5sum_google_cdn" ]] && \
-     [[ "$md5sum_google_cdn" != "$md5sum_cloudflare" ]]; then
-    testfail "All three md5sums are different"
   fi
 }
 
