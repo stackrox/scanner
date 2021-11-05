@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -74,7 +73,7 @@ func getRelevantDownloadURL(centralEndpoint string) (string, error) {
 		return "", errors.Wrap(err, "getting genesis UUID")
 	}
 
-	fullURL, err := urlfmt.FullyQualifiedURL(path.Join(centralEndpoint, apiPathInCentral), url.Values{
+	fullURL, err := urlfmt.FullyQualifiedURL(strings.Join([]string{centralEndpoint, apiPathInCentral}, "/"), url.Values{
 		"uuid": []string{uuid},
 	})
 	if err != nil {
