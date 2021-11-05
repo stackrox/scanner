@@ -3,6 +3,7 @@ package updater
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path"
 	"regexp"
@@ -85,5 +86,12 @@ func getRelevantDownloadURL(centralEndpoint string) (string, error) {
 		uuid = diffLoc
 	}
 
-	return path.Join(centralEndpoint, apiPathInCentral, uuid), nil
+	fullURL, err := urlfmt.FullyQualifiedURL(path.Join(centralEndpoint, apiPathInCentral), url.Values{
+		"uuid": []string{uuid},
+	})
+	if err != nil {
+		return "", errors.Wrap(err, "creating full Central URL")
+	}
+
+	return fullURL, nil
 }
