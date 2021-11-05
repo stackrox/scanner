@@ -165,7 +165,7 @@ EOF
   # from the content pulled directly from the gcs-https endpoint. But the object is
   # updated hourly so I might need to track hashes across runs to test this properly.
   if [[ "$gcs_object_age_seconds" -gt 3600 ]]; then
-    if [[ "$md5sum_cloudflare" == "$md5sum_gcs_https" ]]; then
+    if [[ "$md5sum_cloudflare" != "$md5sum_gcs_https" ]]; then
       testfail "Cloudflare CDN content mistmatch against reference after cache should have been invalidated"
     fi
     if [[ "$md5sum_google_cdn" != "$md5sum_gcs_https" ]]; then
