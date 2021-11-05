@@ -68,19 +68,15 @@ func (r *lazyReaderAt) ReadAt(p []byte, off int64) (int, error) {
 
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	r.readUntilNoLock(off + int64(len(p)))
+	r.readUntil(off + int64(len(p)))
 
-	return r.tryReadAtNoLock(p, off)
+	return r.tryReadAt(p, off)
 }
 
 func (r *lazyReaderAt) tryReadAt(p []byte, off int64) (int, error) {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
-	return r.tryReadAtNoLock(p, off)
-}
-
-func (r *lazyReaderAt) tryReadAtNoLock(p []byte, off int64) (int, error) {
 	pos := int64(len(r.buf))
 	if off+int64(len(p)) <= pos {
 		return copy(p, r.buf[off:]), nil
@@ -98,7 +94,10 @@ func (r *lazyReaderAt) tryReadAtNoLock(p []byte, off int64) (int, error) {
 	return 0, nil
 }
 
-func (r *lazyReaderAt) readUntilNoLock(pos int64) {
+func (r *lazyReaderAt) readUntil(pos int64) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
 	if pos > r.size {
 		pos = r.size
 	}
