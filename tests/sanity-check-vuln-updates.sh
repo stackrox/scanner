@@ -27,9 +27,10 @@ function manual_repro_check {
   cloudflare_metadata=$(wget -q "$cloudflare_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip)
   gcs_metadata=$(wget -q "$gcs_https_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip)
   cdn_metadata=$(wget -q "$gcp_cdn_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip)
-  cloudflare_url_cache_control=$(curl -s -o /tmp/diff1.zip -v "$cloudflare_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
-  gcs_https_url_cache_control=$(curl -s -o /tmp/diff2.zip -v "$gcs_https_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
-  gcp_cdn_url_cache_control=$(curl -s -o /tmp/diff3.zip -v "$gcp_cdn_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
+
+  cloudflare_url_cache_control=$(curl -s -H 'Accept-encoding: gzip' -o /tmp/diff1.zip -v "$cloudflare_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
+  gcs_https_url_cache_control=$(curl -s -H 'Accept-encoding: gzip' -o /tmp/diff2.zip -v "$gcs_https_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
+  gcp_cdn_url_cache_control=$(curl -s -H 'Accept-encoding: gzip' -o /tmp/diff3.zip -v "$gcp_cdn_url" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;")
   cloudflare_url_md5sum=$(md5sum /tmp/diff1.zip | awk '{print $1}')
   gcs_https_url_md5sum=$(md5sum /tmp/diff2.zip | awk '{print $1}')
   gcp_cdn_url_md5sum=$(md5sum /tmp/diff3.zip | awk '{print $1}')
