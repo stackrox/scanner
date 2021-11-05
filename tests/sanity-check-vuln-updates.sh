@@ -185,7 +185,7 @@ EOF
   if [[ "$md5sum_cloudflare" != "$md5sum_gcs_https" ]] && \
      [[ "$md5sum_gcs_https" != "$md5sum_google_cdn" ]] && \
      [[ "$md5sum_google_cdn" != "$md5sum_cloudflare" ]]; then
-    testfail "Content from both CDNs is different and both mismatch against reference"
+    testfail "All three md5sums are different"
   fi
 }
 
