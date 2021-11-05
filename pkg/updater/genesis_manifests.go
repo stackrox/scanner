@@ -69,21 +69,9 @@ func getRelevantDownloadURL(centralEndpoint string) (string, error) {
 		}
 	}
 
-	diffLoc := mostRecentGenesisDump.DiffLocation
-	var uuid string
-	if strings.HasPrefix(diffLoc, gsPrefix) {
-		// legacy pattern.
-		matches := legacyDiffLocationPattern.FindStringSubmatch(diffLoc)
-		if len(matches) != 2 {
-			return "", errors.Errorf("invalid legacy diff location: %q", diffLoc)
-		}
-		uuid = matches[1]
-	} else {
-		// non-legacy pattern.
-		if !uuidPattern.MatchString(diffLoc) {
-			return "", errors.Errorf("invalid diff location UUID: %q", diffLoc)
-		}
-		uuid = diffLoc
+	uuid, err := getUUID(mostRecentGenesisDump.DiffLocation)
+	if err != nil {
+		return "", errors.Wrap(err, "getting genesis UUID")
 	}
 
 	fullURL, err := urlfmt.FullyQualifiedURL(path.Join(centralEndpoint, apiPathInCentral), url.Values{
@@ -94,4 +82,21 @@ func getRelevantDownloadURL(centralEndpoint string) (string, error) {
 	}
 
 	return fullURL, nil
+}
+
+func getUUID(diffLoc string) (string, error) {
+	if strings.HasPrefix(diffLoc, gsPrefix) {
+		// legacy pattern.
+		matches := legacyDiffLocationPattern.FindStringSubmatch(diffLoc)
+		if len(matches) != 2 {
+			return "", errors.Errorf("invalid legacy diff location: %q", diffLoc)
+		}
+		return matches[1], nil
+	}
+
+	// non-legacy pattern.
+	if !uuidPattern.MatchString(diffLoc) {
+		return "", errors.Errorf("invalid diff location UUID: %q", diffLoc)
+	}
+	return diffLoc, nil
 }
