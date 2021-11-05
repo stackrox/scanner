@@ -66,8 +66,6 @@ func (r *lazyReaderAt) ReadAt(p []byte, off int64) (int, error) {
 		return n, err
 	}
 
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.readUntil(off + int64(len(p)))
 
 	return r.tryReadAt(p, off)
