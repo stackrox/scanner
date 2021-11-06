@@ -2,7 +2,6 @@ package updater
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/url"
 	"os"
 	"regexp"
@@ -20,11 +19,7 @@ const (
 	apiPathInCentral = "api/extensions/scannerdefinitions"
 )
 
-var (
-	uuidFmt                   = `[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}`
-	uuidPattern               = regexp.MustCompile(uuidFmt)
-	legacyDiffLocationPattern = regexp.MustCompile(fmt.Sprintf(`gs://definitions.stackrox.io/(%s)/diff.zip`, uuidFmt))
-)
+var uuidPattern = regexp.MustCompile(`[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}`)
 
 type knownGenesisDump struct {
 	Timestamp    time.Time `json:"timestamp"`
@@ -67,15 +62,8 @@ func getRelevantDownloadURL(centralEndpoint string) (string, error) {
 		}
 	}
 
-	var uuid string
-	if mostRecentGenesisDump.UUID != "" {
-		uuid = mostRecentGenesisDump.UUID
-		err = validateUUID(uuid)
-	} else {
-		// fallback on legacy diffLocation.
-		uuid, err = getUUID(mostRecentGenesisDump.DiffLocation)
-	}
-	if err != nil {
+	uuid := mostRecentGenesisDump.UUID
+	if err := validateUUID(uuid); err != nil {
 		return "", errors.Wrap(err, "getting genesis UUID")
 	}
 
@@ -95,13 +83,4 @@ func validateUUID(uuid string) error {
 	}
 
 	return nil
-}
-
-func getUUID(diffLoc string) (string, error) {
-	// legacy pattern.
-	matches := legacyDiffLocationPattern.FindStringSubmatch(diffLoc)
-	if len(matches) != 2 {
-		return "", errors.Errorf("invalid legacy diff location: %q", diffLoc)
-	}
-	return matches[1], nil
 }
