@@ -1,12 +1,28 @@
 package updater
 
 import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestValdiateUUID(t *testing.T) {
-	assert.NoError(t, validateUUID("5ca69bf7-08ab-4f17-9e4f-e342a020d977"))
+	_, filename, _, _ := runtime.Caller(0)
+
+	// Test parsing testdata/fetcher_debian_test.json
+	genesisFile, err := os.Open(filepath.Join(filepath.Dir(filename), "../../image/scanner/dump/genesis_manifests.json"))
+	require.NoError(t, err)
+	var manifest genesisManifest
+	require.NoError(t, json.NewDecoder(genesisFile).Decode(&manifest))
+
+	for _, dump := range manifest.KnownGenesisDumps[1:] {
+		assert.NoError(t, validateUUID(dump.UUID))
+	}
+
 	assert.Error(t, validateUUID("invalid"))
 }

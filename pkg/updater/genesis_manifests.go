@@ -22,9 +22,8 @@ const (
 var uuidPattern = regexp.MustCompile(`[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}`)
 
 type knownGenesisDump struct {
-	Timestamp    time.Time `json:"timestamp"`
-	DiffLocation string    `json:"diffLocation"`
-	UUID         string    `json:"uuid"`
+	Timestamp time.Time `json:"timestamp"`
+	UUID      string    `json:"uuid"`
 }
 
 type genesisManifest struct {
