@@ -1,13 +1,12 @@
 package gem
 
 import (
+	"io"
 	"os"
 	"regexp"
 
 	"github.com/stackrox/scanner/pkg/analyzer"
-	"github.com/stackrox/scanner/pkg/analyzer/internal/common"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 var (
@@ -16,16 +15,18 @@ var (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, _ os.FileInfo) (matches bool, extract bool) {
-	return match(fullPath), true
+func (analyzerImpl) ProcessFile(fullPath string, fi os.FileInfo, contents io.ReaderAt) []*component.Component {
+	if !match(fullPath) {
+		return nil
+	}
+	if c := parseGemSpec(fullPath, io.NewSectionReader(contents, 0, fi.Size())); c != nil {
+		return []*component.Component{c}
+	}
+	return nil
 }
 
 func match(fullPath string) bool {
 	return gemSpecRegexp.MatchString(fullPath)
-}
-
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
-	return common.ExtractComponents(fileMap, match, parseGemSpec), nil
 }
 
 // Analyzer returns a Ruby Gem analyzer.

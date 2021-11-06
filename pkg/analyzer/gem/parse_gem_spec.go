@@ -2,7 +2,7 @@ package gem
 
 import (
 	"bufio"
-	"bytes"
+	"io"
 	"regexp"
 	"strings"
 
@@ -61,7 +61,7 @@ func extractStringValueIfLineMatches(re *regexp.Regexp, line string) string {
 	return val
 }
 
-func parseGemSpec(filePath string, contents []byte) *component.Component {
+func parseGemSpec(filePath string, contents io.Reader) *component.Component {
 	var c *component.Component
 	ensureCInitialized := func() {
 		if c == nil {
@@ -71,7 +71,7 @@ func parseGemSpec(filePath string, contents []byte) *component.Component {
 			}
 		}
 	}
-	scanner := bufio.NewScanner(bytes.NewReader(contents))
+	scanner := bufio.NewScanner(contents)
 	for scanner.Scan() {
 		currentLine := scanner.Text()
 		if name := extractStringValueIfLineMatches(nameRegexp, currentLine); name != "" {
