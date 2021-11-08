@@ -1,27 +1,13 @@
 package analyzer
 
 import (
+	"io"
+	"os"
+
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/matcher"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 // Analyzer defines the functions for analyzing images and extracting the components present in them.
 type Analyzer interface {
-	Analyze(tarutil.FilesMap) ([]*component.Component, error)
-	matcher.Matcher
-}
-
-// Analyze analyzes images and extracts the components present in them.
-func Analyze(filesMap tarutil.FilesMap, analyzers []Analyzer) ([]*component.Component, error) {
-	var allComponents []*component.Component
-	for _, a := range analyzers {
-		components, err := a.Analyze(filesMap)
-		if err != nil {
-			return nil, err
-		}
-		allComponents = append(allComponents, components...)
-	}
-
-	return allComponents, nil
+	ProcessFile(filePath string, fi os.FileInfo, contents io.ReaderAt) []*component.Component
 }

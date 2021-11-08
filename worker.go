@@ -17,6 +17,7 @@ package clair
 import (
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -30,6 +31,7 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	featureFlags "github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/matcher"
 	rhelv2 "github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
@@ -163,7 +165,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 	return datastore.InsertLayerComponents(layer.Name, lineage, languageComponents, removedFiles, opts)
 }
 
-func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
 	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
 
 	distroless := isDistroless(files) || (parent != nil && parent.Distroless)
@@ -171,7 +173,6 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	var featureVersions []database.FeatureVersion
 	var rhelfeatures *database.RHELv2Components
 
-	languageAnalyzerFunc := analyzer.Analyze
 	if namespace != nil && namespaces.IsRHELNamespace(namespace.Name) {
 		// This is a RHEL-based image that must be scanned in a certified manner.
 		// Use the RHELv2 scanner instead.
@@ -185,7 +186,9 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 			CPEs:     cpes,
 		}
 		log.WithFields(log.Fields{logLayerName: name, "rhel package count": len(packages), "rhel cpe count": len(cpes)}).Debug("detected rhelv2 features")
-		languageAnalyzerFunc = rhelv2.WrapAnalyzer()
+		if err := rhelv2.AnnotateComponentsWithPackageManagerInfo(files, languageComponents); err != nil {
+			log.WithError(err).Errorf("Failed to analyze package manager info for language components: %s", name)
+		}
 	} else {
 		var err error
 		// Detect features.
@@ -200,13 +203,6 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 
 	if !env.LanguageVulns.Enabled() {
 		return namespace, distroless, featureVersions, rhelfeatures, nil, nil, nil
-	}
-	allComponents, err := languageAnalyzerFunc(files, analyzers.Analyzers())
-	if err != nil {
-		log.WithError(err).Errorf("Failed to analyze image: %s", name)
-	}
-	if len(allComponents) > 0 {
-		log.WithFields(log.Fields{logLayerName: name, "component count": len(allComponents)}).Debug("detected components")
 	}
 
 	var removedFiles []string
@@ -226,17 +222,47 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		}
 	}
 
-	return namespace, distroless, featureVersions, rhelfeatures, allComponents, removedFiles, err
+	return namespace, distroless, featureVersions, rhelfeatures, languageComponents, removedFiles, nil
+}
+
+// analyzingMatcher is a Matcher implementation that calls ProcessFile on each analyzer,
+// stores the resulting components, and then delegates to another matcher.
+type analyzingMatcher struct {
+	analyzers []analyzer.Analyzer
+	delegate  matcher.Matcher
+
+	components []*component.Component
+}
+
+func (m *analyzingMatcher) Match(filePath string, fi os.FileInfo, contents io.ReaderAt) (bool, bool) {
+	for _, a := range m.analyzers {
+		m.components = append(m.components, component.FilterToOnlyValid(a.ProcessFile(filePath, fi, contents))...)
+	}
+	return m.delegate.Match(filePath, fi, contents)
 }
 
 // DetectContentFromReader detects scanning content in the given reader.
 func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
-	files, err := imagefmt.ExtractFromReader(reader, format, requiredfilenames.SingletonMatcher())
+	// Create a "matcher" that actually calls `ProcessFile` on each analyzer, before delegating
+	// to the actual matcher for operating system-level feature extraction.
+	// TODO: this is ugly. A matcher should not have side-effects; but the `analyzingMatcher`s
+	// sole purpose is to have a side effect. The `ExtractFromReader` should be more explicit
+	// about the matcher not just being a matcher.
+	m := &analyzingMatcher{
+		analyzers: analyzers.Analyzers(),
+		delegate:  requiredfilenames.SingletonMatcher(),
+	}
+
+	files, err := imagefmt.ExtractFromReader(reader, format, m)
 	if err != nil {
 		return nil, false, nil, nil, nil, nil, err
 	}
 
-	return detectFromFiles(files, name, parent, uncertifiedRHEL)
+	if len(m.components) > 0 {
+		log.WithFields(log.Fields{logLayerName: name, "component count": len(m.components)}).Debug("detected components")
+	}
+
+	return detectFromFiles(files, name, parent, m.components, uncertifiedRHEL)
 }
 
 func isDistroless(filesMap tarutil.FilesMap) bool {
