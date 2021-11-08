@@ -1066,7 +1066,7 @@ workflows:
   sanity-check-vuln-updates-scheduled:
     triggers:
       - schedule:
-          cron: "35 0,4,8,12,16,20 * * *"
+          cron: "5 0,4,8,12,16,20 * * *"
           filters:
             branches:
               only:

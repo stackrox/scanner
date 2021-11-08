@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
-	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/osrelease"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -28,42 +27,36 @@ func init() {
 	scannerOperatingSystem, _ = osrelease.GetOSAndVersionFromOSRelease(data)
 }
 
-// WrapAnalyzer wraps the generic analyzer function with one that determines if the language
-// component was added via RPM
-func WrapAnalyzer() func(tarutil.FilesMap, []analyzer.Analyzer) ([]*component.Component, error) {
-	return func(files tarutil.FilesMap, analyzers []analyzer.Analyzer) ([]*component.Component, error) {
-		components, err := analyzer.Analyze(files, analyzers)
-		if err != nil {
-			return nil, err
-		}
-		if len(components) == 0 {
-			return components, nil
-		}
-		f, hasFile := files[dbPath]
-		if !hasFile {
-			return components, nil
-		}
-		matcher, finish, err := isProvidedByRPMPackageMatcher(f.Contents)
-		if err != nil {
-			return nil, err
-		}
-		defer finish()
-
-		locationAlreadyChecked := make(map[string]bool)
-		for _, c := range components {
-			// This handles jar-in-jar cases as the location is manually created so we only want
-			// the initial path
-			normalizedLocation := stringutils.GetUpTo(c.Location, ":")
-			fromPackageManager, ok := locationAlreadyChecked[normalizedLocation]
-			if ok {
-				c.FromPackageManager = fromPackageManager
-				continue
-			}
-			c.FromPackageManager = matcher(normalizedLocation)
-			locationAlreadyChecked[normalizedLocation] = c.FromPackageManager
-		}
-		return components, nil
+// AnnotateComponentsWithPackageManagerInfo checks for each component if it was installed by the package manager,
+// and sets the `FromPackageManager` attribute accordingly.
+func AnnotateComponentsWithPackageManagerInfo(files tarutil.FilesMap, components []*component.Component) error {
+	if len(components) == 0 {
+		return nil
 	}
+	f, hasFile := files[dbPath]
+	if !hasFile {
+		return nil
+	}
+	matcher, finish, err := isProvidedByRPMPackageMatcher(f.Contents)
+	if err != nil {
+		return err
+	}
+	defer finish()
+
+	locationAlreadyChecked := make(map[string]bool)
+	for _, c := range components {
+		// This handles jar-in-jar cases as the location is manually created so we only want
+		// the initial path
+		normalizedLocation := stringutils.GetUpTo(c.Location, ":")
+		fromPackageManager, ok := locationAlreadyChecked[normalizedLocation]
+		if ok {
+			c.FromPackageManager = fromPackageManager
+			continue
+		}
+		c.FromPackageManager = matcher(normalizedLocation)
+		locationAlreadyChecked[normalizedLocation] = c.FromPackageManager
+	}
+	return nil
 }
 
 // isProvidedByRPMPackageMatcher uses the given package contents (expected to be an RPM Berkeley DB)

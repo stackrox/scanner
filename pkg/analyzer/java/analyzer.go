@@ -1,6 +1,7 @@
 package java
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 
@@ -8,15 +9,30 @@ import (
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 var knownIgnorePkgs = set.NewFrozenStringSet("rt", "root")
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, _ os.FileInfo) (matches bool, extract bool) {
-	return match(fullPath), true
+func (analyzerImpl) ProcessFile(fullPath string, fi os.FileInfo, contents io.ReaderAt) []*component.Component {
+	if !match(fullPath) || !fi.Mode().IsRegular() || fi.Size() == 0 {
+		return nil
+	}
+	if filterComponent(filepath.Base(fullPath)) {
+		return nil
+	}
+
+	components := parseContents(fullPath, fi, contents)
+	filteredComponents := components[:0]
+	for _, c := range components {
+		if knownIgnorePkgs.Contains(c.Name) {
+			continue
+		}
+		addVersion(c)
+		filteredComponents = append(filteredComponents, c)
+	}
+	return filteredComponents
 }
 
 func match(fullPath string) bool {
@@ -28,33 +44,6 @@ func addVersion(c *component.Component) {
 		return
 	}
 	c.Version = stringutils.FirstNonEmpty(c.JavaPkgMetadata.MavenVersion, c.JavaPkgMetadata.ImplementationVersion, c.JavaPkgMetadata.SpecificationVersion)
-}
-
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
-	var allComponents []*component.Component
-	for filePath, contents := range fileMap {
-		if !match(filePath) || len(contents.Contents) == 0 {
-			continue
-		}
-		if filterComponent(filepath.Base(filePath)) {
-			continue
-		}
-
-		components, err := parseContents(filePath, contents.Contents)
-		if err != nil {
-			return nil, err
-		}
-		allComponents = append(allComponents, components...)
-	}
-	filteredComponents := allComponents[:0]
-	for _, c := range allComponents {
-		if knownIgnorePkgs.Contains(c.Name) {
-			continue
-		}
-		addVersion(c)
-		filteredComponents = append(filteredComponents, c)
-	}
-	return component.FilterToOnlyValid(filteredComponents), nil
 }
 
 // Analyzer returns the Java analyzer.

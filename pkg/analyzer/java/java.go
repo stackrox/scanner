@@ -2,15 +2,16 @@ package java
 
 import (
 	"archive/zip"
-	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/ioutils"
 )
 
 var (
@@ -50,7 +51,7 @@ func newJavaComponent(location string) component.Component {
 	}
 }
 
-func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) ([]*component.Component, error) {
+func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) []*component.Component {
 	var manifestFile *zip.File
 	var subArchives []*zip.File
 	var pomProperties []*zip.File
@@ -65,13 +66,13 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 	}
 
 	if manifestFile == nil {
-		return nil, nil
+		return nil
 	}
 
 	manifest, err := parseManifestMF(locationSoFar, manifestFile)
 	if err != nil {
 		log.Debugf("error parsing java manifest file: %v", err)
-		return nil, nil
+		return nil
 	}
 
 	fileName := strings.TrimSuffix(filepath.Base(locationSoFar), filepath.Ext(locationSoFar))
@@ -112,6 +113,7 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 		}
 	}
 
+	var buf []byte
 	for _, subArchiveF := range subArchives {
 		if subArchiveF.CompressedSize64 == 0 {
 			continue
@@ -125,29 +127,24 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) (
 			log.Debugf("error opening java sub archive: %v", err)
 			continue
 		}
-		contents, err := io.ReadAll(reader)
-		if err != nil {
-			log.Debugf("error reading java sub archive: %v", err)
-			continue
-		}
 
-		subComponents, err := parseContents(fmt.Sprintf("%s:%s", locationSoFar, subArchiveF.Name), contents)
-		if err != nil {
-			log.Debugf("error parsing contents of java sub archive: %v", err)
-			continue
-		}
+		fi := subArchiveF.FileInfo()
+		contents := ioutils.NewLazyReaderAtWithBuffer(reader, fi.Size(), buf)
+
+		subComponents := parseContents(fmt.Sprintf("%s:%s", locationSoFar, subArchiveF.Name), fi, contents)
 		allComponents = append(allComponents, subComponents...)
+		buf = contents.StealBuffer()
 	}
 
-	return allComponents, nil
+	return allComponents
 }
 
-func parseContents(locationSoFar string, contents []byte) ([]*component.Component, error) {
+func parseContents(locationSoFar string, fi os.FileInfo, contents io.ReaderAt) []*component.Component {
 	// Typically, this is when a jar has a prefix of ._
-	zipReader, err := zip.NewReader(bytes.NewReader(contents), int64(len(contents)))
+	zipReader, err := zip.NewReader(contents, fi.Size())
 	if err != nil {
 		log.Debugf("error parsing %q: %v", locationSoFar, err)
-		return nil, nil
+		return nil
 	}
 	return parseComponentsFromZipReader(locationSoFar, zipReader)
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/matcher"
-	"github.com/stackrox/scanner/singletons/analyzers"
 )
 
 var (
@@ -16,21 +15,20 @@ var (
 	once     sync.Once
 )
 
-// SingletonMatcher returns the singleton matcher instance to use.
+// SingletonMatcher returns the singleton matcher instance to use for extracting
+// files to be analyzed for operating system features.
+// Note: language-level analyzers implement a different interface, and do not require
+// extraction of files into a `FileMap`. Therefore, the respective files do not need
+// to be matched here.
 func SingletonMatcher() matcher.Matcher {
 	once.Do(func() {
 		allFileNames := append(featurefmt.RequiredFilenames(), featurens.RequiredFilenames()...)
 		clairMatcher := matcher.NewPrefixAllowlistMatcher(allFileNames...)
 		whiteoutMatcher := matcher.NewWhiteoutMatcher()
 
-		allAnalyzers := analyzers.Analyzers()
-
 		// Allocate extra spaces for the feature-flagged matchers.
-		allMatchers := make([]matcher.Matcher, 0, len(allAnalyzers)+4)
+		allMatchers := make([]matcher.Matcher, 0, 4)
 		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
-		for _, a := range allAnalyzers {
-			allMatchers = append(allMatchers, a)
-		}
 
 		if features.ActiveVulnMgmt.Enabled() {
 			dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp)

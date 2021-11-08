@@ -17,19 +17,17 @@ package tarutil
 
 import (
 	"archive/tar"
-	"archive/zip"
 	"bufio"
 	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
 	"io"
 	"os/exec"
-	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
 )
@@ -49,8 +47,6 @@ var (
 	gzipHeader  = []byte{0x1f, 0x8b}
 	bzip2Header = []byte{0x42, 0x5a, 0x68}
 	xzHeader    = []byte{0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00}
-
-	javaArchiveRegex = regexp.MustCompile(`^.*\.([jwe]ar|[jh]pi)$`)
 )
 
 // SetMaxExtractableFileSize sets the max extractable file size.
@@ -92,6 +88,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	// Telemetry variables.
 	var numFiles, numMatchedFiles, numExtractedContentBytes int
 
+	var prevLazyReader ioutils.LazyReaderAt
+
 	// For each element in the archive
 	for {
 		hdr, err := tr.Next()
@@ -106,7 +104,20 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		// Get element filename
 		filename := strings.TrimPrefix(hdr.Name, "./")
 
-		match, extractContents := filenameMatcher.Match(filename, hdr.FileInfo())
+		var contents io.ReaderAt
+		if hdr.FileInfo().Mode().IsRegular() {
+			// Recycle the buffer, if possible.
+			var buf []byte
+			if prevLazyReader != nil {
+				buf = prevLazyReader.StealBuffer()
+			}
+			prevLazyReader = ioutils.NewLazyReaderAtWithBuffer(tr, hdr.Size, buf)
+			contents = prevLazyReader
+		} else {
+			contents = bytes.NewReader(nil)
+		}
+
+		match, extractContents := filenameMatcher.Match(filename, hdr.FileInfo(), contents)
 		if !match {
 			continue
 		}
@@ -120,9 +131,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 		// Extract the element
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
-			executable, _ := executableMatcher.Match(filename, hdr.FileInfo())
+			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
 
-			if !extractContents {
+			if !extractContents || hdr.Typeflag != tar.TypeReg {
 				data[filename] = FileData{
 					Contents:   nil, // Making this explicit.
 					Executable: executable,
@@ -130,15 +141,10 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 				continue
 			}
 
-			d, _ := io.ReadAll(tr)
-			if len(d) != 0 && javaArchiveRegex.MatchString(hdr.Name) {
-				newData, err := rewriteArchive(d)
-				if err != nil {
-					// Log the error, but we haven't overwritten the original data
-					log.Errorf("error reading %q: %v", hdr.Name, err)
-				} else {
-					d = newData
-				}
+			d := make([]byte, hdr.Size)
+			if nRead, err := contents.ReadAt(d, 0); err != nil {
+				log.Errorf("error reading %q: %v", hdr.Name, err)
+				d = d[:nRead]
 			}
 
 			// Put the file directly
@@ -161,51 +167,6 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
 
 	return data, nil
-}
-
-func copyZipEntry(writer *zip.Writer, f *zip.File) error {
-	wr, err := writer.Create(f.Name)
-	if err != nil {
-		return errors.Wrap(err, "error creating zip writer")
-	}
-	r, err := f.Open()
-	if err != nil {
-		return errors.Wrap(err, "error opening zip file")
-	}
-	_, err = io.Copy(wr, r)
-	if err != nil {
-		return errors.Wrap(err, "error copying zip file")
-	}
-	if err := r.Close(); err != nil {
-		return errors.Wrap(err, "error closing zip file")
-	}
-	return nil
-}
-
-func rewriteArchive(data []byte) ([]byte, error) {
-	buf := bytes.NewReader(data)
-	r, err := zip.NewReader(buf, int64(len(data)))
-	if err != nil {
-		return nil, errors.Wrap(err, "error reading zip file")
-	}
-
-	outputBuf := new(bytes.Buffer)
-	// Create a new zip archive.
-	zipWriter := zip.NewWriter(outputBuf)
-	for _, f := range r.File {
-		base := filepath.Base(f.Name)
-		if base != "MANIFEST.MF" && base != "pom.properties" && !javaArchiveRegex.MatchString(f.Name) {
-			continue
-		}
-		if err := copyZipEntry(zipWriter, f); err != nil {
-			_ = zipWriter.Close()
-			return nil, errors.Wrapf(err, "error copying zip entry for %q", f.Name)
-		}
-	}
-	if err := zipWriter.Close(); err != nil {
-		return nil, errors.Wrap(err, "error closing zip writer")
-	}
-	return outputBuf.Bytes(), nil
 }
 
 // XzReader implements io.ReadCloser for data compressed via `xz`.
