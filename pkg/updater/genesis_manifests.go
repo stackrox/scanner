@@ -66,9 +66,7 @@ func getRelevantDownloadURL(centralEndpoint string) (string, error) {
 		return "", errors.Wrap(err, "getting genesis UUID")
 	}
 
-	fullURL, err := urlfmt.FullyQualifiedURL(strings.Join([]string{centralEndpoint, apiPathInCentral}, "/"), url.Values{
-		"uuid": []string{uuid},
-	})
+	fullURL, err := getURL(centralEndpoint, uuid)
 	if err != nil {
 		return "", errors.Wrap(err, "creating full Central URL")
 	}
@@ -82,4 +80,10 @@ func validateUUID(uuid string) error {
 	}
 
 	return nil
+}
+
+func getURL(centralEndpoint, uuid string) (string, error) {
+	return urlfmt.FullyQualifiedURL(strings.Join([]string{centralEndpoint, apiPathInCentral}, "/"), url.Values{
+		"uuid": []string{uuid},
+	})
 }

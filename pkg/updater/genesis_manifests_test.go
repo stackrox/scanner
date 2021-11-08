@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/stackrox/rox/pkg/urlfmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -25,4 +26,15 @@ func TestValdiateUUID(t *testing.T) {
 	}
 
 	assert.Error(t, validateUUID("invalid"))
+}
+
+func TestGetURL(t *testing.T) {
+	centralEndpoint := "https://central.stackrox.svc"
+	centralEndpoint = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
+
+	uuid := "55b9538d-0d42-4bbd-b4d4-5d31421e7302"
+	url, err := getURL(centralEndpoint, uuid)
+	assert.NoError(t, err)
+	expected := "https://central.stackrox.svc/api/extensions/scannerdefinitions?uuid=55b9538d-0d42-4bbd-b4d4-5d31421e7302"
+	assert.Equal(t, expected, url)
 }
