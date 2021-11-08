@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Setup:
-#   pip install --upgrade cryptography gsutil google-cloud
+#   pip install --upgrade cryptography google-cloud-storage
 #   gcloud components update
 #
 # Usage:
@@ -15,22 +15,6 @@ set -eu
 
 function is_mac   { uname | grep -qi 'darwin'; }
 function is_linux { uname | grep -qi 'linux'; }
-
-function manual_repro_check {
-  local diff_id=${1:-e8f8b9ab-6a75-433a-8b86-15586ec41a7b}
-
-  cf_url="https://definitions.stackrox.io/$diff_id/diff.zip"
-  gcs_https_url="https://storage.googleapis.com/definitions.stackrox.io/$diff_id/diff.zip"
-  gcs_gs_url="gs://definitions.stackrox.io/$diff_id/diff.zip"
-
-  echo "diff_id => $diff_id"
-  echo "cf_url => $cf_url"
-  wget -q "$cf_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip
-  echo "gcs_https_url => $gcs_https_url"
-  wget -q "$gcs_https_url" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip
-  echo "gcs_gs_url=> $gcs_gs_url"
-  gsutil stat "$gcs_gs_url" | sed -Ene 's/^ +Update time: +(.*)/\1/p'
-}
 
 function parse_date_to_epoch_sec {
   local date_string date_format
@@ -96,75 +80,79 @@ function get_manifest_age_seconds_from_zip {
 }
 
 function run_tests_for_diff_id {
-  local DIFF_ID GCS_CONSOLE_URL DIFF1_CLOUDFLARE_URL DIFF2_GCS_URL
+  local diff_id gsutil_last_update
+  local url_gsutil url_cloudflare url_gcs_https
+  local metadata_cloudflare metadata_gcs_https
+  local cache_control_cloudflare cache_control_gcs_https
+  local md5sum_cloudflare md5sum_gcs_https
 
-  DIFF_ID="$1"
-  GCS_CONSOLE_URL="https://console.cloud.google.com/storage/browser/definitions.stackrox.io/$DIFF_ID"
-  DIFF1_CLOUDFLARE_URL="https://definitions.stackrox.io/$DIFF_ID/diff.zip"
-  DIFF2_GCS_URL="https://storage.googleapis.com/definitions.stackrox.io/$DIFF_ID/diff.zip"
+  diff_id=${1:-0133c2cf-8abe-4d79-9250-9b64b5b3e43e}
 
-  info "--------"
-  info "DIFF_ID              => $DIFF_ID"
-  info "GCS_CONSOLE_URL      => $GCS_CONSOLE_URL"
-  info "DIFF1_CLOUDFLARE_URL => $DIFF1_CLOUDFLARE_URL"
-  info "DIFF2_GCS_URL        => $DIFF2_GCS_URL"
-  info "WORKING_DIR          => $WORKING_DIR"
+  url_cloudflare="https://definitions.stackrox.io/$diff_id/diff.zip"
+  url_gcs_https="https://storage.googleapis.com/definitions.stackrox.io/$diff_id/diff.zip"
 
-  rm -f diff{1,2}.zip
+  metadata_cloudflare=$(wget -q "$url_cloudflare" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip) \
+    || bash_exit_failure "curl failed on $url_cloudflare"
+  metadata_gcs_https=$(wget -q "$url_gcs_https" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip) \
+    || bash_exit_failure "curl failed on $url_gcs_https"
 
-  info "downloading diff1.zip from $DIFF1_CLOUDFLARE_URL"
-  diff1_cache_control=$(curl -s -o ./diff1.zip -v "$DIFF1_CLOUDFLARE_URL" 2>&1 \
-    | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
-    || bash_exit_failure "curl failed on $DIFF1_CLOUDFLARE_URL"
+  cache_control_cloudflare=$(curl -s -H 'Accept-encoding: gzip' -o /tmp/diff1.zip \
+    -v "$url_cloudflare" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
+    || bash_exit_failure "curl failed on $url_cloudflare"
+  cache_control_gcs_https=$(curl -s -H 'Accept-encoding: gzip' -o /tmp/diff2.zip \
+    -v "$url_gcs_https" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
+    || bash_exit_failure "curl failed on $url_gcs_https"
 
-  info "downloading diff2.zip from $DIFF2_GCS_URL"
-  diff2_cache_control=$(curl -s -o ./diff2.zip -v "$DIFF2_GCS_URL" 2>&1 \
-    | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
-    || bash_exit_failure "curl failed on $DIFF2_GCS_URL"
+  md5sum_cloudflare=$(md5sum /tmp/diff1.zip | awk '{print $1}')
+  md5sum_gcs_https=$(md5sum /tmp/diff2.zip | awk '{print $1}')
+  rm -f /tmp/diff{1,2,3}.zip
 
-  local gcs_object_age_seconds diff1_manifest_content diff2_manifest_content \
-    diff1_manifest_age_seconds diff2_manifest_age_seconds diff1_archive_md5 \
-    diff2_archive_md5
+  url_gsutil="gs://definitions.stackrox.io/$diff_id/diff.zip"
+  gsutil_last_update=$(gsutil stat "$url_gsutil" | sed -Ene 's/^ +Update time: +(.*)/\1/p')
+  gcs_object_age_seconds=$(get_gcs_object_age_seconds "$diff_id")
 
-  gcs_object_age_seconds=$(get_gcs_object_age_seconds "$DIFF_ID")
-  diff1_manifest_content=$(get_manifest_content_from_zip "diff1.zip")
-  diff2_manifest_content=$(get_manifest_content_from_zip "diff2.zip")
-  diff1_manifest_age_seconds=$(get_manifest_age_seconds_from_zip "diff1.zip")
-  diff2_manifest_age_seconds=$(get_manifest_age_seconds_from_zip "diff2.zip")
-  diff1_archive_md5=$(md5sum "diff1.zip" | cut -d" " -f1)
-  diff2_archive_md5=$(md5sum "diff2.zip" | cut -d" " -f1)
-  info "gcs_object_age_seconds     => $gcs_object_age_seconds"
-  info "diff1_manifest_content     => $diff1_manifest_content"
-  info "diff2_manifest_content     => $diff2_manifest_content"
-  info "diff1_manifest_age_seconds => $diff1_manifest_age_seconds"
-  info "diff2_manifest_age_seconds => $diff2_manifest_age_seconds"
-  info "diff1_archive_md5          => $diff1_archive_md5"
-  info "diff2_archive_md5          => $diff2_archive_md5"
-  info "diff1_cache_control        => $diff1_cache_control"
-  info "diff2_cache_control        => $diff2_cache_control"
+  cat <<EOF
+-----------------------------------------------------------------------
+diff_id                  : $diff_id
+gsutil_last_update       : $gsutil_last_update
+gcs_object_age_seconds   : $gcs_object_age_seconds
+
+url_gsutil               : $url_gsutil
+url_cloudflare           : $url_cloudflare
+url_gcs_https            : $url_gcs_https
+
+metadata_cloudflare      : $metadata_cloudflare
+metadata_gcs_https       : $metadata_gcs_https
+
+cache_control_cloudflare : $cache_control_cloudflare
+cache_control_gcs_https  : $cache_control_gcs_https
+
+md5sum_cloudflare        : $md5sum_cloudflare
+md5sum_gcs_https         : $md5sum_gcs_https
+
+EOF
 
   if [[ "$gcs_object_age_seconds" -gt "$MAX_GCS_OBJECT_AGE_SECONDS" ]]; then
-    warn "gcs_object_age_seconds exceeds target"
+    testfail "gcs_object_age_seconds exceeds target"
   fi
 
-  if [[ "$diff1_archive_md5" != "$diff2_archive_md5" ]]; then
-    warn "(diff1_archive_md5 != diff2_archive_md5)"
+  if [[ "$cache_control_cloudflare" != "cache-control: public, max-age=3600" ]]; then
+    # known issue -- https://stack-rox.atlassian.net/browse/RS-307
+    testfail "Incorrect cloudflare cache control setting, expected max-age=3600"
   fi
 
-  if [[ "$diff1_manifest_age_seconds" -gt "$MAX_MANIFEST_AGE_SECONDS" ]]; then
-    testfail "diff1_manifest_age_seconds exceeds target"
+  if [[ "$cache_control_gcs_https" != "cache-control: public, max-age=3600" ]]; then
+    testfail "Incorrect gcs cache control setting, expected max-age=3600"
   fi
 
-  if [[ "$diff2_manifest_age_seconds" -gt "$MAX_MANIFEST_AGE_SECONDS" ]]; then
-    testfail "diff2_manifest_age_seconds exceeds target"
-  fi
-
-  if [[ "$diff1_cache_control" != "cache-control: public, max-age=3600" ]]; then
-    testfail "incorrect diff1_cache_control"
-  fi
-
-  if [[ "$diff2_cache_control" != "cache-control: public, max-age=3600" ]]; then
-    testfail "incorrect diff2_cache_control"
+  # If the gcs object age is over 1h, then the CDN cache should have been invalidated
+  # based on the cache-control max-age value. Therefore the checksum should match that
+  # from the content pulled directly from the gcs-https endpoint. But the object is
+  # updated hourly so I might need to track hashes across runs to test this properly.
+  if [[ "$gcs_object_age_seconds" -gt 3600 ]]; then
+    if [[ "$md5sum_cloudflare" != "$md5sum_gcs_https" ]]; then
+      testfail "Cloudflare CDN content mistmatch against reference after cache should have been invalidated"
+    fi
   fi
 }
 
@@ -197,7 +185,6 @@ FPATH_DIFF_ID_LIST="$WORKING_DIR/ids.txt"
 FPATH_DIFF_GSUTIL_STAT="$WORKING_DIR/metadata.txt"
 FPATH_TRANSCRIPT="$WORKING_DIR/transcript.txt"
 MAX_GCS_OBJECT_AGE_SECONDS=$((4 * 3600))
-MAX_MANIFEST_AGE_SECONDS=$((4 * 3600))
 FAILURE_COUNT=0
 
 # Initialize working dir

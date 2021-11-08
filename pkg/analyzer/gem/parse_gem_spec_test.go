@@ -1,6 +1,7 @@
 package gem
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stackrox/scanner/pkg/component"
@@ -358,7 +359,7 @@ func TestGemSpecParsing(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.expectedComponent, parseGemSpec(location, []byte(testCase.spec)))
+			assert.Equal(t, testCase.expectedComponent, parseGemSpec(location, strings.NewReader(testCase.spec)))
 		})
 	}
 }

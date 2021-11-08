@@ -1,13 +1,13 @@
 package dotnetcoreruntime
 
 import (
+	"io"
 	"os"
 	"regexp"
 	"strings"
 
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 var (
@@ -30,25 +30,14 @@ var (
 
 type analyzerImpl struct{}
 
-func (a analyzerImpl) Match(fullPath string, fileInfo os.FileInfo) (matches bool, extract bool) {
-	return fileInfo.IsDir() && dotNetCorePattern.MatchString(fullPath), false
-}
-
-func matchRegex(path string) bool {
-	return dotNetCorePattern.MatchString(path)
-}
-
-func (a analyzerImpl) Analyze(fileMap tarutil.FilesMap) ([]*component.Component, error) {
-	var allComponents []*component.Component
-	for filePath := range fileMap {
-		if !matchRegex(filePath) {
-			continue
-		}
-		if c := parseMetadata(filePath); c != nil {
-			allComponents = append(allComponents, c)
-		}
+func (analyzerImpl) ProcessFile(fullPath string, fileInfo os.FileInfo, _ io.ReaderAt) []*component.Component {
+	if !fileInfo.IsDir() {
+		return nil
 	}
-	return allComponents, nil
+	if c := parseMetadata(fullPath); c != nil {
+		return []*component.Component{c}
+	}
+	return nil
 }
 
 // parseMetadata gets all of the necessary information from the directory path.
@@ -59,6 +48,9 @@ func parseMetadata(filePath string) *component.Component {
 	// This should be a slice of length 3.
 	// [<Full match> Microsoft.(AspNet|NET)Core.(App|All) <Semantic version>]
 	match := dotNetCorePattern.FindStringSubmatch(filePath)
+	if len(match) != 3 {
+		return nil
+	}
 	return &component.Component{
 		Location:   filePath,
 		SourceType: component.DotNetCoreRuntimeSourceType,
