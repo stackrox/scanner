@@ -138,7 +138,7 @@ EOF
 
   if [[ "$cache_control_cloudflare" != "cache-control: public, max-age=3600" ]]; then
     # known issue -- https://stack-rox.atlassian.net/browse/RS-307
-    warn "Incorrect cloudflare cache control setting, expected max-age=3600"
+    testfail "Incorrect cloudflare cache control setting, expected max-age=3600"
   fi
 
   if [[ "$cache_control_gcs_https" != "cache-control: public, max-age=3600" ]]; then
