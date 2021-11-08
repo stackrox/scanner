@@ -888,11 +888,11 @@ jobs:
           name: Upload each diff dump to the prod bucket
           command: |
             idx=-1
-            while IFS=$'\t' read -r diffloc; do
+            while IFS=$'\t' read -r diffUUID; do
               idx=$((idx+1))
               expected_zip_file_loc="/tmp/diff-dumps/dump${idx}/diff.zip"
               [[ -f "${expected_zip_file_loc}" ]]
-              if [[ -z "${diffloc}" ]]; then
+              if [[ -z "${diffUUID}" ]]; then
                 continue
               fi
               echo "Found file at ${expected_zip_file_loc}"
@@ -901,8 +901,8 @@ jobs:
               if [[ "${CIRCLE_BRANCH}" != "master" && -z "${CIRCLE_TAG}" ]]; then
                 cmd+=(echo "Would do")
               fi
-              "${cmd[@]}" gsutil cp "${expected_zip_file_loc}" "${diffloc}"
-            done < <(jq -r '.knownGenesisDumps | .[]| [.diffLocation] | @tsv' < image/scanner/dump/genesis_manifests.json)
+              "${cmd[@]}" gsutil cp "${expected_zip_file_loc}" gs://definitions.stackrox.io/"${diffUUID}"/diff.zip
+            done < <(jq -r '.knownGenesisDumps | .[]| [.uuid] | @tsv' < image/scanner/dump/genesis_manifests.json)
 
       - run:
           name: Generate offline dump
