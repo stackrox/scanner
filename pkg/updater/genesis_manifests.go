@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"net/url"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/urlfmt"
 	"github.com/stackrox/rox/pkg/utils"
+	uuidPkg "github.com/stackrox/rox/pkg/uuid"
 )
 
 const (
@@ -18,8 +18,6 @@ const (
 
 	apiPathInCentral = "api/extensions/scannerdefinitions"
 )
-
-var uuidPattern = regexp.MustCompile(`[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}`)
 
 type knownGenesisDump struct {
 	Timestamp time.Time `json:"timestamp"`
@@ -75,11 +73,8 @@ func getRelevantDownloadURL(centralEndpoint string) (string, error) {
 }
 
 func validateUUID(uuid string) error {
-	if !uuidPattern.MatchString(uuid) {
-		return errors.Errorf("invalid UUID: %q", uuid)
-	}
-
-	return nil
+	_, err := uuidPkg.FromString(uuid)
+	return err
 }
 
 func getURL(centralEndpoint, uuid string) (string, error) {

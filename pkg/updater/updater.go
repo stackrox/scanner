@@ -71,7 +71,7 @@ func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, url string,
 		return false, nil
 	}
 	if resp.StatusCode == http.StatusNotFound {
-		log.Info("Central does not have any vuln dumps")
+		log.Warn("Central does not have any vuln dumps")
 		return false, nil
 	}
 	if err := httputil.ResponseToError(resp); err != nil {
