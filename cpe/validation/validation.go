@@ -3,6 +3,7 @@ package validation
 import (
 	"fmt"
 
+	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/stackrox/scanner/cpe/match"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -23,4 +24,15 @@ func Register(src component.SourceType, validator Validator) {
 		panic(fmt.Sprintf("%q has already been registered", src))
 	}
 	Validators[src] = validator
+}
+
+// TargetSWMatches checks if the TargetSW from the resulting CPE matches the language
+// or matches any language
+func TargetSWMatches(res match.Result, lang string) bool {
+	for _, a := range res.CVE.Config() {
+		if a.TargetSW == wfn.Any || a.TargetSW == lang {
+			return true
+		}
+	}
+	return false
 }

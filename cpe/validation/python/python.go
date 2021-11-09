@@ -22,6 +22,9 @@ var (
 type validator struct{}
 
 func (v validator) ValidateResult(result match.Result) bool {
+	if !validation.TargetSWMatches(result, "python") {
+		return false
+	}
 	if result.CPE.Vendor != "" {
 		return true
 	}

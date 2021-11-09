@@ -55,6 +55,9 @@ func init() {
 type validator struct{}
 
 func (v validator) ValidateResult(result match.Result) bool {
+	if !validation.TargetSWMatches(result, "ruby") {
+		return false
+	}
 	if disallowedVulns.Contains(result.CVE.ID()) {
 		return false
 	}
