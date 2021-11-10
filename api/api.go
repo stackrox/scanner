@@ -22,6 +22,7 @@ import (
 )
 
 // Config is the configuration for the API service.
+// Any updates to this should be tested in cmd/clair/config_test.go.
 type Config struct {
 	HTTPSPort   int
 	GRPCPort    int
