@@ -2031,6 +2031,17 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
+		{
+			image:    "docker.io/anchore/anchore-engine:v0.9.4",
+			registry: "https://registry-1.docker.io",
+			source:   "NVD",
+			unexpectedFeatures: []v1.Feature{
+				{
+					Name:    "netaddr",
+					Version: "0.8.0",
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
