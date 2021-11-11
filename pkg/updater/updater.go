@@ -42,9 +42,8 @@ type Updater struct {
 	lastUpdatedTime time.Time
 	client          *http.Client
 
-	interval           time.Duration
-	downloadURL        string
-	fetchIsFromCentral bool
+	interval    time.Duration
+	downloadURL string
 
 	db database.Datastore
 	// Slice of application-level caches. This includes CPE data from NVD and CVE data from Kubernetes.
@@ -55,7 +54,7 @@ type Updater struct {
 	stopSig *concurrency.Signal
 }
 
-func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, fetchIsFromCentral bool, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
+func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
 	// First, head the URL to see when it was last modified.
 	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, url, nil)
 	if err != nil {
@@ -71,13 +70,9 @@ func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, fetchIsFrom
 		// Not modified
 		return false, nil
 	}
-	// If we're fetching from Central, 404s are okay.
-	if fetchIsFromCentral && resp.StatusCode == http.StatusNotFound {
-		log.Info("No vuln dumps were uploaded to Central")
+	if resp.StatusCode == http.StatusNotFound {
+		log.Warn("Central does not have any vuln dumps")
 		return false, nil
-	}
-	if resp.StatusCode != http.StatusOK {
-		return false, errors.Errorf("invalid response from google storage; got code %d", resp.StatusCode)
 	}
 	if err := httputil.ResponseToError(resp); err != nil {
 		return false, err
@@ -107,7 +102,7 @@ func (u *Updater) doUpdate(mode updateMode) error {
 	if err := os.RemoveAll(diffDumpOutputPath); err != nil {
 		return errors.Wrap(err, "removing diff dump output path")
 	}
-	fetched, err := fetchDumpFromURL(u.stopSig, u.client, u.fetchIsFromCentral, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
+	fetched, err := fetchDumpFromURL(u.stopSig, u.client, u.downloadURL, u.lastUpdatedTime, diffDumpOutputPath)
 	if err != nil {
 		return errors.Wrap(err, "fetching update from URL")
 	}
@@ -175,7 +170,7 @@ func (u *Updater) Stop() {
 
 // New returns a new updater instance, and starts running the update daemon.
 func New(config Config, centralEndpoint string, db database.Datastore, repoToCPE *repo2cpe.Mapping, caches ...cache.Cache) (*Updater, error) {
-	downloadURL, isCentral, err := getRelevantDownloadURL(config, centralEndpoint)
+	downloadURL, err := getRelevantDownloadURL(centralEndpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting relevant download URL")
 	}
@@ -184,14 +179,12 @@ func New(config Config, centralEndpoint string, db database.Datastore, repoToCPE
 		Timeout:   defaultTimeout,
 		Transport: proxy.RoundTripper(),
 	}
-	if isCentral {
-		clientConfig, err := mtls.TLSClientConfigForCentral()
-		if err != nil {
-			return nil, errors.Wrap(err, "generating TLS client config for Central")
-		}
-		client.Transport = &http.Transport{
-			TLSClientConfig: clientConfig,
-		}
+	clientConfig, err := mtls.TLSClientConfigForCentral()
+	if err != nil {
+		return nil, errors.Wrap(err, "generating TLS client config for Central")
+	}
+	client.Transport = &http.Transport{
+		TLSClientConfig: clientConfig,
 	}
 
 	lastUpdatedTime, err := GetLastUpdatedTime(db)
@@ -201,15 +194,14 @@ func New(config Config, centralEndpoint string, db database.Datastore, repoToCPE
 
 	stopSig := concurrency.NewSignal()
 	u := &Updater{
-		fetchIsFromCentral: isCentral,
-		client:             client,
-		interval:           config.Interval,
-		downloadURL:        downloadURL,
-		db:                 db,
-		caches:             caches,
-		repoToCPE:          repoToCPE,
-		stopSig:            &stopSig,
-		lastUpdatedTime:    lastUpdatedTime,
+		client:          client,
+		interval:        config.Interval,
+		downloadURL:     downloadURL,
+		db:              db,
+		caches:          caches,
+		repoToCPE:       repoToCPE,
+		stopSig:         &stopSig,
+		lastUpdatedTime: lastUpdatedTime,
 	}
 	return u, nil
 }

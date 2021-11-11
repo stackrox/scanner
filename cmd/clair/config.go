@@ -26,8 +26,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// File represents a YAML configuration file that namespaces all configuration
-// configuration under the top-level "scanner" key.
+// File represents a YAML configuration file that namespaces all
+// configurations under the top-level "scanner" key.
 type File struct {
 	Scanner Config `yaml:"scanner"`
 }
@@ -40,7 +40,7 @@ type Config struct {
 	LogLevel                 string                              `yaml:"logLevel"`
 	MaxExtractableFileSizeMB int64                               `yaml:"maxExtractableFileSizeMB"`
 
-	// CentralEndpoint is the endpoint that central can be reached at. Defaults to central.stackrox if not present in the config.
+	// CentralEndpoint is the endpoint that central can be reached at. Defaults to https://central.stackrox.svc if not present in the config.
 	CentralEndpoint string `yaml:"centralEndpoint"`
 }
 

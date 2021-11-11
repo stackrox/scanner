@@ -2,7 +2,7 @@ package updater
 
 import (
 	"encoding/json"
-	"fmt"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -10,19 +10,18 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/urlfmt"
 	"github.com/stackrox/rox/pkg/utils"
+	uuidPkg "github.com/stackrox/rox/pkg/uuid"
 )
 
 const (
 	genesisManifestsLocation = "/genesis_manifests.json"
 
-	gsPrefix = "gs://"
-
 	apiPathInCentral = "api/extensions/scannerdefinitions"
 )
 
 type knownGenesisDump struct {
-	Timestamp    time.Time `json:"timestamp"`
-	DiffLocation string    `json:"diffLocation"`
+	Timestamp time.Time `json:"timestamp"`
+	UUID      string    `json:"uuid"`
 }
 
 type genesisManifest struct {
@@ -32,28 +31,25 @@ type genesisManifest struct {
 // getRelevantDownloadURL gets the genesis manifests from the dump, finds the one
 // with the highest timestamp, and returns the location for the diff dump from that location.
 // This ensures that we get the smallest diff dump that works for this version of scanner.
-func getRelevantDownloadURL(config Config, centralEndpoint string) (downloadURL string, isCentral bool, err error) {
-	if config.FetchFromCentral {
-		if centralEndpoint == "" {
-			centralEndpoint = "https://central.stackrox.svc"
-		}
-		centralEndpoint = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
-		return fmt.Sprintf("%s/%s", centralEndpoint, apiPathInCentral), true, nil
+func getRelevantDownloadURL(centralEndpoint string) (string, error) {
+	if centralEndpoint == "" {
+		centralEndpoint = "https://central.stackrox.svc"
 	}
+	centralEndpoint = urlfmt.FormatURL(centralEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
+
 	genesisFile, err := os.Open(genesisManifestsLocation)
 	if err != nil {
-		return "", false, errors.Wrap(err, "opening manifests file")
+		return "", errors.Wrap(err, "opening manifests file")
 	}
 	defer utils.IgnoreError(genesisFile.Close)
 
 	var manifest genesisManifest
 	err = json.NewDecoder(genesisFile).Decode(&manifest)
 	if err != nil {
-		return "", false, errors.Wrap(err, "JSON-decoding manifest")
+		return "", errors.Wrap(err, "JSON-decoding manifest")
 	}
-
 	if len(manifest.KnownGenesisDumps) == 0 {
-		return "", false, errors.New("invalid manifest, no genesis dumps")
+		return "", errors.New("invalid manifest, no genesis dumps")
 	}
 
 	var mostRecentGenesisDump *knownGenesisDump
@@ -63,10 +59,26 @@ func getRelevantDownloadURL(config Config, centralEndpoint string) (downloadURL 
 		}
 	}
 
-	diffLoc := mostRecentGenesisDump.DiffLocation
-	// Convert a gs:// URL to definitions.stackrox.io
-	if !strings.HasPrefix(diffLoc, gsPrefix) {
-		return "", false, errors.Errorf("invalid diff location %q: must start with %s", diffLoc, gsPrefix)
+	uuid := mostRecentGenesisDump.UUID
+	if err := validateUUID(uuid); err != nil {
+		return "", errors.Wrap(err, "getting genesis UUID")
 	}
-	return fmt.Sprintf("https://%s", strings.TrimPrefix(diffLoc, "gs://")), false, nil
+
+	fullURL, err := getURL(centralEndpoint, uuid)
+	if err != nil {
+		return "", errors.Wrap(err, "creating full Central URL")
+	}
+
+	return fullURL, nil
+}
+
+func validateUUID(uuid string) error {
+	_, err := uuidPkg.FromString(uuid)
+	return err
+}
+
+func getURL(centralEndpoint, uuid string) (string, error) {
+	return urlfmt.FullyQualifiedURL(strings.Join([]string{centralEndpoint, apiPathInCentral}, "/"), url.Values{
+		"uuid": []string{uuid},
+	})
 }
