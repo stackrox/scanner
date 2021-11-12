@@ -336,7 +336,11 @@ func (u *updater) alasToFeatureVersions(alas ALAS) []database.FeatureVersion {
 		}
 		err := versionfmt.Valid(rpm.ParserName, version)
 		if err != nil {
-			log.WithError(err).WithField("version", version).Warning("could not parse package version. skipping")
+			log.WithError(err).WithFields(log.Fields{
+				"package":      u.Namespace,
+				"version":      version,
+				"package name": p.Name,
+			}).Warning("could not parse package version, skipping")
 			continue
 		}
 

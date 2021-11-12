@@ -130,7 +130,7 @@ func buildResponse(jsonReader io.Reader, latestKnownHash string) (resp vulnsrc.U
 	for k := range unknownReleases {
 		note := fmt.Sprintf("Debian %s is not mapped to any version number (eg. Jessie->8). Please update me.", k)
 		resp.Notes = append(resp.Notes, note)
-		log.Warning(note)
+		log.WithField("package", "Debian").Warning(note)
 	}
 
 	return resp, nil
@@ -188,7 +188,11 @@ func parseDebianJSON(data *jsonData) (vulnerabilities []database.Vulnerability, 
 					// "fixed_version" (if affected).
 					err = versionfmt.Valid(dpkg.ParserName, releaseNode.FixedVersion)
 					if err != nil {
-						log.WithError(err).WithField("version", version).Warning("could not parse package version. skipping")
+						log.WithError(err).WithFields(log.Fields{
+							"package":      "Debian",
+							"version":      version,
+							"package name": pkgName,
+						}).Warning("could not parse package version, skipping")
 						continue
 					}
 					version = releaseNode.FixedVersion
