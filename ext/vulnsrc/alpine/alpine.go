@@ -237,7 +237,7 @@ func (file *secDB) Vulnerabilities() (vulns []database.Vulnerability) {
 		for version, cveNames := range pkg.Pkg.Fixes {
 			if err := versionfmt.Valid(apk.ParserName, version); err != nil {
 				log.WithError(err).WithFields(log.Fields{
-					"package":      "Alpine",
+					"package":      namespace.Name,
 					"version":      version,
 					"package name": pkg.Pkg.Name,
 				}).Warning("could not parse package version, skipping")
