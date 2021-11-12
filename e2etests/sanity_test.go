@@ -1764,7 +1764,7 @@ func TestImageSanity(t *testing.T) {
 						{
 							Name:          "RHSA-2021:4408",
 							NamespaceName: "rhel:8",
-							Description:   "The libsolv packages provide a library for resolving package dependencies using a satisfiability algorithm.\\n\\nSecurity Fix(es):\\n\\n* libsolv: heap-based buffer overflow in testcase_read() in src/testcase.c (CVE-2021-3200)\\n\\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.\\n\\nAdditional Changes:\\n\\nFor detailed information on changes in this release, see the Red Hat Enterprise Linux 8.5 Release Notes linked from the References section.",
+							Description:   "The libsolv packages provide a library for resolving package dependencies using a satisfiability algorithm.\n\nSecurity Fix(es):\n\n* libsolv: heap-based buffer overflow in testcase_read() in src/testcase.c (CVE-2021-3200)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.\n\nAdditional Changes:\n\nFor detailed information on changes in this release, see the Red Hat Enterprise Linux 8.5 Release Notes linked from the References section.",
 							Link:          "https://access.redhat.com/errata/RHSA-2021:4408",
 							Severity:      "Low",
 							Metadata: map[string]interface{}{
