@@ -56,5 +56,6 @@ var (
 		"ubuntu:20.04",
 		"ubuntu:20.10",
 		"ubuntu:21.04",
+		"ubuntu:21.10",
 	)
 )
