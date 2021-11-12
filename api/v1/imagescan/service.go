@@ -27,35 +27,27 @@ type Service interface {
 }
 
 // NewService returns the service for image scanning
-func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache) Service {
+func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache, liteMode bool) Service {
 	return &serviceImpl{
 		db:       db,
 		nvdCache: nvdCache,
+
+		liteMode: liteMode,
 	}
 }
 
 type serviceImpl struct {
 	db       database.Datastore
 	nvdCache nvdtoolscache.Cache
+
+	liteMode bool
 }
 
-func (s *serviceImpl) GetLanguageLevelComponents(ctx context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
-	layerName, lineage, err := s.getLayerNameFromImageReq(req)
-	if err != nil {
-		return nil, err
-	}
-	components, err := s.db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
-		UncertifiedRHEL: req.GetUncertifiedRHEL(),
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to retrieve components from DB: %v", err)
-	}
-	return &v1.GetLanguageLevelComponentsResponse{
-		LayerToComponents: convertComponents(components),
-	}, nil
-}
+func (s *serviceImpl) ScanImage(_ context.Context, req *v1.ScanImageRequest) (*v1.ScanImageResponse, error) {
+	if s.liteMode {
 
-func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (*v1.ScanImageResponse, error) {
+	}
+
 	image, err := types.GenerateImageFromString(req.GetImage())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "could not parse image %q", req.GetImage())
@@ -145,12 +137,47 @@ func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string
 	return layerName, lineage, nil
 }
 
-func (s *serviceImpl) GetImageScan(ctx context.Context, req *v1.GetImageScanRequest) (*v1.GetImageScanResponse, error) {
+func (s *serviceImpl) GetImageScan(_ context.Context, req *v1.GetImageScanRequest) (*v1.GetImageScanResponse, error) {
 	layerName, lineage, err := s.getLayerNameFromImageReq(req)
 	if err != nil {
 		return nil, err
 	}
 	return s.getLayer(layerName, lineage, req.GetUncertifiedRHEL())
+}
+
+func (s *serviceImpl) GetImageComponents(_ context.Context, req *v1.GetImageComponentsRequest) (*v1.GetImageComponentsResponse, error) {
+	image, err := types.GenerateImageFromString(req.GetImage())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "could not parse image %q", req.GetImage())
+	}
+
+	reg := req.GetRegistry()
+
+	digest, err := server.ProcessImage(s.db, image, reg.GetUrl(), reg.GetUsername(), reg.GetPassword(), reg.GetInsecure(), req.GetUncertifiedRHEL())
+	if err != nil {
+		return nil, err
+	}
+	
+	return &v1.GetImageComponentsResponse{
+		Digest: digest,
+		Layers: nil,
+	}, nil
+}
+
+func (s *serviceImpl) GetLanguageLevelComponents(_ context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
+	layerName, lineage, err := s.getLayerNameFromImageReq(req)
+	if err != nil {
+		return nil, err
+	}
+	components, err := s.db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
+		UncertifiedRHEL: req.GetUncertifiedRHEL(),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to retrieve components from DB: %v", err)
+	}
+	return &v1.GetLanguageLevelComponentsResponse{
+		LayerToComponents: convertComponents(components),
+	}, nil
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.

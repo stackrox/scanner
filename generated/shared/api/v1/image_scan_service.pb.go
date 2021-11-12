@@ -26,6 +26,37 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
+type ScanStatus int32
+
+const (
+	ScanStatus_UNSET     ScanStatus = 0
+	ScanStatus_ANALYZING ScanStatus = 1
+	ScanStatus_FAILED    ScanStatus = 2
+	ScanStatus_SUCCEEDED ScanStatus = 3
+)
+
+var ScanStatus_name = map[int32]string{
+	0: "UNSET",
+	1: "ANALYZING",
+	2: "FAILED",
+	3: "SUCCEEDED",
+}
+
+var ScanStatus_value = map[string]int32{
+	"UNSET":     0,
+	"ANALYZING": 1,
+	"FAILED":    2,
+	"SUCCEEDED": 3,
+}
+
+func (x ScanStatus) String() string {
+	return proto.EnumName(ScanStatus_name, int32(x))
+}
+
+func (ScanStatus) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_21a8706899481053, []int{0}
+}
+
 type SourceType int32
 
 const (
@@ -60,37 +91,6 @@ func (x SourceType) String() string {
 }
 
 func (SourceType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_21a8706899481053, []int{0}
-}
-
-type ScanStatus int32
-
-const (
-	ScanStatus_UNSET     ScanStatus = 0
-	ScanStatus_ANALYZING ScanStatus = 1
-	ScanStatus_FAILED    ScanStatus = 2
-	ScanStatus_SUCCEEDED ScanStatus = 3
-)
-
-var ScanStatus_name = map[int32]string{
-	0: "UNSET",
-	1: "ANALYZING",
-	2: "FAILED",
-	3: "SUCCEEDED",
-}
-
-var ScanStatus_value = map[string]int32{
-	"UNSET":     0,
-	"ANALYZING": 1,
-	"FAILED":    2,
-	"SUCCEEDED": 3,
-}
-
-func (x ScanStatus) String() string {
-	return proto.EnumName(ScanStatus_name, int32(x))
-}
-
-func (ScanStatus) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_21a8706899481053, []int{1}
 }
 
@@ -392,74 +392,6 @@ func (m *ScanImageResponse) Clone() *ScanImageResponse {
 	return cloned
 }
 
-type ImageSpec struct {
-	Digest               string   `protobuf:"bytes,1,opt,name=digest,proto3" json:"digest,omitempty"`
-	Image                string   `protobuf:"bytes,2,opt,name=image,proto3" json:"image,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ImageSpec) Reset()         { *m = ImageSpec{} }
-func (m *ImageSpec) String() string { return proto.CompactTextString(m) }
-func (*ImageSpec) ProtoMessage()    {}
-func (*ImageSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_21a8706899481053, []int{3}
-}
-func (m *ImageSpec) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *ImageSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_ImageSpec.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *ImageSpec) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ImageSpec.Merge(m, src)
-}
-func (m *ImageSpec) XXX_Size() int {
-	return m.Size()
-}
-func (m *ImageSpec) XXX_DiscardUnknown() {
-	xxx_messageInfo_ImageSpec.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ImageSpec proto.InternalMessageInfo
-
-func (m *ImageSpec) GetDigest() string {
-	if m != nil {
-		return m.Digest
-	}
-	return ""
-}
-
-func (m *ImageSpec) GetImage() string {
-	if m != nil {
-		return m.Image
-	}
-	return ""
-}
-
-func (m *ImageSpec) MessageClone() proto.Message {
-	return m.Clone()
-}
-func (m *ImageSpec) Clone() *ImageSpec {
-	if m == nil {
-		return nil
-	}
-	cloned := new(ImageSpec)
-	*cloned = *m
-
-	return cloned
-}
-
 type GetImageScanRequest struct {
 	// Only one of the fields in ImageSpec needs to be set for the request to be properly formed
 	// If both are set, then digest is used
@@ -477,7 +409,7 @@ func (m *GetImageScanRequest) Reset()         { *m = GetImageScanRequest{} }
 func (m *GetImageScanRequest) String() string { return proto.CompactTextString(m) }
 func (*GetImageScanRequest) ProtoMessage()    {}
 func (*GetImageScanRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_21a8706899481053, []int{4}
+	return fileDescriptor_21a8706899481053, []int{3}
 }
 func (m *GetImageScanRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -534,6 +466,314 @@ func (m *GetImageScanRequest) Clone() *GetImageScanRequest {
 	return cloned
 }
 
+type GetImageScanResponse struct {
+	Status               ScanStatus `protobuf:"varint,1,opt,name=status,proto3,enum=scannerV1.ScanStatus" json:"status,omitempty"`
+	Image                *Image     `protobuf:"bytes,2,opt,name=image,proto3" json:"image,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
+}
+
+func (m *GetImageScanResponse) Reset()         { *m = GetImageScanResponse{} }
+func (m *GetImageScanResponse) String() string { return proto.CompactTextString(m) }
+func (*GetImageScanResponse) ProtoMessage()    {}
+func (*GetImageScanResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_21a8706899481053, []int{4}
+}
+func (m *GetImageScanResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetImageScanResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetImageScanResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetImageScanResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetImageScanResponse.Merge(m, src)
+}
+func (m *GetImageScanResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetImageScanResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetImageScanResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetImageScanResponse proto.InternalMessageInfo
+
+func (m *GetImageScanResponse) GetStatus() ScanStatus {
+	if m != nil {
+		return m.Status
+	}
+	return ScanStatus_UNSET
+}
+
+func (m *GetImageScanResponse) GetImage() *Image {
+	if m != nil {
+		return m.Image
+	}
+	return nil
+}
+
+func (m *GetImageScanResponse) MessageClone() proto.Message {
+	return m.Clone()
+}
+func (m *GetImageScanResponse) Clone() *GetImageScanResponse {
+	if m == nil {
+		return nil
+	}
+	cloned := new(GetImageScanResponse)
+	*cloned = *m
+
+	cloned.Image = m.Image.Clone()
+	return cloned
+}
+
+type GetImageComponentsRequest struct {
+	Image    string                                  `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
+	Registry *GetImageComponentsRequest_RegistryData `protobuf:"bytes,2,opt,name=registry,proto3" json:"registry,omitempty"`
+	// uncertifiedRHEL tells the Scanner to scan the image
+	// in an uncertified manner, if the image is RHEL-based.
+	UncertifiedRHEL      bool     `protobuf:"varint,3,opt,name=uncertifiedRHEL,proto3" json:"uncertifiedRHEL,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetImageComponentsRequest) Reset()         { *m = GetImageComponentsRequest{} }
+func (m *GetImageComponentsRequest) String() string { return proto.CompactTextString(m) }
+func (*GetImageComponentsRequest) ProtoMessage()    {}
+func (*GetImageComponentsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_21a8706899481053, []int{5}
+}
+func (m *GetImageComponentsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetImageComponentsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetImageComponentsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetImageComponentsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetImageComponentsRequest.Merge(m, src)
+}
+func (m *GetImageComponentsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetImageComponentsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetImageComponentsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetImageComponentsRequest proto.InternalMessageInfo
+
+func (m *GetImageComponentsRequest) GetImage() string {
+	if m != nil {
+		return m.Image
+	}
+	return ""
+}
+
+func (m *GetImageComponentsRequest) GetRegistry() *GetImageComponentsRequest_RegistryData {
+	if m != nil {
+		return m.Registry
+	}
+	return nil
+}
+
+func (m *GetImageComponentsRequest) GetUncertifiedRHEL() bool {
+	if m != nil {
+		return m.UncertifiedRHEL
+	}
+	return false
+}
+
+func (m *GetImageComponentsRequest) MessageClone() proto.Message {
+	return m.Clone()
+}
+func (m *GetImageComponentsRequest) Clone() *GetImageComponentsRequest {
+	if m == nil {
+		return nil
+	}
+	cloned := new(GetImageComponentsRequest)
+	*cloned = *m
+
+	cloned.Registry = m.Registry.Clone()
+	return cloned
+}
+
+type GetImageComponentsRequest_RegistryData struct {
+	Url                  string   `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	Username             string   `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Password             string   `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	Insecure             bool     `protobuf:"varint,4,opt,name=insecure,proto3" json:"insecure,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetImageComponentsRequest_RegistryData) Reset() {
+	*m = GetImageComponentsRequest_RegistryData{}
+}
+func (m *GetImageComponentsRequest_RegistryData) String() string { return proto.CompactTextString(m) }
+func (*GetImageComponentsRequest_RegistryData) ProtoMessage()    {}
+func (*GetImageComponentsRequest_RegistryData) Descriptor() ([]byte, []int) {
+	return fileDescriptor_21a8706899481053, []int{5, 0}
+}
+func (m *GetImageComponentsRequest_RegistryData) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetImageComponentsRequest_RegistryData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetImageComponentsRequest_RegistryData.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetImageComponentsRequest_RegistryData) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetImageComponentsRequest_RegistryData.Merge(m, src)
+}
+func (m *GetImageComponentsRequest_RegistryData) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetImageComponentsRequest_RegistryData) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetImageComponentsRequest_RegistryData.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetImageComponentsRequest_RegistryData proto.InternalMessageInfo
+
+func (m *GetImageComponentsRequest_RegistryData) GetUrl() string {
+	if m != nil {
+		return m.Url
+	}
+	return ""
+}
+
+func (m *GetImageComponentsRequest_RegistryData) GetUsername() string {
+	if m != nil {
+		return m.Username
+	}
+	return ""
+}
+
+func (m *GetImageComponentsRequest_RegistryData) GetPassword() string {
+	if m != nil {
+		return m.Password
+	}
+	return ""
+}
+
+func (m *GetImageComponentsRequest_RegistryData) GetInsecure() bool {
+	if m != nil {
+		return m.Insecure
+	}
+	return false
+}
+
+func (m *GetImageComponentsRequest_RegistryData) MessageClone() proto.Message {
+	return m.Clone()
+}
+func (m *GetImageComponentsRequest_RegistryData) Clone() *GetImageComponentsRequest_RegistryData {
+	if m == nil {
+		return nil
+	}
+	cloned := new(GetImageComponentsRequest_RegistryData)
+	*cloned = *m
+
+	return cloned
+}
+
+type GetImageComponentsResponse struct {
+	Digest               string   `protobuf:"bytes,1,opt,name=digest,proto3" json:"digest,omitempty"`
+	Layers               []*Layer `protobuf:"bytes,2,rep,name=layers,proto3" json:"layers,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetImageComponentsResponse) Reset()         { *m = GetImageComponentsResponse{} }
+func (m *GetImageComponentsResponse) String() string { return proto.CompactTextString(m) }
+func (*GetImageComponentsResponse) ProtoMessage()    {}
+func (*GetImageComponentsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_21a8706899481053, []int{6}
+}
+func (m *GetImageComponentsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetImageComponentsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetImageComponentsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetImageComponentsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetImageComponentsResponse.Merge(m, src)
+}
+func (m *GetImageComponentsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetImageComponentsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetImageComponentsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetImageComponentsResponse proto.InternalMessageInfo
+
+func (m *GetImageComponentsResponse) GetDigest() string {
+	if m != nil {
+		return m.Digest
+	}
+	return ""
+}
+
+func (m *GetImageComponentsResponse) GetLayers() []*Layer {
+	if m != nil {
+		return m.Layers
+	}
+	return nil
+}
+
+func (m *GetImageComponentsResponse) MessageClone() proto.Message {
+	return m.Clone()
+}
+func (m *GetImageComponentsResponse) Clone() *GetImageComponentsResponse {
+	if m == nil {
+		return nil
+	}
+	cloned := new(GetImageComponentsResponse)
+	*cloned = *m
+
+	if m.Layers != nil {
+		cloned.Layers = make([]*Layer, len(m.Layers))
+		for idx, v := range m.Layers {
+			cloned.Layers[idx] = v.Clone()
+		}
+	}
+	return cloned
+}
+
 type GetLanguageLevelComponentsRequest struct {
 	// Only one of the fields in ImageSpec needs to be set for the request to be properly formed
 	// If both are set, then digest is used
@@ -551,7 +791,7 @@ func (m *GetLanguageLevelComponentsRequest) Reset()         { *m = GetLanguageLe
 func (m *GetLanguageLevelComponentsRequest) String() string { return proto.CompactTextString(m) }
 func (*GetLanguageLevelComponentsRequest) ProtoMessage()    {}
 func (*GetLanguageLevelComponentsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_21a8706899481053, []int{5}
+	return fileDescriptor_21a8706899481053, []int{7}
 }
 func (m *GetLanguageLevelComponentsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -605,156 +845,6 @@ func (m *GetLanguageLevelComponentsRequest) Clone() *GetLanguageLevelComponentsR
 	*cloned = *m
 
 	cloned.ImageSpec = m.ImageSpec.Clone()
-	return cloned
-}
-
-type LanguageLevelComponent struct {
-	SourceType           SourceType `protobuf:"varint,1,opt,name=source_type,json=sourceType,proto3,enum=scannerV1.SourceType" json:"source_type,omitempty"`
-	Name                 string     `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Version              string     `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
-	Location             string     `protobuf:"bytes,4,opt,name=location,proto3" json:"location,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
-}
-
-func (m *LanguageLevelComponent) Reset()         { *m = LanguageLevelComponent{} }
-func (m *LanguageLevelComponent) String() string { return proto.CompactTextString(m) }
-func (*LanguageLevelComponent) ProtoMessage()    {}
-func (*LanguageLevelComponent) Descriptor() ([]byte, []int) {
-	return fileDescriptor_21a8706899481053, []int{6}
-}
-func (m *LanguageLevelComponent) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *LanguageLevelComponent) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_LanguageLevelComponent.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *LanguageLevelComponent) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_LanguageLevelComponent.Merge(m, src)
-}
-func (m *LanguageLevelComponent) XXX_Size() int {
-	return m.Size()
-}
-func (m *LanguageLevelComponent) XXX_DiscardUnknown() {
-	xxx_messageInfo_LanguageLevelComponent.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_LanguageLevelComponent proto.InternalMessageInfo
-
-func (m *LanguageLevelComponent) GetSourceType() SourceType {
-	if m != nil {
-		return m.SourceType
-	}
-	return SourceType_UNSET_SOURCE_TYPE
-}
-
-func (m *LanguageLevelComponent) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *LanguageLevelComponent) GetVersion() string {
-	if m != nil {
-		return m.Version
-	}
-	return ""
-}
-
-func (m *LanguageLevelComponent) GetLocation() string {
-	if m != nil {
-		return m.Location
-	}
-	return ""
-}
-
-func (m *LanguageLevelComponent) MessageClone() proto.Message {
-	return m.Clone()
-}
-func (m *LanguageLevelComponent) Clone() *LanguageLevelComponent {
-	if m == nil {
-		return nil
-	}
-	cloned := new(LanguageLevelComponent)
-	*cloned = *m
-
-	return cloned
-}
-
-type LanguageLevelComponents struct {
-	Components           []*LanguageLevelComponent `protobuf:"bytes,1,rep,name=components,proto3" json:"components,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
-}
-
-func (m *LanguageLevelComponents) Reset()         { *m = LanguageLevelComponents{} }
-func (m *LanguageLevelComponents) String() string { return proto.CompactTextString(m) }
-func (*LanguageLevelComponents) ProtoMessage()    {}
-func (*LanguageLevelComponents) Descriptor() ([]byte, []int) {
-	return fileDescriptor_21a8706899481053, []int{7}
-}
-func (m *LanguageLevelComponents) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *LanguageLevelComponents) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_LanguageLevelComponents.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *LanguageLevelComponents) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_LanguageLevelComponents.Merge(m, src)
-}
-func (m *LanguageLevelComponents) XXX_Size() int {
-	return m.Size()
-}
-func (m *LanguageLevelComponents) XXX_DiscardUnknown() {
-	xxx_messageInfo_LanguageLevelComponents.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_LanguageLevelComponents proto.InternalMessageInfo
-
-func (m *LanguageLevelComponents) GetComponents() []*LanguageLevelComponent {
-	if m != nil {
-		return m.Components
-	}
-	return nil
-}
-
-func (m *LanguageLevelComponents) MessageClone() proto.Message {
-	return m.Clone()
-}
-func (m *LanguageLevelComponents) Clone() *LanguageLevelComponents {
-	if m == nil {
-		return nil
-	}
-	cloned := new(LanguageLevelComponents)
-	*cloned = *m
-
-	if m.Components != nil {
-		cloned.Components = make([]*LanguageLevelComponent, len(m.Components))
-		for idx, v := range m.Components {
-			cloned.Components[idx] = v.Clone()
-		}
-	}
 	return cloned
 }
 
@@ -824,26 +914,26 @@ func (m *GetLanguageLevelComponentsResponse) Clone() *GetLanguageLevelComponents
 	return cloned
 }
 
-type GetImageScanResponse struct {
-	Status               ScanStatus `protobuf:"varint,1,opt,name=status,proto3,enum=scannerV1.ScanStatus" json:"status,omitempty"`
-	Image                *Image     `protobuf:"bytes,2,opt,name=image,proto3" json:"image,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
+type ImageSpec struct {
+	Digest               string   `protobuf:"bytes,1,opt,name=digest,proto3" json:"digest,omitempty"`
+	Image                string   `protobuf:"bytes,2,opt,name=image,proto3" json:"image,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetImageScanResponse) Reset()         { *m = GetImageScanResponse{} }
-func (m *GetImageScanResponse) String() string { return proto.CompactTextString(m) }
-func (*GetImageScanResponse) ProtoMessage()    {}
-func (*GetImageScanResponse) Descriptor() ([]byte, []int) {
+func (m *ImageSpec) Reset()         { *m = ImageSpec{} }
+func (m *ImageSpec) String() string { return proto.CompactTextString(m) }
+func (*ImageSpec) ProtoMessage()    {}
+func (*ImageSpec) Descriptor() ([]byte, []int) {
 	return fileDescriptor_21a8706899481053, []int{9}
 }
-func (m *GetImageScanResponse) XXX_Unmarshal(b []byte) error {
+func (m *ImageSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *GetImageScanResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ImageSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_GetImageScanResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_ImageSpec.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -853,61 +943,213 @@ func (m *GetImageScanResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte
 		return b[:n], nil
 	}
 }
-func (m *GetImageScanResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetImageScanResponse.Merge(m, src)
+func (m *ImageSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ImageSpec.Merge(m, src)
 }
-func (m *GetImageScanResponse) XXX_Size() int {
+func (m *ImageSpec) XXX_Size() int {
 	return m.Size()
 }
-func (m *GetImageScanResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetImageScanResponse.DiscardUnknown(m)
+func (m *ImageSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_ImageSpec.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetImageScanResponse proto.InternalMessageInfo
+var xxx_messageInfo_ImageSpec proto.InternalMessageInfo
 
-func (m *GetImageScanResponse) GetStatus() ScanStatus {
+func (m *ImageSpec) GetDigest() string {
 	if m != nil {
-		return m.Status
+		return m.Digest
 	}
-	return ScanStatus_UNSET
+	return ""
 }
 
-func (m *GetImageScanResponse) GetImage() *Image {
+func (m *ImageSpec) GetImage() string {
 	if m != nil {
 		return m.Image
+	}
+	return ""
+}
+
+func (m *ImageSpec) MessageClone() proto.Message {
+	return m.Clone()
+}
+func (m *ImageSpec) Clone() *ImageSpec {
+	if m == nil {
+		return nil
+	}
+	cloned := new(ImageSpec)
+	*cloned = *m
+
+	return cloned
+}
+
+type LanguageLevelComponents struct {
+	Components           []*LanguageLevelComponent `protobuf:"bytes,1,rep,name=components,proto3" json:"components,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
+	XXX_unrecognized     []byte                    `json:"-"`
+	XXX_sizecache        int32                     `json:"-"`
+}
+
+func (m *LanguageLevelComponents) Reset()         { *m = LanguageLevelComponents{} }
+func (m *LanguageLevelComponents) String() string { return proto.CompactTextString(m) }
+func (*LanguageLevelComponents) ProtoMessage()    {}
+func (*LanguageLevelComponents) Descriptor() ([]byte, []int) {
+	return fileDescriptor_21a8706899481053, []int{10}
+}
+func (m *LanguageLevelComponents) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *LanguageLevelComponents) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_LanguageLevelComponents.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *LanguageLevelComponents) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LanguageLevelComponents.Merge(m, src)
+}
+func (m *LanguageLevelComponents) XXX_Size() int {
+	return m.Size()
+}
+func (m *LanguageLevelComponents) XXX_DiscardUnknown() {
+	xxx_messageInfo_LanguageLevelComponents.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LanguageLevelComponents proto.InternalMessageInfo
+
+func (m *LanguageLevelComponents) GetComponents() []*LanguageLevelComponent {
+	if m != nil {
+		return m.Components
 	}
 	return nil
 }
 
-func (m *GetImageScanResponse) MessageClone() proto.Message {
+func (m *LanguageLevelComponents) MessageClone() proto.Message {
 	return m.Clone()
 }
-func (m *GetImageScanResponse) Clone() *GetImageScanResponse {
+func (m *LanguageLevelComponents) Clone() *LanguageLevelComponents {
 	if m == nil {
 		return nil
 	}
-	cloned := new(GetImageScanResponse)
+	cloned := new(LanguageLevelComponents)
 	*cloned = *m
 
-	cloned.Image = m.Image.Clone()
+	if m.Components != nil {
+		cloned.Components = make([]*LanguageLevelComponent, len(m.Components))
+		for idx, v := range m.Components {
+			cloned.Components[idx] = v.Clone()
+		}
+	}
+	return cloned
+}
+
+type LanguageLevelComponent struct {
+	SourceType           SourceType `protobuf:"varint,1,opt,name=source_type,json=sourceType,proto3,enum=scannerV1.SourceType" json:"source_type,omitempty"`
+	Name                 string     `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Version              string     `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+	Location             string     `protobuf:"bytes,4,opt,name=location,proto3" json:"location,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
+}
+
+func (m *LanguageLevelComponent) Reset()         { *m = LanguageLevelComponent{} }
+func (m *LanguageLevelComponent) String() string { return proto.CompactTextString(m) }
+func (*LanguageLevelComponent) ProtoMessage()    {}
+func (*LanguageLevelComponent) Descriptor() ([]byte, []int) {
+	return fileDescriptor_21a8706899481053, []int{11}
+}
+func (m *LanguageLevelComponent) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *LanguageLevelComponent) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_LanguageLevelComponent.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *LanguageLevelComponent) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LanguageLevelComponent.Merge(m, src)
+}
+func (m *LanguageLevelComponent) XXX_Size() int {
+	return m.Size()
+}
+func (m *LanguageLevelComponent) XXX_DiscardUnknown() {
+	xxx_messageInfo_LanguageLevelComponent.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LanguageLevelComponent proto.InternalMessageInfo
+
+func (m *LanguageLevelComponent) GetSourceType() SourceType {
+	if m != nil {
+		return m.SourceType
+	}
+	return SourceType_UNSET_SOURCE_TYPE
+}
+
+func (m *LanguageLevelComponent) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *LanguageLevelComponent) GetVersion() string {
+	if m != nil {
+		return m.Version
+	}
+	return ""
+}
+
+func (m *LanguageLevelComponent) GetLocation() string {
+	if m != nil {
+		return m.Location
+	}
+	return ""
+}
+
+func (m *LanguageLevelComponent) MessageClone() proto.Message {
+	return m.Clone()
+}
+func (m *LanguageLevelComponent) Clone() *LanguageLevelComponent {
+	if m == nil {
+		return nil
+	}
+	cloned := new(LanguageLevelComponent)
+	*cloned = *m
+
 	return cloned
 }
 
 func init() {
-	proto.RegisterEnum("scannerV1.SourceType", SourceType_name, SourceType_value)
 	proto.RegisterEnum("scannerV1.ScanStatus", ScanStatus_name, ScanStatus_value)
+	proto.RegisterEnum("scannerV1.SourceType", SourceType_name, SourceType_value)
 	proto.RegisterType((*Image)(nil), "scannerV1.Image")
 	proto.RegisterType((*ScanImageRequest)(nil), "scannerV1.ScanImageRequest")
 	proto.RegisterType((*ScanImageRequest_RegistryData)(nil), "scannerV1.ScanImageRequest.RegistryData")
 	proto.RegisterType((*ScanImageResponse)(nil), "scannerV1.ScanImageResponse")
-	proto.RegisterType((*ImageSpec)(nil), "scannerV1.ImageSpec")
 	proto.RegisterType((*GetImageScanRequest)(nil), "scannerV1.GetImageScanRequest")
+	proto.RegisterType((*GetImageScanResponse)(nil), "scannerV1.GetImageScanResponse")
+	proto.RegisterType((*GetImageComponentsRequest)(nil), "scannerV1.GetImageComponentsRequest")
+	proto.RegisterType((*GetImageComponentsRequest_RegistryData)(nil), "scannerV1.GetImageComponentsRequest.RegistryData")
+	proto.RegisterType((*GetImageComponentsResponse)(nil), "scannerV1.GetImageComponentsResponse")
 	proto.RegisterType((*GetLanguageLevelComponentsRequest)(nil), "scannerV1.GetLanguageLevelComponentsRequest")
-	proto.RegisterType((*LanguageLevelComponent)(nil), "scannerV1.LanguageLevelComponent")
-	proto.RegisterType((*LanguageLevelComponents)(nil), "scannerV1.LanguageLevelComponents")
 	proto.RegisterType((*GetLanguageLevelComponentsResponse)(nil), "scannerV1.GetLanguageLevelComponentsResponse")
 	proto.RegisterMapType((map[string]*LanguageLevelComponents)(nil), "scannerV1.GetLanguageLevelComponentsResponse.LayerToComponentsEntry")
-	proto.RegisterType((*GetImageScanResponse)(nil), "scannerV1.GetImageScanResponse")
+	proto.RegisterType((*ImageSpec)(nil), "scannerV1.ImageSpec")
+	proto.RegisterType((*LanguageLevelComponents)(nil), "scannerV1.LanguageLevelComponents")
+	proto.RegisterType((*LanguageLevelComponent)(nil), "scannerV1.LanguageLevelComponent")
 }
 
 func init() {
@@ -915,64 +1157,69 @@ func init() {
 }
 
 var fileDescriptor_21a8706899481053 = []byte{
-	// 900 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x56, 0x5f, 0x6f, 0xdb, 0x54,
-	0x14, 0xaf, 0x93, 0xa6, 0x8b, 0x4f, 0x07, 0x73, 0xef, 0xba, 0x2d, 0x0a, 0x23, 0x4b, 0x2d, 0x31,
-	0x45, 0x15, 0x4b, 0xd5, 0x4e, 0x82, 0x31, 0x89, 0x87, 0x90, 0x78, 0x5d, 0x51, 0x9a, 0x56, 0x37,
-	0xe9, 0x44, 0x27, 0xa4, 0xe8, 0xd6, 0x3d, 0x4b, 0xad, 0xba, 0xd7, 0xe6, 0xde, 0xeb, 0x40, 0x5e,
-	0x07, 0xcf, 0xbc, 0xf0, 0x82, 0x78, 0xe2, 0xe3, 0xf0, 0x88, 0xc4, 0x17, 0x40, 0x85, 0x0f, 0x82,
-	0x7c, 0xed, 0x38, 0x6e, 0x48, 0x37, 0xe0, 0x81, 0xb7, 0x7b, 0xee, 0xf9, 0xf3, 0xfb, 0xf9, 0x9c,
-	0xdf, 0xb1, 0x0d, 0x0f, 0xe5, 0x19, 0x13, 0x78, 0xba, 0xc5, 0x42, 0x6f, 0x6b, 0xbc, 0xbd, 0xe5,
-	0x5d, 0xb0, 0x11, 0x0e, 0xa5, 0xcb, 0xf8, 0x50, 0xa2, 0x18, 0x7b, 0x2e, 0x36, 0x43, 0x11, 0xa8,
-	0x80, 0x98, 0xf1, 0x1d, 0x47, 0xf1, 0x62, 0xbb, 0x7a, 0x7f, 0x14, 0x04, 0x23, 0x1f, 0x75, 0x0a,
-	0xe3, 0x3c, 0x50, 0x4c, 0x79, 0x01, 0x97, 0x49, 0x60, 0x75, 0xe3, 0x6a, 0xc1, 0x71, 0xe4, 0x73,
-	0x14, 0xec, 0xc4, 0xf3, 0x3d, 0x35, 0x49, 0x42, 0xec, 0x8f, 0xa1, 0xb4, 0x17, 0xe3, 0x90, 0x26,
-	0x94, 0x5f, 0x21, 0x53, 0x91, 0x40, 0x59, 0x31, 0xea, 0xc5, 0xc6, 0xea, 0x0e, 0x69, 0x66, 0x38,
-	0xcd, 0x67, 0x89, 0x8b, 0x66, 0x31, 0xf6, 0xf7, 0x05, 0xb0, 0xfa, 0x2e, 0xe3, 0x3a, 0x9b, 0xe2,
-	0x57, 0x11, 0x4a, 0x45, 0xd6, 0xa1, 0xa4, 0x59, 0x57, 0x8c, 0xba, 0xd1, 0x30, 0x69, 0x62, 0x90,
-	0x0e, 0x94, 0x05, 0x8e, 0x3c, 0xa9, 0xc4, 0xa4, 0x52, 0xa8, 0x1b, 0x8d, 0xd5, 0x9d, 0x46, 0xae,
-	0xf4, 0x7c, 0x91, 0x26, 0x4d, 0x63, 0x3b, 0x4c, 0x31, 0x9a, 0x65, 0x92, 0x06, 0xdc, 0x8a, 0xb8,
-	0x8b, 0x42, 0x79, 0xaf, 0x3c, 0x3c, 0xa5, 0xcf, 0x9d, 0x6e, 0xa5, 0x58, 0x37, 0x1a, 0x65, 0x3a,
-	0x7f, 0x5d, 0x55, 0x70, 0x33, 0x5f, 0x83, 0x58, 0x50, 0x8c, 0x84, 0x9f, 0x72, 0x8a, 0x8f, 0xa4,
-	0x0a, 0xe5, 0x48, 0xa2, 0xe0, 0xec, 0x02, 0x35, 0x23, 0x93, 0x66, 0x76, 0xec, 0x0b, 0x99, 0x94,
-	0x5f, 0x07, 0xe2, 0x54, 0x03, 0x98, 0x34, 0xb3, 0x63, 0x9f, 0xc7, 0x25, 0xba, 0x91, 0xc0, 0xca,
-	0xb2, 0x06, 0xcf, 0x6c, 0x9b, 0xc3, 0x5a, 0xee, 0x51, 0x64, 0x18, 0x70, 0x89, 0xe4, 0x11, 0xac,
-	0x48, 0xc5, 0x54, 0x24, 0x35, 0xfa, 0xbb, 0x3b, 0x77, 0xe6, 0x1e, 0xbc, 0xaf, 0x9d, 0x34, 0x0d,
-	0x22, 0x9b, 0xd3, 0xfe, 0x25, 0x6d, 0x5a, 0xcf, 0x45, 0xeb, 0xba, 0xfd, 0x10, 0xdd, 0xb4, 0xab,
-	0xf6, 0x27, 0x60, 0x66, 0x77, 0xe4, 0x2e, 0xac, 0x9c, 0x7a, 0x23, 0x94, 0x2a, 0x7d, 0xca, 0xd4,
-	0x9a, 0x0d, 0xa4, 0x90, 0x1b, 0x88, 0xad, 0xe0, 0xf6, 0x2e, 0xaa, 0x24, 0xdb, 0x65, 0x7c, 0x3a,
-	0xbd, 0xc7, 0x00, 0xa9, 0xe6, 0x42, 0x74, 0x75, 0xa1, 0xeb, 0x28, 0x98, 0x5e, 0x86, 0xbc, 0x60,
-	0x2c, 0x85, 0x85, 0x63, 0xb1, 0x5f, 0x1b, 0xb0, 0xb1, 0x8b, 0xaa, 0xcb, 0xf8, 0x28, 0x62, 0x23,
-	0xec, 0xe2, 0x18, 0xfd, 0x76, 0x70, 0x11, 0x06, 0x1c, 0xb9, 0x92, 0xff, 0x13, 0x89, 0x9f, 0x0c,
-	0xb8, 0xbb, 0x98, 0x01, 0xf9, 0x08, 0x56, 0x65, 0x10, 0x09, 0x17, 0x87, 0x6a, 0x12, 0xe2, 0xa2,
-	0x81, 0x69, 0xef, 0x60, 0x12, 0x22, 0x05, 0x99, 0x9d, 0x09, 0x81, 0xe5, 0x9c, 0x90, 0xf4, 0x99,
-	0x54, 0xe0, 0xc6, 0x18, 0x85, 0xf4, 0x02, 0x9e, 0x6a, 0x68, 0x6a, 0xc6, 0x12, 0xf2, 0x03, 0x57,
-	0xaf, 0xa9, 0x96, 0x90, 0x49, 0x33, 0xdb, 0xfe, 0x12, 0xee, 0x5d, 0xd3, 0x1d, 0xd2, 0x02, 0x70,
-	0x33, 0x2b, 0x5d, 0xd0, 0x8d, 0x1c, 0xb7, 0xc5, 0x79, 0x34, 0x97, 0x64, 0x7f, 0x57, 0x00, 0xfb,
-	0x4d, 0xfd, 0x4f, 0x25, 0xab, 0xe0, 0xb6, 0xcf, 0x26, 0x28, 0x86, 0x2a, 0x18, 0xfe, 0x0d, 0xb2,
-	0x93, 0x83, 0x7c, 0x7b, 0xad, 0x66, 0x37, 0x2e, 0x34, 0x08, 0x66, 0x1e, 0x87, 0x2b, 0x31, 0xa1,
-	0x6b, 0xfe, 0xfc, 0x7d, 0xf5, 0x2c, 0x1e, 0xcb, 0xa2, 0xe0, 0x78, 0x7b, 0xcf, 0x71, 0x32, 0xdd,
-	0xde, 0x73, 0x9c, 0x90, 0x27, 0x50, 0x1a, 0x33, 0x3f, 0x9a, 0x6e, 0x89, 0xfd, 0xd6, 0x36, 0x48,
-	0x9a, 0x24, 0x3c, 0x2d, 0x3c, 0x31, 0xec, 0x0b, 0x58, 0xbf, 0x2a, 0xfe, 0xff, 0xb6, 0xaa, 0x0f,
-	0xaf, 0xae, 0xaa, 0x35, 0x2f, 0xd1, 0x74, 0xd7, 0x36, 0x4f, 0x00, 0x66, 0xba, 0x21, 0x77, 0x60,
-	0xed, 0xa8, 0xd7, 0x77, 0x06, 0xc3, 0xfe, 0xc1, 0x11, 0x6d, 0x3b, 0xc3, 0xc1, 0xf1, 0xa1, 0x63,
-	0x2d, 0x91, 0x32, 0x2c, 0x7f, 0xde, 0x7a, 0xd1, 0xb2, 0x0c, 0x02, 0xb0, 0x72, 0x78, 0x3c, 0x78,
-	0x7e, 0xd0, 0xb3, 0x0a, 0xe4, 0x06, 0x14, 0x7b, 0x87, 0xfb, 0x56, 0x31, 0x3e, 0xec, 0x3a, 0xfb,
-	0xd6, 0x72, 0x9c, 0xde, 0x39, 0x18, 0xf4, 0x9c, 0x41, 0xfb, 0x80, 0x3a, 0xf4, 0xa8, 0x37, 0xd8,
-	0xdb, 0x77, 0xac, 0xd2, 0x66, 0x0b, 0x60, 0xc6, 0x90, 0x98, 0x50, 0xd2, 0x18, 0xd6, 0x12, 0x79,
-	0x07, 0xcc, 0x56, 0xaf, 0xd5, 0x3d, 0x7e, 0xb9, 0xd7, 0xdb, 0x4d, 0x8a, 0x3f, 0x6b, 0xed, 0x75,
-	0x9d, 0x8e, 0x55, 0x88, 0x5d, 0xfd, 0xa3, 0x76, 0xdb, 0x71, 0x3a, 0x4e, 0xc7, 0x2a, 0xee, 0x7c,
-	0x5b, 0x04, 0x2b, 0xeb, 0x49, 0x3f, 0xf9, 0xdc, 0x90, 0x13, 0x30, 0xb3, 0x57, 0x1a, 0x79, 0xef,
-	0x0d, 0xef, 0xec, 0xea, 0xfd, 0xc5, 0xce, 0xa4, 0xb5, 0x76, 0xf5, 0xf5, 0x6f, 0x7f, 0xfe, 0x50,
-	0x58, 0xb7, 0x6f, 0x65, 0x9f, 0x35, 0xb9, 0x15, 0xc7, 0x3f, 0x35, 0x36, 0xc9, 0x19, 0xdc, 0xcc,
-	0x8f, 0x83, 0xd4, 0xae, 0x2a, 0x6c, 0xfe, 0x25, 0x55, 0x7d, 0x70, 0xad, 0x3f, 0x05, 0xbb, 0xa7,
-	0xc1, 0xd6, 0xc8, 0x3c, 0x18, 0xf9, 0xd9, 0x80, 0xea, 0xf5, 0x9a, 0x25, 0x1f, 0xfe, 0x43, 0x69,
-	0x27, 0x34, 0x1e, 0xfd, 0xab, 0x45, 0xb0, 0x3f, 0xd0, 0xa4, 0x1e, 0x90, 0xf7, 0x73, 0xa4, 0xfc,
-	0x34, 0x67, 0xb6, 0x64, 0x9f, 0x7d, 0xfa, 0xcb, 0x65, 0xcd, 0xf8, 0xf5, 0xb2, 0x66, 0xfc, 0x7e,
-	0x59, 0x33, 0x7e, 0xfc, 0xa3, 0xb6, 0x04, 0x75, 0x2f, 0x68, 0x4a, 0xc5, 0xdc, 0x73, 0x11, 0x7c,
-	0x93, 0x7c, 0xb2, 0x9b, 0x2c, 0xf4, 0xa6, 0xe0, 0xcd, 0xf1, 0xf6, 0xcb, 0xd9, 0xdf, 0xc0, 0x17,
-	0x4b, 0x27, 0x2b, 0x3a, 0xe4, 0xf1, 0x5f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xbe, 0xb6, 0x63, 0xba,
-	0x4b, 0x08, 0x00, 0x00,
+	// 988 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x56, 0x4d, 0x6f, 0xdb, 0x46,
+	0x13, 0x36, 0xa9, 0x8f, 0x88, 0xe3, 0xbc, 0x6f, 0xe8, 0x8d, 0x1c, 0x2b, 0x6c, 0xa2, 0xc8, 0x44,
+	0x13, 0x08, 0x46, 0x23, 0xc3, 0x0e, 0xd0, 0xa6, 0x01, 0x7a, 0x50, 0x25, 0xc6, 0x71, 0x21, 0xcb,
+	0x06, 0x25, 0x07, 0x75, 0x50, 0x54, 0x58, 0xd3, 0x1b, 0x99, 0x30, 0x4d, 0xb2, 0xbb, 0x4b, 0xb5,
+	0xba, 0x15, 0x41, 0xd1, 0x63, 0x2f, 0xbd, 0x14, 0x3d, 0xe5, 0xe7, 0xf4, 0x58, 0xa0, 0x7f, 0xa0,
+	0x70, 0xfb, 0x43, 0x0a, 0x2e, 0x3f, 0x44, 0xc9, 0x92, 0x9d, 0x16, 0xe8, 0xa1, 0xb7, 0xdd, 0x9d,
+	0x8f, 0xe7, 0x99, 0xd9, 0x99, 0xd9, 0x85, 0x47, 0xec, 0x14, 0x53, 0x72, 0xb2, 0x89, 0x7d, 0x7b,
+	0x73, 0xb4, 0xb5, 0x69, 0x9f, 0xe3, 0x21, 0x19, 0x30, 0x0b, 0xbb, 0x03, 0x46, 0xe8, 0xc8, 0xb6,
+	0x48, 0xc3, 0xa7, 0x1e, 0xf7, 0x90, 0x12, 0x9e, 0xb9, 0x84, 0xbe, 0xdc, 0xd2, 0xee, 0x0d, 0x3d,
+	0x6f, 0xe8, 0x10, 0x61, 0x82, 0x5d, 0xd7, 0xe3, 0x98, 0xdb, 0x9e, 0xcb, 0x22, 0x45, 0xed, 0xee,
+	0xb4, 0x43, 0x07, 0x8f, 0x09, 0x8d, 0x45, 0xeb, 0xd3, 0xa2, 0x51, 0xe0, 0xb8, 0x84, 0xe2, 0x63,
+	0xdb, 0xb1, 0xf9, 0x38, 0x52, 0xd1, 0x3f, 0x82, 0xc2, 0x6e, 0x48, 0x01, 0x35, 0xa0, 0xf4, 0x9a,
+	0x60, 0x1e, 0x50, 0xc2, 0x2a, 0x52, 0x2d, 0x57, 0x5f, 0xde, 0x46, 0x8d, 0x94, 0x42, 0xe3, 0x79,
+	0x24, 0x32, 0x53, 0x1d, 0xfd, 0x07, 0x19, 0xd4, 0x9e, 0x85, 0x5d, 0x61, 0x6d, 0x92, 0xaf, 0x02,
+	0xc2, 0x38, 0x2a, 0x43, 0x41, 0x04, 0x54, 0x91, 0x6a, 0x52, 0x5d, 0x31, 0xa3, 0x0d, 0x6a, 0x43,
+	0x89, 0x92, 0xa1, 0xcd, 0x38, 0x1d, 0x57, 0xe4, 0x9a, 0x54, 0x5f, 0xde, 0xae, 0x67, 0x5c, 0xcf,
+	0x3a, 0x69, 0x98, 0xb1, 0x6e, 0x1b, 0x73, 0x6c, 0xa6, 0x96, 0xa8, 0x0e, 0xb7, 0x02, 0xd7, 0x22,
+	0x94, 0xdb, 0xaf, 0x6d, 0x72, 0x62, 0xbe, 0x30, 0x3a, 0x95, 0x5c, 0x4d, 0xaa, 0x97, 0xcc, 0xd9,
+	0x63, 0x8d, 0xc3, 0xcd, 0xac, 0x0f, 0xa4, 0x42, 0x2e, 0xa0, 0x4e, 0xcc, 0x29, 0x5c, 0x22, 0x0d,
+	0x4a, 0x01, 0x23, 0xd4, 0xc5, 0xe7, 0x44, 0x30, 0x52, 0xcc, 0x74, 0x1f, 0xca, 0x7c, 0xcc, 0xd8,
+	0xd7, 0x1e, 0x3d, 0x11, 0x00, 0x8a, 0x99, 0xee, 0x43, 0x99, 0xed, 0x32, 0x62, 0x05, 0x94, 0x54,
+	0xf2, 0x02, 0x3c, 0xdd, 0xeb, 0x2e, 0xac, 0x64, 0x42, 0x61, 0xbe, 0xe7, 0x32, 0x82, 0x1e, 0x43,
+	0x91, 0x71, 0xcc, 0x03, 0x26, 0xd0, 0xff, 0xbf, 0xbd, 0x3a, 0x13, 0x78, 0x4f, 0x08, 0xcd, 0x58,
+	0x09, 0x6d, 0x24, 0xf9, 0x8b, 0xd2, 0x54, 0xce, 0x68, 0x0b, 0xbf, 0x3d, 0x9f, 0x58, 0x71, 0x56,
+	0x75, 0x0e, 0xb7, 0x77, 0x08, 0x8f, 0x8e, 0x2d, 0xec, 0x26, 0x57, 0xf0, 0x04, 0x20, 0xae, 0x29,
+	0x9f, 0x58, 0x02, 0x75, 0x91, 0x1f, 0xc5, 0x4e, 0x96, 0xf3, 0x72, 0x2b, 0xcf, 0xcd, 0xad, 0x7e,
+	0x0e, 0xe5, 0x69, 0xd4, 0x7f, 0x16, 0xe8, 0xa3, 0xe9, 0x40, 0xd5, 0x59, 0x82, 0x49, 0x90, 0x6f,
+	0x65, 0xb8, 0x9b, 0xe0, 0xb5, 0xbc, 0x73, 0xdf, 0x73, 0x89, 0xcb, 0xd9, 0xd5, 0xe5, 0xb6, 0x77,
+	0xa9, 0xdc, 0xb6, 0x32, 0xee, 0x17, 0x7a, 0xfb, 0xaf, 0xd6, 0xdd, 0x97, 0xa0, 0xcd, 0x8b, 0x29,
+	0xbe, 0x97, 0x3b, 0x50, 0x3c, 0xb1, 0x87, 0x84, 0xf1, 0x98, 0x46, 0xbc, 0x43, 0x75, 0x28, 0x8a,
+	0x49, 0xc1, 0x2a, 0xb2, 0x68, 0xf6, 0xec, 0x0d, 0x74, 0x42, 0x81, 0x19, 0xcb, 0xf5, 0x37, 0x12,
+	0xac, 0xef, 0x10, 0xde, 0xc1, 0xee, 0x30, 0xc0, 0x43, 0xd2, 0x21, 0x23, 0xe2, 0x5c, 0xbe, 0x8a,
+	0x7f, 0xb9, 0xec, 0xbe, 0x93, 0x41, 0xbf, 0x8a, 0x44, 0x1c, 0x2d, 0x87, 0xdb, 0x82, 0xf5, 0x80,
+	0x7b, 0x03, 0x2b, 0x15, 0xc7, 0xf3, 0xac, 0x3d, 0x5d, 0x05, 0xd7, 0xf8, 0x8a, 0xb2, 0xd0, 0xf7,
+	0x26, 0x12, 0xc3, 0xe5, 0x74, 0x6c, 0xae, 0x38, 0xb3, 0xe7, 0xda, 0x29, 0xdc, 0x99, 0xaf, 0x1c,
+	0x56, 0xc0, 0x19, 0x19, 0x27, 0x15, 0x70, 0x46, 0xc6, 0xe8, 0x29, 0x14, 0x46, 0xd8, 0x09, 0x92,
+	0xc2, 0xd7, 0xa7, 0xd2, 0x3e, 0x9f, 0x50, 0x64, 0xf0, 0x4c, 0x7e, 0x2a, 0xe9, 0x1f, 0x83, 0x92,
+	0x26, 0x72, 0xe1, 0xd5, 0x96, 0xb3, 0xbd, 0x95, 0x74, 0x85, 0xfe, 0x05, 0xac, 0x2d, 0x00, 0x40,
+	0x4d, 0x80, 0x4b, 0xc9, 0x5a, 0xbf, 0x96, 0x98, 0x99, 0x31, 0xd2, 0x7f, 0x96, 0xc2, 0x1c, 0xcc,
+	0x53, 0x43, 0x1f, 0xc2, 0x32, 0xf3, 0x02, 0x6a, 0x91, 0x01, 0x1f, 0xfb, 0x64, 0xde, 0x78, 0x10,
+	0xd2, 0xfe, 0xd8, 0x27, 0x26, 0xb0, 0x74, 0x8d, 0x10, 0xe4, 0x33, 0x7d, 0x22, 0xd6, 0xa8, 0x02,
+	0x37, 0x46, 0x84, 0x32, 0xdb, 0x73, 0xe3, 0x16, 0x49, 0xb6, 0x61, 0x87, 0x38, 0x9e, 0x25, 0x1e,
+	0x46, 0xd1, 0x21, 0x8a, 0x99, 0xee, 0x37, 0x9a, 0x00, 0x93, 0x11, 0x84, 0x14, 0x28, 0x1c, 0x76,
+	0x7b, 0x46, 0x5f, 0x5d, 0x42, 0xff, 0x03, 0xa5, 0xd9, 0x6d, 0x76, 0x8e, 0x5e, 0xed, 0x76, 0x77,
+	0x54, 0x09, 0x01, 0x14, 0x9f, 0x37, 0x77, 0x3b, 0x46, 0x5b, 0x95, 0x43, 0x51, 0xef, 0xb0, 0xd5,
+	0x32, 0x8c, 0xb6, 0xd1, 0x56, 0x73, 0x1b, 0xc7, 0x00, 0x13, 0x9a, 0x68, 0x15, 0x56, 0x84, 0x8b,
+	0x41, 0x6f, 0xff, 0xd0, 0x6c, 0x19, 0x83, 0xfe, 0xd1, 0x81, 0xa1, 0x2e, 0xa1, 0x12, 0xe4, 0x3f,
+	0x6b, 0xbe, 0x6c, 0x46, 0x9e, 0x0e, 0x8e, 0xfa, 0x2f, 0xf6, 0xbb, 0xaa, 0x8c, 0x6e, 0x40, 0xae,
+	0x7b, 0xb0, 0xa7, 0xe6, 0xc2, 0xc5, 0x8e, 0xb1, 0xa7, 0xe6, 0x43, 0xf3, 0xf6, 0x7e, 0xbf, 0x6b,
+	0xf4, 0x5b, 0xfb, 0xa6, 0x61, 0x1e, 0x76, 0xfb, 0xbb, 0x7b, 0x86, 0x5a, 0xd8, 0xfe, 0x3e, 0x0f,
+	0x6a, 0x3a, 0x58, 0x7b, 0xd1, 0x67, 0x00, 0x1d, 0x83, 0x92, 0xbe, 0x2a, 0xe8, 0xbd, 0x2b, 0x9e,
+	0x4d, 0xed, 0xde, 0x7c, 0x61, 0x54, 0xcd, 0xba, 0xf6, 0xe6, 0xb7, 0x3f, 0x7f, 0x94, 0xcb, 0xfa,
+	0xad, 0xf4, 0xd3, 0xc1, 0x36, 0x43, 0xfd, 0x67, 0xd2, 0x06, 0x3a, 0x85, 0x9b, 0xd9, 0x99, 0x8e,
+	0xaa, 0x73, 0xc6, 0x65, 0xe6, 0x89, 0xd1, 0x1e, 0x2c, 0x94, 0xc7, 0x60, 0x6b, 0x02, 0x6c, 0x05,
+	0xcd, 0x82, 0xa1, 0x6f, 0x25, 0x40, 0x97, 0x87, 0x15, 0x7a, 0xff, 0x5d, 0xe6, 0xb3, 0xf6, 0xf0,
+	0x1a, 0xad, 0x18, 0xfc, 0xbe, 0x00, 0x5f, 0x43, 0xab, 0x19, 0xf0, 0x49, 0xa5, 0xa2, 0xb7, 0x92,
+	0x98, 0x97, 0x8b, 0x7a, 0xe1, 0x83, 0x77, 0x1c, 0x12, 0x11, 0xa5, 0xc7, 0x7f, 0x6b, 0xa4, 0xe8,
+	0x0f, 0x05, 0xb5, 0x07, 0xe8, 0x7e, 0x86, 0x9a, 0x13, 0xdb, 0x4c, 0x28, 0x7e, 0xfa, 0xc9, 0x2f,
+	0x17, 0x55, 0xe9, 0xd7, 0x8b, 0xaa, 0xf4, 0xfb, 0x45, 0x55, 0xfa, 0xe9, 0x8f, 0xea, 0x12, 0xd4,
+	0x6c, 0xaf, 0xc1, 0x38, 0xb6, 0xce, 0xa8, 0xf7, 0x4d, 0xf4, 0x71, 0x6b, 0x60, 0xdf, 0x4e, 0xc0,
+	0x1b, 0xa3, 0xad, 0x57, 0x93, 0xef, 0xe2, 0xe7, 0x4b, 0xc7, 0x45, 0xa1, 0xf2, 0xe4, 0xaf, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0xff, 0x01, 0xbf, 0xd5, 0x6c, 0x0a, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -989,6 +1236,7 @@ const _ = grpc.SupportPackageIsVersion6
 type ImageScanServiceClient interface {
 	ScanImage(ctx context.Context, in *ScanImageRequest, opts ...grpc.CallOption) (*ScanImageResponse, error)
 	GetImageScan(ctx context.Context, in *GetImageScanRequest, opts ...grpc.CallOption) (*GetImageScanResponse, error)
+	GetImageComponents(ctx context.Context, in *GetImageComponentsRequest, opts ...grpc.CallOption) (*GetImageComponentsResponse, error)
 	GetLanguageLevelComponents(ctx context.Context, in *GetLanguageLevelComponentsRequest, opts ...grpc.CallOption) (*GetLanguageLevelComponentsResponse, error)
 }
 
@@ -1018,6 +1266,15 @@ func (c *imageScanServiceClient) GetImageScan(ctx context.Context, in *GetImageS
 	return out, nil
 }
 
+func (c *imageScanServiceClient) GetImageComponents(ctx context.Context, in *GetImageComponentsRequest, opts ...grpc.CallOption) (*GetImageComponentsResponse, error) {
+	out := new(GetImageComponentsResponse)
+	err := c.cc.Invoke(ctx, "/scannerV1.ImageScanService/GetImageComponents", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *imageScanServiceClient) GetLanguageLevelComponents(ctx context.Context, in *GetLanguageLevelComponentsRequest, opts ...grpc.CallOption) (*GetLanguageLevelComponentsResponse, error) {
 	out := new(GetLanguageLevelComponentsResponse)
 	err := c.cc.Invoke(ctx, "/scannerV1.ImageScanService/GetLanguageLevelComponents", in, out, opts...)
@@ -1031,6 +1288,7 @@ func (c *imageScanServiceClient) GetLanguageLevelComponents(ctx context.Context,
 type ImageScanServiceServer interface {
 	ScanImage(context.Context, *ScanImageRequest) (*ScanImageResponse, error)
 	GetImageScan(context.Context, *GetImageScanRequest) (*GetImageScanResponse, error)
+	GetImageComponents(context.Context, *GetImageComponentsRequest) (*GetImageComponentsResponse, error)
 	GetLanguageLevelComponents(context.Context, *GetLanguageLevelComponentsRequest) (*GetLanguageLevelComponentsResponse, error)
 }
 
@@ -1043,6 +1301,9 @@ func (*UnimplementedImageScanServiceServer) ScanImage(ctx context.Context, req *
 }
 func (*UnimplementedImageScanServiceServer) GetImageScan(ctx context.Context, req *GetImageScanRequest) (*GetImageScanResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetImageScan not implemented")
+}
+func (*UnimplementedImageScanServiceServer) GetImageComponents(ctx context.Context, req *GetImageComponentsRequest) (*GetImageComponentsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetImageComponents not implemented")
 }
 func (*UnimplementedImageScanServiceServer) GetLanguageLevelComponents(ctx context.Context, req *GetLanguageLevelComponentsRequest) (*GetLanguageLevelComponentsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLanguageLevelComponents not implemented")
@@ -1088,6 +1349,24 @@ func _ImageScanService_GetImageScan_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ImageScanService_GetImageComponents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetImageComponentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImageScanServiceServer).GetImageComponents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scannerV1.ImageScanService/GetImageComponents",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImageScanServiceServer).GetImageComponents(ctx, req.(*GetImageComponentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ImageScanService_GetLanguageLevelComponents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetLanguageLevelComponentsRequest)
 	if err := dec(in); err != nil {
@@ -1117,6 +1396,10 @@ var _ImageScanService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetImageScan",
 			Handler:    _ImageScanService_GetImageScan_Handler,
+		},
+		{
+			MethodName: "GetImageComponents",
+			Handler:    _ImageScanService_GetImageComponents_Handler,
 		},
 		{
 			MethodName: "GetLanguageLevelComponents",
@@ -1326,47 +1609,6 @@ func (m *ScanImageResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *ImageSpec) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *ImageSpec) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ImageSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if len(m.Image) > 0 {
-		i -= len(m.Image)
-		copy(dAtA[i:], m.Image)
-		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Image)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Digest) > 0 {
-		i -= len(m.Digest)
-		copy(dAtA[i:], m.Digest)
-		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Digest)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
 func (m *GetImageScanRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1410,6 +1652,212 @@ func (m *GetImageScanRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i -= size
 			i = encodeVarintImageScanService(dAtA, i, uint64(size))
 		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetImageScanResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetImageScanResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetImageScanResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Image != nil {
+		{
+			size, err := m.Image.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintImageScanService(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Status != 0 {
+		i = encodeVarintImageScanService(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetImageComponentsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetImageComponentsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetImageComponentsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.UncertifiedRHEL {
+		i--
+		if m.UncertifiedRHEL {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.Registry != nil {
+		{
+			size, err := m.Registry.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintImageScanService(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Image) > 0 {
+		i -= len(m.Image)
+		copy(dAtA[i:], m.Image)
+		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Image)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetImageComponentsRequest_RegistryData) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetImageComponentsRequest_RegistryData) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetImageComponentsRequest_RegistryData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Insecure {
+		i--
+		if m.Insecure {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Password) > 0 {
+		i -= len(m.Password)
+		copy(dAtA[i:], m.Password)
+		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Password)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Username) > 0 {
+		i -= len(m.Username)
+		copy(dAtA[i:], m.Username)
+		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Username)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Url) > 0 {
+		i -= len(m.Url)
+		copy(dAtA[i:], m.Url)
+		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Url)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetImageComponentsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetImageComponentsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetImageComponentsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.Layers) > 0 {
+		for iNdEx := len(m.Layers) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Layers[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintImageScanService(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Digest) > 0 {
+		i -= len(m.Digest)
+		copy(dAtA[i:], m.Digest)
+		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Digest)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1461,100 +1909,6 @@ func (m *GetLanguageLevelComponentsRequest) MarshalToSizedBuffer(dAtA []byte) (i
 		}
 		i--
 		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *LanguageLevelComponent) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *LanguageLevelComponent) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *LanguageLevelComponent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if len(m.Location) > 0 {
-		i -= len(m.Location)
-		copy(dAtA[i:], m.Location)
-		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Location)))
-		i--
-		dAtA[i] = 0x22
-	}
-	if len(m.Version) > 0 {
-		i -= len(m.Version)
-		copy(dAtA[i:], m.Version)
-		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Version)))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if len(m.Name) > 0 {
-		i -= len(m.Name)
-		copy(dAtA[i:], m.Name)
-		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Name)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if m.SourceType != 0 {
-		i = encodeVarintImageScanService(dAtA, i, uint64(m.SourceType))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *LanguageLevelComponents) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *LanguageLevelComponents) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *LanguageLevelComponents) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if len(m.Components) > 0 {
-		for iNdEx := len(m.Components) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Components[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintImageScanService(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
 	}
 	return len(dAtA) - i, nil
 }
@@ -1612,7 +1966,7 @@ func (m *GetLanguageLevelComponentsResponse) MarshalToSizedBuffer(dAtA []byte) (
 	return len(dAtA) - i, nil
 }
 
-func (m *GetImageScanResponse) Marshal() (dAtA []byte, err error) {
+func (m *ImageSpec) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1622,12 +1976,12 @@ func (m *GetImageScanResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *GetImageScanResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *ImageSpec) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *GetImageScanResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ImageSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1636,20 +1990,111 @@ func (m *GetImageScanResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	if m.Image != nil {
-		{
-			size, err := m.Image.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintImageScanService(dAtA, i, uint64(size))
-		}
+	if len(m.Image) > 0 {
+		i -= len(m.Image)
+		copy(dAtA[i:], m.Image)
+		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Image)))
 		i--
 		dAtA[i] = 0x12
 	}
-	if m.Status != 0 {
-		i = encodeVarintImageScanService(dAtA, i, uint64(m.Status))
+	if len(m.Digest) > 0 {
+		i -= len(m.Digest)
+		copy(dAtA[i:], m.Digest)
+		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Digest)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *LanguageLevelComponents) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *LanguageLevelComponents) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *LanguageLevelComponents) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.Components) > 0 {
+		for iNdEx := len(m.Components) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Components[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintImageScanService(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *LanguageLevelComponent) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *LanguageLevelComponent) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *LanguageLevelComponent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.Location) > 0 {
+		i -= len(m.Location)
+		copy(dAtA[i:], m.Location)
+		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Location)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Version) > 0 {
+		i -= len(m.Version)
+		copy(dAtA[i:], m.Version)
+		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Version)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintImageScanService(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.SourceType != 0 {
+		i = encodeVarintImageScanService(dAtA, i, uint64(m.SourceType))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -1754,26 +2199,6 @@ func (m *ScanImageResponse) Size() (n int) {
 	return n
 }
 
-func (m *ImageSpec) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Digest)
-	if l > 0 {
-		n += 1 + l + sovImageScanService(uint64(l))
-	}
-	l = len(m.Image)
-	if l > 0 {
-		n += 1 + l + sovImageScanService(uint64(l))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
 func (m *GetImageScanRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1793,6 +2218,97 @@ func (m *GetImageScanRequest) Size() (n int) {
 	return n
 }
 
+func (m *GetImageScanResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Status != 0 {
+		n += 1 + sovImageScanService(uint64(m.Status))
+	}
+	if m.Image != nil {
+		l = m.Image.Size()
+		n += 1 + l + sovImageScanService(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *GetImageComponentsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Image)
+	if l > 0 {
+		n += 1 + l + sovImageScanService(uint64(l))
+	}
+	if m.Registry != nil {
+		l = m.Registry.Size()
+		n += 1 + l + sovImageScanService(uint64(l))
+	}
+	if m.UncertifiedRHEL {
+		n += 2
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *GetImageComponentsRequest_RegistryData) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Url)
+	if l > 0 {
+		n += 1 + l + sovImageScanService(uint64(l))
+	}
+	l = len(m.Username)
+	if l > 0 {
+		n += 1 + l + sovImageScanService(uint64(l))
+	}
+	l = len(m.Password)
+	if l > 0 {
+		n += 1 + l + sovImageScanService(uint64(l))
+	}
+	if m.Insecure {
+		n += 2
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *GetImageComponentsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Digest)
+	if l > 0 {
+		n += 1 + l + sovImageScanService(uint64(l))
+	}
+	if len(m.Layers) > 0 {
+		for _, e := range m.Layers {
+			l = e.Size()
+			n += 1 + l + sovImageScanService(uint64(l))
+		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
 func (m *GetLanguageLevelComponentsRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1805,51 +2321,6 @@ func (m *GetLanguageLevelComponentsRequest) Size() (n int) {
 	}
 	if m.UncertifiedRHEL {
 		n += 2
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *LanguageLevelComponent) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.SourceType != 0 {
-		n += 1 + sovImageScanService(uint64(m.SourceType))
-	}
-	l = len(m.Name)
-	if l > 0 {
-		n += 1 + l + sovImageScanService(uint64(l))
-	}
-	l = len(m.Version)
-	if l > 0 {
-		n += 1 + l + sovImageScanService(uint64(l))
-	}
-	l = len(m.Location)
-	if l > 0 {
-		n += 1 + l + sovImageScanService(uint64(l))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *LanguageLevelComponents) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.Components) > 0 {
-		for _, e := range m.Components {
-			l = e.Size()
-			n += 1 + l + sovImageScanService(uint64(l))
-		}
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -1882,17 +2353,63 @@ func (m *GetLanguageLevelComponentsResponse) Size() (n int) {
 	return n
 }
 
-func (m *GetImageScanResponse) Size() (n int) {
+func (m *ImageSpec) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.Status != 0 {
-		n += 1 + sovImageScanService(uint64(m.Status))
+	l = len(m.Digest)
+	if l > 0 {
+		n += 1 + l + sovImageScanService(uint64(l))
 	}
-	if m.Image != nil {
-		l = m.Image.Size()
+	l = len(m.Image)
+	if l > 0 {
+		n += 1 + l + sovImageScanService(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *LanguageLevelComponents) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Components) > 0 {
+		for _, e := range m.Components {
+			l = e.Size()
+			n += 1 + l + sovImageScanService(uint64(l))
+		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *LanguageLevelComponent) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.SourceType != 0 {
+		n += 1 + sovImageScanService(uint64(m.SourceType))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovImageScanService(uint64(l))
+	}
+	l = len(m.Version)
+	if l > 0 {
+		n += 1 + l + sovImageScanService(uint64(l))
+	}
+	l = len(m.Location)
+	if l > 0 {
 		n += 1 + l + sovImageScanService(uint64(l))
 	}
 	if m.XXX_unrecognized != nil {
@@ -2404,121 +2921,6 @@ func (m *ScanImageResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ImageSpec) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowImageScanService
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: ImageSpec: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ImageSpec: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Digest", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowImageScanService
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Digest = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Image", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowImageScanService
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Image = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipImageScanService(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
 func (m *GetImageScanRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -2626,6 +3028,535 @@ func (m *GetImageScanRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *GetImageScanResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowImageScanService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetImageScanResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetImageScanResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= ScanStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Image", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Image == nil {
+				m.Image = &Image{}
+			}
+			if err := m.Image.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipImageScanService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetImageComponentsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowImageScanService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetImageComponentsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetImageComponentsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Image", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Image = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Registry", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Registry == nil {
+				m.Registry = &GetImageComponentsRequest_RegistryData{}
+			}
+			if err := m.Registry.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UncertifiedRHEL", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.UncertifiedRHEL = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipImageScanService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetImageComponentsRequest_RegistryData) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowImageScanService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RegistryData: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RegistryData: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Url", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Url = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Username", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Username = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Password", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Password = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Insecure", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Insecure = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipImageScanService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetImageComponentsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowImageScanService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetImageComponentsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetImageComponentsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Digest", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Digest = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Layers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Layers = append(m.Layers, &Layer{})
+			if err := m.Layers[len(m.Layers)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipImageScanService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *GetLanguageLevelComponentsRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -2711,257 +3642,6 @@ func (m *GetLanguageLevelComponentsRequest) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.UncertifiedRHEL = bool(v != 0)
-		default:
-			iNdEx = preIndex
-			skippy, err := skipImageScanService(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *LanguageLevelComponent) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowImageScanService
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: LanguageLevelComponent: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: LanguageLevelComponent: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SourceType", wireType)
-			}
-			m.SourceType = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowImageScanService
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.SourceType |= SourceType(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowImageScanService
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Name = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowImageScanService
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Version = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Location", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowImageScanService
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Location = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipImageScanService(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *LanguageLevelComponents) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowImageScanService
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: LanguageLevelComponents: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: LanguageLevelComponents: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Components", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowImageScanService
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthImageScanService
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Components = append(m.Components, &LanguageLevelComponent{})
-			if err := m.Components[len(m.Components)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipImageScanService(dAtA[iNdEx:])
@@ -3164,7 +3844,7 @@ func (m *GetLanguageLevelComponentsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *GetImageScanResponse) Unmarshal(dAtA []byte) error {
+func (m *ImageSpec) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -3187,17 +3867,17 @@ func (m *GetImageScanResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: GetImageScanResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: ImageSpec: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetImageScanResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ImageSpec: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Digest", wireType)
 			}
-			m.Status = 0
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowImageScanService
@@ -3207,14 +3887,110 @@ func (m *GetImageScanResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Status |= ScanStatus(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Digest = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Image", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Image = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipImageScanService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *LanguageLevelComponents) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowImageScanService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: LanguageLevelComponents: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: LanguageLevelComponents: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Components", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -3241,12 +4017,176 @@ func (m *GetImageScanResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Image == nil {
-				m.Image = &Image{}
-			}
-			if err := m.Image.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.Components = append(m.Components, &LanguageLevelComponent{})
+			if err := m.Components[len(m.Components)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipImageScanService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *LanguageLevelComponent) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowImageScanService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: LanguageLevelComponent: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: LanguageLevelComponent: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SourceType", wireType)
+			}
+			m.SourceType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.SourceType |= SourceType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Version = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Location", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowImageScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthImageScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Location = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

@@ -28,3 +28,5 @@ scanner:
   # The max size of files in images that are extracted. The scanner intentionally avoids extracting any files
   # larger than this to prevent DoS attacks. Leave commmented to use a reasonable default.
   # maxExtractableFileSizeMB: 200
+
+  liteMode: false
