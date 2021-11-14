@@ -166,15 +166,19 @@ func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]da
 		}
 	}
 
+	filteredVulns := vulnerabilities[:0]
 	for i := range vulnerabilities {
 		vuln := &vulnerabilities[i]
 		appender := vulnmdsrc.AppenderForVuln(vuln)
 		if err := appender.Append(vuln.Name, vuln.SubCVEs, appendFuncForVuln(vuln)); err != nil {
 			return nil, errors.Wrapf(err, "Failed to append metadata for vuln %s", vuln.Name)
 		}
+		if isValidVuln(vuln) {
+			filteredVulns = append(filteredVulns, vulnerabilities[i])
+		}
 	}
 
-	return vulnerabilities, nil
+	return filteredVulns, nil
 }
 
 func purgeCaches() {
@@ -201,6 +205,15 @@ func appendFuncForVuln(v *database.Vulnerability) types.AppendFunc {
 			v.Severity = severity
 		}
 	}
+}
+
+func isValidVuln(vuln *database.Vulnerability) bool {
+	return vuln.Name != "" &&
+		vuln.Namespace.Name != "" &&
+		vuln.Namespace.VersionFormat != "" &&
+		vuln.Metadata != nil &&
+		vuln.Description != "" &&
+		vuln.Link != ""
 }
 
 // doVulnerabilitiesNamespacing takes Vulnerabilities that don't have a
