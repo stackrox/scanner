@@ -382,7 +382,11 @@ func toFeatureVersions(criteria criteria, osVersion string) []database.FeatureVe
 				version := c.Comment[strings.Index(c.Comment, " is earlier than ")+prefixLen:]
 				err := versionfmt.Valid(rpm.ParserName, version)
 				if err != nil {
-					log.WithError(err).WithField("version", version).Warning("could not parse package version. skipping")
+					log.WithError(err).WithFields(log.Fields{
+						"package":      "RHEL",
+						"version":      version,
+						"package name": featureVersion.Feature.Name,
+					}).Warning("could not parse package version, skipping")
 				} else {
 					featureVersion.Version = version
 					featureVersion.Feature.Namespace.VersionFormat = rpm.ParserName

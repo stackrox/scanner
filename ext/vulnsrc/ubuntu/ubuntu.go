@@ -344,7 +344,11 @@ func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability
 					if md["note"] != "" {
 						err := versionfmt.Valid(dpkg.ParserName, md["note"])
 						if err != nil {
-							log.WithError(err).WithField("version", md["note"]).Warning("could not parse package version. skipping")
+							log.WithError(err).WithFields(log.Fields{
+								"package":      "ubuntu",
+								"version":      md["note"],
+								"package name": md["package"],
+							}).Warning("could not parse package version, skipping")
 						}
 						version = md["note"]
 					}
