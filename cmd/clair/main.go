@@ -157,6 +157,9 @@ func Boot(config *Config) {
 	grpcAPI := grpc.NewAPI(grpc.Config{
 		Port:         config.API.GRPCPort,
 		CustomRoutes: debugRoutes,
+
+		// TODO
+		//LiteMode: config.LiteMode,
 	})
 
 	grpcAPI.Register(
