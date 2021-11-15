@@ -145,7 +145,7 @@ func (s *serviceImpl) GetImageScan(_ context.Context, req *v1.GetImageScanReques
 	return s.getLayer(layerName, lineage, req.GetUncertifiedRHEL())
 }
 
-func (s *serviceImpl) GetImageComponents(_ context.Context, req *v1.GetImageComponentsRequest) (*v1.GetImageComponentsResponse, error) {
+func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest) (*v1.GetImageComponentsResponse, error) {
 	image, err := types.GenerateImageFromString(req.GetImage())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "could not parse image %q", req.GetImage())
@@ -157,6 +157,12 @@ func (s *serviceImpl) GetImageComponents(_ context.Context, req *v1.GetImageComp
 	if err != nil {
 		return nil, err
 	}
+
+	//ret := s.ScanImage(ctx, nil)
+	s.GetImageScan(ctx, &v1.GetImageScanRequest{
+		ImageSpec:            nil,
+		UncertifiedRHEL:      false,
+	})
 	
 	return &v1.GetImageComponentsResponse{
 		Digest: digest,
