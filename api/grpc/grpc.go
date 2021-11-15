@@ -62,11 +62,7 @@ func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
 }
 
 func (a *apiImpl) Start() {
-	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(
-			grpcmiddleware.ChainUnaryServer(a.unaryInterceptors()...),
-		),
-	)
+	grpcServer := grpc.NewServer(grpcmiddleware.WithUnaryServerChain(a.unaryInterceptors()...))
 	for _, serv := range a.apiServices {
 		serv.RegisterServiceServer(grpcServer)
 	}
@@ -127,6 +123,8 @@ type apiImpl struct {
 type Config struct {
 	Port         int
 	CustomRoutes map[string]http.Handler
+
+	LiteMode bool
 }
 
 func (a *apiImpl) Register(services ...APIService) {
@@ -135,6 +133,7 @@ func (a *apiImpl) Register(services ...APIService) {
 
 func (a *apiImpl) unaryInterceptors() []grpc.UnaryServerInterceptor {
 	return []grpc.UnaryServerInterceptor{
+		liteModeUnaryServerInterceptor(a.config.LiteMode),
 		grpcprometheus.UnaryServerInterceptor,
 	}
 }
