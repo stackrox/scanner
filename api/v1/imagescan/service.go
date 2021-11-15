@@ -80,15 +80,10 @@ func (s *serviceImpl) getLayer(layerName, lineage string, layerOpts getLayerOpts
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	features, err := convertFeatures(layer.Features)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error converting features: %v", err)
-	}
-
 	return &v1.GetImageScanResponse{
 		Status: v1.ScanStatus_SUCCEEDED,
 		Image: &v1.Image{
-			Features: features,
+			Features: ConvertFeatures(layer.Features),
 		},
 		Notes: convertNotes(notes),
 	}, nil

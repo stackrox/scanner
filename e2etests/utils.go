@@ -37,16 +37,16 @@ func mustGetDockerCredentials(t *testing.T) (string, string) {
 			return user, pass
 		}
 	}
-	return mustGetEnv(dockerIOUsernameEnv, t), mustGetEnv(dockerIOPasswordEnv, t)
+	return mustGetEnv(t, dockerIOUsernameEnv), mustGetEnv(t, dockerIOPasswordEnv)
 }
 
-func mustGetEnv(key string, t *testing.T) string {
+func mustGetEnv(t *testing.T, key string) string {
 	val := os.Getenv(key)
 	require.NotEmpty(t, val, "No %s env found", key)
 	return val
 }
 
-func getScannerHTTPEndpoint(t *testing.T) string {
+func getScannerHTTPEndpoint() string {
 	return urlfmt.FormatURL(stringutils.OrDefault(os.Getenv(scannerHTTPEndpointEnv), "localhost:8080"), urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 }
 

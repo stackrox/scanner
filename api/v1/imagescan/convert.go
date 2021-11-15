@@ -64,7 +64,8 @@ func convertProvidedExecutables(paths []string) []*v1.Executable {
 	return executables
 }
 
-func convertFeatures(apiFeatures []apiV1.Feature) ([]*v1.Feature, error) {
+// ConvertFeatures converts apiV1 Features into v1 Feature pointers.
+func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 	features := make([]*v1.Feature, 0, len(apiFeatures))
 	for _, a := range apiFeatures {
 		vulns := convertVulnerabilities(a.Vulnerabilities)
@@ -80,7 +81,7 @@ func convertFeatures(apiFeatures []apiV1.Feature) ([]*v1.Feature, error) {
 			ProvidedExecutables: executables,
 		})
 	}
-	return features, nil
+	return features
 }
 
 func convertComponents(layersToComponents []*component.LayerToComponents) map[string]*v1.LanguageLevelComponents {

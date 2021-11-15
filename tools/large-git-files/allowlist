@@ -1,4 +1,4 @@
-e2etests/sanity_test.go
+e2etests/testcase.go
 ext/featurefmt/rpm/testdata/Packages
 generated/shared/api/v1/image_scan_service.pb.go
 go.sum
