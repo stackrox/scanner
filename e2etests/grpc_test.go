@@ -6,12 +6,12 @@ package e2etests
 import (
 	"context"
 	"fmt"
-	"github.com/stackrox/scanner/api/v1/imagescan"
 	"os"
 	"sort"
 	"strings"
 	"testing"
 
+	"github.com/stackrox/scanner/api/v1/imagescan"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

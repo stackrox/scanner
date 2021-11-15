@@ -5,7 +5,6 @@ option go_package = "scannerV1";
 option java_package = "io.stackrox.proto.api.scanner.v1";
 
 import weak "google/api/annotations.proto";
-import "shared/api/v1/layer.proto";
 import "shared/api/v1/vulnerability.proto";
 
 package scannerV1;
