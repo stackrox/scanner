@@ -1,3 +1,3 @@
 FROM centos
 
-RUN rpm -e --nodeps curl yum rpm rpm-libs rpm-build-libs
+RUN rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*')

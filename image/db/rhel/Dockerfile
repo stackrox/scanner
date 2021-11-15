@@ -35,13 +35,12 @@ RUN groupadd -g 70 postgres && \
     dnf install -y \
         ca-certificates libicu systemd-sysv /tmp/postgres-libs.rpm \
         /tmp/postgres-server.rpm /tmp/postgres.rpm glibc-locale-source glibc-langpack-en && \
-    rpm -e --nodeps curl && \
     dnf clean all && \
     rm -rf /var/cache/dnf && \
     rm /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm && \
     rm RPM-GPG-KEY-PGDG-12 && \
-    # (Optional) Remove line below to keep package management utilities
-    rpm -e --nodeps rpm rpm-build-libs rpm-libs python3-rpm subscription-manager python3-subscription-manager-rhsm yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \ 
+    # (Optional) Remove line below to keep package management utilities other than rpm
+    rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
