@@ -104,37 +104,37 @@ func local_request_ImageScanService_GetImageScan_0(ctx context.Context, marshale
 }
 
 var (
-	filter_ImageScanService_GetImageComponents_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_ImageScanService_ImageScanAndGet_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
 
-func request_ImageScanService_GetImageComponents_0(ctx context.Context, marshaler runtime.Marshaler, client ImageScanServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetImageComponentsRequest
+func request_ImageScanService_ImageScanAndGet_0(ctx context.Context, marshaler runtime.Marshaler, client ImageScanServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ImageScanAndGetRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ImageScanService_GetImageComponents_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ImageScanService_ImageScanAndGet_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.GetImageComponents(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ImageScanAndGet(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_ImageScanService_GetImageComponents_0(ctx context.Context, marshaler runtime.Marshaler, server ImageScanServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetImageComponentsRequest
+func local_request_ImageScanService_ImageScanAndGet_0(ctx context.Context, marshaler runtime.Marshaler, server ImageScanServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ImageScanAndGetRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ImageScanService_GetImageComponents_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ImageScanService_ImageScanAndGet_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.GetImageComponents(ctx, &protoReq)
+	msg, err := server.ImageScanAndGet(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -227,7 +227,7 @@ func RegisterImageScanServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 
 	})
 
-	mux.Handle("GET", pattern_ImageScanService_GetImageComponents_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ImageScanService_ImageScanAndGet_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -238,7 +238,7 @@ func RegisterImageScanServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_ImageScanService_GetImageComponents_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ImageScanService_ImageScanAndGet_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -246,7 +246,7 @@ func RegisterImageScanServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 
-		forward_ImageScanService_GetImageComponents_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImageScanService_ImageScanAndGet_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -354,7 +354,7 @@ func RegisterImageScanServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 
 	})
 
-	mux.Handle("GET", pattern_ImageScanService_GetImageComponents_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ImageScanService_ImageScanAndGet_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -363,14 +363,14 @@ func RegisterImageScanServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ImageScanService_GetImageComponents_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ImageScanService_ImageScanAndGet_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_ImageScanService_GetImageComponents_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImageScanService_ImageScanAndGet_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -402,7 +402,7 @@ var (
 
 	pattern_ImageScanService_GetImageScan_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "images", "scan"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_ImageScanService_GetImageComponents_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "images", "components"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_ImageScanService_ImageScanAndGet_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "images", "scan", "complete"}, "", runtime.AssumeColonVerbOpt(false)))
 
 	pattern_ImageScanService_GetLanguageLevelComponents_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "images", "languagecomponents"}, "", runtime.AssumeColonVerbOpt(false)))
 )
@@ -412,7 +412,7 @@ var (
 
 	forward_ImageScanService_GetImageScan_0 = runtime.ForwardResponseMessage
 
-	forward_ImageScanService_GetImageComponents_0 = runtime.ForwardResponseMessage
+	forward_ImageScanService_ImageScanAndGet_0 = runtime.ForwardResponseMessage
 
 	forward_ImageScanService_GetLanguageLevelComponents_0 = runtime.ForwardResponseMessage
 )

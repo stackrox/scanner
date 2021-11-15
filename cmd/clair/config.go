@@ -15,11 +15,11 @@
 package main
 
 import (
-	"github.com/stackrox/rox/pkg/utils"
 	"io"
 	"os"
 	"time"
 
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/tarutil"

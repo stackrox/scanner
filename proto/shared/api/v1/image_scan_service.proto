@@ -16,12 +16,6 @@ message Image {
 
 message ScanImageRequest {
     string image          = 1;
-    message RegistryData {
-        string url      = 1;
-        string username = 2;
-        string password = 3;
-        bool   insecure = 4;
-    }
     RegistryData registry = 2;
     // uncertifiedRHEL tells the Scanner to scan the image
     // in an uncertified manner, if the image is RHEL-based.
@@ -30,7 +24,7 @@ message ScanImageRequest {
 
 message ScanImageResponse {
     ScanStatus status = 1;
-    ImageSpec image   = 2;
+    ImageSpec  image  = 2;
 }
 
 message GetImageScanRequest {
@@ -44,27 +38,22 @@ message GetImageScanRequest {
 }
 
 message GetImageScanResponse {
-    ScanStatus status = 1;
-    Image image       = 2;
+    ScanStatus status   = 1;
+    Image      image    = 2;
+    repeated Note notes = 3;
 }
 
-message GetImageComponentsRequest {
-    string image          = 1;
-    message RegistryData {
-        string url      = 1;
-        string username = 2;
-        string password = 3;
-        bool   insecure = 4;
-    }
-    RegistryData registry = 2;
-    // uncertifiedRHEL tells the Scanner to scan the image
-    // in an uncertified manner, if the image is RHEL-based.
-    bool uncertifiedRHEL  = 3;
+message ImageScanAndGetRequest {
+    string image              = 1;
+    RegistryData registry     = 2;
+    bool         withVulns    = 3;
+    bool         withFeatures = 4;
 }
 
-message GetImageComponentsResponse {
-    string digest         = 1;
-    repeated Layer layers = 2;
+message ImageScanAndGetResponse {
+    ScanStatus status   = 1;
+    Image      image    = 2;
+    repeated Note notes = 3;
 }
 
 message GetLanguageLevelComponentsRequest {
@@ -86,11 +75,26 @@ message ImageSpec {
     string image  = 2;
 }
 
+message RegistryData {
+    string url      = 1;
+    string username = 2;
+    string password = 3;
+    bool   insecure = 4;
+}
+
 enum ScanStatus {
     UNSET     = 0;
     ANALYZING = 1;
     FAILED    = 2;
     SUCCEEDED = 3;
+}
+
+// TODO: ensure these are up-to-date with other copy. Use that test method I've seen before...
+enum Note {
+    OS_CVES_UNAVAILABLE             = 0;
+    OS_CVES_STALE                   = 1;
+    LANGUAGE_CVES_UNAVAILABLE       = 2;
+    CERTIFIED_RHEL_SCAN_UNAVAILABLE = 3;
 }
 
 message LanguageLevelComponents {
@@ -130,11 +134,18 @@ service ImageScanService {
         };
     }
 
-    rpc GetImageComponents(GetImageComponentsRequest) returns (GetImageComponentsResponse) {
+    rpc ImageScanAndGet(ImageScanAndGetRequest) returns (ImageScanAndGetResponse) {
         option (google.api.http) = {
-            get: "/v1/images/components"
+            // TODO: change name?
+            get: "/v1/images/scan/complete"
         };
     }
+
+//    rpc GetImageComponents(ScanImageRequest) returns (GetImageScanResponse) {
+//        option (google.api.http) = {
+//            get: "/v1/images/components"
+//        };
+//    }
 
     rpc GetLanguageLevelComponents(GetLanguageLevelComponentsRequest) returns (GetLanguageLevelComponentsResponse) {
         option (google.api.http) = {

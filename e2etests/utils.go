@@ -72,7 +72,7 @@ func scanImage(client v1.ImageScanServiceClient, req *v1.ScanImageRequest, t *te
 func scanPublicDockerHubImage(client v1.ImageScanServiceClient, imageName string, uncertifiedRHEL bool, t *testing.T) *v1.ScanImageResponse {
 	return scanImage(client, &v1.ScanImageRequest{
 		Image: imageName,
-		Registry: &v1.ScanImageRequest_RegistryData{
+		Registry: &v1.RegistryData{
 			Url: "https://registry-1.docker.io",
 		},
 		UncertifiedRHEL: uncertifiedRHEL,
@@ -83,7 +83,7 @@ func scanDockerIOStackRoxImage(client v1.ImageScanServiceClient, imageName strin
 	user, pass := mustGetDockerCredentials(t)
 	return scanImage(client, &v1.ScanImageRequest{
 		Image: imageName,
-		Registry: &v1.ScanImageRequest_RegistryData{
+		Registry: &v1.RegistryData{
 			Url:      "https://registry-1.docker.io",
 			Username: user,
 			Password: pass,
@@ -95,7 +95,7 @@ func scanDockerIOStackRoxImage(client v1.ImageScanServiceClient, imageName strin
 func scanQuayStackRoxImage(client v1.ImageScanServiceClient, imageName string, uncertifiedRHEL bool, t *testing.T) *v1.ScanImageResponse {
 	return scanImage(client, &v1.ScanImageRequest{
 		Image: imageName,
-		Registry: &v1.ScanImageRequest_RegistryData{
+		Registry: &v1.RegistryData{
 			Url:      "https://quay.io",
 			Username: os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 			Password: os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
@@ -107,7 +107,7 @@ func scanQuayStackRoxImage(client v1.ImageScanServiceClient, imageName string, u
 func scanGCRImage(client v1.ImageScanServiceClient, imageName string, t *testing.T) *v1.ScanImageResponse {
 	return scanImage(client, &v1.ScanImageRequest{
 		Image: imageName,
-		Registry: &v1.ScanImageRequest_RegistryData{
+		Registry: &v1.RegistryData{
 			Url: "https://gcr.io",
 		},
 	}, t)

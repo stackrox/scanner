@@ -109,3 +109,21 @@ func convertComponent(c *component.Component) *v1.LanguageLevelComponent {
 		Location:   c.Location,
 	}
 }
+
+// TODO: make sure this stays up to date.
+func convertNotes(notes []apiV1.Note) []v1.Note {
+	v1Notes := make([]v1.Note, 0, len(notes))
+	for _, note := range notes {
+		switch note {
+		case apiV1.OSCVEsUnavailable:
+			v1Notes = append(v1Notes, v1.Note_OS_CVES_UNAVAILABLE)
+		case apiV1.OSCVEsStale:
+			v1Notes = append(v1Notes, v1.Note_OS_CVES_STALE)
+		case apiV1.LanguageCVEsUnavailable:
+			v1Notes = append(v1Notes, v1.Note_LANGUAGE_CVES_UNAVAILABLE)
+		case apiV1.CertifiedRHELScanUnavailable:
+			v1Notes = append(v1Notes, v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE)
+		}
+	}
+	return v1Notes
+}
