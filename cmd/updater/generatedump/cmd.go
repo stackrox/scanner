@@ -175,6 +175,8 @@ func addMetadata(vulnerabilities []database.Vulnerability, dumpDir string) ([]da
 		}
 		if isValidVuln(vuln) {
 			filteredVulns = append(filteredVulns, vulnerabilities[i])
+		} else {
+			log.Debugf("Ignoring vulnerability %s for namespace %s", vuln.Name, vuln.Namespace.Name)
 		}
 	}
 
