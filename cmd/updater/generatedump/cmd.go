@@ -214,7 +214,6 @@ func isValidVuln(vuln *database.Vulnerability) bool {
 		vuln.Namespace.Name != "" &&
 		vuln.Namespace.VersionFormat != "" &&
 		vuln.Metadata != nil &&
-		vuln.Description != "" &&
 		vuln.Link != ""
 }
 
