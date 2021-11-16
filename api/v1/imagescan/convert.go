@@ -90,7 +90,7 @@ func convertProvidedExecutables(paths []string) []*v1.Executable {
 	return executables
 }
 
-// ConvertFeatures converts apiV1 Features into v1 Feature pointers.
+// ConvertFeatures converts api Features into v1 (proto) Feature pointers.
 func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 	features := make([]*v1.Feature, 0, len(apiFeatures))
 	for _, a := range apiFeatures {
