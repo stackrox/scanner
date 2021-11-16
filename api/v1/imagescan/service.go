@@ -39,7 +39,7 @@ type serviceImpl struct {
 	nvdCache nvdtoolscache.Cache
 }
 
-func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (*v1.ScanImageResponse, error) {
+func (s *serviceImpl) ScanImage(_ context.Context, req *v1.ScanImageRequest) (*v1.ScanImageResponse, error) {
 	image, err := types.GenerateImageFromString(req.GetImage())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "could not parse image %q", req.GetImage())
