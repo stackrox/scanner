@@ -242,7 +242,7 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 
 // addLanguageVulns adds language-based features into the given layer.
 // Assumes layer is not nil.
-func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncertifiedRHEL bool) {
+func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, withVulnerabilities, uncertifiedRHEL bool) {
 	// Add Language Features
 	languageFeatureVersions, err := getLanguageData(db, layer.Name, lineage, uncertifiedRHEL)
 	if err != nil {
@@ -254,7 +254,9 @@ func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncer
 	for _, dbFeatureVersion := range languageFeatureVersions {
 		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
 		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
-			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
+			if withVulnerabilities {
+				updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
+			}
 			languageFeatures = append(languageFeatures, *feature)
 		}
 	}
@@ -327,7 +329,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			}
 		}
 		if env.LanguageVulns.Enabled() {
-			addLanguageVulns(db, &layer, lineage, uncertifiedRHEL)
+			addLanguageVulns(db, &layer, lineage, withVulnerabilities, uncertifiedRHEL)
 		}
 	}
 
