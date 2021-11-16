@@ -122,7 +122,7 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 		})
 	}
 
-	for _, feature := range imagescan.ConvertFeatures(test.expectedFeatures) {
+	for _, feature := range imagescan.ConvertFeatures(test.unexpectedFeatures) {
 		assert.Nil(t, getMatchingGRPCFeature(t, imgScan.Features, feature, true))
 	}
 }
