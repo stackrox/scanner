@@ -158,8 +158,7 @@ func Boot(config *Config) {
 		Port:         config.API.GRPCPort,
 		CustomRoutes: debugRoutes,
 
-		// TODO
-		//LiteMode: config.LiteMode,
+		LiteMode: config.LiteMode,
 	})
 
 	grpcAPI.Register(
