@@ -118,7 +118,7 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 			matching.Vulnerabilities = nil
 
 			// Ensure the parts of the feature aside from the provided executables and vulnerabilities are equal, too.
-			assert.Equal(t, feature, *matching)
+			assert.Equal(t, *feature, *matching)
 		})
 	}
 
