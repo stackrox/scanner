@@ -1,5 +1,5 @@
-//go:build darwin && e2e
-// +build darwin,e2e
+// +build darwin
+// +build e2e
 
 package e2etests
 

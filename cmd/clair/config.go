@@ -43,8 +43,6 @@ type Config struct {
 
 	// CentralEndpoint is the endpoint that central can be reached at. Defaults to https://central.stackrox.svc if not present in the config.
 	CentralEndpoint string `yaml:"centralEndpoint"`
-
-	LiteMode bool `yaml:"liteMode"`
 }
 
 // DefaultConfig is a configuration that can be used as a fallback value.
