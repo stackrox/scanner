@@ -55,8 +55,8 @@ func TestGRPCScanImageAndGet(t *testing.T) {
 		})
 		require.Nil(t, err)
 
-		assert.Equal(t, imgScanResp.GetStatus(), v1.ScanStatus_SUCCEEDED)
-		assert.Equal(t, testCase.uncertifiedRHEL, isUncertifiedRHEL(imgScanResp.Notes))
+		assert.Equal(t, imgScanResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
+		assert.Equal(t, testCase.uncertifiedRHEL, isUncertifiedRHEL(imgScanResp.Notes), "Image %s", testCase.image)
 		verifyImage(t, imgScanResp.GetImage(), testCase)
 	}
 }
@@ -75,7 +75,7 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 
 	for _, feature := range imagescan.ConvertFeatures(test.expectedFeatures) {
 
-		t.Run(fmt.Sprintf("%s/%s", feature.Name, feature.Version), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%s/%s/%s", test.image, feature.Name, feature.Version), func(t *testing.T) {
 			matching := getMatchingGRPCFeature(t, imgScan.Features, feature, false)
 			if matching.Vulnerabilities != nil {
 				sort.Slice(matching.Vulnerabilities, func(i, j int) bool {
