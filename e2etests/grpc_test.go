@@ -150,7 +150,16 @@ func checkGRPCMatch(t *testing.T, expectedVuln, matchingVuln *v1.Vulnerability) 
 		assert.NotNil(t, metadata.CvssV2)
 		assert.NotNil(t, metadata.CvssV3)
 
+		// Ignore modified time and published time
+		metadata.LastModifiedDateTime = ""
+		metadata.PublishedDateTime = ""
+
 		matchingMetadata := matchingVuln.MetadataV2
+
+		// Ignore modified time and published time
+		matchingMetadata.LastModifiedDateTime = ""
+		matchingMetadata.PublishedDateTime = ""
+
 		assert.Equal(t, *metadata, *matchingMetadata)
 	}
 	expectedVuln.MetadataV2 = nil
