@@ -1,6 +1,8 @@
 package imagescan
 
 import (
+	"github.com/pkg/errors"
+	"github.com/stackrox/rox/pkg/utils"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -11,10 +13,13 @@ import (
 )
 
 var (
+	errSourceTypesMismatch = errors.New("Number of source types in proto and Go are not equal")
+	errNotesMismatch       = errors.New("Number of notes in proto and Go are not equal")
+
 	sourceTypeToProtoMap = func() map[component.SourceType]v1.SourceType {
 		numComponentSourceTypes := int(component.SentinelEndSourceType) - int(component.UnsetSourceType)
 		if numComponentSourceTypes != len(v1.SourceType_value) {
-			panic("Number of source types in proto and Go are not equal")
+			utils.Must(errSourceTypesMismatch)
 		}
 
 		m := make(map[component.SourceType]v1.SourceType, numComponentSourceTypes)
@@ -27,7 +32,7 @@ var (
 			}
 		}
 		if len(m) != numComponentSourceTypes {
-			panic("Mismatch in source types in proto and code")
+			utils.Must(errSourceTypesMismatch)
 		}
 		return m
 	}()
@@ -35,7 +40,7 @@ var (
 	noteToProtoMap = func() map[apiV1.Note]v1.Note {
 		numNotes := int(apiV1.SentinelNote)
 		if numNotes != len(v1.Note_value) {
-			panic("Number of notes in proto and Go are not equal")
+			utils.Must(errNotesMismatch)
 		}
 
 		m := make(map[apiV1.Note]v1.Note, numNotes)
@@ -48,7 +53,7 @@ var (
 			}
 		}
 		if len(m) != numNotes {
-			panic("Mismatch in source types in proto and code")
+			utils.Must(errNotesMismatch)
 		}
 		return m
 	}()
