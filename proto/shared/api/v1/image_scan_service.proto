@@ -37,22 +37,22 @@ message GetImageScanRequest {
 }
 
 message GetImageScanResponse {
-    ScanStatus status   = 1;
-    Image      image    = 2;
-    repeated Note notes = 3;
+    ScanStatus    status = 1;
+    Image         image  = 2;
+    repeated Note notes  = 3;
 }
 
 message ImageScanAndGetRequest {
-    string image              = 1;
+    string       image        = 1;
     RegistryData registry     = 2;
     bool         withVulns    = 3;
     bool         withFeatures = 4;
 }
 
 message ImageScanAndGetResponse {
-    ScanStatus status   = 1;
-    Image      image    = 2;
-    repeated Note notes = 3;
+    ScanStatus    status = 1;
+    Image         image  = 2;
+    repeated Note notes  = 3;
 }
 
 message GetLanguageLevelComponentsRequest {
