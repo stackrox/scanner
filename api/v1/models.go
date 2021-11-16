@@ -420,6 +420,7 @@ type LayerEnvelope struct {
 }
 
 // Note defines scanning notes.
+//go:generate stringer -type=Note
 type Note int
 
 const (
@@ -434,6 +435,9 @@ const (
 	// of the Red Hat Certification program.
 	// These images were made before June 2020, and they are missing content manifest JSON files.
 	CertifiedRHELScanUnavailable
+
+	// SentinelNote is a fake note which should ALWAYS be last to ensure the proto is up-to-date.
+	SentinelNote
 )
 
 // VulnerabilityEnvelope envelopes complete vulnerability data to return to the client.

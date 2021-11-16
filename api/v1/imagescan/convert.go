@@ -31,6 +31,27 @@ var (
 		}
 		return m
 	}()
+
+	noteToProtoMap = func() map[apiV1.Note]v1.Note {
+		numNotes := int(apiV1.SentinelNote)
+		if numNotes != len(v1.Note_value) {
+			panic("Number of notes in proto and Go are not equal")
+		}
+
+		m := make(map[apiV1.Note]v1.Note, numNotes)
+		for name, val := range v1.Note_value {
+			normalizedName := strings.ToLower(strings.Replace(name, "_", "", -1))
+			for note := apiV1.OSCVEsUnavailable; note < apiV1.SentinelNote; note++ {
+				if strings.HasPrefix(strings.ToLower(note.String()), normalizedName) {
+					m[note] = v1.Note(val)
+				}
+			}
+		}
+		if len(m) != numNotes {
+			panic("Mismatch in source types in proto and code")
+		}
+		return m
+	}()
 )
 
 func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability {
@@ -111,20 +132,10 @@ func convertComponent(c *component.Component) *v1.LanguageLevelComponent {
 	}
 }
 
-// TODO: make sure this stays up to date.
 func convertNotes(notes []apiV1.Note) []v1.Note {
 	v1Notes := make([]v1.Note, 0, len(notes))
 	for _, note := range notes {
-		switch note {
-		case apiV1.OSCVEsUnavailable:
-			v1Notes = append(v1Notes, v1.Note_OS_CVES_UNAVAILABLE)
-		case apiV1.OSCVEsStale:
-			v1Notes = append(v1Notes, v1.Note_OS_CVES_STALE)
-		case apiV1.LanguageCVEsUnavailable:
-			v1Notes = append(v1Notes, v1.Note_LANGUAGE_CVES_UNAVAILABLE)
-		case apiV1.CertifiedRHELScanUnavailable:
-			v1Notes = append(v1Notes, v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE)
-		}
+		v1Notes = append(v1Notes, noteToProtoMap[note])
 	}
 	return v1Notes
 }

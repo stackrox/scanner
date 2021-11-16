@@ -57,7 +57,6 @@ func (ScanStatus) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_21a8706899481053, []int{0}
 }
 
-// TODO: ensure these are up-to-date with other copy. Use that test method I've seen before...
 type Note int32
 
 const (
