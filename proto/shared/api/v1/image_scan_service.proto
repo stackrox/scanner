@@ -139,12 +139,6 @@ service ImageScanService {
         };
     }
 
-//    rpc GetImageComponents(ScanImageRequest) returns (GetImageScanResponse) {
-//        option (google.api.http) = {
-//            get: "/v1/images/components"
-//        };
-//    }
-
     rpc GetLanguageLevelComponents(GetLanguageLevelComponentsRequest) returns (GetLanguageLevelComponentsResponse) {
         option (google.api.http) = {
             get: "/v1/images/languagecomponents"
