@@ -74,7 +74,6 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 	}
 
 	for _, feature := range imagescan.ConvertFeatures(test.expectedFeatures) {
-
 		t.Run(fmt.Sprintf("%s/%s/%s", test.image, feature.Name, feature.Version), func(t *testing.T) {
 			matching := getMatchingGRPCFeature(t, imgScan.Features, feature, false)
 			if matching.Vulnerabilities != nil {
