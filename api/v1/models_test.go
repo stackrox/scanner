@@ -276,7 +276,7 @@ func TestLatestLanguageFeatureVersion(t *testing.T) {
 		Name: "layer",
 	}
 
-	addLanguageVulns(db, dbLayer, "", false)
+	addLanguageVulns(db, dbLayer, "", true, false)
 	assert.Equal(t, "2.3.29", dbLayer.Features[0].FixedBy)
 }
 
@@ -475,7 +475,7 @@ func TestAddLanguageVulns(t *testing.T) {
 	layer := &Layer{
 		Name: "layer2",
 	}
-	addLanguageVulns(db, layer, "", false)
+	addLanguageVulns(db, layer, "", true, false)
 	assert.Len(t, layer.Features, 1)
 	feature := layer.Features[0]
 	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
@@ -489,19 +489,19 @@ func TestAddLanguageVulns(t *testing.T) {
 	layer = &Layer{
 		Name: "layer3",
 	}
-	addLanguageVulns(db, layer, "", false)
+	addLanguageVulns(db, layer, "", true, false)
 	assert.Len(t, layer.Features, 2)
 
 	layer = &Layer{
 		Name: "layer4",
 	}
-	addLanguageVulns(db, layer, "", false)
+	addLanguageVulns(db, layer, "", true, false)
 	assert.Empty(t, layer.Features)
 
 	layer = &Layer{
 		Name: "layer6",
 	}
-	addLanguageVulns(db, layer, "", false)
+	addLanguageVulns(db, layer, "", true, false)
 	assert.Len(t, layer.Features, 1)
 	feature = layer.Features[0]
 	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
@@ -512,6 +512,6 @@ func TestAddLanguageVulns(t *testing.T) {
 	layer = &Layer{
 		Name: "layer8",
 	}
-	addLanguageVulns(db, layer, "", false)
+	addLanguageVulns(db, layer, "", true, false)
 	assert.Empty(t, layer.Features)
 }
