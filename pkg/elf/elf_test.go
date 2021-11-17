@@ -37,7 +37,8 @@ func TestIsElfExecutable(t *testing.T) {
 func TestGetNeededLibraries(t *testing.T) {
 	elfFile, err := os.Open("test_data/linux_true")
 	require.NoError(t, err)
-	libraries, err := GetNeededLibraries(elfFile)
+	elfData, err := GetElfData(elfFile)
 	assert.NoError(t, err)
-	assert.NotZero(t, len(libraries))
+	assert.NotZero(t, len(elfData.Dependencies))
+	assert.Zero(t, len(elfData.Sonames))
 }

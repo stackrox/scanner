@@ -7,6 +7,12 @@ import (
 	"io"
 )
 
+type ElfData struct {
+	Sonames            []string
+	Dependencies       []string
+	SupportExecutables set.StringSet
+}
+
 func IsKnownExecutable(r io.ReaderAt) bool {
 	var elfBytes = make([]byte, len(elf.ELFMAG))
 
@@ -23,10 +29,18 @@ func IsKnownExecutable(r io.ReaderAt) bool {
 	return set.NewIntSet(int(elf.ET_EXEC), int(elf.ET_DYN), int(elf.ET_REL)).Contains(int(elfFile.Type))
 }
 
-func GetNeededLibraries(r io.ReaderAt)([]string, error) {
+func GetElfData(r io.ReaderAt)(*ElfData, error) {
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
 		return nil, err
 	}
-	return elfFile.ImportedLibraries()
+	soname, err := elfFile.DynString(elf.DT_SONAME)
+	dependencies, err := elfFile.ImportedLibraries()
+	if err != nil {
+		return nil, err
+	}
+	return &ElfData{
+		Sonames: soname,
+		Dependencies: dependencies,
+	}, nil
 }
