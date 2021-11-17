@@ -18,7 +18,7 @@ func K8sVulnerabilities(version string, k8sVulns []*validation.CVESchema) ([]*v1
 			continue
 		}
 		if m.IsNilOrEmpty() {
-			log.Warnf("nil or empty metadata for %s: %v", v.CVE, err)
+			log.Warnf("nil or empty metadata for %s", v.CVE)
 			continue
 		}
 
