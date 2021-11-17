@@ -33,13 +33,17 @@ type Server struct {
 	endpoint   string
 	storage    database.Datastore
 	httpServer *http.Server
+
+	liteMode bool
 }
 
 // New returns a new instantiation of the Server.
-func New(serverEndpoint string, db database.Datastore) *Server {
+func New(serverEndpoint string, db database.Datastore, liteMode bool) *Server {
 	return &Server{
 		endpoint: serverEndpoint,
 		storage:  db,
+
+		liteMode: liteMode,
 	}
 }
 
@@ -258,7 +262,7 @@ func (s *Server) GetVulnDefsMetadata(w http.ResponseWriter, _ *http.Request) {
 func (s *Server) Start() error {
 	r := mux.NewRouter()
 	r.Use(
-		middleware.AllowLiteMode(true),
+		middleware.AllowLiteMode(s.liteMode),
 		middleware.VerifyPeerCerts(),
 	)
 

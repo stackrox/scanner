@@ -151,7 +151,7 @@ func Boot(config *Config) {
 	metricsServ := metrics.NewHTTPServer(config.API)
 	go metricsServ.RunForever()
 
-	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db)
+	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db, config.LiteMode)
 	go api.RunClairify(serv)
 
 	grpcAPI := grpc.NewAPI(grpc.Config{
