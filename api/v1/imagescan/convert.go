@@ -1,11 +1,11 @@
 package imagescan
 
 import (
-	"github.com/pkg/errors"
-	"github.com/stackrox/rox/pkg/utils"
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
