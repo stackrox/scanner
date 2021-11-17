@@ -271,7 +271,6 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 }
 
 type depData struct {
-	isExecutable bool
 	support      set.StringSet
 	dependencies []string
 	completed    bool
@@ -279,54 +278,33 @@ type depData struct {
 
 func enrichFilesMap(files tarutil.FilesMap) {
 	depMap := make(map[string]*depData)
-	for filePath, file := range files {
-		if file.ElfData == nil {
+	for filePath, fileData := range files {
+		if fileData.ElfData == nil {
 			continue
 		}
-		log.Infof("filePath: %s, file %+v", filePath, *file.ElfData)
-		var execOption []string
-		if file.Executable {
-			execOption = []string{filePath}
-		}
-		for _, depPath := range append(file.ElfData.Sonames, execOption...) {
+		for _, depPath := range append(fileData.ElfData.Sonames) {
 			data, ok := depMap[depPath]
 			if !ok {
-				log.Infof("Creating depPath %s", depPath)
 				data = &depData{}
-			} else {
-				log.Infof("Updating depPath %s, curr %+v", depPath, *data)
 			}
 			data.support.Add(filePath)
-			data.dependencies = append(data.dependencies, file.ElfData.Dependencies...)
-			if depPath == filePath {
-				data.isExecutable = file.Executable
-			}
+			data.dependencies = append(data.dependencies, fileData.ElfData.Dependencies...)
 			depMap[depPath] = data
 		}
-		/*
-		file.ElfData.Sonames = nil
-		file.ElfData.Dependencies = nil
-		 */
+		fileData.ElfData.Sonames = nil
 	}
-
-	for key, value := range depMap {
-		log.Infof("so: %s", key)
-		if value.isExecutable {
+	for filePath, fileData := range files {
+		if fileData.Executable && fileData.ElfData != nil {
+			value := &depData{dependencies: fileData.ElfData.Dependencies}
 			fillIn(depMap, value)
 			for exec := range value.support {
-				file, ok := files[exec]
-				if !ok || file.ElfData == nil {
+				execFileData, ok := files[exec]
+				if !ok || execFileData.ElfData == nil {
 					utils.Must(errors.Errorf("Cannot find exec %s", exec))
 				}
-				file.ElfData.SupportExecutables.Add("/" + key)
+				execFileData.ElfData.SupportExecutables.Add("/" + filePath)
 			}
 		}
-	}
-	for key, file := range files {
-		if file.ElfData == nil {
-			continue
-		}
-		log.Infof("Key: %s, file %+v", key, *file.ElfData)
 	}
 }
 
@@ -335,13 +313,12 @@ func fillIn(depMap map[string]*depData, data *depData) set.StringSet {
 		return data.support
 	}
 	for _, soname := range data.dependencies {
-		value, ok := depMap[soname]
-		if !ok {
-			log.Infof("Unresolved soname %s", soname)
-			return nil
+		if value, ok := depMap[soname]; !ok {
+			log.Warnf("Unresolved soname %s", soname)
+		} else {
+			executables := fillIn(depMap, value)
+			data.support = data.support.Union(executables)
 		}
-		executables := fillIn(depMap, value)
-		data.support = data.support.Union(executables)
 	}
 	data.completed = true
 	return data.support

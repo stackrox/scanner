@@ -15,6 +15,9 @@
 package clair
 
 import (
+	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/pkg/elf"
+	"github.com/stackrox/scanner/pkg/tarutil"
 	"io"
 	"os"
 	"path/filepath"
@@ -123,6 +126,101 @@ func TestProcessWithDistUpgrade(t *testing.T) {
 			nufv.Feature.Namespace.Name = "debian:8"
 			nufv.Feature.Namespace.VersionFormat = dpkg.ParserName
 			assert.NotContains(t, jessie.Features, nufv)
+		}
+	}
+}
+
+func TestEnrichSoMap(t *testing.T) {
+	files := tarutil.FilesMap{
+		// Non-elf executable
+		"bin/script": tarutil.FileData{
+			Executable: true,
+		},
+		// Non-elf text
+		"lib/readme": tarutil.FileData{
+			Executable: false,
+		},
+		// A base library
+		"lib/libx1.so.1": tarutil.FileData{
+			Executable: false,
+			ElfData: &elf.ElfData{
+				Sonames: []string{"x1.so.1"},
+				Dependencies: []string{},
+			},
+		},
+		// An upper layer library which is executable
+		"lib/libz1.so.1": tarutil.FileData{
+			Executable: true,
+			ElfData: &elf.ElfData{
+				Sonames: []string{"z1.so.1"},
+				Dependencies: []string{"x1.so.1"},
+			},
+		},
+		// An elf executable that depends on both libraries
+		"bin/ls": tarutil.FileData{
+			Executable: true,
+			ElfData: &elf.ElfData{
+				Sonames: nil,
+				Dependencies: []string{"x1.so.1", "z1.so.1"},
+			},
+		},
+		// An elf executable that depends on upper layer library
+		"bin/ps": tarutil.FileData{
+			Executable: true,
+			ElfData: &elf.ElfData{
+				Sonames: []string{},
+				Dependencies: []string{"z1.so.1"},
+			},
+		},
+		// An elf executable that depends on base library
+		"bin/df": tarutil.FileData{
+			Executable: true,
+			ElfData: &elf.ElfData{
+				Sonames: []string{},
+				Dependencies: []string{"x1.so.1"},
+			},
+		},
+		// A compatible library for the upper layer library that is not executable
+		"lib/libz1.so.1.7": tarutil.FileData{
+			Executable: false,
+			ElfData: &elf.ElfData{
+				Sonames: []string{"z1.so.1", "z1.so.1.7"},
+				Dependencies: []string{"x1.so.1"},
+			},
+		},
+		// An elf executable that depends on the compatible library
+		"bin/mount": tarutil.FileData{
+			Executable: true,
+			ElfData: &elf.ElfData{
+				Dependencies: []string{"z1.so.1.7", "y.so.1"},
+			},
+		},
+		// The library used by the compatible library.
+		"lib/liby.so.1.9": tarutil.FileData{
+			Executable: false,
+			ElfData: &elf.ElfData{
+				Sonames: []string{"y.so.1"},
+			},
+		},
+		// Some elf executable with an unresolved dependency, it is not a perfect world
+		"bin/vi": tarutil.FileData{
+			Executable: true,
+			ElfData: &elf.ElfData{
+				Dependencies: []string{"unresolved.so.9", "y.so.1"},
+			},
+		},
+	}
+	expectedSupport := make(map[string][]string, len(files))
+	expectedSupport["lib/libx1.so.1"] = []string{"/bin/df", "/bin/ps", "/bin/ls", "/lib/libz1.so.1", "/bin/mount"}
+	expectedSupport["lib/libz1.so.1"] = []string{"/bin/ps", "/bin/ls"}
+	expectedSupport["lib/libz1.so.1.7"] = []string{"/bin/ps", "/bin/ls", "/bin/mount"}
+	expectedSupport["lib/liby.so.1.9"] = []string{"/bin/mount", "/bin/vi"}
+	enrichFilesMap(files)
+	for filePath := range files {
+		if expected, ok := expectedSupport[filePath]; ok {
+			assert.Equal(t, set.NewStringSet(expected...), files[filePath].ElfData.SupportExecutables)
+		} else if (files[filePath]).ElfData != nil {
+			assert.Zero(t, files[filePath].ElfData.SupportExecutables)
 		}
 	}
 }
