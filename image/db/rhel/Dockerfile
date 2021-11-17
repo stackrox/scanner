@@ -36,11 +36,11 @@ RUN groupadd -g 70 postgres && \
         ca-certificates libicu systemd-sysv /tmp/postgres-libs.rpm \
         /tmp/postgres-server.rpm /tmp/postgres.rpm glibc-locale-source glibc-langpack-en && \
     dnf clean all && \
-    rm -rf /var/cache/dnf && \
     rm /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm && \
     rm RPM-GPG-KEY-PGDG-12 && \
     # (Optional) Remove line below to keep package management utilities
     rpm -e --nodeps $(rpm -qa curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
+    rm -rf /var/cache/dnf && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
