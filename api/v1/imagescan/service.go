@@ -61,34 +61,6 @@ func (s *serviceImpl) ScanImage(_ context.Context, req *v1.ScanImageRequest) (*v
 	}, nil
 }
 
-func (s *serviceImpl) getLayer(layerName, lineage string, layerOpts getLayerOpts) (*v1.GetImageScanResponse, error) {
-	opts := &database.DatastoreOptions{
-		WithFeatures:        layerOpts.withFeatures,
-		WithVulnerabilities: layerOpts.withVulns,
-		UncertifiedRHEL:     layerOpts.uncertifiedRHEL,
-	}
-
-	dbLayer, err := s.db.FindLayer(layerName, lineage, opts)
-	if err == commonerr.ErrNotFound {
-		return nil, status.Errorf(codes.NotFound, "Could not find Clair layer %q", layerName)
-	} else if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	layer, notes, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, lineage, opts)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &v1.GetImageScanResponse{
-		Status: v1.ScanStatus_SUCCEEDED,
-		Image: &v1.Image{
-			Features: ConvertFeatures(layer.Features),
-		},
-		Notes: convertNotes(notes),
-	}, nil
-}
-
 func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string, error) {
 	imgSpec := req.GetImageSpec()
 
@@ -136,6 +108,34 @@ func (s *serviceImpl) getImageScan(_ context.Context, req *v1.GetImageScanReques
 		withVulns:       opts.withVulns,
 		withFeatures:    opts.withFeatures,
 	})
+}
+
+func (s *serviceImpl) getLayer(layerName, lineage string, layerOpts getLayerOpts) (*v1.GetImageScanResponse, error) {
+	opts := &database.DatastoreOptions{
+		WithFeatures:        layerOpts.withFeatures,
+		WithVulnerabilities: layerOpts.withVulns,
+		UncertifiedRHEL:     layerOpts.uncertifiedRHEL,
+	}
+
+	dbLayer, err := s.db.FindLayer(layerName, lineage, opts)
+	if err == commonerr.ErrNotFound {
+		return nil, status.Errorf(codes.NotFound, "Could not find Clair layer %q", layerName)
+	} else if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	layer, notes, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, lineage, opts)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &v1.GetImageScanResponse{
+		Status: v1.ScanStatus_SUCCEEDED,
+		Image: &v1.Image{
+			Features: ConvertFeatures(layer.Features),
+		},
+		Notes: convertNotes(notes),
+	}, nil
 }
 
 func (s *serviceImpl) ImageScanAndGet(ctx context.Context, req *v1.ImageScanAndGetRequest) (*v1.ImageScanAndGetResponse, error) {
