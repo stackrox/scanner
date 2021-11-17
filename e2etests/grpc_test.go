@@ -88,7 +88,7 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 			feature.ProvidedExecutables = nil
 			matching.ProvidedExecutables = nil
 
-			if !test.checkContainsOnly {
+			if !test.onlyCheckSpecifiedVulns {
 				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
 					fmt.Printf("Matching: %s\n", matching.Vulnerabilities)
 					fmt.Printf("Expected Feature: %s\n", feature.Vulnerabilities)

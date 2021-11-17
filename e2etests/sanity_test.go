@@ -1,4 +1,3 @@
-//go:build e2e
 // +build e2e
 
 package e2etests
@@ -56,7 +55,7 @@ func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulne
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
-func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, checkContainsOnly, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
+func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, onlyCheckSpecifiedVulns, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
@@ -93,7 +92,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 			feature.ProvidedExecutables = nil
 			matching.ProvidedExecutables = nil
 
-			if !checkContainsOnly {
+			if !onlyCheckSpecifiedVulns {
 				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
 					matchingBytes, _ := json.MarshalIndent(matching.Vulnerabilities, "", "  ")
 					featureVulnsBytes, _ := json.MarshalIndent(feature.Vulnerabilities, "", "  ")
@@ -145,7 +144,7 @@ func TestImageSanity(t *testing.T) {
 				testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
 				testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
 			}
-			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.checkProvidedExecutables, testCase.expectedFeatures, testCase.unexpectedFeatures)
+			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.onlyCheckSpecifiedVulns, testCase.checkProvidedExecutables, testCase.expectedFeatures, testCase.unexpectedFeatures)
 		})
 	}
 }
