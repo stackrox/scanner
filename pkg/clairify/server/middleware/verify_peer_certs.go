@@ -1,0 +1,37 @@
+package middleware
+
+import (
+	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/stackrox/rox/pkg/httputil"
+	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/pkg/env"
+	"github.com/stackrox/scanner/pkg/mtls"
+	"google.golang.org/grpc/codes"
+)
+
+var (
+	ignorePaths = set.NewFrozenStringSet(
+		"/clairify/ping",
+		"/scanner/ping",
+	)
+)
+
+// VerifyPeerCerts returns http middleware to verify peer certs for certain endpoints
+func VerifyPeerCerts() mux.MiddlewareFunc {
+	skipPeerValidation := env.SkipPeerValidation.Enabled()
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !skipPeerValidation && !ignorePaths.Contains(r.RequestURI) {
+				if err := mtls.VerifyCentralPeerCertificate(r); err != nil {
+					httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
+					return
+				}
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
