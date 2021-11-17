@@ -2018,6 +2018,7 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: "apk",
 					Version:       "1.33.1-r2",
 					AddedBy:       "sha256:5843afab387455b37944e709ee8c78d7520df80f8d01cf7f861aae63beeddb6b",
+					FixedBy:       "1.33.1-r6",
 				},
 			},
 		},
