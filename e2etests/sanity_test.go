@@ -56,7 +56,7 @@ func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulne
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
-func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, checkContainsOnly, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
+func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, onlyCheckSpecifiedVulns, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
@@ -93,7 +93,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 			feature.ProvidedExecutables = nil
 			matching.ProvidedExecutables = nil
 
-			if !checkContainsOnly {
+			if !onlyCheckSpecifiedVulns {
 				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
 					matchingBytes, _ := json.MarshalIndent(matching.Vulnerabilities, "", "  ")
 					featureVulnsBytes, _ := json.MarshalIndent(feature.Vulnerabilities, "", "  ")
@@ -145,7 +145,7 @@ func TestImageSanity(t *testing.T) {
 		expectedFeatures   []v1.Feature
 		unexpectedFeatures []v1.Feature
 		// This specifies that the features only need to contain at least the vulnerabilities specified
-		checkContainsOnly        bool
+		onlyCheckSpecifiedVulns  bool
 		uncertifiedRHEL          bool
 		checkProvidedExecutables bool
 	}{
@@ -153,7 +153,7 @@ func TestImageSanity(t *testing.T) {
 			image:                    "ubuntu:16.04",
 			registry:                 "https://registry-1.docker.io",
 			source:                   "NVD",
-			checkContainsOnly:        true,
+			onlyCheckSpecifiedVulns:  true,
 			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
@@ -539,10 +539,10 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:             "mcr.microsoft.com/dotnet/core/runtime:3.1.2",
-			registry:          "https://mcr.microsoft.com",
-			source:            "NVD",
-			checkContainsOnly: true,
+			image:                   "mcr.microsoft.com/dotnet/core/runtime:3.1.2",
+			registry:                "https://mcr.microsoft.com",
+			source:                  "NVD",
+			onlyCheckSpecifiedVulns: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "microsoft.netcore.app",
@@ -732,10 +732,10 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:             "mcr.microsoft.com/dotnet/core/sdk:3.1.100@sha256:091126a93870729f4438ee7ed682ed98639a89acebed40409af90f84302c48dd",
-			registry:          "https://mcr.microsoft.com",
-			source:            "NVD",
-			checkContainsOnly: true,
+			image:                   "mcr.microsoft.com/dotnet/core/sdk:3.1.100@sha256:091126a93870729f4438ee7ed682ed98639a89acebed40409af90f84302c48dd",
+			registry:                "https://mcr.microsoft.com",
+			source:                  "NVD",
+			onlyCheckSpecifiedVulns: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "microsoft.aspnetcore.app",
@@ -1136,12 +1136,12 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// Deletes directory containing jackson-databind:2.6.6.
-			image:             "docker.io/stackrox/sandbox:scannerremovejar",
-			registry:          "https://registry-1.docker.io",
-			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-			source:            "NVD",
-			checkContainsOnly: true,
+			image:                   "docker.io/stackrox/sandbox:scannerremovejar",
+			registry:                "https://registry-1.docker.io",
+			username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:                  "NVD",
+			onlyCheckSpecifiedVulns: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "jackson-databind",
@@ -1427,7 +1427,7 @@ func TestImageSanity(t *testing.T) {
 			username:                 os.Getenv("DOCKER_IO_PULL_USERNAME"),
 			password:                 os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:                   "Red Hat",
-			checkContainsOnly:        true,
+			onlyCheckSpecifiedVulns:  true,
 			checkProvidedExecutables: true,
 			expectedFeatures: []v1.Feature{
 				{
@@ -1518,12 +1518,12 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// One of the images used for Red Hat Scanner Certification with a chown on jackson-databind that should not show up in the results.
-			image:             "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7-chown",
-			registry:          "https://registry-1.docker.io",
-			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-			source:            "Red Hat",
-			checkContainsOnly: true,
+			image:                   "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7-chown",
+			registry:                "https://registry-1.docker.io",
+			username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:                  "Red Hat",
+			onlyCheckSpecifiedVulns: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "rh-maven35-log4j12",
@@ -1608,12 +1608,12 @@ func TestImageSanity(t *testing.T) {
 		},
 		{
 			// One of the images used for Red Hat Scanner Certification.
-			image:             "docker.io/stackrox/sandbox:nodejs-10",
-			registry:          "https://registry-1.docker.io",
-			username:          os.Getenv("DOCKER_IO_PULL_USERNAME"),
-			password:          os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-			source:            "Red Hat",
-			checkContainsOnly: true,
+			image:                   "docker.io/stackrox/sandbox:nodejs-10",
+			registry:                "https://registry-1.docker.io",
+			username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
+			password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+			source:                  "Red Hat",
+			onlyCheckSpecifiedVulns: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "nodejs-full-i18n",
@@ -1846,10 +1846,10 @@ func TestImageSanity(t *testing.T) {
 		// The first is a centos:7 image that has the package p11-kit. The second image is from fedora and we
 		// can't identify the OS so it should not have p11-kit
 		{
-			image:             "quay.io/dougtidwell/open-adventure@sha256:564c8dde1931f337a7bc8925f94cb594d9c81a5ee9eacc5ec5590f1e60e94b6a",
-			registry:          "https://quay.io",
-			source:            "NVD",
-			checkContainsOnly: true,
+			image:                   "quay.io/dougtidwell/open-adventure@sha256:564c8dde1931f337a7bc8925f94cb594d9c81a5ee9eacc5ec5590f1e60e94b6a",
+			registry:                "https://quay.io",
+			source:                  "NVD",
+			onlyCheckSpecifiedVulns: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "p11-kit",
@@ -1873,10 +1873,10 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:             "alpine:3.13.0",
-			registry:          "https://registry-1.docker.io",
-			source:            "NVD",
-			checkContainsOnly: true,
+			image:                   "alpine:3.13.0",
+			registry:                "https://registry-1.docker.io",
+			source:                  "NVD",
+			onlyCheckSpecifiedVulns: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apk-tools",
@@ -1973,10 +1973,10 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:             "alpine:3.14.0",
-			registry:          "https://registry-1.docker.io",
-			source:            "NVD",
-			checkContainsOnly: true,
+			image:                   "alpine:3.14.0",
+			registry:                "https://registry-1.docker.io",
+			source:                  "NVD",
+			onlyCheckSpecifiedVulns: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apk-tools",
@@ -2076,7 +2076,7 @@ func TestImageSanity(t *testing.T) {
 				testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
 				testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
 			}
-			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.checkContainsOnly, testCase.checkProvidedExecutables, testCase.expectedFeatures, testCase.unexpectedFeatures)
+			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.onlyCheckSpecifiedVulns, testCase.checkProvidedExecutables, testCase.expectedFeatures, testCase.unexpectedFeatures)
 		})
 	}
 }
