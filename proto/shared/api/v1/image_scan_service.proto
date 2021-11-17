@@ -42,14 +42,14 @@ message GetImageScanResponse {
     repeated Note notes  = 3;
 }
 
-message ImageScanAndGetRequest {
+message GetImageComponentsRequest {
     string       image        = 1;
     RegistryData registry     = 2;
     bool         withVulns    = 3;
     bool         withFeatures = 4;
 }
 
-message ImageScanAndGetResponse {
+message GetImageComponentsResponse {
     ScanStatus    status = 1;
     Image         image  = 2;
     repeated Note notes  = 3;
@@ -132,10 +132,9 @@ service ImageScanService {
         };
     }
 
-    rpc ImageScanAndGet(ImageScanAndGetRequest) returns (ImageScanAndGetResponse) {
+    rpc GetImageComponents(GetImageComponentsRequest) returns (GetImageComponentsResponse) {
         option (google.api.http) = {
-            // TODO: change name?
-            get: "/v1/images/scan/complete"
+            get: "/v1/images/scan/components"
         };
     }
 

@@ -138,7 +138,7 @@ func (s *serviceImpl) getLayer(layerName, lineage string, layerOpts getLayerOpts
 	}, nil
 }
 
-func (s *serviceImpl) ImageScanAndGet(ctx context.Context, req *v1.ImageScanAndGetRequest) (*v1.ImageScanAndGetResponse, error) {
+func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest) (*v1.GetImageComponentsResponse, error) {
 	// Attempt to get image results assuming the image is within RHEL Certification scope (or is a non-RHEL image).
 	res, err := s.imageScanAndGet(ctx, req, false)
 	if err != nil {
@@ -155,14 +155,14 @@ func (s *serviceImpl) ImageScanAndGet(ctx context.Context, req *v1.ImageScanAndG
 		return nil, err
 	}
 
-	return &v1.ImageScanAndGetResponse{
+	return &v1.GetImageComponentsResponse{
 		Status: res.GetStatus(),
 		Image:  res.GetImage(),
 		Notes:  res.GetNotes(),
 	}, nil
 }
 
-func (s *serviceImpl) imageScanAndGet(ctx context.Context, req *v1.ImageScanAndGetRequest, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
+func (s *serviceImpl) imageScanAndGet(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
 	imageScan, err := s.ScanImage(ctx, &v1.ScanImageRequest{
 		Image:           req.GetImage(),
 		Registry:        req.GetRegistry(),

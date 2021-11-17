@@ -42,7 +42,7 @@ func TestGRPCScanImageAndGet(t *testing.T) {
 			testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
 		}
 
-		imgScanResp, err := client.ImageScanAndGet(context.Background(), &v1.ImageScanAndGetRequest{
+		imgScanResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
 			Image: testCase.image,
 			Registry: &v1.RegistryData{
 				Url:      testCase.registry,
