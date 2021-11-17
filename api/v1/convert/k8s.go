@@ -17,6 +17,10 @@ func K8sVulnerabilities(version string, k8sVulns []*validation.CVESchema) ([]*v1
 			log.Errorf("unable to convert metadata for %s: %v", v.CVE, err)
 			continue
 		}
+		if m.IsNilOrEmpty() {
+			log.Warnf("nil or empty metadata for %s: %v", v.CVE, err)
+			continue
+		}
 
 		link := stringutils.OrDefault(v.IssueURL, v.URL)
 		fixedBy, err := GetFixedBy(version, v)

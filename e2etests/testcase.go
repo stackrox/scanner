@@ -1666,19 +1666,21 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:    "registry.redhat.io/openshift3/logging-elasticsearch",
-		registry: "https://registry.redhat.io",
-		username: os.Getenv("REDHAT_USERNAME"),
-		password: os.Getenv("REDHAT_PASSWORD"),
-		source:   "Red Hat",
+		image:           "registry.redhat.io/openshift3/logging-elasticsearch",
+		registry:        "https://registry.redhat.io",
+		username:        os.Getenv("REDHAT_USERNAME"),
+		password:        os.Getenv("REDHAT_PASSWORD"),
+		source:          "Red Hat",
+		uncertifiedRHEL: true,
 	},
 	{
 
-		image:    "registry.redhat.io/openshift3/logging-elasticsearch:v3.10.175-1",
-		registry: "https://registry.redhat.io",
-		username: os.Getenv("REDHAT_USERNAME"),
-		password: os.Getenv("REDHAT_PASSWORD"),
-		source:   "Red Hat",
+		image:           "registry.redhat.io/openshift3/logging-elasticsearch:v3.10.175-1",
+		registry:        "https://registry.redhat.io",
+		username:        os.Getenv("REDHAT_USERNAME"),
+		password:        os.Getenv("REDHAT_PASSWORD"),
+		source:          "Red Hat",
+		uncertifiedRHEL: true,
 	},
 	{
 		// Had an issue where Scanner claimed jq 6.1-r1 was vulnerable to

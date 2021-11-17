@@ -67,6 +67,10 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability 
 			log.Errorf("error converting metadata map: %v", err)
 			continue
 		}
+		if metadata == nil {
+			log.Warnf("metadata is nil for %s; skipping...", v.Name)
+			continue
+		}
 
 		vulns = append(vulns, &v1.Vulnerability{
 			Name:        v.Name,

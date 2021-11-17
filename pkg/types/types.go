@@ -195,3 +195,14 @@ func ConvertCVSSv3(cvss3Vector string) (*MetadataCVSSv3, error) {
 func roundTo1Decimal(x float64) float64 {
 	return math.Round(x*10) / 10
 }
+
+func (m *Metadata) IsNilOrEmpty() bool {
+	if m == nil {
+		return true
+	}
+
+	return m.LastModifiedDateTime == "" &&
+		m.PublishedDateTime == "" &&
+		m.CVSSv2.Vectors == "" &&
+		m.CVSSv3.Vectors == ""
+}
