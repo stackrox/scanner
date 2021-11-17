@@ -35,6 +35,7 @@ RUN dnf upgrade -y && \
     dnf install -y ca-certificates xz && \
     dnf clean all && \
     # (Optional) Remove line below to keep package management utilities other than rpm
+    # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
     rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     rm -rf /var/cache/dnf && \
     chown -R 65534:65534 "${NVD_DEFINITIONS_DIR}" && \
