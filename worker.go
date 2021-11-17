@@ -16,6 +16,9 @@ package clair
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
+	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/rox/pkg/utils"
 	"io"
 	"os"
 	"path/filepath"
@@ -258,11 +261,90 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 		return nil, false, nil, nil, nil, nil, err
 	}
 
+	enrichFilesMap(files)
+
 	if len(m.components) > 0 {
 		log.WithFields(log.Fields{logLayerName: name, "component count": len(m.components)}).Debug("detected components")
 	}
 
 	return detectFromFiles(files, name, parent, m.components, uncertifiedRHEL)
+}
+
+type depData struct {
+	isExecutable bool
+	support      set.StringSet
+	dependencies []string
+	completed    bool
+}
+
+func enrichFilesMap(files tarutil.FilesMap) {
+	depMap := make(map[string]*depData)
+	for filePath, file := range files {
+		if file.ElfData == nil {
+			continue
+		}
+		log.Infof("filePath: %s, file %+v", filePath, *file.ElfData)
+		var execOption []string
+		if file.Executable {
+			execOption = []string{filePath}
+		}
+		for _, depPath := range append(file.ElfData.Sonames, execOption...) {
+			data, ok := depMap[depPath]
+			if !ok {
+				log.Infof("Creating depPath %s", depPath)
+				data = &depData{}
+			} else {
+				log.Infof("Updating depPath %s, curr %+v", depPath, *data)
+			}
+			data.support.Add(filePath)
+			data.dependencies = append(data.dependencies, file.ElfData.Dependencies...)
+			if depPath == filePath {
+				data.isExecutable = file.Executable
+			}
+			depMap[depPath] = data
+		}
+		/*
+		file.ElfData.Sonames = nil
+		file.ElfData.Dependencies = nil
+		 */
+	}
+
+	for key, value := range depMap {
+		log.Infof("so: %s", key)
+		if value.isExecutable {
+			fillIn(depMap, value)
+			for exec := range value.support {
+				file, ok := files[exec]
+				if !ok || file.ElfData == nil {
+					utils.Must(errors.Errorf("Cannot find exec %s", exec))
+				}
+				file.ElfData.SupportExecutables.Add("/" + key)
+			}
+		}
+	}
+	for key, file := range files {
+		if file.ElfData == nil {
+			continue
+		}
+		log.Infof("Key: %s, file %+v", key, *file.ElfData)
+	}
+}
+
+func fillIn(depMap map[string]*depData, data *depData) set.StringSet {
+	if data.completed {
+		return data.support
+	}
+	for _, soname := range data.dependencies {
+		value, ok := depMap[soname]
+		if !ok {
+			log.Infof("Unresolved soname %s", soname)
+			return nil
+		}
+		executables := fillIn(depMap, value)
+		data.support = data.support.Union(executables)
+	}
+	data.completed = true
+	return data.support
 }
 
 func isDistroless(filesMap tarutil.FilesMap) bool {
