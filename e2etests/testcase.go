@@ -1749,9 +1749,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:    "alpine:3.13.0",
-		registry: "https://registry-1.docker.io",
-		source:   "NVD",
+		image:                   "alpine:3.13.0",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "apk-tools",
@@ -1848,9 +1849,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:    "alpine:3.14.0",
-		registry: "https://registry-1.docker.io",
-		source:   "NVD",
+		image:                   "alpine:3.14.0",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "apk-tools",
