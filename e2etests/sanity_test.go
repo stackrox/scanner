@@ -1873,9 +1873,10 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
-			image:    "alpine:3.13.0",
-			registry: "https://registry-1.docker.io",
-			source:   "NVD",
+			image:             "alpine:3.13.0",
+			registry:          "https://registry-1.docker.io",
+			source:            "NVD",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apk-tools",
@@ -1967,14 +1968,15 @@ func TestImageSanity(t *testing.T) {
 						},
 					},
 					AddedBy: "sha256:596ba82af5aaa3e2fd9d6f955b8b94f0744a2b60710e3c243ba3e4a467f051d1",
-					FixedBy: "1.32.1-r4",
+					FixedBy: "1.32.1-r7",
 				},
 			},
 		},
 		{
-			image:    "alpine:3.14.0",
-			registry: "https://registry-1.docker.io",
-			source:   "NVD",
+			image:             "alpine:3.14.0",
+			registry:          "https://registry-1.docker.io",
+			source:            "NVD",
+			checkContainsOnly: true,
 			expectedFeatures: []v1.Feature{
 				{
 					Name:          "apk-tools",
