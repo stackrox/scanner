@@ -116,37 +116,44 @@ func Boot(config *Config) {
 	}()
 
 	var nvdVulnCache nvdtoolscache.Cache
-	wg.Add(1)
-	go func() {
-		defer wg.Add(-1)
-		nvdVulnCache = nvdtoolscache.Singleton()
-	}()
-
 	var k8sVulnCache k8scache.Cache
-	wg.Add(1)
-	go func() {
-		defer wg.Add(-1)
-		k8sVulnCache = k8scache.Singleton()
-	}()
-
 	var repoToCPE *repo2cpe.Mapping
-	wg.Add(1)
-	go func() {
-		defer wg.Add(-1)
-		repoToCPE = repo2cpe.Singleton()
-	}()
+	if !config.LiteMode {
+		wg.Add(1)
+		go func() {
+			defer wg.Add(-1)
+			nvdVulnCache = nvdtoolscache.Singleton()
+		}()
 
-	// Initialize the vulnerability caches prior to making the API available
+		wg.Add(1)
+		go func() {
+			defer wg.Add(-1)
+			k8sVulnCache = k8scache.Singleton()
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Add(-1)
+			repoToCPE = repo2cpe.Singleton()
+		}()
+	}
+
+	// Initialize the datastores prior to making the API available
 	wg.Wait()
 	defer db.Close()
 
-	u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdVulnCache, k8sVulnCache)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to initialize updater")
-	}
+	if !config.LiteMode {
+		u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdVulnCache, k8sVulnCache)
+		if err != nil {
+			log.WithError(err).Fatal("Failed to initialize updater")
+		}
 
-	// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up to date
-	u.UpdateApplicationCachesOnly()
+		// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up-to-date
+		u.UpdateApplicationCachesOnly()
+
+		go u.RunForever()
+		defer u.Stop()
+	}
 
 	metricsServ := metrics.NewHTTPServer(config.API)
 	go metricsServ.RunForever()
@@ -170,13 +177,11 @@ func Boot(config *Config) {
 	)
 	go grpcAPI.Start()
 
-	go u.RunForever()
-
 	// Wait for interruption and shutdown gracefully.
 	waitForSignals(os.Interrupt, unix.SIGTERM)
 	log.Info("Received interruption, gracefully stopping ...")
+	// Do not defer this, as we should close the API immediately upon receiving interrupt signal.
 	serv.Close()
-	u.Stop()
 }
 
 func main() {
