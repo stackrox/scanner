@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -12,13 +13,13 @@ import (
 var (
 	// Method name(s) taken from the respective generated pb.go file(s).
 	liteModeMethodsAllowlist = set.NewFrozenStringSet(
-		"/scannerV1.ImageScanService/ImageScanAndGet",
 		"/scannerV1.PingService/Ping",
 	)
 )
 
 func liteModeUnaryServerInterceptor(liteMode bool) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		logrus.Info(info.FullMethod)
 		if liteMode && !liteModeMethodsAllowlist.Contains(info.FullMethod) {
 			// TODO: ensure this is the right status code.
 			return nil, status.Error(codes.FailedPrecondition, "request not available in lite-mode")
