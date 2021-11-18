@@ -19,7 +19,7 @@ var (
 
 func liteModeUnaryServerInterceptor(liteMode bool) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		logrus.Info(info.FullMethod)
+		logrus.Infof("Lite Mode (%v): %v", liteMode, info.FullMethod)
 		if liteMode && !liteModeMethodsAllowlist.Contains(info.FullMethod) {
 			// TODO: ensure this is the right status code.
 			return nil, status.Error(codes.FailedPrecondition, "request not available in lite-mode")
