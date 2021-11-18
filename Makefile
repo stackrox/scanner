@@ -204,7 +204,7 @@ scanner-image-lite: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanne
 .PHONY: db-image-lite
 db-image-lite: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/scanner-db-lite:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
+	@docker build -t us.gcr.io/stackrox-ci/scanner-db-lite:$(TAG) -f image/db/rhel/Dockerfile-lite image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered
