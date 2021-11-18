@@ -224,7 +224,11 @@ func main() {
 		imagefmt.SetInsecureTLS(*flagInsecureTLS)
 	}
 
-	log.Infof("Running Scanner version: %s", version.Version)
+	scannerName := "Scanner"
+	if config.LiteMode {
+		scannerName = "Scanner-lite"
+	}
+	log.Infof("Running %s version: %s", scannerName, version.Version)
 
 	Boot(config)
 }
