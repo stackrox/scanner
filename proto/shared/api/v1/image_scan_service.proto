@@ -46,7 +46,6 @@ message GetImageComponentsRequest {
     string       image        = 1;
     RegistryData registry     = 2;
     bool         withVulns    = 3;
-    bool         withFeatures = 4;
 }
 
 message GetImageComponentsResponse {

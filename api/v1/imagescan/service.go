@@ -177,7 +177,7 @@ func (s *serviceImpl) imageScanAndGet(ctx context.Context, req *v1.GetImageCompo
 		UncertifiedRHEL: uncertifiedRHEL,
 	}, imageScanOpts{
 		withVulns:    req.GetWithVulns(),
-		withFeatures: req.GetWithFeatures(),
+		withFeatures: true,
 	})
 }
 
