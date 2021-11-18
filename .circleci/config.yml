@@ -950,7 +950,7 @@ jobs:
     <<: *defaults
     steps:
       - build-and-push-image:
-          make-image-target: image
+          make-image-target: all-images
 
   provision-cluster:
     <<: *defaults
