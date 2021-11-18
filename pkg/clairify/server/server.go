@@ -261,6 +261,8 @@ func (s *Server) GetVulnDefsMetadata(w http.ResponseWriter, _ *http.Request) {
 // Start starts the server listening.
 func (s *Server) Start() error {
 	r := mux.NewRouter()
+	// Note: order is important.
+	// Middlewares are executed in left-to-right order.
 	r.Use(
 		middleware.AllowLiteMode(s.liteMode),
 		middleware.VerifyPeerCerts(),
