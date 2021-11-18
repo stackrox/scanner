@@ -1,28 +1,29 @@
-package pgsql
+package database
 
 import (
 	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"github.com/stackrox/rox/pkg/set"
 )
 
 func StringMapArrayString(m map[string][]string) interface {
 	driver.Valuer
 	sql.Scanner
 } {
-	return (* stringMapArrayString)(&m)
+	return (*DependencyMap)(&m)
 }
 
-type stringMapArrayString map[string][]string
+type DependencyMap map[string][]string
 
 // Value returns the JSON-encoded representation
-func (a stringMapArrayString) Value() (driver.Value, error) {
+func (a DependencyMap) Value() (driver.Value, error) {
 	return json.Marshal(a)
 }
 
 // Scan Decodes a JSON-encoded value
-func (a *stringMapArrayString) Scan(value interface{}) error {
+func (a *DependencyMap) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
@@ -33,4 +34,12 @@ func (a *stringMapArrayString) Scan(value interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func (a DependencyMap) Merge(b DependencyMap) {
+	for k, v := range b {
+		newValue := set.NewStringSet(a[k]...)
+		newValue.AddAll(v...)
+		a[k] = newValue.AsSlice()
+	}
 }

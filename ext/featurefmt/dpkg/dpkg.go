@@ -18,6 +18,7 @@ package dpkg
 import (
 	"bufio"
 	"bytes"
+	"github.com/cznic/mathutil"
 	"regexp"
 	"sort"
 	"strings"
@@ -52,6 +53,7 @@ var (
 	// FilenamesListRegexp is the pattern for dpkg files which list the filenames the
 	// related package provides.
 	FilenamesListRegexp = regexp.MustCompile(`^var/lib/dpkg/info/(.*)\.list$`)
+	DynamicLibRegexp = regexp.MustCompile(`/lib([^/]*).so([^/]*)$`)
 )
 
 type lister struct{}
@@ -74,6 +76,7 @@ func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap
 		pkgFmt = `distroless`
 	}
 	defer metrics.ObserveListFeaturesTime(pkgFmt, "all", time.Now())
+	log.Infof("parseComponents: file %v, packageMap %v, removedPackages %v, distroless %v", string(file[:mathutil.Min(10, len(file))]), packagesMap, removedPackages, distroless)
 
 	scanner := bufio.NewScanner(bytes.NewReader(file))
 
@@ -160,6 +163,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	}
 
 	var executables []string
+	provides := make(database.DependencyMap)
+	needed := make(database.DependencyMap)
 	// Distroless containers do not provide executable files the same way distro containers do.
 	if !distroless && features.ActiveVulnMgmt.Enabled() {
 		// for example: var/lib/dpkg/info/vim.list
@@ -178,8 +183,19 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 			filename := filenamesFileScanner.Text()
 
 			// The first character is always "/", which is removed when inserted into the files maps.
-			if fileData := files[filename[1:]]; fileData.Executable {
+			fileData := files[filename[1:]]
+			if fileData.Executable {
 				executables = append(executables, filename)
+				if fileData.ElfData != nil {
+					for _, dep := range fileData.ElfData.Dependencies {
+						needed[dep] = append(needed[dep], filename)
+					}
+				}
+			}
+			if fileData.ElfData != nil {
+				for _, soname := range fileData.ElfData.Sonames {
+					provides[soname] = fileData.ElfData.Dependencies
+				}
 			}
 		}
 		if err := filenamesFileScanner.Err(); err != nil {
@@ -200,6 +216,14 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	if feature, exists := packagesMap[key]; exists {
 		// Append the executable files for the associated package to the source package.
 		feature.ProvidedExecutables = append(feature.ProvidedExecutables, executables...)
+		feature.ProvidedLibraries.Merge(provides)
+		for k, v := range needed {
+			if existValues, ok := feature.NeededLibrariesMap[k]; !ok {
+				feature.NeededLibrariesMap[k] = v
+			} else {
+				feature.NeededLibrariesMap[k] = append(existValues, v...)
+			}
+		}
 		return
 	}
 
@@ -209,6 +233,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		},
 		Version:             pkgVersion,
 		ProvidedExecutables: executables,
+		ProvidedLibraries:   provides,
+		NeededLibrariesMap:  needed,
 	}
 }
 

@@ -16,6 +16,8 @@ package v1
 
 import (
 	"fmt"
+	"github.com/stackrox/rox/pkg/set"
+	"runtime/debug"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -183,7 +185,7 @@ func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability
 	return vuln
 }
 
-func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertified bool) *Feature {
+func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertified bool, depMap map[string]set.StringSet) *Feature {
 	version := dbFeatureVersion.Version
 	if version == versionfmt.MaxVersion {
 		version = "None"
@@ -194,6 +196,11 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
+	executables := set.NewStringSet(dbFeatureVersion.ProvidedExecutables...)
+	for lib := range dbFeatureVersion.ProvidedLibraries {
+		executables = executables.Union(depMap[lib])
+	}
+
 	return &Feature{
 		Name:                dbFeatureVersion.Feature.Name,
 		NamespaceName:       dbFeatureVersion.Feature.Namespace.Name,
@@ -201,7 +208,7 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		Version:             version,
 		AddedBy:             addedBy,
 		Location:            dbFeatureVersion.Feature.Location,
-		ProvidedExecutables: dbFeatureVersion.ProvidedExecutables,
+		ProvidedExecutables: executables.AsSlice(),
 	}
 }
 
@@ -252,7 +259,8 @@ func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncer
 
 	var languageFeatures []Feature
 	for _, dbFeatureVersion := range languageFeatureVersions {
-		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
+		log.Infof("addLanguageVulns %s Stack:\n%s", dbFeatureVersion, string(debug.Stack()))
+		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL, nil)
 		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
 			languageFeatures = append(languageFeatures, *feature)
@@ -271,7 +279,7 @@ func hasKernelPrefix(name string) bool {
 }
 
 // LayerFromDatabaseModel returns the scan data for the given layer based on the data in the given datastore.
-func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, opts *database.DatastoreOptions) (Layer, []Note, error) {
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, opts *database.DatastoreOptions, depMap map[string]set.StringSet) (Layer, []Note, error) {
 	withFeatures := opts.GetWithFeatures()
 	withVulnerabilities := opts.GetWithVulnerabilities()
 	uncertifiedRHEL := opts.GetUncertifiedRHEL()
@@ -307,7 +315,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 
 	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
-			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL())
+			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL(), depMap)
 
 			if hasKernelPrefix(feature.Name) {
 				continue

@@ -261,8 +261,6 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 		return nil, false, nil, nil, nil, nil, err
 	}
 
-	enrichFilesMap(files)
-
 	if len(m.components) > 0 {
 		log.WithFields(log.Fields{logLayerName: name, "component count": len(m.components)}).Debug("detected components")
 	}
