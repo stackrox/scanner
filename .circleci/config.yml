@@ -387,7 +387,7 @@ commands:
             docker tag "${gcr_scanner_lite_image}" "${dockerhub_scanner_lite_image}"
             ./scripts/push-as-manifest-list.sh "${dockerhub_scanner_lite_image}"
 
-            dockerhub_db_lite_image="stackrox/${db_image_lite_name}:scanner-db-lite-${tag}"
+            dockerhub_db_lite_image="stackrox/${db_lite_image_name}:scanner-db-lite-${tag}"
             docker tag "${gcr_db_lite_image}" "${dockerhub_db_lite_image}"
             ./scripts/push-as-manifest-list.sh "${dockerhub_db_lite_image}"
 
