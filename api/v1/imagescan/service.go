@@ -140,14 +140,14 @@ func (s *serviceImpl) getLayer(layerName, lineage string, layerOpts getLayerOpts
 
 func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest) (*v1.GetImageComponentsResponse, error) {
 	// Attempt to get image results assuming the image is within RHEL Certification scope (or is a non-RHEL image).
-	res, err := s.imageScanAndGet(ctx, req, false)
+	res, err := s.getImageComponents(ctx, req, false)
 	if err != nil {
 		return nil, err
 	}
 	for _, note := range res.GetNotes() {
 		if note == v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE {
 			// Image is RHEL, but not within Certification scope. Try again...
-			res, err = s.imageScanAndGet(ctx, req, true)
+			res, err = s.getImageComponents(ctx, req, true)
 			break
 		}
 	}
@@ -162,7 +162,7 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 	}, nil
 }
 
-func (s *serviceImpl) imageScanAndGet(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
+func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
 	imageScan, err := s.ScanImage(ctx, &v1.ScanImageRequest{
 		Image:           req.GetImage(),
 		Registry:        req.GetRegistry(),
