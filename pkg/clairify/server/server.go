@@ -264,7 +264,7 @@ func (s *Server) Start() error {
 	// Note: order is important.
 	// Middlewares are executed in left-to-right order.
 	r.Use(
-		middleware.AllowLiteMode(s.liteMode),
+		middleware.LiteMode(s.liteMode),
 		middleware.VerifyPeerCerts(),
 	)
 

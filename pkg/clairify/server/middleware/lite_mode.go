@@ -11,9 +11,8 @@ import (
 
 var errLiteMode = errors.New("request not available in lite-mode")
 
-// AllowLiteMode is middleware which only allows the request is continue when NOT in lite-mode.
-// TODO: rename
-func AllowLiteMode(liteMode bool) mux.MiddlewareFunc {
+// LiteMode returns middleware which only allows the request to continue when NOT in lite-mode.
+func LiteMode(liteMode bool) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if liteMode {
