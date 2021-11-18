@@ -34,7 +34,7 @@ COPY ./THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 RUN dnf upgrade -y && \
     dnf install -y ca-certificates xz && \
     dnf clean all && \
-    # (Optional) Remove line below to keep package management utilities other than rpm
+    # (Optional) Remove line below to keep package management utilities
     # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
     rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     rm -rf /var/cache/dnf && \
