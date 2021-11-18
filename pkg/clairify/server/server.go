@@ -276,7 +276,7 @@ func (s *Server) Start() error {
 		r.HandleFunc(fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA).Methods(http.MethodGet)
 		r.HandleFunc(fmt.Sprintf("/%s/image", root), s.ScanImage).Methods(http.MethodPost)
 		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.GetResultsByImage).Methods(http.MethodGet)
-	
+
 		r.HandleFunc(fmt.Sprintf("/%s/vulndefs/metadata", root), s.GetVulnDefsMetadata).Methods(http.MethodGet)
 	}
 

@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	ignorePaths = set.NewFrozenStringSet(
+	verifyPeerCertsAllowList = set.NewFrozenStringSet(
 		"/clairify/ping",
 		"/scanner/ping",
 	)
@@ -24,7 +24,7 @@ func VerifyPeerCerts() mux.MiddlewareFunc {
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if !skipPeerValidation && !ignorePaths.Contains(r.RequestURI) {
+			if !skipPeerValidation && !verifyPeerCertsAllowList.Contains(r.RequestURI) {
 				if err := mtls.VerifyCentralPeerCertificate(r); err != nil {
 					httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
 					return
