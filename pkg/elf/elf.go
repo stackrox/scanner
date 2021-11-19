@@ -1,38 +1,32 @@
 package elf
 
 import (
-	"bytes"
 	"debug/elf"
 	"io"
 
 	"github.com/stackrox/rox/pkg/set"
 )
 
-// MetaData contains the exacted metadata from ELF file
-type MetaData struct {
+// Metadata contains the exacted metadata from ELF file
+type Metadata struct {
+	// SoNames contains provided sonames for shared objects
 	SoNames           []string
 	ImportedLibraries []string
 }
 
 // IsElfExecutable tests if the data is in ELF format
 func IsElfExecutable(r io.ReaderAt) bool {
-	var elfBytes = make([]byte, len(elf.ELFMAG))
-
-	_, err := r.ReadAt(elfBytes, 0)
-	if err != nil || !bytes.Equal(elfBytes, []byte(elf.ELFMAG)) {
-		return false
-	}
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
 		return false
 	}
 
 	// Exclude core and other unknown elf file.
-	return set.NewIntSet(int(elf.ET_EXEC), int(elf.ET_DYN), int(elf.ET_REL)).Contains(int(elfFile.Type))
+	return set.NewFrozenIntSet(int(elf.ET_EXEC), int(elf.ET_DYN)).Contains(int(elfFile.Type))
 }
 
-// GetElfMetadataData extracts and returns ELF metadata
-func GetElfMetadataData(r io.ReaderAt) (*MetaData, error) {
+// GetElfMetadata extracts and returns ELF metadata
+func GetElfMetadata(r io.ReaderAt) (*Metadata, error) {
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
 		return nil, err
@@ -45,7 +39,7 @@ func GetElfMetadataData(r io.ReaderAt) (*MetaData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &MetaData{
+	return &Metadata{
 		SoNames:           soName,
 		ImportedLibraries: libraries,
 	}, nil

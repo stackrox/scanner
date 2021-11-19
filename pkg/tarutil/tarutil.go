@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
-	"fmt"
 	"io"
 	"os/exec"
 	"strings"
@@ -66,12 +65,8 @@ type FileData struct {
 	Contents []byte
 	// Executable indicates if the file is executable.
 	Executable bool
-	// ElfMetaData contains the dynamic library dependency metadata if the file is in ELF format.
-	ElfMetaData *elf.MetaData
-}
-
-func (f *FileData) String() string {
-	return string(f.Contents[:30]) + fmt.Sprintf("%v", f.Executable)
+	// ElfMetadata contains the dynamic library dependency metadata if the file is in ELF format.
+	ElfMetadata *elf.Metadata
 }
 
 // FilesMap is a map of files' paths to their contents.
@@ -144,10 +139,10 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 			isElf, _ := elfMatcher.Match(filename, hdr.FileInfo(), contents)
 			if isElf {
-				if elfMetadata, err := elf.GetElfMetadataData(contents); err != nil {
+				if elfMetadata, err := elf.GetElfMetadata(contents); err != nil {
 					log.Errorf("Failed to get dependencies for %s", filename)
 				} else {
-					fileData.ElfMetaData = elfMetadata
+					fileData.ElfMetadata = elfMetadata
 				}
 			}
 

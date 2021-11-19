@@ -55,7 +55,6 @@ func NewWhiteoutMatcher() Matcher {
 type executableMatcher struct{}
 
 func (e *executableMatcher) Match(_ string, fi os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
-	// Something
 	return fi.Mode().IsRegular() && fi.Mode()&0111 != 0, false
 }
 
@@ -103,7 +102,7 @@ func (lm *elfMatcher) Match(_ string, _ os.FileInfo, contents io.ReaderAt) (matc
 	return elf.IsElfExecutable(contents), false
 }
 
-// NewElfMatcher returns a matcher that matches if and only if any of the passed submatchers does.
+// NewElfMatcher returns a matcher that matches executables and shared objects in ELF format
 func NewElfMatcher() Matcher {
 	return &elfMatcher{}
 }

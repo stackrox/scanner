@@ -14,15 +14,15 @@ func TestIsElfExecutable(t *testing.T) {
 		isElf bool
 	}{
 		{
-			path:  "test_data/linux_true",
+			path:  "testdata/elf_exec",
 			isElf: true,
 		},
 		{
-			path:  "test_data/macho_true",
+			path:  "testdata/macho_exec",
 			isElf: false,
 		},
 		{
-			path:  "test_data/short",
+			path:  "testdata/README.md",
 			isElf: false,
 		},
 	}
@@ -36,10 +36,10 @@ func TestIsElfExecutable(t *testing.T) {
 }
 
 func TestGetImportedLibraries(t *testing.T) {
-	elfFile, err := os.Open("test_data/linux_true")
+	elfFile, err := os.Open("testdata/elf_exec")
 	require.NoError(t, err)
-	elfData, err := GetElfMetadataData(elfFile)
+	elfMetadata, err := GetElfMetadata(elfFile)
 	assert.NoError(t, err)
-	assert.NotZero(t, len(elfData.ImportedLibraries))
-	assert.Zero(t, len(elfData.SoNames))
+	assert.NotZero(t, len(elfMetadata.ImportedLibraries))
+	assert.Zero(t, len(elfMetadata.SoNames))
 }
