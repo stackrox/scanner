@@ -39,7 +39,9 @@ func SingletonMatcher() matcher.Matcher {
 			// Therefore, this matcher MUST be the last matcher.
 			executableMatcher := matcher.NewExecutableMatcher()
 
-			allMatchers = append(allMatchers, dpkgFilenamesMatcher, executableMatcher)
+			dynamicLibMatcher := matcher.NewRegexpMatcher(dpkg.DynamicLibRegexp)
+
+			allMatchers = append(allMatchers, dpkgFilenamesMatcher, dynamicLibMatcher, executableMatcher)
 		}
 
 		instance = matcher.NewOrMatcher(allMatchers...)
