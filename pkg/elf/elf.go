@@ -8,9 +8,8 @@ import (
 )
 
 type ElfData struct {
-	Sonames            []string
-	Dependencies       []string
-	SupportExecutables set.StringSet
+	Sonames           []string
+	ImportedLibraries []string
 }
 
 func IsKnownExecutable(r io.ReaderAt) bool {
@@ -34,13 +33,13 @@ func GetElfData(r io.ReaderAt)(*ElfData, error) {
 	if err != nil {
 		return nil, err
 	}
-	soname, err := elfFile.DynString(elf.DT_SONAME)
+	sonames, err := elfFile.DynString(elf.DT_SONAME)
 	dependencies, err := elfFile.ImportedLibraries()
 	if err != nil {
 		return nil, err
 	}
 	return &ElfData{
-		Sonames: soname,
-		Dependencies: dependencies,
+		Sonames:           sonames,
+		ImportedLibraries: dependencies,
 	}, nil
 }

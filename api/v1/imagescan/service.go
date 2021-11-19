@@ -2,7 +2,7 @@ package imagescan
 
 import (
 	"context"
-	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/api/v1/common"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/sirupsen/logrus"
@@ -78,43 +78,6 @@ func (s *serviceImpl) ScanImage(ctx context.Context, req *v1.ScanImageRequest) (
 	}, nil
 }
 
-type depData struct {
-	support      set.StringSet
-	dependencies []string
-	completed    bool
-}
-
-func getDepMap(dbLayer database.Layer) map[string]set.StringSet{
-	// Map from so to list of executables
-	depMap := make(map[string]set.StringSet)
-	for _, feature := range dbLayer.Features {
-		for needed, execs := range feature.NeededLibrariesMap {
-			if dep, ok := depMap[needed]; ok {
-				dep.AddAll(execs...)
-			} else {
-				depMap[needed] = set.NewStringSet(execs...)
-			}
-		}
-	}
-	return depMap
-}
-
-func fillIn(depMap map[string]*depData, data *depData) set.StringSet {
-	if data.completed {
-		return data.support
-	}
-	for _, soname := range data.dependencies {
-		if value, ok := depMap[soname]; !ok {
-			logrus.Warnf("Unresolved soname %s", soname)
-		} else {
-			executables := fillIn(depMap, value)
-			data.support = data.support.Union(executables)
-		}
-	}
-	data.completed = true
-	return data.support
-}
-
 func (s *serviceImpl) getLayer(layerName, lineage string, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
 	opts := &database.DatastoreOptions{
 		WithFeatures:        true,
@@ -128,7 +91,7 @@ func (s *serviceImpl) getLayer(layerName, lineage string, uncertifiedRHEL bool) 
 	} else if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	depMap := getDepMap(dbLayer)
+	depMap := common.GetDepMap(dbLayer.Features)
 	// This endpoint is not used, so not going to bother with notes until they are necessary.
 	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, lineage, opts, depMap)
 	if err != nil {

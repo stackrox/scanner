@@ -16,9 +16,7 @@ package clair
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
-	"github.com/stackrox/rox/pkg/utils"
 	"io"
 	"os"
 	"path/filepath"
@@ -272,54 +270,6 @@ type depData struct {
 	support      set.StringSet
 	dependencies []string
 	completed    bool
-}
-
-func enrichFilesMap(files tarutil.FilesMap) {
-	depMap := make(map[string]*depData)
-	for filePath, fileData := range files {
-		if fileData.ElfData == nil {
-			continue
-		}
-		for _, depPath := range append(fileData.ElfData.Sonames) {
-			data, ok := depMap[depPath]
-			if !ok {
-				data = &depData{}
-			}
-			data.support.Add(filePath)
-			data.dependencies = append(data.dependencies, fileData.ElfData.Dependencies...)
-			depMap[depPath] = data
-		}
-		fileData.ElfData.Sonames = nil
-	}
-	for filePath, fileData := range files {
-		if fileData.Executable && fileData.ElfData != nil {
-			value := &depData{dependencies: fileData.ElfData.Dependencies}
-			fillIn(depMap, value)
-			for exec := range value.support {
-				execFileData, ok := files[exec]
-				if !ok || execFileData.ElfData == nil {
-					utils.Must(errors.Errorf("Cannot find exec %s", exec))
-				}
-				execFileData.ElfData.SupportExecutables.Add("/" + filePath)
-			}
-		}
-	}
-}
-
-func fillIn(depMap map[string]*depData, data *depData) set.StringSet {
-	if data.completed {
-		return data.support
-	}
-	for _, soname := range data.dependencies {
-		if value, ok := depMap[soname]; !ok {
-			log.Warnf("Unresolved soname %s", soname)
-		} else {
-			executables := fillIn(depMap, value)
-			data.support = data.support.Union(executables)
-		}
-	}
-	data.completed = true
-	return data.support
 }
 
 func isDistroless(filesMap tarutil.FilesMap) bool {

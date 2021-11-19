@@ -39,6 +39,6 @@ func TestGetNeededLibraries(t *testing.T) {
 	require.NoError(t, err)
 	elfData, err := GetElfData(elfFile)
 	assert.NoError(t, err)
-	assert.NotZero(t, len(elfData.Dependencies))
+	assert.NotZero(t, len(elfData.ImportedLibraries))
 	assert.Zero(t, len(elfData.Sonames))
 }

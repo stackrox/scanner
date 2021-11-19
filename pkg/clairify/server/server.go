@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/stackrox/rox/pkg/set"
 	"io"
 	"net"
 	"net/http"
@@ -20,6 +19,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil"
 	v1 "github.com/stackrox/scanner/api/v1"
+	v1common "github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/database"
 	protoV1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
@@ -67,23 +67,6 @@ func clairError(w http.ResponseWriter, status int, err error) {
 	clairErrorString(w, status, err.Error())
 }
 
-func getDepMap(dbLayer database.Layer) map[string]set.StringSet{
-	// Map from so to list of executables
-	depMap := make(map[string]set.StringSet)
-	for _, feature := range dbLayer.Features {
-		logrus.Infof("getClairLayer feature %s", feature.ID)
-		for needed, execs := range feature.NeededLibrariesMap {
-			if dep, ok := depMap[needed]; ok {
-				dep.AddAll(execs...)
-			} else {
-				depMap[needed] = set.NewStringSet(execs...)
-			}
-		}
-	}
-	logrus.Infof("clair depMap %+v", depMap)
-	return depMap
-}
-
 func (s *Server) getClairLayer(w http.ResponseWriter, layerName, lineage string, uncertifiedRHEL bool) {
 	opts := &database.DatastoreOptions{
 		WithVulnerabilities: true,
@@ -99,7 +82,7 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName, lineage string,
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
-	depMap := getDepMap(dbLayer)
+	depMap := v1common.GetDepMap(dbLayer.Features)
 
 	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, lineage, opts, depMap)
 	if err != nil {

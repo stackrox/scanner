@@ -18,6 +18,7 @@ func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
 	// Map from libname to its dependency data
 	libToDep := make(map[string]*libDep)
 
+	// Build the map
 	for _, feature := range features {
 		for lib, dependencies := range feature.ProvidedLibraries {
 			for _, dep := range dependencies {
@@ -29,34 +30,36 @@ func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
 				libToDep[dep] = data
 			}
 		}
-		for needed, execs := range feature.NeededLibrariesMap {
-			if dep, ok := libToDep[needed]; ok {
+		// Add executables
+		for lib, execs := range feature.NeededLibrariesMap {
+			if dep, ok := libToDep[lib]; ok {
 				dep.executables.AddAll(execs...)
 			} else {
 				dep= &libDep{executables: set.NewStringSet(execs...)}
-				libToDep[needed] = dep
+				libToDep[lib] = dep
 			}
 		}
 	}
-	ret := make(map[string]set.StringSet)
+	// Traverse it and get the results
+	depMap := make(map[string]set.StringSet)
 	for k, v := range libToDep {
-		ret[k] = fillIn(libToDep, v)
+		depMap[k] = fillIn(libToDep, v)
 	}
-	return ret
+	return depMap
 }
 
-func fillIn(libToDep map[string]*libDep, data *libDep) set.StringSet {
-	if data.completed {
-		return data.executables
+func fillIn(libToDep map[string]*libDep, dep *libDep) set.StringSet {
+	if dep.completed {
+		return dep.executables
 	}
-	for soname := range data.libraries {
+	for soname := range dep.libraries {
 		if value, ok := libToDep[soname]; !ok {
 			logrus.Warnf("Unresolved soname %s", soname)
 		} else {
 			executables := fillIn(libToDep, value)
-			data.executables = data.executables.Union(executables)
+			dep.executables = dep.executables.Union(executables)
 		}
 	}
-	data.completed = true
-	return data.executables
+	dep.completed = true
+	return dep.executables
 }
