@@ -25,7 +25,7 @@ func VerifyPeerCerts() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if !skipPeerValidation && !verifyPeerCertsAllowList.Contains(r.RequestURI) {
-				if err := mtls.VerifyCentralPeerCertificate(r); err != nil {
+				if err := mtls.VerifyCentralPeerCertificate(r.TLS); err != nil {
 					httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
 					return
 				}

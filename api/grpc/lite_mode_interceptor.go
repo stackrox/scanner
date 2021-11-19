@@ -3,7 +3,6 @@ package grpc
 import (
 	"context"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -19,10 +18,8 @@ var (
 
 func liteModeUnaryServerInterceptor(liteMode bool) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		logrus.Infof("Lite Mode (%v): %v", liteMode, info.FullMethod)
 		if liteMode && !liteModeMethodsAllowlist.Contains(info.FullMethod) {
-			// TODO: ensure this is the right status code.
-			return nil, status.Error(codes.FailedPrecondition, "request not available in lite-mode")
+			return nil, status.Error(codes.PermissionDenied, "request not available in lite-mode")
 		}
 
 		return handler(ctx, req)
