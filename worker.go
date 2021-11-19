@@ -16,7 +16,6 @@ package clair
 
 import (
 	"fmt"
-	"github.com/stackrox/rox/pkg/set"
 	"io"
 	"os"
 	"path/filepath"
@@ -264,12 +263,6 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 	}
 
 	return detectFromFiles(files, name, parent, m.components, uncertifiedRHEL)
-}
-
-type depData struct {
-	support      set.StringSet
-	dependencies []string
-	completed    bool
 }
 
 func isDistroless(filesMap tarutil.FilesMap) bool {
