@@ -97,9 +97,10 @@ func NewOrMatcher(subMatchers ...Matcher) Matcher {
 	return &orMatcher{matchers: subMatchers}
 }
 
-type elfMatcher struct {}
-func (lm *elfMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (matches bool, extract bool) {
-	return elf.IsKnownExecutable(contents), false
+type elfMatcher struct{}
+
+func (lm *elfMatcher) Match(_ string, _ os.FileInfo, contents io.ReaderAt) (matches bool, extract bool) {
+	return elf.IsElfExecutable(contents), false
 }
 
 // NewElfMatcher returns a matcher that matches if and only if any of the passed submatchers does.
