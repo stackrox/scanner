@@ -5,11 +5,18 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/stackrox/scanner/api"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadConfig(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
-	_, err := LoadConfig(filepath.Dir(filename) + "/testdata/config.yaml")
+	cfg, err := LoadConfig(filepath.Dir(filename) + "/testdata/config.yaml")
 	assert.NoError(t, err)
+
+	assert.Equal(t, &api.Config{
+		HTTPSPort:   8080,
+		GRPCPort:    8081,
+		MetricsPort: nil,
+	}, cfg.API)
 }
