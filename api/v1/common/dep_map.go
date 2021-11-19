@@ -6,58 +6,57 @@ import (
 	"github.com/stackrox/scanner/database"
 )
 
-type depData struct {
-	support      set.StringSet
-	dependencies set.StringSet
+type libDep struct {
+	// Executables that uses this library
+	executables  set.StringSet
+	// Libraries that uses this library
+	libraries    set.StringSet
 	completed    bool
 }
 
 func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
-	// Map from so to list of executables
-	depMap := make(map[string]*depData)
-	ret := make(map[string]set.StringSet)
+	// Map from libname to its dependency data
+	libToDep := make(map[string]*libDep)
 
 	for _, feature := range features {
-		for provides, dependencies := range feature.ProvidedLibraries {
+		for lib, dependencies := range feature.ProvidedLibraries {
 			for _, dep := range dependencies {
-				data, ok := depMap[dep]
+				data, ok := libToDep[dep]
 				if !ok {
-					data = &depData{}
+					data = &libDep{}
 				}
-				data.dependencies.Add(provides)
-				depMap[dep] = data
+				data.libraries.Add(lib)
+				libToDep[dep] = data
 			}
 		}
 		for needed, execs := range feature.NeededLibrariesMap {
-			if dep, ok := depMap[needed]; ok {
-				dep.support.AddAll(execs...)
+			if dep, ok := libToDep[needed]; ok {
+				dep.executables.AddAll(execs...)
 			} else {
-				dep= &depData{support: set.NewStringSet(execs...)}
-				depMap[needed] = dep
+				dep= &libDep{executables: set.NewStringSet(execs...)}
+				libToDep[needed] = dep
 			}
 		}
 	}
-	for _, v := range depMap {
-		fillIn(depMap, v)
-	}
-	for k, v := range depMap {
-		ret[k] = v.support
+	ret := make(map[string]set.StringSet)
+	for k, v := range libToDep {
+		ret[k] = fillIn(libToDep, v)
 	}
 	return ret
 }
 
-func fillIn(depMap map[string]*depData, data *depData) set.StringSet {
+func fillIn(libToDep map[string]*libDep, data *libDep) set.StringSet {
 	if data.completed {
-		return data.support
+		return data.executables
 	}
-	for soname := range data.dependencies {
-		if value, ok := depMap[soname]; !ok {
+	for soname := range data.libraries {
+		if value, ok := libToDep[soname]; !ok {
 			logrus.Warnf("Unresolved soname %s", soname)
 		} else {
-			executables := fillIn(depMap, value)
-			data.support = data.support.Union(executables)
+			executables := fillIn(libToDep, value)
+			data.executables = data.executables.Union(executables)
 		}
 	}
 	data.completed = true
-	return data.support
+	return data.executables
 }
