@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/whiteout"
 )
 
@@ -54,6 +55,7 @@ func NewWhiteoutMatcher() Matcher {
 type executableMatcher struct{}
 
 func (e *executableMatcher) Match(_ string, fi os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
+	// Something
 	return fi.Mode().IsRegular() && fi.Mode()&0111 != 0, false
 }
 
@@ -93,4 +95,14 @@ func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.Rea
 // NewOrMatcher returns a matcher that matches if and only if any of the passed submatchers does.
 func NewOrMatcher(subMatchers ...Matcher) Matcher {
 	return &orMatcher{matchers: subMatchers}
+}
+
+type elfMatcher struct {}
+func (lm *elfMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (matches bool, extract bool) {
+	return elf.IsKnownExecutable(contents), false
+}
+
+// NewElfMatcher returns a matcher that matches if and only if any of the passed submatchers does.
+func NewElfMatcher() Matcher {
+	return &elfMatcher{}
 }
