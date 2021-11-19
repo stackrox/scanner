@@ -186,15 +186,15 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 			fileData := files[filename[1:]]
 			if fileData.Executable {
 				executables = append(executables, filename)
-				if fileData.ElfData != nil {
-					for _, dep := range fileData.ElfData.ImportedLibraries {
+				if fileData.ElfMetaData != nil {
+					for _, dep := range fileData.ElfMetaData.ImportedLibraries {
 						needed[dep] = append(needed[dep], filename)
 					}
 				}
 			}
-			if fileData.ElfData != nil {
-				for _, soname := range fileData.ElfData.Sonames {
-					provides[soname] = fileData.ElfData.ImportedLibraries
+			if fileData.ElfMetaData != nil {
+				for _, soname := range fileData.ElfMetaData.SoNames {
+					provides[soname] = fileData.ElfMetaData.ImportedLibraries
 				}
 			}
 		}
