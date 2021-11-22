@@ -243,7 +243,6 @@ func updateUbuntuLink(cfg config, vuln *database.Vulnerability) {
 	}
 }
 
-
 func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, cfg config) error {
 	baseVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
 	if err != nil {

@@ -42,12 +42,12 @@ func TestFilterFixableCentOSVulns(t *testing.T) {
 
 func TestUpdateUbuntuLink(t *testing.T) {
 	vuln := database.Vulnerability{
-		Name:      "CVE-2021-1234",
+		Name: "CVE-2021-1234",
 		Namespace: database.Namespace{
 			Name:          "ubuntu:21.10",
 			VersionFormat: "dpkg",
 		},
-		Link:      "https://ubuntu.com/security/CVE-2021-1234",
+		Link: "https://ubuntu.com/security/CVE-2021-1234",
 	}
 
 	cfg := config{UseLegacyUbuntuCVEURLPrefix: false}
