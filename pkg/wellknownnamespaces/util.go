@@ -13,7 +13,7 @@ func IsAlpineNamespace(namespace string) bool {
 // The namespace is expected to be of form `namespacename:version`.
 // For example: rhel:7, rhel:8, centos:8, ubuntu:14.04.
 func IsCentOSNamespace(namespace string) bool {
-	return strings.HasPrefix(namespace, "rhel")
+	return strings.HasPrefix(namespace, "centos")
 }
 
 // IsRHELNamespace returns true if the given argument identifies a RHEL namespace.
