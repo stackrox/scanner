@@ -219,7 +219,7 @@ func filterUbuntuLinuxKernelFeatures(vuln *database.Vulnerability) {
 func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnerability {
 	var filtered []database.Vulnerability
 	for _, vuln := range vulns {
-		if !strings.HasPrefix(vuln.Namespace.Name, "centos") {
+		if !namespaces.IsCentOSNamespace(vuln.Namespace.Name) {
 			filtered = append(filtered, vuln)
 			continue
 		}
@@ -236,6 +236,13 @@ func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnera
 	}
 	return filtered
 }
+
+func updateUbuntuLink(cfg config, vuln *database.Vulnerability) {
+	if cfg.UseLegacyUbuntuCVEURLPrefix && namespaces.IsUbuntuNamespace(vuln.Namespace.Name) {
+		vuln.Link = ubuntu.LegacyCVEURLPrefix + vuln.Link[len(ubuntu.CVEURLPrefix):]
+	}
+}
+
 
 func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, cfg config) error {
 	baseVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
@@ -276,9 +283,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 			}
 		}
 
-		if cfg.UseLegacyUbuntuCVEURLPrefix && namespaces.IsUbuntuNamespace(headVuln.Namespace.Name) {
-			headVuln.Link = ubuntu.LegacyCVEURLPrefix + headVuln.Link[len(ubuntu.CVEURLPrefix):]
-		}
+		updateUbuntuLink(cfg, &headVuln)
 
 		key := keyFromVuln(&headVuln)
 		matchingBaseVuln, found := baseVulnsMap[key]

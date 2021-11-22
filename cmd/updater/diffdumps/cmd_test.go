@@ -39,3 +39,22 @@ func TestFilterFixableCentOSVulns(t *testing.T) {
 		centOSVulnWithFixable, centOSVulnWithFixableAndNonFixable,
 	}, out)
 }
+
+func TestUpdateUbuntuLink(t *testing.T) {
+	vuln := database.Vulnerability{
+		Name:      "CVE-2021-1234",
+		Namespace: database.Namespace{
+			Name:          "ubuntu:21.10",
+			VersionFormat: "dpkg",
+		},
+		Link:      "https://ubuntu.com/security/CVE-2021-1234",
+	}
+
+	cfg := config{UseLegacyUbuntuCVEURLPrefix: false}
+	updateUbuntuLink(cfg, &vuln)
+	assert.Equal(t, "https://ubuntu.com/security/CVE-2021-1234", vuln.Link)
+
+	cfg.UseLegacyUbuntuCVEURLPrefix = true
+	updateUbuntuLink(cfg, &vuln)
+	assert.Equal(t, "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2021-1234", vuln.Link)
+}
