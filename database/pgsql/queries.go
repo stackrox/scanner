@@ -97,6 +97,10 @@ const (
 		WHERE ldf.featureversion_id = fv.id AND fv.feature_id = f.id AND f.namespace_id = fn.id
 		ORDER BY ltree.ordering`
 
+	insertLanguageComponentLayer = `
+		INSERT INTO LanguageLayer(layer_id, layer_name, lineage, component_data, removed_components)
+		VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`
+
 	searchLanguageComponentsInImage = `
 		WITH RECURSIVE layer_tree(id, name, parent_id, depth, path, cycle) AS(
 			SELECT l.id, l.name, l.parent_id, 1, ARRAY[l.id], false
