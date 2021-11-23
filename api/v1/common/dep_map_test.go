@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stretchr/testify/assert"
@@ -12,68 +11,68 @@ func TestEnrichSoMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		// A base library without any dependencies
 		"x1": {
-			ProvidedLibraries: map[string][]string{
+			LibraryToDependencies: database.StringToStringsMap{
 				"x1.so.1": {},
 			},
-			NeededLibrariesMap: map[string][]string{},
+			DependencyToExecutables: database.StringToStringsMap{},
 		},
 		// An upper layer library depends on x
 		"z1": {
-			ProvidedLibraries: map[string][]string{
-				"z1.so.1": {"x1.so.1"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"z1.so.1": set.NewStringSet("x1.so.1"),
 			},
-			NeededLibrariesMap: map[string][]string{
-				"x1.so.1": {"/bin/z1_exec1", "/bin/z1_exec2"},
+			DependencyToExecutables: database.StringToStringsMap{
+				"x1.so.1": set.NewStringSet("/bin/z1_exec1", "/bin/z1_exec2"),
 			},
 		},
 		// An executable package depends on that depends on both libraries
 		"v1": {
-			ProvidedLibraries: map[string][]string{},
-			NeededLibrariesMap: map[string][]string{
-				"x1.so.1": {"/bin/v1_exec1", "/bin/v1_exec4"},
-				"z1.so.1": {"/bin/v1_exec2", "/bin/v1_exec3"},
+			LibraryToDependencies: database.StringToStringsMap{},
+			DependencyToExecutables: database.StringToStringsMap{
+				"x1.so.1": set.NewStringSet("/bin/v1_exec1", "/bin/v1_exec4"),
+				"z1.so.1": set.NewStringSet("/bin/v1_exec2", "/bin/v1_exec3"),
 			},
 		},
 		// An executable package that depends on upper layer library z1
 		"v2": {
-			NeededLibrariesMap: map[string][]string{
-				"z1.so.1": {"/bin/v2_exec1", "/bin/v2_exec2"},
+			DependencyToExecutables: database.StringToStringsMap{
+				"z1.so.1": set.NewStringSet("/bin/v2_exec1", "/bin/v2_exec2"),
 			},
 		},
 		// An executable package depends on base library x1
 		"v3": {
-			NeededLibrariesMap: map[string][]string{
-				"x1.so.1": {"/bin/v3_exec1"},
+			DependencyToExecutables: database.StringToStringsMap{
+				"x1.so.1": set.NewStringSet("/bin/v3_exec1"),
 			},
 		},
 		// A compatible library for the upper layer library that is not executable
 		"z1-compatible": {
-			ProvidedLibraries: map[string][]string{
-				"z1.so.1": {"x1.so.1", "y.so.1"},
-				"z1.so.1.7": {"x1.so.1", "y.so.1"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"z1.so.1": set.NewStringSet("x1.so.1", "y.so.1"),
+				"z1.so.1.7": set.NewStringSet("x1.so.1", "y.so.1"),
 			},
-			NeededLibrariesMap: map[string][]string{
-				"x1.so.1": {"/bin/z1c_exec1"},
-				"y.so.1": {"/bin/z1c_exec2"},
+			DependencyToExecutables: database.StringToStringsMap{
+				"x1.so.1": set.NewStringSet("/bin/z1c_exec1"),
+				"y.so.1":  set.NewStringSet("/bin/z1c_exec2"),
 			},
 		},
 		// An executable package that depends on the compatible library z1-compatible
 		"v4": {
-			NeededLibrariesMap: map[string][]string{
-				"z1.so.1.7": {"/bin/v4_exec1"},
+			DependencyToExecutables: database.StringToStringsMap{
+				"z1.so.1.7": set.NewStringSet("/bin/v4_exec1"),
 			},
 		},
 		// The library used by the compatible library.
 		"y": {
-			ProvidedLibraries: map[string][]string{
+			LibraryToDependencies: database.StringToStringsMap{
 				"y.so.1": {},
 			},
 		},
 		// Some executable package with an unresolved dependency, it is not a perfect world
 		"v5": {
-			NeededLibrariesMap: map[string][]string{
-				"unresolved.so.9": {"/bin/v5_exec1"},
-				"y.so.1": {"/bin/v5_exec2"},
+			DependencyToExecutables: database.StringToStringsMap{
+				"unresolved.so.9": {"/bin/v5_exec1": {}},
+				"y.so.1": {"/bin/v5_exec2": {}},
 			},
 		},
 	}
@@ -82,36 +81,129 @@ func TestEnrichSoMap(t *testing.T) {
 		features = append(features, feature)
 	}
 	depMap := GetDepMap(features)
-	for k, v := range depMap {
-		fmt.Println(k, v)
-	}
 
-	assert.Equal(t, featureMap["v4"].NeededLibrariesMap["z1.so.1.7"],  depMap["z1.so.1.7"].AsSlice())
+	assert.Equal(t, featureMap["v4"].DependencyToExecutables["z1.so.1.7"],  depMap["z1.so.1.7"])
 	// assert.NotContains(t, depMap, "unresolved.so.9")
 
-	verifyAndRemove(t, depMap["y.so.1"], depMap["z1.so.1.7"].AsSlice()...)
-	verifyAndRemove(t, depMap["y.so.1"], depMap["z1.so.1"].AsSlice()...)
-	verifyAndRemove(t, depMap["y.so.1"], featureMap["v5"].NeededLibrariesMap["y.so.1"]...)
-	verifyAndRemove(t, depMap["y.so.1"], featureMap["z1-compatible"].NeededLibrariesMap["y.so.1"]...)
+	verifyAndRemove(t, depMap["y.so.1"], depMap["z1.so.1.7"])
+	verifyAndRemove(t, depMap["y.so.1"], depMap["z1.so.1"])
+	verifyAndRemove(t, depMap["y.so.1"], featureMap["v5"].DependencyToExecutables["y.so.1"])
+	verifyAndRemove(t, depMap["y.so.1"], featureMap["z1-compatible"].DependencyToExecutables["y.so.1"])
 	assert.Empty(t, depMap["y.so.1"])
 
-	verifyAndRemove(t, depMap["x1.so.1"], depMap["z1.so.1.7"].AsSlice()...)
-	verifyAndRemove(t, depMap["x1.so.1"], depMap["z1.so.1"].AsSlice()...)
-	verifyAndRemove(t, depMap["x1.so.1"], featureMap["z1"].NeededLibrariesMap["x1.so.1"]...)
-	verifyAndRemove(t, depMap["x1.so.1"], featureMap["z1-compatible"].NeededLibrariesMap["x1.so.1"]...)
-	verifyAndRemove(t, depMap["x1.so.1"], featureMap["v3"].NeededLibrariesMap["x1.so.1"]...)
-	verifyAndRemove(t, depMap["x1.so.1"], featureMap["v1"].NeededLibrariesMap["x1.so.1"]...)
+	verifyAndRemove(t, depMap["x1.so.1"], depMap["z1.so.1.7"])
+	verifyAndRemove(t, depMap["x1.so.1"], depMap["z1.so.1"])
+	verifyAndRemove(t, depMap["x1.so.1"], featureMap["z1"].DependencyToExecutables["x1.so.1"])
+	verifyAndRemove(t, depMap["x1.so.1"], featureMap["z1-compatible"].DependencyToExecutables["x1.so.1"])
+	verifyAndRemove(t, depMap["x1.so.1"], featureMap["v3"].DependencyToExecutables["x1.so.1"])
+	verifyAndRemove(t, depMap["x1.so.1"], featureMap["v1"].DependencyToExecutables["x1.so.1"])
 	assert.Empty(t, depMap["x1.so.1"])
 
-	verifyAndRemove(t, depMap["z1.so.1"], featureMap["v2"].NeededLibrariesMap["z1.so.1"]...)
-	verifyAndRemove(t, depMap["z1.so.1"], featureMap["v1"].NeededLibrariesMap["z1.so.1"]...)
+	verifyAndRemove(t, depMap["z1.so.1"], featureMap["v2"].DependencyToExecutables["z1.so.1"])
+	verifyAndRemove(t, depMap["z1.so.1"], featureMap["v1"].DependencyToExecutables["z1.so.1"])
 	assert.Empty(t, depMap["z1.so.1"])
-
-
 }
 
-func verifyAndRemove(t *testing.T, d set.StringSet, items ...string) {
-	for _, item := range items {
+func TestLoopDepMap(t *testing.T) {
+	featureMap := map[string]database.FeatureVersion{
+		"x": {
+			LibraryToDependencies: database.StringToStringsMap{
+				"x.so.1": {"z.so.1": {}},
+			},
+			DependencyToExecutables: database.StringToStringsMap{
+				"z.so.1" : {"/bin/x_exec": {}},
+			},
+		},
+		"y": {
+			LibraryToDependencies: database.StringToStringsMap{
+				"y.so.1": {"x.so.1": {}},
+			},
+			DependencyToExecutables: database.StringToStringsMap{
+				"x.so.1" : {"/bin/y_exec": {}},
+			},
+		},
+		"y1": {
+			LibraryToDependencies: database.StringToStringsMap{
+				"y1.so.1": {"y.so.1": {}},
+			},
+			DependencyToExecutables: database.StringToStringsMap{
+				"y.so.1" : {"/bin/y1_exec": {}},
+			},
+		},
+		"z": {
+			LibraryToDependencies: database.StringToStringsMap{
+				"z.so.1": {"y1.so.1": {}},
+			},
+			DependencyToExecutables: database.StringToStringsMap{
+				"y1.so.1" : {"/bin/z_exec": {}},
+			},
+		},
+	}
+	var features []database.FeatureVersion
+	for _, feature := range featureMap {
+		features = append(features, feature)
+	}
+	depMap := GetDepMap(features)
+	assert.Len(t, depMap, 4)
+	assert.Equal(t, depMap["x.so.1"], depMap["y.so.1"], depMap["z.so.1"], depMap["y1.so.1"])
+	assert.Len(t, depMap["x.so.1"], 4)
+}
+
+func TestDoubleLoopDepMap(t *testing.T) {
+	featureMap := map[string]database.FeatureVersion{
+		"x": {
+			LibraryToDependencies: database.StringToStringsMap{
+				"x.so.1": {"z.so.1": {}},
+			},
+			DependencyToExecutables: database.StringToStringsMap{
+				"z.so.1" : {"/bin/x_exec": {}},
+			},
+		},
+		"y": {
+			LibraryToDependencies: database.StringToStringsMap{
+				"y.so.1": {"x.so.1": {}},
+			},
+			DependencyToExecutables: database.StringToStringsMap{
+				"x.so.1" : {"/bin/y_exec": {}},
+			},
+		},
+		"z": {
+			LibraryToDependencies: database.StringToStringsMap{
+				"z.so.1": {"y.so.1": {}, "z2.so.1": {}},
+			},
+			DependencyToExecutables: database.StringToStringsMap{
+				"y.so.1" : {"/bin/z_exec": {}},
+			},
+		},
+		"z1": {
+			LibraryToDependencies: database.StringToStringsMap{
+				"z1.so.1": {"z.so.1": {}},
+			},
+			DependencyToExecutables: database.StringToStringsMap{
+				"z.so.1" : {"/bin/z1_exec": {}},
+			},
+		},
+		"z2": {
+			LibraryToDependencies: database.StringToStringsMap{
+				"z2.so.1": {"z1.so.1": {}},
+			},
+			DependencyToExecutables: database.StringToStringsMap{
+				"z1.so.1" : {"/bin/z2_exec": {}},
+			},
+		},
+	}
+	var features []database.FeatureVersion
+	for _, feature := range featureMap {
+		features = append(features, feature)
+	}
+	depMap := GetDepMap(features)
+	assert.Len(t, depMap, 5)
+	assert.Equal(t, depMap["x.so.1"], depMap["y.so.1"], depMap["z.so.1"], depMap["z1.so.1"], depMap["z2.so.1"])
+	assert.Len(t, depMap["x.so.1"], 5)
+}
+
+func verifyAndRemove(t *testing.T, d set.StringSet, items set.StringSet) {
+	for item := range items {
 		assert.True(t, d.Remove(item))
 	}
 }

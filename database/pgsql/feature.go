@@ -146,8 +146,8 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 		featureID,
 		fv.Version,
 		pq.Array(fv.ProvidedExecutables),
-		database.StringMapArrayString(fv.LibraryDepsToLibraries),
-		database.StringMapArrayString(fv.LibraryDepsToExecutables),
+		database.NewStringToStringsMap(fv.LibraryToDependencies),
+		database.NewStringToStringsMap(fv.DependencyToExecutables),
 	).Scan(&fv.ID)
 	metrics.ObserveQueryTime("insertFeatureVersion", "insertFeatureVersion", t)
 

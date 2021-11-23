@@ -197,7 +197,7 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 	}
 
 	executables := set.NewStringSet(dbFeatureVersion.ProvidedExecutables...)
-	for lib := range dbFeatureVersion.ProvidedLibraries {
+	for lib := range dbFeatureVersion.LibraryToDependencies {
 		executables = executables.Union(depMap[lib])
 	}
 

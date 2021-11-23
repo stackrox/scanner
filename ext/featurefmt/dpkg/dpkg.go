@@ -162,8 +162,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	}
 
 	var executables []string
-	provides := make(database.DependencyMap)
-	needed := make(database.DependencyMap)
+	libToDeps := make(database.StringToStringsMap)
+	depToExecs := make(database.StringToStringsMap)
 	// Distroless containers do not provide executable files the same way distro containers do.
 	if !distroless && features.ActiveVulnMgmt.Enabled() {
 		// for example: var/lib/dpkg/info/vim.list
@@ -187,13 +187,15 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 				executables = append(executables, filename)
 				if fileData.ElfMetadata != nil {
 					for _, dep := range fileData.ElfMetadata.ImportedLibraries {
-						needed[dep] = append(needed[dep], filename)
+						execs := depToExecs[dep]
+						execs.Add(filename)
+						depToExecs[dep] = execs
 					}
 				}
 			}
 			if fileData.ElfMetadata != nil {
 				for _, soname := range fileData.ElfMetadata.SoNames {
-					provides[soname] = fileData.ElfMetadata.ImportedLibraries
+					libToDeps[soname] = set.NewStringSet(fileData.ElfMetadata.ImportedLibraries...)
 				}
 			}
 		}
@@ -215,14 +217,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	if feature, exists := packagesMap[key]; exists {
 		// Append the executable files for the associated package to the source package.
 		feature.ProvidedExecutables = append(feature.ProvidedExecutables, executables...)
-		feature.LibraryDepsToLibraries.Merge(provides)
-		for k, v := range needed {
-			if existValues, ok := feature.LibraryDepsToExecutables[k]; !ok {
-				feature.LibraryDepsToExecutables[k] = v
-			} else {
-				feature.LibraryDepsToExecutables[k] = append(existValues, v...)
-			}
-		}
+		feature.LibraryToDependencies.Merge(libToDeps)
+		feature.DependencyToExecutables.Merge(depToExecs)
 		return
 	}
 
@@ -230,10 +226,10 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		Feature: database.Feature{
 			Name: pkgName,
 		},
-		Version:             pkgVersion,
-		ProvidedExecutables: executables,
-		LibraryDepsToLibraries:   provides,
-		LibraryDepsToExecutables:  needed,
+		Version:                 pkgVersion,
+		ProvidedExecutables:     executables,
+		LibraryToDependencies:   libToDeps,
+		DependencyToExecutables: depToExecs,
 	}
 }
 

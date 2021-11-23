@@ -48,8 +48,11 @@ func (m *StringToStringsMap) Scan(value interface{}) error {
 //    b contains str_a -> ["b", "c"]
 // Then after merging:
 //    a contains str_a -> {"a", "b", "c"}
-func (m StringToStringsMap) Merge(b StringToStringsMap) {
+func (m *StringToStringsMap) Merge(b StringToStringsMap) {
+	if *m == nil {
+		*m = make(StringToStringsMap)
+	}
 	for k, v := range b {
-		m[k] = m[k].Union(v)
+		(*m)[k] = (*m)[k].Union(v)
 	}
 }

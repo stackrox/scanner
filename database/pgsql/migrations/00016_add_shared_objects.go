@@ -6,8 +6,8 @@ func init() {
 	RegisterMigration(migrate.Migration{
 		ID: 16,
 		Up: migrate.Queries([]string{
-			`ALTER TABLE FeatureVersion ADD COLUMN lib_deps_to_libs JSONB`,
-			`ALTER TABLE FeatureVersion ADD COLUMN lib_deps_to_execs JSONB`,
+			`ALTER TABLE FeatureVersion ADD COLUMN library_to_dependencies JSONB`,
+			`ALTER TABLE FeatureVersion ADD COLUMN dependency_to_executables JSONB`,
 		}),
 	})
 }
