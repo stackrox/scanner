@@ -72,9 +72,9 @@ type Layer struct {
 // A known issue is if a file defines multiple features, and the file is modified between layers in a way
 // that does affect the features it describes (adds, updates, or removes features), which is currently only a
 // concern for the Java source type. However, this event is unlikely, which is why it is not considered at this time.
-func getLanguageData(db database.Datastore, layerName, lineage string, uncertifiedRHEL bool) ([]database.FeatureVersion, error) {
+func getLanguageData(db database.Datastore, layerName, lineage string, opts *database.DatastoreOptions) ([]database.FeatureVersion, error) {
 	layersToComponents, err := db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
-		UncertifiedRHEL: uncertifiedRHEL,
+		UncertifiedRHEL: opts.GetUncertifiedRHEL(),
 	})
 	if err != nil {
 		return nil, err
@@ -128,7 +128,7 @@ func getLanguageData(db database.Datastore, layerName, lineage string, uncertifi
 			}
 		}
 
-		newFeatures := cpe.CheckForVulnerabilities(layerToComponents.Layer, components)
+		newFeatures := cpe.CheckForFeatures(layerToComponents.Layer, components, opts.GetWithVulnerabilities())
 		for _, fv := range newFeatures {
 			location := fv.Feature.Location
 			featureValue := languageFeatureValue{
@@ -242,10 +242,9 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 
 // addLanguageVulns adds language-based features into the given layer.
 // Assumes layer is not nil.
-func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, withVulnerabilities, uncertifiedRHEL bool) {
+func addLanguageFeatures(db database.Datastore, layer *Layer, lineage string, opts *database.DatastoreOptions) {
 	// Add Language Features
-	// TODO: ignore vulns at this level?
-	languageFeatureVersions, err := getLanguageData(db, layer.Name, lineage, uncertifiedRHEL)
+	languageFeatureVersions, err := getLanguageData(db, layer.Name, lineage, opts)
 	if err != nil {
 		log.Errorf("error getting language data: %v", err)
 		return
@@ -253,11 +252,9 @@ func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, withV
 
 	var languageFeatures []Feature
 	for _, dbFeatureVersion := range languageFeatureVersions {
-		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
+		feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL())
 		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
-			if withVulnerabilities { // TODO: can optimize by filtering out vulns earlier.
-				updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
-			}
+			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
 			languageFeatures = append(languageFeatures, *feature)
 		}
 	}
@@ -287,26 +284,11 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 		layer.ParentName = dbLayer.Parent.Name
 	}
 
-	var notes []Note
 	if dbLayer.Namespace != nil {
 		layer.NamespaceName = dbLayer.Namespace.Name
-
-		if namespaces.KnownStaleNamespaces.Contains(layer.NamespaceName) {
-			notes = append(notes, OSCVEsStale)
-		} else if !namespaces.KnownSupportedNamespaces.Contains(layer.NamespaceName) {
-			notes = append(notes, OSCVEsUnavailable)
-		}
-	} else {
-		notes = append(notes, OSCVEsUnavailable)
 	}
 
-	if !env.LanguageVulns.Enabled() {
-		notes = append(notes, LanguageCVEsUnavailable)
-	}
-	if uncertifiedRHEL {
-		// Uncertified results were requested.
-		notes = append(notes, CertifiedRHELScanUnavailable)
-	}
+	notes := GetNotes(layer.NamespaceName, uncertifiedRHEL)
 
 	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
@@ -330,7 +312,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			}
 		}
 		if env.LanguageVulns.Enabled() {
-			addLanguageVulns(db, &layer, lineage, withVulnerabilities, uncertifiedRHEL)
+			addLanguageFeatures(db, &layer, lineage, opts)
 		}
 	}
 
@@ -356,6 +338,31 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 		allVulnsFixedBy = higherVersion
 	}
 	feature.FixedBy = allVulnsFixedBy
+}
+
+// GetNotes returns scan notes based on the given arguments.
+func GetNotes(namespaceName string, uncertifiedRHEL bool) []Note {
+	var notes []Note
+	if namespaceName != "" {
+		if namespaces.KnownStaleNamespaces.Contains(namespaceName) {
+			notes = append(notes, OSCVEsStale)
+		} else if !namespaces.KnownSupportedNamespaces.Contains(namespaceName) {
+			notes = append(notes, OSCVEsUnavailable)
+		}
+	} else {
+		notes = append(notes, OSCVEsUnavailable)
+	}
+
+	if !env.LanguageVulns.Enabled() {
+		notes = append(notes, LanguageCVEsUnavailable)
+	}
+
+	if uncertifiedRHEL {
+		// Uncertified results were requested.
+		notes = append(notes, CertifiedRHELScanUnavailable)
+	}
+
+	return notes
 }
 
 // Namespace is the image's base OS.

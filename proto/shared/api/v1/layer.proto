@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option go_package = "scannerV1";
+option java_package = "io.stackrox.proto.api.scanner.v1";
+
+import "shared/api/v1/vulnerability.proto";
+
+package scannerV1;
+
+message Layers {
+  repeated Layer layers = 1;
+  repeated Note  notes  = 2;
+}
+
+message Layer {
+  string             digest     = 1;
+  Namespace          namespace  = 2;
+  repeated Component components = 3;
+}
+
+message Namespace {
+  string name       = 1; // ex: ubuntu:18.04
+  bool   distroless = 2;
+}
+
+message Component {
+  SourceType type                   = 1;
+  string     name                   = 2;
+  string     version                = 3;
+  string     arch                   = 4; // For RHEL-based images.
+  string     module                 = 5; // For RHEL-based images.
+  oneof is_language_level {
+    LanguageLevelData language_data = 6;
+  }
+  repeated Executable executables   = 7; // For Active Vulnerability Management.
+}
+
+enum Note {
+  OS_CVES_UNAVAILABLE             = 0;
+  OS_CVES_STALE                   = 1;
+  LANGUAGE_CVES_UNAVAILABLE       = 2;
+  CERTIFIED_RHEL_SCAN_UNAVAILABLE = 3;
+}
+
+enum SourceType {
+  UNSET_SOURCE_TYPE = 0;
+  JAVA              = 1;
+  PYTHON            = 2;
+  NPM               = 3;
+  GEM               = 4;
+  DOTNETCORERUNTIME = 5;
+}
+
+message LanguageLevelData {
+  string location           = 1;
+  bytes  data               = 2;
+  bytes  removed_components = 3;
+}

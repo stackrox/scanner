@@ -107,9 +107,9 @@ func getAttributes(c *component.Component) []*wfn.Attributes {
 	return attrs
 }
 
-// CheckForVulnerabilities returns matching vulnerabilities for the given components in the given layer.
-// The vulnerabilities are from the NVD data source.
-func CheckForVulnerabilities(layer string, components []*component.Component) []database.FeatureVersion {
+// CheckForFeatures returns matching features for the given components in the given layer.
+// If vulnerabilities are requested, they are from the NVD data source.
+func CheckForFeatures(layer string, components []*component.Component, withVulnerabilities bool) []database.FeatureVersion {
 	cache := nvdtoolscache.Singleton()
 	var matchResults []match.Result
 
