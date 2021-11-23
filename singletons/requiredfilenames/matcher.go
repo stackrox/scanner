@@ -1,6 +1,7 @@
 package requiredfilenames
 
 import (
+	"regexp"
 	"sync"
 
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -11,8 +12,9 @@ import (
 )
 
 var (
-	instance matcher.Matcher
-	once     sync.Once
+	instance         matcher.Matcher
+	once             sync.Once
+	dynamicLibRegexp = regexp.MustCompile(`(^|/)lib[^/.]*\.so(\.[^/.]+)*$`)
 )
 
 // SingletonMatcher returns the singleton matcher instance to use for extracting
@@ -39,7 +41,9 @@ func SingletonMatcher() matcher.Matcher {
 			// Therefore, this matcher MUST be the last matcher.
 			executableMatcher := matcher.NewExecutableMatcher()
 
-			allMatchers = append(allMatchers, dpkgFilenamesMatcher, executableMatcher)
+			dynamicLibMatcher := matcher.NewRegexpMatcher(dynamicLibRegexp)
+
+			allMatchers = append(allMatchers, dpkgFilenamesMatcher, executableMatcher, dynamicLibMatcher)
 		}
 
 		instance = matcher.NewOrMatcher(allMatchers...)
