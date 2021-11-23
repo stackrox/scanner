@@ -2,6 +2,7 @@ package imagescan
 
 import (
 	"context"
+	"github.com/stackrox/scanner/api/v1/common"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/sirupsen/logrus"
@@ -90,9 +91,9 @@ func (s *serviceImpl) getLayer(layerName, lineage string, uncertifiedRHEL bool) 
 	} else if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
+	depMap := common.GetDepMap(dbLayer.Features)
 	// This endpoint is not used, so not going to bother with notes until they are necessary.
-	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, lineage, opts)
+	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, lineage, opts, depMap)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

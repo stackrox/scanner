@@ -19,6 +19,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil"
 	v1 "github.com/stackrox/scanner/api/v1"
+	v1common "github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/database"
 	protoV1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
@@ -81,8 +82,9 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName, lineage string,
 		clairError(w, http.StatusInternalServerError, err)
 		return
 	}
+	depMap := v1common.GetDepMap(dbLayer.Features)
 
-	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, lineage, opts)
+	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, lineage, opts, depMap)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
