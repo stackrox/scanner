@@ -187,7 +187,7 @@ type Datastore interface {
 	GetLayerBySHA(sha string, opts *DatastoreOptions) (string, string, bool, error)
 	GetLayerByName(name string, opts *DatastoreOptions) (string, string, bool, error)
 	AddImage(layer, lineage, digest, name string, opts *DatastoreOptions) error
-	InsertLayerComponents(l, lineage string, c []*component.Component, r []string, opts *DatastoreOptions) error
+	InsertLayerComponents(l, lineage string, components []*component.Component, removedComponents []string, opts *DatastoreOptions) error
 
 	GetLayerLanguageComponents(layer, lineage string, opts *DatastoreOptions) ([]*component.LayerToComponents, error)
 

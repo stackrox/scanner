@@ -207,9 +207,9 @@ func (mds *MockDatastore) AddImage(layer, lineage, digest, name string, opts *Da
 	panic("required mock function not implemented")
 }
 
-func (mds *MockDatastore) InsertLayerComponents(l, lineage string, c []*component.Component, r []string, opts *DatastoreOptions) error {
+func (mds *MockDatastore) InsertLayerComponents(l, lineage string, components []*component.Component, removedComponents []string, opts *DatastoreOptions) error {
 	if mds.FctInsertLayerComponents != nil {
-		return mds.FctInsertLayerComponents(l, lineage, c, r, opts)
+		return mds.FctInsertLayerComponents(l, lineage, components, removedComponents, opts)
 	}
 	panic("required mock function not implemented")
 }
