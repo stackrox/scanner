@@ -83,27 +83,27 @@ func TestEnrichSoMap(t *testing.T) {
 	depMap := GetDepMap(features)
 
 	assert.Equal(t, featureMap["v4"].DependencyToExecutables["z1.so.1.7"],  depMap["z1.so.1.7"])
-	// assert.NotContains(t, depMap, "unresolved.so.9")
 
-	verifyAndRemove(t, depMap["y.so.1"], depMap["z1.so.1.7"])
-	verifyAndRemove(t, depMap["y.so.1"], depMap["z1.so.1"])
-	verifyAndRemove(t, depMap["y.so.1"], featureMap["v5"].DependencyToExecutables["y.so.1"])
-	verifyAndRemove(t, depMap["y.so.1"], featureMap["z1-compatible"].DependencyToExecutables["y.so.1"])
-	assert.Empty(t, depMap["y.so.1"])
+	assert.Equal(t, depMap["y.so.1"], depMap["z1.so.1.7"].
+		Union(depMap["z1.so.1"]).
+		Union(featureMap["v5"].DependencyToExecutables["y.so.1"]).
+		Union(featureMap["z1-compatible"].DependencyToExecutables["y.so.1"]))
 
-	verifyAndRemove(t, depMap["x1.so.1"], depMap["z1.so.1.7"])
-	verifyAndRemove(t, depMap["x1.so.1"], depMap["z1.so.1"])
-	verifyAndRemove(t, depMap["x1.so.1"], featureMap["z1"].DependencyToExecutables["x1.so.1"])
-	verifyAndRemove(t, depMap["x1.so.1"], featureMap["z1-compatible"].DependencyToExecutables["x1.so.1"])
-	verifyAndRemove(t, depMap["x1.so.1"], featureMap["v3"].DependencyToExecutables["x1.so.1"])
-	verifyAndRemove(t, depMap["x1.so.1"], featureMap["v1"].DependencyToExecutables["x1.so.1"])
-	assert.Empty(t, depMap["x1.so.1"])
+	assert.Equal(t, depMap["x1.so.1"], depMap["z1.so.1.7"].
+		Union(depMap["z1.so.1"]).
+		Union(featureMap["z1"].DependencyToExecutables["x1.so.1"]).
+		Union(featureMap["z1-compatible"].DependencyToExecutables["x1.so.1"]).
+		Union(featureMap["v3"].DependencyToExecutables["x1.so.1"]).
+		Union(featureMap["v1"].DependencyToExecutables["x1.so.1"]))
 
-	verifyAndRemove(t, depMap["z1.so.1"], featureMap["v2"].DependencyToExecutables["z1.so.1"])
-	verifyAndRemove(t, depMap["z1.so.1"], featureMap["v1"].DependencyToExecutables["z1.so.1"])
-	assert.Empty(t, depMap["z1.so.1"])
+	assert.Equal(t, depMap["z1.so.1"], featureMap["v2"].DependencyToExecutables["z1.so.1"].
+		Union(featureMap["v1"].DependencyToExecutables["z1.so.1"]))
 }
 
+// Test Topology:
+//         x -> y -> z
+//         ^         |
+//         |_________|
 func TestLoopDepMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		"x": {
@@ -122,20 +122,12 @@ func TestLoopDepMap(t *testing.T) {
 				"x.so.1" : {"/bin/y_exec": {}},
 			},
 		},
-		"y1": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"y1.so.1": {"y.so.1": {}},
-			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"y.so.1" : {"/bin/y1_exec": {}},
-			},
-		},
 		"z": {
 			LibraryToDependencies: database.StringToStringsMap{
-				"z.so.1": {"y1.so.1": {}},
+				"z.so.1": {"y.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
-				"y1.so.1" : {"/bin/z_exec": {}},
+				"y.so.1" : {"/bin/z_exec": {}},
 			},
 		},
 	}
@@ -144,11 +136,17 @@ func TestLoopDepMap(t *testing.T) {
 		features = append(features, feature)
 	}
 	depMap := GetDepMap(features)
-	assert.Len(t, depMap, 4)
-	assert.Equal(t, depMap["x.so.1"], depMap["y.so.1"], depMap["z.so.1"], depMap["y1.so.1"])
-	assert.Len(t, depMap["x.so.1"], 4)
+	assert.Len(t, depMap, 3)
+	assert.Equal(t, depMap["x.so.1"], depMap["y.so.1"], depMap["z.so.1"])
+	assert.Len(t, depMap["x.so.1"], 3)
 }
 
+// Test Topology:
+//                   |------------
+//                   v           |
+//         x -> y -> z -> z1 -> z2
+//         ^         |
+//         |_________|
 func TestDoubleLoopDepMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		"x": {
@@ -200,10 +198,4 @@ func TestDoubleLoopDepMap(t *testing.T) {
 	assert.Len(t, depMap, 5)
 	assert.Equal(t, depMap["x.so.1"], depMap["y.so.1"], depMap["z.so.1"], depMap["z1.so.1"], depMap["z2.so.1"])
 	assert.Len(t, depMap["x.so.1"], 5)
-}
-
-func verifyAndRemove(t *testing.T, d set.StringSet, items set.StringSet) {
-	for item := range items {
-		assert.True(t, d.Remove(item))
-	}
 }
