@@ -37,7 +37,11 @@ import (
 const (
 	trackerGitURL = "git://git.launchpad.net/ubuntu-cve-tracker"
 	updaterFlag   = "ubuntuUpdater"
-	cveURL        = "http://people.ubuntu.com/~ubuntu-security/cve/%s"
+
+	// LegacyCVEURLPrefix is the legacy CVE URL prefix used.
+	LegacyCVEURLPrefix = "http://people.ubuntu.com/~ubuntu-security/cve/"
+	// CVEURLPrefix is the current CVE URL prefix to use.
+	CVEURLPrefix = "https://ubuntu.com/security/"
 
 	xenialESMLinePrefix = "esm-infra/xenial_"
 )
@@ -285,7 +289,7 @@ func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability
 		// Parse the name.
 		if strings.HasPrefix(line, "Candidate:") {
 			vulnerability.Name = strings.TrimSpace(strings.TrimPrefix(line, "Candidate:"))
-			vulnerability.Link = fmt.Sprintf(cveURL, vulnerability.Name)
+			vulnerability.Link = CVEURLPrefix + vulnerability.Name
 			continue
 		}
 
