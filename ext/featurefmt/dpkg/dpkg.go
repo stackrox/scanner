@@ -215,12 +215,12 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	if feature, exists := packagesMap[key]; exists {
 		// Append the executable files for the associated package to the source package.
 		feature.ProvidedExecutables = append(feature.ProvidedExecutables, executables...)
-		feature.ProvidedLibraries.Merge(provides)
+		feature.LibraryDepsToLibraries.Merge(provides)
 		for k, v := range needed {
-			if existValues, ok := feature.NeededLibrariesMap[k]; !ok {
-				feature.NeededLibrariesMap[k] = v
+			if existValues, ok := feature.LibraryDepsToExecutables[k]; !ok {
+				feature.LibraryDepsToExecutables[k] = v
 			} else {
-				feature.NeededLibrariesMap[k] = append(existValues, v...)
+				feature.LibraryDepsToExecutables[k] = append(existValues, v...)
 			}
 		}
 		return
@@ -232,8 +232,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		},
 		Version:             pkgVersion,
 		ProvidedExecutables: executables,
-		ProvidedLibraries:   provides,
-		NeededLibrariesMap:  needed,
+		LibraryDepsToLibraries:   provides,
+		LibraryDepsToExecutables:  needed,
 	}
 }
 

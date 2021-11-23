@@ -142,7 +142,13 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	}
 
 	t = time.Now()
-	err = tx.QueryRow(insertFeatureVersion, featureID, fv.Version, pq.Array(fv.ProvidedExecutables), database.StringMapArrayString(fv.ProvidedLibraries), database.StringMapArrayString(fv.NeededLibrariesMap)).Scan(&fv.ID)
+	err = tx.QueryRow(insertFeatureVersion,
+		featureID,
+		fv.Version,
+		pq.Array(fv.ProvidedExecutables),
+		database.StringMapArrayString(fv.LibraryDepsToLibraries),
+		database.StringMapArrayString(fv.LibraryDepsToExecutables),
+	).Scan(&fv.ID)
 	metrics.ObserveQueryTime("insertFeatureVersion", "insertFeatureVersion", t)
 
 	if err != nil && err != sql.ErrNoRows {

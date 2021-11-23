@@ -108,8 +108,8 @@ func TestInsertFeature(t *testing.T) {
 		},
 		Version: "2:3.0-imba",
 		ProvidedExecutables: []string{"/bin/ls", "/bin/ps"},
-		ProvidedLibraries: []string{"linux.so.1", "libthread.so.2"},
-		NeededLibrariesMap: map[string][]string{"libsome.so.1": {"/bin/ls"}},
+		LibraryDepsToLibraries: []string{"linux.so.1", "libxml.so.2"},
+		LibraryDepsToExecutables: map[string][]string{"libsome.so.1": {"/bin/ls"}},
 	}
 	id4, err := datastore.insertFeatureVersion(featureVersion)
 	assert.Nil(t, err)

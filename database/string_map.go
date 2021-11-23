@@ -8,38 +8,48 @@ import (
 	"github.com/stackrox/rox/pkg/set"
 )
 
-func StringMapArrayString(m map[string][]string) interface {
+func NewStringToStringsMap(m map[string]set.StringSet) interface {
 	driver.Valuer
 	sql.Scanner
 } {
-	return (*DependencyMap)(&m)
+	return (*StringToStringsMap)(&m)
 }
 
-type DependencyMap map[string][]string
+type StringToStringsMap map[string]set.StringSet
 
 // Value returns the JSON-encoded representation
-func (a DependencyMap) Value() (driver.Value, error) {
-	return json.Marshal(a)
+func (m StringToStringsMap) Value() (driver.Value, error) {
+	converted := make(map[string][]string, len(m))
+	for k, v := range m {
+		converted[k] = v.AsSlice()
+	}
+	return json.Marshal(converted)
 }
 
 // Scan Decodes a JSON-encoded value
-func (a *DependencyMap) Scan(value interface{}) error {
+func (m *StringToStringsMap) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
 	}
 	// Unmarshal from json to map[string][]string
-	*a = make(map[string][]string)
-	if err := json.Unmarshal(b, a); err != nil {
+	raw := make(map[string][]string)
+	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
+	}
+	for k, v := range raw {
+		(*m)[k] = set.NewStringSet(v...)
 	}
 	return nil
 }
 
-func (a DependencyMap) Merge(b DependencyMap) {
+// Merge merges map b to map a.
+// If a contains str_a -> ["a", "b"]
+//    b contains str_a -> ["b", "c"]
+// Then after merging:
+//    a contains str_a -> {"a", "b", "c"}
+func (m StringToStringsMap) Merge(b StringToStringsMap) {
 	for k, v := range b {
-		newValue := set.NewStringSet(a[k]...)
-		newValue.AddAll(v...)
-		a[k] = newValue.AsSlice()
+		m[k] = m[k].Union(v)
 	}
 }
