@@ -18,7 +18,6 @@ package dpkg
 import (
 	"bufio"
 	"bytes"
-	"github.com/cznic/mathutil"
 	"regexp"
 	"sort"
 	"strings"
@@ -75,7 +74,6 @@ func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap
 		pkgFmt = `distroless`
 	}
 	defer metrics.ObserveListFeaturesTime(pkgFmt, "all", time.Now())
-	log.Infof("parseComponents: file %v, packageMap %v, removedPackages %v, distroless %v", string(file[:mathutil.Min(10, len(file))]), packagesMap, removedPackages, distroless)
 
 	scanner := bufio.NewScanner(bytes.NewReader(file))
 
