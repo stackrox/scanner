@@ -34,12 +34,14 @@ func (m *StringToStringsMap) Scan(value interface{}) error {
 	}
 	// Unmarshal from json to map[string][]string
 	raw := make(map[string][]string)
+	scanned := make(StringToStringsMap)
 	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
 	for k, v := range raw {
-		(*m)[k] = set.NewStringSet(v...)
+		scanned[k] = set.NewStringSet(v...)
 	}
+	*m = scanned
 	return nil
 }
 
