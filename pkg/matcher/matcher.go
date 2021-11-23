@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/whiteout"
 )
 
@@ -94,15 +93,4 @@ func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.Rea
 // NewOrMatcher returns a matcher that matches if and only if any of the passed submatchers does.
 func NewOrMatcher(subMatchers ...Matcher) Matcher {
 	return &orMatcher{matchers: subMatchers}
-}
-
-type elfMatcher struct{}
-
-func (lm *elfMatcher) Match(_ string, _ os.FileInfo, contents io.ReaderAt) (matches bool, extract bool) {
-	return elf.IsElfExecutable(contents), false
-}
-
-// NewElfMatcher returns a matcher that matches executables and shared objects in ELF format
-func NewElfMatcher() Matcher {
-	return &elfMatcher{}
 }

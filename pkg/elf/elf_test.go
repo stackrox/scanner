@@ -30,16 +30,21 @@ func TestIsElfExecutable(t *testing.T) {
 		t.Run(c.path, func(t *testing.T) {
 			elfFile, err := os.Open(c.path)
 			require.NoError(t, err)
-			assert.Equal(t, c.isElf, IsElfExecutable(elfFile))
+			if c.isElf {
+				assert.NotNil(t, OpenIfElfExecutable(elfFile))
+			} else {
+				assert.Nil(t, OpenIfElfExecutable(elfFile))
+			}
 		})
 	}
 }
 
 func TestGetImportedLibraries(t *testing.T) {
-	elfFile, err := os.Open("testdata/elf_exec")
+	file, err := os.Open("testdata/elf_exec")
+	elfFile := OpenIfElfExecutable(file)
 	require.NoError(t, err)
 	elfMetadata, err := GetElfMetadata(elfFile)
 	assert.NoError(t, err)
 	assert.NotZero(t, len(elfMetadata.ImportedLibraries))
-	assert.Zero(t, len(elfMetadata.SoNames))
+	assert.Zero(t, len(elfMetadata.Sonames))
 }

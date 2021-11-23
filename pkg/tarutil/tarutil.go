@@ -80,7 +80,6 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	// executableMatcher indicates if the given file is executable
 	// for the FileData struct.
 	executableMatcher := matcher.NewExecutableMatcher()
-	elfMatcher := matcher.NewElfMatcher()
 
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
@@ -135,12 +134,12 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 		// Extract the element
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
-			fileData := FileData{}
+			var fileData FileData
 
-			isElf, _ := elfMatcher.Match(filename, hdr.FileInfo(), contents)
-			if isElf {
-				if elfMetadata, err := elf.GetElfMetadata(contents); err != nil {
-					log.Errorf("Failed to get dependencies for %s", filename)
+			elfFile := elf.OpenIfElfExecutable(contents)
+			if elfFile != nil {
+				if elfMetadata, err := elf.GetElfMetadata(elfFile); err != nil {
+					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 				} else {
 					fileData.ElfMetadata = elfMetadata
 				}
