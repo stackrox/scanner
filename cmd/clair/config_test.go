@@ -15,7 +15,7 @@ func TestLoadConfig(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, &api.Config{
-		HTTPSPort:   8080,
+		HTTPSPort:   8082,
 		GRPCPort:    8081,
 		MetricsPort: nil,
 	}, cfg.API)
