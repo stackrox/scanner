@@ -27,6 +27,7 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
@@ -64,6 +65,8 @@ type FileData struct {
 	Contents []byte
 	// Executable indicates if the file is executable.
 	Executable bool
+	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
+	ELFMetadata *elf.Metadata
 }
 
 // FilesMap is a map of files' paths to their contents.
@@ -131,13 +134,21 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 		// Extract the element
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
-			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
+			var fileData FileData
 
-			if !extractContents || hdr.Typeflag != tar.TypeReg {
-				data[filename] = FileData{
-					Contents:   nil, // Making this explicit.
-					Executable: executable,
+			elfFile := elf.OpenIfELFExecutable(contents)
+			if elfFile != nil {
+				if elfMetadata, err := elf.GetELFMetadata(elfFile); err != nil {
+					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
+				} else {
+					fileData.ELFMetadata = elfMetadata
 				}
+			}
+
+			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
+			if !extractContents || hdr.Typeflag != tar.TypeReg {
+				fileData.Executable = executable
+				data[filename] = fileData
 				continue
 			}
 
@@ -148,10 +159,10 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			}
 
 			// Put the file directly
-			data[filename] = FileData{
-				Contents:   d,
-				Executable: executable,
-			}
+			fileData.Contents = d
+			fileData.Executable = executable
+			data[filename] = fileData
+
 			numExtractedContentBytes += len(d)
 		}
 		if hdr.Typeflag == tar.TypeDir {
