@@ -72,9 +72,9 @@ type Layer struct {
 // A known issue is if a file defines multiple features, and the file is modified between layers in a way
 // that does affect the features it describes (adds, updates, or removes features), which is currently only a
 // concern for the Java source type. However, this event is unlikely, which is why it is not considered at this time.
-func getLanguageData(db database.Datastore, layerName, lineage string, uncertifiedRHEL bool) ([]database.FeatureVersion, error) {
+func getLanguageData(db database.Datastore, layerName, lineage string, opts *database.DatastoreOptions) ([]database.FeatureVersion, error) {
 	layersToComponents, err := db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
-		UncertifiedRHEL: uncertifiedRHEL,
+		UncertifiedRHEL: opts.GetUncertifiedRHEL(),
 	})
 	if err != nil {
 		return nil, err
@@ -242,9 +242,9 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 
 // addLanguageVulns adds language-based features into the given layer.
 // Assumes layer is not nil.
-func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncertifiedRHEL bool) {
+func addLanguageFeatures(db database.Datastore, layer *Layer, lineage string, opts *database.DatastoreOptions) {
 	// Add Language Features
-	languageFeatureVersions, err := getLanguageData(db, layer.Name, lineage, uncertifiedRHEL)
+	languageFeatureVersions, err := getLanguageData(db, layer.Name, lineage, opts)
 	if err != nil {
 		log.Errorf("error getting language data: %v", err)
 		return
@@ -252,7 +252,7 @@ func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncer
 
 	var languageFeatures []Feature
 	for _, dbFeatureVersion := range languageFeatureVersions {
-		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
+		feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL())
 		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
 			languageFeatures = append(languageFeatures, *feature)
@@ -317,7 +317,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			layer.Features = append(layer.Features, *feature)
 		}
 		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
-			certified, err := addRHELv2Vulns(db, &layer)
+			certified, err := addRHELv2Features(db, &layer, withVulnerabilities)
 			if err != nil {
 				return layer, notes, err
 			}
@@ -327,7 +327,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			}
 		}
 		if env.LanguageVulns.Enabled() {
-			addLanguageVulns(db, &layer, lineage, uncertifiedRHEL)
+			addLanguageFeatures(db, &layer, lineage, opts)
 		}
 	}
 
@@ -420,6 +420,7 @@ type LayerEnvelope struct {
 }
 
 // Note defines scanning notes.
+//go:generate stringer -type=Note
 type Note int
 
 const (
@@ -434,6 +435,9 @@ const (
 	// of the Red Hat Certification program.
 	// These images were made before June 2020, and they are missing content manifest JSON files.
 	CertifiedRHELScanUnavailable
+
+	// SentinelNote is a fake note which should ALWAYS be last to ensure the proto is up-to-date.
+	SentinelNote
 )
 
 // VulnerabilityEnvelope envelopes complete vulnerability data to return to the client.

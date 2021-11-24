@@ -195,3 +195,15 @@ func ConvertCVSSv3(cvss3Vector string) (*MetadataCVSSv3, error) {
 func roundTo1Decimal(x float64) float64 {
 	return math.Round(x*10) / 10
 }
+
+// IsNilOrEmpty returns "true" if the passed Metadata is nil or its contents are empty
+func (m *Metadata) IsNilOrEmpty() bool {
+	if m == nil {
+		return true
+	}
+
+	return m.LastModifiedDateTime == "" &&
+		m.PublishedDateTime == "" &&
+		m.CVSSv2.Vectors == "" &&
+		m.CVSSv3.Vectors == ""
+}

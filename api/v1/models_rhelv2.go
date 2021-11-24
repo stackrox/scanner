@@ -21,12 +21,12 @@ const (
 	timeFormat = "2006-01-02T15:04Z"
 )
 
-// addRHELv2Vulns appends vulnerabilities found during RHELv2 scanning.
+// addRHELv2Features appends features found during RHELv2 scanning.
 // RHELv2 scanning performs the scanning/analysis needed to be
 // certified as part of Red Hat's Scanner Certification Program.
 // The returned bool indicates if full certified scanning was performed.
 // This is typically only `false` for images without proper CPE information.
-func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
+func addRHELv2Features(db database.Datastore, layer *Layer, withVulnerabilities bool) (bool, error) {
 	layers, err := db.GetRHELv2Layers(layer.Name)
 	if err != nil {
 		return false, err
@@ -36,9 +36,12 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 
 	pkgEnvs, records := getRHELv2PkgData(layers)
 
-	vulns, err := db.GetRHELv2Vulnerabilities(records)
-	if err != nil {
-		return false, err
+	var vulns map[int][]*database.RHELv2Vulnerability
+	if withVulnerabilities {
+		vulns, err = db.GetRHELv2Vulnerabilities(records)
+		if err != nil {
+			return false, err
+		}
 	}
 
 	for _, pkgEnv := range pkgEnvs {
@@ -60,57 +63,69 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 			ProvidedExecutables: pkg.ProvidedExecutables,
 		}
 
-		pkgVersion := rpmVersion.NewVersion(pkg.Version)
-		pkgArch := pkg.Arch
-		fixedBy := pkgVersion
-
-		// Database query results need more filtering.
-		// Need to ensure:
-		// 1. The package's version is less than the vuln's fixed-in version, if present.
-		// 2. The ArchOperation passes.
-		for _, vuln := range vulns[pkg.ID] {
-			if len(vuln.PackageInfos) != 1 {
-				log.Warnf("Unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
-				continue
-			}
-			vulnPkgInfo := vuln.PackageInfos[0]
-
-			if len(vulnPkgInfo.Packages) != 1 {
-				log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vulnPkgInfo.Packages), 1)
-				continue
-			}
-			vulnPkg := vulnPkgInfo.Packages[0]
-
-			// Assume the vulnerability is not fixed.
-			// In that case, all versions are affected.
-			affectedVersion := true
-			var vulnVersion *rpmVersion.Version
-			if vulnPkgInfo.FixedInVersion != "" {
-				// The vulnerability is fixed. Determine if this package is affected.
-				vulnVersion = rpmVersionPtr(rpmVersion.NewVersion(vulnPkgInfo.FixedInVersion))
-				affectedVersion = pkgVersion.LessThan(*vulnVersion)
-			}
-
-			// Compare the package's architecture to the affected architecture.
-			affectedArch := vulnPkgInfo.ArchOperation.Cmp(pkgArch, vulnPkg.Arch)
-
-			if affectedVersion && affectedArch {
-				feature.Vulnerabilities = append(feature.Vulnerabilities, RHELv2ToVulnerability(vuln, feature.NamespaceName))
-
-				if vulnVersion != nil && vulnVersion.GreaterThan(fixedBy) {
-					fixedBy = *vulnVersion
-				}
-			}
-		}
-
-		if fixedBy.GreaterThan(pkgVersion) {
-			feature.FixedBy = fixedBy.String()
+		if withVulnerabilities {
+			feature.FixedBy, feature.Vulnerabilities = getRHELv2Vulns(vulns, pkg, feature.NamespaceName)
 		}
 
 		layer.Features = append(layer.Features, feature)
 	}
 
 	return cpesExist, nil
+}
+
+// getRHELv2Vulns gets the vulnerabilities and fixedBy version found during RHELv2 scanning.
+func getRHELv2Vulns(vulns map[int][]*database.RHELv2Vulnerability, pkg *database.RHELv2Package, namespaceName string) (string, []Vulnerability) {
+	pkgVersion := rpmVersion.NewVersion(pkg.Version)
+	pkgArch := pkg.Arch
+	fixedBy := pkgVersion
+
+	var vulnerabilities []Vulnerability
+
+	// Database query results need more filtering.
+	// Need to ensure:
+	// 1. The package's version is less than the vuln's fixed-in version, if present.
+	// 2. The ArchOperation passes.
+	for _, vuln := range vulns[pkg.ID] {
+		if len(vuln.PackageInfos) != 1 {
+			log.Warnf("Unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
+			continue
+		}
+		vulnPkgInfo := vuln.PackageInfos[0]
+
+		if len(vulnPkgInfo.Packages) != 1 {
+			log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vulnPkgInfo.Packages), 1)
+			continue
+		}
+		vulnPkg := vulnPkgInfo.Packages[0]
+
+		// Assume the vulnerability is not fixed.
+		// In that case, all versions are affected.
+		affectedVersion := true
+		var vulnVersion *rpmVersion.Version
+		if vulnPkgInfo.FixedInVersion != "" {
+			// The vulnerability is fixed. Determine if this package is affected.
+			vulnVersion = rpmVersionPtr(rpmVersion.NewVersion(vulnPkgInfo.FixedInVersion))
+			affectedVersion = pkgVersion.LessThan(*vulnVersion)
+		}
+
+		// Compare the package's architecture to the affected architecture.
+		affectedArch := vulnPkgInfo.ArchOperation.Cmp(pkgArch, vulnPkg.Arch)
+
+		if affectedVersion && affectedArch {
+			vulnerabilities = append(vulnerabilities, RHELv2ToVulnerability(vuln, namespaceName))
+
+			if vulnVersion != nil && vulnVersion.GreaterThan(fixedBy) {
+				fixedBy = *vulnVersion
+			}
+		}
+	}
+
+	var fixedByStr string
+	if fixedBy.GreaterThan(pkgVersion) {
+		fixedByStr = fixedBy.String()
+	}
+
+	return fixedByStr, vulnerabilities
 }
 
 func rpmVersionPtr(ver rpmVersion.Version) *rpmVersion.Version {

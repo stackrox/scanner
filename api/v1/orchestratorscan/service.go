@@ -173,6 +173,10 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 			log.Errorf("error converting metadata for %s: %v. Skipping...", vuln.Name, err)
 			continue
 		}
+		if metadata == nil {
+			log.Warnf("metadata is nil for %s; Skipping...", vuln.Name)
+			continue
+		}
 
 		resp.Vulnerabilities = append(resp.Vulnerabilities, &v1.Vulnerability{
 			Name:        v1Vuln.Name,

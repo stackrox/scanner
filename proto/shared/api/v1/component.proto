@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+option go_package = "scannerV1";
+option java_package = "io.stackrox.proto.api.scanner.v1";
+
+import "shared/api/v1/vulnerability.proto";
+
+package scannerV1;
+
+message Components {
+  repeated OSComponent       os_components       = 1;
+  repeated LanguageComponent language_components = 2;
+}
+
+message OSComponent {
+  string name                     = 1;
+  string version                  = 2;
+  string arch                     = 3;
+  string module                   = 4;
+  repeated Executable executables = 5;
+}
+
+message LanguageComponent {
+  SourceType type          = 1;
+  string     name          = 2;
+  string     version       = 3;
+  string     location      = 4;
+  oneof language {
+    JavaComponent   java   = 5;
+    PythonComponent python = 6;
+  }
+}
+
+message JavaComponent {
+  string          implementation_version = 1;
+  string          maven_version          = 2;
+  repeated string origins                = 3;
+  string          specification_version  = 4;
+  string          bundle_name            = 5;
+}
+
+message PythonComponent {
+  string homepage     = 1;
+  string author_email = 2;
+  string download_url = 3;
+  string summary      = 4;
+  string description  = 5;
+}
+
+enum SourceType {
+  UNSET_SOURCE_TYPE = 0;
+  JAVA              = 1;
+  PYTHON            = 2;
+  NPM               = 3;
+  GEM               = 4;
+  DOTNETCORERUNTIME = 5;
+}
