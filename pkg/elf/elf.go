@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	allowedElfTypeList = set.NewFrozenIntSet(int(elf.ET_EXEC), int(elf.ET_DYN))
+	allowedELFTypeList = set.NewFrozenIntSet(int(elf.ET_EXEC), int(elf.ET_DYN))
 )
 
 // Metadata contains the exacted metadata from ELF file
@@ -19,29 +19,29 @@ type Metadata struct {
 	ImportedLibraries []string
 }
 
-// OpenIfElfExecutable tests if the data is in ELF format
-func OpenIfElfExecutable(r io.ReaderAt) *elf.File {
+// OpenIfELFExecutable returns an ELF file if the data is in ELF format
+func OpenIfELFExecutable(r io.ReaderAt) *elf.File {
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
 		return nil
 	}
 
 	// Exclude core and other unknown elf file.
-	if allowedElfTypeList.Contains(int(elfFile.Type)) {
+	if allowedELFTypeList.Contains(int(elfFile.Type)) {
 		return elfFile
 	}
 	return nil
 }
 
-// GetElfMetadata extracts and returns ELF metadata
-func GetElfMetadata(elfFile *elf.File) (*Metadata, error) {
+// GetELFMetadata extracts and returns ELF metadata
+func GetELFMetadata(elfFile *elf.File) (*Metadata, error) {
 	sonames, err := elfFile.DynString(elf.DT_SONAME)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get sonames from elf executable")
+		return nil, errors.Wrapf(err, "failed to get sonames from ELF executable")
 	}
 	libraries, err := elfFile.ImportedLibraries()
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get imported libraries from elf executable")
+		return nil, errors.Wrapf(err, "failed to get imported libraries from ELF executable")
 	}
 	return &Metadata{
 		Sonames:           sonames,

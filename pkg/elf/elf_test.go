@@ -8,32 +8,32 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestIsElfExecutable(t *testing.T) {
+func TestIsELFExecutable(t *testing.T) {
 	testCases := []struct {
 		path  string
-		isElf bool
+		isELF bool
 	}{
 		{
 			path:  "testdata/elf_exec",
-			isElf: true,
+			isELF: true,
 		},
 		{
 			path:  "testdata/macho_exec",
-			isElf: false,
+			isELF: false,
 		},
 		{
 			path:  "testdata/README.md",
-			isElf: false,
+			isELF: false,
 		},
 	}
 	for _, c := range testCases {
 		t.Run(c.path, func(t *testing.T) {
 			elfFile, err := os.Open(c.path)
 			require.NoError(t, err)
-			if c.isElf {
-				assert.NotNil(t, OpenIfElfExecutable(elfFile))
+			if c.isELF {
+				assert.NotNil(t, OpenIfELFExecutable(elfFile))
 			} else {
-				assert.Nil(t, OpenIfElfExecutable(elfFile))
+				assert.Nil(t, OpenIfELFExecutable(elfFile))
 			}
 		})
 	}
@@ -41,9 +41,9 @@ func TestIsElfExecutable(t *testing.T) {
 
 func TestGetImportedLibraries(t *testing.T) {
 	file, err := os.Open("testdata/elf_exec")
-	elfFile := OpenIfElfExecutable(file)
+	elfFile := OpenIfELFExecutable(file)
 	require.NoError(t, err)
-	elfMetadata, err := GetElfMetadata(elfFile)
+	elfMetadata, err := GetELFMetadata(elfFile)
 	assert.NoError(t, err)
 	assert.NotZero(t, len(elfMetadata.ImportedLibraries))
 	assert.Zero(t, len(elfMetadata.Sonames))
