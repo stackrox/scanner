@@ -171,8 +171,9 @@ func getLayerFeatureVersions(tx *sql.Tx, layerID int, lineage string) ([]databas
 			&fv.ID,
 			&fv.Version,
 			pq.Array(&fv.ProvidedExecutables),
-			&fv.LibraryToDependencies,
 			&fv.DependencyToExecutables,
+			pq.Array(&fv.ProvidedLibraries),
+			&fv.DependencyToLibraries,
 			&fv.AddedBy.ID,
 			&fv.AddedBy.Name,
 		)

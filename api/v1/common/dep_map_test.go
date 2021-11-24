@@ -11,15 +11,15 @@ func TestEnrichSoMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		// A base library without any dependencies
 		"x1": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"x1.so.1": {},
-			},
+			ProvidedLibraries: []string{"x1.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{},
 			DependencyToExecutables: database.StringToStringsMap{},
 		},
 		// An upper layer library depends on x
 		"z1": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"z1.so.1": set.NewStringSet("x1.so.1"),
+			ProvidedLibraries: []string{"z1.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{
+				"x1.so.1": set.NewStringSet("z1.so.1"),
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"x1.so.1": set.NewStringSet("/bin/z1_exec1", "/bin/z1_exec2"),
@@ -27,7 +27,7 @@ func TestEnrichSoMap(t *testing.T) {
 		},
 		// An executable package depends on that depends on both libraries
 		"v1": {
-			LibraryToDependencies: database.StringToStringsMap{},
+			DependencyToLibraries: database.StringToStringsMap{},
 			DependencyToExecutables: database.StringToStringsMap{
 				"x1.so.1": set.NewStringSet("/bin/v1_exec1", "/bin/v1_exec4"),
 				"z1.so.1": set.NewStringSet("/bin/v1_exec2", "/bin/v1_exec3"),
@@ -47,9 +47,10 @@ func TestEnrichSoMap(t *testing.T) {
 		},
 		// A compatible library for the upper layer library that is not executable
 		"z1-compatible": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"z1.so.1": set.NewStringSet("x1.so.1", "y.so.1"),
-				"z1.so.1.7": set.NewStringSet("x1.so.1", "y.so.1"),
+			ProvidedLibraries: []string{"z1.so.1", "z1.so.1.7"},
+			DependencyToLibraries: database.StringToStringsMap{
+				"x1.so.1": {"z1.so.1": {}, "z1.so.1.7": {}},
+				"y.so.1": {"z1.so.1": {}, "z1.so.1.7": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"x1.so.1": set.NewStringSet("/bin/z1c_exec1"),
@@ -64,9 +65,8 @@ func TestEnrichSoMap(t *testing.T) {
 		},
 		// The library used by the compatible library.
 		"y": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"y.so.1": {},
-			},
+			ProvidedLibraries: []string{"y.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{},
 		},
 		// Some executable package with an unresolved dependency, it is not a perfect world
 		"v5": {
@@ -107,24 +107,27 @@ func TestEnrichSoMap(t *testing.T) {
 func TestLoopDepMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		"x": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"x.so.1": {"z.so.1": {}},
+			ProvidedLibraries: []string{"x.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{
+				"z.so.1": {"x.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"z.so.1" : {"/bin/x_exec": {}},
 			},
 		},
 		"y": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"y.so.1": {"x.so.1": {}},
+			ProvidedLibraries: []string{"y.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{
+				"x.so.1": {"y.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"x.so.1" : {"/bin/y_exec": {}},
 			},
 		},
 		"z": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"z.so.1": {"y.so.1": {}},
+			ProvidedLibraries: []string{"z.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{
+				"y.so.1": {"z.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"y.so.1" : {"/bin/z_exec": {}},
@@ -150,40 +153,46 @@ func TestLoopDepMap(t *testing.T) {
 func TestDoubleLoopDepMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		"x": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"x.so.1": {"z.so.1": {}},
+			ProvidedLibraries: []string{"x.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{
+				"z.so.1": {"x.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"z.so.1" : {"/bin/x_exec": {}},
 			},
 		},
 		"y": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"y.so.1": {"x.so.1": {}},
+			ProvidedLibraries: []string{"y.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{
+				"x.so.1": {"y.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"x.so.1" : {"/bin/y_exec": {}},
 			},
 		},
 		"z": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"z.so.1": {"y.so.1": {}, "z2.so.1": {}},
+			ProvidedLibraries: []string{"z.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{
+				"y.so.1": {"z.so.1": {}},
+				"z2.so.1": {"z.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"y.so.1" : {"/bin/z_exec": {}},
 			},
 		},
 		"z1": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"z1.so.1": {"z.so.1": {}},
+			ProvidedLibraries: []string{"z1.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{
+				"z.so.1": {"z1.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"z.so.1" : {"/bin/z1_exec": {}},
 			},
 		},
 		"z2": {
-			LibraryToDependencies: database.StringToStringsMap{
-				"z2.so.1": {"z1.so.1": {}},
+			ProvidedLibraries: []string{"z2.so.1"},
+			DependencyToLibraries: database.StringToStringsMap{
+				"z1.so.1": {"z2.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"z1.so.1" : {"/bin/z2_exec": {}},

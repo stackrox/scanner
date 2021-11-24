@@ -17,7 +17,6 @@ package v1
 import (
 	"fmt"
 	"github.com/stackrox/rox/pkg/set"
-	"runtime/debug"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -197,9 +196,10 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 	}
 
 	executables := set.NewStringSet(dbFeatureVersion.ProvidedExecutables...)
-	for lib := range dbFeatureVersion.LibraryToDependencies {
+	for _, lib := range dbFeatureVersion.ProvidedLibraries {
 		executables = executables.Union(depMap[lib])
 	}
+	log.Infof("feature %s: %v", dbFeatureVersion.Feature.Name, executables.AsSlice())
 
 	return &Feature{
 		Name:                dbFeatureVersion.Feature.Name,
@@ -259,7 +259,6 @@ func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncer
 
 	var languageFeatures []Feature
 	for _, dbFeatureVersion := range languageFeatureVersions {
-		log.Infof("addLanguageVulns %s Stack:\n%s", dbFeatureVersion, string(debug.Stack()))
 		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL, nil)
 		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)

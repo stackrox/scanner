@@ -160,7 +160,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	}
 
 	var executables []string
-	libToDeps := make(database.StringToStringsMap)
+	var libraries []string
+	depToLibs := make(database.StringToStringsMap)
 	depToExecs := make(database.StringToStringsMap)
 	// Distroless containers do not provide executable files the same way distro containers do.
 	if !distroless && features.ActiveVulnMgmt.Enabled() {
@@ -191,9 +192,12 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 					}
 				}
 			}
-			if fileData.ELFMetadata != nil {
-				for _, soname := range fileData.ELFMetadata.Sonames {
-					libToDeps[soname] = set.NewStringSet(fileData.ELFMetadata.ImportedLibraries...)
+			if fileData.ELFMetadata != nil && len(fileData.ELFMetadata.Sonames) > 0 {
+				libraries = append(libraries, fileData.ELFMetadata.Sonames...)
+				for _, dep := range fileData.ELFMetadata.ImportedLibraries {
+					libs := depToLibs[dep]
+					libs.AddAll(fileData.ELFMetadata.Sonames...)
+					depToLibs[dep] = libs
 				}
 			}
 		}
@@ -215,8 +219,9 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	if feature, exists := packagesMap[key]; exists {
 		// Append the executable files for the associated package to the source package.
 		feature.ProvidedExecutables = append(feature.ProvidedExecutables, executables...)
-		feature.LibraryToDependencies.Merge(libToDeps)
 		feature.DependencyToExecutables.Merge(depToExecs)
+		feature.ProvidedLibraries = append(feature.ProvidedLibraries, libraries...)
+		feature.DependencyToLibraries.Merge(depToLibs)
 		return
 	}
 
@@ -226,8 +231,9 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		},
 		Version:                 pkgVersion,
 		ProvidedExecutables:     executables,
-		LibraryToDependencies:   libToDeps,
 		DependencyToExecutables: depToExecs,
+		ProvidedLibraries:       libraries,
+		DependencyToLibraries:   depToLibs,
 	}
 }
 

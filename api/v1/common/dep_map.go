@@ -6,7 +6,7 @@ import (
 	"github.com/stackrox/scanner/database"
 )
 
-type libDep struct {
+type usedByNode struct {
 	// Executables that uses this library.
 	executables  set.StringSet
 	// Libraries that imported this library directly.
@@ -21,36 +21,34 @@ type circle struct {
 
 func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
 	// Map from a library to its dependency data
-	libToDep := make(map[string]*libDep)
+	depToUsedByNode := make(map[string]*usedByNode)
 
 	// Build the map
 	for _, feature := range features {
 		// Populate libraries with all direct import.
-		for lib, dependencies := range feature.LibraryToDependencies {
-			for dep := range dependencies {
-				data, ok := libToDep[dep]
-				if !ok {
-					data = &libDep{}
-				}
-				data.libraries.Add(lib)
-				libToDep[dep] = data
+		for dep, libs := range feature.DependencyToLibraries {
+			if node, ok := depToUsedByNode[dep]; ok {
+				node.libraries = node.libraries.Union(libs)
+			} else {
+				node = &usedByNode{libraries: libs}
+				depToUsedByNode[dep] = node
 			}
 		}
 		// Populate executables with all direct use.
-		for lib, execs := range feature.DependencyToExecutables {
-			if dep, ok := libToDep[lib]; ok {
-				dep.executables = dep.executables.Union(execs)
+		for dep, execs := range feature.DependencyToExecutables {
+			if node, ok := depToUsedByNode[dep]; ok {
+				node.executables = node.executables.Union(execs)
 			} else {
-				dep= &libDep{executables: execs}
-				libToDep[lib] = dep
+				node = &usedByNode{executables: execs}
+				depToUsedByNode[dep] = node
 			}
 		}
 	}
 	// Traverse it and get the dependency map
 	depMap := make(map[string]set.StringSet)
-	for k, v := range libToDep {
+	for k, v := range depToUsedByNode {
 		var cycle *circle
-		depMap[k], cycle = fillIn(libToDep, k, v, map[string]int{k: 0})
+		depMap[k], cycle = fillIn(depToUsedByNode, k, v, map[string]int{k: 0})
 		if cycle != nil {
 			// This is a very rare case that we have a loop in dependency map.
 			// All members in the loop should map to the same set of executables.
@@ -62,7 +60,7 @@ func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
 	return depMap
 }
 
-func fillIn(libToDep map[string]*libDep, depname string, dep *libDep, path map[string]int) (set.StringSet, *circle) {
+func fillIn(libToDep map[string]*usedByNode, depname string, dep *usedByNode, path map[string]int) (set.StringSet, *circle) {
 	if dep.completed {
 		return dep.executables, nil
 	}
