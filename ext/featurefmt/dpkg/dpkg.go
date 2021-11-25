@@ -159,8 +159,7 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		return
 	}
 
-	var executables []string
-	var libraries []string
+	var executables, libraries []string
 	depToLibs := make(database.StringToStringsMap)
 	depToExecs := make(database.StringToStringsMap)
 	// Distroless containers do not provide executable files the same way distro containers do.
@@ -223,6 +222,13 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		feature.ProvidedLibraries = append(feature.ProvidedLibraries, libraries...)
 		feature.DependencyToLibraries.Merge(depToLibs)
 		return
+	}
+
+	if len(depToLibs) == 0 {
+		depToLibs = nil
+	}
+	if len(depToExecs) == 0 {
+		depToExecs = nil
 	}
 
 	packagesMap[key] = &database.FeatureVersion{

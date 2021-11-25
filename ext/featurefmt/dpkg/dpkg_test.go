@@ -17,9 +17,11 @@ package dpkg
 import (
 	"testing"
 
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -94,6 +96,7 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Feature:             database.Feature{Name: "gcc-5"},
 					Version:             "5.1.1-12ubuntu1", // The version comes from the "Source:" line
 					ProvidedExecutables: []string{"/i/am/an/executable"},
+					ProvidedLibraries:   []string{"gcc5.so.1"},
 				},
 				{
 					Feature: database.Feature{Name: "base-files"},
@@ -104,9 +107,12 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Version: "5.6",
 				},
 				{
-					Feature:             database.Feature{Name: "pkg-source"},
-					Version:             "1.1.8-3.1ubuntu3",
-					ProvidedExecutables: []string{"/exec-me", "/exec-me-2"},
+					Feature:                 database.Feature{Name: "pkg-source"},
+					Version:                 "1.1.8-3.1ubuntu3",
+					ProvidedExecutables:     []string{"/exec-me", "/exec-me-2"},
+					DependencyToExecutables: map[string]set.StringSet{"gcc5.so.1": {"/exec-me-2": {}}},
+					ProvidedLibraries:       []string{"somelib.so.1"},
+					DependencyToLibraries:   map[string]set.StringSet{"gcc5.so.1": {"somelib.so.1": {}}},
 				},
 			},
 			Files: tarutil.FilesMap{
@@ -126,8 +132,10 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				"var/lib/dpkg/info/pkg1:amd64.list":         tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg1:amd64.list")},
 				"var/lib/dpkg/info/pkg2.list":               tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg2.list")},
 				"exec-me":                                   tarutil.FileData{Executable: true},
-				"exec-me-2":                                 tarutil.FileData{Executable: true},
+				"exec-me-2":                                 tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{ImportedLibraries: []string{"gcc5.so.1"}}},
 				"my-jar.jar":                                tarutil.FileData{Contents: []byte("jar contents")},
+				"lib/linux/libgcc5.so.1":                    tarutil.FileData{ELFMetadata: &elf.Metadata{Sonames: []string{"gcc5.so.1"}}},
+				"lib/linux/libsomelib.so.1":                 tarutil.FileData{ELFMetadata: &elf.Metadata{Sonames: []string{"somelib.so.1"}, ImportedLibraries: []string{"gcc5.so.1"}}},
 			},
 		},
 	}

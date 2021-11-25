@@ -8,17 +8,18 @@ import (
 
 type usedByNode struct {
 	// Executables that uses this library.
-	executables  set.StringSet
+	executables set.StringSet
 	// Libraries that imported this library directly.
-	libraries    set.StringSet
-	completed    bool
+	libraries set.StringSet
+	completed bool
 }
 
 type circle struct {
 	head string
-	all set.StringSet
+	all  set.StringSet
 }
 
+// GetDepMap creates a dependency map from a library to the executables that depends on it.
 func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
 	// Map from a library to its dependency data
 	depToUsedByNode := make(map[string]*usedByNode)
@@ -76,7 +77,7 @@ func fillIn(libToDep map[string]*usedByNode, depname string, dep *usedByNode, pa
 			// We create a circle and put it in the circles.
 			// We use a map from library to its sequence number im path to prioritize the most frequently used code path.
 			c := circle{head: lib, all: set.NewStringSet(lib)}
-			for p, s := range path  {
+			for p, s := range path {
 				if s > seq {
 					c.all.Add(p)
 				}
@@ -117,4 +118,3 @@ func fillIn(libToDep map[string]*usedByNode, depname string, dep *usedByNode, pa
 	}
 	return dep.executables, &mc
 }
-

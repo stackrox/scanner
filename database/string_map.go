@@ -5,9 +5,11 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+
 	"github.com/stackrox/rox/pkg/set"
 )
 
+// NewStringToStringsMap creates a NewStringToStringsMap from a string to string set map.
 func NewStringToStringsMap(m map[string]set.StringSet) interface {
 	driver.Valuer
 	sql.Scanner
@@ -15,6 +17,7 @@ func NewStringToStringsMap(m map[string]set.StringSet) interface {
 	return (*StringToStringsMap)(&m)
 }
 
+// StringToStringsMap defines driver.Valuer and sql.Scanner for a map from string to set of string
 type StringToStringsMap map[string]set.StringSet
 
 // Value returns the JSON-encoded representation
@@ -51,6 +54,9 @@ func (m *StringToStringsMap) Scan(value interface{}) error {
 // Then after merging:
 //    a contains str_a -> {"a", "b", "c"}
 func (m *StringToStringsMap) Merge(b StringToStringsMap) {
+	if len(b) == 0 {
+		return
+	}
 	if *m == nil {
 		*m = make(StringToStringsMap)
 	}

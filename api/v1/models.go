@@ -16,10 +16,10 @@ package v1
 
 import (
 	"fmt"
-	"github.com/stackrox/rox/pkg/set"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
@@ -199,7 +199,6 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 	for _, lib := range dbFeatureVersion.ProvidedLibraries {
 		executables = executables.Union(depMap[lib])
 	}
-	log.Infof("feature %s: %v", dbFeatureVersion.Feature.Name, executables.AsSlice())
 
 	return &Feature{
 		Name:                dbFeatureVersion.Feature.Name,

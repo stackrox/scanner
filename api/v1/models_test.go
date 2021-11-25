@@ -168,7 +168,7 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
-	})
+	}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].FixedBy)
 	assert.ElementsMatch(t, providedExecs, layer.Features[0].ProvidedExecutables)
@@ -231,7 +231,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
-	})
+	}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
 	assert.ElementsMatch(t, providedExecs, layer.Features[0].ProvidedExecutables)
@@ -295,7 +295,7 @@ func TestNotesNoLanguageVulns(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, LanguageCVEsUnavailable)
@@ -312,7 +312,7 @@ func TestNotesStaleCVEs(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsStale)
@@ -329,7 +329,7 @@ func TestNotesUnavailableCVEs(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsUnavailable)

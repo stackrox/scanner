@@ -2,13 +2,13 @@ package imagescan
 
 import (
 	"context"
-	"github.com/stackrox/scanner/api/v1/common"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"

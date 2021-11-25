@@ -1,18 +1,19 @@
 package common
 
 import (
+	"testing"
+
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestEnrichSoMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		// A base library without any dependencies
 		"x1": {
-			ProvidedLibraries: []string{"x1.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{},
+			ProvidedLibraries:       []string{"x1.so.1"},
+			DependencyToLibraries:   database.StringToStringsMap{},
 			DependencyToExecutables: database.StringToStringsMap{},
 		},
 		// An upper layer library depends on x
@@ -50,7 +51,7 @@ func TestEnrichSoMap(t *testing.T) {
 			ProvidedLibraries: []string{"z1.so.1", "z1.so.1.7"},
 			DependencyToLibraries: database.StringToStringsMap{
 				"x1.so.1": {"z1.so.1": {}, "z1.so.1.7": {}},
-				"y.so.1": {"z1.so.1": {}, "z1.so.1.7": {}},
+				"y.so.1":  {"z1.so.1": {}, "z1.so.1.7": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
 				"x1.so.1": set.NewStringSet("/bin/z1c_exec1"),
@@ -65,14 +66,14 @@ func TestEnrichSoMap(t *testing.T) {
 		},
 		// The library used by the compatible library.
 		"y": {
-			ProvidedLibraries: []string{"y.so.1"},
+			ProvidedLibraries:     []string{"y.so.1"},
 			DependencyToLibraries: database.StringToStringsMap{},
 		},
 		// Some executable package with an unresolved dependency, it is not a perfect world
 		"v5": {
 			DependencyToExecutables: database.StringToStringsMap{
 				"unresolved.so.9": {"/bin/v5_exec1": {}},
-				"y.so.1": {"/bin/v5_exec2": {}},
+				"y.so.1":          {"/bin/v5_exec2": {}},
 			},
 		},
 	}
@@ -82,7 +83,7 @@ func TestEnrichSoMap(t *testing.T) {
 	}
 	depMap := GetDepMap(features)
 
-	assert.Equal(t, featureMap["v4"].DependencyToExecutables["z1.so.1.7"],  depMap["z1.so.1.7"])
+	assert.Equal(t, featureMap["v4"].DependencyToExecutables["z1.so.1.7"], depMap["z1.so.1.7"])
 
 	assert.Equal(t, depMap["y.so.1"], depMap["z1.so.1.7"].
 		Union(depMap["z1.so.1"]).
@@ -112,7 +113,7 @@ func TestLoopDepMap(t *testing.T) {
 				"z.so.1": {"x.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
-				"z.so.1" : {"/bin/x_exec": {}},
+				"z.so.1": {"/bin/x_exec": {}},
 			},
 		},
 		"y": {
@@ -121,7 +122,7 @@ func TestLoopDepMap(t *testing.T) {
 				"x.so.1": {"y.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
-				"x.so.1" : {"/bin/y_exec": {}},
+				"x.so.1": {"/bin/y_exec": {}},
 			},
 		},
 		"z": {
@@ -130,7 +131,7 @@ func TestLoopDepMap(t *testing.T) {
 				"y.so.1": {"z.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
-				"y.so.1" : {"/bin/z_exec": {}},
+				"y.so.1": {"/bin/z_exec": {}},
 			},
 		},
 	}
@@ -158,7 +159,7 @@ func TestDoubleLoopDepMap(t *testing.T) {
 				"z.so.1": {"x.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
-				"z.so.1" : {"/bin/x_exec": {}},
+				"z.so.1": {"/bin/x_exec": {}},
 			},
 		},
 		"y": {
@@ -167,17 +168,17 @@ func TestDoubleLoopDepMap(t *testing.T) {
 				"x.so.1": {"y.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
-				"x.so.1" : {"/bin/y_exec": {}},
+				"x.so.1": {"/bin/y_exec": {}},
 			},
 		},
 		"z": {
 			ProvidedLibraries: []string{"z.so.1"},
 			DependencyToLibraries: database.StringToStringsMap{
-				"y.so.1": {"z.so.1": {}},
+				"y.so.1":  {"z.so.1": {}},
 				"z2.so.1": {"z.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
-				"y.so.1" : {"/bin/z_exec": {}},
+				"y.so.1": {"/bin/z_exec": {}},
 			},
 		},
 		"z1": {
@@ -186,7 +187,7 @@ func TestDoubleLoopDepMap(t *testing.T) {
 				"z.so.1": {"z1.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
-				"z.so.1" : {"/bin/z1_exec": {}},
+				"z.so.1": {"/bin/z1_exec": {}},
 			},
 		},
 		"z2": {
@@ -195,7 +196,7 @@ func TestDoubleLoopDepMap(t *testing.T) {
 				"z1.so.1": {"z2.so.1": {}},
 			},
 			DependencyToExecutables: database.StringToStringsMap{
-				"z1.so.1" : {"/bin/z2_exec": {}},
+				"z1.so.1": {"/bin/z2_exec": {}},
 			},
 		},
 	}

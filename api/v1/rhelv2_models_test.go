@@ -160,7 +160,7 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 	layer, _, err := LayerFromDatabaseModel(db, dbLayer, "", &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
-	})
+	}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "layer2", layer.Name)
 	assert.Equal(t, "", layer.ParentName)
