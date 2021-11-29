@@ -24,9 +24,9 @@ import (
 // Config is the configuration for the API service.
 // Any updates to this should be tested in cmd/clair/config_test.go.
 type Config struct {
-	HTTPSPort   int  `yaml:"httpsPort"`
-	GRPCPort    int  `yaml:"grpcPort"`
-	MetricsPort *int `yaml:"metricsPort"`
+	HTTPSPort   int  `json:"httpsPort"`
+	GRPCPort    int  `json:"grpcPort"`
+	MetricsPort *int `json:"metricsPort"`
 }
 
 // RunClairify runs the main Scanner API server.

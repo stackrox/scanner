@@ -12,7 +12,6 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker-credential-helpers v0.6.3
 	github.com/facebookincubator/nvdtools v0.1.4
-	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/gogo/protobuf v1.3.2
@@ -53,6 +52,7 @@ require (
 	google.golang.org/grpc v1.40.0
 	gopkg.in/yaml.v2 v2.4.0
 	honnef.co/go/tools v0.0.1-2020.1.6
+	sigs.k8s.io/yaml v1.3.0
 )
 
 replace (
