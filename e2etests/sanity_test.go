@@ -132,6 +132,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 	}
 }
 
+// TODO(cdu) Fix this test with more active component
 func TestImageSanity(t *testing.T) {
 	cli := client.New(getScannerHTTPEndpoint(t), true)
 
