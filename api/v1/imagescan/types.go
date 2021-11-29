@@ -10,7 +10,7 @@ type imageRequest interface {
 
 // imageReq is an implementation of imageRequest.
 type imageReq struct {
-	imageSpec *v1.ImageSpec
+	imageSpec       *v1.ImageSpec
 	uncertifiedRHEL bool
 }
 
@@ -20,10 +20,4 @@ func (i *imageReq) GetImageSpec() *v1.ImageSpec {
 
 func (i *imageReq) GetUncertifiedRHEL() bool {
 	return i.uncertifiedRHEL
-}
-
-// getLayerOpts represents options for layer retrieval.
-type getLayerOpts struct {
-	withVulns       bool
-	withFeatures    bool
 }

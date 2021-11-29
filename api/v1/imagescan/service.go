@@ -2,7 +2,6 @@ package imagescan
 
 import (
 	"context"
-	"github.com/stackrox/scanner/pkg/component"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/sirupsen/logrus"
@@ -14,6 +13,7 @@ import (
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/component"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -152,9 +152,9 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 	}
 
 	return &v1.GetImageComponentsResponse{
-		Status:      v1.ScanStatus_SUCCEEDED,
-		Components:  makeComponents(features, components),
-		Notes:       convertNotes(notes),
+		Status:     v1.ScanStatus_SUCCEEDED,
+		Components: makeComponents(features, components),
+		Notes:      convertNotes(notes),
 	}, nil
 }
 
@@ -172,8 +172,8 @@ func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageCo
 		imageSpec:       imageScan.GetImage(),
 		uncertifiedRHEL: uncertifiedRHEL,
 	}, &database.DatastoreOptions{
-		WithFeatures:        true,
-		UncertifiedRHEL:     uncertifiedRHEL,
+		WithFeatures:    true,
+		UncertifiedRHEL: uncertifiedRHEL,
 	})
 	if err != nil {
 		return nil, nil, nil, err

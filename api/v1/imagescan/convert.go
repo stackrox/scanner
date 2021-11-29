@@ -1,11 +1,11 @@
 package imagescan
 
 import (
-	"github.com/stackrox/rox/pkg/utils"
 	"strings"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
@@ -153,9 +153,9 @@ func makeComponents(features []apiV1.Feature, components []*component.Component)
 	osComponents := make([]*v1.OSComponent, 0, len(features))
 	for _, feature := range features {
 		osComponents = append(osComponents, &v1.OSComponent{
-			Name:            feature.Name,
-			Version:         feature.Version,
-			Executables:     convertProvidedExecutables(feature.ProvidedExecutables),
+			Name:        feature.Name,
+			Version:     feature.Version,
+			Executables: convertProvidedExecutables(feature.ProvidedExecutables),
 		})
 	}
 
@@ -205,7 +205,7 @@ func makeComponents(features []apiV1.Feature, components []*component.Component)
 	}
 
 	return &v1.Components{
-		OsComponents:         osComponents,
-		LanguageComponents:   languageComponents,
+		OsComponents:       osComponents,
+		LanguageComponents: languageComponents,
 	}
 }
