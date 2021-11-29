@@ -59,6 +59,33 @@ type Layer struct {
 	Features         []Feature         `json:"Features,omitempty"`
 }
 
+// languageFeatureValue is the value for a map of language features.
+type languageFeatureValue struct {
+	name, version, layer string
+}
+
+// getIgnoredLanguageComponents returns a map of language components to ignore.
+// The map keeps track of the language components that were ignored because
+// they came from the package manager.
+//
+// It is assumed the given layersToComponents is sorted in lowest (base layer) to highest layer.
+// This is because modifications to the files in later layers may not have a package manager change associated (e.g. chown a JAR).
+func getIgnoredLanguageComponents(layersToComponents []*component.LayerToComponents) map[string]languageFeatureValue {
+	ignoredLanguageComponents := make(map[string]languageFeatureValue)
+	for _, layerToComponent := range layersToComponents {
+		for _, c := range layerToComponent.Components {
+			if c.FromPackageManager {
+				ignoredLanguageComponents[c.Location] = languageFeatureValue{
+					name:    c.Name,
+					version: c.Version,
+				}
+			}
+		}
+	}
+
+	return ignoredLanguageComponents
+}
+
 // getLanguageData returns all application (language) features in the given layer.
 // This data includes features which were introduced in lower (parent) layers.
 // Since an image is based on a layered-filesystem, this function recognizes when files/locations
@@ -80,29 +107,13 @@ func getLanguageData(db database.Datastore, layerName, lineage string, opts *dat
 		return nil, err
 	}
 
-	type languageFeatureValue struct {
-		name, version, layer string
-	}
+	ignoredLanguageComponents := getIgnoredLanguageComponents(layersToComponents)
+
 	languageFeatureMap := make(map[string]languageFeatureValue)
 	var removedLanguageComponentLocations []string
 	var features []database.FeatureVersion
 
-	// ignoredLanguageComponents keeps track of the language components that were ignored because
-	// they came from the package manager. This is from lowest (base image) up to the highest because
-	// modifications to the files in later layers may not have a package manager change associated (e.g. chown a JAR)
-	ignoredLanguageComponents := make(map[string]languageFeatureValue)
-	for _, layerToComponent := range layersToComponents {
-		for _, c := range layerToComponent.Components {
-			if c.FromPackageManager {
-				ignoredLanguageComponents[c.Location] = languageFeatureValue{
-					name:    c.Name,
-					version: c.Version,
-				}
-			}
-		}
-	}
-
-	// Loop from highest layer to lowest.
+	// Loop from the highest layer to lowest.
 	for i := len(layersToComponents) - 1; i >= 0; i-- {
 		layerToComponents := layersToComponents[i]
 
@@ -165,6 +176,58 @@ func getLanguageData(db database.Datastore, layerName, lineage string, opts *dat
 	}
 
 	return filtered, nil
+}
+
+// getLanguageComponents returns the language components present in the image whose top layer is indicated by the given layerName.
+func getLanguageComponents(db database.Datastore, layerName, lineage string, uncertifiedRHEL bool) []*component.Component {
+	layersToComponents, err := db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
+		UncertifiedRHEL: uncertifiedRHEL,
+	})
+	if err != nil {
+		log.Errorf("error getting language data: %v", err)
+		return nil
+	}
+
+	var components []*component.Component
+	var removedLanguageComponentLocations []string
+	ignoredLanguageComponents := getIgnoredLanguageComponents(layersToComponents)
+	// Loop from the highest layer to lowest.
+	for i := len(layersToComponents) - 1; i >= 0; i-- {
+		layerToComponents := layersToComponents[i]
+
+		// Ignore components which were removed in higher layers.
+		layerComponents := layerToComponents.Components[:0]
+		for _, c := range layerToComponents.Components {
+			if c.FromPackageManager {
+				continue
+			}
+			if lfv, ok := ignoredLanguageComponents[c.Location]; ok && lfv.name == c.Name && lfv.version == c.Version {
+				continue
+			}
+			include := true
+			for _, removedLocation := range removedLanguageComponentLocations {
+				if strings.HasPrefix(c.Location, removedLocation) {
+					include = false
+					break
+				}
+			}
+
+			if include {
+				layerComponents = append(layerComponents, c)
+			}
+
+			removedLanguageComponentLocations = append(removedLanguageComponentLocations, layerToComponents.Removed...)
+		}
+
+		components = append(components, layerComponents...)
+	}
+
+	// We want to output the components in layer-order, so we must reverse the components slice.
+	for i, j := 0, len(components) - 1; i < j; i, j = i+1, j-1 {
+		components[i], components[j] = components[j], components[i]
+	}
+
+	return components
 }
 
 // VulnerabilityFromDatabaseModel converts the given database.Vulnerability into a Vulnerability.
@@ -242,7 +305,7 @@ func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
 
 // addLanguageVulns adds language-based features into the given layer.
 // Assumes layer is not nil.
-func addLanguageFeatures(db database.Datastore, layer *Layer, lineage string, opts *database.DatastoreOptions) {
+func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, opts *database.DatastoreOptions) {
 	// Add Language Features
 	languageFeatureVersions, err := getLanguageData(db, layer.Name, lineage, opts)
 	if err != nil {
@@ -284,26 +347,11 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 		layer.ParentName = dbLayer.Parent.Name
 	}
 
-	var notes []Note
 	if dbLayer.Namespace != nil {
 		layer.NamespaceName = dbLayer.Namespace.Name
-
-		if namespaces.KnownStaleNamespaces.Contains(layer.NamespaceName) {
-			notes = append(notes, OSCVEsStale)
-		} else if !namespaces.KnownSupportedNamespaces.Contains(layer.NamespaceName) {
-			notes = append(notes, OSCVEsUnavailable)
-		}
-	} else {
-		notes = append(notes, OSCVEsUnavailable)
 	}
 
-	if !env.LanguageVulns.Enabled() {
-		notes = append(notes, LanguageCVEsUnavailable)
-	}
-	if uncertifiedRHEL {
-		// Uncertified results were requested.
-		notes = append(notes, CertifiedRHELScanUnavailable)
-	}
+	notes := getNotes(layer.NamespaceName, uncertifiedRHEL)
 
 	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
@@ -327,7 +375,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			}
 		}
 		if env.LanguageVulns.Enabled() {
-			addLanguageFeatures(db, &layer, lineage, opts)
+			addLanguageVulns(db, &layer, lineage, opts)
 		}
 	}
 
@@ -353,6 +401,76 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 		allVulnsFixedBy = higherVersion
 	}
 	feature.FixedBy = allVulnsFixedBy
+}
+
+// ComponentsFromDatabaseModel returns the package features and language components for the given layer based on the data in the given datastore.
+//
+// Two language components may potentially produce the same feature. Similarly, the feature may already be seen as an OS-package feature.
+// However, these are not deduplicated here. This is left for the vulnerability matcher to determine upon converting the language components to feature versions.
+func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer, lineage string, uncertifiedRHEL bool) ([]Feature, []*component.Component, []Note, error) {
+	var namespaceName string
+	if dbLayer.Namespace != nil {
+		namespaceName = dbLayer.Namespace.Name
+	}
+
+	layer := Layer{
+		Name:          dbLayer.Name,
+		NamespaceName: namespaceName,
+	}
+
+	var components []*component.Component
+	notes := getNotes(layer.NamespaceName, uncertifiedRHEL)
+
+	isRHELNamespace := namespaces.IsRHELNamespace(namespaceName)
+	if dbLayer.Features != nil || isRHELNamespace {
+		for _, dbFeatureVersion := range dbLayer.Features {
+			feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
+
+			if hasKernelPrefix(feature.Name) {
+				continue
+			}
+
+			layer.Features = append(layer.Features, *feature)
+		}
+		if !uncertifiedRHEL && isRHELNamespace {
+			certified, err := addRHELv2Features(db, &layer, false)
+			if err != nil {
+				return nil, nil, notes, err
+			}
+			if !certified {
+				// Client expected certified results, but they are unavailable.
+				notes = append(notes, CertifiedRHELScanUnavailable)
+			}
+		}
+
+		if env.LanguageVulns.Enabled() {
+			components = getLanguageComponents(db, dbLayer.Name, lineage, uncertifiedRHEL)
+		}
+	}
+
+	return layer.Features, components, notes, nil
+}
+
+func getNotes(namespaceName string, uncertifiedRHEL bool) []Note {
+	var notes []Note
+	if namespaceName != "" {
+		if namespaces.KnownStaleNamespaces.Contains(namespaceName) {
+			notes = append(notes, OSCVEsStale)
+		} else if !namespaces.KnownSupportedNamespaces.Contains(namespaceName) {
+			notes = append(notes, OSCVEsUnavailable)
+		}
+	} else {
+		notes = append(notes, OSCVEsUnavailable)
+	}
+	if !env.LanguageVulns.Enabled() {
+		notes = append(notes, LanguageCVEsUnavailable)
+	}
+	if uncertifiedRHEL {
+		// Uncertified results were requested.
+		notes = append(notes, CertifiedRHELScanUnavailable)
+	}
+
+	return notes
 }
 
 // Namespace is the image's base OS.

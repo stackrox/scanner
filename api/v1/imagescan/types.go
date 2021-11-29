@@ -8,15 +8,22 @@ type imageRequest interface {
 	GetUncertifiedRHEL() bool
 }
 
-// getLayerOpts represents options for layer retrieval.
-type getLayerOpts struct {
+// imageReq is an implementation of imageRequest.
+type imageReq struct {
+	imageSpec *v1.ImageSpec
 	uncertifiedRHEL bool
-	withVulns       bool
-	withFeatures    bool
 }
 
-// imageScanOpts represents options for image scan retrieval.
-type imageScanOpts struct {
-	withVulns    bool
-	withFeatures bool
+func (i *imageReq) GetImageSpec() *v1.ImageSpec {
+	return i.imageSpec
+}
+
+func (i *imageReq) GetUncertifiedRHEL() bool {
+	return i.uncertifiedRHEL
+}
+
+// getLayerOpts represents options for layer retrieval.
+type getLayerOpts struct {
+	withVulns       bool
+	withFeatures    bool
 }

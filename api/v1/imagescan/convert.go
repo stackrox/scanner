@@ -40,7 +40,7 @@ var (
 	noteToProtoMap = func() map[apiV1.Note]v1.Note {
 		numNotes := int(apiV1.SentinelNote)
 		if numNotes != len(v1.Note_value) {
-			utils.Must(errNotesMismatch)
+			utils.CrashOnError(errNotesMismatch)
 		}
 
 		m := make(map[apiV1.Note]v1.Note, numNotes)
@@ -53,7 +53,7 @@ var (
 			}
 		}
 		if len(m) != numNotes {
-			utils.Must(errNotesMismatch)
+			utils.CrashOnError(errNotesMismatch)
 		}
 		return m
 	}()
@@ -149,13 +149,13 @@ func convertNotes(notes []apiV1.Note) []v1.Note {
 	return v1Notes
 }
 
-func makeComponents(features []v1.Feature, components []*component.Component) *v1.Components {
+func makeComponents(features []apiV1.Feature, components []*component.Component) *v1.Components {
 	osComponents := make([]*v1.OSComponent, 0, len(features))
 	for _, feature := range features {
 		osComponents = append(osComponents, &v1.OSComponent{
 			Name:            feature.Name,
 			Version:         feature.Version,
-			Executables:     feature.ProvidedExecutables,
+			Executables:     convertProvidedExecutables(feature.ProvidedExecutables),
 		})
 	}
 

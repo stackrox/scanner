@@ -2,6 +2,7 @@ package imagescan
 
 import (
 	"context"
+	"github.com/stackrox/scanner/pkg/component"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/sirupsen/logrus"
@@ -61,40 +62,19 @@ func (s *serviceImpl) ScanImage(_ context.Context, req *v1.ScanImageRequest) (*v
 	}, nil
 }
 
-func (s *serviceImpl) GetImageScan(ctx context.Context, req *v1.GetImageScanRequest) (*v1.GetImageScanResponse, error) {
-	return s.getImageScan(ctx, req, imageScanOpts{
-		withVulns:    true,
-		withFeatures: true,
-	})
-}
+func (s *serviceImpl) GetImageScan(_ context.Context, req *v1.GetImageScanRequest) (*v1.GetImageScanResponse, error) {
+	opts := &database.DatastoreOptions{
+		WithFeatures:        true,
+		WithVulnerabilities: true,
+		UncertifiedRHEL:     req.GetUncertifiedRHEL(),
+	}
 
-func (s *serviceImpl) getImageScan(_ context.Context, req *v1.GetImageScanRequest, opts imageScanOpts) (*v1.GetImageScanResponse, error) {
-	layerName, lineage, err := s.getLayerNameFromImageReq(req)
+	dbLayer, lineage, err := s.getLayer(req, opts)
 	if err != nil {
 		return nil, err
 	}
-	return s.getLayer(layerName, lineage, getLayerOpts{
-		uncertifiedRHEL: req.GetUncertifiedRHEL(),
-		withVulns:       opts.withVulns,
-		withFeatures:    opts.withFeatures,
-	})
-}
 
-func (s *serviceImpl) getLayer(layerName, lineage string, layerOpts getLayerOpts) (*v1.GetImageScanResponse, error) {
-	opts := &database.DatastoreOptions{
-		WithFeatures:        layerOpts.withFeatures,
-		WithVulnerabilities: layerOpts.withVulns,
-		UncertifiedRHEL:     layerOpts.uncertifiedRHEL,
-	}
-
-	dbLayer, err := s.db.FindLayer(layerName, lineage, opts)
-	if err == commonerr.ErrNotFound {
-		return nil, status.Errorf(codes.NotFound, "Could not find Clair layer %q", layerName)
-	} else if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	layer, notes, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, lineage, opts)
+	layer, notes, err := apiV1.LayerFromDatabaseModel(s.db, *dbLayer, lineage, opts)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -106,6 +86,22 @@ func (s *serviceImpl) getLayer(layerName, lineage string, layerOpts getLayerOpts
 		},
 		Notes: convertNotes(notes),
 	}, nil
+}
+
+func (s *serviceImpl) getLayer(req imageRequest, opts *database.DatastoreOptions) (*database.Layer, string, error) {
+	layerName, lineage, err := s.getLayerNameFromImageReq(req)
+	if err != nil {
+		return nil, "", err
+	}
+
+	dbLayer, err := s.db.FindLayer(layerName, lineage, opts)
+	if err == commonerr.ErrNotFound {
+		return nil, "", status.Errorf(codes.NotFound, "Could not find Clair layer %q", layerName)
+	} else if err != nil {
+		return nil, "", status.Error(codes.Internal, err.Error())
+	}
+
+	return &dbLayer, "", nil
 }
 
 func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string, error) {
@@ -140,14 +136,14 @@ func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string
 
 func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest) (*v1.GetImageComponentsResponse, error) {
 	// Attempt to get image results assuming the image is within RHEL Certification scope (or is a non-RHEL image).
-	scanResp, err := s.getImageComponents(ctx, req, false)
+	features, components, notes, err := s.getImageComponents(ctx, req, false)
 	if err != nil {
 		return nil, err
 	}
-	for _, note := range scanResp.GetNotes() {
-		if note == v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE {
+	for _, note := range notes {
+		if note == apiV1.CertifiedRHELScanUnavailable {
 			// Image is RHEL, but not within Certification scope. Try again...
-			scanResp, err = s.getImageComponents(ctx, req, true)
+			features, components, notes, err = s.getImageComponents(ctx, req, true)
 			break
 		}
 	}
@@ -156,29 +152,34 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 	}
 
 	return &v1.GetImageComponentsResponse{
-		Status: scanResp.GetStatus(),
-		Components:  scanResp.GetImage(),
-		Notes:  scanResp.GetNotes(),
+		Status:      v1.ScanStatus_SUCCEEDED,
+		Components:  makeComponents(features, components),
+		Notes:       convertNotes(notes),
 	}, nil
 }
 
-func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*v1.GetImageScanResponse, error) {
+func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) ([]apiV1.Feature, []*component.Component, []apiV1.Note, error) {
 	imageScan, err := s.ScanImage(ctx, &v1.ScanImageRequest{
 		Image:           req.GetImage(),
 		Registry:        req.GetRegistry(),
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
-	return s.getImageScan(ctx, &v1.GetImageScanRequest{
-		ImageSpec:       imageScan.GetImage(),
-		UncertifiedRHEL: uncertifiedRHEL,
-	}, imageScanOpts{
-		withVulns:    req.GetWithVulns(),
-		withFeatures: true,
+	dbLayer, lineage, err := s.getLayer(&imageReq{
+		imageSpec:       imageScan.GetImage(),
+		uncertifiedRHEL: uncertifiedRHEL,
+	}, &database.DatastoreOptions{
+		WithFeatures:        true,
+		UncertifiedRHEL:     uncertifiedRHEL,
 	})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return apiV1.ComponentsFromDatabaseModel(s.db, dbLayer, lineage, uncertifiedRHEL)
 }
 
 func (s *serviceImpl) GetLanguageLevelComponents(_ context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
