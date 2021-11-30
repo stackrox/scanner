@@ -175,7 +175,7 @@ func convertFeaturesAndComponents(features []apiV1.Feature, rhelv2PkgEnvs map[in
 			Module:      pkg.Module,
 			Cpes:        rhelv2PkgEnv.CPEs,
 			AddedBy:     rhelv2PkgEnv.AddedBy,
-			Executables: convertProvidedExecutables(rhelv2PkgEnv.Pkg.ProvidedExecutables),
+			Executables: convertProvidedExecutables(pkg.ProvidedExecutables),
 		})
 	}
 
