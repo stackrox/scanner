@@ -53,15 +53,24 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability 
 	return vulns
 }
 
-func convertProvidedExecutables(paths []string) []*v1.Executable {
+func convertProvidedExecutables(paths []*apiV1.Executable) []*v1.Executable {
 	executables := make([]*v1.Executable, 0, len(paths))
 	for _, path := range paths {
 		executables = append(executables, &v1.Executable{
-			Path: path,
+			Path:             path.Path,
+			RequiredFeatures: convertRequiredFeatures(path.RequiredFeatures),
 		})
 	}
 
 	return executables
+}
+
+func convertRequiredFeatures(apiFeatures []apiV1.FeatureKey) []*v1.FeatureNameVersion {
+	features := make([]*v1.FeatureNameVersion, 0, len(apiFeatures))
+	for _, f := range apiFeatures {
+		features = append(features, &v1.FeatureNameVersion{Name: f.Name, Version: f.Version})
+	}
+	return features
 }
 
 func convertFeatures(apiFeatures []apiV1.Feature) ([]*v1.Feature, error) {

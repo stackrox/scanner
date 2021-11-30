@@ -50,6 +50,12 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 		if pkg.Arch != "" {
 			version += "." + pkg.Arch
 		}
+		executables := make([]*Executable, 0, len(pkg.ProvidedExecutables))
+		for _, exec := range pkg.ProvidedExecutables {
+			executables = append(executables, &Executable{
+				Path: exec,
+			})
+		}
 
 		feature := Feature{
 			Name:                pkg.Name,
@@ -57,7 +63,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 			VersionFormat:       rpm.ParserName,
 			Version:             version,
 			AddedBy:             pkgEnv.AddedBy,
-			ProvidedExecutables: pkg.ProvidedExecutables,
+			ProvidedExecutables: executables,
 		}
 
 		pkgVersion := rpmVersion.NewVersion(pkg.Version)

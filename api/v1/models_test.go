@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
@@ -128,7 +129,11 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
-	providedExecs := []string{"/exec/me", "/pls/exec/me"}
+	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
+	expectedExecs := make([]*Executable, 0, len(providedExecs))
+	for exec := range providedExecs {
+		expectedExecs = append(expectedExecs, &Executable{Path: exec})
+	}
 
 	dbLayer := database.Layer{
 		Name:          "example",
@@ -161,7 +166,7 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 						FixedBy: "7.35.0-1ubuntu2.20+esm2",
 					},
 				},
-				ProvidedExecutables: providedExecs,
+				ExecutableToDependencies: providedExecs,
 			},
 		},
 	}
@@ -171,7 +176,7 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].FixedBy)
-	assert.ElementsMatch(t, providedExecs, layer.Features[0].ProvidedExecutables)
+	assert.ElementsMatch(t, expectedExecs, layer.Features[0].ProvidedExecutables)
 }
 
 func TestLatestCentOSFeatureVersion(t *testing.T) {
@@ -179,7 +184,11 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
-	providedExecs := []string{"/exec/me", "/pls/exec/me"}
+	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
+	expectedExecs := make([]*Executable, 0, len(providedExecs))
+	for exec := range providedExecs {
+		expectedExecs = append(expectedExecs, &Executable{Path: exec})
+	}
 
 	dbLayer := database.Layer{
 		Name:          "example",
@@ -224,7 +233,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 						FixedBy: "0:3.26.0-11.el8",
 					},
 				},
-				ProvidedExecutables: providedExecs,
+				ExecutableToDependencies: providedExecs,
 			},
 		},
 	}
@@ -234,7 +243,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
-	assert.ElementsMatch(t, providedExecs, layer.Features[0].ProvidedExecutables)
+	assert.ElementsMatch(t, expectedExecs, layer.Features[0].ProvidedExecutables)
 }
 
 func TestLatestLanguageFeatureVersion(t *testing.T) {

@@ -16,15 +16,18 @@ package v1
 
 import (
 	"fmt"
+	"github.com/stackrox/scanner/api/v1/common"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/language"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/rhel"
@@ -195,9 +198,16 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
-	executables := set.NewStringSet(dbFeatureVersion.ProvidedExecutables...)
-	for _, lib := range dbFeatureVersion.ProvidedLibraries {
-		executables = executables.Union(depMap[lib])
+	executables := make([]*Executable, 0, len(dbFeatureVersion.ExecutableToDependencies))
+	for exec, libs := range dbFeatureVersion.ExecutableToDependencies {
+		features := set.NewStringSet()
+		for lib := range libs {
+			features = features.Union(depMap[lib])
+		}
+		executables = append(executables, &Executable{
+			Path:             exec,
+			RequiredFeatures: toFeatures(features),
+		})
 	}
 
 	return &Feature{
@@ -207,8 +217,21 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		Version:             version,
 		AddedBy:             addedBy,
 		Location:            dbFeatureVersion.Feature.Location,
-		ProvidedExecutables: executables.AsSlice(),
+		ProvidedExecutables: executables,
 	}
+}
+
+func toFeatures(keys set.StringSet) []FeatureKey {
+	if len(keys) == 0 {
+		return nil
+	}
+	features := make([]FeatureKey, len(keys))
+	for k := range keys {
+		featureKey, err := common.ParseFeatureNameVersion(k)
+		utils.Should(err)
+		features = append(features, FeatureKey{Name: featureKey.Name, Version: featureKey.Version})
+	}
+	return features
 }
 
 func dedupeVersionMatcher(v1, v2 string) bool {
@@ -380,15 +403,30 @@ type Vulnerability struct {
 
 // Feature is a scanned package in an image.
 type Feature struct {
-	Name                string          `json:"Name,omitempty"`
-	NamespaceName       string          `json:"NamespaceName,omitempty"`
-	VersionFormat       string          `json:"VersionFormat,omitempty"`
-	Version             string          `json:"Version,omitempty"`
-	Vulnerabilities     []Vulnerability `json:"Vulnerabilities,omitempty"`
-	AddedBy             string          `json:"AddedBy,omitempty"`
-	Location            string          `json:"Location,omitempty"`
-	FixedBy             string          `json:"FixedBy,omitempty"`
-	ProvidedExecutables []string        `json:"ProvidedExecutables,omitempty"`
+	Name            string          `json:"Name,omitempty"`
+	NamespaceName   string          `json:"NamespaceName,omitempty"`
+	VersionFormat   string          `json:"VersionFormat,omitempty"`
+	Version         string          `json:"Version,omitempty"`
+	Vulnerabilities []Vulnerability `json:"Vulnerabilities,omitempty"`
+	AddedBy         string          `json:"AddedBy,omitempty"`
+	Location        string          `json:"Location,omitempty"`
+	FixedBy         string          `json:"FixedBy,omitempty"`
+	// Do we need to support backward compatibility?
+	// ProvidedExecutables    []string                `json:"ProvidedExecutables,omitempty"`
+	ProvidedExecutables []*Executable    `json:"ProvidedExecutables,omitempty"`
+	PE                  []*v1.Executable `json:"PE,omitempty"`
+}
+
+// Executable is an executable in the package
+type Executable struct {
+	Path             string       `json:"Path,omitempty"`
+	RequiredFeatures []FeatureKey `json:"RequiredFeatures,omitempty"`
+}
+
+// FeatureKey is the key for a feature
+type FeatureKey struct {
+	Name    string `json:"Name,omitempty"`
+	Version string `json:"Version,omitempty"`
 }
 
 // DatabaseModel returns a database.FeatureVersion based on the caller Feature.
