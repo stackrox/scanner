@@ -252,8 +252,9 @@ func TestComponentsFromDatabaseModelRHELv2(t *testing.T) {
 				Arch:                "x86_64",
 				ProvidedExecutables: []string{"executable"},
 			},
-			AddedBy: "layer1",
-			CPEs:    []string{"my-cpe"},
+			Namespace: "rhel:7",
+			AddedBy:   "layer1",
+			CPEs:      []string{"my-cpe"},
 		},
 	}
 	expectedNotes := []Note{LanguageCVEsUnavailable}

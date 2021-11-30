@@ -639,7 +639,7 @@ func TestComponentsFromDatabaseModel(t *testing.T) {
 				SpecificationVersion:  "something",
 				BundleName:            "bundle",
 			},
-			AddedBy: "layer1",
+			AddedBy: "layer0",
 		},
 		{
 			Name:       "pythonpkg",
@@ -653,7 +653,7 @@ func TestComponentsFromDatabaseModel(t *testing.T) {
 				Summary:     "this is the coolest package ever",
 				Description: "something something something",
 			},
-			AddedBy: "layer1",
+			AddedBy: "layer0",
 		},
 	}
 	expectedNotes := []Note{CertifiedRHELScanUnavailable}
