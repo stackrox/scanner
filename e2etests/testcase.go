@@ -1,5 +1,3 @@
-// +build e2e
-
 package e2etests
 
 import (
