@@ -210,7 +210,10 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 		})
 	}
 
-	assert.ElementsMatch(t, nonLanguageFeatures, features)
+	for _, expectedFeature := range nonLanguageFeatures {
+		f := getMatchingFeature(t, features, expectedFeature, false)
+		assert.Equal(t, expectedFeature, *f)
+	}
 }
 
 func TestGRPCVulnDefsMetadata(t *testing.T) {
