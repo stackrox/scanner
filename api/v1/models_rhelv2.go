@@ -21,7 +21,7 @@ const (
 	timeFormat = "2006-01-02T15:04Z"
 )
 
-// addRHELv2Vulns appends features found during RHELv2 scanning.
+// addRHELv2Vulns appends vulnerabilities found during RHELv2 scanning.
 // RHELv2 scanning performs the scanning/analysis needed to be
 // certified as part of Red Hat's Scanner Certification Program.
 // The returned bool indicates if full certified scanning was performed.
