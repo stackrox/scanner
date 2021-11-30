@@ -213,11 +213,12 @@ func getLanguageComponents(db database.Datastore, layerName, lineage string, unc
 			}
 
 			if include {
+				c.AddedBy = layerToComponents.Layer
 				layerComponents = append(layerComponents, c)
 			}
-
-			removedLanguageComponentLocations = append(removedLanguageComponentLocations, layerToComponents.Removed...)
 		}
+
+		removedLanguageComponentLocations = append(removedLanguageComponentLocations, layerToComponents.Removed...)
 
 		components = append(components, layerComponents...)
 	}
@@ -365,7 +366,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			layer.Features = append(layer.Features, *feature)
 		}
 		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
-			certified, err := addRHELv2Features(db, &layer, withVulnerabilities)
+			certified, err := addRHELv2Vulns(db, &layer)
 			if err != nil {
 				return layer, notes, err
 			}
@@ -407,19 +408,16 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 //
 // Two language components may potentially produce the same feature. Similarly, the feature may already be seen as an OS-package feature.
 // However, these are not deduplicated here. This is left for the vulnerability matcher to determine upon converting the language components to feature versions.
-func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer, lineage string, uncertifiedRHEL bool) ([]Feature, []*component.Component, []Note, error) {
+func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer, lineage string, uncertifiedRHEL bool) ([]Feature, map[int]*database.RHELv2PackageEnv, []*component.Component, []Note, error) {
 	var namespaceName string
 	if dbLayer.Namespace != nil {
 		namespaceName = dbLayer.Namespace.Name
 	}
 
-	layer := Layer{
-		Name:          dbLayer.Name,
-		NamespaceName: namespaceName,
-	}
-
+	var features []Feature
+	var rhelv2PkgEnvs map[int]*database.RHELv2PackageEnv
 	var components []*component.Component
-	notes := getNotes(layer.NamespaceName, uncertifiedRHEL)
+	notes := getNotes(namespaceName, uncertifiedRHEL)
 
 	isRHELNamespace := namespaces.IsRHELNamespace(namespaceName)
 	if dbLayer.Features != nil || isRHELNamespace {
@@ -430,12 +428,14 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 				continue
 			}
 
-			layer.Features = append(layer.Features, *feature)
+			features = append(features, *feature)
 		}
 		if !uncertifiedRHEL && isRHELNamespace {
-			certified, err := addRHELv2Features(db, &layer, false)
+			var certified bool
+			var err error
+			rhelv2PkgEnvs, certified, err = getRHELv2PkgEnvs(db, dbLayer.Name)
 			if err != nil {
-				return nil, nil, notes, err
+				return nil, nil, nil, notes, err
 			}
 			if !certified {
 				// Client expected certified results, but they are unavailable.
@@ -448,7 +448,7 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 		}
 	}
 
-	return layer.Features, components, notes, nil
+	return features, rhelv2PkgEnvs, components, notes, nil
 }
 
 func getNotes(namespaceName string, uncertifiedRHEL bool) []Note {

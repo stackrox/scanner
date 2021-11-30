@@ -21,27 +21,22 @@ const (
 	timeFormat = "2006-01-02T15:04Z"
 )
 
-// addRHELv2Features appends features found during RHELv2 scanning.
+// addRHELv2Vulns appends features found during RHELv2 scanning.
 // RHELv2 scanning performs the scanning/analysis needed to be
 // certified as part of Red Hat's Scanner Certification Program.
 // The returned bool indicates if full certified scanning was performed.
 // This is typically only `false` for images without proper CPE information.
-func addRHELv2Features(db database.Datastore, layer *Layer, withVulnerabilities bool) (bool, error) {
-	layers, err := db.GetRHELv2Layers(layer.Name)
+func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
+	pkgEnvs, cpesExist, err := getRHELv2PkgEnvs(db, layer.Name)
 	if err != nil {
 		return false, err
 	}
 
-	cpesExist := shareCPEs(layers)
+	records := getRHELv2Records(pkgEnvs)
 
-	pkgEnvs, records := getRHELv2PkgData(layers)
-
-	var vulns map[int][]*database.RHELv2Vulnerability
-	if withVulnerabilities {
-		vulns, err = db.GetRHELv2Vulnerabilities(records)
-		if err != nil {
-			return false, err
-		}
+	vulns, err := db.GetRHELv2Vulnerabilities(records)
+	if err != nil {
+		return false, err
 	}
 
 	for _, pkgEnv := range pkgEnvs {
@@ -63,9 +58,7 @@ func addRHELv2Features(db database.Datastore, layer *Layer, withVulnerabilities 
 			ProvidedExecutables: pkg.ProvidedExecutables,
 		}
 
-		if withVulnerabilities {
-			feature.FixedBy, feature.Vulnerabilities = getRHELv2Vulns(vulns, pkg, feature.NamespaceName)
-		}
+		feature.FixedBy, feature.Vulnerabilities = getRHELv2Vulns(vulns, pkg, feature.NamespaceName)
 
 		layer.Features = append(layer.Features, feature)
 	}
@@ -138,8 +131,8 @@ func rpmVersionPtr(ver rpmVersion.Version) *rpmVersion.Version {
 func shareCPEs(layers []*database.RHELv2Layer) bool {
 	var cpesExist bool
 
-	// User's layers build on top of Red Hat images doesn't have a repository definition.
-	// We need to share CPE repo definition to all layer where CPEs are missing
+	// Users' layers built on top of Red Hat images don't have repository definitions.
+	// We need to share CPE repo definitions to all layers where CPEs are missing.
 	var previousCPEs []string
 	for i := 0; i < len(layers); i++ {
 		if len(layers[i].CPEs) != 0 {
@@ -154,7 +147,7 @@ func shareCPEs(layers []*database.RHELv2Layer) bool {
 
 	// The same thing has to be done in reverse
 	// example:
-	//   Red Hat's base images doesn't have repository definition
+	//   Red Hat's base image doesn't have repository definition
 	//   We need to get them from layer[i+1]
 	for i := len(layers) - 1; i >= 0; i-- {
 		if len(layers[i].CPEs) != 0 {
@@ -167,11 +160,19 @@ func shareCPEs(layers []*database.RHELv2Layer) bool {
 	return cpesExist
 }
 
-func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2PackageEnv, []*database.RHELv2Record) {
+// getRHELv2PkgEnvs returns a map from package ID to package environment and a bool to indicate CPEs exist in the image.
+func getRHELv2PkgEnvs(db database.Datastore, layerName string) (map[int]*database.RHELv2PackageEnv, bool, error) {
+	layers, err := db.GetRHELv2Layers(layerName)
+	if err != nil {
+		return nil, false, err
+	}
+
+	cpesExist := shareCPEs(layers)
+
 	pkgEnvs := make(map[int]*database.RHELv2PackageEnv)
 
-	// Find all packages that were ever added to the image
-	// labelled with the layer hash that introduced it.
+	// Find all packages which were ever added to the image,
+	// labeled with the layer hash which introduced it.
 	for _, layer := range layers {
 		for _, pkg := range layer.Pkgs {
 			if _, ok := pkgEnvs[pkg.ID]; !ok {
@@ -184,29 +185,35 @@ func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2P
 		}
 	}
 
-	// Look for the packages that still remain in the final image.
-	// Loop from highest layer to base in search of the latest version of
-	// the packages database.
+	// Look for the packages which still remain in the final image.
+	// Loop from the highest layer to base in search of the latest version of
+	// the package database.
 	for i := len(layers) - 1; i >= 0; i-- {
-		if len(layers[i].Pkgs) != 0 {
-			// Found the latest version of `var/lib/rpm/Packages`
-			// This has the final version of all the packages in this image.
-			finalPkgs := set.NewIntSet()
-			for _, pkg := range layers[i].Pkgs {
-				finalPkgs.Add(pkg.ID)
-			}
-
-			for pkgID := range pkgEnvs {
-				// Remove packages that were in lower layers, but not at the highest.
-				if !finalPkgs.Contains(pkgID) {
-					delete(pkgEnvs, pkgID)
-				}
-			}
-
-			break
+		if len(layers[i].Pkgs) == 0 {
+			continue
 		}
+
+		// Found the latest version of `var/lib/rpm/Packages`
+		// This has the final version of all the packages in this image.
+		finalPkgs := set.NewIntSet()
+		for _, pkg := range layers[i].Pkgs {
+			finalPkgs.Add(pkg.ID)
+		}
+
+		for pkgID := range pkgEnvs {
+			// Remove packages which were in lower layers, but not in the highest.
+			if !finalPkgs.Contains(pkgID) {
+				delete(pkgEnvs, pkgID)
+			}
+		}
+
+		break
 	}
 
+	return pkgEnvs, cpesExist, nil
+}
+
+func getRHELv2Records(pkgEnvs map[int]*database.RHELv2PackageEnv) []*database.RHELv2Record {
 	// Create a record for each pkgEnvironment for each CPE.
 	var records []*database.RHELv2Record
 
@@ -227,7 +234,7 @@ func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2P
 		}
 	}
 
-	return pkgEnvs, records
+	return records
 }
 
 // RHELv2ToVulnerability converts the given database.RHELv2Vulnerability into a Vulnerability.

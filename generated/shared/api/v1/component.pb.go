@@ -61,7 +61,8 @@ func (SourceType) EnumDescriptor() ([]byte, []int) {
 
 type Components struct {
 	OsComponents         []*OSComponent       `protobuf:"bytes,1,rep,name=os_components,json=osComponents,proto3" json:"os_components,omitempty"`
-	LanguageComponents   []*LanguageComponent `protobuf:"bytes,2,rep,name=language_components,json=languageComponents,proto3" json:"language_components,omitempty"`
+	RhelComponents       []*RHELComponent     `protobuf:"bytes,2,rep,name=rhel_components,json=rhelComponents,proto3" json:"rhel_components,omitempty"`
+	LanguageComponents   []*LanguageComponent `protobuf:"bytes,3,rep,name=language_components,json=languageComponents,proto3" json:"language_components,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
@@ -107,6 +108,13 @@ func (m *Components) GetOsComponents() []*OSComponent {
 	return nil
 }
 
+func (m *Components) GetRhelComponents() []*RHELComponent {
+	if m != nil {
+		return m.RhelComponents
+	}
+	return nil
+}
+
 func (m *Components) GetLanguageComponents() []*LanguageComponent {
 	if m != nil {
 		return m.LanguageComponents
@@ -130,6 +138,12 @@ func (m *Components) Clone() *Components {
 			cloned.OsComponents[idx] = v.Clone()
 		}
 	}
+	if m.RhelComponents != nil {
+		cloned.RhelComponents = make([]*RHELComponent, len(m.RhelComponents))
+		for idx, v := range m.RhelComponents {
+			cloned.RhelComponents[idx] = v.Clone()
+		}
+	}
 	if m.LanguageComponents != nil {
 		cloned.LanguageComponents = make([]*LanguageComponent, len(m.LanguageComponents))
 		for idx, v := range m.LanguageComponents {
@@ -142,9 +156,8 @@ func (m *Components) Clone() *Components {
 type OSComponent struct {
 	Name                 string        `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Version              string        `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	Arch                 string        `protobuf:"bytes,3,opt,name=arch,proto3" json:"arch,omitempty"`
-	Module               string        `protobuf:"bytes,4,opt,name=module,proto3" json:"module,omitempty"`
-	Executables          []*Executable `protobuf:"bytes,5,rep,name=executables,proto3" json:"executables,omitempty"`
+	AddedBy              string        `protobuf:"bytes,3,opt,name=added_by,json=addedBy,proto3" json:"added_by,omitempty"`
+	Executables          []*Executable `protobuf:"bytes,4,rep,name=executables,proto3" json:"executables,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
 	XXX_unrecognized     []byte        `json:"-"`
 	XXX_sizecache        int32         `json:"-"`
@@ -197,16 +210,9 @@ func (m *OSComponent) GetVersion() string {
 	return ""
 }
 
-func (m *OSComponent) GetArch() string {
+func (m *OSComponent) GetAddedBy() string {
 	if m != nil {
-		return m.Arch
-	}
-	return ""
-}
-
-func (m *OSComponent) GetModule() string {
-	if m != nil {
-		return m.Module
+		return m.AddedBy
 	}
 	return ""
 }
@@ -237,6 +243,132 @@ func (m *OSComponent) Clone() *OSComponent {
 	return cloned
 }
 
+type RHELComponent struct {
+	Id                   string        `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                 string        `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Version              string        `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+	Arch                 string        `protobuf:"bytes,4,opt,name=arch,proto3" json:"arch,omitempty"`
+	Module               string        `protobuf:"bytes,5,opt,name=module,proto3" json:"module,omitempty"`
+	Cpes                 []string      `protobuf:"bytes,6,rep,name=cpes,proto3" json:"cpes,omitempty"`
+	AddedBy              string        `protobuf:"bytes,7,opt,name=added_by,json=addedBy,proto3" json:"added_by,omitempty"`
+	Executables          []*Executable `protobuf:"bytes,8,rep,name=executables,proto3" json:"executables,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *RHELComponent) Reset()         { *m = RHELComponent{} }
+func (m *RHELComponent) String() string { return proto.CompactTextString(m) }
+func (*RHELComponent) ProtoMessage()    {}
+func (*RHELComponent) Descriptor() ([]byte, []int) {
+	return fileDescriptor_fafe30cd91123914, []int{2}
+}
+func (m *RHELComponent) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *RHELComponent) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_RHELComponent.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *RHELComponent) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RHELComponent.Merge(m, src)
+}
+func (m *RHELComponent) XXX_Size() int {
+	return m.Size()
+}
+func (m *RHELComponent) XXX_DiscardUnknown() {
+	xxx_messageInfo_RHELComponent.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RHELComponent proto.InternalMessageInfo
+
+func (m *RHELComponent) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *RHELComponent) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *RHELComponent) GetVersion() string {
+	if m != nil {
+		return m.Version
+	}
+	return ""
+}
+
+func (m *RHELComponent) GetArch() string {
+	if m != nil {
+		return m.Arch
+	}
+	return ""
+}
+
+func (m *RHELComponent) GetModule() string {
+	if m != nil {
+		return m.Module
+	}
+	return ""
+}
+
+func (m *RHELComponent) GetCpes() []string {
+	if m != nil {
+		return m.Cpes
+	}
+	return nil
+}
+
+func (m *RHELComponent) GetAddedBy() string {
+	if m != nil {
+		return m.AddedBy
+	}
+	return ""
+}
+
+func (m *RHELComponent) GetExecutables() []*Executable {
+	if m != nil {
+		return m.Executables
+	}
+	return nil
+}
+
+func (m *RHELComponent) MessageClone() proto.Message {
+	return m.Clone()
+}
+func (m *RHELComponent) Clone() *RHELComponent {
+	if m == nil {
+		return nil
+	}
+	cloned := new(RHELComponent)
+	*cloned = *m
+
+	if m.Cpes != nil {
+		cloned.Cpes = make([]string, len(m.Cpes))
+		copy(cloned.Cpes, m.Cpes)
+	}
+	if m.Executables != nil {
+		cloned.Executables = make([]*Executable, len(m.Executables))
+		for idx, v := range m.Executables {
+			cloned.Executables[idx] = v.Clone()
+		}
+	}
+	return cloned
+}
+
 type LanguageComponent struct {
 	Type     SourceType `protobuf:"varint,1,opt,name=type,proto3,enum=scannerV1.SourceType" json:"type,omitempty"`
 	Name     string     `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
@@ -246,6 +378,7 @@ type LanguageComponent struct {
 	//	*LanguageComponent_Java
 	//	*LanguageComponent_Python
 	Language             isLanguageComponent_Language `protobuf_oneof:"language"`
+	AddedBy              string                       `protobuf:"bytes,7,opt,name=added_by,json=addedBy,proto3" json:"added_by,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
 	XXX_unrecognized     []byte                       `json:"-"`
 	XXX_sizecache        int32                        `json:"-"`
@@ -255,7 +388,7 @@ func (m *LanguageComponent) Reset()         { *m = LanguageComponent{} }
 func (m *LanguageComponent) String() string { return proto.CompactTextString(m) }
 func (*LanguageComponent) ProtoMessage()    {}
 func (*LanguageComponent) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fafe30cd91123914, []int{2}
+	return fileDescriptor_fafe30cd91123914, []int{3}
 }
 func (m *LanguageComponent) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -370,6 +503,13 @@ func (m *LanguageComponent) GetPython() *PythonComponent {
 	return nil
 }
 
+func (m *LanguageComponent) GetAddedBy() string {
+	if m != nil {
+		return m.AddedBy
+	}
+	return ""
+}
+
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*LanguageComponent) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
@@ -409,7 +549,7 @@ func (m *JavaComponent) Reset()         { *m = JavaComponent{} }
 func (m *JavaComponent) String() string { return proto.CompactTextString(m) }
 func (*JavaComponent) ProtoMessage()    {}
 func (*JavaComponent) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fafe30cd91123914, []int{3}
+	return fileDescriptor_fafe30cd91123914, []int{4}
 }
 func (m *JavaComponent) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -505,7 +645,7 @@ func (m *PythonComponent) Reset()         { *m = PythonComponent{} }
 func (m *PythonComponent) String() string { return proto.CompactTextString(m) }
 func (*PythonComponent) ProtoMessage()    {}
 func (*PythonComponent) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fafe30cd91123914, []int{4}
+	return fileDescriptor_fafe30cd91123914, []int{5}
 }
 func (m *PythonComponent) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -586,6 +726,7 @@ func init() {
 	proto.RegisterEnum("scannerV1.SourceType", SourceType_name, SourceType_value)
 	proto.RegisterType((*Components)(nil), "scannerV1.Components")
 	proto.RegisterType((*OSComponent)(nil), "scannerV1.OSComponent")
+	proto.RegisterType((*RHELComponent)(nil), "scannerV1.RHELComponent")
 	proto.RegisterType((*LanguageComponent)(nil), "scannerV1.LanguageComponent")
 	proto.RegisterType((*JavaComponent)(nil), "scannerV1.JavaComponent")
 	proto.RegisterType((*PythonComponent)(nil), "scannerV1.PythonComponent")
@@ -594,49 +735,54 @@ func init() {
 func init() { proto.RegisterFile("shared/api/v1/component.proto", fileDescriptor_fafe30cd91123914) }
 
 var fileDescriptor_fafe30cd91123914 = []byte{
-	// 664 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x54, 0xcd, 0x6e, 0xd3, 0x4a,
-	0x14, 0xae, 0xe3, 0x24, 0x6d, 0x8f, 0xdb, 0x7b, 0xd3, 0xb9, 0x37, 0x95, 0x55, 0xdd, 0x1b, 0xd2,
-	0xb0, 0x29, 0x2c, 0x5c, 0xb5, 0x05, 0xb1, 0x40, 0x2c, 0xda, 0x62, 0x51, 0x2a, 0xf2, 0x23, 0xc7,
-	0xa9, 0x54, 0x36, 0xd6, 0xc4, 0x19, 0x12, 0x83, 0xed, 0xb1, 0x66, 0x6c, 0xd3, 0xbc, 0x49, 0x97,
-	0xbc, 0x01, 0xaf, 0xc1, 0x92, 0x3d, 0x1b, 0x54, 0xde, 0x82, 0x15, 0xf2, 0xf8, 0x27, 0x76, 0x61,
-	0x37, 0xe7, 0x3b, 0xdf, 0xf9, 0xe6, 0x7c, 0xe7, 0x8c, 0x06, 0xfe, 0xe7, 0x0b, 0xcc, 0xc8, 0xec,
-	0x10, 0x07, 0xce, 0x61, 0x7c, 0x74, 0x68, 0x53, 0x2f, 0xa0, 0x3e, 0xf1, 0x43, 0x2d, 0x60, 0x34,
-	0xa4, 0x68, 0x93, 0xdb, 0xd8, 0xf7, 0x09, 0xbb, 0x3a, 0xda, 0xdb, 0xaf, 0x32, 0xe3, 0xc8, 0xf5,
-	0x09, 0xc3, 0x53, 0xc7, 0x75, 0xc2, 0x65, 0xca, 0xee, 0xdd, 0x4a, 0x00, 0xe7, 0xb9, 0x02, 0x47,
-	0xcf, 0x61, 0x9b, 0x72, 0xab, 0x90, 0xe4, 0xaa, 0xd4, 0x95, 0x0f, 0x94, 0xe3, 0x5d, 0xad, 0x10,
-	0xd5, 0x86, 0xe3, 0x82, 0x6f, 0x6c, 0x51, 0x5e, 0x2a, 0xee, 0xc3, 0x3f, 0x2e, 0xf6, 0xe7, 0x11,
-	0x9e, 0x93, 0xb2, 0x44, 0x4d, 0x48, 0xfc, 0x57, 0x92, 0x78, 0x93, 0xb1, 0x56, 0x42, 0xc8, 0xbd,
-	0x0f, 0xf1, 0xde, 0x27, 0x09, 0x94, 0xd2, 0x65, 0x08, 0x41, 0xdd, 0xc7, 0x1e, 0x51, 0xa5, 0xae,
-	0x74, 0xb0, 0x69, 0x88, 0x33, 0x52, 0x61, 0x3d, 0x26, 0x8c, 0x3b, 0xd4, 0x57, 0x6b, 0x02, 0xce,
-	0xc3, 0x84, 0x8d, 0x99, 0xbd, 0x50, 0xe5, 0x94, 0x9d, 0x9c, 0xd1, 0x2e, 0x34, 0x3d, 0x3a, 0x8b,
-	0x5c, 0xa2, 0xd6, 0x05, 0x9a, 0x45, 0xe8, 0x19, 0x28, 0xe4, 0x86, 0xd8, 0x51, 0x88, 0xa7, 0x2e,
-	0xe1, 0x6a, 0x43, 0x34, 0xdc, 0x2e, 0x35, 0xac, 0x17, 0x59, 0xa3, 0xcc, 0xec, 0xfd, 0x94, 0x60,
-	0xe7, 0x37, 0x33, 0xe8, 0x11, 0xd4, 0xc3, 0x65, 0x90, 0x36, 0xfa, 0x57, 0x45, 0x67, 0x4c, 0x23,
-	0x66, 0x13, 0x73, 0x19, 0x10, 0x43, 0x50, 0x0a, 0x4f, 0xb5, 0x3f, 0x7b, 0x92, 0xab, 0x9e, 0xf6,
-	0x60, 0xc3, 0xa5, 0x36, 0x0e, 0x93, 0x54, 0xea, 0xa0, 0x88, 0x91, 0x06, 0xf5, 0xf7, 0x38, 0xc6,
-	0x6a, 0xa3, 0x2b, 0x1d, 0x28, 0xc7, 0x6a, 0xe9, 0xd2, 0x4b, 0x1c, 0xe3, 0xa2, 0xb9, 0x8b, 0x35,
-	0x43, 0xf0, 0xd0, 0x13, 0x68, 0x06, 0xcb, 0x70, 0x41, 0x7d, 0xb5, 0x29, 0x2a, 0xf6, 0x4a, 0x15,
-	0x23, 0x91, 0x28, 0xd7, 0x64, 0xdc, 0x33, 0x80, 0x8d, 0x7c, 0x53, 0xbd, 0x6f, 0x12, 0x6c, 0x57,
-	0xb4, 0xd1, 0x53, 0xd8, 0x75, 0xbc, 0xc0, 0x25, 0x1e, 0xf1, 0x43, 0xd1, 0x95, 0x95, 0x1b, 0x49,
-	0x77, 0xd6, 0xae, 0x66, 0xaf, 0x32, 0x5b, 0x0f, 0x61, 0xdb, 0xc3, 0x31, 0x59, 0xb1, 0xd3, 0x69,
-	0x6c, 0x09, 0x30, 0x27, 0xa9, 0xb0, 0x4e, 0x99, 0x33, 0x77, 0x7c, 0xae, 0xca, 0x5d, 0x39, 0x99,
-	0x4a, 0x16, 0xa2, 0x13, 0x68, 0xf3, 0x80, 0xd8, 0xce, 0x3b, 0xc7, 0xae, 0x5e, 0x9a, 0x8e, 0xe8,
-	0xdf, 0x4a, 0x32, 0x97, 0x7b, 0x00, 0xca, 0x34, 0xf2, 0x67, 0x2e, 0xb1, 0xc4, 0xfc, 0x1b, 0x82,
-	0x0a, 0x29, 0x34, 0xc0, 0x1e, 0xe9, 0x7d, 0x96, 0xe0, 0xef, 0x7b, 0x73, 0x48, 0xe6, 0xbf, 0xa0,
-	0x1e, 0x09, 0xf0, 0x3c, 0x7f, 0x85, 0x45, 0x8c, 0xf6, 0x61, 0x0b, 0x47, 0xe1, 0x82, 0x32, 0x8b,
-	0x78, 0xd8, 0x71, 0x33, 0x0f, 0x4a, 0x8a, 0xe9, 0x09, 0x94, 0x50, 0x66, 0xf4, 0xa3, 0xef, 0x52,
-	0x3c, 0xb3, 0x22, 0xe6, 0x66, 0xdb, 0x55, 0x72, 0x6c, 0xc2, 0xdc, 0xc4, 0x25, 0x8f, 0x3c, 0x0f,
-	0xb3, 0x65, 0xd6, 0x7d, 0x1e, 0xa2, 0x2e, 0x28, 0x33, 0xc2, 0x6d, 0xe6, 0x04, 0x62, 0xfd, 0x8d,
-	0xac, 0x76, 0x05, 0x3d, 0x9e, 0x02, 0xac, 0xde, 0x17, 0x6a, 0xc3, 0xce, 0x64, 0x30, 0xd6, 0x4d,
-	0x6b, 0x3c, 0x9c, 0x18, 0xe7, 0xba, 0x65, 0x5e, 0x8f, 0xf4, 0xd6, 0x1a, 0xda, 0x80, 0xfa, 0xe5,
-	0xe9, 0xd5, 0x69, 0x4b, 0x42, 0x00, 0xcd, 0xd1, 0xb5, 0x79, 0x31, 0x1c, 0xb4, 0x6a, 0x68, 0x1d,
-	0xe4, 0xc1, 0xa8, 0xdf, 0x92, 0x93, 0xc3, 0x2b, 0xbd, 0xdf, 0xaa, 0x27, 0xe5, 0x2f, 0x87, 0xe6,
-	0x40, 0x37, 0xcf, 0x87, 0x86, 0x6e, 0x4c, 0x06, 0xe6, 0xeb, 0xbe, 0xde, 0x6a, 0x9c, 0xbd, 0xf8,
-	0x72, 0xd7, 0x91, 0xbe, 0xde, 0x75, 0xa4, 0xef, 0x77, 0x1d, 0xe9, 0xf6, 0x47, 0x67, 0x0d, 0xba,
-	0x0e, 0xd5, 0x78, 0x88, 0xed, 0x0f, 0x8c, 0xde, 0xa4, 0x7f, 0x8a, 0x86, 0x03, 0x27, 0x7f, 0x4c,
-	0x5a, 0x7c, 0xf4, 0x76, 0xf5, 0x21, 0x4d, 0x9b, 0x82, 0x70, 0xf2, 0x2b, 0x00, 0x00, 0xff, 0xff,
-	0x3f, 0x46, 0x46, 0xea, 0xc3, 0x04, 0x00, 0x00,
+	// 739 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x54, 0xcd, 0x6e, 0xd3, 0x4a,
+	0x14, 0xae, 0x13, 0x37, 0x49, 0x4f, 0x9a, 0x36, 0x9d, 0x7b, 0x53, 0xf9, 0x56, 0x97, 0x90, 0x86,
+	0x4d, 0x61, 0x91, 0xaa, 0x14, 0xc4, 0x02, 0xb1, 0x68, 0x8b, 0x45, 0xa9, 0x9a, 0x1f, 0x39, 0x49,
+	0xa5, 0xb2, 0xb1, 0x26, 0xf6, 0x90, 0x0c, 0xd8, 0x1e, 0x6b, 0x6c, 0x87, 0xe6, 0x29, 0x58, 0x21,
+	0xf1, 0x16, 0xbc, 0x06, 0x4b, 0xf6, 0x6c, 0xa0, 0xbc, 0x08, 0xf2, 0xf8, 0x27, 0x76, 0x41, 0x15,
+	0xec, 0xe6, 0x9c, 0xf3, 0x7d, 0x9f, 0xbf, 0x73, 0xe6, 0x8c, 0xe1, 0x8e, 0x37, 0xc3, 0x9c, 0x98,
+	0xfb, 0xd8, 0xa5, 0xfb, 0xf3, 0x83, 0x7d, 0x83, 0xd9, 0x2e, 0x73, 0x88, 0xe3, 0x77, 0x5c, 0xce,
+	0x7c, 0x86, 0xd6, 0x3c, 0x03, 0x3b, 0x0e, 0xe1, 0x17, 0x07, 0x3b, 0xbb, 0x79, 0xe4, 0x3c, 0xb0,
+	0x1c, 0xc2, 0xf1, 0x84, 0x5a, 0xd4, 0x5f, 0x44, 0xe8, 0xf6, 0x57, 0x09, 0xe0, 0x24, 0x51, 0xf0,
+	0xd0, 0x53, 0xa8, 0x31, 0x4f, 0x4f, 0x25, 0x3d, 0x45, 0x6a, 0x15, 0xf7, 0xaa, 0x0f, 0xb7, 0x3b,
+	0xa9, 0x68, 0xa7, 0x3f, 0x4c, 0xf1, 0xda, 0x3a, 0xf3, 0x32, 0xe4, 0x23, 0xd8, 0xe4, 0x33, 0x62,
+	0x65, 0xe9, 0x05, 0x41, 0x57, 0x32, 0x74, 0xed, 0x54, 0x3d, 0x5f, 0x0a, 0x6c, 0x84, 0x84, 0x8c,
+	0x44, 0x17, 0xfe, 0xb1, 0xb0, 0x33, 0x0d, 0xf0, 0x94, 0x64, 0x65, 0x8a, 0x42, 0xe6, 0xff, 0x8c,
+	0xcc, 0x79, 0x8c, 0x5a, 0x4a, 0x21, 0xeb, 0x66, 0xca, 0x6b, 0xbf, 0x97, 0xa0, 0x9a, 0xf1, 0x8b,
+	0x10, 0xc8, 0x0e, 0xb6, 0x89, 0x22, 0xb5, 0xa4, 0xbd, 0x35, 0x4d, 0x9c, 0x91, 0x02, 0xe5, 0x39,
+	0xe1, 0x1e, 0x65, 0x8e, 0x52, 0x10, 0xe9, 0x24, 0x44, 0xff, 0x41, 0x05, 0x9b, 0x26, 0x31, 0xf5,
+	0xc9, 0x42, 0x29, 0x46, 0x25, 0x11, 0x1f, 0x2f, 0xd0, 0x13, 0xa8, 0x92, 0x2b, 0x62, 0x04, 0x3e,
+	0x9e, 0x58, 0xc4, 0x53, 0x64, 0xe1, 0xaf, 0x91, 0xf1, 0xa7, 0xa6, 0x55, 0x2d, 0x8b, 0x6c, 0x7f,
+	0x97, 0xa0, 0x96, 0x1b, 0x01, 0xda, 0x80, 0x02, 0x35, 0x63, 0x47, 0x05, 0x6a, 0xa6, 0x1e, 0x0b,
+	0xbf, 0xf7, 0x58, 0xcc, 0x7b, 0x44, 0x20, 0x63, 0x6e, 0xcc, 0x14, 0x39, 0x42, 0x87, 0x67, 0xb4,
+	0x0d, 0x25, 0x9b, 0x99, 0x81, 0x45, 0x94, 0x55, 0x91, 0x8d, 0xa3, 0x10, 0x6b, 0xb8, 0xc4, 0x53,
+	0x4a, 0xad, 0x62, 0x88, 0x0d, 0xcf, 0xb9, 0x1e, 0xcb, 0xb7, 0xf6, 0x58, 0xf9, 0xe3, 0x1e, 0x3f,
+	0x14, 0x60, 0xeb, 0x97, 0xfb, 0x41, 0xf7, 0x41, 0xf6, 0x17, 0x6e, 0x34, 0xfb, 0x8d, 0x9c, 0xce,
+	0x90, 0x05, 0xdc, 0x20, 0xa3, 0x85, 0x4b, 0x34, 0x01, 0xf9, 0xcb, 0x11, 0xec, 0x40, 0xc5, 0x62,
+	0x06, 0xf6, 0xc3, 0x52, 0x34, 0x86, 0x34, 0x46, 0x1d, 0x90, 0xdf, 0xe0, 0x39, 0x16, 0x83, 0xc8,
+	0xef, 0xe1, 0x19, 0x9e, 0xe3, 0xd4, 0xdc, 0xe9, 0x8a, 0x26, 0x70, 0xe8, 0x11, 0x94, 0xdc, 0x85,
+	0x3f, 0x63, 0x8e, 0x52, 0x12, 0x8c, 0x9d, 0x0c, 0x63, 0x20, 0x0a, 0x59, 0x4e, 0x8c, 0xbd, 0x65,
+	0x88, 0xc7, 0x00, 0x95, 0x64, 0x2f, 0xc3, 0xb7, 0x56, 0xcb, 0x7d, 0x16, 0x3d, 0x86, 0x6d, 0x6a,
+	0xbb, 0x16, 0xb1, 0x89, 0xe3, 0x0b, 0xc3, 0x7a, 0xd2, 0x63, 0xb4, 0x0f, 0x8d, 0x7c, 0xf5, 0x22,
+	0xee, 0xf8, 0x1e, 0xd4, 0x6c, 0x3c, 0x27, 0x4b, 0x74, 0x34, 0xa8, 0x75, 0x91, 0x4c, 0x40, 0x0a,
+	0x94, 0x19, 0xa7, 0x53, 0xea, 0x44, 0xcf, 0x67, 0x4d, 0x4b, 0x42, 0x74, 0x08, 0x0d, 0xcf, 0x25,
+	0x06, 0x7d, 0x4d, 0x8d, 0xfc, 0x47, 0xa3, 0xe9, 0xfd, 0x9b, 0x2b, 0x26, 0x72, 0x77, 0xa1, 0x3a,
+	0x09, 0x1c, 0xd3, 0x22, 0xba, 0xb8, 0x9a, 0x68, 0xb3, 0x20, 0x4a, 0xf5, 0xb0, 0x4d, 0xda, 0x9f,
+	0x24, 0xd8, 0xbc, 0x31, 0xa2, 0xf0, 0x6a, 0x66, 0xcc, 0x26, 0x2e, 0x9e, 0x26, 0x6f, 0x2e, 0x8d,
+	0xd1, 0x2e, 0xac, 0xe3, 0xc0, 0x9f, 0x31, 0xae, 0x13, 0x1b, 0x53, 0x2b, 0xee, 0xa1, 0x1a, 0xe5,
+	0xd4, 0x30, 0x15, 0x42, 0x4c, 0xf6, 0xce, 0xb1, 0x18, 0x36, 0xf5, 0x80, 0x5b, 0xf1, 0xc5, 0x57,
+	0x93, 0xdc, 0x98, 0x5b, 0x61, 0x97, 0x5e, 0x60, 0xdb, 0x98, 0x2f, 0x62, 0xf7, 0x49, 0x88, 0x5a,
+	0x50, 0x35, 0x89, 0x67, 0x70, 0xea, 0x8a, 0xcd, 0x58, 0x8d, 0xb9, 0xcb, 0xd4, 0x83, 0x09, 0xc0,
+	0x72, 0xf5, 0x50, 0x03, 0xb6, 0xc6, 0xbd, 0xa1, 0x3a, 0xd2, 0x87, 0xfd, 0xb1, 0x76, 0xa2, 0xea,
+	0xa3, 0xcb, 0x81, 0x5a, 0x5f, 0x41, 0x15, 0x90, 0xcf, 0x8e, 0x2e, 0x8e, 0xea, 0x12, 0x02, 0x28,
+	0x0d, 0x2e, 0x47, 0xa7, 0xfd, 0x5e, 0xbd, 0x80, 0xca, 0x50, 0xec, 0x0d, 0xba, 0xf5, 0x62, 0x78,
+	0x78, 0xa1, 0x76, 0xeb, 0x72, 0x48, 0x7f, 0xde, 0x1f, 0xf5, 0xd4, 0xd1, 0x49, 0x5f, 0x53, 0xb5,
+	0x71, 0x6f, 0xf4, 0xb2, 0xab, 0xd6, 0x57, 0x8f, 0x9f, 0x7d, 0xbe, 0x6e, 0x4a, 0x5f, 0xae, 0x9b,
+	0xd2, 0xb7, 0xeb, 0xa6, 0xf4, 0xf1, 0x47, 0x73, 0x05, 0x5a, 0x94, 0x75, 0x3c, 0x1f, 0x1b, 0x6f,
+	0x39, 0xbb, 0x8a, 0x7e, 0xc2, 0x1d, 0xec, 0xd2, 0x64, 0xcf, 0x3a, 0xf3, 0x83, 0x57, 0xcb, 0x3f,
+	0xf8, 0xa4, 0x24, 0x00, 0x87, 0x3f, 0x03, 0x00, 0x00, 0xff, 0xff, 0x6a, 0x04, 0x35, 0xe4, 0xf4,
+	0x05, 0x00, 0x00,
 }
 
 func (m *Components) Marshal() (dAtA []byte, err error) {
@@ -667,6 +813,20 @@ func (m *Components) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		for iNdEx := len(m.LanguageComponents) - 1; iNdEx >= 0; iNdEx-- {
 			{
 				size, err := m.LanguageComponents[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintComponent(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.RhelComponents) > 0 {
+		for iNdEx := len(m.RhelComponents) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.RhelComponents[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -729,20 +889,13 @@ func (m *OSComponent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintComponent(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x22
 		}
 	}
-	if len(m.Module) > 0 {
-		i -= len(m.Module)
-		copy(dAtA[i:], m.Module)
-		i = encodeVarintComponent(dAtA, i, uint64(len(m.Module)))
-		i--
-		dAtA[i] = 0x22
-	}
-	if len(m.Arch) > 0 {
-		i -= len(m.Arch)
-		copy(dAtA[i:], m.Arch)
-		i = encodeVarintComponent(dAtA, i, uint64(len(m.Arch)))
+	if len(m.AddedBy) > 0 {
+		i -= len(m.AddedBy)
+		copy(dAtA[i:], m.AddedBy)
+		i = encodeVarintComponent(dAtA, i, uint64(len(m.AddedBy)))
 		i--
 		dAtA[i] = 0x1a
 	}
@@ -757,6 +910,98 @@ func (m *OSComponent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.Name)
 		copy(dAtA[i:], m.Name)
 		i = encodeVarintComponent(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *RHELComponent) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *RHELComponent) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RHELComponent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.Executables) > 0 {
+		for iNdEx := len(m.Executables) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Executables[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintComponent(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x42
+		}
+	}
+	if len(m.AddedBy) > 0 {
+		i -= len(m.AddedBy)
+		copy(dAtA[i:], m.AddedBy)
+		i = encodeVarintComponent(dAtA, i, uint64(len(m.AddedBy)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.Cpes) > 0 {
+		for iNdEx := len(m.Cpes) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Cpes[iNdEx])
+			copy(dAtA[i:], m.Cpes[iNdEx])
+			i = encodeVarintComponent(dAtA, i, uint64(len(m.Cpes[iNdEx])))
+			i--
+			dAtA[i] = 0x32
+		}
+	}
+	if len(m.Module) > 0 {
+		i -= len(m.Module)
+		copy(dAtA[i:], m.Module)
+		i = encodeVarintComponent(dAtA, i, uint64(len(m.Module)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Arch) > 0 {
+		i -= len(m.Arch)
+		copy(dAtA[i:], m.Arch)
+		i = encodeVarintComponent(dAtA, i, uint64(len(m.Arch)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Version) > 0 {
+		i -= len(m.Version)
+		copy(dAtA[i:], m.Version)
+		i = encodeVarintComponent(dAtA, i, uint64(len(m.Version)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintComponent(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintComponent(dAtA, i, uint64(len(m.Id)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -786,6 +1031,13 @@ func (m *LanguageComponent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	if m.XXX_unrecognized != nil {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.AddedBy) > 0 {
+		i -= len(m.AddedBy)
+		copy(dAtA[i:], m.AddedBy)
+		i = encodeVarintComponent(dAtA, i, uint64(len(m.AddedBy)))
+		i--
+		dAtA[i] = 0x3a
 	}
 	if m.Language != nil {
 		{
@@ -1016,6 +1268,12 @@ func (m *Components) Size() (n int) {
 			n += 1 + l + sovComponent(uint64(l))
 		}
 	}
+	if len(m.RhelComponents) > 0 {
+		for _, e := range m.RhelComponents {
+			l = e.Size()
+			n += 1 + l + sovComponent(uint64(l))
+		}
+	}
 	if len(m.LanguageComponents) > 0 {
 		for _, e := range m.LanguageComponents {
 			l = e.Size()
@@ -1042,11 +1300,55 @@ func (m *OSComponent) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovComponent(uint64(l))
 	}
+	l = len(m.AddedBy)
+	if l > 0 {
+		n += 1 + l + sovComponent(uint64(l))
+	}
+	if len(m.Executables) > 0 {
+		for _, e := range m.Executables {
+			l = e.Size()
+			n += 1 + l + sovComponent(uint64(l))
+		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *RHELComponent) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Id)
+	if l > 0 {
+		n += 1 + l + sovComponent(uint64(l))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovComponent(uint64(l))
+	}
+	l = len(m.Version)
+	if l > 0 {
+		n += 1 + l + sovComponent(uint64(l))
+	}
 	l = len(m.Arch)
 	if l > 0 {
 		n += 1 + l + sovComponent(uint64(l))
 	}
 	l = len(m.Module)
+	if l > 0 {
+		n += 1 + l + sovComponent(uint64(l))
+	}
+	if len(m.Cpes) > 0 {
+		for _, s := range m.Cpes {
+			l = len(s)
+			n += 1 + l + sovComponent(uint64(l))
+		}
+	}
+	l = len(m.AddedBy)
 	if l > 0 {
 		n += 1 + l + sovComponent(uint64(l))
 	}
@@ -1085,6 +1387,10 @@ func (m *LanguageComponent) Size() (n int) {
 	}
 	if m.Language != nil {
 		n += m.Language.Size()
+	}
+	l = len(m.AddedBy)
+	if l > 0 {
+		n += 1 + l + sovComponent(uint64(l))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -1253,6 +1559,40 @@ func (m *Components) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RhelComponents", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowComponent
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthComponent
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthComponent
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RhelComponents = append(m.RhelComponents, &RHELComponent{})
+			if err := m.RhelComponents[len(m.RhelComponents)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field LanguageComponents", wireType)
 			}
 			var msglen int
@@ -1402,6 +1742,219 @@ func (m *OSComponent) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AddedBy", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowComponent
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthComponent
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthComponent
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AddedBy = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Executables", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowComponent
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthComponent
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthComponent
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Executables = append(m.Executables, &Executable{})
+			if err := m.Executables[len(m.Executables)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipComponent(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthComponent
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *RHELComponent) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowComponent
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RHELComponent: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RHELComponent: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowComponent
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthComponent
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthComponent
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Id = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowComponent
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthComponent
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthComponent
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowComponent
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthComponent
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthComponent
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Version = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Arch", wireType)
 			}
 			var stringLen uint64
@@ -1432,7 +1985,7 @@ func (m *OSComponent) Unmarshal(dAtA []byte) error {
 			}
 			m.Arch = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 4:
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Module", wireType)
 			}
@@ -1464,7 +2017,71 @@ func (m *OSComponent) Unmarshal(dAtA []byte) error {
 			}
 			m.Module = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 5:
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Cpes", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowComponent
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthComponent
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthComponent
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Cpes = append(m.Cpes, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AddedBy", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowComponent
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthComponent
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthComponent
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AddedBy = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 8:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Executables", wireType)
 			}
@@ -1733,6 +2350,38 @@ func (m *LanguageComponent) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.Language = &LanguageComponent_Python{v}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AddedBy", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowComponent
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthComponent
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthComponent
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AddedBy = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

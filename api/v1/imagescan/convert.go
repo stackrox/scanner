@@ -1,6 +1,7 @@
 package imagescan
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -8,6 +9,7 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
+	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -114,25 +116,25 @@ func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 	return features
 }
 
-func convertComponents(layersToComponents []*component.LayerToComponents) map[string]*v1.LanguageLevelComponents {
+func convertLanguageLevelComponents(layersToComponents []*component.LayerToComponents) map[string]*v1.LanguageLevelComponents {
 	converted := make(map[string]*v1.LanguageLevelComponents, len(layersToComponents))
 	for _, layerToComponents := range layersToComponents {
-		converted[layerToComponents.Layer] = convertComponentsSlice(layerToComponents.Components)
+		converted[layerToComponents.Layer] = convertLanguageLevelComponentsSlice(layerToComponents.Components)
 	}
 	return converted
 }
 
-func convertComponentsSlice(components []*component.Component) *v1.LanguageLevelComponents {
+func convertLanguageLevelComponentsSlice(components []*component.Component) *v1.LanguageLevelComponents {
 	converted := make([]*v1.LanguageLevelComponent, 0, len(components))
 	for _, c := range components {
-		converted = append(converted, convertComponent(c))
+		converted = append(converted, convertLanguageLevelComponent(c))
 	}
 	return &v1.LanguageLevelComponents{
 		Components: converted,
 	}
 }
 
-func convertComponent(c *component.Component) *v1.LanguageLevelComponent {
+func convertLanguageLevelComponent(c *component.Component) *v1.LanguageLevelComponent {
 	return &v1.LanguageLevelComponent{
 		SourceType: sourceTypeToProtoMap[c.SourceType],
 		Name:       c.Name,
@@ -149,13 +151,31 @@ func convertNotes(notes []apiV1.Note) []v1.Note {
 	return v1Notes
 }
 
-func makeComponents(features []apiV1.Feature, components []*component.Component) *v1.Components {
+// convertFeaturesAndComponents converts the given OS-level features and language-level components into
+// Components.
+func convertFeaturesAndComponents(features []apiV1.Feature, rhelv2PkgEnvs map[int]*database.RHELv2PackageEnv, components []*component.Component) *v1.Components {
 	osComponents := make([]*v1.OSComponent, 0, len(features))
 	for _, feature := range features {
 		osComponents = append(osComponents, &v1.OSComponent{
 			Name:        feature.Name,
 			Version:     feature.Version,
+			AddedBy:     feature.AddedBy,
 			Executables: convertProvidedExecutables(feature.ProvidedExecutables),
+		})
+	}
+
+	rhelv2Components := make([]*v1.RHELComponent, 0, len(rhelv2PkgEnvs))
+	for _, rhelv2PkgEnv := range rhelv2PkgEnvs {
+		pkg := rhelv2PkgEnv.Pkg
+		rhelv2Components = append(rhelv2Components, &v1.RHELComponent{
+			Id:          strconv.Itoa(pkg.ID),
+			Name:        pkg.Name,
+			Version:     pkg.Version,
+			Arch:        pkg.Arch,
+			Module:      pkg.Module,
+			Cpes:        rhelv2PkgEnv.CPEs,
+			AddedBy:     rhelv2PkgEnv.AddedBy,
+			Executables: convertProvidedExecutables(rhelv2PkgEnv.Pkg.ProvidedExecutables),
 		})
 	}
 
@@ -166,6 +186,7 @@ func makeComponents(features []apiV1.Feature, components []*component.Component)
 			Name:     c.Name,
 			Version:  c.Version,
 			Location: c.Location,
+			AddedBy:  c.AddedBy,
 		}
 
 		switch c.SourceType {
@@ -206,6 +227,7 @@ func makeComponents(features []apiV1.Feature, components []*component.Component)
 
 	return &v1.Components{
 		OsComponents:       osComponents,
+		RhelComponents:     rhelv2Components,
 		LanguageComponents: languageComponents,
 	}
 }

@@ -9,15 +9,26 @@ package scannerV1;
 
 message Components {
   repeated OSComponent       os_components       = 1;
-  repeated LanguageComponent language_components = 2;
+  repeated RHELComponent     rhel_components     = 2;
+  repeated LanguageComponent language_components = 3;
 }
 
 message OSComponent {
-  string name                     = 1;
-  string version                  = 2;
-  string arch                     = 3;
-  string module                   = 4;
-  repeated Executable executables = 5;
+  string              name        = 1;
+  string              version     = 2;
+  string              added_by    = 3;
+  repeated Executable executables = 4;
+}
+
+message RHELComponent {
+  string              id          = 1;
+  string              name        = 2;
+  string              version     = 3;
+  string              arch        = 4;
+  string              module      = 5;
+  repeated string     cpes        = 6;
+  string              added_by    = 7;
+  repeated Executable executables = 8;
 }
 
 message LanguageComponent {
@@ -29,6 +40,7 @@ message LanguageComponent {
     JavaComponent   java   = 5;
     PythonComponent python = 6;
   }
+  string added_by          = 7;
 }
 
 message JavaComponent {

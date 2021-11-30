@@ -136,14 +136,14 @@ func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string
 
 func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest) (*v1.GetImageComponentsResponse, error) {
 	// Attempt to get image results assuming the image is within RHEL Certification scope (or is a non-RHEL image).
-	features, components, notes, err := s.getImageComponents(ctx, req, false)
+	features, rhelv2PkgEnvs, components, notes, err := s.getImageComponents(ctx, req, false)
 	if err != nil {
 		return nil, err
 	}
 	for _, note := range notes {
 		if note == apiV1.CertifiedRHELScanUnavailable {
 			// Image is RHEL, but not within Certification scope. Try again...
-			features, components, notes, err = s.getImageComponents(ctx, req, true)
+			features, rhelv2PkgEnvs, components, notes, err = s.getImageComponents(ctx, req, true)
 			break
 		}
 	}
@@ -153,19 +153,19 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 
 	return &v1.GetImageComponentsResponse{
 		Status:     v1.ScanStatus_SUCCEEDED,
-		Components: makeComponents(features, components),
+		Components: convertFeaturesAndComponents(features, rhelv2PkgEnvs, components),
 		Notes:      convertNotes(notes),
 	}, nil
 }
 
-func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) ([]apiV1.Feature, []*component.Component, []apiV1.Note, error) {
+func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) ([]apiV1.Feature, map[int]*database.RHELv2PackageEnv, []*component.Component, []apiV1.Note, error) {
 	imageScan, err := s.ScanImage(ctx, &v1.ScanImageRequest{
 		Image:           req.GetImage(),
 		Registry:        req.GetRegistry(),
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	dbLayer, lineage, err := s.getLayer(&imageReq{
@@ -176,7 +176,7 @@ func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageCo
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	return apiV1.ComponentsFromDatabaseModel(s.db, dbLayer, lineage, uncertifiedRHEL)
@@ -194,7 +194,7 @@ func (s *serviceImpl) GetLanguageLevelComponents(_ context.Context, req *v1.GetL
 		return nil, status.Errorf(codes.Internal, "failed to retrieve components from DB: %v", err)
 	}
 	return &v1.GetLanguageLevelComponentsResponse{
-		LayerToComponents: convertComponents(components),
+		LayerToComponents: convertLanguageLevelComponents(components),
 	}, nil
 }
 
