@@ -88,10 +88,13 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 			}
 
 			if checkProvidedExecutables {
-				assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
+				assert.ElementsMatch(t, feature.DeprecatedProvidedExecutables, matching.DeprecatedProvidedExecutables)
+				assert.ElementsMatch(t, feature.Executables, matching.Executables)
 			}
-			feature.ProvidedExecutables = nil
-			matching.ProvidedExecutables = nil
+			feature.DeprecatedProvidedExecutables = nil
+			matching.DeprecatedProvidedExecutables = nil
+			feature.Executables = nil
+			matching.Executables = nil
 
 			if !onlyCheckSpecifiedVulns {
 				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
@@ -162,7 +165,7 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: "dpkg",
 					Version:       "0.0~r131-2ubuntu2",
 					// The only provided executable file is a symlink, so there are no regular executable files.
-					ProvidedExecutables: []string{},
+					DeprecatedProvidedExecutables: []string{},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2021-3520",
@@ -278,7 +281,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "debian:8",
 					VersionFormat: "dpkg",
 					Version:       "1.0.9.8.4",
-					ProvidedExecutables: []string{
+					DeprecatedProvidedExecutables: []string{
 						"/etc/cron.daily/apt",
 						"/etc/kernel/postinst.d/apt-auto-removal",
 						"/usr/share/bug/apt/script",
@@ -401,7 +404,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "centos:7",
 					VersionFormat: "rpm",
 					Version:       "3.3.10-26.el7",
-					ProvidedExecutables: []string{
+					DeprecatedProvidedExecutables: []string{
 						"/usr/bin/free",
 						"/usr/bin/pgrep",
 						"/usr/bin/pkill",
@@ -1436,7 +1439,7 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: "rpm",
 					Version:       "1.2.17-19.2.el7.noarch",
 					// This feature provides several JAR files, but they are either not executable or they are symlinks.
-					ProvidedExecutables: []string{},
+					DeprecatedProvidedExecutables: []string{},
 					AddedBy:             "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
@@ -1445,7 +1448,7 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: "rpm",
 					Version:       "2.7.6-2.10.el7.noarch",
 					// This feature provides a JAR file that is not executable.
-					ProvidedExecutables: []string{},
+					DeprecatedProvidedExecutables: []string{},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4173",
@@ -1480,7 +1483,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName:       "rhel:7",
 					VersionFormat:       "rpm",
 					Version:             "2:7.4.629-6.el7.x86_64",
-					ProvidedExecutables: []string{"/usr/bin/vi"},
+					DeprecatedProvidedExecutables: []string{"/usr/bin/vi"},
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2017-1000382",
@@ -2038,7 +2041,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "debian:11",
 					VersionFormat: "dpkg",
 					Version:       "0.5.11+git20200708+dd9ef66-5",
-					ProvidedExecutables: []string{
+					DeprecatedProvidedExecutables: []string{
 						"/bin/dash",
 					},
 					AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
@@ -2048,7 +2051,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "debian:11",
 					VersionFormat: "dpkg",
 					Version:       "1:3.7-5",
-					ProvidedExecutables: []string{
+					DeprecatedProvidedExecutables: []string{
 						"/usr/bin/cmp",
 						"/usr/bin/diff",
 						"/usr/bin/diff3",

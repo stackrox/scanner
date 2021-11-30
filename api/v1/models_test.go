@@ -177,7 +177,7 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].FixedBy)
-	assert.ElementsMatch(t, expectedExecs, layer.Features[0].ProvidedExecutables)
+	assert.ElementsMatch(t, expectedExecs, layer.Features[0].Executables)
 }
 
 func TestLatestCentOSFeatureVersion(t *testing.T) {
@@ -244,7 +244,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
-	assert.ElementsMatch(t, expectedExecs, layer.Features[0].ProvidedExecutables)
+	assert.ElementsMatch(t, expectedExecs, layer.Features[0].Executables)
 }
 
 func TestLatestLanguageFeatureVersion(t *testing.T) {
