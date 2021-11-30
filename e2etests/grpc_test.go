@@ -13,6 +13,7 @@ import (
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/imagescan"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -171,65 +172,45 @@ func TestGRPCGetImageComponents(t *testing.T) {
 }
 
 func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
-	if !test.uncertifiedRHEL {
-		verifyRHELv2Components(t, components.RhelComponents, test)
-		assert.Empty(t, components.OsComponents)
-	} else {
-		verifyOSComponents(t, components.OsComponents, test)
-		assert.Empty(t, components.RhelComponents)
-	}
+	assert.True(t, len(components.RhelComponents) == 0 || len(components.OsComponents) == 0)
 
 	// Skip language components at this time.
-}
-
-func verifyRHELv2Components(t *testing.T, components []*v1.RHELComponent, test testCase) {
-	nonLanguageFeatures := make([]apiV1.Feature, 0, len(test.expectedFeatures))
+	var nonLanguageFeatures []apiV1.Feature
 	for _, feature := range test.expectedFeatures {
 		if feature.Location == "" {
 			feature.Vulnerabilities = nil
 			feature.FixedBy = ""
+			if !namespaces.IsRHELNamespace(feature.NamespaceName) {
+				feature.VersionFormat = ""
+			}
 			nonLanguageFeatures = append(nonLanguageFeatures, feature)
 		}
 	}
 
-	rhelFeatures := make([]apiV1.Feature, 0, len(components))
-	for _, component := range components {
-		rhelFeatures = append(rhelFeatures, apiV1.Feature{
-			Name:                component.Name,
-			NamespaceName:       component.Namespace,
+	assert.Len(t, nonLanguageFeatures, len(components.RhelComponents) + len(components.OsComponents))
+
+	features := make([]apiV1.Feature, 0, len(nonLanguageFeatures))
+	for _, c := range components.OsComponents {
+		features = append(features, apiV1.Feature{
+			Name:                c.Name,
+			NamespaceName:       c.Namespace,
+			Version:             c.Version,
+			AddedBy:             c.AddedBy,
+			ProvidedExecutables: imagescan.ConvertExecutables(c.Executables),
+		})
+	}
+	for _, c := range components.RhelComponents {
+		features = append(features, apiV1.Feature{
+			Name:                c.Name,
+			NamespaceName:       c.Namespace,
 			VersionFormat:       "rpm",
-			Version:             component.Version,
-			AddedBy:             component.AddedBy,
-			ProvidedExecutables: imagescan.ConvertExecutables(component.Executables),
+			Version:             c.Version,
+			AddedBy:             c.AddedBy,
+			ProvidedExecutables: imagescan.ConvertExecutables(c.Executables),
 		})
 	}
 
-	assert.ElementsMatch(t, nonLanguageFeatures, rhelFeatures)
-}
-
-func verifyOSComponents(t *testing.T, components []*v1.OSComponent, test testCase) {
-	nonLanguageFeatures := make([]apiV1.Feature, 0, len(test.expectedFeatures))
-	for _, feature := range test.expectedFeatures {
-		if feature.Location == "" {
-			feature.Vulnerabilities = nil
-			feature.FixedBy = ""
-			feature.VersionFormat = ""
-			nonLanguageFeatures = append(nonLanguageFeatures, feature)
-		}
-	}
-
-	osFeatures := make([]apiV1.Feature, 0, len(components))
-	for _, component := range components {
-		osFeatures = append(osFeatures, apiV1.Feature{
-			Name:                component.Name,
-			NamespaceName:       component.Namespace,
-			Version:             component.Version,
-			AddedBy:             component.AddedBy,
-			ProvidedExecutables: imagescan.ConvertExecutables(component.Executables),
-		})
-	}
-
-	assert.ElementsMatch(t, nonLanguageFeatures, osFeatures)
+	assert.ElementsMatch(t, nonLanguageFeatures, features)
 }
 
 func TestGRPCVulnDefsMetadata(t *testing.T) {
