@@ -5,7 +5,9 @@ package e2etests
 import (
 	"context"
 	"fmt"
+	"os"
 	"sort"
+	"strings"
 	"testing"
 
 	apiV1 "github.com/stackrox/scanner/api/v1"
@@ -164,7 +166,7 @@ func TestGRPCGetImageComponents(t *testing.T) {
 
 		assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
 		assert.Equal(t, testCase.uncertifiedRHEL, isUncertifiedRHEL(imgComponentsResp.Notes), "Image %s", testCase.image)
-		verifyComponents(t, imgScanResp.GetComponents(), testCase)
+		verifyComponents(t, imgComponentsResp.GetComponents(), testCase)
 	}
 }
 
@@ -185,7 +187,7 @@ func verifyRHELv2Components(t *testing.T, components []*v1.RHELComponent, test t
 	for _, feature := range test.expectedFeatures {
 		if feature.Location == "" {
 			feature.Vulnerabilities = nil
-			feature.FixedBy = nil
+			feature.FixedBy = ""
 			nonLanguageFeatures = append(nonLanguageFeatures, feature)
 		}
 	}
@@ -210,7 +212,7 @@ func verifyOSComponents(t *testing.T, components []*v1.OSComponent, test testCas
 	for _, feature := range test.expectedFeatures {
 		if feature.Location == "" {
 			feature.Vulnerabilities = nil
-			feature.FixedBy = nil
+			feature.FixedBy = ""
 			feature.VersionFormat = ""
 			nonLanguageFeatures = append(nonLanguageFeatures, feature)
 		}
@@ -218,7 +220,7 @@ func verifyOSComponents(t *testing.T, components []*v1.OSComponent, test testCas
 
 	osFeatures := make([]apiV1.Feature, 0, len(components))
 	for _, component := range components {
-		rhelFeatures = append(rhelFeatures, apiV1.Feature{
+		osFeatures = append(osFeatures, apiV1.Feature{
 			Name:                component.Name,
 			NamespaceName:       component.Namespace,
 			Version:             component.Version,
