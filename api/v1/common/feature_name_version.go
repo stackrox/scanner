@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/pkg/errors"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
-	"strings"
 )
 
 // FeatureNameVersionToString serialize v1.FeatureNameVersion to a string

@@ -14,6 +14,7 @@ import (
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 )
 
@@ -50,9 +51,9 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 		if pkg.Arch != "" {
 			version += "." + pkg.Arch
 		}
-		executables := make([]*Executable, 0, len(pkg.ProvidedExecutables))
+		executables := make([]*v1.Executable, 0, len(pkg.ProvidedExecutables))
 		for _, exec := range pkg.ProvidedExecutables {
-			executables = append(executables, &Executable{
+			executables = append(executables, &v1.Executable{
 				Path: exec,
 			})
 		}

@@ -1,11 +1,11 @@
 package common
 
 import (
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"testing"
 
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stretchr/testify/assert"
 )
 

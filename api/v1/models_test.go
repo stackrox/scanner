@@ -10,6 +10,7 @@ import (
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/testutils"
@@ -130,9 +131,9 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	defer envIsolator.RestoreAll()
 
 	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
-	expectedExecs := make([]*Executable, 0, len(providedExecs))
+	expectedExecs := make([]*v1.Executable, 0, len(providedExecs))
 	for exec := range providedExecs {
-		expectedExecs = append(expectedExecs, &Executable{Path: exec})
+		expectedExecs = append(expectedExecs, &v1.Executable{Path: exec})
 	}
 
 	dbLayer := database.Layer{
@@ -185,9 +186,9 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	defer envIsolator.RestoreAll()
 
 	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
-	expectedExecs := make([]*Executable, 0, len(providedExecs))
+	expectedExecs := make([]*v1.Executable, 0, len(providedExecs))
 	for exec := range providedExecs {
-		expectedExecs = append(expectedExecs, &Executable{Path: exec})
+		expectedExecs = append(expectedExecs, &v1.Executable{Path: exec})
 	}
 
 	dbLayer := database.Layer{
