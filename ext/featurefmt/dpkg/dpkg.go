@@ -19,7 +19,6 @@ import (
 	"bufio"
 	"bytes"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 
@@ -159,9 +158,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		return
 	}
 
-	var executables, libraries []string
-	depToLibs := make(database.StringToStringsMap)
-	depToExecs := make(database.StringToStringsMap)
+	execToDeps := make(database.StringToStringsMap)
+	libToDeps := make(database.StringToStringsMap)
 	// Distroless containers do not provide executable files the same way distro containers do.
 	if !distroless && features.ActiveVulnMgmt.Enabled() {
 		// for example: var/lib/dpkg/info/vim.list
@@ -182,21 +180,20 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 			// The first character is always "/", which is removed when inserted into the files maps.
 			fileData := files[filename[1:]]
 			if fileData.Executable {
-				executables = append(executables, filename)
+				deps := set.NewStringSet()
 				if fileData.ELFMetadata != nil {
-					for _, dep := range fileData.ELFMetadata.ImportedLibraries {
-						execs := depToExecs[dep]
-						execs.Add(filename)
-						depToExecs[dep] = execs
-					}
+					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
 				}
+				execToDeps[filename] = deps
 			}
-			if fileData.ELFMetadata != nil && len(fileData.ELFMetadata.Sonames) > 0 {
-				libraries = append(libraries, fileData.ELFMetadata.Sonames...)
-				for _, dep := range fileData.ELFMetadata.ImportedLibraries {
-					libs := depToLibs[dep]
-					libs.AddAll(fileData.ELFMetadata.Sonames...)
-					depToLibs[dep] = libs
+			if fileData.ELFMetadata != nil {
+				for _, soname := range fileData.ELFMetadata.Sonames {
+					deps, ok := libToDeps[soname]
+					if !ok {
+						deps = set.NewStringSet()
+					}
+					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+					libToDeps[soname] = deps
 				}
 			}
 		}
@@ -217,29 +214,25 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	// with multiple associated packages.
 	if feature, exists := packagesMap[key]; exists {
 		// Append the executable files for the associated package to the source package.
-		feature.ProvidedExecutables = append(feature.ProvidedExecutables, executables...)
-		feature.DependencyToExecutables.Merge(depToExecs)
-		feature.ProvidedLibraries = append(feature.ProvidedLibraries, libraries...)
-		feature.DependencyToLibraries.Merge(depToLibs)
+		feature.ExecutableToDependencies.Merge(execToDeps)
+		feature.LibraryToDependencies.Merge(libToDeps)
 		return
 	}
 
-	if len(depToLibs) == 0 {
-		depToLibs = nil
+	if len(libToDeps) == 0 {
+		libToDeps = nil
 	}
-	if len(depToExecs) == 0 {
-		depToExecs = nil
+	if len(execToDeps) == 0 {
+		execToDeps = nil
 	}
 
 	packagesMap[key] = &database.FeatureVersion{
 		Feature: database.Feature{
 			Name: pkgName,
 		},
-		Version:                 pkgVersion,
-		ProvidedExecutables:     executables,
-		DependencyToExecutables: depToExecs,
-		ProvidedLibraries:       libraries,
-		DependencyToLibraries:   depToLibs,
+		Version:                  pkgVersion,
+		ExecutableToDependencies: execToDeps,
+		LibraryToDependencies:    libToDeps,
 	}
 }
 
@@ -271,18 +264,6 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	packages := make([]database.FeatureVersion, 0, len(packagesMap))
 	for _, pkg := range packagesMap {
 		if !removedPackages.Contains(pkg.Feature.Name) {
-			// Sort the provided executables and only allow unique executables.
-			sort.Strings(pkg.ProvidedExecutables)
-			filtered := pkg.ProvidedExecutables[:0]
-			prev := ""
-			for _, executable := range pkg.ProvidedExecutables {
-				if executable != prev {
-					filtered = append(filtered, executable)
-				}
-				prev = executable
-			}
-			pkg.ProvidedExecutables = filtered
-
 			packages = append(packages, *pkg)
 		}
 	}

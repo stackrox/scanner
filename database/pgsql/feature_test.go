@@ -106,11 +106,13 @@ func TestInsertFeature(t *testing.T) {
 			},
 			Name: "TestInsertFeature1",
 		},
-		Version:                 "2:3.0-imba",
-		ProvidedExecutables:     []string{"/bin/ls", "/bin/ps"},
-		DependencyToExecutables: map[string]database.StringToStringsMap{"some.so.1": {"/bin/ls": {}}},
-		ProvidedLibraries: []string{"linux.so.1"},
-		DependencyToLibraries:  map[string]database.StringToStringsMap{"libxml.so.2": {"linux.so.1": {}}},
+		Version:             "2:3.0-imba",
+		ProvidedExecutables: []string{"/bin/ls", "/bin/ps"},
+		ExecutableToDependencies: database.StringToStringsMap{
+			"/bin/ls": {"some.so.1": {}},
+			"/bin/ps": {},
+		},
+		LibraryToDependencies: database.StringToStringsMap{"linux.so.1": {"libxml.so.2": {}}},
 	}
 	id4, err := datastore.insertFeatureVersion(featureVersion)
 	assert.Nil(t, err)

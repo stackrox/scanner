@@ -56,8 +56,8 @@ const (
 		SELECT id FROM FeatureVersion WHERE feature_id = $1 AND version = $2`
 
 	insertFeatureVersion = `
-		INSERT INTO FeatureVersion(feature_id, version, executables, dependency_to_executables, libraries, dependency_to_libraries)
-		VALUES($1, $2, $3, $4, $5, $6)
+		INSERT INTO FeatureVersion(feature_id, version, executable_to_dependencies, library_to_dependencies)
+		VALUES($1, $2, $3, $4)
 		ON CONFLICT (feature_id, version)
 		DO NOTHING
 		RETURNING id
@@ -99,10 +99,8 @@ const (
 			f.name,
 			fv.id,
 			fv.version,
-			fv.executables,
-			fv.dependency_to_executables,
-			fv.libraries,
-			fv.dependency_to_libraries,
+			fv.executable_to_dependencies,
+			fv.library_to_dependencies,
 			ltree.id,
 			ltree.name
 		FROM Layer_diff_FeatureVersion ldf

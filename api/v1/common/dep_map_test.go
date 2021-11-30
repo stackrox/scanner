@@ -1,6 +1,7 @@
 package common
 
 import (
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"testing"
 
 	"github.com/stackrox/rox/pkg/set"
@@ -8,73 +9,32 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEnrichSoMap(t *testing.T) {
+func TestCreateDepMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		// A base library without any dependencies
 		"x1": {
-			ProvidedLibraries:       []string{"x1.so.1"},
-			DependencyToLibraries:   database.StringToStringsMap{},
-			DependencyToExecutables: database.StringToStringsMap{},
+			Feature:               database.Feature{Name: "x1"},
+			LibraryToDependencies: database.StringToStringsMap{"x1.so.1": set.NewStringSet()},
 		},
 		// An upper layer library depends on x
 		"z1": {
-			ProvidedLibraries: []string{"z1.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{
-				"x1.so.1": set.NewStringSet("z1.so.1"),
-			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"x1.so.1": set.NewStringSet("/bin/z1_exec1", "/bin/z1_exec2"),
-			},
-		},
-		// An executable package depends on that depends on both libraries
-		"v1": {
-			DependencyToLibraries: database.StringToStringsMap{},
-			DependencyToExecutables: database.StringToStringsMap{
-				"x1.so.1": set.NewStringSet("/bin/v1_exec1", "/bin/v1_exec4"),
-				"z1.so.1": set.NewStringSet("/bin/v1_exec2", "/bin/v1_exec3"),
-			},
-		},
-		// An executable package that depends on upper layer library z1
-		"v2": {
-			DependencyToExecutables: database.StringToStringsMap{
-				"z1.so.1": set.NewStringSet("/bin/v2_exec1", "/bin/v2_exec2"),
-			},
-		},
-		// An executable package depends on base library x1
-		"v3": {
-			DependencyToExecutables: database.StringToStringsMap{
-				"x1.so.1": set.NewStringSet("/bin/v3_exec1"),
+			Feature: database.Feature{Name: "z1"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"z1.so.1": set.NewStringSet("x1.so.1"),
 			},
 		},
 		// A compatible library for the upper layer library that is not executable
 		"z1-compatible": {
-			ProvidedLibraries: []string{"z1.so.1", "z1.so.1.7"},
-			DependencyToLibraries: database.StringToStringsMap{
-				"x1.so.1": {"z1.so.1": {}, "z1.so.1.7": {}},
-				"y.so.1":  {"z1.so.1": {}, "z1.so.1.7": {}},
-			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"x1.so.1": set.NewStringSet("/bin/z1c_exec1"),
-				"y.so.1":  set.NewStringSet("/bin/z1c_exec2"),
-			},
-		},
-		// An executable package that depends on the compatible library z1-compatible
-		"v4": {
-			DependencyToExecutables: database.StringToStringsMap{
-				"z1.so.1.7": set.NewStringSet("/bin/v4_exec1"),
+			Feature: database.Feature{Name: "z1c"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"z1.so.1":   {"x1.so.1": {}, "y.so.1": {}},
+				"z1.so.1.7": {"x1.so.1": {}, "y.so.1": {}},
 			},
 		},
 		// The library used by the compatible library.
 		"y": {
-			ProvidedLibraries:     []string{"y.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{},
-		},
-		// Some executable package with an unresolved dependency, it is not a perfect world
-		"v5": {
-			DependencyToExecutables: database.StringToStringsMap{
-				"unresolved.so.9": {"/bin/v5_exec1": {}},
-				"y.so.1":          {"/bin/v5_exec2": {}},
-			},
+			Feature:               database.Feature{Name: "y"},
+			LibraryToDependencies: database.StringToStringsMap{"y.so.1": set.NewStringSet()},
 		},
 	}
 	var features []database.FeatureVersion
@@ -83,55 +43,38 @@ func TestEnrichSoMap(t *testing.T) {
 	}
 	depMap := GetDepMap(features)
 
-	assert.Equal(t, featureMap["v4"].DependencyToExecutables["z1.so.1.7"], depMap["z1.so.1.7"])
-
-	assert.Equal(t, depMap["y.so.1"], depMap["z1.so.1.7"].
-		Union(depMap["z1.so.1"]).
-		Union(featureMap["v5"].DependencyToExecutables["y.so.1"]).
-		Union(featureMap["z1-compatible"].DependencyToExecutables["y.so.1"]))
-
-	assert.Equal(t, depMap["x1.so.1"], depMap["z1.so.1.7"].
-		Union(depMap["z1.so.1"]).
-		Union(featureMap["z1"].DependencyToExecutables["x1.so.1"]).
-		Union(featureMap["z1-compatible"].DependencyToExecutables["x1.so.1"]).
-		Union(featureMap["v3"].DependencyToExecutables["x1.so.1"]).
-		Union(featureMap["v1"].DependencyToExecutables["x1.so.1"]))
-
-	assert.Equal(t, depMap["z1.so.1"], featureMap["v2"].DependencyToExecutables["z1.so.1"].
-		Union(featureMap["v1"].DependencyToExecutables["z1.so.1"]))
+	assert.Equal(t, set.NewStringSet(FeatureNameVersionToString(&v1.FeatureNameVersion{Name: featureMap["x1"].Feature.Name})), depMap["x1.so.1"])
+	assert.Equal(t, set.NewStringSet(FeatureNameVersionToString(&v1.FeatureNameVersion{Name: featureMap["y"].Feature.Name})), depMap["y.so.1"])
+	assert.Len(t, depMap["z1.so.1"], 4)
+	assert.Contains(t, depMap["z1.so.1.7"],
+		FeatureNameVersionToString(&v1.FeatureNameVersion{Name: featureMap["x1"].Feature.Name}),
+		FeatureNameVersionToString(&v1.FeatureNameVersion{Name: featureMap["y"].Feature.Name}),
+		FeatureNameVersionToString(&v1.FeatureNameVersion{Name: featureMap["z1"].Feature.Name}),
+	)
 }
 
-// Test Topology:
+// Test Topology:  x -> y means x is used by y.
 //         x -> y -> z
 //         ^         |
 //         |_________|
 func TestLoopDepMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		"x": {
-			ProvidedLibraries: []string{"x.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{
-				"z.so.1": {"x.so.1": {}},
-			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"z.so.1": {"/bin/x_exec": {}},
+			Feature: database.Feature{Name: "x"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"x.so.1": {"z.so.1": {}},
 			},
 		},
 		"y": {
-			ProvidedLibraries: []string{"y.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{
-				"x.so.1": {"y.so.1": {}},
-			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"x.so.1": {"/bin/y_exec": {}},
+			Feature: database.Feature{Name: "y"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"y.so.1": {"x.so.1": {}},
 			},
 		},
 		"z": {
-			ProvidedLibraries: []string{"z.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{
-				"y.so.1": {"z.so.1": {}},
-			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"y.so.1": {"/bin/z_exec": {}},
+			Feature: database.Feature{Name: "z"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"z.so.1": {"y.so.1": {}},
 			},
 		},
 	}
@@ -145,58 +88,54 @@ func TestLoopDepMap(t *testing.T) {
 	assert.Len(t, depMap["x.so.1"], 3)
 }
 
-// Test Topology:
+// Test Topology: x -> y means x is used by y.
 //                   |------------
 //                   v           |
-//         x -> y -> z -> z1 -> z2
+//   x1 -> x -> y -> z -> z1 -> z2 -> z3
 //         ^         |
 //         |_________|
 func TestDoubleLoopDepMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
-		"x": {
-			ProvidedLibraries: []string{"x.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{
-				"z.so.1": {"x.so.1": {}},
+		"x1": {
+			Feature: database.Feature{Name: "x1"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"x1.so.1": {},
 			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"z.so.1": {"/bin/x_exec": {}},
+		},
+		"x": {
+			Feature: database.Feature{Name: "x"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"x.so.1": {"z.so.1": {}, "x1.so.1": {}},
 			},
 		},
 		"y": {
-			ProvidedLibraries: []string{"y.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{
-				"x.so.1": {"y.so.1": {}},
-			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"x.so.1": {"/bin/y_exec": {}},
+			Feature: database.Feature{Name: "y"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"y.so.1": {"x.so.1": {}},
 			},
 		},
 		"z": {
-			ProvidedLibraries: []string{"z.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{
-				"y.so.1":  {"z.so.1": {}},
-				"z2.so.1": {"z.so.1": {}},
-			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"y.so.1": {"/bin/z_exec": {}},
+			Feature: database.Feature{Name: "z"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"z.so.1": {"y.so.1": {}, "z2.so.1": {}},
 			},
 		},
 		"z1": {
-			ProvidedLibraries: []string{"z1.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{
-				"z.so.1": {"z1.so.1": {}},
-			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"z.so.1": {"/bin/z1_exec": {}},
+			Feature: database.Feature{Name: "z1"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"z1.so.1": {"z.so.1": {}},
 			},
 		},
 		"z2": {
-			ProvidedLibraries: []string{"z2.so.1"},
-			DependencyToLibraries: database.StringToStringsMap{
-				"z1.so.1": {"z2.so.1": {}},
+			Feature: database.Feature{Name: "z2"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"z2.so.1": {"z1.so.1": {}},
 			},
-			DependencyToExecutables: database.StringToStringsMap{
-				"z1.so.1": {"/bin/z2_exec": {}},
+		},
+		"z3": {
+			Feature: database.Feature{Name: "z3"},
+			LibraryToDependencies: database.StringToStringsMap{
+				"z3.so.1": {"z2.so.1": {}},
 			},
 		},
 	}
@@ -205,7 +144,14 @@ func TestDoubleLoopDepMap(t *testing.T) {
 		features = append(features, feature)
 	}
 	depMap := GetDepMap(features)
-	assert.Len(t, depMap, 5)
-	assert.Equal(t, depMap["x.so.1"], depMap["y.so.1"], depMap["z.so.1"], depMap["z1.so.1"], depMap["z2.so.1"])
-	assert.Len(t, depMap["x.so.1"], 5)
+	assert.Len(t, depMap, 7)
+	assert.Equal(t, depMap["y.so.1"], depMap["z.so.1"], depMap["z1.so.1"], depMap["z2.so.1"])
+	assert.Len(t, depMap["x.so.1"], 6)
+	assert.Len(t, depMap["x1.so.1"], 1)
+	allFeatures := set.NewStringSet()
+	for _, feature := range featureMap {
+		allFeatures.Add(FeatureNameVersionToString(&v1.FeatureNameVersion{Name: feature.Feature.Name}))
+	}
+	assert.Len(t, depMap["z3.so.1"], 7)
+	assert.Equal(t, allFeatures, depMap["z3.so.1"])
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"sort"
 
 	"github.com/stackrox/rox/pkg/set"
 )
@@ -20,12 +21,34 @@ func NewStringToStringsMap(m map[string]set.StringSet) interface {
 // StringToStringsMap defines driver.Valuer and sql.Scanner for a map from string to set of string
 type StringToStringsMap map[string]set.StringSet
 
+type internalMap []internalMapEntry
+type internalMapEntry struct {
+	K string   `json:"k,omitempty"`
+	V []string `json:"v,omitempty"`
+}
+
+func (m internalMap) Len() int {
+	return len(m)
+}
+
+func (m internalMap) Less(i, j int) bool {
+	return m[i].K < m[j].K
+}
+
+func (m internalMap) Swap(i, j int) {
+	m[j], m[i] = m[i], m[j]
+}
+
 // Value returns the JSON-encoded representation
 func (m StringToStringsMap) Value() (driver.Value, error) {
-	converted := make(map[string][]string, len(m))
+	converted := make(internalMap, 0, len(m))
 	for k, v := range m {
-		converted[k] = v.AsSlice()
+		converted = append(converted, internalMapEntry{
+			K: k,
+			V: v.AsSortedSlice(func(i, j string) bool { return i < j }),
+		})
 	}
+	sort.Sort(converted)
 	return json.Marshal(converted)
 }
 
@@ -36,13 +59,13 @@ func (m *StringToStringsMap) Scan(value interface{}) error {
 		return errors.New("type assertion to []byte failed")
 	}
 	// Unmarshal from json to map[string][]string
-	raw := make(map[string][]string)
-	scanned := make(StringToStringsMap)
+	var raw internalMap
 	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
-	for k, v := range raw {
-		scanned[k] = set.NewStringSet(v...)
+	scanned := make(StringToStringsMap, len(raw))
+	for _, r := range raw {
+		scanned[r.K] = set.NewStringSet(r.V...)
 	}
 	*m = scanned
 	return nil

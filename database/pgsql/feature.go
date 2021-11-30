@@ -20,7 +20,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lib/pq"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/ext/versionfmt"
@@ -145,10 +144,8 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	err = tx.QueryRow(insertFeatureVersion,
 		featureID,
 		fv.Version,
-		pq.Array(fv.ProvidedExecutables),
-		database.NewStringToStringsMap(fv.DependencyToExecutables),
-		pq.Array(fv.ProvidedLibraries),
-		database.NewStringToStringsMap(fv.DependencyToLibraries),
+		database.NewStringToStringsMap(fv.ExecutableToDependencies),
+		database.NewStringToStringsMap(fv.LibraryToDependencies),
 	).Scan(&fv.ID)
 	metrics.ObserveQueryTime("insertFeatureVersion", "insertFeatureVersion", t)
 
