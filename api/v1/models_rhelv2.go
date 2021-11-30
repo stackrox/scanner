@@ -177,9 +177,10 @@ func getRHELv2PkgEnvs(db database.Datastore, layerName string) (map[int]*databas
 		for _, pkg := range layer.Pkgs {
 			if _, ok := pkgEnvs[pkg.ID]; !ok {
 				pkgEnvs[pkg.ID] = &database.RHELv2PackageEnv{
-					Pkg:     pkg,
-					AddedBy: layer.Hash,
-					CPEs:    layer.CPEs,
+					Pkg:       pkg,
+					Namespace: layer.Dist,
+					AddedBy:   layer.Hash,
+					CPEs:      layer.CPEs,
 				}
 			}
 		}

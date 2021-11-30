@@ -96,6 +96,16 @@ func convertProvidedExecutables(paths []string) []*v1.Executable {
 	return executables
 }
 
+// ConvertExecutables converts executables into the paths.
+func ConvertExecutables(executables []*v1.Executable) []string {
+	paths := make([]string, 0, len(executables))
+	for _, executable := range executables {
+		paths = append(paths, executable.Path)
+	}
+
+	return paths
+}
+
 // ConvertFeatures converts api Features into v1 (proto) Feature pointers.
 func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 	features := make([]*v1.Feature, 0, len(apiFeatures))
@@ -158,6 +168,7 @@ func convertFeaturesAndComponents(features []apiV1.Feature, rhelv2PkgEnvs map[in
 	for _, feature := range features {
 		osComponents = append(osComponents, &v1.OSComponent{
 			Name:        feature.Name,
+			Namespace:   feature.NamespaceName,
 			Version:     feature.Version,
 			AddedBy:     feature.AddedBy,
 			Executables: convertProvidedExecutables(feature.ProvidedExecutables),
@@ -170,6 +181,7 @@ func convertFeaturesAndComponents(features []apiV1.Feature, rhelv2PkgEnvs map[in
 		rhelv2Components = append(rhelv2Components, &v1.RHELComponent{
 			Id:          strconv.Itoa(pkg.ID),
 			Name:        pkg.Name,
+			Namespace:   rhelv2PkgEnv.Namespace,
 			Version:     pkg.Version,
 			Arch:        pkg.Arch,
 			Module:      pkg.Module,

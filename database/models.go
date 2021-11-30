@@ -208,9 +208,10 @@ func (r *RHELv2Components) String() string {
 // RHELv2PackageEnv contains a RHELv2Package plus
 // data about the environment surrounding a particular package.
 type RHELv2PackageEnv struct {
-	Pkg     *RHELv2Package
-	AddedBy string
-	CPEs    []string
+	Pkg       *RHELv2Package
+	Namespace string
+	AddedBy   string
+	CPEs      []string
 }
 
 // RHELv2Record is used for querying RHELv2 vulnerabilities from the database.

@@ -5,11 +5,10 @@ package e2etests
 import (
 	"context"
 	"fmt"
-	"os"
 	"sort"
-	"strings"
 	"testing"
 
+	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/imagescan"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stretchr/testify/assert"
@@ -26,39 +25,6 @@ func TestGRPCScanImage(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.NotZero(t, len(getScanResp.GetImage().GetFeatures()))
-}
-
-func TestGRPCScanImageAndGet(t *testing.T) {
-	conn := connectToScanner(t)
-	client := v1.NewImageScanServiceClient(conn)
-
-	_, inCIRun := os.LookupEnv("CI")
-
-	for _, testCase := range testCases {
-		if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
-			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
-			testCase.registry = "https://quay.io"
-			testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
-			testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
-		}
-
-		imgScanResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
-			Image: testCase.image,
-			Registry: &v1.RegistryData{
-				Url:      testCase.registry,
-				Username: testCase.username,
-				Password: testCase.password,
-				Insecure: true,
-			},
-			WithVulns:    true,
-			WithFeatures: true,
-		})
-		require.Nil(t, err)
-
-		assert.Equal(t, imgScanResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
-		assert.Equal(t, testCase.uncertifiedRHEL, isUncertifiedRHEL(imgScanResp.Notes), "Image %s", testCase.image)
-		verifyImage(t, imgScanResp.GetImage(), testCase)
-	}
 }
 
 func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
@@ -169,6 +135,99 @@ func isUncertifiedRHEL(notes []v1.Note) bool {
 	}
 
 	return false
+}
+
+func TestGRPCGetImageComponents(t *testing.T) {
+	conn := connectToScanner(t)
+	client := v1.NewImageScanServiceClient(conn)
+
+	_, inCIRun := os.LookupEnv("CI")
+
+	for _, testCase := range testCases {
+		if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
+			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
+			testCase.registry = "https://quay.io"
+			testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
+			testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
+		}
+
+		imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
+			Image: testCase.image,
+			Registry: &v1.RegistryData{
+				Url:      testCase.registry,
+				Username: testCase.username,
+				Password: testCase.password,
+				Insecure: true,
+			},
+		})
+		require.Nil(t, err)
+
+		assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
+		assert.Equal(t, testCase.uncertifiedRHEL, isUncertifiedRHEL(imgComponentsResp.Notes), "Image %s", testCase.image)
+		verifyComponents(t, imgScanResp.GetComponents(), testCase)
+	}
+}
+
+func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
+	if !test.uncertifiedRHEL {
+		verifyRHELv2Components(t, components.RhelComponents, test)
+		assert.Empty(t, components.OsComponents)
+	} else {
+		verifyOSComponents(t, components.OsComponents, test)
+		assert.Empty(t, components.RhelComponents)
+	}
+
+	// Skip language components at this time.
+}
+
+func verifyRHELv2Components(t *testing.T, components []*v1.RHELComponent, test testCase) {
+	nonLanguageFeatures := make([]apiV1.Feature, 0, len(test.expectedFeatures))
+	for _, feature := range test.expectedFeatures {
+		if feature.Location == "" {
+			feature.Vulnerabilities = nil
+			feature.FixedBy = nil
+			nonLanguageFeatures = append(nonLanguageFeatures, feature)
+		}
+	}
+
+	rhelFeatures := make([]apiV1.Feature, 0, len(components))
+	for _, component := range components {
+		rhelFeatures = append(rhelFeatures, apiV1.Feature{
+			Name:                component.Name,
+			NamespaceName:       component.Namespace,
+			VersionFormat:       "rpm",
+			Version:             component.Version,
+			AddedBy:             component.AddedBy,
+			ProvidedExecutables: imagescan.ConvertExecutables(component.Executables),
+		})
+	}
+
+	assert.ElementsMatch(t, nonLanguageFeatures, rhelFeatures)
+}
+
+func verifyOSComponents(t *testing.T, components []*v1.OSComponent, test testCase) {
+	nonLanguageFeatures := make([]apiV1.Feature, 0, len(test.expectedFeatures))
+	for _, feature := range test.expectedFeatures {
+		if feature.Location == "" {
+			feature.Vulnerabilities = nil
+			feature.FixedBy = nil
+			feature.VersionFormat = ""
+			nonLanguageFeatures = append(nonLanguageFeatures, feature)
+		}
+	}
+
+	osFeatures := make([]apiV1.Feature, 0, len(components))
+	for _, component := range components {
+		rhelFeatures = append(rhelFeatures, apiV1.Feature{
+			Name:                component.Name,
+			NamespaceName:       component.Namespace,
+			Version:             component.Version,
+			AddedBy:             component.AddedBy,
+			ProvidedExecutables: imagescan.ConvertExecutables(component.Executables),
+		})
+	}
+
+	assert.ElementsMatch(t, nonLanguageFeatures, osFeatures)
 }
 
 func TestGRPCVulnDefsMetadata(t *testing.T) {
