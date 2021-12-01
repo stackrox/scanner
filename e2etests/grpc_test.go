@@ -189,6 +189,7 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 
 	features := make([]apiV1.Feature, 0, len(nonLanguageFeatures))
 	for _, c := range components.OsComponents {
+		var executables []string
 		if test.checkProvidedExecutables {
 			executables = imagescan.ConvertExecutables(c.Executables)
 		}
