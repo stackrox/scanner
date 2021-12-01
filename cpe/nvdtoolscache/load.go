@@ -68,7 +68,7 @@ func cpeIsApplicationOrLinuxKernel(cpe string) bool {
 		return false
 	}
 	// Check if the application is valid.
-	// Empty or ANY package is not valid.
+	// Empty or ANY product is not valid.
 	if spl[2] == "a" && spl[3] != "" && spl[3] != "*" {
 		return true
 	}
