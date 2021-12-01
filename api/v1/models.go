@@ -419,8 +419,7 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 	var components []*component.Component
 	notes := getNotes(namespaceName, uncertifiedRHEL)
 
-	isRHELNamespace := namespaces.IsRHELNamespace(namespaceName)
-	if dbLayer.Features != nil || isRHELNamespace {
+	if dbLayer.Features != nil {
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
 
@@ -430,22 +429,23 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 
 			features = append(features, *feature)
 		}
-		if !uncertifiedRHEL && isRHELNamespace {
-			var certified bool
-			var err error
-			rhelv2PkgEnvs, certified, err = getRHELv2PkgEnvs(db, dbLayer.Name)
-			if err != nil {
-				return nil, nil, nil, notes, err
-			}
-			if !certified {
-				// Client expected certified results, but they are unavailable.
-				notes = append(notes, CertifiedRHELScanUnavailable)
-			}
-		}
+	}
 
-		if env.LanguageVulns.Enabled() {
-			components = getLanguageComponents(db, dbLayer.Name, lineage, uncertifiedRHEL)
+	if !uncertifiedRHEL && namespaces.IsRHELNamespace(namespaceName) {
+		var certified bool
+		var err error
+		rhelv2PkgEnvs, certified, err = getRHELv2PkgEnvs(db, dbLayer.Name)
+		if err != nil {
+			return nil, nil, nil, notes, err
 		}
+		if !certified {
+			// Client expected certified results, but they are unavailable.
+			notes = append(notes, CertifiedRHELScanUnavailable)
+		}
+	}
+
+	if env.LanguageVulns.Enabled() {
+		components = getLanguageComponents(db, dbLayer.Name, lineage, uncertifiedRHEL)
 	}
 
 	return features, rhelv2PkgEnvs, components, notes, nil
