@@ -187,26 +187,31 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 		}
 	}
 
-	assert.Len(t, nonLanguageFeatures, len(components.RhelComponents) + len(components.OsComponents))
-
 	features := make([]apiV1.Feature, 0, len(nonLanguageFeatures))
 	for _, c := range components.OsComponents {
+		if test.checkProvidedExecutables {
+			executables = imagescan.ConvertExecutables(c.Executables)
+		}
 		features = append(features, apiV1.Feature{
 			Name:                c.Name,
 			NamespaceName:       c.Namespace,
 			Version:             c.Version,
 			AddedBy:             c.AddedBy,
-			ProvidedExecutables: imagescan.ConvertExecutables(c.Executables),
+			ProvidedExecutables: executables,
 		})
 	}
 	for _, c := range components.RhelComponents {
+		var executables []string
+		if test.checkProvidedExecutables {
+			executables = imagescan.ConvertExecutables(c.Executables)
+		}
 		features = append(features, apiV1.Feature{
 			Name:                c.Name,
 			NamespaceName:       c.Namespace,
 			VersionFormat:       "rpm",
 			Version:             c.Version,
 			AddedBy:             c.AddedBy,
-			ProvidedExecutables: imagescan.ConvertExecutables(c.Executables),
+			ProvidedExecutables: executables,
 		})
 	}
 
