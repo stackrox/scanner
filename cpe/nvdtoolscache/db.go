@@ -1,6 +1,7 @@
 package nvdtoolscache
 
 import (
+	"github.com/sirupsen/logrus"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -88,6 +89,8 @@ func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSO
 			}
 			productsToDelete.AddAll(products...)
 		}
+
+		logrus.Info(vuln.ID(), " - ", vuln.Config())
 
 		// Update the associated product buckets with the CVE.
 		for _, a := range vuln.Config() {
