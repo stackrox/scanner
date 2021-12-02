@@ -71,6 +71,7 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 	if image.SHA == "" {
 		image.SHA = digest
 	}
+	logrus.Infof("Adding image %s - %s - %s - %s - %v", layer, image.SHA, lineage, image.TaggedName(), uncertifiedRHEL)
 	return digest, storage.AddImage(layer, image.SHA, lineage, image.TaggedName(), &database.DatastoreOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})

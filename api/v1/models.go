@@ -100,6 +100,7 @@ func getIgnoredLanguageComponents(layersToComponents []*component.LayerToCompone
 // that does affect the features it describes (adds, updates, or removes features), which is currently only a
 // concern for the Java source type. However, this event is unlikely, which is why it is not considered at this time.
 func getLanguageData(db database.Datastore, layerName, lineage string, uncertifiedRHEL bool) ([]database.FeatureVersion, error) {
+	log.Infof("Searching for image %s - %s - %v", layerName, lineage, uncertifiedRHEL)
 	layersToComponents, err := db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
@@ -323,8 +324,6 @@ func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncer
 		}
 	}
 	layer.Features = append(layer.Features, languageFeatures...)
-
-	log.Infof("Layer %s:%s has language vulns: %v", layer.Name, layer.NamespaceName, languageFeatures)
 }
 
 func hasKernelPrefix(name string) bool {
@@ -358,7 +357,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 
 	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
-			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL())
+			feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
 
 			if hasKernelPrefix(feature.Name) {
 				continue
