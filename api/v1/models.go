@@ -323,6 +323,8 @@ func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncer
 		}
 	}
 	layer.Features = append(layer.Features, languageFeatures...)
+
+	log.Infof("Layer %s:%s has language vulns: %v", layer.Name, layer.NamespaceName, languageFeatures)
 }
 
 func hasKernelPrefix(name string) bool {
