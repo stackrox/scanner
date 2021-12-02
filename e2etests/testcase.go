@@ -42,7 +42,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-3520",
 						NamespaceName: "ubuntu:16.04",
 						Description:   "There's a flaw in lz4. An attacker who submits a crafted file to an application linked with lz4 may be able to trigger an integer overflow, leading to calling of memmove() on a negative size argument, causing an out-of-bounds write and/or a crash. The greatest impact of this flaw is to availability, with some potential impact to confidentiality and integrity as well.",
-						Link:          "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2021-3520",
+						Link:          "https://ubuntu.com/security/CVE-2021-3520",
 						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -387,7 +387,7 @@ var testCases = []testCase{
 						Name:          "CVE-2017-9525",
 						NamespaceName: "ubuntu:14.04",
 						Description:   "In the cron package through 3.0pl1-128 on Debian, and through 3.0pl1-128ubuntu2 on Ubuntu, the postinst maintainer script allows for group-crontab-to-root privilege escalation via symlink attacks against unsafe usage of the chown and chmod programs.",
-						Link:          "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-9525",
+						Link:          "https://ubuntu.com/security/CVE-2017-9525",
 						Severity:      "Low",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
