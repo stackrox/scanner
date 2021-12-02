@@ -1,3 +1,4 @@
+//go:build e2e
 // +build e2e
 
 package e2etests
@@ -2019,6 +2020,28 @@ func TestImageSanity(t *testing.T) {
 					Version:       "1.33.1-r2",
 					AddedBy:       "sha256:5843afab387455b37944e709ee8c78d7520df80f8d01cf7f861aae63beeddb6b",
 					FixedBy:       "1.33.1-r6",
+				},
+			},
+		},
+		{
+			image:                   "alpine:3.15.0",
+			registry:                "https://registry-1.docker.io",
+			source:                  "NVD",
+			onlyCheckSpecifiedVulns: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "apk-tools",
+					NamespaceName: "alpine:v3.15",
+					VersionFormat: "apk",
+					Version:       "2.12.7-r3",
+					AddedBy:       "idk",
+				},
+				{
+					Name:          "busybox",
+					NamespaceName: "alpine:v3.15",
+					VersionFormat: "apk",
+					Version:       "1.34.1-r3",
+					AddedBy:       "idk",
 				},
 			},
 		},
