@@ -101,7 +101,7 @@ func (s *serviceImpl) getLayer(req imageRequest, opts *database.DatastoreOptions
 		return nil, "", status.Error(codes.Internal, err.Error())
 	}
 
-	return &dbLayer, "", nil
+	return &dbLayer, lineage, nil
 }
 
 func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string, error) {
@@ -122,11 +122,9 @@ func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string
 		argument = imgSpec.GetImage()
 		layerFetcher = s.db.GetLayerByName
 	}
-	logrus.Infof("Searching for layer and lineage: %s", argument)
 	layerName, lineage, exists, err := layerFetcher(argument, &database.DatastoreOptions{
 		UncertifiedRHEL: req.GetUncertifiedRHEL(),
 	})
-	logrus.Infof("Got layer and lineage %s - %s", layerName, lineage)
 	if err != nil {
 		return "", "", err
 	}
