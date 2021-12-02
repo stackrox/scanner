@@ -202,7 +202,7 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 			Name:                c.Name,
 			NamespaceName:       c.Namespace,
 			VersionFormat:       "rpm",
-			Version:             c.Version,
+			Version:             c.Version + "." + c.Arch,
 			AddedBy:             c.AddedBy,
 			ProvidedExecutables: imagescan.ConvertExecutables(c.Executables),
 		})
