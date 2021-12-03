@@ -24,7 +24,7 @@ func LiteMode(liteMode bool) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if liteMode && !liteModeAllowList.Contains(r.RequestURI) {
-				httputil.WriteGRPCStyleError(w, codes.PermissionDenied, errLiteMode)
+				httputil.WriteGRPCStyleError(w, codes.NotFound, errLiteMode)
 				return
 			}
 

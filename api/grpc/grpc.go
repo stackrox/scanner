@@ -125,11 +125,11 @@ func (a *apiImpl) Register(services ...APIService) {
 }
 
 func (a *apiImpl) unaryInterceptors() []grpc.UnaryServerInterceptor {
-	// Note: order is important.
-	// Interceptors are executed in left-to-right order.
+	// Interceptors are executed in order.
 	return []grpc.UnaryServerInterceptor{
-		liteModeUnaryServerInterceptor(a.config.LiteMode),
+		// Ensure the user is authorized before doing anything else.
 		verifyPeerCertsUnaryServerInterceptor(),
+		liteModeUnaryServerInterceptor(a.config.LiteMode),
 		grpcprometheus.UnaryServerInterceptor,
 	}
 }

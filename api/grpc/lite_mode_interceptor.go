@@ -19,7 +19,7 @@ var (
 func liteModeUnaryServerInterceptor(liteMode bool) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		if liteMode && !liteModeMethodsAllowlist.Contains(info.FullMethod) {
-			return nil, status.Error(codes.PermissionDenied, "request not available in lite-mode")
+			return nil, status.Error(codes.NotFound, "request not available in lite-mode")
 		}
 
 		return handler(ctx, req)
