@@ -36,9 +36,10 @@ COPY ./THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 RUN dnf upgrade -y && \
     dnf install -y ca-certificates xz && \
     dnf clean all && \
-    rm -rf /var/cache/dnf && \
     # (Optional) Remove line below to keep package management utilities
-    rpm -e subscription-manager yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \
+    # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
+    rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
+    rm -rf /var/cache/dnf && \
     chown -R 65534:65534 "${NVD_DEFINITIONS_DIR}" && \
     chown -R 65534:65534 "${K8S_DEFINITIONS_DIR}" && \
     chown -R 65534:65534 "${REPO_TO_CPE_DIR}" && \

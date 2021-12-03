@@ -20,6 +20,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
 	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
@@ -218,7 +219,7 @@ func filterUbuntuLinuxKernelFeatures(vuln *database.Vulnerability) {
 func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnerability {
 	var filtered []database.Vulnerability
 	for _, vuln := range vulns {
-		if !strings.HasPrefix(vuln.Namespace.Name, "centos") {
+		if !namespaces.IsCentOSNamespace(vuln.Namespace.Name) {
 			filtered = append(filtered, vuln)
 			continue
 		}
@@ -234,6 +235,12 @@ func filterFixableCentOSVulns(vulns []database.Vulnerability) []database.Vulnera
 		}
 	}
 	return filtered
+}
+
+func updateUbuntuLink(cfg config, vuln *database.Vulnerability) {
+	if cfg.UseLegacyUbuntuCVEURLPrefix && namespaces.IsUbuntuNamespace(vuln.Namespace.Name) {
+		vuln.Link = ubuntu.LegacyCVEURLPrefix + vuln.Link[len(ubuntu.CVEURLPrefix):]
+	}
 }
 
 func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, cfg config) error {
@@ -275,6 +282,8 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 			}
 		}
 
+		updateUbuntuLink(cfg, &headVuln)
+
 		key := keyFromVuln(&headVuln)
 		matchingBaseVuln, found := baseVulnsMap[key]
 		// If the vuln was in the base, and equal to what was in the base,
@@ -306,9 +315,10 @@ type config struct {
 	SkipSeverityComparison     bool `json:"skipSeverityComparison"`
 	SkipRHELv2Vulns            bool `json:"skipRHELv2Vulns"`
 	UseDPKGParserForAlpine     bool `json:"useDPKGParserForAlpine"`
-	// SkipRHELv2TitleComparison need only be set when SkipRHELv2Vulns is NOT set.
-	SkipRHELv2TitleComparison bool `json:"skipRHELv2TitleComparison"`
-	RemovedUnusedRHELv2CPEs   bool `json:"removedUnusedRHELv2CPEs"`
+	// SkipRHELv2TitleComparison needed only be set for one specific release.
+	SkipRHELv2TitleComparison   bool `json:"skipRHELv2TitleComparison"`
+	KeepUnusedRHELv2CPEs        bool `json:"keepUnusedRHELv2CPEs"`
+	UseLegacyUbuntuCVEURLPrefix bool `json:"useLegacyUbuntuCVEURLPrefix"`
 }
 
 // Command defines the diff-dumps command.
