@@ -408,7 +408,7 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 //
 // Two language components may potentially produce the same feature. Similarly, the feature may already be seen as an OS-package feature.
 // However, these are not deduplicated here. This is left for the vulnerability matcher to determine upon converting the language components to feature versions.
-func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer, lineage string, uncertifiedRHEL bool) ([]Feature, map[int]*database.RHELv2PackageEnv, []*component.Component, []Note, error) {
+func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer, lineage string, uncertifiedRHEL bool) (*ComponentsEnvelope, error) {
 	var namespaceName string
 	if dbLayer.Namespace != nil {
 		namespaceName = dbLayer.Namespace.Name
@@ -436,7 +436,7 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 		var err error
 		rhelv2PkgEnvs, certified, err = getRHELv2PkgEnvs(db, dbLayer.Name)
 		if err != nil {
-			return nil, nil, nil, notes, err
+			return nil, err
 		}
 		if !certified {
 			// Client expected certified results, but they are unavailable.
@@ -448,7 +448,13 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 		components = getLanguageComponents(db, dbLayer.Name, lineage, uncertifiedRHEL)
 	}
 
-	return features, rhelv2PkgEnvs, components, notes, nil
+	return &ComponentsEnvelope{
+		Features:           features,
+		RHELv2PkgEnvs:      rhelv2PkgEnvs,
+		LanguageComponents: components,
+
+		Notes: notes,
+	}, nil
 }
 
 func getNotes(namespaceName string, uncertifiedRHEL bool) []Note {
@@ -571,4 +577,14 @@ type FeatureEnvelope struct {
 	Feature  *Feature   `json:"Feature,omitempty"`
 	Features *[]Feature `json:"Features,omitempty"`
 	Error    *Error     `json:"Error,omitempty"`
+}
+
+// ComponentsEnvelope envelopes component data (OS-packages and language-level-packages).
+type ComponentsEnvelope struct {
+	Features []Feature
+	// RHELv2PkgEnvs maps the package ID to the related package environment.
+	RHELv2PkgEnvs      map[int]*database.RHELv2PackageEnv
+	LanguageComponents []*component.Component
+
+	Notes []Note
 }
