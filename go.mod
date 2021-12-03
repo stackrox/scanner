@@ -52,7 +52,6 @@ require (
 	google.golang.org/grpc v1.40.0
 	gopkg.in/yaml.v2 v2.4.0
 	honnef.co/go/tools v0.0.1-2020.1.6
-	sigs.k8s.io/yaml v1.3.0
 )
 
 replace (

@@ -23,25 +23,25 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
-	"sigs.k8s.io/yaml"
+	"gopkg.in/yaml.v2"
 )
 
 // File represents a YAML configuration file that namespaces all
 // configurations under the top-level "scanner" key.
 type File struct {
-	Scanner Config `json:"scanner"`
+	Scanner Config `yaml:"scanner"`
 }
 
 // Config is the global configuration for an instance of Clair.
 type Config struct {
-	Database                 database.RegistrableComponentConfig `json:"database"`
-	API                      *api.Config                         `json:"api"`
-	Updater                  updater.Config                      `json:"updater"`
-	LogLevel                 string                              `json:"logLevel"`
-	MaxExtractableFileSizeMB int64                               `json:"maxExtractableFileSizeMB"`
+	Database                 database.RegistrableComponentConfig `yaml:"database"`
+	API                      *api.Config                         `yaml:"api"`
+	Updater                  updater.Config                      `yaml:"updater"`
+	LogLevel                 string                              `yaml:"logLevel"`
+	MaxExtractableFileSizeMB int64                               `yaml:"maxExtractableFileSizeMB"`
 
 	// CentralEndpoint is the endpoint that central can be reached at. Defaults to https://central.stackrox.svc if not present in the config.
-	CentralEndpoint string `json:"centralEndpoint"`
+	CentralEndpoint string `yaml:"centralEndpoint"`
 }
 
 // DefaultConfig is a configuration that can be used as a fallback value.

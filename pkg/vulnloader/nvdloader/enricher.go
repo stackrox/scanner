@@ -10,7 +10,7 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/pkg/errors"
 	"github.com/stackrox/dotnet-scraper/types"
-	"sigs.k8s.io/yaml"
+	"gopkg.in/yaml.v2"
 )
 
 const (
