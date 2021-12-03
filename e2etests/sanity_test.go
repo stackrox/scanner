@@ -28,10 +28,6 @@ func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1
 	if allowNotFound && candidateIdx == -1 {
 		return nil
 	}
-	if candidateIdx == -1 {
-		// TODO: delete
-		fmt.Printf("Feature %+v not in list: %v", featureToFind, featureList)
-	}
 	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list: %v", featureToFind, featureList)
 	return &featureList[candidateIdx]
 }
