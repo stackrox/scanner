@@ -1,4 +1,4 @@
-e2etests/testcase.go
+e2etests/testcase_test.go
 ext/featurefmt/rpm/testdata/Packages
 generated/shared/api/v1/image_scan_service.pb.go
 generated/shared/api/v1/component.pb.go
