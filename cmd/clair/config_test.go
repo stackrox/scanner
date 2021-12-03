@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/stackrox/scanner/api"
 	"github.com/stretchr/testify/assert"
@@ -19,4 +20,6 @@ func TestLoadConfig(t *testing.T) {
 		GRPCPort:    8081,
 		MetricsPort: nil,
 	}, cfg.API)
+
+	assert.Equal(t, 5 * time.Minute, cfg.Updater.Interval)
 }
