@@ -124,6 +124,8 @@ service ImageScanService {
 
     rpc GetImageComponents(GetImageComponentsRequest) returns (GetImageComponentsResponse) {}
 
+    rpc GetImageVulnerabilities(GetImageVulnerabilitiesRequest) returns (GetImageScanResponse) {}
+
     rpc GetLanguageLevelComponents(GetLanguageLevelComponentsRequest) returns (GetLanguageLevelComponentsResponse) {
         option (google.api.http) = {
             get: "/v1/images/languagecomponents"
