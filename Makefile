@@ -151,14 +151,8 @@ install-dev-tools:
 ## Images ##
 ############
 
-.PHONY: all-images
-all-images: image image-lite
-
 .PHONY: image
 image: scanner-image db-image
-
-.PHONY: image-lite
-image-lite: scanner-image-lite db-image-lite
 
 .PHONY: scanner-image-builder
 scanner-image-builder:
@@ -195,16 +189,6 @@ db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
 	@docker build -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
-
-.PHONY: scanner-image-lite
-scanner-image-lite: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
-	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-lite-$(TAG) -f image/scanner/rhel/Dockerfile-lite image/scanner/rhel
-
-.PHONY: db-image-lite
-db-image-lite: $(CURDIR)/image/db/rhel/bundle.tar.gz
-	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-db-lite-$(TAG) -f image/db/rhel/Dockerfile-lite image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered
