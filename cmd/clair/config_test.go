@@ -21,5 +21,5 @@ func TestLoadConfig(t *testing.T) {
 		MetricsPort: nil,
 	}, cfg.API)
 
-	assert.Equal(t, 5 * time.Minute, cfg.Updater.Interval)
+	assert.Equal(t, 5*time.Minute, cfg.Updater.Interval)
 }
