@@ -1,4 +1,4 @@
-# Note: Any changes here should be considered for the Dockerfile-lite as well.
+# Note: Any changes here should be considered for the Dockerfile as well.
 
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8/ubi
@@ -18,31 +18,20 @@ LABEL name="scanner-rhel" \
       summary="Image scanner for the StackRox Kubernetes Security Platform" \
       description="This image supports image scanning in the StackRox Kubernetes Security Platform."
 
-ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
-ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
-ENV REPO_TO_CPE_DIR="/repo2cpe"
-
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 COPY scripts /
 
 COPY --from=extracted_bundle /bundle/genesis_manifests.json /bundle/scanner ./
-COPY --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
-COPY --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
-COPY --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 
 COPY ./THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
 RUN dnf upgrade -y && \
     dnf install -y ca-certificates xz && \
     dnf clean all && \
-    # (Optional) Remove line below to keep package management utilities
-    # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
-    rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     rm -rf /var/cache/dnf && \
-    chown -R 65534:65534 "${NVD_DEFINITIONS_DIR}" && \
-    chown -R 65534:65534 "${K8S_DEFINITIONS_DIR}" && \
-    chown -R 65534:65534 "${REPO_TO_CPE_DIR}" && \
+    # (Optional) Remove line below to keep package management utilities
+    rpm -e subscription-manager yum $(rpm -qa *hawkey*) $(rpm -qa *dnf*) && \
     chown -R 65534:65534 /tmp && \
     # The contents of paths mounted as emptyDir volumes in Kubernetes are saved
     # by the script `save-dir-contents` during the image build. The directory
