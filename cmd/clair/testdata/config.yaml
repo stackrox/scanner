@@ -14,7 +14,7 @@ scanner:
       cachesize: 16384
 
   api:
-    httpsPort: 8080
+    httpsPort: 8082
     grpcPort: 8081
 
   updater:
