@@ -9,7 +9,6 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
-	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -96,8 +95,8 @@ func convertProvidedExecutables(paths []string) []*v1.Executable {
 	return executables
 }
 
-// ConvertExecutables converts executables into the paths.
-func ConvertExecutables(executables []*v1.Executable) []string {
+// ConvertExecutablesToPaths converts executables into the paths.
+func ConvertExecutablesToPaths(executables []*v1.Executable) []string {
 	paths := make([]string, 0, len(executables))
 	for _, executable := range executables {
 		paths = append(paths, executable.Path)
@@ -161,11 +160,11 @@ func convertNotes(notes []apiV1.Note) []v1.Note {
 	return v1Notes
 }
 
-// convertFeaturesAndComponents converts the given OS-level features and language-level components into
+// convertImageComponents converts the given OS-level features and language-level components into
 // Components.
-func convertFeaturesAndComponents(features []apiV1.Feature, rhelv2PkgEnvs map[int]*database.RHELv2PackageEnv, components []*component.Component) *v1.Components {
-	osComponents := make([]*v1.OSComponent, 0, len(features))
-	for _, feature := range features {
+func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Components {
+	osComponents := make([]*v1.OSComponent, 0, len(imgComponents.Features))
+	for _, feature := range imgComponents.Features {
 		osComponents = append(osComponents, &v1.OSComponent{
 			Name:        feature.Name,
 			Namespace:   feature.NamespaceName,
@@ -175,8 +174,8 @@ func convertFeaturesAndComponents(features []apiV1.Feature, rhelv2PkgEnvs map[in
 		})
 	}
 
-	rhelv2Components := make([]*v1.RHELComponent, 0, len(rhelv2PkgEnvs))
-	for _, rhelv2PkgEnv := range rhelv2PkgEnvs {
+	rhelv2Components := make([]*v1.RHELComponent, 0, len(imgComponents.RHELv2PkgEnvs))
+	for _, rhelv2PkgEnv := range imgComponents.RHELv2PkgEnvs {
 		pkg := rhelv2PkgEnv.Pkg
 		rhelv2Components = append(rhelv2Components, &v1.RHELComponent{
 			Id:          strconv.Itoa(pkg.ID),
@@ -191,8 +190,8 @@ func convertFeaturesAndComponents(features []apiV1.Feature, rhelv2PkgEnvs map[in
 		})
 	}
 
-	languageComponents := make([]*v1.LanguageComponent, 0, len(components))
-	for _, c := range components {
+	languageComponents := make([]*v1.LanguageComponent, 0, len(imgComponents.LanguageComponents))
+	for _, c := range imgComponents.LanguageComponents {
 		languageComponent := &v1.LanguageComponent{
 			Type:     sourceTypeToProtoMap[c.SourceType],
 			Name:     c.Name,

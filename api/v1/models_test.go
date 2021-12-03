@@ -614,7 +614,7 @@ func TestComponentsFromDatabaseModel(t *testing.T) {
 		},
 	}
 
-	features, rhelv2PkgEnvs, components, notes, err := ComponentsFromDatabaseModel(db, &dbLayer, "", true)
+	imgComponents, err := ComponentsFromDatabaseModel(db, &dbLayer, "", true)
 	assert.NoError(t, err)
 
 	expectedFeatures := []Feature{
@@ -658,8 +658,8 @@ func TestComponentsFromDatabaseModel(t *testing.T) {
 	}
 	expectedNotes := []Note{CertifiedRHELScanUnavailable}
 
-	assert.ElementsMatch(t, expectedFeatures, features)
-	assert.Empty(t, rhelv2PkgEnvs)
-	assert.ElementsMatch(t, expectedComponents, components)
-	assert.ElementsMatch(t, expectedNotes, notes)
+	assert.ElementsMatch(t, expectedFeatures, imgComponents.Features)
+	assert.Empty(t, imgComponents.RHELv2PkgEnvs)
+	assert.ElementsMatch(t, expectedComponents, imgComponents.LanguageComponents)
+	assert.ElementsMatch(t, expectedNotes, imgComponents.Notes)
 }

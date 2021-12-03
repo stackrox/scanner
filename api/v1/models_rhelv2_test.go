@@ -239,7 +239,7 @@ func TestComponentsFromDatabaseModelRHELv2(t *testing.T) {
 			VersionFormat: "rpm",
 		},
 	}
-	features, rhelv2PkgEnvs, components, notes, err := ComponentsFromDatabaseModel(db, layer, "", false)
+	imgComponents, err := ComponentsFromDatabaseModel(db, layer, "", false)
 	assert.NoError(t, err)
 
 	expectedRHELv2PkgEnvs := map[int]*database.RHELv2PackageEnv{
@@ -259,9 +259,9 @@ func TestComponentsFromDatabaseModelRHELv2(t *testing.T) {
 	}
 	expectedNotes := []Note{LanguageCVEsUnavailable}
 
-	assert.Empty(t, features)
+	assert.Empty(t, imgComponents.Features)
 
-	assert.Empty(t, components)
-	assert.Equal(t, expectedRHELv2PkgEnvs, rhelv2PkgEnvs)
-	assert.ElementsMatch(t, expectedNotes, notes)
+	assert.Empty(t, imgComponents.LanguageComponents)
+	assert.Equal(t, expectedRHELv2PkgEnvs, imgComponents.RHELv2PkgEnvs)
+	assert.ElementsMatch(t, expectedNotes, imgComponents.Notes)
 }

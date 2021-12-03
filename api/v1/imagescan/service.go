@@ -13,7 +13,6 @@ import (
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
-	"github.com/stackrox/scanner/pkg/component"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -136,14 +135,14 @@ func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string
 
 func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest) (*v1.GetImageComponentsResponse, error) {
 	// Attempt to get image results assuming the image is within RHEL Certification scope (or is a non-RHEL image).
-	features, rhelv2PkgEnvs, components, notes, err := s.getImageComponents(ctx, req, false)
+	imgComponents, err := s.getImageComponents(ctx, req, false)
 	if err != nil {
 		return nil, err
 	}
-	for _, note := range notes {
+	for _, note := range imgComponents.Notes {
 		if note == apiV1.CertifiedRHELScanUnavailable {
 			// Image is RHEL, but not within Certification scope. Try again...
-			features, rhelv2PkgEnvs, components, notes, err = s.getImageComponents(ctx, req, true)
+			imgComponents, err = s.getImageComponents(ctx, req, true)
 			break
 		}
 	}
@@ -153,19 +152,19 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 
 	return &v1.GetImageComponentsResponse{
 		Status:     v1.ScanStatus_SUCCEEDED,
-		Components: convertFeaturesAndComponents(features, rhelv2PkgEnvs, components),
-		Notes:      convertNotes(notes),
+		Components: convertImageComponents(imgComponents),
+		Notes:      convertNotes(imgComponents.Notes),
 	}, nil
 }
 
-func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) ([]apiV1.Feature, map[int]*database.RHELv2PackageEnv, []*component.Component, []apiV1.Note, error) {
+func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*apiV1.ComponentsEnvelope, error) {
 	imageScan, err := s.ScanImage(ctx, &v1.ScanImageRequest{
 		Image:           req.GetImage(),
 		Registry:        req.GetRegistry(),
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, err
 	}
 
 	dbLayer, lineage, err := s.getLayer(&imageReq{
@@ -176,7 +175,7 @@ func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageCo
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, err
 	}
 
 	return apiV1.ComponentsFromDatabaseModel(s.db, dbLayer, lineage, uncertifiedRHEL)

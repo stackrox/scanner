@@ -194,7 +194,7 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 			NamespaceName:       c.Namespace,
 			Version:             c.Version,
 			AddedBy:             c.AddedBy,
-			ProvidedExecutables: imagescan.ConvertExecutables(c.Executables),
+			ProvidedExecutables: imagescan.ConvertExecutablesToPaths(c.Executables),
 		})
 	}
 	for _, c := range components.RhelComponents {
@@ -204,7 +204,7 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 			VersionFormat:       "rpm",
 			Version:             c.Version + "." + c.Arch,
 			AddedBy:             c.AddedBy,
-			ProvidedExecutables: imagescan.ConvertExecutables(c.Executables),
+			ProvidedExecutables: imagescan.ConvertExecutablesToPaths(c.Executables),
 		})
 	}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/facebookincubator/nvdtools/cvss2"
 	"github.com/facebookincubator/nvdtools/cvss3"
 	"github.com/stackrox/k8s-cves/pkg/validation"
+	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 )
 
@@ -202,8 +203,5 @@ func (m *Metadata) IsNilOrEmpty() bool {
 		return true
 	}
 
-	return m.LastModifiedDateTime == "" &&
-		m.PublishedDateTime == "" &&
-		m.CVSSv2.Vectors == "" &&
-		m.CVSSv3.Vectors == ""
+	return stringutils.AllEmpty(m.LastModifiedDateTime, m.PublishedDateTime, m.CVSSv2.Vectors, m.CVSSv3.Vectors)
 }
