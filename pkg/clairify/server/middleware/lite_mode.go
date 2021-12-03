@@ -1,13 +1,13 @@
 package middleware
 
 import (
-	"github.com/stackrox/scanner/pkg/env"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/httputil"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/pkg/env"
 	"google.golang.org/grpc/codes"
 )
 
