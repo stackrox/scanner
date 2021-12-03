@@ -18,6 +18,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/stackrox/scanner/pkg/env"
 	"math/rand"
 	"net/http"
 	"net/http/pprof"
@@ -98,7 +99,7 @@ func waitForSignals(signals ...os.Signal) {
 }
 
 // Boot starts Clair instance with the provided config.
-func Boot(config *Config) {
+func Boot(config *Config, liteMode bool) {
 	rand.Seed(time.Now().UnixNano())
 
 	// Open database and initialize vuln caches in parallel, prior to making the API available.
@@ -118,7 +119,7 @@ func Boot(config *Config) {
 	var nvdVulnCache nvdtoolscache.Cache
 	var k8sVulnCache k8scache.Cache
 	var repoToCPE *repo2cpe.Mapping
-	if !config.LiteMode {
+	if !liteMode {
 		wg.Add(1)
 		go func() {
 			defer wg.Add(-1)
@@ -142,7 +143,7 @@ func Boot(config *Config) {
 	wg.Wait()
 	defer db.Close()
 
-	if !config.LiteMode {
+	if !liteMode {
 		u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdVulnCache, k8sVulnCache)
 		if err != nil {
 			log.WithError(err).Fatal("Failed to initialize updater")
@@ -158,14 +159,12 @@ func Boot(config *Config) {
 	metricsServ := metrics.NewHTTPServer(config.API)
 	go metricsServ.RunForever()
 
-	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db, config.LiteMode)
+	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db)
 	go api.RunClairify(serv)
 
 	grpcAPI := grpc.NewAPI(grpc.Config{
 		Port:         config.API.GRPCPort,
 		CustomRoutes: debugRoutes,
-
-		LiteMode: config.LiteMode,
 	})
 
 	grpcAPI.Register(
@@ -229,11 +228,13 @@ func main() {
 		imagefmt.SetInsecureTLS(*flagInsecureTLS)
 	}
 
+	liteMode := env.LiteMode.Enabled()
+
 	scannerName := "Scanner"
-	if config.LiteMode {
+	if liteMode {
 		scannerName = "Scanner-lite"
 	}
 	log.Infof("Running %s version: %s", scannerName, version.Version)
 
-	Boot(config)
+	Boot(config, liteMode)
 }

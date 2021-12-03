@@ -33,17 +33,13 @@ type Server struct {
 	endpoint   string
 	storage    database.Datastore
 	httpServer *http.Server
-
-	liteMode bool
 }
 
 // New returns a new instantiation of the Server.
-func New(serverEndpoint string, db database.Datastore, liteMode bool) *Server {
+func New(serverEndpoint string, db database.Datastore) *Server {
 	return &Server{
 		endpoint: serverEndpoint,
 		storage:  db,
-
-		liteMode: liteMode,
 	}
 }
 
@@ -265,7 +261,7 @@ func (s *Server) Start() error {
 	r.Use(
 		// Ensure the user is authorized before doing anything else.
 		middleware.VerifyPeerCerts(),
-		middleware.LiteMode(s.liteMode),
+		middleware.LiteMode(),
 	)
 
 	apiRoots := []string{"clairify", "scanner"}

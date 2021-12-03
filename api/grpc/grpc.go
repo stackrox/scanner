@@ -116,8 +116,6 @@ type apiImpl struct {
 type Config struct {
 	Port         int
 	CustomRoutes map[string]http.Handler
-
-	LiteMode bool
 }
 
 func (a *apiImpl) Register(services ...APIService) {
@@ -129,7 +127,7 @@ func (a *apiImpl) unaryInterceptors() []grpc.UnaryServerInterceptor {
 	return []grpc.UnaryServerInterceptor{
 		// Ensure the user is authorized before doing anything else.
 		verifyPeerCertsUnaryServerInterceptor(),
-		liteModeUnaryServerInterceptor(a.config.LiteMode),
+		liteModeUnaryServerInterceptor(),
 		grpcprometheus.UnaryServerInterceptor,
 	}
 }

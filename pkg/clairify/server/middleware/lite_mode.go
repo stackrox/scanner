@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"github.com/stackrox/scanner/pkg/env"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -20,7 +21,9 @@ var (
 )
 
 // LiteMode returns middleware which only allows the request to continue when NOT in lite-mode.
-func LiteMode(liteMode bool) mux.MiddlewareFunc {
+func LiteMode() mux.MiddlewareFunc {
+	liteMode := env.LiteMode.Enabled()
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if liteMode && !liteModeAllowList.Contains(r.RequestURI) {

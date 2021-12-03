@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"github.com/stackrox/scanner/pkg/env"
 
 	"github.com/stackrox/rox/pkg/set"
 	"google.golang.org/grpc"
@@ -16,7 +17,9 @@ var (
 	)
 )
 
-func liteModeUnaryServerInterceptor(liteMode bool) grpc.UnaryServerInterceptor {
+func liteModeUnaryServerInterceptor() grpc.UnaryServerInterceptor {
+	liteMode := env.LiteMode.Enabled()
+
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		if liteMode && !liteModeMethodsAllowlist.Contains(info.FullMethod) {
 			return nil, status.Error(codes.NotFound, "request not available in lite-mode")
