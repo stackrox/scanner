@@ -15,6 +15,7 @@ type config struct {
 	Interval string `json:"interval"`
 }
 
+// UnmarshalJSON is needed to implement json/Unmarshaler.
 func (c *Config) UnmarshalJSON(b []byte) error {
 	var cfg config
 	if err := json.Unmarshal(b, &cfg); err != nil {
