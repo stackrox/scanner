@@ -13,7 +13,7 @@ RUN tar -xzf /bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
-LABEL name="scanner-db-rhel" \
+LABEL name="scanner-db-lite-rhel" \
       vendor="StackRox" \
       maintainer="support@stackrox.com" \
       summary="Image scanner database for the StackRox Kubernetes Security Platform" \

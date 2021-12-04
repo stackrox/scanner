@@ -6,7 +6,7 @@ ARG BASE_TAG=8.5
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
-LABEL name="scanner-rhel" \
+LABEL name="scanner-lite-rhel" \
       vendor="StackRox" \
       maintainer="support@stackrox.com" \
       summary="Image scanner for the StackRox Kubernetes Security Platform" \
