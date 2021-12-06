@@ -1,7 +1,6 @@
 package imagescan
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -178,7 +177,7 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 	for _, rhelv2PkgEnv := range imgComponents.RHELv2PkgEnvs {
 		pkg := rhelv2PkgEnv.Pkg
 		rhelv2Components = append(rhelv2Components, &v1.RHELComponent{
-			Id:          strconv.Itoa(pkg.ID),
+			Id:          int64(pkg.ID),
 			Name:        pkg.Name,
 			Namespace:   rhelv2PkgEnv.Namespace,
 			Version:     pkg.Version,
