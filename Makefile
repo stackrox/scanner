@@ -199,7 +199,7 @@ db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
 .PHONY: scanner-image-lite
 scanner-image-lite: scanner-image
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-lite-$(TAG) --build-arg BASE_IMAGE=us.gcr.io/stackrox-ci/scanner --build-arg BASE_TAG=$(TAG) -f image/scanner/rhel/Dockerfile-lite image/scanner/rhel
+	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-lite-$(TAG) --build-arg BASE_IMAGE=us.gcr.io/stackrox-ci/scanner --build-arg BASE_TAG=$(TAG) -f image/scanner/rhel/Dockerfile.lite image/scanner/rhel
 
 .PHONY: db-image-lite
 db-image-lite: db-image
