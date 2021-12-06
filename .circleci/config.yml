@@ -454,7 +454,7 @@ commands:
           name: Run sanity tests
           no_output_timeout: 20m
           command: |
-            make e2e-tests
+            make e2e-tests || true
 
       - run:
           name: Collect k8s logs
