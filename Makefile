@@ -185,26 +185,36 @@ $(CURDIR)/image/scanner/rhel/bundle.tar.gz: build
 $(CURDIR)/image/db/rhel/bundle.tar.gz:
 	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $(CURDIR)/image/db/rhel
 
-.PHONY: scanner-image
-scanner-image: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+.PHONY: scanner-image-base
+scanner-image-base: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
+	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-base-$(TAG) -f image/scanner/rhel/Dockerfile.base image/scanner/rhel
 
-.PHONY: db-image
-db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
+.PHONY: scanner-image
+scanner-image: scanner-image-base $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
+	@docker build --build-arg BASE_REPOSITORY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=sandbox --build-arg BASE_TAG=scanner-base-$(TAG) -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: scanner-image-lite
-scanner-image-lite: scanner-image
+scanner-image-lite: scanner-image-base $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-lite-$(TAG) --build-arg BASE_IMAGE=us.gcr.io/stackrox-ci/scanner --build-arg BASE_TAG=$(TAG) -f image/scanner/rhel/Dockerfile.lite image/scanner/rhel
+	@docker build --build-arg BASE_REPOSITORY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=sandbox --build-arg BASE_TAG=scanner-base-$(TAG) -t us.gcr.io/stackrox-ci/sandbox:scanner-lite-$(TAG) -f image/scanner/rhel/Dockerfile.lite image/scanner/rhel
+
+.PHONY: db-image-base
+db-image-base: $(CURDIR)/image/db/rhel/bundle.tar.gz
+	@echo "+ $@"
+	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-db-base-$(TAG) -f image/db/rhel/Dockerfile.base image/db/rhel
+
+.PHONY: db-image
+db-image: db-image-base $(CURDIR)/image/db/rhel/bundle.tar.gz
+	@echo "+ $@"
+	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
+	@docker build --build-arg BASE_REPOSITORY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=sandbox --build-arg BASE_TAG=scanner-db-base-$(TAG) -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: db-image-lite
-db-image-lite: db-image
+db-image-lite: db-image-base
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-db-lite-$(TAG) --build-arg BASE_IMAGE=us.gcr.io/stackrox-ci/scanner-db --build-arg BASE_TAG=$(TAG) -f image/db/rhel/Dockerfile.lite image/db/rhel
+	@docker build --build-arg BASE_REPOSITORY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=sandbox --build-arg BASE_TAG=scanner-db-base-$(TAG) -t us.gcr.io/stackrox-ci/sandbox:scanner-db-lite-$(TAG) -f image/db/rhel/Dockerfile.lite image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered
