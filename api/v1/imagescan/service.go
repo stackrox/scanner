@@ -181,6 +181,10 @@ func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageCo
 	return apiV1.ComponentsFromDatabaseModel(s.db, dbLayer, lineage, uncertifiedRHEL)
 }
 
+func (s *serviceImpl) GetImageVulnerabilities(_ context.Context, req *v1.GetImageVulnerabilitiesRequest) (*v1.GetImageVulnerabilitiesResponse, error) {
+	return nil, nil
+}
+
 func (s *serviceImpl) GetLanguageLevelComponents(_ context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
 	layerName, lineage, err := s.getLayerNameFromImageReq(req)
 	if err != nil {
