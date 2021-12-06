@@ -182,6 +182,8 @@ func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageCo
 }
 
 func (s *serviceImpl) GetImageVulnerabilities(_ context.Context, req *v1.GetImageVulnerabilitiesRequest) (*v1.GetImageVulnerabilitiesResponse, error) {
+	req.Components
+
 	return nil, nil
 }
 

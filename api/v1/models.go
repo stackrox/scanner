@@ -16,6 +16,7 @@ package v1
 
 import (
 	"fmt"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -477,6 +478,12 @@ func getNotes(namespaceName string, uncertifiedRHEL bool) []Note {
 	}
 
 	return notes
+}
+
+func GetVulnerabilitiesForComponents(components *v1.Components) (*Layer, error) {
+	layer := &Layer{}
+
+	components.RhelComponents
 }
 
 // Namespace is the image's base OS.

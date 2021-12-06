@@ -6,6 +6,7 @@
 package v1
 
 import (
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"strconv"
 
 	rpmVersion "github.com/knqyf263/go-rpm-version"
@@ -64,6 +65,13 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 	}
 
 	return cpesExist, nil
+}
+
+func getRHELv2VulnsForPackages(pkgs []*v1.RHELComponent) []Vulnerability {
+	pkgEnvs := make(map[int]*database.RHELv2PackageEnv, len(pkgs))
+	for _, pkg := range pkgs {
+		pkgEnvs[pkg.Id] =
+	}
 }
 
 // getRHELv2Vulns gets the vulnerabilities and fixedBy version found during RHELv2 scanning.
