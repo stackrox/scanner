@@ -197,14 +197,14 @@ db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@docker build -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: scanner-image-lite
-scanner-image-lite: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image-lite: scanner-image
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-lite-$(TAG) -f image/scanner/rhel/Dockerfile-lite image/scanner/rhel
+	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-lite-$(TAG) --build-arg BASE_IMAGE=us.gcr.io/stackrox-ci/scanner --build-arg BASE_TAG=$(TAG) -f image/scanner/rhel/Dockerfile-lite image/scanner/rhel
 
 .PHONY: db-image-lite
-db-image-lite: $(CURDIR)/image/db/rhel/bundle.tar.gz
+db-image-lite: db-image
 	@echo "+ $@"
-	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-db-lite-$(TAG) -f image/db/rhel/Dockerfile-lite image/db/rhel
+	@docker build -t us.gcr.io/stackrox-ci/sandbox:scanner-db-lite-$(TAG) --build-arg BASE_IMAGE=us.gcr.io/stackrox-ci/scanner-db --build-arg BASE_TAG=$(TAG) -f image/db/rhel/Dockerfile.lite image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered

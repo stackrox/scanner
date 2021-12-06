@@ -1,5 +1,3 @@
-# Note: Any changes here should be considered for the Dockerfile-lite as well.
-
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8/ubi
 # Be sure to keep the pg_rhel_version in create-bundle.sh up-to-date.
