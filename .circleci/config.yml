@@ -33,6 +33,20 @@ runOnAllTagsWithRedHatCtx: &runOnAllTagsWithRedHatCtx
 orbs:
   slack: circleci/slack@4.4.2
 
+executors:
+  env-check:
+    parameters:
+      resource_class:
+        type: string
+        default: small
+    resource_class: << parameters.resource_class >>
+    docker:
+      - image: quay.io/rhacs-eng/apollo-ci:snapshot-env-check-0.3.19-42-g5b17c7c565
+        auth:
+          username: $QUAY_RHACS_ENG_RO_USERNAME
+          password: $QUAY_RHACS_ENG_RO_PASSWORD
+    working_directory: /tmp
+
 slackTemplateTestFailure: &slackTemplateTestFailure
   custom: |
      {
@@ -1002,6 +1016,14 @@ jobs:
           mentions: "@scanner-defs-oncall,@shane"
           <<: *slackTemplateTestFailure
 
+  check-for-sensitive-data:
+    executor: env-check
+    steps:
+      - run:
+          name: Check build output for sensitive data
+          command: |
+            check-build-output-for-env-values.sh
+
 workflows:
   version: 2
 
@@ -1137,3 +1159,13 @@ workflows:
         requires:
           - build
           - provision-scale-cluster
+    - check-for-sensitive-data:
+        context:
+          - docker-io-and-stackrox-io-push
+          - quay-rhacs-eng-readonly
+          - quay-rhacs-eng-readwrite
+          - redhat-developer-account-login
+          - scanner-support
+        requires:
+          - e2e-tests
+          - scale-tests
