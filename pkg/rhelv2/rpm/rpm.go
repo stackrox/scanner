@@ -151,8 +151,9 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 	var pkgs []*database.RHELv2Package
 
 	p := &database.RHELv2Package{}
-	// executablesSet ensures only unique executables are stored per package.
-	executablesSet := set.NewStringSet()
+	// execToDeps and execToDeps ensures only unique executables or libraries are stored per package.
+	execToDeps := make(database.StringToStringsMap)
+	libToDeps := make(database.StringToStringsMap)
 	s := bufio.NewScanner(r)
 	for i := 0; s.Scan(); i++ {
 		line := strings.TrimSpace(s.Text())
@@ -165,16 +166,15 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			// Ensure the current package is well-formed.
 			// If it is, add it to the return slice.
 			if p.Name != "" && p.Version != "" && p.Arch != "" {
-				p.ProvidedExecutables = executablesSet.AsSortedSlice(func(i, j string) bool {
-					return i < j
-				})
-
+				p.ExecutableToDependencies = execToDeps
+				p.LibraryToDependencies = libToDeps
 				pkgs = append(pkgs, p)
 			}
 
 			// Start a new package definition and reset 'i'.
 			p = &database.RHELv2Package{}
-			executablesSet.Clear()
+			execToDeps = make(database.StringToStringsMap)
+			libToDeps = make(database.StringToStringsMap)
 			i = -1
 			continue
 		}
@@ -203,8 +203,23 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			// Rename to make it clear what the line represents.
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
-			if fileData := files[filename[1:]]; fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
-				executablesSet.Add(filename)
+			fileData := files[filename[1:]]
+			if fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
+				deps := set.NewStringSet()
+				if fileData.ELFMetadata != nil {
+					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+				}
+				execToDeps[filename] = deps
+			}
+			if fileData.ELFMetadata != nil {
+				for _, soname := range fileData.ELFMetadata.Sonames {
+					deps, ok := libToDeps[soname]
+					if !ok {
+						deps = set.NewStringSet()
+					}
+					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+					libToDeps[soname] = deps
+				}
 			}
 		}
 	}

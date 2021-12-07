@@ -74,7 +74,7 @@ func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*datab
 			continue
 		}
 
-		_, err := tx.Exec(insertRHELv2Package, pkg.Name, pkg.Version, pkg.Module, pkg.Arch, pq.Array(pkg.ProvidedExecutables))
+		_, err := tx.Exec(insertRHELv2Package, pkg.Name, pkg.Version, pkg.Module, pkg.Arch, pq.Array(pkg.ExecutableToDependencies))
 		if err != nil {
 			return err
 		}
@@ -190,7 +190,7 @@ func (pgSQL *pgSQL) getPackagesByLayer(tx *sql.Tx, layer *database.RHELv2Layer) 
 			&pkg.Version,
 			&pkg.Module,
 			&pkg.Arch,
-			pq.Array(&pkg.ProvidedExecutables),
+			pq.Array(&pkg.ExecutableToDependencies),
 		)
 		if err != nil {
 			return err

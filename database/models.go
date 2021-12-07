@@ -164,7 +164,12 @@ type RHELv2Package struct {
 	Module  string `json:"module,omitempty"`
 	Arch    string `json:"arch,omitempty"`
 
-	ProvidedExecutables []string `json:"provided_executables,omitempty"`
+	// ExecutableToDependencies maps a feature provided executable to its dependencies.
+	// Eg, If executable E is provided by this feature, and it imports a library B, we will have a map for E -> [B]
+	ExecutableToDependencies StringToStringsMap
+	// LibraryToDependencies maps a feature provided library to its dependencies.
+	// Eg, If library A is provided by this feature, and it imports a library B, we will have a map for A -> [B]
+	LibraryToDependencies StringToStringsMap
 }
 
 func (p *RHELv2Package) String() string {

@@ -198,20 +198,7 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
-	executables := make([]*v1.Executable, 0, len(dbFeatureVersion.ExecutableToDependencies))
-	legacyExecutables := make([]string, 0, len(dbFeatureVersion.ExecutableToDependencies))
-	for exec, libs := range dbFeatureVersion.ExecutableToDependencies {
-		features := set.NewStringSet()
-		for lib := range libs {
-			features = features.Union(depMap[lib])
-		}
-		executables = append(executables, &v1.Executable{
-			Path:             exec,
-			RequiredFeatures: toFeatureNameVersions(features),
-		})
-		legacyExecutables = append(legacyExecutables, exec)
-	}
-
+	executables, legacyExecutables := createExecutablesFromDependencies(dbFeatureVersion.ExecutableToDependencies, depMap)
 	return &Feature{
 		Name:                          dbFeatureVersion.Feature.Name,
 		NamespaceName:                 dbFeatureVersion.Feature.Namespace.Name,
@@ -349,7 +336,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			layer.Features = append(layer.Features, *feature)
 		}
 		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
-			certified, err := addRHELv2Vulns(db, &layer)
+			certified, err := addRHELv2Vulns(db, &layer, depMap)
 			if err != nil {
 				return layer, notes, err
 			}
@@ -414,8 +401,8 @@ type Feature struct {
 	AddedBy         string          `json:"AddedBy,omitempty"`
 	Location        string          `json:"Location,omitempty"`
 	FixedBy         string          `json:"FixedBy,omitempty"`
-	// Deprecated: ProvidedExecutables
-	DeprecatedProvidedExecutables []string         `json:"ProvidedExecutables,omitempty"`
+	// Deprecated: ExecutableToDependencies
+	DeprecatedProvidedExecutables []string         `json:"ExecutableToDependencies,omitempty"`
 	Executables                   []*v1.Executable `json:"Executables,omitempty"`
 }
 

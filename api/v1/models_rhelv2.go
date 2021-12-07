@@ -27,7 +27,7 @@ const (
 // certified as part of Red Hat's Scanner Certification Program.
 // The returned bool indicates if full certified scanning was performed.
 // This is typically only `false` for images without proper CPE information.
-func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
+func addRHELv2Vulns(db database.Datastore, layer *Layer, depMap map[string]set.StringSet) (bool, error) {
 	layers, err := db.GetRHELv2Layers(layer.Name)
 	if err != nil {
 		return false, err
@@ -51,20 +51,15 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 		if pkg.Arch != "" {
 			version += "." + pkg.Arch
 		}
-		executables := make([]*v1.Executable, 0, len(pkg.ProvidedExecutables))
-		for _, exec := range pkg.ProvidedExecutables {
-			executables = append(executables, &v1.Executable{
-				Path: exec,
-			})
-		}
 
+		executables, legacyExecutables := createExecutablesFromDependencies(pkg.ExecutableToDependencies, depMap)
 		feature := Feature{
 			Name:                          pkg.Name,
 			NamespaceName:                 layer.NamespaceName,
 			VersionFormat:                 rpm.ParserName,
 			Version:                       version,
 			AddedBy:                       pkgEnv.AddedBy,
-			DeprecatedProvidedExecutables: pkg.ProvidedExecutables,
+			DeprecatedProvidedExecutables: legacyExecutables,
 			Executables:                   executables,
 		}
 
@@ -294,4 +289,21 @@ func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		// It is guaranteed there is 1 and only one element in `vuln.PackageInfos`.
 		FixedBy: vuln.PackageInfos[0].FixedInVersion, // Empty string if not fixed.
 	}
+}
+
+func createExecutablesFromDependencies(executableToDependencies map[string]set.StringSet, depMap map[string]set.StringSet) (executables []*v1.Executable, legacyExecutables []string){
+	executables = make([]*v1.Executable, 0, len(executableToDependencies))
+	legacyExecutables = make([]string, 0, len(executableToDependencies))
+	for exec, libs := range executableToDependencies {
+		features := set.NewStringSet()
+		for lib := range libs {
+			features = features.Union(depMap[lib])
+		}
+		executables = append(executables, &v1.Executable{
+			Path:             exec,
+			RequiredFeatures: toFeatureNameVersions(features),
+		})
+		legacyExecutables = append(legacyExecutables, exec)
+	}
+	return executables, legacyExecutables
 }
