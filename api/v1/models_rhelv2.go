@@ -33,18 +33,31 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 		return false, err
 	}
 
-	records := getRHELv2Records(pkgEnvs)
-
-	vulns, err := db.GetRHELv2Vulnerabilities(records)
+	features, err := getFullRHELv2Features(db, pkgEnvs)
 	if err != nil {
 		return false, err
 	}
 
+	layer.Features = append(layer.Features, features...)
+
+	return cpesExist, nil
+}
+
+func getFullRHELv2Features(db database.Datastore, pkgEnvs map[int]*database.RHELv2PackageEnv) ([]Feature, error) {
+	records := getRHELv2Records(pkgEnvs)
+	vulns, err := db.GetRHELv2Vulnerabilities(records)
+	if err != nil {
+		return nil, err
+	}
+
+	var features []Feature
 	for _, pkgEnv := range pkgEnvs {
 		pkg := pkgEnv.Pkg
+
 		if hasKernelPrefix(pkg.Name) {
 			continue
 		}
+
 		version := pkg.Version
 		if pkg.Arch != "" {
 			version += "." + pkg.Arch
@@ -52,7 +65,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 
 		feature := Feature{
 			Name:                pkg.Name,
-			NamespaceName:       layer.NamespaceName,
+			NamespaceName:       pkgEnv.Namespace,
 			VersionFormat:       rpm.ParserName,
 			Version:             version,
 			AddedBy:             pkgEnv.AddedBy,
@@ -61,17 +74,36 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 
 		feature.FixedBy, feature.Vulnerabilities = getRHELv2Vulns(vulns, pkg, feature.NamespaceName)
 
-		layer.Features = append(layer.Features, feature)
+		features = append(features, feature)
 	}
 
-	return cpesExist, nil
+	return features, nil
 }
 
-func getRHELv2VulnsForPackages(pkgs []*v1.RHELComponent) []Vulnerability {
+func getFullFeaturesForRHELv2Packages(db database.Datastore, pkgs []*v1.RHELComponent) ([]Feature, error) {
 	pkgEnvs := make(map[int]*database.RHELv2PackageEnv, len(pkgs))
 	for _, pkg := range pkgs {
-		pkgEnvs[pkg.Id] =
+		paths := make([]string, 0, len(pkg.GetExecutables()))
+		for _, executable := range pkg.GetExecutables() {
+			paths = append(paths, executable.GetPath())
+		}
+
+		pkgEnvs[int(pkg.GetId())] = &database.RHELv2PackageEnv{
+			Pkg:       &database.RHELv2Package{
+				Model:               database.Model{ID: int(pkg.GetId())},
+				Name:                pkg.GetName(),
+				Version:             pkg.GetVersion(),
+				Module:              pkg.GetModule(),
+				Arch:                pkg.GetArch(),
+				ProvidedExecutables: paths,
+			},
+			Namespace: pkg.GetNamespace(),
+			AddedBy:   pkg.GetAddedBy(),
+			CPEs:      pkg.GetCpes(),
+		}
 	}
+
+	return getFullRHELv2Features(db, pkgEnvs)
 }
 
 // getRHELv2Vulns gets the vulnerabilities and fixedBy version found during RHELv2 scanning.
