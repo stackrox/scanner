@@ -198,16 +198,15 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
-	executables, legacyExecutables := createExecutablesFromDependencies(dbFeatureVersion.ExecutableToDependencies, depMap)
+	executables := createExecutablesFromDependencies(dbFeatureVersion.ExecutableToDependencies, depMap)
 	return &Feature{
-		Name:                          dbFeatureVersion.Feature.Name,
-		NamespaceName:                 dbFeatureVersion.Feature.Namespace.Name,
-		VersionFormat:                 stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
-		Version:                       version,
-		AddedBy:                       addedBy,
-		Location:                      dbFeatureVersion.Feature.Location,
-		DeprecatedProvidedExecutables: legacyExecutables,
-		Executables:                   executables,
+		Name:          dbFeatureVersion.Feature.Name,
+		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
+		VersionFormat: stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
+		Version:       version,
+		AddedBy:       addedBy,
+		Location:      dbFeatureVersion.Feature.Location,
+		Executables:   executables,
 	}
 }
 
@@ -393,17 +392,15 @@ type Vulnerability struct {
 
 // Feature is a scanned package in an image.
 type Feature struct {
-	Name            string          `json:"Name,omitempty"`
-	NamespaceName   string          `json:"NamespaceName,omitempty"`
-	VersionFormat   string          `json:"VersionFormat,omitempty"`
-	Version         string          `json:"Version,omitempty"`
-	Vulnerabilities []Vulnerability `json:"Vulnerabilities,omitempty"`
-	AddedBy         string          `json:"AddedBy,omitempty"`
-	Location        string          `json:"Location,omitempty"`
-	FixedBy         string          `json:"FixedBy,omitempty"`
-	// Deprecated: ProvidedExecutables
-	DeprecatedProvidedExecutables []string         `json:"ProvidedExecutables,omitempty"`
-	Executables                   []*v1.Executable `json:"Executables,omitempty"`
+	Name            string           `json:"Name,omitempty"`
+	NamespaceName   string           `json:"NamespaceName,omitempty"`
+	VersionFormat   string           `json:"VersionFormat,omitempty"`
+	Version         string           `json:"Version,omitempty"`
+	Vulnerabilities []Vulnerability  `json:"Vulnerabilities,omitempty"`
+	AddedBy         string           `json:"AddedBy,omitempty"`
+	Location        string           `json:"Location,omitempty"`
+	FixedBy         string           `json:"FixedBy,omitempty"`
+	Executables     []*v1.Executable `json:"Executables,omitempty"`
 }
 
 // DatabaseModel returns a database.FeatureVersion based on the caller Feature.

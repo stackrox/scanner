@@ -59,13 +59,12 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 		}
 
 		feature := Feature{
-			Name:                          pkg.Name,
-			NamespaceName:                 layer.NamespaceName,
-			VersionFormat:                 rpm.ParserName,
-			Version:                       version,
-			AddedBy:                       pkgEnv.AddedBy,
-			DeprecatedProvidedExecutables: pkg.ProvidedExecutables,
-			Executables:                   executables,
+			Name:          pkg.Name,
+			NamespaceName: layer.NamespaceName,
+			VersionFormat: rpm.ParserName,
+			Version:       version,
+			AddedBy:       pkgEnv.AddedBy,
+			Executables:   executables,
 		}
 
 		pkgVersion := rpmVersion.NewVersion(pkg.Version)
@@ -296,9 +295,8 @@ func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 	}
 }
 
-func createExecutablesFromDependencies(executableToDependencies map[string]set.StringSet, depMap map[string]set.StringSet) (executables []*v1.Executable, legacyExecutables []string) {
-	executables = make([]*v1.Executable, 0, len(executableToDependencies))
-	legacyExecutables = make([]string, 0, len(executableToDependencies))
+func createExecutablesFromDependencies(executableToDependencies map[string]set.StringSet, depMap map[string]set.StringSet) []*v1.Executable {
+	executables := make([]*v1.Executable, 0, len(executableToDependencies))
 	for exec, libs := range executableToDependencies {
 		features := set.NewStringSet()
 		for lib := range libs {
@@ -308,7 +306,6 @@ func createExecutablesFromDependencies(executableToDependencies map[string]set.S
 			Path:             exec,
 			RequiredFeatures: toFeatureNameVersions(features),
 		})
-		legacyExecutables = append(legacyExecutables, exec)
 	}
-	return executables, legacyExecutables
+	return executables
 }
