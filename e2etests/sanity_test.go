@@ -2026,6 +2026,28 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
+			image:                   "alpine:3.15.0",
+			registry:                "https://registry-1.docker.io",
+			source:                  "NVD",
+			onlyCheckSpecifiedVulns: true,
+			expectedFeatures: []v1.Feature{
+				{
+					Name:          "apk-tools",
+					NamespaceName: "alpine:v3.15",
+					VersionFormat: "apk",
+					Version:       "2.12.7-r3",
+					AddedBy:       "sha256:59bf1c3509f33515622619af21ed55bbe26d24913cedbca106468a5fb37a50c3",
+				},
+				{
+					Name:          "busybox",
+					NamespaceName: "alpine:v3.15",
+					VersionFormat: "apk",
+					Version:       "1.34.1-r3",
+					AddedBy:       "sha256:59bf1c3509f33515622619af21ed55bbe26d24913cedbca106468a5fb37a50c3",
+				},
+			},
+		},
+		{
 			image:    "quay.io/rhacs-eng/qa:debian-package-removal",
 			registry: "https://quay.io",
 			username: os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
