@@ -296,7 +296,7 @@ func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 	}
 }
 
-func createExecutablesFromDependencies(executableToDependencies map[string]set.StringSet, depMap map[string]set.StringSet) (executables []*v1.Executable, legacyExecutables []string){
+func createExecutablesFromDependencies(executableToDependencies map[string]set.StringSet, depMap map[string]set.StringSet) (executables []*v1.Executable, legacyExecutables []string) {
 	executables = make([]*v1.Executable, 0, len(executableToDependencies))
 	legacyExecutables = make([]string, 0, len(executableToDependencies))
 	for exec, libs := range executableToDependencies {

@@ -24,7 +24,7 @@ func TestMerge(t *testing.T) {
 		aMap     StringToStringsMap
 		bMap     StringToStringsMap
 		expected StringToStringsMap
-	} {
+	}{
 		{
 			desc: "new libraries and new execs",
 			aMap: StringToStringsMap{
