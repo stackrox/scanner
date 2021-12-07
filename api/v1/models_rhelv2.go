@@ -295,3 +295,20 @@ func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		FixedBy: vuln.PackageInfos[0].FixedInVersion, // Empty string if not fixed.
 	}
 }
+
+func createExecutablesFromDependencies(executableToDependencies map[string]set.StringSet, depMap map[string]set.StringSet) (executables []*v1.Executable, legacyExecutables []string){
+	executables = make([]*v1.Executable, 0, len(executableToDependencies))
+	legacyExecutables = make([]string, 0, len(executableToDependencies))
+	for exec, libs := range executableToDependencies {
+		features := set.NewStringSet()
+		for lib := range libs {
+			features = features.Union(depMap[lib])
+		}
+		executables = append(executables, &v1.Executable{
+			Path:             exec,
+			RequiredFeatures: toFeatureNameVersions(features),
+		})
+		legacyExecutables = append(legacyExecutables, exec)
+	}
+	return executables, legacyExecutables
+}

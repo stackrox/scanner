@@ -198,20 +198,7 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
-	executables := make([]*v1.Executable, 0, len(dbFeatureVersion.ExecutableToDependencies))
-	legacyExecutables := make([]string, 0, len(dbFeatureVersion.ExecutableToDependencies))
-	for exec, libs := range dbFeatureVersion.ExecutableToDependencies {
-		features := set.NewStringSet()
-		for lib := range libs {
-			features = features.Union(depMap[lib])
-		}
-		executables = append(executables, &v1.Executable{
-			Path:             exec,
-			RequiredFeatures: toFeatureNameVersions(features),
-		})
-		legacyExecutables = append(legacyExecutables, exec)
-	}
-
+	executables, legacyExecutables := createExecutablesFromDependencies(dbFeatureVersion.ExecutableToDependencies, depMap)
 	return &Feature{
 		Name:                          dbFeatureVersion.Feature.Name,
 		NamespaceName:                 dbFeatureVersion.Feature.Namespace.Name,
