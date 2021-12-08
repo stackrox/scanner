@@ -5,12 +5,13 @@ package e2etests
 import (
 	"encoding/json"
 	"fmt"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"os"
 	"sort"
 	"strings"
 	"testing"
 
-	v1 "github.com/stackrox/scanner/api/v1"
+	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/component"
@@ -18,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1.Feature, allowNotFound bool) *v1.Feature {
+func getMatchingFeature(t *testing.T, featureList []apiV1.Feature, featureToFind apiV1.Feature, allowNotFound bool) *apiV1.Feature {
 	candidateIdx := -1
 	for i, f := range featureList {
 		if f.Name == featureToFind.Name && f.Version == featureToFind.Version {
@@ -33,7 +34,7 @@ func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1
 	return &featureList[candidateIdx]
 }
 
-func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulnerability) {
+func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln apiV1.Vulnerability) {
 	if expectedVuln.Metadata == nil {
 		assert.Nil(t, matchingVuln.Metadata, "Expected no metadata for %s but got some", expectedVuln.Name)
 	} else {
@@ -56,7 +57,7 @@ func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulne
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
-func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, onlyCheckSpecifiedVulns, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
+func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, onlyCheckSpecifiedVulns, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []apiV1.Feature) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
@@ -88,11 +89,8 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 			}
 
 			if checkProvidedExecutables {
-				assert.ElementsMatch(t, feature.DeprecatedProvidedExecutables, matching.DeprecatedProvidedExecutables)
 				assert.ElementsMatch(t, feature.Executables, matching.Executables)
 			}
-			feature.DeprecatedProvidedExecutables = nil
-			matching.DeprecatedProvidedExecutables = nil
 			feature.Executables = nil
 			matching.Executables = nil
 
@@ -145,8 +143,8 @@ func TestImageSanity(t *testing.T) {
 		registry           string
 		username, password string
 		source             string
-		expectedFeatures   []v1.Feature
-		unexpectedFeatures []v1.Feature
+		expectedFeatures   []apiV1.Feature
+		unexpectedFeatures []apiV1.Feature
 		// This specifies that the features only need to contain at least the vulnerabilities specified
 		onlyCheckSpecifiedVulns  bool
 		uncertifiedRHEL          bool
@@ -158,15 +156,15 @@ func TestImageSanity(t *testing.T) {
 			source:                   "NVD",
 			onlyCheckSpecifiedVulns:  true,
 			checkProvidedExecutables: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "lz4",
 					NamespaceName: "ubuntu:16.04",
 					VersionFormat: "dpkg",
 					Version:       "0.0~r131-2ubuntu2",
 					// The only provided executable file is a symlink, so there are no regular executable files.
-					DeprecatedProvidedExecutables: []string{},
-					Vulnerabilities: []v1.Vulnerability{
+					Executables: []*v1.Executable{},
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "CVE-2021-3520",
 							NamespaceName: "ubuntu:16.04",
@@ -201,7 +199,7 @@ func TestImageSanity(t *testing.T) {
 			image:    "docker.io/library/nginx:1.10",
 			registry: "https://registry-1.docker.io",
 			source:   "NVD",
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:            "diffutils",
 					NamespaceName:   "debian:8",
@@ -215,7 +213,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "debian:8",
 					VersionFormat: "dpkg",
 					Version:       "8.23-4",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "CVE-2016-2781",
 							NamespaceName: "debian:8",
@@ -275,39 +273,39 @@ func TestImageSanity(t *testing.T) {
 			registry:                 "https://registry-1.docker.io",
 			source:                   "NVD",
 			checkProvidedExecutables: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "apt",
 					NamespaceName: "debian:8",
 					VersionFormat: "dpkg",
 					Version:       "1.0.9.8.4",
-					DeprecatedProvidedExecutables: []string{
-						"/etc/cron.daily/apt",
-						"/etc/kernel/postinst.d/apt-auto-removal",
-						"/usr/share/bug/apt/script",
-						"/usr/lib/dpkg/methods/apt/update",
-						"/usr/lib/dpkg/methods/apt/setup",
-						"/usr/lib/dpkg/methods/apt/install",
-						"/usr/lib/apt/apt-helper",
-						"/usr/lib/apt/methods/cdrom",
-						"/usr/lib/apt/methods/copy",
-						"/usr/lib/apt/methods/file",
-						"/usr/lib/apt/methods/ftp",
-						"/usr/lib/apt/methods/gpgv",
-						"/usr/lib/apt/methods/gzip",
-						"/usr/lib/apt/methods/http",
-						"/usr/lib/apt/methods/mirror",
-						"/usr/lib/apt/methods/rred",
-						"/usr/lib/apt/methods/rsh",
-						"/usr/bin/apt",
-						"/usr/bin/apt-cache",
-						"/usr/bin/apt-cdrom",
-						"/usr/bin/apt-config",
-						"/usr/bin/apt-get",
-						"/usr/bin/apt-mark",
-						"/usr/bin/apt-key",
+					Executables: []*v1.Executable {
+						{Path: "/etc/cron.daily/apt", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/etc/kernel/postinst.d/apt-auto-removal", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/share/bug/apt/script", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/dpkg/methods/apt/update", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/dpkg/methods/apt/setup", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/dpkg/methods/apt/install", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/apt-helper", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/methods/cdrom", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/methods/copy", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/methods/file", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/methods/ftp", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/methods/gpgv", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/methods/gzip", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/methods/http", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/methods/mirror", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/methods/rred", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/lib/apt/methods/rsh", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/bin/apt", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/bin/apt-cache", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/bin/apt-cdrom", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/bin/apt-config", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/bin/apt-get", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/bin/apt-mark", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+						{Path: "/usr/bin/apt-key", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
 					},
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "CVE-2011-3374",
 							NamespaceName: "debian:8",
@@ -398,32 +396,33 @@ func TestImageSanity(t *testing.T) {
 			// This image is older than June 2020, so we need to explicitly request for an uncertified scan.
 			uncertifiedRHEL:          true,
 			checkProvidedExecutables: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "procps-ng",
 					NamespaceName: "centos:7",
 					VersionFormat: "rpm",
 					Version:       "3.3.10-26.el7",
-					DeprecatedProvidedExecutables: []string{
-						"/usr/bin/free",
-						"/usr/bin/pgrep",
-						"/usr/bin/pkill",
-						"/usr/bin/pmap",
-						"/usr/bin/ps",
-						"/usr/bin/pwdx",
-						"/usr/bin/skill",
-						"/usr/bin/slabtop",
-						"/usr/bin/snice",
-						"/usr/bin/tload",
-						"/usr/bin/top",
-						"/usr/bin/uptime",
-						"/usr/bin/vmstat",
-						"/usr/bin/w",
-						"/usr/bin/watch",
-						"/usr/lib64/libprocps.so.4.0.0",
-						"/usr/sbin/sysctl",
+					Executables: []*v1.Executable{
+						{Path: "/etc/cron.daily/apt", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/free", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/pgrep", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/pkill", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/pmap", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/ps", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/pwdx", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/skill", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/slabtop", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/snice", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/tload", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/top", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/uptime", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/vmstat", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/w", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/bin/watch", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/lib64/libprocps.so.4.0.0", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+						{Path: "/usr/sbin/sysctl", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
 					},
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "CVE-2018-1121",
 							NamespaceName: "centos:7",
@@ -504,14 +503,14 @@ func TestImageSanity(t *testing.T) {
 			username: "_json_key",
 			password: os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER"),
 			source:   "NVD",
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "cron",
 					NamespaceName: "ubuntu:14.04",
 					VersionFormat: "dpkg",
 					Version:       "3.0pl1-124ubuntu2",
 					AddedBy:       "sha256:bae382666908fd87a3a3646d7eb7176fa42226027d3256cac38ee0b79bdb0491",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "CVE-2017-9525",
 							NamespaceName: "ubuntu:14.04",
@@ -546,7 +545,7 @@ func TestImageSanity(t *testing.T) {
 			registry:                "https://mcr.microsoft.com",
 			source:                  "NVD",
 			onlyCheckSpecifiedVulns: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "microsoft.netcore.app",
 					Version:       "3.1.2",
@@ -554,7 +553,7 @@ func TestImageSanity(t *testing.T) {
 					Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/",
 					AddedBy:       "sha256:b48f8e1b0b06887c382543e23275911a388c1010e3436dc9b708ef29885bb594",
 					FixedBy:       "3.1.18",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:        "CVE-2020-1108",
 							Description: "A denial of service vulnerability exists when .NET Core or .NET Framework improperly handles web requests, aka '.NET Core & .NET Framework Denial of Service Vulnerability'.",
@@ -739,12 +738,12 @@ func TestImageSanity(t *testing.T) {
 			registry:                "https://mcr.microsoft.com",
 			source:                  "NVD",
 			onlyCheckSpecifiedVulns: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "microsoft.aspnetcore.app",
 					VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
 					Version:       "3.1.0",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:        "CVE-2020-0602",
 							Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests, aka 'ASP.NET Core Denial of Service Vulnerability'.",
@@ -904,7 +903,7 @@ func TestImageSanity(t *testing.T) {
 					Name:          "microsoft.netcore.app",
 					VersionFormat: "DotNetCoreRuntimeSourceType",
 					Version:       "3.1.0",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:        "CVE-2020-0605",
 							Description: "A remote code execution vulnerability exists in .NET software when the software fails to check the source markup of a file.An attacker who successfully exploited the vulnerability could run arbitrary code in the context of the current user, aka '.NET Framework Remote Code Execution Vulnerability'. This CVE ID is unique from CVE-2020-0606.",
@@ -1145,12 +1144,12 @@ func TestImageSanity(t *testing.T) {
 			password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:                  "NVD",
 			onlyCheckSpecifiedVulns: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "jackson-databind",
 					VersionFormat: component.JavaSourceType.String(),
 					Version:       "2.9.10.4",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:        "CVE-2020-14060",
 							Description: "FasterXML jackson-databind 2.x before 2.9.10.5 mishandles the interaction between serialization gadgets and typing, related to oadd.org.apache.xalan.lib.sql.JNDIConnectionPool (aka apache/drill).",
@@ -1382,7 +1381,7 @@ func TestImageSanity(t *testing.T) {
 					FixedBy:  "2.9.10.8",
 				},
 			},
-			unexpectedFeatures: []v1.Feature{
+			unexpectedFeatures: []apiV1.Feature{
 				{
 					Name:          "jackson-databind",
 					VersionFormat: component.JavaSourceType.String(),
@@ -1397,7 +1396,7 @@ func TestImageSanity(t *testing.T) {
 			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
 			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:   "NVD",
-			unexpectedFeatures: []v1.Feature{
+			unexpectedFeatures: []apiV1.Feature{
 				{
 					Name:          "zookeeper",
 					VersionFormat: component.JavaSourceType.String(),
@@ -1432,15 +1431,15 @@ func TestImageSanity(t *testing.T) {
 			source:                   "Red Hat",
 			onlyCheckSpecifiedVulns:  true,
 			checkProvidedExecutables: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "rh-maven35-log4j12",
 					NamespaceName: "rhel:7",
 					VersionFormat: "rpm",
 					Version:       "1.2.17-19.2.el7.noarch",
 					// This feature provides several JAR files, but they are either not executable or they are symlinks.
-					DeprecatedProvidedExecutables: []string{},
-					AddedBy:             "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+					Executables: []*v1.Executable{},
+					AddedBy:     "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 				},
 				{
 					Name:          "rh-maven35-jackson-databind",
@@ -1448,8 +1447,8 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: "rpm",
 					Version:       "2.7.6-2.10.el7.noarch",
 					// This feature provides a JAR file that is not executable.
-					DeprecatedProvidedExecutables: []string{},
-					Vulnerabilities: []v1.Vulnerability{
+					Executables: []*v1.Executable{},
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4173",
 							NamespaceName: "rhel:7",
@@ -1483,8 +1482,10 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName:       "rhel:7",
 					VersionFormat:       "rpm",
 					Version:             "2:7.4.629-6.el7.x86_64",
-					DeprecatedProvidedExecutables: []string{"/usr/bin/vi"},
-					Vulnerabilities: []v1.Vulnerability{
+					Executables: []*v1.Executable{
+						{Path: "/usr/bin/vi", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "vim-minimal", Version: "2:7.4.629-6.el7.x86_64"}}},
+					},
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "CVE-2017-1000382",
 							NamespaceName: "rhel:7",
@@ -1512,7 +1513,7 @@ func TestImageSanity(t *testing.T) {
 					AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
 				},
 			},
-			unexpectedFeatures: []v1.Feature{
+			unexpectedFeatures: []apiV1.Feature{
 				{
 					Name:    "jackson-databind",
 					Version: "2.7.6",
@@ -1527,7 +1528,7 @@ func TestImageSanity(t *testing.T) {
 			password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:                  "Red Hat",
 			onlyCheckSpecifiedVulns: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "rh-maven35-log4j12",
 					NamespaceName: "rhel:7",
@@ -1540,7 +1541,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "rhel:7",
 					VersionFormat: "rpm",
 					Version:       "2.7.6-2.10.el7.noarch",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4173",
 							NamespaceName: "rhel:7",
@@ -1574,7 +1575,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "rhel:7",
 					VersionFormat: "rpm",
 					Version:       "2:7.4.629-6.el7.x86_64",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "CVE-2017-1000382",
 							NamespaceName: "rhel:7",
@@ -1602,7 +1603,7 @@ func TestImageSanity(t *testing.T) {
 					AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
 				},
 			},
-			unexpectedFeatures: []v1.Feature{
+			unexpectedFeatures: []apiV1.Feature{
 				{
 					Name:    "jackson-databind",
 					Version: "2.7.6",
@@ -1617,13 +1618,13 @@ func TestImageSanity(t *testing.T) {
 			password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:                  "Red Hat",
 			onlyCheckSpecifiedVulns: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "nodejs-full-i18n",
 					NamespaceName: "rhel:8",
 					VersionFormat: "rpm",
 					Version:       "1:10.21.0-3.module+el8.2.0+7071+d2377ea3.x86_64",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "RHSA-2021:0548",
 							NamespaceName: "rhel:8",
@@ -1681,7 +1682,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "rhel:8",
 					VersionFormat: "rpm",
 					Version:       "2.9.1-4.el8.x86_64",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4952",
 							NamespaceName: "rhel:8",
@@ -1715,7 +1716,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "rhel:8",
 					VersionFormat: "rpm",
 					Version:       "0.7.7-1.el8.x86_64",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "RHSA-2020:4508",
 							NamespaceName: "rhel:8",
@@ -1818,7 +1819,7 @@ func TestImageSanity(t *testing.T) {
 			username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
 			password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:   "NVD",
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "jq",
 					NamespaceName: "alpine:v3.13",
@@ -1828,14 +1829,14 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
-		// Verify digest-based scanning and also a v1 versioned image
+		// Verify digest-based scanning and also a apiV1 versioned image
 		// This image result has two layers with the same digests so it checks a duplicate layer case
 		{
 			image:           "docker.io/richxsl/rhel7@sha256:8f3aae325d2074d2dc328cb532d6e7aeb0c588e15ddf847347038fe0566364d6",
 			registry:        "https://registry-1.docker.io",
 			source:          "NVD",
 			uncertifiedRHEL: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "fipscheck",
 					NamespaceName: "centos:7",
@@ -1853,7 +1854,7 @@ func TestImageSanity(t *testing.T) {
 			registry:                "https://quay.io",
 			source:                  "NVD",
 			onlyCheckSpecifiedVulns: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "p11-kit",
 					NamespaceName: "centos:7",
@@ -1867,7 +1868,7 @@ func TestImageSanity(t *testing.T) {
 			image:    "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
 			registry: "https://quay.io",
 			source:   "NVD",
-			unexpectedFeatures: []v1.Feature{
+			unexpectedFeatures: []apiV1.Feature{
 				{
 					Name:          "p11-kit",
 					VersionFormat: "rpm",
@@ -1880,13 +1881,13 @@ func TestImageSanity(t *testing.T) {
 			registry:                "https://registry-1.docker.io",
 			source:                  "NVD",
 			onlyCheckSpecifiedVulns: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "apk-tools",
 					NamespaceName: "alpine:v3.13",
 					VersionFormat: "apk",
 					Version:       "2.12.0-r4",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "CVE-2021-30139",
 							NamespaceName: "alpine:v3.13",
@@ -1944,7 +1945,7 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "alpine:v3.13",
 					VersionFormat: "apk",
 					Version:       "1.32.1-r0",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "CVE-2021-28831",
 							NamespaceName: "alpine:v3.13",
@@ -1980,13 +1981,13 @@ func TestImageSanity(t *testing.T) {
 			registry:                "https://registry-1.docker.io",
 			source:                  "NVD",
 			onlyCheckSpecifiedVulns: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "apk-tools",
 					NamespaceName: "alpine:v3.14",
 					VersionFormat: "apk",
 					Version:       "2.12.5-r1",
-					Vulnerabilities: []v1.Vulnerability{
+					Vulnerabilities: []apiV1.Vulnerability{
 						{
 							Name:          "CVE-2021-36159",
 							NamespaceName: "alpine:v3.14",
@@ -2026,6 +2027,28 @@ func TestImageSanity(t *testing.T) {
 			},
 		},
 		{
+			image:                   "alpine:3.15.0",
+			registry:                "https://registry-1.docker.io",
+			source:                  "NVD",
+			onlyCheckSpecifiedVulns: true,
+			expectedFeatures: []apiV1.Feature{
+				{
+					Name:          "apk-tools",
+					NamespaceName: "alpine:v3.15",
+					VersionFormat: "apk",
+					Version:       "2.12.7-r3",
+					AddedBy:       "sha256:59bf1c3509f33515622619af21ed55bbe26d24913cedbca106468a5fb37a50c3",
+				},
+				{
+					Name:          "busybox",
+					NamespaceName: "alpine:v3.15",
+					VersionFormat: "apk",
+					Version:       "1.34.1-r3",
+					AddedBy:       "sha256:59bf1c3509f33515622619af21ed55bbe26d24913cedbca106468a5fb37a50c3",
+				},
+			},
+		},
+		{
 			image:    "quay.io/rhacs-eng/qa:debian-package-removal",
 			registry: "https://quay.io",
 			username: os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
@@ -2035,14 +2058,14 @@ func TestImageSanity(t *testing.T) {
 			// package DB version. The relevant *.list file will only exist in the layer the package is added
 			// so the layer with the latest packages DB will not have the *.list file for these packages.
 			checkProvidedExecutables: true,
-			expectedFeatures: []v1.Feature{
+			expectedFeatures: []apiV1.Feature{
 				{
 					Name:          "dash",
 					NamespaceName: "debian:11",
 					VersionFormat: "dpkg",
 					Version:       "0.5.11+git20200708+dd9ef66-5",
-					DeprecatedProvidedExecutables: []string{
-						"/bin/dash",
+					Executables: []*v1.Executable{
+						{Path: "/bin/dash", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "dash", Version: "0.5.11+git20200708+dd9ef66-5"}}},
 					},
 					AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
 				},
@@ -2051,11 +2074,11 @@ func TestImageSanity(t *testing.T) {
 					NamespaceName: "debian:11",
 					VersionFormat: "dpkg",
 					Version:       "1:3.7-5",
-					DeprecatedProvidedExecutables: []string{
-						"/usr/bin/cmp",
-						"/usr/bin/diff",
-						"/usr/bin/diff3",
-						"/usr/bin/sdiff",
+					Executables: []*v1.Executable{
+						{Path: "/usr/bin/cmp", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
+						{Path: "/usr/bin/diff", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
+						{Path: "/usr/bin/diff3", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
+						{Path: "/usr/bin/sdiff", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
 					},
 					AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
 				},
@@ -2065,7 +2088,7 @@ func TestImageSanity(t *testing.T) {
 			image:    "docker.io/anchore/anchore-engine:v0.9.4",
 			registry: "https://registry-1.docker.io",
 			source:   "NVD",
-			unexpectedFeatures: []v1.Feature{
+			unexpectedFeatures: []apiV1.Feature{
 				{
 					Name:    "netaddr",
 					Version: "0.8.0",

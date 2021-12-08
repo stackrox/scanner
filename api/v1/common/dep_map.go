@@ -15,6 +15,10 @@ type libDepNode struct {
 	completed bool
 }
 
+// circle is discovered while traversing a graph of dependency.
+// head: the first element that was traversed within the circle.
+// members: all the elements that may appear in the circle regardless
+//          of the order.
 type circle struct {
 	head    string
 	members set.StringSet
@@ -30,7 +34,7 @@ func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
 			Name:    feature.Feature.Name,
 			Version: feature.Version,
 		})
-		// Populate libraries with all direct import.
+		// Populate libraries with all direct imports.
 		for lib, deps := range feature.LibraryToDependencies {
 			if node, ok := libNodes[lib]; ok {
 				node.libraries = node.libraries.Union(deps)
@@ -44,12 +48,12 @@ func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
 	// Traverse it and get the dependency map
 	depMap := make(map[string]set.StringSet)
 	for k, v := range libNodes {
-		var cycle *circle
-		depMap[k], cycle = fillIn(libNodes, k, v, map[string]int{k: 0})
-		if cycle != nil {
+		var c *circle
+		depMap[k], c = fillIn(libNodes, k, v, map[string]int{k: 0})
+		if c != nil {
 			// This is a very rare case that we have a loop in dependency map.
 			// All members in the loop should map to the same set of features.
-			for c := range cycle.members {
+			for c := range c.members {
 				depMap[c] = depMap[k]
 			}
 		}
@@ -94,11 +98,11 @@ func fillIn(libToDep map[string]*libDepNode, depname string, dep *libDepNode, pa
 		return dep.features, nil
 	}
 
-	// Again, this is a rare case.
+	// Again, this is a rare case that we have a circle in the dependency graph.
 	mc := circle{head: depname, members: set.NewStringSet()}
 	for _, c := range circles {
-		// This is an extremely rare case we have more than one circles.
-		// Merge multiple circles together.
+		// This is an extremely rare case we have multiple circles.
+		// Merge multiple circles together to form a bigger possible circle.
 		if path[c.head] < path[mc.head] {
 			mc.head = c.head
 		}
