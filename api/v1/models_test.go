@@ -171,10 +171,10 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 			},
 		},
 	}
-	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
-	}, nil)
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].FixedBy)
 	assert.ElementsMatch(t, expectedExecs, layer.Features[0].Executables)
@@ -238,10 +238,10 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 			},
 		},
 	}
-	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
-	}, nil)
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
 	assert.ElementsMatch(t, expectedExecs, layer.Features[0].Executables)

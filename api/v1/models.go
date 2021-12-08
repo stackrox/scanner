@@ -289,7 +289,7 @@ func hasKernelPrefix(name string) bool {
 }
 
 // LayerFromDatabaseModel returns the scan data for the given layer based on the data in the given datastore.
-func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, opts *database.DatastoreOptions, depMap map[string]set.StringSet) (Layer, []Note, error) {
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, depMap map[string]set.StringSet, opts *database.DatastoreOptions) (Layer, []Note, error) {
 	withFeatures := opts.GetWithFeatures()
 	withVulnerabilities := opts.GetWithVulnerabilities()
 	uncertifiedRHEL := opts.GetUncertifiedRHEL()

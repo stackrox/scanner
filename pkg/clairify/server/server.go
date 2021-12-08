@@ -84,7 +84,7 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName, lineage string,
 	}
 	depMap := v1common.GetDepMap(dbLayer.Features)
 
-	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, lineage, opts, depMap)
+	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, lineage, depMap, opts)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return

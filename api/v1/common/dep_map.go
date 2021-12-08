@@ -15,11 +15,11 @@ type libDepNode struct {
 	completed bool
 }
 
-// circle is discovered while traversing a graph of dependency.
-// head: the first element that was traversed within the circle.
-// members: all the elements that may appear in the circle regardless
+// cycle is discovered while traversing a graph of dependency.
+// head: the first element that was traversed within the cycle.
+// members: all the elements that may appear in the cycle regardless
 //          of the order.
-type circle struct {
+type cycle struct {
 	head    string
 	members set.StringSet
 }
@@ -48,7 +48,7 @@ func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
 	// Traverse it and get the dependency map
 	depMap := make(map[string]set.StringSet)
 	for k, v := range libNodes {
-		var c *circle
+		var c *cycle
 		depMap[k], c = fillIn(libNodes, k, v, map[string]int{k: 0})
 		if c != nil {
 			// This is a very rare case that we have a loop in dependency map.
@@ -61,11 +61,11 @@ func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
 	return depMap
 }
 
-func fillIn(libToDep map[string]*libDepNode, depname string, dep *libDepNode, path map[string]int) (set.StringSet, *circle) {
+func fillIn(libToDep map[string]*libDepNode, depname string, dep *libDepNode, path map[string]int) (set.StringSet, *cycle) {
 	if dep.completed {
 		return dep.features, nil
 	}
-	var circles []circle
+	var cycles []cycle
 	for lib := range dep.libraries {
 		execs, ok := libToDep[lib]
 		if !ok {
@@ -74,41 +74,41 @@ func fillIn(libToDep map[string]*libDepNode, depname string, dep *libDepNode, pa
 		}
 		if seq, ok := path[lib]; ok {
 			// This is a very rare case that we detect a loop in dependency map.
-			// We create a circle and put it in the circles.
-			// We use a map from library to its sequence number im path to prioritize the most frequently used code path.
-			c := circle{head: lib, members: set.NewStringSet(lib)}
+			// We create a cycle and put it in the cycles.
+			// We use a map from library to its sequence number in path to prioritize the most frequently used code path.
+			c := cycle{head: lib, members: set.NewStringSet(lib)}
 			for p, s := range path {
 				if s > seq {
 					c.members.Add(p)
 				}
 			}
-			circles = append(circles, c)
+			cycles = append(cycles, c)
 			continue
 		}
 		path[lib] = len(path)
 		features, c := fillIn(libToDep, lib, execs, path)
 		delete(path, lib)
 		if c != nil {
-			circles = append(circles, *c)
+			cycles = append(cycles, *c)
 		}
 		dep.features = dep.features.Union(features)
 	}
 	dep.completed = true
-	if len(circles) == 0 {
+	if len(cycles) == 0 {
 		return dep.features, nil
 	}
 
-	// Again, this is a rare case that we have a circle in the dependency graph.
-	mc := circle{head: depname, members: set.NewStringSet()}
-	for _, c := range circles {
-		// This is an extremely rare case we have multiple circles.
-		// Merge multiple circles together to form a bigger possible circle.
+	// Again, this is a rare case that we have a cycle in the dependency graph.
+	mc := cycle{head: depname, members: set.NewStringSet()}
+	for _, c := range cycles {
+		// This is an extremely rare case we have multiple cycles.
+		// Merge multiple cycles together to form a bigger possible cycle.
 		if path[c.head] < path[mc.head] {
 			mc.head = c.head
 		}
 		mc.members = mc.members.Union(c.members)
 	}
-	// If this is the head of the circle, resolve the circle by assigning the features
+	// If this is the head of the cycle, resolve the cycle by assigning the features
 	// of the head to all members
 	if mc.head == depname {
 		for c := range mc.members {

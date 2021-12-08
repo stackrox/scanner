@@ -93,7 +93,7 @@ func (s *serviceImpl) getLayer(layerName, lineage string, uncertifiedRHEL bool) 
 	}
 	depMap := common.GetDepMap(dbLayer.Features)
 	// This endpoint is not used, so not going to bother with notes until they are necessary.
-	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, lineage, opts, depMap)
+	layer, _, err := apiV1.LayerFromDatabaseModel(s.db, dbLayer, lineage, depMap, opts)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
