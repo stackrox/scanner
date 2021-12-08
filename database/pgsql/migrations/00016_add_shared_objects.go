@@ -12,7 +12,7 @@ import (
 
 const (
 	declareFmt = "DECLARE %s CURSOR FOR SELECT id, executables FROM %s ORDER BY id"
-	updateFmt = "UPDATE %s SET executable_to_dependencies = $2 WHERE id = $1"
+	updateFmt  = "UPDATE %s SET executable_to_dependencies = $2 WHERE id = $1"
 )
 
 func init() {
@@ -40,8 +40,10 @@ func init() {
 				return err
 			}
 			// Drop column executables
-			_, err := tx.Exec("ALTER TABLE FeatureVersion DROP COLUMN IF EXISTS executables")
-			_, err = tx.Exec("ALTER TABLE rhelv2_package DROP COLUMN IF EXISTS executables")
+			if _, err := tx.Exec("ALTER TABLE FeatureVersion DROP COLUMN IF EXISTS executables"); err != nil {
+				return err
+			}
+			_, err := tx.Exec("ALTER TABLE rhelv2_package DROP COLUMN IF EXISTS executables")
 			return err
 		},
 	})
