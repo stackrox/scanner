@@ -95,7 +95,7 @@ func (s *serviceImpl) getLayer(req imageRequest, opts *database.DatastoreOptions
 
 	dbLayer, err := s.db.FindLayer(layerName, lineage, opts)
 	if err == commonerr.ErrNotFound {
-		return nil, "", status.Errorf(codes.NotFound, "Could not find Clair layer %q", layerName)
+		return nil, "", status.Errorf(codes.NotFound, "Could not find layer %q", layerName)
 	} else if err != nil {
 		return nil, "", status.Error(codes.Internal, err.Error())
 	}
@@ -143,11 +143,12 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 		if note == apiV1.CertifiedRHELScanUnavailable {
 			// Image is RHEL, but not within Certification scope. Try again...
 			imgComponents, err = s.getImageComponents(ctx, req, true)
+			if err != nil {
+				return nil, err
+			}
+
 			break
 		}
-	}
-	if err != nil {
-		return nil, err
 	}
 
 	return &v1.GetImageComponentsResponse{
