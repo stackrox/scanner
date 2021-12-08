@@ -55,8 +55,9 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// uniqueness.
 	pkgSet := make(map[featurefmt.PackageKey]database.FeatureVersion)
 	var pkg database.FeatureVersion
-	// executablesSet ensures only unique executables are stored per package.
-	executablesSet := set.NewStringSet()
+	// Use map to ensures only unique executables or libraries are stored per package.
+	execToDeps := make(database.StringToStringsMap)
+	libToDeps := make(database.StringToStringsMap)
 	scanner := bufio.NewScanner(bytes.NewBuffer(file.Contents))
 	var dir string
 	for scanner.Scan() {
@@ -69,12 +70,11 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 			// Protect the map from entries with invalid versions.
 			if pkg.Feature.Name != "" && pkg.Version != "" {
-				if len(executablesSet) != 0 {
-					execToDeps := make(database.StringToStringsMap, len(executablesSet))
-					for exec := range executablesSet {
-						execToDeps[exec] = set.NewStringSet()
-					}
+				if len(execToDeps) != 0 {
 					pkg.ExecutableToDependencies = execToDeps
+				}
+				if len(libToDeps) != 0 {
+					pkg.LibraryToDependencies = libToDeps
 				}
 
 				key := featurefmt.PackageKey{
@@ -85,7 +85,8 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			}
 
 			pkg = database.FeatureVersion{}
-			executablesSet.Clear()
+			execToDeps = make(database.StringToStringsMap)
+			libToDeps = make(database.StringToStringsMap)
 		case len(line) < 2:
 			// Invalid line.
 			continue
@@ -107,8 +108,23 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the files maps.
-			if fileData := files[filename[1:]]; fileData.Executable {
-				executablesSet.Add(filename)
+			fileData := files[filename[1:]]
+			if fileData.Executable {
+				deps := set.NewStringSet()
+				if fileData.ELFMetadata != nil {
+					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+				}
+				execToDeps[filename] = deps
+			}
+			if fileData.ELFMetadata != nil {
+				for _, soname := range fileData.ELFMetadata.Sonames {
+					deps, ok := libToDeps[soname]
+					if !ok {
+						deps = set.NewStringSet()
+					}
+					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+					libToDeps[soname] = deps
+				}
 			}
 		}
 	}
