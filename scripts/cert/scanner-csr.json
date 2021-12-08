@@ -1,0 +1,16 @@
+{
+  "hosts": [
+    "scanner.stackrox"
+  ],
+  "key": {
+    "algo": "ecdsa",
+    "size": 256
+  },
+  "names": [{
+    "C": "US",
+    "L": "Raleigh",
+    "O": "Red Hat, Inc.",
+    "OU": "Engineering",
+    "ST": "North Carolina"
+  }]
+}
