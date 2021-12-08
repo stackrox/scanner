@@ -241,15 +241,15 @@ func getLanguageComponents(db database.Datastore, layerName, lineage string, unc
 	return components
 }
 
-func getLanguageFeatures(components []*v1.LanguageComponent) ([]Feature, error) {
+func getLanguageFeatures(osFeatures []Feature, components []*v1.LanguageComponent, uncertifiedRHEL bool) ([]Feature, error) {
 	layerToComponents := getLayerToComponents(components)
 
 	languageFeatureMap := make(map[string]languageFeatureValue)
-	var features []database.FeatureVersion
+	var featureVersions []database.FeatureVersion
 
 	for _, layer := range layerToComponents {
-		featureVersions := cpe.CheckForVulnerabilities(layer.Layer, layer.Components)
-		for _, fv := range featureVersions {
+		fvs := cpe.CheckForVulnerabilities(layer.Layer, layer.Components)
+		for _, fv := range fvs {
 			location := fv.Feature.Location
 			featureValue := languageFeatureValue{
 				name:    fv.Feature.Name,
@@ -264,12 +264,26 @@ func getLanguageFeatures(components []*v1.LanguageComponent) ([]Feature, error) 
 				}
 			}
 
-			features = append(features, fv)
+			featureVersions = append(featureVersions, fv)
 			languageFeatureMap[location] = featureValue
 		}
 	}
 
-	return nil, nil
+	// We want to be sure to remove any repeat features that were not filtered previously
+	// (this would be due us detecting a feature was introduced into the image at a lower level than originally thought).
+	features := make([]Feature, 0, len(featureVersions))
+	for _, fv := range featureVersions {
+		featureValue := languageFeatureMap[fv.Feature.Location]
+		if fv.AddedBy.Name == featureValue.layer {
+			feature := featureFromDatabaseModel(fv, uncertifiedRHEL)
+			if !shouldDedupeLanguageFeature(*feature, features) {
+				updateFeatureWithVulns(feature, fv.AffectedBy, language.ParserName)
+				features = append(features, *feature)
+			}
+		}
+	}
+
+	return features, nil
 }
 
 // getLayerToComponents gets a slice of LayerToComponents from teh given components.

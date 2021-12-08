@@ -15,6 +15,7 @@
 package v1
 
 import (
+	"github.com/pkg/errors"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"strings"
 
@@ -250,16 +251,22 @@ func getNotes(namespaceName string, uncertifiedRHEL bool) []Note {
 }
 
 // GetVulnerabilitiesForComponents retrieves the vulnerabilities for the given components.
-func GetVulnerabilitiesForComponents(db database.Datastore, components *v1.Components) (*Layer, error) {
-	layer := &Layer{}
+func GetVulnerabilitiesForComponents(db database.Datastore, components *v1.Components, uncertifiedRHEL bool) (*Layer, error) {
+	var features []Feature
 
 	rhelv2Features, err := getFullFeaturesForRHELv2Packages(db, components.RhelComponents)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "getting RHELv2 features")
 	}
-	layer.Features = append(layer.Features, rhelv2Features...)
+	features = append(features, rhelv2Features...)
 
-	getLanguageFeatures(db, components.LanguageComponents)
+	languageFeatures, err := getLanguageFeatures(features, components.LanguageComponents, uncertifiedRHEL)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting language features")
+	}
+	features = append(features, languageFeatures...)
+
+	return features, nil
 }
 
 // Namespace is the image's base OS.
