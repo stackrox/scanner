@@ -7,12 +7,6 @@ set -e
 SCANNER_TLS_FILE=$1
 SCANNER_DB_TLS_FILE=$2
 
-SED_ARG="-i"
-UNAME=$(uname -s)
-if [ ${UNAME} == "Darwin" ]; then
-    SED_ARG="-i ''"
-fi
-
 echo "Generating CA and Cert/Key for Scanner"
 cfssl genkey -initca scanner-csr.json | cfssljson -bare ca
 SCANNER_CA=$(base64 -in ca.pem)
