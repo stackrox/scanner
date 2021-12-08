@@ -19,6 +19,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -76,7 +77,7 @@ func LoadConfig(path string) (config *Config, err error) {
 	if err != nil {
 		return
 	}
-	defer f.Close()
+	defer utils.IgnoreError(f.Close)
 
 	d, err := io.ReadAll(f)
 	if err != nil {

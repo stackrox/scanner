@@ -1,7 +1,7 @@
 package mtls
 
 import (
-	"net/http"
+	"crypto/tls"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -13,11 +13,11 @@ const (
 
 // VerifyCentralPeerCertificate verifies that the peer certificate has the Central Common Name
 // The CA should have already been verified via tls.VerifyClientCertIfGiven
-func VerifyCentralPeerCertificate(r *http.Request) error {
-	if r.TLS == nil {
+func VerifyCentralPeerCertificate(tls *tls.ConnectionState) error {
+	if tls == nil {
 		return errors.New("no tls connection state")
 	}
-	peerCerts := r.TLS.PeerCertificates
+	peerCerts := tls.PeerCertificates
 	if len(peerCerts) == 0 {
 		return errors.New("no peer certificates found")
 	}
