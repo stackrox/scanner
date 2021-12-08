@@ -20,6 +20,7 @@ import (
 	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -74,18 +75,33 @@ func TestRpmFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Feature: database.Feature{Name: "filesystem"},
 					Version: "3.2-18.el7",
 					ExecutableToDependencies: database.StringToStringsMap{
-						"/usr/games":     {},
+						"/usr/games":     {"ld-linux.so.2": {}, "libc.so.6.1": {}},
 						"/usr/include":   {},
 						"/usr/lib/debug": {},
 					},
 				},
+				{
+					Feature: database.Feature{Name: "glibc"},
+					Version: "2.28-72.el8_1.1.x86_64",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/sbin/ldconfig": {},
+					},
+					LibraryToDependencies: database.StringToStringsMap{
+						"libc.so.6":     {"ld-linux.so.2": {}},
+						"libc.so.6.1":   {"ld-linux.so.2": {}},
+						"ld-linux.so.2": {},
+					},
+				},
 			},
 			Files: tarutil.FilesMap{
-				"var/lib/rpm/Packages": tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
-				"etc/centos-release":   tarutil.FileData{Executable: true},
-				"usr/games":            tarutil.FileData{Executable: true},
-				"usr/include":          tarutil.FileData{Executable: true},
-				"usr/lib/debug":        tarutil.FileData{Executable: true},
+				"var/lib/rpm/Packages":       tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
+				"etc/centos-release":         tarutil.FileData{Executable: true},
+				"usr/games":                  tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{ImportedLibraries: []string{"ld-linux.so.2", "libc.so.6.1"}}},
+				"usr/include":                tarutil.FileData{Executable: true},
+				"usr/lib/debug":              tarutil.FileData{Executable: true},
+				"lib64/libc.so.6":            tarutil.FileData{ELFMetadata: &elf.Metadata{Sonames: []string{"libc.so.6", "libc.so.6.1"}, ImportedLibraries: []string{"ld-linux.so.2"}}},
+				"sbin/ldconfig":              tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{}}},
+				"lib64/ld-linux-x86-64.so.2": tarutil.FileData{ELFMetadata: &elf.Metadata{Sonames: []string{"ld-linux.so.2"}}},
 			},
 		},
 	}

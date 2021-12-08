@@ -135,8 +135,12 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			// Ensure the current feature is well-formed.
 			// If it is, add it to the return slice.
 			if fv.Feature.Name != "" && fv.Version != "" {
-				fv.LibraryToDependencies = libToDeps
-				fv.ExecutableToDependencies = execToDeps
+				if len(execToDeps) > 0 {
+					fv.ExecutableToDependencies = execToDeps
+				}
+				if len(libToDeps) > 0 {
+					fv.LibraryToDependencies = libToDeps
+				}
 				featureVersions = append(featureVersions, fv)
 			}
 

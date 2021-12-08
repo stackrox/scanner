@@ -70,10 +70,13 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Dist:       "rhel:8",
 			Pkgs: []*database.RHELv2Package{
 				{
-					Name:                     "pkg",
-					Version:                  "2",
-					Arch:                     "x86_64",
-					ExecutableToDependencies: []string{"/exec/me", "/pls/exec/me"},
+					Name:    "pkg",
+					Version: "2",
+					Arch:    "x86_64",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/exec/me":     {},
+						"/pls/exec/me": {},
+					},
 				},
 				{
 					Name:    "pkg2",
@@ -89,10 +92,13 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Dist:       "rhel:8",
 			Pkgs: []*database.RHELv2Package{
 				{
-					Name:                     "pkg",
-					Version:                  "2",
-					Arch:                     "x86_64",
-					ExecutableToDependencies: []string{"/exec/me", "/pls/exec/me"},
+					Name:    "pkg",
+					Version: "2",
+					Arch:    "x86_64",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/exec/me":     {},
+						"/pls/exec/me": {},
+					},
 				},
 			},
 		},
