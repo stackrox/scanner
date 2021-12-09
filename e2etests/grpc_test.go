@@ -130,7 +130,7 @@ func checkGRPCMatch(t *testing.T, expectedVuln, matchingVuln *v1.Vulnerability) 
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
-func isUncertifiedRHEL(notes []v1.Note) bool {
+func hasUncertifiedRHEL(notes []v1.Note) bool {
 	for _, note := range notes {
 		if note == v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE {
 			return true
@@ -166,7 +166,7 @@ func TestGRPCGetImageComponents(t *testing.T) {
 		require.Nil(t, err)
 
 		assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
-		assert.Equal(t, testCase.uncertifiedRHEL, isUncertifiedRHEL(imgComponentsResp.Notes), "Image %s", testCase.image)
+		assert.Equal(t, testCase.uncertifiedRHEL, hasUncertifiedRHEL(imgComponentsResp.Notes), "Image %s", testCase.image)
 		verifyComponents(t, imgComponentsResp.GetComponents(), testCase)
 	}
 }

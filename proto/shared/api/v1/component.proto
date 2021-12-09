@@ -8,9 +8,10 @@ import "shared/api/v1/vulnerability.proto";
 package scannerV1;
 
 message Components {
-  repeated OSComponent       os_components       = 1;
-  repeated RHELComponent     rhel_components     = 2;
-  repeated LanguageComponent language_components = 3;
+  string                     namespace           = 1;
+  repeated OSComponent       os_components       = 2;
+  repeated RHELComponent     rhel_components     = 3;
+  repeated LanguageComponent language_components = 4;
 }
 
 message OSComponent {

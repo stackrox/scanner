@@ -276,7 +276,7 @@ func getLanguageFeatures(osFeatures []Feature, components []*v1.LanguageComponen
 		featureValue := languageFeatureMap[fv.Feature.Location]
 		if fv.AddedBy.Name == featureValue.layer {
 			feature := featureFromDatabaseModel(fv, uncertifiedRHEL)
-			if !shouldDedupeLanguageFeature(*feature, features) {
+			if !shouldDedupeLanguageFeature(*feature, osFeatures) {
 				updateFeatureWithVulns(feature, fv.AffectedBy, language.ParserName)
 				features = append(features, *feature)
 			}

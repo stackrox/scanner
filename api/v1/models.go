@@ -220,6 +220,8 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 	}
 
 	return &ComponentsEnvelope{
+		Namespace: namespaceName,
+
 		Features:           features,
 		RHELv2PkgEnvs:      rhelv2PkgEnvs,
 		LanguageComponents: components,
@@ -252,21 +254,23 @@ func getNotes(namespaceName string, uncertifiedRHEL bool) []Note {
 
 // GetVulnerabilitiesForComponents retrieves the vulnerabilities for the given components.
 func GetVulnerabilitiesForComponents(db database.Datastore, components *v1.Components, uncertifiedRHEL bool) (*Layer, error) {
-	var features []Feature
+	layer := &Layer{
+		NamespaceName: components.Namespace,
+	}
 
 	rhelv2Features, err := getFullFeaturesForRHELv2Packages(db, components.RhelComponents)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting RHELv2 features")
 	}
-	features = append(features, rhelv2Features...)
+	layer.Features = append(layer.Features, rhelv2Features...)
 
-	languageFeatures, err := getLanguageFeatures(features, components.LanguageComponents, uncertifiedRHEL)
+	languageFeatures, err := getLanguageFeatures(layer.Features, components.LanguageComponents, uncertifiedRHEL)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting language features")
 	}
-	features = append(features, languageFeatures...)
+	layer.Features = append(layer.Features, languageFeatures...)
 
-	return features, nil
+	return layer, nil
 }
 
 // Namespace is the image's base OS.
@@ -371,6 +375,8 @@ type FeatureEnvelope struct {
 
 // ComponentsEnvelope envelopes component data (OS-packages and language-level-packages).
 type ComponentsEnvelope struct {
+	Namespace string
+
 	Features []Feature
 	// RHELv2PkgEnvs maps the package ID to the related package environment.
 	RHELv2PkgEnvs      map[int]*database.RHELv2PackageEnv

@@ -179,13 +179,33 @@ func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageCo
 		return nil, err
 	}
 
-	return apiV1.ComponentsFromDatabaseModel(s.db, dbLayer, lineage, uncertifiedRHEL)
+	components, err := apiV1.ComponentsFromDatabaseModel(s.db, dbLayer, lineage, uncertifiedRHEL)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return components, nil
 }
 
 func (s *serviceImpl) GetImageVulnerabilities(_ context.Context, req *v1.GetImageVulnerabilitiesRequest) (*v1.GetImageVulnerabilitiesResponse, error) {
-	req.Components
+	layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetComponents(), hasUncertifiedRHEL(req.GetNotes()))
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	
 
 	return nil, nil
+}
+
+func hasUncertifiedRHEL(notes []v1.Note) bool {
+	for _, note := range notes {
+		if note == v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (s *serviceImpl) GetLanguageLevelComponents(_ context.Context, req *v1.GetLanguageLevelComponentsRequest) (*v1.GetLanguageLevelComponentsResponse, error) {
