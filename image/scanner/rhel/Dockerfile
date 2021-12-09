@@ -26,3 +26,5 @@ RUN chown -R 65534:65534 "${NVD_DEFINITIONS_DIR}" && \
     chown -R 65534:65534 "${K8S_DEFINITIONS_DIR}" && \
     chown -R 65534:65534 "${REPO_TO_CPE_DIR}" && \
     chmod +rx /scanner
+
+USER 65534:65534
