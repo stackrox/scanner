@@ -143,7 +143,6 @@ func getRHELv2Vulns(vulns map[int][]*database.RHELv2Vulnerability, pkg *database
 
 		// Compare the package's architecture to the affected architecture.
 		affectedArch := vulnPkgInfo.ArchOperation.Cmp(pkgArch, vulnPkg.Arch)
-
 		if affectedVersion && affectedArch {
 			vulnerabilities = append(vulnerabilities, RHELv2ToVulnerability(vuln, namespaceName))
 

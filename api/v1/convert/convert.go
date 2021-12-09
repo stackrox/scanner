@@ -2,6 +2,7 @@ package convert
 
 import (
 	"encoding/json"
+
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
