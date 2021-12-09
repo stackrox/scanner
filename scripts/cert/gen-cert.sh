@@ -7,28 +7,28 @@ set -e
 SCANNER_TLS_FILE=$1
 SCANNER_DB_TLS_FILE=$2
 
-echo "Generating CA and Cert/Key for Scanner"
+echo "Generating CA for Scanner and Scanner DB"
 cfssl genkey -initca scanner-csr.json | cfssljson -bare ca
 SCANNER_CA=$(base64 -in ca.pem)
-cfssl gencert -ca ca.pem -ca-key ca-key.pem scanner-csr.json | cfssljson -bare
+
+echo "Generating Cert/Key pair for Scanner"
+cfssl gencert -ca ca.pem -ca-key ca-key.pem -hostname scanner.stackrox scanner-csr.json | cfssljson -bare
 SCANNER_CERT=$(base64 -in cert.pem)
 SCANNER_KEY=$(base64 -in cert-key.pem)
-yq eval ".data[\"ca.pem\"] = \"${SCANNER_CA}\"" ${SCANNER_TLS_FILE} > tmp.yaml
+yq eval ".data[\"ca.pem\"] = \"${SCANNER_CA}\"" "${SCANNER_TLS_FILE}" > tmp.yaml
 yq eval ".data[\"cert.pem\"] = \"${SCANNER_CERT}\"" tmp.yaml > tmp2.yaml
 yq eval ".data[\"key.pem\"] = \"${SCANNER_KEY}\"" tmp2.yaml > tmp3.yaml
-mv tmp3.yaml ${SCANNER_TLS_FILE}
+mv tmp3.yaml "${SCANNER_TLS_FILE}"
 
-rm -f *.pem *.csr *.yaml
+rm *.yaml
 
-echo "Generating CA and Cert/Key for Scanner DB"
-cfssl genkey -initca scanner-db-csr.json | cfssljson -bare ca
-SCANNER_DB_CA=$(base64 -in ca.pem)
-cfssl gencert -ca ca.pem -ca-key ca-key.pem scanner-db-csr.json | cfssljson -bare
+echo "Generating Cert/Key pair for Scanner DB"
+cfssl gencert -ca ca.pem -ca-key ca-key.pem -hostname scanner-db.stackrox scanner-db-csr.json | cfssljson -bare
 SCANNER_DB_CERT=$(base64 -in cert.pem)
 SCANNER_DB_KEY=$(base64 -in cert-key.pem)
-yq eval ".data[\"ca.pem\"] = \"${SCANNER_DB_CA}\"" ${SCANNER_DB_TLS_FILE} > tmp.yaml
+yq eval ".data[\"ca.pem\"] = \"${SCANNER_CA}\"" "${SCANNER_DB_TLS_FILE}" > tmp.yaml
 yq eval ".data[\"cert.pem\"] = \"${SCANNER_DB_CERT}\"" tmp.yaml > tmp2.yaml
 yq eval ".data[\"key.pem\"] = \"${SCANNER_DB_KEY}\"" tmp2.yaml > tmp3.yaml
-mv tmp3.yaml ${SCANNER_DB_TLS_FILE}
+mv tmp3.yaml "${SCANNER_DB_TLS_FILE}"
 
 rm -f *.pem *.csr *.yaml

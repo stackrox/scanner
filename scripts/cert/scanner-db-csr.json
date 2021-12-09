@@ -1,7 +1,4 @@
 {
-  "hosts": [
-    "scanner-db.stackrox"
-  ],
   "key": {
     "algo": "ecdsa",
     "size": 256
