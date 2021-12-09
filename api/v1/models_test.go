@@ -515,3 +515,151 @@ func TestAddLanguageVulns(t *testing.T) {
 	addLanguageVulns(db, layer, "", false)
 	assert.Empty(t, layer.Features)
 }
+
+func TestComponentsFromDatabaseModel(t *testing.T) {
+	db := newMockDatastore()
+
+	dbLayer := database.Layer{
+		Name: "layer1",
+		Namespace: &database.Namespace{
+			Name:          "centos:8",
+			VersionFormat: "rpm",
+		},
+		Features: []database.FeatureVersion{
+			{
+				Version: "3.26.0-6.el8",
+				Feature: database.Feature{
+					Name: "sqlite-libs",
+					Namespace: database.Namespace{
+						Name:          "centos:8",
+						VersionFormat: "rpm",
+					},
+				},
+				AddedBy: database.Layer{
+					Name: "layer1",
+				},
+				AffectedBy: []database.Vulnerability{
+					{
+						Name:    "CVE-2020-15358",
+						FixedBy: "",
+					},
+					{
+						Name:    "CVE-2020-13632",
+						FixedBy: "0:3.26.0-11.el8",
+					},
+					{
+						Name:    "CVE-2021-1234",
+						FixedBy: "",
+					},
+					{
+						Name:    "CVE-2021-1235",
+						FixedBy: "0:3.27.1-12.el8",
+					},
+					{
+						Name:    "CVE-2020-13630",
+						FixedBy: "0:3.26.0-11.el8",
+					},
+				},
+			},
+		},
+	}
+
+	db.layers["layer1"] = []*component.LayerToComponents{
+		{
+			Layer: "layer0",
+			Components: []*component.Component{
+				{
+					Name:       "javapkg",
+					Version:    "1.2.3",
+					SourceType: component.JavaSourceType,
+					Location:   "/opt/java/pkg/location",
+					JavaPkgMetadata: &component.JavaPkgMetadata{
+						ImplementationVersion: "1",
+						MavenVersion:          "2",
+						Origins:               []string{"idk"},
+						SpecificationVersion:  "something",
+						BundleName:            "bundle",
+					},
+				},
+				{
+					Name:               "ospkg",
+					Version:            "1.2.3",
+					FromPackageManager: true,
+					SourceType:         component.DotNetCoreRuntimeSourceType,
+				},
+				{
+					Name:       "pythonpkg",
+					Version:    "2.2.3",
+					SourceType: component.PythonSourceType,
+					Location:   "/opt/python/pkg/location",
+					PythonPkgMetadata: &component.PythonPkgMetadata{
+						Homepage:    "pkg.com",
+						AuthorEmail: "stackrox",
+						DownloadURL: "pkg.com/stackrox",
+						Summary:     "this is the coolest package ever",
+						Description: "something something something",
+					},
+				},
+				{
+					Name:       "removedpkg",
+					Version:    "1.2.3",
+					SourceType: component.GemSourceType,
+					Location:   "/something/removed",
+				},
+			},
+		},
+		{
+			Layer:   "layer1",
+			Removed: []string{"/something/removed"},
+		},
+	}
+
+	imgComponents, err := ComponentsFromDatabaseModel(db, &dbLayer, "", true)
+	assert.NoError(t, err)
+
+	expectedFeatures := []Feature{
+		{
+			Name:          "sqlite-libs",
+			NamespaceName: "centos:8",
+			VersionFormat: "rpm",
+			Version:       "3.26.0-6.el8",
+			AddedBy:       "layer1",
+		},
+	}
+	expectedComponents := []*component.Component{
+		{
+			Name:       "javapkg",
+			Version:    "1.2.3",
+			SourceType: component.JavaSourceType,
+			Location:   "/opt/java/pkg/location",
+			JavaPkgMetadata: &component.JavaPkgMetadata{
+				ImplementationVersion: "1",
+				MavenVersion:          "2",
+				Origins:               []string{"idk"},
+				SpecificationVersion:  "something",
+				BundleName:            "bundle",
+			},
+			AddedBy: "layer0",
+		},
+		{
+			Name:       "pythonpkg",
+			Version:    "2.2.3",
+			SourceType: component.PythonSourceType,
+			Location:   "/opt/python/pkg/location",
+			PythonPkgMetadata: &component.PythonPkgMetadata{
+				Homepage:    "pkg.com",
+				AuthorEmail: "stackrox",
+				DownloadURL: "pkg.com/stackrox",
+				Summary:     "this is the coolest package ever",
+				Description: "something something something",
+			},
+			AddedBy: "layer0",
+		},
+	}
+	expectedNotes := []Note{CertifiedRHELScanUnavailable}
+
+	assert.ElementsMatch(t, expectedFeatures, imgComponents.Features)
+	assert.Empty(t, imgComponents.RHELv2PkgEnvs)
+	assert.ElementsMatch(t, expectedComponents, imgComponents.LanguageComponents)
+	assert.ElementsMatch(t, expectedNotes, imgComponents.Notes)
+}

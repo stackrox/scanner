@@ -40,7 +40,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 					{
 						Name:        "CVE-2020-27675",
 						Description: "An issue was discovered in the Linux kernel through 5.9.1, as used with Xen through 4.14.x. drivers/xen/events/events_base.c allows event-channel removal during the event-handling loop (a race condition). This can cause a use-after-free or NULL pointer dereference, as demonstrated by a dom0 crash via events for an in-reconfiguration paravirtualized device, aka CID-073d0552ead5.",
-						Link:        "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2020-27675",
+						Link:        "https://ubuntu.com/security/CVE-2020-27675",
 						MetadataV2: &v1.Metadata{
 							PublishedDateTime:    "2020-10-22T21:15Z",
 							LastModifiedDateTime: "2020-12-18T14:15Z",

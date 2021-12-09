@@ -144,6 +144,10 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 			log.Warnf("error converting metadata: %v. Skipping...", err)
 			continue
 		}
+		if metadata == nil {
+			log.Warnf("metadata is nil for %s. Skipping...", affected.Name)
+			continue
+		}
 
 		vuln := &v1.Vulnerability{
 			Name:        affected.Name,
