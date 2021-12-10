@@ -174,7 +174,20 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Version:       "2.x86_64",
 			AddedBy:       "layer1",
 			FixedBy:       "5",
-			Executables:   []*v1.Executable{{Path: "/exec/me"}, {Path: "/pls/exec/me"}},
+			Executables: []*v1.Executable{
+				{
+					Path: "/exec/me",
+					RequiredFeatures: []*v1.FeatureNameVersion{
+						{Name: "pkg", Version: "2.x86_64"},
+					},
+				},
+				{
+					Path: "/pls/exec/me",
+					RequiredFeatures: []*v1.FeatureNameVersion{
+						{Name: "pkg", Version: "2.x86_64"},
+					},
+				},
+			},
 			Vulnerabilities: []Vulnerability{
 				{
 					Name:          "v1",

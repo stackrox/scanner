@@ -194,102 +194,187 @@ var testCases = []testCase{
 						Path: "/usr/lib/apt/apt-helper",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/lib/apt/methods/cdrom",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/lib/apt/methods/copy",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/lib/apt/methods/file",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/lib/apt/methods/ftp",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/lib/apt/methods/gpgv",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/lib/apt/methods/gzip",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/lib/apt/methods/http",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/lib/apt/methods/mirror",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/lib/apt/methods/rred",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/lib/apt/methods/rsh",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/bin/apt",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
-						Path: "/usr/bin/apt-cache",
+						Path: "/usr/bin/",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/bin/apt-cdrom",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/bin/apt-config",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/bin/apt-get",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
 						Path: "/usr/bin/apt-mark",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
+							{Name: "bzip2", Version: "1.0.6-7"},
+							{Name: "gcc-4.9", Version: "4.9.2-10"},
+							{Name: "glibc", Version: "2.19-18+deb8u10"},
+							{Name: "xz-utils", Version: "5.1.1alpha+20120614-2"},
+							{Name: "zlib", Version: "1:1.2.8.dfsg-2"},
 						},
 					},
 					{
@@ -397,12 +482,12 @@ var testCases = []testCase{
 				VersionFormat: "rpm",
 				Version:       "3.3.10-26.el7",
 				Executables: []*v1.Executable{
-					{
-						Path: "/etc/cron.daily/apt",
-						RequiredFeatures: []*v1.FeatureNameVersion{
-							{Name: "procps-ng", Version: "3.3.10-26.el7"},
-						},
-					},
+					// {
+					//	Path: "/etc/cron.daily/apt",
+					//	RequiredFeatures: []*v1.FeatureNameVersion{
+					//		{Name: "procps-ng", Version: "3.3.10-26.el7"},
+					//	},
+					// },
 					{
 						Path: "/usr/bin/free",
 						RequiredFeatures: []*v1.FeatureNameVersion{
