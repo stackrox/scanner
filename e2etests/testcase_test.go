@@ -323,7 +323,7 @@ var testCases = []testCase{
 						},
 					},
 					{
-						Path: "/usr/bin/",
+						Path: "/usr/bin/apt-cache",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apt", Version: "1.0.9.8.4"},
 							{Name: "bzip2", Version: "1.0.6-7"},
@@ -482,12 +482,6 @@ var testCases = []testCase{
 				VersionFormat: "rpm",
 				Version:       "3.3.10-26.el7",
 				Executables: []*v1.Executable{
-					// {
-					//	Path: "/etc/cron.daily/apt",
-					//	RequiredFeatures: []*v1.FeatureNameVersion{
-					//		{Name: "procps-ng", Version: "3.3.10-26.el7"},
-					//	},
-					// },
 					{
 						Path: "/usr/bin/free",
 						RequiredFeatures: []*v1.FeatureNameVersion{
