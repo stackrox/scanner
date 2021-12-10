@@ -58,20 +58,20 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 func removeInvalidCPEs(item *schema.NVDCVEFeedJSON10DefNode) {
 	cpeMatches := item.CPEMatch[:0]
 	for _, cpeMatch := range item.CPEMatch {
-		if cpeMatch.Cpe23Uri != "" {
-			attr, err := wfn.UnbindFmtString(cpeMatch.Cpe23Uri)
-			if err != nil {
-				log.Errorf("error parsing %+v", item)
-				continue
-			}
-			if attr.Product == wfn.Any {
-				log.Warnf("Filtering out CPE: %+v", attr)
-				continue
-			}
+		if cpeMatch.Cpe23Uri == "" {
 			cpeMatches = append(cpeMatches, cpeMatch)
-		} else {
-			cpeMatches = append(cpeMatches, cpeMatch)
+			continue
 		}
+		attr, err := wfn.UnbindFmtString(cpeMatch.Cpe23Uri)
+		if err != nil {
+			log.Errorf("error parsing %+v", item)
+			continue
+		}
+		if attr.Product == wfn.Any {
+			log.Warnf("Filtering out CPE: %+v", attr)
+			continue
+		}
+		cpeMatches = append(cpeMatches, cpeMatch)
 	}
 	for _, child := range item.Children {
 		removeInvalidCPEs(child)
