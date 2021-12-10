@@ -154,7 +154,12 @@ var testCases = []testCase{
 				VersionFormat: "dpkg",
 				Version:       "1.0.9.8.4",
 				Executables: []*v1.Executable{
-					{Path: "/etc/cron.daily/apt", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{
+						Path: "/etc/cron.daily/apt",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
 					{Path: "/etc/kernel/postinst.d/apt-auto-removal", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
 					{Path: "/usr/share/bug/apt/script", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
 					{Path: "/usr/lib/dpkg/methods/apt/update", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
@@ -1941,7 +1946,10 @@ var testCases = []testCase{
 				VersionFormat: "dpkg",
 				Version:       "0.5.11+git20200708+dd9ef66-5",
 				Executables: []*v1.Executable{
-					{Path: "/bin/dash", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "dash", Version: "0.5.11+git20200708+dd9ef66-5"}}},
+					{Path: "/bin/dash", RequiredFeatures: []*v1.FeatureNameVersion{
+						{Name: "dash", Version: "0.5.11+git20200708+dd9ef66-5"},
+						{Name: "glibc", Version: "2.31-13"},
+					}},
 				},
 				AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
 			},
@@ -1951,10 +1959,34 @@ var testCases = []testCase{
 				VersionFormat: "dpkg",
 				Version:       "1:3.7-5",
 				Executables: []*v1.Executable{
-					{Path: "/usr/bin/cmp", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
-					{Path: "/usr/bin/diff", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
-					{Path: "/usr/bin/diff3", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
-					{Path: "/usr/bin/sdiff", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
+					{
+						Path: "/usr/bin/cmp",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "diffutils", Version: "1:3.7-5"},
+							{Name: "glibc", Version: "2.31-13"},
+						},
+					},
+					{
+						Path: "/usr/bin/diff",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "diffutils", Version: "1:3.7-5"},
+							{Name: "glibc", Version: "2.31-13"},
+						},
+					},
+					{
+						Path: "/usr/bin/diff3",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "diffutils", Version: "1:3.7-5"},
+							{Name: "glibc", Version: "2.31-13"},
+						},
+					},
+					{
+						Path: "/usr/bin/sdiff",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "diffutils", Version: "1:3.7-5"},
+							{Name: "glibc", Version: "2.31-13"},
+						},
+					},
 				},
 				AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
 			},

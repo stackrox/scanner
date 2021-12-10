@@ -260,7 +260,7 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
-	executables := createExecutablesFromDependencies(dbFeatureVersion.ExecutableToDependencies, depMap)
+	executables := createExecutablesFromDependencies(dbFeatureVersion, depMap)
 	return &Feature{
 		Name:          dbFeatureVersion.Feature.Name,
 		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,

@@ -133,7 +133,12 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
 	expectedExecs := make([]*v1.Executable, 0, len(providedExecs))
 	for exec := range providedExecs {
-		expectedExecs = append(expectedExecs, &v1.Executable{Path: exec})
+		expectedExecs = append(expectedExecs, &v1.Executable{Path: exec, RequiredFeatures: []*v1.FeatureNameVersion{
+			{
+				Name:    "curl",
+				Version: "7.35.0-1ubuntu2.20",
+			},
+		}})
 	}
 
 	dbLayer := database.Layer{
@@ -188,7 +193,12 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
 	expectedExecs := make([]*v1.Executable, 0, len(providedExecs))
 	for exec := range providedExecs {
-		expectedExecs = append(expectedExecs, &v1.Executable{Path: exec})
+		expectedExecs = append(expectedExecs, &v1.Executable{Path: exec, RequiredFeatures: []*v1.FeatureNameVersion{
+			{
+				Name:    "sqlite-libs",
+				Version: "3.26.0-6.el8",
+			},
+		}})
 	}
 
 	dbLayer := database.Layer{

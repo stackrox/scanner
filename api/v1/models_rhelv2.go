@@ -8,6 +8,8 @@ package v1
 import (
 	"strconv"
 
+	"github.com/stackrox/scanner/ext/featurefmt"
+
 	rpmVersion "github.com/knqyf263/go-rpm-version"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -319,10 +321,13 @@ func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 	}
 }
 
-func createExecutablesFromDependencies(executableToDependencies map[string]set.StringSet, depMap map[string]common.FeatureKeySet) []*v1.Executable {
+func createExecutablesFromDependencies(dbFeatureVersion database.FeatureVersion, depMap map[string]common.FeatureKeySet) []*v1.Executable {
+	executableToDependencies := dbFeatureVersion.ExecutableToDependencies
+	featureKey := featurefmt.PackageKey{Name: dbFeatureVersion.Feature.Name, Version: dbFeatureVersion.Version}
 	executables := make([]*v1.Executable, 0, len(executableToDependencies))
 	for exec, libs := range executableToDependencies {
 		features := make(common.FeatureKeySet)
+		features.Add(featureKey)
 		for lib := range libs {
 			features.Merge(depMap[lib])
 		}
