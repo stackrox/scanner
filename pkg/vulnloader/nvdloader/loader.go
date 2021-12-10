@@ -98,7 +98,12 @@ func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir 
 		return errors.Wrapf(err, "could not decode json for year %d", year)
 	}
 
+	cveItems := dump.CVEItems[:0]
 	for _, item := range dump.CVEItems {
+		if _, ok := manuallyEnrichedVulns[item.CVE.CVEDataMeta.ID]; ok {
+			log.Warnf("Skipping vuln %s because it is being manually enriched", item.CVE.CVEDataMeta.ID)
+			continue
+		}
 		for _, node := range item.Configurations.Nodes {
 			removeInvalidCPEs(node)
 		}
@@ -110,7 +115,12 @@ func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir 
 			})
 			item.LastModifiedDate = enrichedEntry.LastUpdated
 		}
+		cveItems = append(cveItems, item)
 	}
+	for _, item := range manuallyEnrichedVulns {
+		cveItems = append(cveItems, item)
+	}
+	dump.CVEItems = cveItems
 
 	outF, err := os.Create(filepath.Join(outputDir, fmt.Sprintf("%d.json", year)))
 	if err != nil {
