@@ -17,6 +17,9 @@ type Component struct {
 
 	JavaPkgMetadata   *JavaPkgMetadata
 	PythonPkgMetadata *PythonPkgMetadata
+
+	// AddedBy specifies the layer which added this component. This is used for internal purposes.
+	AddedBy string
 }
 
 // LayerToComponents describes a layer to the components found in the layer
