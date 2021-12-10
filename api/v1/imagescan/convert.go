@@ -3,6 +3,8 @@ package imagescan
 import (
 	"strings"
 
+	"github.com/stackrox/scanner/database"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
@@ -83,11 +85,14 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability 
 	return vulns
 }
 
-func convertProvidedExecutables(paths []string) []*v1.Executable {
+func convertProvidedExecutables(pkg *database.RHELv2Package) []*v1.Executable {
+	paths := pkg.ProvidedExecutables
+	requiredFeatures := []*v1.FeatureNameVersion{{Name: pkg.Name, Version: pkg.Version}}
 	executables := make([]*v1.Executable, 0, len(paths))
 	for _, path := range paths {
 		executables = append(executables, &v1.Executable{
-			Path: path,
+			Path:             path,
+			RequiredFeatures: requiredFeatures,
 		})
 	}
 
@@ -174,7 +179,7 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 			Module:      pkg.Module,
 			Cpes:        rhelv2PkgEnv.CPEs,
 			AddedBy:     rhelv2PkgEnv.AddedBy,
-			Executables: convertProvidedExecutables(pkg.ProvidedExecutables),
+			Executables: convertProvidedExecutables(pkg),
 		})
 	}
 
