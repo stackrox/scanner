@@ -8,6 +8,8 @@ package v1
 import (
 	"strconv"
 
+	"github.com/stackrox/scanner/api/v1/common"
+
 	rpmVersion "github.com/knqyf263/go-rpm-version"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -318,12 +320,12 @@ func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 	}
 }
 
-func createExecutablesFromDependencies(executableToDependencies map[string]set.StringSet, depMap map[string]set.StringSet) []*v1.Executable {
+func createExecutablesFromDependencies(executableToDependencies map[string]set.StringSet, depMap map[string]common.FeatureKeySet) []*v1.Executable {
 	executables := make([]*v1.Executable, 0, len(executableToDependencies))
 	for exec, libs := range executableToDependencies {
-		features := set.NewStringSet()
+		features := make(common.FeatureKeySet)
 		for lib := range libs {
-			features = features.Union(depMap[lib])
+			features.Merge(depMap[lib])
 		}
 		executables = append(executables, &v1.Executable{
 			Path:             exec,

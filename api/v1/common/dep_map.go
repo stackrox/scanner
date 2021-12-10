@@ -4,12 +4,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	"github.com/stackrox/scanner/ext/featurefmt"
 )
 
 type libDepNode struct {
 	// Features used by this library.
-	features set.StringSet
+	features FeatureKeySet
 	// Libraries used by this library directly.
 	libraries set.StringSet
 	completed bool
@@ -25,28 +25,31 @@ type cycle struct {
 }
 
 // GetDepMap creates a dependency map from a library to the features it uses.
-func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
+func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
 	// Map from a library to its dependency data
 	libNodes := make(map[string]*libDepNode)
 	// Build the map
 	for _, feature := range features {
-		fvKey := FeatureNameVersionToString(&v1.FeatureNameVersion{
+		fvKey := featurefmt.PackageKey{
 			Name:    feature.Feature.Name,
 			Version: feature.Version,
-		})
+		}
 		// Populate libraries with all direct imports.
 		for lib, deps := range feature.LibraryToDependencies {
 			if node, ok := libNodes[lib]; ok {
 				node.libraries = node.libraries.Union(deps)
 				node.features.Add(fvKey)
 			} else {
-				node = &libDepNode{libraries: deps, features: set.NewStringSet(fvKey)}
+				node = &libDepNode{
+					libraries: deps,
+					features:  FeatureKeySet{fvKey: {}},
+				}
 				libNodes[lib] = node
 			}
 		}
 	}
 	// Traverse it and get the dependency map
-	depMap := make(map[string]set.StringSet)
+	depMap := make(map[string]FeatureKeySet)
 	for k, v := range libNodes {
 		var c *cycle
 		depMap[k], c = fillIn(libNodes, k, v, map[string]int{k: 0})
@@ -61,7 +64,7 @@ func GetDepMap(features []database.FeatureVersion) map[string]set.StringSet {
 	return depMap
 }
 
-func fillIn(libToDep map[string]*libDepNode, depname string, dep *libDepNode, path map[string]int) (set.StringSet, *cycle) {
+func fillIn(libToDep map[string]*libDepNode, depname string, dep *libDepNode, path map[string]int) (FeatureKeySet, *cycle) {
 	if dep.completed {
 		return dep.features, nil
 	}
@@ -91,7 +94,7 @@ func fillIn(libToDep map[string]*libDepNode, depname string, dep *libDepNode, pa
 		if c != nil {
 			cycles = append(cycles, *c)
 		}
-		dep.features = dep.features.Union(features)
+		dep.features.Merge(features)
 	}
 	dep.completed = true
 	if len(cycles) == 0 {

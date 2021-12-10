@@ -19,9 +19,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
-	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
@@ -251,7 +249,7 @@ func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability
 	return vuln
 }
 
-func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertified bool, depMap map[string]set.StringSet) *Feature {
+func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertified bool, depMap map[string]common.FeatureKeySet) *Feature {
 	version := dbFeatureVersion.Version
 	if version == versionfmt.MaxVersion {
 		version = "None"
@@ -274,15 +272,13 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 	}
 }
 
-func toFeatureNameVersions(keys set.StringSet) []*v1.FeatureNameVersion {
+func toFeatureNameVersions(keys common.FeatureKeySet) []*v1.FeatureNameVersion {
 	if len(keys) == 0 {
 		return nil
 	}
 	features := make([]*v1.FeatureNameVersion, 0, len(keys))
 	for k := range keys {
-		featureKey, err := common.ParseFeatureNameVersion(k)
-		utils.Should(err)
-		features = append(features, &v1.FeatureNameVersion{Name: featureKey.Name, Version: featureKey.Version})
+		features = append(features, &v1.FeatureNameVersion{Name: k.Name, Version: k.Version})
 	}
 	return features
 }
@@ -353,7 +349,7 @@ func hasKernelPrefix(name string) bool {
 }
 
 // LayerFromDatabaseModel returns the scan data for the given layer based on the data in the given datastore.
-func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, depMap map[string]set.StringSet, opts *database.DatastoreOptions) (Layer, []Note, error) {
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, depMap map[string]common.FeatureKeySet, opts *database.DatastoreOptions) (Layer, []Note, error) {
 	withFeatures := opts.GetWithFeatures()
 	withVulnerabilities := opts.GetWithVulnerabilities()
 	uncertifiedRHEL := opts.GetUncertifiedRHEL()

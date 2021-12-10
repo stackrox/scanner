@@ -570,6 +570,12 @@ func TestComponentsFromDatabaseModel(t *testing.T) {
 						FixedBy: "0:3.26.0-11.el8",
 					},
 				},
+				ExecutableToDependencies: database.StringToStringsMap{
+					"/usr/bin/showdb": {"sqlite3.so": {}},
+				},
+				LibraryToDependencies: database.StringToStringsMap{
+					"sqlite3.so": {},
+				},
 			},
 		},
 	}
@@ -634,6 +640,17 @@ func TestComponentsFromDatabaseModel(t *testing.T) {
 			VersionFormat: "rpm",
 			Version:       "3.26.0-6.el8",
 			AddedBy:       "layer1",
+			Executables: []*v1.Executable{
+				{
+					Path: "/usr/bin/showdb",
+					RequiredFeatures: []*v1.FeatureNameVersion{
+						{
+							Name:    "sqlite-libs",
+							Version: "3.26.0-6.el8",
+						},
+					},
+				},
+			},
 		},
 	}
 	expectedComponents := []*component.Component{
