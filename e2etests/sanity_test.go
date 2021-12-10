@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stackrox/scanner/api/v1"
+	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stretchr/testify/assert"

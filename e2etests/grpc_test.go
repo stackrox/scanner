@@ -212,10 +212,10 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 		f := getMatchingFeature(t, features, expectedFeature, false)
 
 		if test.checkProvidedExecutables {
-			assert.ElementsMatch(t, expectedFeature.ProvidedExecutables, f.ProvidedExecutables)
+			assert.ElementsMatch(t, expectedFeature.Executables, f.Executables)
 		}
-		expectedFeature.ProvidedExecutables = nil
-		f.ProvidedExecutables = nil
+		expectedFeature.Executables = nil
+		f.Executables = nil
 
 		assert.Equal(t, expectedFeature, *f)
 	}

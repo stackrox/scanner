@@ -5,7 +5,8 @@ package e2etests
 import (
 	"os"
 
-	v1 "github.com/stackrox/scanner/api/v1"
+	apiV1 "github.com/stackrox/scanner/api/v1"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
@@ -14,8 +15,8 @@ type testCase struct {
 	registry           string
 	username, password string
 	source             string
-	expectedFeatures   []v1.Feature
-	unexpectedFeatures []v1.Feature
+	expectedFeatures   []apiV1.Feature
+	unexpectedFeatures []apiV1.Feature
 	// This specifies that the features only need to contain at least the vulnerabilities specified
 	onlyCheckSpecifiedVulns  bool
 	uncertifiedRHEL          bool
@@ -29,15 +30,15 @@ var testCases = []testCase{
 		source:                   "NVD",
 		onlyCheckSpecifiedVulns:  true,
 		checkProvidedExecutables: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "lz4",
 				NamespaceName: "ubuntu:16.04",
 				VersionFormat: "dpkg",
 				Version:       "0.0~r131-2ubuntu2",
 				// The only provided executable file is a symlink, so there are no regular executable files.
-				ProvidedExecutables: []string{},
-				Vulnerabilities: []v1.Vulnerability{
+				Executables: []*v1.Executable{},
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-3520",
 						NamespaceName: "ubuntu:16.04",
@@ -72,7 +73,7 @@ var testCases = []testCase{
 		image:    "docker.io/library/nginx:1.10",
 		registry: "https://registry-1.docker.io",
 		source:   "NVD",
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:            "diffutils",
 				NamespaceName:   "debian:8",
@@ -86,7 +87,7 @@ var testCases = []testCase{
 				NamespaceName: "debian:8",
 				VersionFormat: "dpkg",
 				Version:       "8.23-4",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2016-2781",
 						NamespaceName: "debian:8",
@@ -146,39 +147,39 @@ var testCases = []testCase{
 		registry:                 "https://registry-1.docker.io",
 		source:                   "NVD",
 		checkProvidedExecutables: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "apt",
 				NamespaceName: "debian:8",
 				VersionFormat: "dpkg",
 				Version:       "1.0.9.8.4",
-				ProvidedExecutables: []string{
-					"/etc/cron.daily/apt",
-					"/etc/kernel/postinst.d/apt-auto-removal",
-					"/usr/share/bug/apt/script",
-					"/usr/lib/dpkg/methods/apt/update",
-					"/usr/lib/dpkg/methods/apt/setup",
-					"/usr/lib/dpkg/methods/apt/install",
-					"/usr/lib/apt/apt-helper",
-					"/usr/lib/apt/methods/cdrom",
-					"/usr/lib/apt/methods/copy",
-					"/usr/lib/apt/methods/file",
-					"/usr/lib/apt/methods/ftp",
-					"/usr/lib/apt/methods/gpgv",
-					"/usr/lib/apt/methods/gzip",
-					"/usr/lib/apt/methods/http",
-					"/usr/lib/apt/methods/mirror",
-					"/usr/lib/apt/methods/rred",
-					"/usr/lib/apt/methods/rsh",
-					"/usr/bin/apt",
-					"/usr/bin/apt-cache",
-					"/usr/bin/apt-cdrom",
-					"/usr/bin/apt-config",
-					"/usr/bin/apt-get",
-					"/usr/bin/apt-mark",
-					"/usr/bin/apt-key",
+				Executables: []*v1.Executable{
+					{Path: "/etc/cron.daily/apt", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/etc/kernel/postinst.d/apt-auto-removal", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/share/bug/apt/script", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/dpkg/methods/apt/update", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/dpkg/methods/apt/setup", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/dpkg/methods/apt/install", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/apt-helper", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/methods/cdrom", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/methods/copy", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/methods/file", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/methods/ftp", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/methods/gpgv", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/methods/gzip", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/methods/http", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/methods/mirror", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/methods/rred", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/lib/apt/methods/rsh", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/bin/apt", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/bin/apt-cache", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/bin/apt-cdrom", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/bin/apt-config", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/bin/apt-get", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/bin/apt-mark", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{Path: "/usr/bin/apt-key", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
 				},
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2011-3374",
 						NamespaceName: "debian:8",
@@ -269,32 +270,33 @@ var testCases = []testCase{
 		// This image is older than June 2020, so we need to explicitly request for an uncertified scan.
 		uncertifiedRHEL:          true,
 		checkProvidedExecutables: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "procps-ng",
 				NamespaceName: "centos:7",
 				VersionFormat: "rpm",
 				Version:       "3.3.10-26.el7",
-				ProvidedExecutables: []string{
-					"/usr/bin/free",
-					"/usr/bin/pgrep",
-					"/usr/bin/pkill",
-					"/usr/bin/pmap",
-					"/usr/bin/ps",
-					"/usr/bin/pwdx",
-					"/usr/bin/skill",
-					"/usr/bin/slabtop",
-					"/usr/bin/snice",
-					"/usr/bin/tload",
-					"/usr/bin/top",
-					"/usr/bin/uptime",
-					"/usr/bin/vmstat",
-					"/usr/bin/w",
-					"/usr/bin/watch",
-					"/usr/lib64/libprocps.so.4.0.0",
-					"/usr/sbin/sysctl",
+				Executables: []*v1.Executable{
+					{Path: "/etc/cron.daily/apt", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/free", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/pgrep", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/pkill", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/pmap", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/ps", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/pwdx", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/skill", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/slabtop", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/snice", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/tload", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/top", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/uptime", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/vmstat", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/w", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/bin/watch", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/lib64/libprocps.so.4.0.0", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{Path: "/usr/sbin/sysctl", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
 				},
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2018-1121",
 						NamespaceName: "centos:7",
@@ -375,14 +377,14 @@ var testCases = []testCase{
 		username: "_json_key",
 		password: os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER"),
 		source:   "NVD",
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "cron",
 				NamespaceName: "ubuntu:14.04",
 				VersionFormat: "dpkg",
 				Version:       "3.0pl1-124ubuntu2",
 				AddedBy:       "sha256:bae382666908fd87a3a3646d7eb7176fa42226027d3256cac38ee0b79bdb0491",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2017-9525",
 						NamespaceName: "ubuntu:14.04",
@@ -417,7 +419,7 @@ var testCases = []testCase{
 		registry:                "https://mcr.microsoft.com",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "microsoft.netcore.app",
 				Version:       "3.1.2",
@@ -425,7 +427,7 @@ var testCases = []testCase{
 				Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/",
 				AddedBy:       "sha256:b48f8e1b0b06887c382543e23275911a388c1010e3436dc9b708ef29885bb594",
 				FixedBy:       "3.1.18",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:        "CVE-2020-1108",
 						Description: "A denial of service vulnerability exists when .NET Core or .NET Framework improperly handles web requests, aka '.NET Core & .NET Framework Denial of Service Vulnerability'.",
@@ -610,12 +612,12 @@ var testCases = []testCase{
 		registry:                "https://mcr.microsoft.com",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "microsoft.aspnetcore.app",
 				VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
 				Version:       "3.1.0",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:        "CVE-2020-0602",
 						Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests, aka 'ASP.NET Core Denial of Service Vulnerability'.",
@@ -775,7 +777,7 @@ var testCases = []testCase{
 				Name:          "microsoft.netcore.app",
 				VersionFormat: "DotNetCoreRuntimeSourceType",
 				Version:       "3.1.0",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:        "CVE-2020-0605",
 						Description: "A remote code execution vulnerability exists in .NET software when the software fails to check the source markup of a file.An attacker who successfully exploited the vulnerability could run arbitrary code in the context of the current user, aka '.NET Framework Remote Code Execution Vulnerability'. This CVE ID is unique from CVE-2020-0606.",
@@ -1016,12 +1018,12 @@ var testCases = []testCase{
 		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "jackson-databind",
 				VersionFormat: component.JavaSourceType.String(),
 				Version:       "2.9.10.4",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:        "CVE-2020-14060",
 						Description: "FasterXML jackson-databind 2.x before 2.9.10.5 mishandles the interaction between serialization gadgets and typing, related to oadd.org.apache.xalan.lib.sql.JNDIConnectionPool (aka apache/drill).",
@@ -1253,7 +1255,7 @@ var testCases = []testCase{
 				FixedBy:  "2.9.10.8",
 			},
 		},
-		unexpectedFeatures: []v1.Feature{
+		unexpectedFeatures: []apiV1.Feature{
 			{
 				Name:          "jackson-databind",
 				VersionFormat: component.JavaSourceType.String(),
@@ -1268,7 +1270,7 @@ var testCases = []testCase{
 		username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
 		password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		source:   "NVD",
-		unexpectedFeatures: []v1.Feature{
+		unexpectedFeatures: []apiV1.Feature{
 			{
 				Name:          "zookeeper",
 				VersionFormat: component.JavaSourceType.String(),
@@ -1303,15 +1305,15 @@ var testCases = []testCase{
 		source:                   "Red Hat",
 		onlyCheckSpecifiedVulns:  true,
 		checkProvidedExecutables: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "rh-maven35-log4j12",
 				NamespaceName: "rhel:7",
 				VersionFormat: "rpm",
 				Version:       "1.2.17-19.2.el7.noarch",
 				// This feature provides several JAR files, but they are either not executable or they are symlinks.
-				ProvidedExecutables: []string{},
-				AddedBy:             "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				Executables: []*v1.Executable{},
+				AddedBy:     "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
 			},
 			{
 				Name:          "rh-maven35-jackson-databind",
@@ -1319,99 +1321,8 @@ var testCases = []testCase{
 				VersionFormat: "rpm",
 				Version:       "2.7.6-2.10.el7.noarch",
 				// This feature provides a JAR file that is not executable.
-				ProvidedExecutables: []string{},
-				Vulnerabilities: []v1.Vulnerability{
-					{
-						Name:          "RHSA-2020:4173",
-						NamespaceName: "rhel:7",
-						Description:   "The jackson-databind package provides general data-binding functionality for Jackson, which works on top of Jackson core streaming API.\n\nSecurity Fix(es):\n\n* jackson-databind: Serialization gadgets in com.pastdev.httpcomponents.configuration.JndiConfiguration (CVE-2020-24750)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
-						Link:          "https://access.redhat.com/errata/RHSA-2020:4173",
-						Severity:      "Important",
-						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.9,
-									"Score":               8.1,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 0.0,
-									"ImpactScore":         0.0,
-									"Score":               0.0,
-									"Vectors":             "",
-								},
-							},
-						},
-						FixedBy: "0:2.7.6-2.11.el7",
-					},
-				},
-				AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
-				FixedBy: "2.7.6-2.12.el7",
-			},
-			{
-				Name:                "vim-minimal",
-				NamespaceName:       "rhel:7",
-				VersionFormat:       "rpm",
-				Version:             "2:7.4.629-6.el7.x86_64",
-				ProvidedExecutables: []string{"/usr/bin/vi"},
-				Vulnerabilities: []v1.Vulnerability{
-					{
-						Name:          "CVE-2017-1000382",
-						NamespaceName: "rhel:7",
-						Description:   "DOCUMENTATION: It was found that vim applies the opened file read permissions to the swap file, overriding the process' umask. An attacker might search for vim swap files that were not deleted properly, in order to retrieve sensitive data.\n            STATEMENT: Red Hat Product Security has rated this issue as having Low security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
-						Link:          "https://access.redhat.com/security/cve/CVE-2017-1000382",
-						Severity:      "Low",
-						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.8,
-									"ImpactScore":         3.6,
-									"Score":               5.5,
-									"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
-								},
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 0.0,
-									"ImpactScore":         0.0,
-									"Score":               0.0,
-									"Vectors":             "",
-								},
-							},
-						},
-					},
-				},
-				AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
-			},
-		},
-		unexpectedFeatures: []v1.Feature{
-			{
-				Name:    "jackson-databind",
-				Version: "2.7.6",
-			},
-		},
-	},
-	{
-		// One of the images used for Red Hat Scanner Certification with a chown on jackson-databind that should not show up in the results.
-		image:                   "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7-chown",
-		registry:                "https://registry-1.docker.io",
-		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-		source:                  "Red Hat",
-		onlyCheckSpecifiedVulns: true,
-		expectedFeatures: []v1.Feature{
-			{
-				Name:          "rh-maven35-log4j12",
-				NamespaceName: "rhel:7",
-				VersionFormat: "rpm",
-				Version:       "1.2.17-19.2.el7.noarch",
-				AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
-			},
-			{
-				Name:          "rh-maven35-jackson-databind",
-				NamespaceName: "rhel:7",
-				VersionFormat: "rpm",
-				Version:       "2.7.6-2.10.el7.noarch",
-				Vulnerabilities: []v1.Vulnerability{
+				Executables: []*v1.Executable{},
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2020:4173",
 						NamespaceName: "rhel:7",
@@ -1445,7 +1356,10 @@ var testCases = []testCase{
 				NamespaceName: "rhel:7",
 				VersionFormat: "rpm",
 				Version:       "2:7.4.629-6.el7.x86_64",
-				Vulnerabilities: []v1.Vulnerability{
+				Executables: []*v1.Executable{
+					{Path: "/usr/bin/vi", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "vim-minimal", Version: "2:7.4.629-6.el7.x86_64"}}},
+				},
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2017-1000382",
 						NamespaceName: "rhel:7",
@@ -1473,7 +1387,97 @@ var testCases = []testCase{
 				AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
 			},
 		},
-		unexpectedFeatures: []v1.Feature{
+		unexpectedFeatures: []apiV1.Feature{
+			{
+				Name:    "jackson-databind",
+				Version: "2.7.6",
+			},
+		},
+	},
+	{
+		// One of the images used for Red Hat Scanner Certification with a chown on jackson-databind that should not show up in the results.
+		image:                   "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7-chown",
+		registry:                "https://registry-1.docker.io",
+		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
+		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		source:                  "Red Hat",
+		onlyCheckSpecifiedVulns: true,
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "rh-maven35-log4j12",
+				NamespaceName: "rhel:7",
+				VersionFormat: "rpm",
+				Version:       "1.2.17-19.2.el7.noarch",
+				AddedBy:       "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+			},
+			{
+				Name:          "rh-maven35-jackson-databind",
+				NamespaceName: "rhel:7",
+				VersionFormat: "rpm",
+				Version:       "2.7.6-2.10.el7.noarch",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "RHSA-2020:4173",
+						NamespaceName: "rhel:7",
+						Description:   "The jackson-databind package provides general data-binding functionality for Jackson, which works on top of Jackson core streaming API.\n\nSecurity Fix(es):\n\n* jackson-databind: Serialization gadgets in com.pastdev.httpcomponents.configuration.JndiConfiguration (CVE-2020-24750)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+						Link:          "https://access.redhat.com/errata/RHSA-2020:4173",
+						Severity:      "Important",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         5.9,
+									"Score":               8.1,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "0:2.7.6-2.11.el7",
+					},
+				},
+				AddedBy: "sha256:4b4eac8c1d679c473379a42d37ec83b98bbafd8bb316200f53123f72d53bbb84",
+				FixedBy: "2.7.6-2.12.el7",
+			},
+			{
+				Name:          "vim-minimal",
+				NamespaceName: "rhel:7",
+				VersionFormat: "rpm",
+				Version:       "2:7.4.629-6.el7.x86_64",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2017-1000382",
+						NamespaceName: "rhel:7",
+						Description:   "DOCUMENTATION: It was found that vim applies the opened file read permissions to the swap file, overriding the process' umask. An attacker might search for vim swap files that were not deleted properly, in order to retrieve sensitive data.\n            STATEMENT: Red Hat Product Security has rated this issue as having Low security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2017-1000382",
+						Severity:      "Low",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 1.8,
+									"ImpactScore":         3.6,
+									"Score":               5.5,
+									"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+					},
+				},
+				AddedBy: "sha256:e20f387c7bf5a184eeef83f7e5626661f593ca05c788f377a01e2df62f613e44",
+			},
+		},
+		unexpectedFeatures: []apiV1.Feature{
 			{
 				Name:    "jackson-databind",
 				Version: "2.7.6",
@@ -1488,13 +1492,13 @@ var testCases = []testCase{
 		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		source:                  "Red Hat",
 		onlyCheckSpecifiedVulns: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "nodejs-full-i18n",
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "1:10.21.0-3.module+el8.2.0+7071+d2377ea3.x86_64",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2021:0548",
 						NamespaceName: "rhel:8",
@@ -1552,7 +1556,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "2.9.1-4.el8.x86_64",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2020:4952",
 						NamespaceName: "rhel:8",
@@ -1586,7 +1590,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "0.7.7-1.el8.x86_64",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2020:4508",
 						NamespaceName: "rhel:8",
@@ -1691,7 +1695,7 @@ var testCases = []testCase{
 		username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
 		password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		source:   "NVD",
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "jq",
 				NamespaceName: "alpine:v3.13",
@@ -1708,7 +1712,7 @@ var testCases = []testCase{
 		registry:        "https://registry-1.docker.io",
 		source:          "NVD",
 		uncertifiedRHEL: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "fipscheck",
 				NamespaceName: "centos:7",
@@ -1726,7 +1730,7 @@ var testCases = []testCase{
 		registry:                "https://quay.io",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "p11-kit",
 				NamespaceName: "centos:7",
@@ -1740,7 +1744,7 @@ var testCases = []testCase{
 		image:    "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
 		registry: "https://quay.io",
 		source:   "NVD",
-		unexpectedFeatures: []v1.Feature{
+		unexpectedFeatures: []apiV1.Feature{
 			{
 				Name:          "p11-kit",
 				VersionFormat: "rpm",
@@ -1753,13 +1757,13 @@ var testCases = []testCase{
 		registry:                "https://registry-1.docker.io",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "apk-tools",
 				NamespaceName: "alpine:v3.13",
 				VersionFormat: "apk",
 				Version:       "2.12.0-r4",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-30139",
 						NamespaceName: "alpine:v3.13",
@@ -1817,7 +1821,7 @@ var testCases = []testCase{
 				NamespaceName: "alpine:v3.13",
 				VersionFormat: "apk",
 				Version:       "1.32.1-r0",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-28831",
 						NamespaceName: "alpine:v3.13",
@@ -1853,13 +1857,13 @@ var testCases = []testCase{
 		registry:                "https://registry-1.docker.io",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "apk-tools",
 				NamespaceName: "alpine:v3.14",
 				VersionFormat: "apk",
 				Version:       "2.12.5-r1",
-				Vulnerabilities: []v1.Vulnerability{
+				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-36159",
 						NamespaceName: "alpine:v3.14",
@@ -1903,7 +1907,7 @@ var testCases = []testCase{
 		registry:                "https://registry-1.docker.io",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "apk-tools",
 				NamespaceName: "alpine:v3.15",
@@ -1930,14 +1934,14 @@ var testCases = []testCase{
 		// package DB version. The relevant *.list file will only exist in the layer the package is added
 		// so the layer with the latest packages DB will not have the *.list file for these packages.
 		checkProvidedExecutables: true,
-		expectedFeatures: []v1.Feature{
+		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "dash",
 				NamespaceName: "debian:11",
 				VersionFormat: "dpkg",
 				Version:       "0.5.11+git20200708+dd9ef66-5",
-				ProvidedExecutables: []string{
-					"/bin/dash",
+				Executables: []*v1.Executable{
+					{Path: "/bin/dash", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "dash", Version: "0.5.11+git20200708+dd9ef66-5"}}},
 				},
 				AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
 			},
@@ -1946,11 +1950,11 @@ var testCases = []testCase{
 				NamespaceName: "debian:11",
 				VersionFormat: "dpkg",
 				Version:       "1:3.7-5",
-				ProvidedExecutables: []string{
-					"/usr/bin/cmp",
-					"/usr/bin/diff",
-					"/usr/bin/diff3",
-					"/usr/bin/sdiff",
+				Executables: []*v1.Executable{
+					{Path: "/usr/bin/cmp", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
+					{Path: "/usr/bin/diff", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
+					{Path: "/usr/bin/diff3", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
+					{Path: "/usr/bin/sdiff", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "diffutils", Version: "1:3.7-5"}}},
 				},
 				AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
 			},
@@ -1960,7 +1964,7 @@ var testCases = []testCase{
 		image:    "docker.io/anchore/anchore-engine:v0.9.4",
 		registry: "https://registry-1.docker.io",
 		source:   "NVD",
-		unexpectedFeatures: []v1.Feature{
+		unexpectedFeatures: []apiV1.Feature{
 			{
 				Name:    "netaddr",
 				Version: "0.8.0",
