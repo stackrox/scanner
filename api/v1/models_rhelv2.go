@@ -8,14 +8,13 @@ package v1
 import (
 	"strconv"
 
-	"github.com/stackrox/scanner/ext/featurefmt"
-
 	rpmVersion "github.com/knqyf263/go-rpm-version"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/types"

@@ -160,29 +160,144 @@ var testCases = []testCase{
 							{Name: "apt", Version: "1.0.9.8.4"},
 						},
 					},
-					{Path: "/etc/kernel/postinst.d/apt-auto-removal", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/share/bug/apt/script", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/dpkg/methods/apt/update", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/dpkg/methods/apt/setup", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/dpkg/methods/apt/install", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/apt-helper", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/methods/cdrom", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/methods/copy", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/methods/file", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/methods/ftp", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/methods/gpgv", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/methods/gzip", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/methods/http", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/methods/mirror", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/methods/rred", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/lib/apt/methods/rsh", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/bin/apt", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/bin/apt-cache", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/bin/apt-cdrom", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/bin/apt-config", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/bin/apt-get", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/bin/apt-mark", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
-					{Path: "/usr/bin/apt-key", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "apt", Version: "1.0.9.8.4"}}},
+					{
+						Path: "/etc/kernel/postinst.d/apt-auto-removal",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/share/bug/apt/script",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/dpkg/methods/apt/update",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/dpkg/methods/apt/setup",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/dpkg/methods/apt/install",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/apt-helper",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/methods/cdrom",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/methods/copy",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/methods/file",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/methods/ftp",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/methods/gpgv",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/methods/gzip",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/methods/http",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/methods/mirror",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/methods/rred",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/lib/apt/methods/rsh",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/bin/apt",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/bin/apt-cache",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/bin/apt-cdrom",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/bin/apt-config",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/bin/apt-get",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/bin/apt-mark",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
+					{
+						Path: "/usr/bin/apt-key",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apt", Version: "1.0.9.8.4"},
+						},
+					},
 				},
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
@@ -282,24 +397,114 @@ var testCases = []testCase{
 				VersionFormat: "rpm",
 				Version:       "3.3.10-26.el7",
 				Executables: []*v1.Executable{
-					{Path: "/etc/cron.daily/apt", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/free", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/pgrep", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/pkill", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/pmap", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/ps", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/pwdx", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/skill", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/slabtop", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/snice", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/tload", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/top", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/uptime", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/vmstat", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/w", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/bin/watch", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/lib64/libprocps.so.4.0.0", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
-					{Path: "/usr/sbin/sysctl", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "procps-ng", Version: "3.3.10-26.el7"}}},
+					{
+						Path: "/etc/cron.daily/apt",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/free",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/pgrep",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/pkill",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/pmap",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/ps",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/pwdx",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/skill",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/slabtop",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/snice",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/tload",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/top",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/uptime",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/vmstat",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/w",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/bin/watch",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/lib64/libprocps.so.4.0.0",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
+					{
+						Path: "/usr/sbin/sysctl",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+						},
+					},
 				},
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
@@ -1362,7 +1567,12 @@ var testCases = []testCase{
 				VersionFormat: "rpm",
 				Version:       "2:7.4.629-6.el7.x86_64",
 				Executables: []*v1.Executable{
-					{Path: "/usr/bin/vi", RequiredFeatures: []*v1.FeatureNameVersion{{Name: "vim-minimal", Version: "2:7.4.629-6.el7.x86_64"}}},
+					{
+						Path: "/usr/bin/vi",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "vim-minimal", Version: "2:7.4.629-6.el7.x86_64"},
+						},
+					},
 				},
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
@@ -1946,10 +2156,13 @@ var testCases = []testCase{
 				VersionFormat: "dpkg",
 				Version:       "0.5.11+git20200708+dd9ef66-5",
 				Executables: []*v1.Executable{
-					{Path: "/bin/dash", RequiredFeatures: []*v1.FeatureNameVersion{
-						{Name: "dash", Version: "0.5.11+git20200708+dd9ef66-5"},
-						{Name: "glibc", Version: "2.31-13"},
-					}},
+					{
+						Path: "/bin/dash",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "dash", Version: "0.5.11+git20200708+dd9ef66-5"},
+							{Name: "glibc", Version: "2.31-13"},
+						},
+					},
 				},
 				AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
 			},
