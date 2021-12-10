@@ -73,6 +73,7 @@ func removeInvalidCPEs(item *schema.NVDCVEFeedJSON10DefNode) {
 		}
 		cpeMatches = append(cpeMatches, cpeMatch)
 	}
+	item.CPEMatch = cpeMatches
 	for _, child := range item.Children {
 		removeInvalidCPEs(child)
 	}
