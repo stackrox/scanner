@@ -1,23 +1,23 @@
+// +build e2e
 
 package e2etests
 
 import (
 	"encoding/json"
 	"fmt"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"os"
 	"sort"
 	"strings"
 	"testing"
 
-	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func getMatchingFeature(t *testing.T, featureList []apiV1.Feature, featureToFind apiV1.Feature, allowNotFound bool) *apiV1.Feature {
+func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1.Feature, allowNotFound bool) *v1.Feature {
 	candidateIdx := -1
 	for i, f := range featureList {
 		if f.Name == featureToFind.Name && f.Version == featureToFind.Version {
@@ -32,7 +32,7 @@ func getMatchingFeature(t *testing.T, featureList []apiV1.Feature, featureToFind
 	return &featureList[candidateIdx]
 }
 
-func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln apiV1.Vulnerability) {
+func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulnerability) {
 	if expectedVuln.Metadata == nil {
 		assert.Nil(t, matchingVuln.Metadata, "Expected no metadata for %s but got some", expectedVuln.Name)
 	} else {
@@ -55,7 +55,7 @@ func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln apiV1.Vu
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
-func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, onlyCheckSpecifiedVulns, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []apiV1.Feature) {
+func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, onlyCheckSpecifiedVulns, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
 	img, err := client.AddImage(username, password, imageRequest)
 	require.NoError(t, err)
 
