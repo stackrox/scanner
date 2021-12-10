@@ -20,7 +20,7 @@ func (f *FeatureKeySet) Merge(other FeatureKeySet) {
 // Add adds a feature key to this feature key set.
 func (f *FeatureKeySet) Add(featureKey featurefmt.PackageKey) {
 	if *f == nil {
-		*f = make(FeatureKeySet, 1)
+		*f = make(FeatureKeySet)
 	}
 	(*f)[featureKey] = struct{}{}
 }

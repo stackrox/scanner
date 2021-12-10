@@ -12,6 +12,7 @@ type libDepNode struct {
 	features FeatureKeySet
 	// Libraries used by this library directly.
 	libraries set.StringSet
+	// True if this node has been visited and features are fully populated.
 	completed bool
 }
 
