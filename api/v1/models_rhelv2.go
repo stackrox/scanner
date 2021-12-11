@@ -12,8 +12,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 )
 
@@ -49,13 +52,27 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 			version += "." + pkg.Arch
 		}
 
+		requiredFeatures := []*v1.FeatureNameVersion{
+			{
+				Name:    pkg.Name,
+				Version: version,
+			},
+		}
+		executables := make([]*v1.Executable, 0, len(pkg.ProvidedExecutables))
+		for _, exec := range pkg.ProvidedExecutables {
+			executables = append(executables, &v1.Executable{
+				Path:             exec,
+				RequiredFeatures: requiredFeatures,
+			})
+		}
+
 		feature := Feature{
-			Name:                pkg.Name,
-			NamespaceName:       layer.NamespaceName,
-			VersionFormat:       rpm.ParserName,
-			Version:             version,
-			AddedBy:             pkgEnv.AddedBy,
-			ProvidedExecutables: pkg.ProvidedExecutables,
+			Name:          pkg.Name,
+			NamespaceName: layer.NamespaceName,
+			VersionFormat: rpm.ParserName,
+			Version:       version,
+			AddedBy:       pkgEnv.AddedBy,
+			Executables:   executables,
 		}
 
 		feature.FixedBy, feature.Vulnerabilities = getRHELv2Vulns(vulns, pkg, feature.NamespaceName)
@@ -309,4 +326,22 @@ func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		// It is guaranteed there is 1 and only one element in `vuln.PackageInfos`.
 		FixedBy: vuln.PackageInfos[0].FixedInVersion, // Empty string if not fixed.
 	}
+}
+
+func createExecutablesFromDependencies(dbFeatureVersion database.FeatureVersion, depMap map[string]common.FeatureKeySet) []*v1.Executable {
+	executableToDependencies := dbFeatureVersion.ExecutableToDependencies
+	featureKey := featurefmt.PackageKey{Name: dbFeatureVersion.Feature.Name, Version: dbFeatureVersion.Version}
+	executables := make([]*v1.Executable, 0, len(executableToDependencies))
+	for exec, libs := range executableToDependencies {
+		features := make(common.FeatureKeySet)
+		features.Add(featureKey)
+		for lib := range libs {
+			features.Merge(depMap[lib])
+		}
+		executables = append(executables, &v1.Executable{
+			Path:             exec,
+			RequiredFeatures: toFeatureNameVersions(features),
+		})
+	}
+	return executables
 }

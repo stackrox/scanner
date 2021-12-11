@@ -8,6 +8,7 @@ import (
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
@@ -73,7 +74,8 @@ func (s *serviceImpl) GetImageScan(_ context.Context, req *v1.GetImageScanReques
 		return nil, err
 	}
 
-	layer, notes, err := apiV1.LayerFromDatabaseModel(s.db, *dbLayer, lineage, opts)
+	depMap := common.GetDepMap(dbLayer.Features)
+	layer, notes, err := apiV1.LayerFromDatabaseModel(s.db, *dbLayer, lineage, depMap, opts)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

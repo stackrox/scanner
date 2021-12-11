@@ -96,24 +96,24 @@ func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				{
 					Feature: database.Feature{Name: "musl"},
 					Version: "1.1.14-r10",
-					ProvidedExecutables: []string{
-						"/lib/ld-musl-x86_64.so.1",
-						"/lib/libc.musl-x86_64.so.1",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/lib/ld-musl-x86_64.so.1":   {},
+						"/lib/libc.musl-x86_64.so.1": {},
 					},
 				},
 				{
 					Feature: database.Feature{Name: "busybox"},
 					Version: "1.24.2-r9",
-					ProvidedExecutables: []string{
-						"/bin/busybox",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/bin/busybox": {},
 					},
 				},
 				{
 					Feature: database.Feature{Name: "alpine-baselayout"},
 					Version: "3.0.3-r0",
-					ProvidedExecutables: []string{
-						"/etc/crontabs/root",
-						"/etc/hosts",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/etc/crontabs/root": {},
+						"/etc/hosts":         {},
 					},
 				},
 				{

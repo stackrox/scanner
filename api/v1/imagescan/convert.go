@@ -8,6 +8,7 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
+	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -83,25 +84,18 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability 
 	return vulns
 }
 
-func convertProvidedExecutables(paths []string) []*v1.Executable {
+func convertProvidedExecutables(pkg *database.RHELv2Package) []*v1.Executable {
+	paths := pkg.ProvidedExecutables
+	requiredFeatures := []*v1.FeatureNameVersion{{Name: pkg.Name, Version: pkg.Version}}
 	executables := make([]*v1.Executable, 0, len(paths))
 	for _, path := range paths {
 		executables = append(executables, &v1.Executable{
-			Path: path,
+			Path:             path,
+			RequiredFeatures: requiredFeatures,
 		})
 	}
 
 	return executables
-}
-
-// ConvertExecutablesToPaths converts executables into the paths.
-func ConvertExecutablesToPaths(executables []*v1.Executable) []string {
-	paths := make([]string, 0, len(executables))
-	for _, executable := range executables {
-		paths = append(paths, executable.Path)
-	}
-
-	return paths
 }
 
 // ConvertFeatures converts api Features into v1 (proto) Feature pointers.
@@ -109,7 +103,6 @@ func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 	features := make([]*v1.Feature, 0, len(apiFeatures))
 	for _, a := range apiFeatures {
 		vulns := convertVulnerabilities(a.Vulnerabilities)
-		executables := convertProvidedExecutables(a.ProvidedExecutables)
 
 		features = append(features, &v1.Feature{
 			Name:                a.Name,
@@ -118,7 +111,7 @@ func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 			FeatureType:         a.VersionFormat,
 			AddedByLayer:        a.AddedBy,
 			Location:            a.Location,
-			ProvidedExecutables: executables,
+			ProvidedExecutables: a.Executables,
 		})
 	}
 	return features
@@ -169,7 +162,7 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 			Namespace:   feature.NamespaceName,
 			Version:     feature.Version,
 			AddedBy:     feature.AddedBy,
-			Executables: convertProvidedExecutables(feature.ProvidedExecutables),
+			Executables: feature.Executables,
 		})
 	}
 
@@ -185,7 +178,7 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 			Module:      pkg.Module,
 			Cpes:        rhelv2PkgEnv.CPEs,
 			AddedBy:     rhelv2PkgEnv.AddedBy,
-			Executables: convertProvidedExecutables(pkg.ProvidedExecutables),
+			Executables: convertProvidedExecutables(pkg),
 		})
 	}
 

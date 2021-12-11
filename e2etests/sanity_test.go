@@ -87,10 +87,16 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 			}
 
 			if checkProvidedExecutables {
-				assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
+				for _, exec := range matching.Executables {
+					sort.Slice(exec.RequiredFeatures, func(i, j int) bool {
+						return exec.RequiredFeatures[i].GetName() < exec.RequiredFeatures[j].GetName() ||
+							exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()
+					})
+				}
+				assert.ElementsMatch(t, feature.Executables, matching.Executables)
 			}
-			feature.ProvidedExecutables = nil
-			matching.ProvidedExecutables = nil
+			feature.Executables = nil
+			matching.Executables = nil
 
 			if !onlyCheckSpecifiedVulns {
 				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {

@@ -67,8 +67,12 @@ type FeatureVersion struct {
 	Feature    Feature
 	Version    string
 	AffectedBy []Vulnerability
-	// ProvidedExecutables indicates which regular executable files this feature provided.
-	ProvidedExecutables []string
+	// ExecutableToDependencies maps a feature provided executable to its dependencies.
+	// Eg, If executable E is provided by this feature, and it imports a library B, we will have a map for E -> [B]
+	ExecutableToDependencies StringToStringsMap
+	// LibraryToDependencies maps a feature provided library to its dependencies.
+	// Eg, If library A is provided by this feature, and it imports a library B, we will have a map for A -> [B]
+	LibraryToDependencies StringToStringsMap
 
 	// For output purposes. Only make sense when the feature version is in the context of an image.
 	AddedBy Layer
