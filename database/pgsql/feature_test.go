@@ -106,8 +106,7 @@ func TestInsertFeature(t *testing.T) {
 			},
 			Name: "TestInsertFeature1",
 		},
-		Version:             "2:3.0-imba",
-		ProvidedExecutables: []string{"/bin/ls", "/bin/ps"},
+		Version: "2:3.0-imba",
 		ExecutableToDependencies: database.StringToStringsMap{
 			"/bin/ls": {"some.so.1": {}},
 			"/bin/ps": {},
