@@ -57,23 +57,23 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	// If the test failed, print helpful debug information.
 	defer func() {
 		if t.Failed() {
-			fmt.Println("PRINTING COMPONENTS FROM SCAN")
+			fmt.Printf("PRINTING COMPONENTS FROM SCAN OF %s\n", testCase.image)
 			for _, feat := range scan.GetImage().GetFeatures() {
 				fmt.Println(feat.GetName(), feat.GetVersion())
 			}
-			fmt.Println("DONE PRINTING COMPONENTS FROM SCAN")
+			fmt.Printf("DONE PRINTING COMPONENTS FROM SCAN OF %s\n", testCase.image)
 
 			componentsMap, err := client.GetLanguageLevelComponents(context.Background(), &v1.GetLanguageLevelComponentsRequest{
 				ImageSpec: scanResp.GetImage(),
 			})
 			require.NoError(t, err)
-			fmt.Println("PRINTING LANGUAGE LEVEL COMPONENTS")
+			fmt.Printf("PRINTING LANGUAGE LEVEL COMPONENTS OF %s\n", testCase.image)
 			for _, components := range componentsMap.GetLayerToComponents() {
 				for _, component := range components.GetComponents() {
 					fmt.Println(component.GetName(), component.GetVersion(), component.GetLocation())
 				}
 			}
-			fmt.Println("DONE PRINTING LANGUAGE LEVEL COMPONENTS")
+			fmt.Printf("DONE PRINTING LANGUAGE LEVEL COMPONENTS OF %s\n", testCase.image)
 		}
 	}()
 	for _, expectedFeat := range testCase.expectedFeatures {

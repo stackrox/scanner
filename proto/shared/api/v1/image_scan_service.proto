@@ -5,6 +5,7 @@ option go_package = "scannerV1";
 option java_package = "io.stackrox.proto.api.scanner.v1";
 
 import weak "google/api/annotations.proto";
+import "shared/api/v1/component.proto";
 import "shared/api/v1/vulnerability.proto";
 
 package scannerV1;
@@ -15,12 +16,6 @@ message Image {
 
 message ScanImageRequest {
     string image          = 1;
-    message RegistryData {
-        string url      = 1;
-        string username = 2;
-        string password = 3;
-        bool   insecure = 4;
-    }
     RegistryData registry = 2;
     // uncertifiedRHEL tells the Scanner to scan the image
     // in an uncertified manner, if the image is RHEL-based.
@@ -30,11 +25,6 @@ message ScanImageRequest {
 message ScanImageResponse {
     ScanStatus status = 1;
     ImageSpec image   = 2;
-}
-
-message ImageSpec {
-    string digest = 1;
-    string image  = 2;
 }
 
 message GetImageScanRequest {
@@ -47,6 +37,23 @@ message GetImageScanRequest {
     bool uncertifiedRHEL = 2;
 }
 
+message GetImageScanResponse {
+    ScanStatus    status = 1;
+    Image         image  = 2;
+    repeated Note notes  = 3;
+}
+
+message GetImageComponentsRequest {
+    string       image        = 1;
+    RegistryData registry     = 2;
+}
+
+message GetImageComponentsResponse {
+    ScanStatus    status     = 1;
+    Components    components = 2;
+    repeated Note notes      = 3;
+}
+
 message GetLanguageLevelComponentsRequest {
     // Only one of the fields in ImageSpec needs to be set for the request to be properly formed
     // If both are set, then digest is used
@@ -57,13 +64,31 @@ message GetLanguageLevelComponentsRequest {
     bool uncertifiedRHEL = 2;
 }
 
-enum SourceType {
-    UNSET_SOURCE_TYPE = 0;
-    JAVA              = 1;
-    PYTHON            = 2;
-    NPM               = 3;
-    GEM               = 4;
-    DOTNETCORERUNTIME = 5;
+message GetLanguageLevelComponentsResponse {
+    map <string, LanguageLevelComponents> layer_to_components = 1;
+}
+
+message ImageSpec {
+    string digest = 1;
+    string image  = 2;
+}
+
+message RegistryData {
+    string url      = 1;
+    string username = 2;
+    string password = 3;
+    bool   insecure = 4;
+}
+
+enum ScanStatus {
+    UNSET     = 0;
+    ANALYZING = 1;
+    FAILED    = 2;
+    SUCCEEDED = 3;
+}
+
+message LanguageLevelComponents {
+    repeated LanguageLevelComponent components = 1;
 }
 
 message LanguageLevelComponent {
@@ -75,29 +100,16 @@ message LanguageLevelComponent {
     // TODO: consider adding more specific version information here (like all the stuff we have for Java).
 }
 
-message LanguageLevelComponents {
-    repeated LanguageLevelComponent components = 1;
-}
-
-message GetLanguageLevelComponentsResponse {
-    map <string, LanguageLevelComponents> layer_to_components = 1;
-}
-
-enum ScanStatus {
-    UNSET     = 0;
-    ANALYZING = 1;
-    FAILED    = 2;
-    SUCCEEDED = 3;
-}
-
-message GetImageScanResponse {
-    ScanStatus status = 1;
-    Image image       = 2;
+enum Note {
+    OS_CVES_UNAVAILABLE             = 0;
+    OS_CVES_STALE                   = 1;
+    LANGUAGE_CVES_UNAVAILABLE       = 2;
+    CERTIFIED_RHEL_SCAN_UNAVAILABLE = 3;
 }
 
 // ImageScanService APIs can be used to scan images.
 service ImageScanService {
-    rpc ScanImage (ScanImageRequest) returns (ScanImageResponse) {
+    rpc ScanImage(ScanImageRequest) returns (ScanImageResponse) {
         option (google.api.http) = {
             post: "/v1/images/scan"
             body: "*"
@@ -109,6 +121,8 @@ service ImageScanService {
             get: "/v1/images/scan"
         };
     }
+
+    rpc GetImageComponents(GetImageComponentsRequest) returns (GetImageComponentsResponse) {}
 
     rpc GetLanguageLevelComponents(GetLanguageLevelComponentsRequest) returns (GetLanguageLevelComponentsResponse) {
         option (google.api.http) = {

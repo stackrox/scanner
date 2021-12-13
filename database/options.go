@@ -7,7 +7,7 @@ type DatastoreOptions struct {
 	WithFeatures bool
 	// WithVulnerabilities is a read-only option.
 	// `true` means the Features field should be filled
-	// and their AffectedBy fields should contain every vulnerabilities that
+	// and their AffectedBy fields should contain every vulnerability that
 	// affect them.
 	WithVulnerabilities bool
 	// UncertifiedRHEL indicates the returned results should be for an

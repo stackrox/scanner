@@ -154,8 +154,8 @@ func testInsertLayerTree(t *testing.T, datastore database.Datastore) {
 			},
 			Name: "TestInsertLayerFeature2",
 		},
-		Version: "0.34",
-		ProvidedExecutables: []string{"/exec/me"},
+		Version:                  "0.34",
+		ExecutableToDependencies: database.StringToStringsMap{"/exec/me": {}},
 	}
 	f3 := database.FeatureVersion{
 		Feature: database.Feature{
@@ -165,8 +165,8 @@ func testInsertLayerTree(t *testing.T, datastore database.Datastore) {
 			},
 			Name: "TestInsertLayerFeature3",
 		},
-		Version: "0.56",
-		ProvidedExecutables: []string{"/exec/me/too", "/pls/exec/me"},
+		Version:                  "0.56",
+		ExecutableToDependencies: database.StringToStringsMap{"/exec/me/too": {}, "/pls/exec/me": {}},
 	}
 	f4 := database.FeatureVersion{
 		Feature: database.Feature{
@@ -386,21 +386,23 @@ func cmpFV(a, b database.FeatureVersion) bool {
 	return a.Feature.Name == b.Feature.Name &&
 		a.Feature.Namespace.Name == b.Feature.Namespace.Name &&
 		a.Version == b.Version &&
-		cmpStringSlices(a.ProvidedExecutables, b.ProvidedExecutables)
+		cmpStringToStringsMap(a.ExecutableToDependencies, b.ExecutableToDependencies)
 }
 
-// cmpStringSlices compares the given string slices.
-// It assumes the slices are sorted.
-func cmpStringSlices(a, b []string) bool {
+// cmpStringToStringsMap compares the given string to string sets.
+func cmpStringToStringsMap(a, b database.StringToStringsMap) bool {
 	if len(a) != len(b) {
 		return false
 	}
 
-	for i := range a {
-		if a[i] != b[i] {
+	for k, av := range a {
+		bv, ok := b[k]
+		if !ok {
+			return false
+		}
+		if !av.Equal(bv) {
 			return false
 		}
 	}
-
 	return true
 }
