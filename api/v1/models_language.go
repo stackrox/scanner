@@ -179,7 +179,7 @@ func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncer
 
 	var languageFeatures []Feature
 	for _, dbFeatureVersion := range languageFeatureVersions {
-		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
+		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL, nil)
 		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
 			languageFeatures = append(languageFeatures, *feature)
@@ -275,7 +275,7 @@ func getLanguageFeatures(osFeatures []Feature, components []*v1.LanguageComponen
 	for _, fv := range featureVersions {
 		featureValue := languageFeatureMap[fv.Feature.Location]
 		if fv.AddedBy.Name == featureValue.layer {
-			feature := featureFromDatabaseModel(fv, uncertifiedRHEL)
+			feature := featureFromDatabaseModel(fv, uncertifiedRHEL, nil)
 			if !shouldDedupeLanguageFeature(*feature, osFeatures) {
 				updateFeatureWithVulns(feature, fv.AffectedBy, language.ParserName)
 				features = append(features, *feature)
@@ -293,10 +293,10 @@ func getLayerToComponents(components []*v1.LanguageComponent) []*component.Layer
 	var prevLayer string
 	for _, languageComponent := range components {
 		c := &component.Component{
-			Name:               languageComponent.GetName(),
-			Version:            languageComponent.GetVersion(),
-			Location:           languageComponent.Location,
-			AddedBy:            languageComponent.GetAddedBy(),
+			Name:     languageComponent.GetName(),
+			Version:  languageComponent.GetVersion(),
+			Location: languageComponent.Location,
+			AddedBy:  languageComponent.GetAddedBy(),
 		}
 
 		var err error
@@ -318,11 +318,11 @@ func getLayerToComponents(components []*v1.LanguageComponent) []*component.Layer
 		if prevLayer == "" || prevLayer != languageComponent.GetAddedBy() {
 			prevLayer = languageComponent.GetAddedBy()
 			layers = append(layers, &component.LayerToComponents{
-				Layer:      languageComponent.GetAddedBy(),
+				Layer: languageComponent.GetAddedBy(),
 			})
 		}
 
-		topLayer := layers[len(layers) - 1]
+		topLayer := layers[len(layers)-1]
 		topLayer.Components = append(topLayer.Components, c)
 	}
 

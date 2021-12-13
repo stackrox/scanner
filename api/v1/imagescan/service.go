@@ -84,7 +84,7 @@ func (s *serviceImpl) GetImageScan(_ context.Context, req *v1.GetImageScanReques
 		Status: v1.ScanStatus_SUCCEEDED,
 		Image: &v1.Image{
 			Namespace: layer.NamespaceName,
-			Features: ConvertFeatures(layer.Features),
+			Features:  ConvertFeatures(layer.Features),
 		},
 		Notes: convertNotes(notes),
 	}, nil
@@ -198,7 +198,7 @@ func (s *serviceImpl) GetImageVulnerabilities(_ context.Context, req *v1.GetImag
 
 	return &v1.GetImageVulnerabilitiesResponse{
 		Status: v1.ScanStatus_SUCCEEDED,
-		Image:  &v1.Image{
+		Image: &v1.Image{
 			Namespace: layer.NamespaceName,
 			Features:  ConvertFeatures(layer.Features),
 		},

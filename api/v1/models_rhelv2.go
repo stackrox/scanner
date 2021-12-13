@@ -6,7 +6,6 @@
 package v1
 
 import (
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"strconv"
 
 	rpmVersion "github.com/knqyf263/go-rpm-version"
@@ -17,6 +16,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 )
 
@@ -105,7 +105,7 @@ func getFullFeaturesForRHELv2Packages(db database.Datastore, pkgs []*v1.RHELComp
 		}
 
 		pkgEnvs[int(pkg.GetId())] = &database.RHELv2PackageEnv{
-			Pkg:       &database.RHELv2Package{
+			Pkg: &database.RHELv2Package{
 				Model:               database.Model{ID: int(pkg.GetId())},
 				Name:                pkg.GetName(),
 				Version:             pkg.GetVersion(),

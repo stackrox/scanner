@@ -15,9 +15,9 @@
 package v1
 
 import (
-	"github.com/pkg/errors"
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/api/v1/common"
@@ -319,12 +319,12 @@ func getOSFeatures(db database.Datastore, components []*v1.OSComponent) ([]Featu
 		}
 
 		features = append(features, Feature{
-			Name:                fv.Feature.Name,
-			NamespaceName:       fv.Feature.Namespace.Name,
-			VersionFormat:       versionfmt.GetVersionFormatForNamespace(fv.Feature.Namespace.Name),
-			Version:             fv.Version,
-			Vulnerabilities:     vulns,
-			FixedBy:             fixedBy,
+			Name:            fv.Feature.Name,
+			NamespaceName:   fv.Feature.Namespace.Name,
+			VersionFormat:   versionfmt.GetVersionFormatForNamespace(fv.Feature.Namespace.Name),
+			Version:         fv.Version,
+			Vulnerabilities: vulns,
+			FixedBy:         fixedBy,
 		})
 	}
 
