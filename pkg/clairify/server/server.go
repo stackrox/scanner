@@ -17,22 +17,16 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/httputil"
 	v1 "github.com/stackrox/scanner/api/v1"
 	v1common "github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/database"
 	protoV1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	"github.com/stackrox/scanner/pkg/clairify/server/middleware"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
-	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/mtls"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"github.com/stackrox/scanner/pkg/updater"
-	"google.golang.org/grpc/codes"
-)
-
-var (
-	skipPeerValidation = env.SkipPeerValidation.Enabled()
 )
 
 // Server is the HTTP server for Clairify.
@@ -84,7 +78,7 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName, lineage string,
 	}
 	depMap := v1common.GetDepMap(dbLayer.Features)
 
-	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, lineage, opts, depMap)
+	layer, notes, err := v1.LayerFromDatabaseModel(s.storage, dbLayer, lineage, depMap, opts)
 	if err != nil {
 		clairError(w, http.StatusInternalServerError, err)
 		return
@@ -262,37 +256,26 @@ func (s *Server) GetVulnDefsMetadata(w http.ResponseWriter, _ *http.Request) {
 	w.Write(data)
 }
 
-func (s *Server) wrapHandlerToVerifyPeerCertificates(f http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if !skipPeerValidation {
-			if err := mtls.VerifyCentralPeerCertificate(r); err != nil {
-				httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
-				return
-			}
-		}
-		f(w, r)
-	}
-}
-
-func (s *Server) handleFuncRouterAndVerifyClient(r *mux.Router, path string, handlerFunc http.HandlerFunc, method string) {
-	r.HandleFunc(path, s.wrapHandlerToVerifyPeerCertificates(handlerFunc)).Methods(method)
-}
-
 // Start starts the server listening.
 func (s *Server) Start() error {
 	r := mux.NewRouter()
+	// Middlewares are executed in order.
+	r.Use(
+		// Ensure the user is authorized before doing anything else.
+		middleware.VerifyPeerCerts(),
+		middleware.LiteMode(),
+	)
 
 	apiRoots := []string{"clairify", "scanner"}
 
 	for _, root := range apiRoots {
-		// Do not verify client cert for ping endpoint. This will be used by the readiness probe
 		r.HandleFunc(fmt.Sprintf("/%s/ping", root), s.Ping).Methods(http.MethodGet)
 
-		s.handleFuncRouterAndVerifyClient(r, fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA, http.MethodGet)
-		s.handleFuncRouterAndVerifyClient(r, fmt.Sprintf("/%s/image", root), s.ScanImage, http.MethodPost)
-		s.handleFuncRouterAndVerifyClient(r, fmt.Sprintf("/%s/vulndefs/metadata", root), s.GetVulnDefsMetadata, http.MethodGet)
+		r.HandleFunc(fmt.Sprintf("/%s/sha/{sha}", root), s.GetResultsBySHA).Methods(http.MethodGet)
+		r.HandleFunc(fmt.Sprintf("/%s/image", root), s.ScanImage).Methods(http.MethodPost)
+		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.GetResultsByImage).Methods(http.MethodGet)
 
-		r.PathPrefix(fmt.Sprintf("/%s/image/", root)).HandlerFunc(s.wrapHandlerToVerifyPeerCertificates(s.GetResultsByImage)).Methods(http.MethodGet)
+		r.HandleFunc(fmt.Sprintf("/%s/vulndefs/metadata", root), s.GetVulnDefsMetadata).Methods(http.MethodGet)
 	}
 
 	var tlsConfig *tls.Config

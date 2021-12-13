@@ -158,10 +158,10 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 		},
 		Features: nil,
 	}
-	layer, _, err := LayerFromDatabaseModel(db, dbLayer, "", &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(db, dbLayer, "", nil, &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
-	}, nil)
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, "layer2", layer.Name)
 	assert.Equal(t, "", layer.ParentName)
@@ -174,7 +174,20 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Version:       "2.x86_64",
 			AddedBy:       "layer1",
 			FixedBy:       "5",
-			Executables:   []*v1.Executable{{Path: "/exec/me"}, {Path: "/pls/exec/me"}},
+			Executables: []*v1.Executable{
+				{
+					Path: "/exec/me",
+					RequiredFeatures: []*v1.FeatureNameVersion{
+						{Name: "pkg", Version: "2.x86_64"},
+					},
+				},
+				{
+					Path: "/pls/exec/me",
+					RequiredFeatures: []*v1.FeatureNameVersion{
+						{Name: "pkg", Version: "2.x86_64"},
+					},
+				},
+			},
 			Vulnerabilities: []Vulnerability{
 				{
 					Name:          "v1",
@@ -201,4 +214,68 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 		},
 	}
 	assert.ElementsMatch(t, layer.Features, features)
+}
+
+func TestComponentsFromDatabaseModelRHELv2(t *testing.T) {
+	envIsolator := testutils.NewEnvIsolator(t)
+	defer envIsolator.RestoreAll()
+	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
+
+	db := newMockRHELv2Datastore()
+	db.layers["layer1"] = []*database.RHELv2Layer{
+		{
+			Hash: "layer1",
+			Dist: "rhel:7",
+			Pkgs: []*database.RHELv2Package{
+				{
+					Model:               database.Model{ID: 3},
+					Name:                "pkg",
+					Version:             "22",
+					Arch:                "x86_64",
+					Module:              "idk",
+					ProvidedExecutables: []string{"executable"},
+				},
+			},
+			CPEs: []string{"my-cpe"},
+		},
+	}
+	// Vulns for the testing pkg.
+	db.vulns[0] = []*database.RHELv2Vulnerability{
+		{
+			Name: "vuln",
+		},
+	}
+
+	layer := &database.Layer{
+		Name: "layer1",
+		Namespace: &database.Namespace{
+			Name:          "rhel:7",
+			VersionFormat: "rpm",
+		},
+	}
+	imgComponents, err := ComponentsFromDatabaseModel(db, layer, "", false)
+	assert.NoError(t, err)
+
+	expectedRHELv2PkgEnvs := map[int]*database.RHELv2PackageEnv{
+		3: {
+			Pkg: &database.RHELv2Package{
+				Model:               database.Model{ID: 3},
+				Name:                "pkg",
+				Version:             "22",
+				Module:              "idk",
+				Arch:                "x86_64",
+				ProvidedExecutables: []string{"executable"},
+			},
+			Namespace: "rhel:7",
+			AddedBy:   "layer1",
+			CPEs:      []string{"my-cpe"},
+		},
+	}
+	expectedNotes := []Note{LanguageCVEsUnavailable}
+
+	assert.Empty(t, imgComponents.Features)
+
+	assert.Empty(t, imgComponents.LanguageComponents)
+	assert.Equal(t, expectedRHELv2PkgEnvs, imgComponents.RHELv2PkgEnvs)
+	assert.ElementsMatch(t, expectedNotes, imgComponents.Notes)
 }
