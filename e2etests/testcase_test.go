@@ -3,8 +3,11 @@
 package e2etests
 
 import (
+	"os"
+
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	"github.com/stackrox/scanner/pkg/component"
 )
 
 type testCase struct {

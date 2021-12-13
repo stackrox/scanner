@@ -138,8 +138,6 @@ type Datastore interface {
 	// createNotification equals to true.
 	InsertVulnerabilities(vulnerabilities []Vulnerability) error
 
-	//InsertFeatures(features []Feature) error
-
 	// InsertRHELv2Vulnerabilities stores the given RHELv2 vulnerabilities into
 	// the database.
 	InsertRHELv2Vulnerabilities(vulnerabilities []*RHELv2Vulnerability) error
