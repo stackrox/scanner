@@ -55,8 +55,8 @@ func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulne
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
-func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, username, password, source string, imageRequest *types.ImageRequest, onlyCheckSpecifiedVulns, checkProvidedExecutables bool, expectedFeatures, unexpectedFeatures []v1.Feature) {
-	img, err := client.AddImage(username, password, imageRequest)
+func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test testCase, imageRequest *types.ImageRequest) {
+	img, err := client.AddImage(test.username, test.password, imageRequest)
 	require.NoError(t, err)
 
 	env, err := client.RetrieveImageDataBySHA(img.SHA, &types.GetImageDataOpts{
@@ -64,6 +64,9 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 	})
 	require.NoError(t, err)
 	require.Nil(t, env.Error)
+	require.NotNil(t, env.Layer)
+
+	assert.Equal(t, test.namespace, env.Layer.NamespaceName)
 
 	// Filter out vulnerabilities with no metadata
 	for idx, feature := range env.Layer.Features {
@@ -77,7 +80,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 		env.Layer.Features[idx].Vulnerabilities = filteredVulns
 	}
 
-	for _, feature := range expectedFeatures {
+	for _, feature := range test.expectedFeatures {
 		t.Run(fmt.Sprintf("%s/%s", feature.Name, feature.Version), func(t *testing.T) {
 			matching := getMatchingFeature(t, env.Layer.Features, feature, false)
 			if matching.Vulnerabilities != nil {
@@ -86,13 +89,13 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 				})
 			}
 
-			if checkProvidedExecutables {
+			if test.checkProvidedExecutables {
 				assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
 			}
 			feature.ProvidedExecutables = nil
 			matching.ProvidedExecutables = nil
 
-			if !onlyCheckSpecifiedVulns {
+			if !test.onlyCheckSpecifiedVulns {
 				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
 					matchingBytes, _ := json.MarshalIndent(matching.Vulnerabilities, "", "  ")
 					featureVulnsBytes, _ := json.MarshalIndent(feature.Vulnerabilities, "", "  ")
@@ -103,7 +106,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 				require.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
 				for i, matchingVuln := range matching.Vulnerabilities {
 					expectedVuln := feature.Vulnerabilities[i]
-					checkMatch(t, source, expectedVuln, matchingVuln)
+					checkMatch(t, test.source, expectedVuln, matchingVuln)
 				}
 			} else {
 				for _, expectedVuln := range feature.Vulnerabilities {
@@ -113,7 +116,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 							continue
 						}
 						foundMatch = true
-						checkMatch(t, source, expectedVuln, matchingVuln)
+						checkMatch(t, test.source, expectedVuln, matchingVuln)
 					}
 					assert.True(t, foundMatch)
 				}
@@ -126,7 +129,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, usern
 		})
 	}
 
-	for _, feature := range unexpectedFeatures {
+	for _, feature := range test.unexpectedFeatures {
 		assert.Nil(t, getMatchingFeature(t, env.Layer.Features, feature, true))
 	}
 }
@@ -144,7 +147,7 @@ func TestImageSanity(t *testing.T) {
 				testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
 				testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
 			}
-			verifyImageHasExpectedFeatures(t, cli, testCase.username, testCase.password, testCase.source, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL}, testCase.onlyCheckSpecifiedVulns, testCase.checkProvidedExecutables, testCase.expectedFeatures, testCase.unexpectedFeatures)
+			verifyImageHasExpectedFeatures(t, cli, testCase, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL})
 		})
 	}
 }

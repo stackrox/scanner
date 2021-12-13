@@ -14,6 +14,7 @@ type testCase struct {
 	registry           string
 	username, password string
 	source             string
+	namespace          string
 	expectedFeatures   []v1.Feature
 	unexpectedFeatures []v1.Feature
 	// This specifies that the features only need to contain at least the vulnerabilities specified
@@ -27,6 +28,7 @@ var testCases = []testCase{
 		image:                    "ubuntu:16.04",
 		registry:                 "https://registry-1.docker.io",
 		source:                   "NVD",
+		namespace:                "ubuntu:16.04",
 		onlyCheckSpecifiedVulns:  true,
 		checkProvidedExecutables: true,
 		expectedFeatures: []v1.Feature{
@@ -69,9 +71,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:    "docker.io/library/nginx:1.10",
-		registry: "https://registry-1.docker.io",
-		source:   "NVD",
+		image:     "docker.io/library/nginx:1.10",
+		registry:  "https://registry-1.docker.io",
+		source:    "NVD",
+		namespace: "debian:8",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:            "diffutils",
@@ -145,6 +148,7 @@ var testCases = []testCase{
 		image:                    "docker.io/kaizheh/apache-struts2-cve-2017-5638:latest",
 		registry:                 "https://registry-1.docker.io",
 		source:                   "NVD",
+		namespace:                "debian:8",
 		checkProvidedExecutables: true,
 		expectedFeatures: []v1.Feature{
 			{
@@ -263,9 +267,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:    "docker.io/anchore/anchore-engine:v0.5.0",
-		registry: "https://registry-1.docker.io",
-		source:   "Red Hat",
+		image:     "docker.io/anchore/anchore-engine:v0.5.0",
+		registry:  "https://registry-1.docker.io",
+		source:    "Red Hat",
+		namespace: "centos:7",
 		// This image is older than June 2020, so we need to explicitly request for an uncertified scan.
 		uncertifiedRHEL:          true,
 		checkProvidedExecutables: true,
@@ -370,11 +375,12 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:    "us.gcr.io/stackrox-ci/qa/apache/server:latest",
-		registry: "https://us.gcr.io",
-		username: "_json_key",
-		password: os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER"),
-		source:   "NVD",
+		image:     "us.gcr.io/stackrox-ci/qa/apache/server:latest",
+		registry:  "https://us.gcr.io",
+		username:  "_json_key",
+		password:  os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER"),
+		source:    "NVD",
+		namespace: "ubuntu:14.04",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "cron",
@@ -417,6 +423,7 @@ var testCases = []testCase{
 		registry:                "https://mcr.microsoft.com",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
+		namespace:               "debian:10",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "microsoft.netcore.app",
@@ -610,6 +617,7 @@ var testCases = []testCase{
 		registry:                "https://mcr.microsoft.com",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
+		namespace:               "debian:10",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "microsoft.aspnetcore.app",
@@ -1016,6 +1024,7 @@ var testCases = []testCase{
 		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:14.04",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "jackson-databind",
@@ -1263,11 +1272,12 @@ var testCases = []testCase{
 	},
 	{
 		// Deletes fatjar containing zookeeper and guava, and deletes standalone jar containing netty.
-		image:    "docker.io/stackrox/sandbox:zookeeper-fatjar-remove",
-		registry: "https://registry-1.docker.io",
-		username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-		source:   "NVD",
+		image:     "docker.io/stackrox/sandbox:zookeeper-fatjar-remove",
+		registry:  "https://registry-1.docker.io",
+		username:  os.Getenv("DOCKER_IO_PULL_USERNAME"),
+		password:  os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		source:    "NVD",
+		namespace: "alpine:v3.8",
 		unexpectedFeatures: []v1.Feature{
 			{
 				Name:          "zookeeper",
@@ -1288,11 +1298,12 @@ var testCases = []testCase{
 	},
 	{
 		// OCI media type manifest.
-		image:    "docker.io/stackrox/sandbox:oci-manifest",
-		registry: "https://registry-1.docker.io",
-		username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-		source:   "NVD",
+		image:     "docker.io/stackrox/sandbox:oci-manifest",
+		registry:  "https://registry-1.docker.io",
+		username:  os.Getenv("DOCKER_IO_PULL_USERNAME"),
+		password:  os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		source:    "NVD",
+		namespace: "ubuntu:14.04",
 	},
 	{
 		// One of the images used for Red Hat Scanner Certification.
@@ -1303,6 +1314,7 @@ var testCases = []testCase{
 		source:                   "Red Hat",
 		onlyCheckSpecifiedVulns:  true,
 		checkProvidedExecutables: true,
+		namespace:                "rhel:7",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "rh-maven35-log4j12",
@@ -1398,6 +1410,7 @@ var testCases = []testCase{
 		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		source:                  "Red Hat",
 		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:7",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "rh-maven35-log4j12",
@@ -1488,6 +1501,7 @@ var testCases = []testCase{
 		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		source:                  "Red Hat",
 		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:8",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "nodejs-full-i18n",
@@ -1671,6 +1685,7 @@ var testCases = []testCase{
 		username:        os.Getenv("REDHAT_USERNAME"),
 		password:        os.Getenv("REDHAT_PASSWORD"),
 		source:          "Red Hat",
+		namespace:       "centos:7",
 		uncertifiedRHEL: true,
 	},
 	{
@@ -1680,17 +1695,19 @@ var testCases = []testCase{
 		username:        os.Getenv("REDHAT_USERNAME"),
 		password:        os.Getenv("REDHAT_PASSWORD"),
 		source:          "Red Hat",
+		namespace:       "centos:7",
 		uncertifiedRHEL: true,
 	},
 	{
 		// Had an issue where Scanner claimed jq 6.1-r1 was vulnerable to
 		// a CVE fixed in 1.6_rc1-r0. We do NOT expect this version of
 		// jq to be vulnerable to this CVE (CVE-2016-4074).
-		image:    "docker.io/stackrox/sandbox:alpine-jq-1.6-r1",
-		registry: "https://registry-1.docker.io",
-		username: os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
-		source:   "NVD",
+		image:     "docker.io/stackrox/sandbox:alpine-jq-1.6-r1",
+		registry:  "https://registry-1.docker.io",
+		username:  os.Getenv("DOCKER_IO_PULL_USERNAME"),
+		password:  os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		source:    "NVD",
+		namespace: "alpine:v3.13",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "jq",
@@ -1708,6 +1725,7 @@ var testCases = []testCase{
 		registry:        "https://registry-1.docker.io",
 		source:          "NVD",
 		uncertifiedRHEL: true,
+		namespace:       "centos:7",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "fipscheck",
@@ -1726,6 +1744,7 @@ var testCases = []testCase{
 		registry:                "https://quay.io",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
+		namespace:               "centos:7",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "p11-kit",
@@ -1737,9 +1756,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:    "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
-		registry: "https://quay.io",
-		source:   "NVD",
+		image:     "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
+		registry:  "https://quay.io",
+		source:    "NVD",
+		namespace: "TODO",
 		unexpectedFeatures: []v1.Feature{
 			{
 				Name:          "p11-kit",
@@ -1753,6 +1773,7 @@ var testCases = []testCase{
 		registry:                "https://registry-1.docker.io",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
+		namespace:               "alpine:v3.13",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "apk-tools",
@@ -1853,6 +1874,7 @@ var testCases = []testCase{
 		registry:                "https://registry-1.docker.io",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
+		namespace:               "alpine:v3.14",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "apk-tools",
@@ -1903,6 +1925,7 @@ var testCases = []testCase{
 		registry:                "https://registry-1.docker.io",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
+		namespace:               "alpine:v3.15",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "apk-tools",
@@ -1930,6 +1953,7 @@ var testCases = []testCase{
 		// package DB version. The relevant *.list file will only exist in the layer the package is added
 		// so the layer with the latest packages DB will not have the *.list file for these packages.
 		checkProvidedExecutables: true,
+		namespace:                "debian:11",
 		expectedFeatures: []v1.Feature{
 			{
 				Name:          "dash",
@@ -1957,9 +1981,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:    "docker.io/anchore/anchore-engine:v0.9.4",
-		registry: "https://registry-1.docker.io",
-		source:   "NVD",
+		image:     "docker.io/anchore/anchore-engine:v0.9.4",
+		registry:  "https://registry-1.docker.io",
+		source:    "NVD",
+		namespace: "TODO",
 		unexpectedFeatures: []v1.Feature{
 			{
 				Name:    "netaddr",

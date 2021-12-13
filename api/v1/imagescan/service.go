@@ -81,6 +81,7 @@ func (s *serviceImpl) GetImageScan(_ context.Context, req *v1.GetImageScanReques
 	return &v1.GetImageScanResponse{
 		Status: v1.ScanStatus_SUCCEEDED,
 		Image: &v1.Image{
+			Namespace: layer.NamespaceName,
 			Features: ConvertFeatures(layer.Features),
 		},
 		Notes: convertNotes(notes),
@@ -193,9 +194,13 @@ func (s *serviceImpl) GetImageVulnerabilities(_ context.Context, req *v1.GetImag
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	
-
-	return nil, nil
+	return &v1.GetImageVulnerabilitiesResponse{
+		Status: v1.ScanStatus_SUCCEEDED,
+		Image:  &v1.Image{
+			Namespace: layer.NamespaceName,
+			Features:  ConvertFeatures(layer.Features),
+		},
+	}, nil
 }
 
 func hasUncertifiedRHEL(notes []v1.Note) bool {

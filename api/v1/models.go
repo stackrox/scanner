@@ -255,22 +255,77 @@ func getNotes(namespaceName string, uncertifiedRHEL bool) []Note {
 // GetVulnerabilitiesForComponents retrieves the vulnerabilities for the given components.
 func GetVulnerabilitiesForComponents(db database.Datastore, components *v1.Components, uncertifiedRHEL bool) (*Layer, error) {
 	layer := &Layer{
-		NamespaceName: components.Namespace,
+		NamespaceName: components.GetNamespace(),
 	}
 
-	rhelv2Features, err := getFullFeaturesForRHELv2Packages(db, components.RhelComponents)
+	osFeatures, err := getOSFeatures(db, components.GetOsComponents())
+	if err != nil {
+		return nil, errors.Wrap(err, "getting OS features")
+	}
+	layer.Features = append(layer.Features, osFeatures...)
+
+	rhelv2Features, err := getFullFeaturesForRHELv2Packages(db, components.GetRhelComponents())
 	if err != nil {
 		return nil, errors.Wrap(err, "getting RHELv2 features")
 	}
 	layer.Features = append(layer.Features, rhelv2Features...)
 
-	languageFeatures, err := getLanguageFeatures(layer.Features, components.LanguageComponents, uncertifiedRHEL)
+	languageFeatures, err := getLanguageFeatures(layer.Features, components.GetLanguageComponents(), uncertifiedRHEL)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting language features")
 	}
 	layer.Features = append(layer.Features, languageFeatures...)
 
 	return layer, nil
+}
+
+func getOSFeatures(db database.Datastore, components []*v1.OSComponent) ([]Feature, error) {
+	featureVersions := make([]database.FeatureVersion, 0, len(components))
+	for _, c := range components {
+		featureVersions = append(featureVersions, database.FeatureVersion{
+			Feature: database.Feature{
+				Name: c.GetName(),
+				Namespace: database.Namespace{
+					Name:          c.GetNamespace(),
+					VersionFormat: versionfmt.GetVersionFormatForNamespace(c.GetNamespace()),
+				},
+			},
+			Version: c.GetVersion(),
+		})
+	}
+
+	err := db.LoadVulnerabilities(featureVersions)
+	if err != nil {
+		return nil, err
+	}
+
+	features := make([]Feature, 0, len(featureVersions))
+	for _, fv := range featureVersions {
+		fixedBy := versionfmt.MaxVersion
+		vulns := make([]Vulnerability, 0, len(fv.AffectedBy))
+		for _, vuln := range fv.AffectedBy {
+			vulns = append(vulns, Vulnerability{
+				Name:          vuln.Name,
+				NamespaceName: vuln.Namespace.Name,
+				Description:   vuln.Description,
+				Link:          vuln.Link,
+				Severity:      string(databaseVulnToSeverity(vuln)),
+			})
+
+			// TODO: Metadata and FixedBy
+		}
+
+		features = append(features, Feature{
+			Name:                fv.Feature.Name,
+			NamespaceName:       fv.Feature.Namespace.Name,
+			VersionFormat:       versionfmt.GetVersionFormatForNamespace(fv.Feature.Namespace.Name),
+			Version:             fv.Version,
+			Vulnerabilities:     vulns,
+			FixedBy:             fixedBy,
+		})
+	}
+
+	return features, nil
 }
 
 // Namespace is the image's base OS.

@@ -31,6 +31,8 @@ func TestGRPCScanImage(t *testing.T) {
 }
 
 func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
+	assert.Equal(t, test.namespace, imgScan.GetNamespace())
+
 	// Filter out vulnerabilities with no metadata
 	for _, feature := range imgScan.Features {
 		filteredVulns := feature.Vulnerabilities[:0]
@@ -164,9 +166,11 @@ func TestGRPCGetImageComponents(t *testing.T) {
 			},
 		})
 		require.Nil(t, err)
+		require.NotNil(t, imgComponentsResp.GetStatus())
 
 		assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
-		assert.Equal(t, testCase.uncertifiedRHEL, hasUncertifiedRHEL(imgComponentsResp.Notes), "Image %s", testCase.image)
+		assert.Equal(t, testCase.uncertifiedRHEL, hasUncertifiedRHEL(imgComponentsResp.GetNotes()), "Image %s", testCase.image)
+		assert.Equal(t, testCase.namespace, imgComponentsResp.GetComponents().GetNamespace())
 		verifyComponents(t, imgComponentsResp.GetComponents(), testCase)
 	}
 }

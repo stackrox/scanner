@@ -138,6 +138,8 @@ type Datastore interface {
 	// createNotification equals to true.
 	InsertVulnerabilities(vulnerabilities []Vulnerability) error
 
+	//InsertFeatures(features []Feature) error
+
 	// InsertRHELv2Vulnerabilities stores the given RHELv2 vulnerabilities into
 	// the database.
 	InsertRHELv2Vulnerabilities(vulnerabilities []*RHELv2Vulnerability) error
@@ -191,7 +193,8 @@ type Datastore interface {
 
 	GetLayerLanguageComponents(layer, lineage string, opts *DatastoreOptions) ([]*component.LayerToComponents, error)
 
-	GetVulnerabilitiesForFeatureVersion(featureVersions FeatureVersion) ([]Vulnerability, error)
+	GetVulnerabilitiesForFeatureVersion(featureVersion FeatureVersion) ([]Vulnerability, error)
+	LoadVulnerabilities(featureVersions []FeatureVersion) error
 
 	FeatureExists(namespace, feature string) (bool, error)
 }
