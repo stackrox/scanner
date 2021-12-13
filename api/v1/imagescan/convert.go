@@ -7,8 +7,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/api/v1/convert"
-	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurefmt"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 )
@@ -84,21 +85,7 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability 
 	return vulns
 }
 
-func convertProvidedExecutables(pkg *database.RHELv2Package) []*v1.Executable {
-	paths := pkg.ProvidedExecutables
-	requiredFeatures := []*v1.FeatureNameVersion{{Name: pkg.Name, Version: pkg.Version}}
-	executables := make([]*v1.Executable, 0, len(paths))
-	for _, path := range paths {
-		executables = append(executables, &v1.Executable{
-			Path:             path,
-			RequiredFeatures: requiredFeatures,
-		})
-	}
-
-	return executables
-}
-
-// ConvertFeatures converts api Features into v1 (proto) Feature pointers.
+// ConvertFeatures converts api Features into v1 (proto) FeatureForDependency pointers.
 func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 	features := make([]*v1.Feature, 0, len(apiFeatures))
 	for _, a := range apiFeatures {
@@ -166,9 +153,11 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 		})
 	}
 
+	depMap := common.GetDepMapRHEL(imgComponents.RHELv2PkgEnvs)
 	rhelv2Components := make([]*v1.RHELComponent, 0, len(imgComponents.RHELv2PkgEnvs))
 	for _, rhelv2PkgEnv := range imgComponents.RHELv2PkgEnvs {
 		pkg := rhelv2PkgEnv.Pkg
+		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: pkg.Version}
 		rhelv2Components = append(rhelv2Components, &v1.RHELComponent{
 			Id:          int64(pkg.ID),
 			Name:        pkg.Name,
@@ -178,7 +167,7 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 			Module:      pkg.Module,
 			Cpes:        rhelv2PkgEnv.CPEs,
 			AddedBy:     rhelv2PkgEnv.AddedBy,
-			Executables: convertProvidedExecutables(pkg),
+			Executables: common.CreateExecutablesFromDependencies(pkgKey, pkg.ExecutableToDependencies, depMap),
 		})
 	}
 
