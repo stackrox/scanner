@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 	"testing"
 
 	apiV1 "github.com/stackrox/scanner/api/v1"
@@ -149,29 +148,31 @@ func TestGRPCGetImageComponents(t *testing.T) {
 	_, inCIRun := os.LookupEnv("CI")
 
 	for _, testCase := range testCases {
-		if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
-			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
-			testCase.registry = "https://quay.io"
-			testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
-			testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
-		}
+		t.Run(testCase.image, func(t *testing.T) {
+			if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
+				testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
+				testCase.registry = "https://quay.io"
+				testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
+				testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
+			}
 
-		imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
-			Image: testCase.image,
-			Registry: &v1.RegistryData{
-				Url:      testCase.registry,
-				Username: testCase.username,
-				Password: testCase.password,
-				Insecure: true,
-			},
+			imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
+				Image: testCase.image,
+				Registry: &v1.RegistryData{
+					Url:      testCase.registry,
+					Username: testCase.username,
+					Password: testCase.password,
+					Insecure: true,
+				},
+			})
+			require.Nil(t, err)
+			require.NotNil(t, imgComponentsResp.GetStatus())
+
+			assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
+			assert.Equal(t, testCase.uncertifiedRHEL, hasUncertifiedRHEL(imgComponentsResp.GetNotes()), "Image %s", testCase.image)
+			assert.Equal(t, testCase.namespace, imgComponentsResp.GetComponents().GetNamespace())
+			verifyComponents(t, imgComponentsResp.GetComponents(), testCase)
 		})
-		require.Nil(t, err)
-		require.NotNil(t, imgComponentsResp.GetStatus())
-
-		assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
-		assert.Equal(t, testCase.uncertifiedRHEL, hasUncertifiedRHEL(imgComponentsResp.GetNotes()), "Image %s", testCase.image)
-		assert.Equal(t, testCase.namespace, imgComponentsResp.GetComponents().GetNamespace())
-		verifyComponents(t, imgComponentsResp.GetComponents(), testCase)
 	}
 }
 

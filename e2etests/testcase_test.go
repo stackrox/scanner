@@ -1594,7 +1594,7 @@ var testCases = []testCase{
 		username:  os.Getenv("DOCKER_IO_PULL_USERNAME"),
 		password:  os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		source:    "NVD",
-		namespace: "ubuntu:14.04",
+		namespace: "ubuntu:16.04",
 	},
 	{
 		// One of the images used for Red Hat Scanner Certification.
@@ -2057,7 +2057,7 @@ var testCases = []testCase{
 		image:     "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
 		registry:  "https://quay.io",
 		source:    "NVD",
-		namespace: "TODO",
+		namespace: "", // Fedora 28
 		unexpectedFeatures: []apiV1.Feature{
 			{
 				Name:          "p11-kit",
@@ -2312,7 +2312,7 @@ var testCases = []testCase{
 		image:     "docker.io/anchore/anchore-engine:v0.9.4",
 		registry:  "https://registry-1.docker.io",
 		source:    "NVD",
-		namespace: "TODO",
+		namespace: "rhel:8",
 		unexpectedFeatures: []apiV1.Feature{
 			{
 				Name:    "netaddr",
