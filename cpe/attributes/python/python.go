@@ -64,6 +64,21 @@ func ignored(c *component.Component) bool {
 	return false
 }
 
+func parseAuthorEmailAsVendor(email string) string {
+	startIdx := strings.Index(email, "@")
+	if startIdx != -1 && startIdx != len(email)-1 {
+		endIdx := strings.Index(email[startIdx+1:], ".")
+		if endIdx == -1 {
+			return ""
+		}
+		if endIdx >= len(email) {
+			return email[startIdx+1:]
+		}
+		return email[startIdx+1 : startIdx+endIdx+1]
+	}
+	return ""
+}
+
 // GetPythonAttributes returns the Python-related attributes for the given component.
 func GetPythonAttributes(c *component.Component) []*wfn.Attributes {
 	python := c.PythonPkgMetadata
@@ -95,14 +110,8 @@ func GetPythonAttributes(c *component.Component) []*wfn.Attributes {
 		}
 	}
 	if python.AuthorEmail != "" {
-		startIdx := strings.Index(python.AuthorEmail, "@")
-		if startIdx != -1 && startIdx != len(python.AuthorEmail)-1 {
-			endIdx := strings.Index(python.AuthorEmail[startIdx+1:], ".")
-			if endIdx >= len(python.AuthorEmail) {
-				vendorSet.Add(python.AuthorEmail[startIdx+1:])
-			} else {
-				vendorSet.Add(python.AuthorEmail[startIdx+1 : startIdx+endIdx+1])
-			}
+		if vendor := parseAuthorEmailAsVendor(python.AuthorEmail); vendor != "" {
+			vendorSet.Add(vendor)
 		}
 	}
 	if strings.HasPrefix(python.DownloadURL, "https://pypi.org/project/") {
