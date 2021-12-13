@@ -16,13 +16,14 @@ package v1
 
 import (
 	"github.com/pkg/errors"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/rhel"
@@ -74,7 +75,7 @@ func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability
 	return vuln
 }
 
-func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertified bool) *Feature {
+func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertified bool, depMap map[string]common.FeatureKeySet) *Feature {
 	version := dbFeatureVersion.Version
 	if version == versionfmt.MaxVersion {
 		version = "None"
@@ -85,14 +86,15 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
+	executables := createExecutablesFromDependencies(dbFeatureVersion, depMap)
 	return &Feature{
-		Name:                dbFeatureVersion.Feature.Name,
-		NamespaceName:       dbFeatureVersion.Feature.Namespace.Name,
-		VersionFormat:       stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
-		Version:             version,
-		AddedBy:             addedBy,
-		Location:            dbFeatureVersion.Feature.Location,
-		ProvidedExecutables: dbFeatureVersion.ProvidedExecutables,
+		Name:          dbFeatureVersion.Feature.Name,
+		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
+		VersionFormat: stringutils.OrDefault(dbFeatureVersion.Feature.SourceType, dbFeatureVersion.Feature.Namespace.VersionFormat),
+		Version:       version,
+		AddedBy:       addedBy,
+		Location:      dbFeatureVersion.Feature.Location,
+		Executables:   executables,
 	}
 }
 
@@ -106,7 +108,7 @@ func hasKernelPrefix(name string) bool {
 }
 
 // LayerFromDatabaseModel returns the scan data for the given layer based on the data in the given datastore.
-func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, opts *database.DatastoreOptions) (Layer, []Note, error) {
+func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, depMap map[string]common.FeatureKeySet, opts *database.DatastoreOptions) (Layer, []Note, error) {
 	withFeatures := opts.GetWithFeatures()
 	withVulnerabilities := opts.GetWithVulnerabilities()
 	uncertifiedRHEL := opts.GetUncertifiedRHEL()
@@ -127,7 +129,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 
 	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
-			feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
+			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL(), depMap)
 
 			if hasKernelPrefix(feature.Name) {
 				continue
@@ -191,8 +193,9 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 	notes := getNotes(namespaceName, uncertifiedRHEL)
 
 	if dbLayer.Features != nil {
+		depMap := common.GetDepMap(dbLayer.Features)
 		for _, dbFeatureVersion := range dbLayer.Features {
-			feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL)
+			feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL, depMap)
 
 			if hasKernelPrefix(feature.Name) {
 				continue
@@ -347,15 +350,15 @@ type Vulnerability struct {
 
 // Feature is a scanned package in an image.
 type Feature struct {
-	Name                string          `json:"Name,omitempty"`
-	NamespaceName       string          `json:"NamespaceName,omitempty"`
-	VersionFormat       string          `json:"VersionFormat,omitempty"`
-	Version             string          `json:"Version,omitempty"`
-	Vulnerabilities     []Vulnerability `json:"Vulnerabilities,omitempty"`
-	AddedBy             string          `json:"AddedBy,omitempty"`
-	Location            string          `json:"Location,omitempty"`
-	FixedBy             string          `json:"FixedBy,omitempty"`
-	ProvidedExecutables []string        `json:"ProvidedExecutables,omitempty"`
+	Name            string           `json:"Name,omitempty"`
+	NamespaceName   string           `json:"NamespaceName,omitempty"`
+	VersionFormat   string           `json:"VersionFormat,omitempty"`
+	Version         string           `json:"Version,omitempty"`
+	Vulnerabilities []Vulnerability  `json:"Vulnerabilities,omitempty"`
+	AddedBy         string           `json:"AddedBy,omitempty"`
+	Location        string           `json:"Location,omitempty"`
+	FixedBy         string           `json:"FixedBy,omitempty"`
+	Executables     []*v1.Executable `json:"Executables,omitempty"`
 }
 
 // DatabaseModel returns a database.FeatureVersion based on the caller Feature.

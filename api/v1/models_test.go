@@ -3,7 +3,9 @@ package v1
 import (
 	"testing"
 
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/testutils"
@@ -21,7 +23,16 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
-	providedExecs := []string{"/exec/me", "/pls/exec/me"}
+	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
+	expectedExecs := make([]*v1.Executable, 0, len(providedExecs))
+	for exec := range providedExecs {
+		expectedExecs = append(expectedExecs, &v1.Executable{Path: exec, RequiredFeatures: []*v1.FeatureNameVersion{
+			{
+				Name:    "curl",
+				Version: "7.35.0-1ubuntu2.20",
+			},
+		}})
+	}
 
 	dbLayer := database.Layer{
 		Name:          "example",
@@ -54,17 +65,17 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 						FixedBy: "7.35.0-1ubuntu2.20+esm2",
 					},
 				},
-				ProvidedExecutables: providedExecs,
+				ExecutableToDependencies: providedExecs,
 			},
 		},
 	}
-	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].FixedBy)
-	assert.ElementsMatch(t, providedExecs, layer.Features[0].ProvidedExecutables)
+	assert.ElementsMatch(t, expectedExecs, layer.Features[0].Executables)
 }
 
 func TestLatestCentOSFeatureVersion(t *testing.T) {
@@ -72,7 +83,16 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
-	providedExecs := []string{"/exec/me", "/pls/exec/me"}
+	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
+	expectedExecs := make([]*v1.Executable, 0, len(providedExecs))
+	for exec := range providedExecs {
+		expectedExecs = append(expectedExecs, &v1.Executable{Path: exec, RequiredFeatures: []*v1.FeatureNameVersion{
+			{
+				Name:    "sqlite-libs",
+				Version: "3.26.0-6.el8",
+			},
+		}})
+	}
 
 	dbLayer := database.Layer{
 		Name:          "example",
@@ -117,17 +137,17 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 						FixedBy: "0:3.26.0-11.el8",
 					},
 				},
-				ProvidedExecutables: providedExecs,
+				ExecutableToDependencies: providedExecs,
 			},
 		},
 	}
-	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
-	assert.ElementsMatch(t, providedExecs, layer.Features[0].ProvidedExecutables)
+	assert.ElementsMatch(t, expectedExecs, layer.Features[0].Executables)
 }
 
 func TestNotesNoLanguageVulns(t *testing.T) {
@@ -145,7 +165,7 @@ func TestNotesNoLanguageVulns(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, LanguageCVEsUnavailable)
@@ -162,7 +182,7 @@ func TestNotesStaleCVEs(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsStale)
@@ -179,7 +199,7 @@ func TestNotesUnavailableCVEs(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsUnavailable)
@@ -243,6 +263,12 @@ func TestComponentsFromDatabaseModel(t *testing.T) {
 						Name:    "CVE-2020-13630",
 						FixedBy: "0:3.26.0-11.el8",
 					},
+				},
+				ExecutableToDependencies: database.StringToStringsMap{
+					"/usr/bin/showdb": {"sqlite3.so": {}},
+				},
+				LibraryToDependencies: database.StringToStringsMap{
+					"sqlite3.so": {},
 				},
 			},
 		},
@@ -308,6 +334,17 @@ func TestComponentsFromDatabaseModel(t *testing.T) {
 			VersionFormat: "rpm",
 			Version:       "3.26.0-6.el8",
 			AddedBy:       "layer1",
+			Executables: []*v1.Executable{
+				{
+					Path: "/usr/bin/showdb",
+					RequiredFeatures: []*v1.FeatureNameVersion{
+						{
+							Name:    "sqlite-libs",
+							Version: "3.26.0-6.el8",
+						},
+					},
+				},
+			},
 		},
 	}
 	expectedComponents := []*component.Component{

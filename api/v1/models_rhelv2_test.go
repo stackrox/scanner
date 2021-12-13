@@ -7,6 +7,7 @@ import (
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/archop"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/testutils"
@@ -157,7 +158,7 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 		},
 		Features: nil,
 	}
-	layer, _, err := LayerFromDatabaseModel(db, dbLayer, "", &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(db, dbLayer, "", nil, &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
 	})
@@ -167,13 +168,26 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 	assert.Equal(t, "rhel:8", layer.NamespaceName)
 	features := []Feature{
 		{
-			Name:                "pkg",
-			NamespaceName:       "rhel:8",
-			VersionFormat:       rpm.ParserName,
-			Version:             "2.x86_64",
-			AddedBy:             "layer1",
-			FixedBy:             "5",
-			ProvidedExecutables: []string{"/exec/me", "/pls/exec/me"},
+			Name:          "pkg",
+			NamespaceName: "rhel:8",
+			VersionFormat: rpm.ParserName,
+			Version:       "2.x86_64",
+			AddedBy:       "layer1",
+			FixedBy:       "5",
+			Executables: []*v1.Executable{
+				{
+					Path: "/exec/me",
+					RequiredFeatures: []*v1.FeatureNameVersion{
+						{Name: "pkg", Version: "2.x86_64"},
+					},
+				},
+				{
+					Path: "/pls/exec/me",
+					RequiredFeatures: []*v1.FeatureNameVersion{
+						{Name: "pkg", Version: "2.x86_64"},
+					},
+				},
+			},
 			Vulnerabilities: []Vulnerability{
 				{
 					Name:          "v1",

@@ -194,21 +194,26 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 	features := make([]apiV1.Feature, 0, len(nonLanguageFeatures))
 	for _, c := range components.OsComponents {
 		features = append(features, apiV1.Feature{
-			Name:                c.Name,
-			NamespaceName:       c.Namespace,
-			Version:             c.Version,
-			AddedBy:             c.AddedBy,
-			ProvidedExecutables: imagescan.ConvertExecutablesToPaths(c.Executables),
+			Name:          c.Name,
+			NamespaceName: c.Namespace,
+			Version:       c.Version,
+			AddedBy:       c.AddedBy,
+			Executables:   c.Executables,
 		})
 	}
 	for _, c := range components.RhelComponents {
+		for _, exec := range c.Executables {
+			for _, rf := range exec.RequiredFeatures {
+				rf.Version = rf.Version + "." + c.Arch
+			}
+		}
 		features = append(features, apiV1.Feature{
-			Name:                c.Name,
-			NamespaceName:       c.Namespace,
-			VersionFormat:       "rpm",
-			Version:             c.Version + "." + c.Arch,
-			AddedBy:             c.AddedBy,
-			ProvidedExecutables: imagescan.ConvertExecutablesToPaths(c.Executables),
+			Name:          c.Name,
+			NamespaceName: c.Namespace,
+			VersionFormat: "rpm",
+			Version:       c.Version + "." + c.Arch,
+			AddedBy:       c.AddedBy,
+			Executables:   c.Executables,
 		})
 	}
 
@@ -216,10 +221,16 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 		f := getMatchingFeature(t, features, expectedFeature, false)
 
 		if test.checkProvidedExecutables {
-			assert.ElementsMatch(t, expectedFeature.ProvidedExecutables, f.ProvidedExecutables)
+			for _, exec := range f.Executables {
+				sort.Slice(exec.RequiredFeatures, func(i, j int) bool {
+					return exec.RequiredFeatures[i].GetName() < exec.RequiredFeatures[j].GetName() ||
+						exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()
+				})
+			}
+			assert.ElementsMatch(t, expectedFeature.Executables, f.Executables)
 		}
-		expectedFeature.ProvidedExecutables = nil
-		f.ProvidedExecutables = nil
+		expectedFeature.Executables = nil
+		f.Executables = nil
 
 		assert.Equal(t, expectedFeature, *f)
 	}

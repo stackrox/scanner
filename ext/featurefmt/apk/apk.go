@@ -69,9 +69,13 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 			// Protect the map from entries with invalid versions.
 			if pkg.Feature.Name != "" && pkg.Version != "" {
-				pkg.ProvidedExecutables = executablesSet.AsSortedSlice(func(i, j string) bool {
-					return i < j
-				})
+				if len(executablesSet) != 0 {
+					execToDeps := make(database.StringToStringsMap, len(executablesSet))
+					for exec := range executablesSet {
+						execToDeps[exec] = set.NewStringSet()
+					}
+					pkg.ExecutableToDependencies = execToDeps
+				}
 
 				key := featurefmt.PackageKey{
 					Name:    pkg.Feature.Name,
