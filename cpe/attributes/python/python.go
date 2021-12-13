@@ -67,14 +67,12 @@ func ignored(c *component.Component) bool {
 func parseAuthorEmailAsVendor(email string) string {
 	startIdx := strings.Index(email, "@")
 	if startIdx != -1 && startIdx != len(email)-1 {
-		endIdx := strings.Index(email[startIdx+1:], ".")
+		shortened := email[startIdx+1:]
+		endIdx := strings.Index(shortened, ".")
 		if endIdx == -1 {
-			return ""
+			return shortened
 		}
-		if endIdx >= len(email) {
-			return email[startIdx+1:]
-		}
-		return email[startIdx+1 : startIdx+endIdx+1]
+		return shortened[:endIdx]
 	}
 	return ""
 }

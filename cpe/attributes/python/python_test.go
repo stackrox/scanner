@@ -25,7 +25,7 @@ func TestParseAuthorEmailAsVendor(t *testing.T) {
 		},
 		{
 			email:  "a@stackrox",
-			vendor: "",
+			vendor: "stackrox",
 		},
 		{
 			email:  "a@stackrox.com",
