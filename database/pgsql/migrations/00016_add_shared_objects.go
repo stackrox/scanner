@@ -9,9 +9,6 @@ func init() {
 			`ALTER TABLE FeatureVersion ADD COLUMN IF NOT EXISTS executable_to_dependencies BYTEA`,
 			`ALTER TABLE FeatureVersion ADD COLUMN IF NOT EXISTS library_to_dependencies BYTEA`,
 			`ALTER TABLE FeatureVersion DROP COLUMN IF EXISTS executables`,
-			`ALTER TABLE rhelv2_package ADD COLUMN IF NOT EXISTS executable_to_dependencies BYTEA`,
-			`ALTER TABLE rhelv2_package ADD COLUMN IF NOT EXISTS library_to_dependencies BYTEA`,
-			`ALTER TABLE rhelv2_package DROP COLUMN IF EXISTS executables`,
 		}),
 	})
 }
