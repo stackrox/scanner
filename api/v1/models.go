@@ -293,7 +293,9 @@ func getOSFeatures(db database.Datastore, components []*v1.OSComponent) ([]Featu
 					VersionFormat: versionfmt.GetVersionFormatForNamespace(c.GetNamespace()),
 				},
 			},
-			Version: c.GetVersion(),
+			Version:     c.GetVersion(),
+			Executables: c.GetExecutables(),
+			AddedBy:     database.Layer{Name: c.GetAddedBy()},
 		})
 	}
 
@@ -305,12 +307,13 @@ func getOSFeatures(db database.Datastore, components []*v1.OSComponent) ([]Featu
 	features := make([]Feature, 0, len(featureVersions))
 	for _, fv := range featureVersions {
 		feature := Feature{
-			Name:            fv.Feature.Name,
-			NamespaceName:   fv.Feature.Namespace.Name,
-			VersionFormat:   versionfmt.GetVersionFormatForNamespace(fv.Feature.Namespace.Name),
-			Version:         fv.Version,
+			Name:          fv.Feature.Name,
+			NamespaceName: fv.Feature.Namespace.Name,
+			VersionFormat: versionfmt.GetVersionFormatForNamespace(fv.Feature.Namespace.Name),
+			Version:       fv.Version,
+			AddedBy:       fv.AddedBy.Name,
+			Executables:   fv.Executables,
 		}
-		// TODO: Executables
 		updateFeatureWithVulns(&feature, fv.AffectedBy, feature.VersionFormat)
 
 		features = append(features, feature)
