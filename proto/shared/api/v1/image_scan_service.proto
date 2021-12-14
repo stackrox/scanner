@@ -11,8 +11,8 @@ import "shared/api/v1/vulnerability.proto";
 package scannerV1;
 
 message Image {
-    string   namespace        = 2;
-    repeated Feature features = 1;
+    string           namespace = 2;
+    repeated Feature features  = 1;
 }
 
 message ScanImageRequest {

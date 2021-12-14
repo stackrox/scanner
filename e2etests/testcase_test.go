@@ -32,6 +32,7 @@ var testCases = []testCase{
 		namespace:                "ubuntu:16.04",
 		onlyCheckSpecifiedVulns:  true,
 		checkProvidedExecutables: true,
+		namespace:                "ubuntu:16.04",
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "lz4",
@@ -151,6 +152,7 @@ var testCases = []testCase{
 		source:                   "NVD",
 		namespace:                "debian:8",
 		checkProvidedExecutables: true,
+		namespace:                "debian:8",
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "apt",
@@ -1985,6 +1987,7 @@ var testCases = []testCase{
 		source:          "Red Hat",
 		namespace:       "centos:7",
 		uncertifiedRHEL: true,
+		namespace:       "centos:7",
 	},
 	{
 
@@ -1995,6 +1998,7 @@ var testCases = []testCase{
 		source:          "Red Hat",
 		namespace:       "centos:7",
 		uncertifiedRHEL: true,
+		namespace:       "centos:7",
 	},
 	{
 		// Had an issue where Scanner claimed jq 6.1-r1 was vulnerable to
@@ -2035,8 +2039,8 @@ var testCases = []testCase{
 		},
 	},
 	// The next two images have the same layer and thus verify lineage checks between different images
-	// The first is a centos:7 image that has the package p11-kit. The second image is from fedora and we
-	// can't identify the OS so it should not have p11-kit
+	// The first is a centos:7 image that has the package p11-kit. The second image is from fedora, and we
+	// can't identify the OS, so it should not have p11-kit.
 	{
 		image:                   "quay.io/dougtidwell/open-adventure@sha256:564c8dde1931f337a7bc8925f94cb594d9c81a5ee9eacc5ec5590f1e60e94b6a",
 		registry:                "https://quay.io",
