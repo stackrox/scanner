@@ -6,6 +6,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stretchr/testify/assert"
 
+	// Register the following parsers.
 	_ "github.com/stackrox/scanner/ext/versionfmt/apk"
 	_ "github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	_ "github.com/stackrox/scanner/ext/versionfmt/rpm"
@@ -29,4 +30,3 @@ func TestGetVersionFormatForNamespace(t *testing.T) {
 
 	assert.Equal(t, "", versionfmt.GetVersionFormatForNamespace(":"))
 }
-
