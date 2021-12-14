@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"sort"
 	"testing"
 	"time"
 
@@ -70,10 +71,13 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Dist:       "rhel:8",
 			Pkgs: []*database.RHELv2Package{
 				{
-					Name:                "pkg",
-					Version:             "2",
-					Arch:                "x86_64",
-					ProvidedExecutables: []string{"/exec/me", "/pls/exec/me"},
+					Name:    "pkg",
+					Version: "2",
+					Arch:    "x86_64",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/exec/me":     {},
+						"/pls/exec/me": {},
+					},
 				},
 				{
 					Name:    "pkg2",
@@ -89,10 +93,13 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Dist:       "rhel:8",
 			Pkgs: []*database.RHELv2Package{
 				{
-					Name:                "pkg",
-					Version:             "2",
-					Arch:                "x86_64",
-					ProvidedExecutables: []string{"/exec/me", "/pls/exec/me"},
+					Name:    "pkg",
+					Version: "2",
+					Arch:    "x86_64",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/exec/me":     {},
+						"/pls/exec/me": {},
+					},
 				},
 			},
 		},
@@ -178,13 +185,13 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 				{
 					Path: "/exec/me",
 					RequiredFeatures: []*v1.FeatureNameVersion{
-						{Name: "pkg", Version: "2.x86_64"},
+						{Name: "pkg", Version: "2"},
 					},
 				},
 				{
 					Path: "/pls/exec/me",
 					RequiredFeatures: []*v1.FeatureNameVersion{
-						{Name: "pkg", Version: "2.x86_64"},
+						{Name: "pkg", Version: "2"},
 					},
 				},
 			},
@@ -213,6 +220,11 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			},
 		},
 	}
+	for _, feature := range layer.Features {
+		sort.Slice(feature.Executables, func(i, j int) bool {
+			return feature.Executables[i].Path < feature.Executables[j].Path
+		})
+	}
 	assert.ElementsMatch(t, layer.Features, features)
 }
 
@@ -228,12 +240,12 @@ func TestComponentsFromDatabaseModelRHELv2(t *testing.T) {
 			Dist: "rhel:7",
 			Pkgs: []*database.RHELv2Package{
 				{
-					Model:               database.Model{ID: 3},
-					Name:                "pkg",
-					Version:             "22",
-					Arch:                "x86_64",
-					Module:              "idk",
-					ProvidedExecutables: []string{"executable"},
+					Model:                    database.Model{ID: 3},
+					Name:                     "pkg",
+					Version:                  "22",
+					Arch:                     "x86_64",
+					Module:                   "idk",
+					ExecutableToDependencies: database.StringToStringsMap{"executable": {}},
 				},
 			},
 			CPEs: []string{"my-cpe"},
@@ -259,12 +271,12 @@ func TestComponentsFromDatabaseModelRHELv2(t *testing.T) {
 	expectedRHELv2PkgEnvs := map[int]*database.RHELv2PackageEnv{
 		3: {
 			Pkg: &database.RHELv2Package{
-				Model:               database.Model{ID: 3},
-				Name:                "pkg",
-				Version:             "22",
-				Module:              "idk",
-				Arch:                "x86_64",
-				ProvidedExecutables: []string{"executable"},
+				Model:                    database.Model{ID: 3},
+				Name:                     "pkg",
+				Version:                  "22",
+				Module:                   "idk",
+				Arch:                     "x86_64",
+				ExecutableToDependencies: database.StringToStringsMap{"executable": {}},
 			},
 			Namespace: "rhel:7",
 			AddedBy:   "layer1",

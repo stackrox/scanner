@@ -25,6 +25,33 @@ type cycle struct {
 	members set.StringSet
 }
 
+// GetDepMapRHEL creates a dependency map from a library to the features it uses.
+func GetDepMapRHEL(pkgEnvs map[int]*database.RHELv2PackageEnv) map[string]FeatureKeySet {
+	// Map from a library to its dependency data
+	libNodes := make(map[string]*libDepNode)
+	// Build the map
+	for _, pkgEnv := range pkgEnvs {
+		fvKey := featurefmt.PackageKey{
+			Name:    pkgEnv.Pkg.Name,
+			Version: pkgEnv.Pkg.Version,
+		}
+		// Populate libraries with all direct imports.
+		for lib, deps := range pkgEnv.Pkg.LibraryToDependencies {
+			if node, ok := libNodes[lib]; ok {
+				node.libraries = node.libraries.Union(deps)
+				node.features.Add(fvKey)
+			} else {
+				node = &libDepNode{
+					libraries: deps,
+					features:  FeatureKeySet{fvKey: {}},
+				}
+				libNodes[lib] = node
+			}
+		}
+	}
+	return createDepMap(libNodes)
+}
+
 // GetDepMap creates a dependency map from a library to the features it uses.
 func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
 	// Map from a library to its dependency data
@@ -49,7 +76,11 @@ func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
 			}
 		}
 	}
-	// Traverse it and get the dependency map
+	return createDepMap(libNodes)
+}
+
+// Traverse map of lib dep nodes and create a dependency map
+func createDepMap(libNodes map[string]*libDepNode) map[string]FeatureKeySet {
 	depMap := make(map[string]FeatureKeySet)
 	for k, v := range libNodes {
 		var c *cycle

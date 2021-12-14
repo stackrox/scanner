@@ -23,6 +23,7 @@ import (
 	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/language"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
@@ -260,7 +261,8 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
-	executables := createExecutablesFromDependencies(dbFeatureVersion, depMap)
+	featureKey := featurefmt.PackageKey{Name: dbFeatureVersion.Feature.Name, Version: dbFeatureVersion.Version}
+	executables := common.CreateExecutablesFromDependencies(featureKey, dbFeatureVersion.ExecutableToDependencies, depMap)
 	return &Feature{
 		Name:          dbFeatureVersion.Feature.Name,
 		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
@@ -270,17 +272,6 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		Location:      dbFeatureVersion.Feature.Location,
 		Executables:   executables,
 	}
-}
-
-func toFeatureNameVersions(keys common.FeatureKeySet) []*v1.FeatureNameVersion {
-	if len(keys) == 0 {
-		return nil
-	}
-	features := make([]*v1.FeatureNameVersion, 0, len(keys))
-	for k := range keys {
-		features = append(features, &v1.FeatureNameVersion{Name: k.Name, Version: k.Version})
-	}
-	return features
 }
 
 func dedupeVersionMatcher(v1, v2 string) bool {
@@ -380,7 +371,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			layer.Features = append(layer.Features, *feature)
 		}
 		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
-			certified, err := addRHELv2Vulns(db, &layer)
+			certified, err := addRHELv2Vulns(db, &layer, depMap)
 			if err != nil {
 				return layer, notes, err
 			}
