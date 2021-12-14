@@ -46,12 +46,9 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer, depMap map[string]commo
 		if hasKernelPrefix(pkg.Name) {
 			continue
 		}
-		version := pkg.Version
-		if pkg.Arch != "" {
-			version += "." + pkg.Arch
-		}
 
-		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: pkg.Version}
+		version := pkg.GetPackageVersion()
+		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: version}
 		executables := common.CreateExecutablesFromDependencies(pkgKey, pkg.ExecutableToDependencies, depMap)
 		feature := Feature{
 			Name:          pkg.Name,

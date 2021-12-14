@@ -176,6 +176,15 @@ func (p *RHELv2Package) String() string {
 	return strings.Join([]string{p.Name, p.Version, p.Module, p.Arch}, ":")
 }
 
+// GetPackageVersion concatenates version and arch and returns package version
+func (p *RHELv2Package) GetPackageVersion() string {
+	version := p.Version
+	if p.Arch != "" {
+		version = version + "." + p.Arch
+	}
+	return version
+}
+
 // RHELv2Layer defines a RHEL image layer.
 type RHELv2Layer struct {
 	Model
