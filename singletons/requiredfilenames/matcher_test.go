@@ -19,4 +19,10 @@ func TestDynamicLibraryRegex(t *testing.T) {
 	assert.False(t, dynamicLibRegexp.MatchString("lib.xyz.so.1.99"))
 	assert.False(t, dynamicLibRegexp.MatchString("xyz/lib/libxyz.so1.99."))
 	assert.False(t, dynamicLibRegexp.MatchString("lib.so.99"))
+
+	assert.True(t, dynamicLibRegexp.MatchString("lib/x86_64-linux-gnu/ld-2.28.so"))
+	assert.True(t, dynamicLibRegexp.MatchString("lib/x86_64-linux-gnu/ld-linux-x86-64.so.2"))
+	assert.True(t, dynamicLibRegexp.MatchString("lib/x86_64-linux-gnu/libdl.so.2"))
+	assert.True(t, dynamicLibRegexp.MatchString("lib/x86_64-linux-gnu/libdl-2.23.so"))
+
 }
