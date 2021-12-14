@@ -167,9 +167,10 @@ func TestGRPCGetImageComponents(t *testing.T) {
 				},
 			})
 			require.Nil(t, err)
+			require.NotNil(t, imgComponentsResp.GetStatus())
 
 			assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
-			assert.Equal(t, testCase.uncertifiedRHEL, hasUncertifiedRHEL(imgComponentsResp.Notes), "Image %s", testCase.image)
+			assert.Equal(t, testCase.uncertifiedRHEL, hasUncertifiedRHEL(imgComponentsResp.GetNotes()), "Image %s", testCase.image)
 			assert.Equal(t, testCase.namespace, imgComponentsResp.GetComponents().GetNamespace())
 			verifyComponents(t, imgComponentsResp.GetComponents(), testCase)
 		})
