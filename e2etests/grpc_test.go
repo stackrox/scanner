@@ -60,7 +60,7 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 							exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()
 					})
 				}
-				assert.ElementsMatch(t, feature.Executables, matching.Executables)
+				assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
 			}
 			feature.ProvidedExecutables = nil
 			matching.ProvidedExecutables = nil
