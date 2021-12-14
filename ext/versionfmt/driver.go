@@ -150,6 +150,11 @@ func GetHigherVersion(format, a, b string) (string, error) {
 // associated with this namespace.
 // For example: if "rhel" is given, then "rpm" is returned.
 func GetVersionFormatForNamespace(namespace string) string {
+	idx := strings.Index(namespace, ":")
+	if idx >= 0 {
+		namespace = namespace[:idx]
+	}
+
 	parsersM.Lock()
 	defer parsersM.Unlock()
 

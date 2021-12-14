@@ -59,8 +59,8 @@ type Layer struct {
 	Features         []Feature         `json:"Features,omitempty"`
 }
 
-// VulnerabilityFromDatabaseModel converts the given database.Vulnerability into a Vulnerability.
-func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability {
+// vulnerabilityFromDatabaseModel converts the given database.Vulnerability into a Vulnerability.
+func vulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability {
 	vuln := Vulnerability{
 		Name:          dbVuln.Name,
 		NamespaceName: dbVuln.Namespace.Name,
@@ -159,7 +159,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, versionFormat string) {
 	allVulnsFixedBy := feature.FixedBy
 	for _, dbVuln := range dbVulns {
-		vuln := VulnerabilityFromDatabaseModel(dbVuln)
+		vuln := vulnerabilityFromDatabaseModel(dbVuln)
 		feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
 
 		// If at least one vulnerability is not fixable, then we mark it the component as not fixable.
@@ -304,28 +304,16 @@ func getOSFeatures(db database.Datastore, components []*v1.OSComponent) ([]Featu
 
 	features := make([]Feature, 0, len(featureVersions))
 	for _, fv := range featureVersions {
-		fixedBy := versionfmt.MaxVersion
-		vulns := make([]Vulnerability, 0, len(fv.AffectedBy))
-		for _, vuln := range fv.AffectedBy {
-			vulns = append(vulns, Vulnerability{
-				Name:          vuln.Name,
-				NamespaceName: vuln.Namespace.Name,
-				Description:   vuln.Description,
-				Link:          vuln.Link,
-				Severity:      string(databaseVulnToSeverity(vuln)),
-			})
-
-			// TODO: Metadata and FixedBy
-		}
-
-		features = append(features, Feature{
+		feature := Feature{
 			Name:            fv.Feature.Name,
 			NamespaceName:   fv.Feature.Namespace.Name,
 			VersionFormat:   versionfmt.GetVersionFormatForNamespace(fv.Feature.Namespace.Name),
 			Version:         fv.Version,
-			Vulnerabilities: vulns,
-			FixedBy:         fixedBy,
-		})
+		}
+		// TODO: Executables
+		updateFeatureWithVulns(&feature, fv.AffectedBy, feature.VersionFormat)
+
+		features = append(features, feature)
 	}
 
 	return features, nil
