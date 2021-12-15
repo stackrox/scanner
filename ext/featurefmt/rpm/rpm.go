@@ -24,6 +24,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackrox/scanner/pkg/trace"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -116,6 +118,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 }
 
 func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersion, error) {
+	trace.Trace()
 	var featureVersions []database.FeatureVersion
 
 	var fv database.FeatureVersion
@@ -141,6 +144,7 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 				if len(libToDeps) > 0 {
 					fv.LibraryToDependencies = libToDeps
 				}
+				log.Infof("Found feature %+v", fv)
 				featureVersions = append(featureVersions, fv)
 			}
 
@@ -176,13 +180,14 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 				execToDeps[filename] = deps
 			}
 			if fileData.ELFMetadata != nil {
+				log.Infof("file %s has sonames %v", filename, fileData.ELFMetadata.Sonames)
 				for _, soname := range fileData.ELFMetadata.Sonames {
 					deps, ok := libToDeps[soname]
 					if !ok {
 						deps = set.NewStringSet()
+						libToDeps[soname] = deps
 					}
 					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
-					libToDeps[soname] = deps
 				}
 			}
 		}

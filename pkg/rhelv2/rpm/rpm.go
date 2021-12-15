@@ -17,6 +17,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackrox/scanner/pkg/trace"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -148,6 +150,7 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 }
 
 func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Package, error) {
+	trace.Trace()
 	var pkgs []*database.RHELv2Package
 
 	p := &database.RHELv2Package{}
@@ -172,6 +175,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 				if len(libToDeps) > 0 {
 					p.LibraryToDependencies = libToDeps
 				}
+				log.Infof("Found package %+v", p)
 				pkgs = append(pkgs, p)
 			}
 
@@ -216,6 +220,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 				execToDeps[filename] = deps
 			}
 			if fileData.ELFMetadata != nil {
+				log.Infof("file %s has sonames %v", filename, fileData.ELFMetadata.Sonames)
 				for _, soname := range fileData.ELFMetadata.Sonames {
 					deps, ok := libToDeps[soname]
 					if !ok {

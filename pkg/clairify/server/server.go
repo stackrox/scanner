@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackrox/scanner/pkg/trace"
+
 	protoTypes "github.com/gogo/protobuf/types"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -62,6 +64,7 @@ func clairError(w http.ResponseWriter, status int, err error) {
 }
 
 func (s *Server) getClairLayer(w http.ResponseWriter, layerName, lineage string, uncertifiedRHEL bool) {
+	trace.Trace()
 	opts := &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
@@ -98,6 +101,7 @@ func (s *Server) getClairLayer(w http.ResponseWriter, layerName, lineage string,
 
 // GetResultsBySHA implements retrieving scan data via image SHA.
 func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
+	trace.Trace()
 	vars := mux.Vars(r)
 	sha, ok := vars[`sha`]
 	if !ok {
@@ -105,6 +109,7 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
+	logrus.Infof("cdu: Analyzing %s uncertifiedRHEL %v", sha, uncertifiedRHEL)
 	layer, lineage, exists, err := s.storage.GetLayerBySHA(sha, &database.DatastoreOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
@@ -113,6 +118,7 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !exists {
+		logrus.Infof("cdu: Cound not find sha %s", sha)
 		clairErrorString(w, http.StatusNotFound, "Could not find sha %q", sha)
 		return
 	}

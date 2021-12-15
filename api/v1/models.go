@@ -362,6 +362,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL(), depMap)
+			log.Infof("feature %+v", feature)
 
 			if hasKernelPrefix(feature.Name) {
 				continue

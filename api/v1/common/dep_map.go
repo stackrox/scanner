@@ -5,6 +5,7 @@ import (
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/trace"
 )
 
 type libDepNode struct {
@@ -29,12 +30,14 @@ type cycle struct {
 func GetDepMapRHEL(pkgEnvs map[int]*database.RHELv2PackageEnv) map[string]FeatureKeySet {
 	// Map from a library to its dependency data
 	libNodes := make(map[string]*libDepNode)
+	logrus.Infof("features %+v", pkgEnvs)
 	// Build the map
 	for _, pkgEnv := range pkgEnvs {
 		fvKey := featurefmt.PackageKey{
 			Name:    pkgEnv.Pkg.Name,
 			Version: pkgEnv.Pkg.GetPackageVersion(),
 		}
+		logrus.Infof("Create dep map for rhel %v", fvKey)
 		// Populate libraries with all direct imports.
 		for lib, deps := range pkgEnv.Pkg.LibraryToDependencies {
 			if node, ok := libNodes[lib]; ok {
@@ -54,6 +57,7 @@ func GetDepMapRHEL(pkgEnvs map[int]*database.RHELv2PackageEnv) map[string]Featur
 
 // GetDepMap creates a dependency map from a library to the features it uses.
 func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
+	logrus.Infof("features %+v", features)
 	// Map from a library to its dependency data
 	libNodes := make(map[string]*libDepNode)
 	// Build the map
@@ -62,6 +66,7 @@ func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
 			Name:    feature.Feature.Name,
 			Version: feature.Version,
 		}
+		logrus.Infof("Create dep map for %v", fvKey)
 		// Populate libraries with all direct imports.
 		for lib, deps := range feature.LibraryToDependencies {
 			if node, ok := libNodes[lib]; ok {
@@ -81,6 +86,7 @@ func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
 
 // Traverse map of lib dep nodes and create a dependency map
 func createDepMap(libNodes map[string]*libDepNode) map[string]FeatureKeySet {
+	trace.Trace()
 	depMap := make(map[string]FeatureKeySet)
 	for k, v := range libNodes {
 		var c *cycle
@@ -93,6 +99,7 @@ func createDepMap(libNodes map[string]*libDepNode) map[string]FeatureKeySet {
 			}
 		}
 	}
+	logrus.Infof("depMap %v", depMap)
 	return depMap
 }
 
