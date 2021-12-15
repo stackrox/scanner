@@ -114,6 +114,10 @@ func getMatchingGRPCFeature(t *testing.T, features []*v1.Feature, featureToFind 
 		return nil
 	}
 	if candidateIdx == -1 {
+		featureToFind.Vulnerabilities = nil
+		for _, feature := range features {
+			feature.Vulnerabilities = nil
+		}
 		fmt.Printf("Feature %+v not in list: %v", featureToFind, features)
 	}
 	require.NotEqual(t, -1, candidateIdx)
