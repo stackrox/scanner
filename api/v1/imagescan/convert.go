@@ -14,29 +14,7 @@ import (
 )
 
 var (
-	errSourceTypesMismatch = errors.New("Number of source types in proto and Go are not equal")
 	errNotesMismatch       = errors.New("Number of notes in proto and Go are not equal")
-
-	sourceTypeToProtoMap = func() map[component.SourceType]v1.SourceType {
-		numComponentSourceTypes := int(component.SentinelEndSourceType) - int(component.UnsetSourceType)
-		if numComponentSourceTypes != len(v1.SourceType_value) {
-			utils.CrashOnError(errSourceTypesMismatch)
-		}
-
-		m := make(map[component.SourceType]v1.SourceType, numComponentSourceTypes)
-		for name, val := range v1.SourceType_value {
-			normalizedName := strings.ToLower(strings.TrimSuffix(name, "_SOURCE_TYPE"))
-			for sourceType := component.UnsetSourceType; sourceType < component.SentinelEndSourceType; sourceType++ {
-				if strings.HasPrefix(strings.ToLower(sourceType.String()), normalizedName) {
-					m[sourceType] = v1.SourceType(val)
-				}
-			}
-		}
-		if len(m) != numComponentSourceTypes {
-			utils.CrashOnError(errSourceTypesMismatch)
-		}
-		return m
-	}()
 
 	noteToProtoMap = func() map[apiV1.Note]v1.Note {
 		numNotes := int(apiV1.SentinelNote)
@@ -137,7 +115,7 @@ func convertLanguageLevelComponentsSlice(components []*component.Component) *v1.
 
 func convertLanguageLevelComponent(c *component.Component) *v1.LanguageLevelComponent {
 	return &v1.LanguageLevelComponent{
-		SourceType: sourceTypeToProtoMap[c.SourceType],
+		SourceType: convert.SourceTypeToProtoMap[c.SourceType],
 		Name:       c.Name,
 		Version:    c.Version,
 		Location:   c.Location,
@@ -182,53 +160,7 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 		})
 	}
 
-	languageComponents := make([]*v1.LanguageComponent, 0, len(imgComponents.LanguageComponents))
-	for _, c := range imgComponents.LanguageComponents {
-		languageComponent := &v1.LanguageComponent{
-			Type:     sourceTypeToProtoMap[c.SourceType],
-			Name:     c.Name,
-			Version:  c.Version,
-			Location: c.Location,
-			AddedBy:  c.AddedBy,
-		}
-
-		switch c.SourceType {
-		case component.JavaSourceType:
-			javaMetadata := c.JavaPkgMetadata
-			if javaMetadata == nil {
-				log.Warnf("Java package %s:%s at %s is invalid; skipping...", c.Name, c.Version, c.Location)
-				continue
-			} else {
-				languageComponent.Language = &v1.LanguageComponent_Java{
-					Java: &v1.JavaComponent{
-						ImplementationVersion: javaMetadata.ImplementationVersion,
-						MavenVersion:          javaMetadata.MavenVersion,
-						Origins:               javaMetadata.Origins,
-						SpecificationVersion:  javaMetadata.SpecificationVersion,
-						BundleName:            javaMetadata.BundleName,
-					},
-				}
-			}
-		case component.PythonSourceType:
-			pythonMetadata := c.PythonPkgMetadata
-			if pythonMetadata == nil {
-				log.Warnf("Python package %s:%s at %s is invalid; skipping...", c.Name, c.Version, c.Location)
-				continue
-			} else {
-				languageComponent.Language = &v1.LanguageComponent_Python{
-					Python: &v1.PythonComponent{
-						Homepage:    pythonMetadata.Homepage,
-						AuthorEmail: pythonMetadata.AuthorEmail,
-						DownloadUrl: pythonMetadata.DownloadURL,
-						Summary:     pythonMetadata.Summary,
-						Description: pythonMetadata.Description,
-					},
-				}
-			}
-		}
-
-		languageComponents = append(languageComponents, languageComponent)
-	}
+	languageComponents := convert.LanguageComponents(imgComponents.LanguageComponents)
 
 	return &v1.Components{
 		Namespace:          imgComponents.Namespace,

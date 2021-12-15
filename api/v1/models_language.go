@@ -233,16 +233,15 @@ func getLanguageComponents(db database.Datastore, layerName, lineage string, unc
 		components = append(components, layerComponents...)
 	}
 
-	// We want to output the components in layer-order, so we must reverse the components slice.
-	for i, j := 0, len(components)-1; i < j; i, j = i+1, j-1 {
-		components[i], components[j] = components[j], components[i]
-	}
+	// Keep the components in reverse-layer order, as this will be useful when performing
+	// vulnerability matching.
 
 	return components
 }
 
 func getLanguageFeatures(osFeatures []Feature, components []*v1.LanguageComponent, uncertifiedRHEL bool) ([]Feature, error) {
 	layerToComponents := getLayerToComponents(components)
+	log.Info(layerToComponents)
 
 	languageFeatureMap := make(map[string]languageFeatureValue)
 	var featureVersions []database.FeatureVersion
@@ -295,24 +294,32 @@ func getLayerToComponents(components []*v1.LanguageComponent) []*component.Layer
 		c := &component.Component{
 			Name:     languageComponent.GetName(),
 			Version:  languageComponent.GetVersion(),
-			Location: languageComponent.Location,
+			Location: languageComponent.GetLocation(),
 			AddedBy:  languageComponent.GetAddedBy(),
 		}
 
 		var err error
 		switch languageComponent.GetType() {
 		case v1.SourceType_JAVA:
+			c.SourceType = component.JavaSourceType
 			c.JavaPkgMetadata, err = getJavaPkgMetadata(languageComponent.GetJava())
 			if err != nil {
 				log.Warnf("Unable to parse Java metadata: %v. skipping...", err)
 				continue
 			}
 		case v1.SourceType_PYTHON:
+			c.SourceType = component.PythonSourceType
 			c.PythonPkgMetadata, err = getPythonPkgMetadata(languageComponent.GetPython())
 			if err != nil {
 				log.Warnf("Unable to parse Java metadata: %v. skipping...", err)
 				continue
 			}
+		case v1.SourceType_NPM:
+			c.SourceType = component.NPMSourceType
+		case v1.SourceType_GEM:
+			c.SourceType = component.GemSourceType
+		case v1.SourceType_DOTNETCORERUNTIME:
+			c.SourceType = component.DotNetCoreRuntimeSourceType
 		}
 
 		if prevLayer == "" || prevLayer != languageComponent.GetAddedBy() {
