@@ -75,6 +75,7 @@ func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap
 	defer metrics.ObserveListFeaturesTime(pkgFmt, "all", time.Now())
 
 	scanner := bufio.NewScanner(bytes.NewReader(file))
+	log.Infof("package file content %s", string(file))
 
 	var pkgMetadata componentMetadata
 	for scanner.Scan() {
@@ -83,6 +84,7 @@ func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap
 		case line == "": // Delimits end of package definition. Go to the bottom of the loop.
 		case strings.HasPrefix(line, "Package: "):
 			pkgMetadata.name = line[len("Package: "):]
+			log.Infof("found package %s", pkgMetadata.name)
 			continue
 		case strings.HasPrefix(line, "Version: "):
 			version := line[len("Version: "):]
@@ -92,6 +94,7 @@ func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap
 				continue
 			}
 			pkgMetadata.version = version
+			log.Infof("found version %s", pkgMetadata.version)
 			continue
 		case strings.HasPrefix(line, "Architecture: "):
 			pkgMetadata.arch = line[len("Architecture: "):]
@@ -100,6 +103,7 @@ func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap
 			if strings.Contains(line, "deinstall") {
 				// It is assumed the package's name has already been determined at this point.
 				removedPackages.Add(pkgMetadata.name)
+				log.Infof("pkg removed %s", pkgMetadata.name)
 			}
 			continue
 		case strings.HasPrefix(line, "Source: "):
@@ -152,9 +156,11 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	// and not the package binaries, though usually only the binaries are installed.
 	pkgName := stringutils.FirstNonEmpty(pkgMetadata.sourceName, pkgMetadata.name)
 	pkgVersion := stringutils.FirstNonEmpty(pkgMetadata.sourceVersion, pkgMetadata.version)
+	log.Infof("handle component %s:%s", pkgName, pkgVersion)
 
 	// Sanity check the package definition.
 	if pkgName == "" || pkgVersion == "" || removedPackages.Contains(pkgMetadata.name) {
+		log.Infof("skip component %s:%s", pkgName, pkgVersion)
 		return
 	}
 
@@ -170,15 +176,19 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		// Read the list of files provided by the current package.
 		filenamesFileData := files[filenamesList]
 		if len(filenamesFileData.Contents) == 0 {
+			log.Infof("Use arch %s", filenamesArchList)
 			filenamesFileData = files[filenamesArchList]
 		}
+		log.Infof("filename list: %s", string(filenamesFileData.Contents))
 
 		filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.Contents))
 		for filenamesFileScanner.Scan() {
 			filename := filenamesFileScanner.Text()
+			log.Infof("Processing file %s", filename)
 
 			// The first character is always "/", which is removed when inserted into the files maps.
-			fileData := files[filename[1:]]
+			fileData, ok := files[filename[1:]]
+			log.Infof("found %v", ok)
 			if fileData.Executable {
 				deps := set.NewStringSet()
 				if fileData.ELFMetadata != nil {
@@ -188,12 +198,13 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 			}
 			if fileData.ELFMetadata != nil {
 				for _, soname := range fileData.ELFMetadata.Sonames {
+					log.Infof("file %s has library %s", filename, soname)
 					deps, ok := libToDeps[soname]
 					if !ok {
 						deps = set.NewStringSet()
-						libToDeps[soname] = deps
 					}
 					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+					libToDeps[soname] = deps
 				}
 			}
 		}
@@ -210,12 +221,19 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		Version: pkgVersion,
 	}
 
+	log.Infof("libToDeps %d", len(libToDeps))
 	// If the package already exists, then this must be a source package
 	// with multiple associated packages.
 	if feature, exists := packagesMap[key]; exists {
 		// Append the executable files for the associated package to the source package.
+		log.Infof("before merge: left %d, right %d", len(feature.LibraryToDependencies), len(libToDeps))
+		log.Infof("%v", feature.LibraryToDependencies)
+		log.Infof("%v", libToDeps)
 		feature.ExecutableToDependencies.Merge(execToDeps)
 		feature.LibraryToDependencies.Merge(libToDeps)
+		log.Infof("after merge: left %d, right %d", len(feature.LibraryToDependencies), len(libToDeps))
+		log.Infof("%v", feature.LibraryToDependencies)
+		log.Infof("feature %s has library %d %v", pkgName, len(packagesMap[key].LibraryToDependencies), packagesMap[key].LibraryToDependencies)
 		return
 	}
 
@@ -226,6 +244,11 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		execToDeps = nil
 	}
 
+	sonames := make([]string, 0, len(libToDeps))
+	for k := range libToDeps {
+		sonames = append(sonames, k)
+	}
+	log.Infof("feature %s has library %v", pkgName, sonames)
 	packagesMap[key] = &database.FeatureVersion{
 		Feature: database.Feature{
 			Name: pkgName,
@@ -244,11 +267,13 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
 	if f, hasFile := files[statusFile]; hasFile {
+		log.Infof("non Distroless")
 		if err := l.parseComponents(files, f.Contents, packagesMap, removedPackages, false); err != nil {
 			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", statusFile)
 		}
 	}
 
+	log.Infof("Distroless")
 	for filename, file := range files {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
