@@ -198,11 +198,6 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 		})
 	}
 	for _, c := range components.RhelComponents {
-		for _, exec := range c.Executables {
-			for _, rf := range exec.RequiredFeatures {
-				rf.Version = rf.Version + "." + c.Arch
-			}
-		}
 		features = append(features, apiV1.Feature{
 			Name:          c.Name,
 			NamespaceName: c.Namespace,
