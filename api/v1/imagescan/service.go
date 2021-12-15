@@ -74,7 +74,10 @@ func (s *serviceImpl) GetImageScan(_ context.Context, req *v1.GetImageScanReques
 		return nil, err
 	}
 
-	depMap := common.GetDepMap(dbLayer.Features)
+	var depMap map[string]common.FeatureKeySet
+	if !dbLayer.Distroless {
+		depMap = common.GetDepMap(dbLayer.Features)
+	}
 	layer, notes, err := apiV1.LayerFromDatabaseModel(s.db, *dbLayer, lineage, depMap, opts)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

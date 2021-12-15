@@ -434,7 +434,10 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 	notes := getNotes(namespaceName, uncertifiedRHEL)
 
 	if dbLayer.Features != nil {
-		depMap := common.GetDepMap(dbLayer.Features)
+		var depMap map[string]common.FeatureKeySet
+		if !dbLayer.Distroless {
+			depMap = common.GetDepMap(dbLayer.Features)
+		}
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL, depMap)
 

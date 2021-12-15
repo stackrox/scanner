@@ -335,8 +335,10 @@ func createExecutablesFromDependencies(dbFeatureVersion database.FeatureVersion,
 	for exec, libs := range executableToDependencies {
 		features := make(common.FeatureKeySet)
 		features.Add(featureKey)
-		for lib := range libs {
-			features.Merge(depMap[lib])
+		if len(depMap) > 0 {
+			for lib := range libs {
+				features.Merge(depMap[lib])
+			}
 		}
 		executables = append(executables, &v1.Executable{
 			Path:             exec,
