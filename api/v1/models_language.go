@@ -241,7 +241,6 @@ func getLanguageComponents(db database.Datastore, layerName, lineage string, unc
 
 func getLanguageFeatures(osFeatures []Feature, components []*v1.LanguageComponent, uncertifiedRHEL bool) ([]Feature, error) {
 	layerToComponents := getLayerToComponents(components)
-	log.Info(layerToComponents)
 
 	languageFeatureMap := make(map[string]languageFeatureValue)
 	var featureVersions []database.FeatureVersion
@@ -268,10 +267,13 @@ func getLanguageFeatures(osFeatures []Feature, components []*v1.LanguageComponen
 		}
 	}
 
-	// We want to be sure to remove any repeat features that were not filtered previously
+	// We want to output the features in layer-order, so we must reverse the feature slice.
+	// At the same time, we want to be sure to remove any repeat features that were not filtered previously
 	// (this would be due us detecting a feature was introduced into the image at a lower level than originally thought).
 	features := make([]Feature, 0, len(featureVersions))
-	for _, fv := range featureVersions {
+	for i := len(featureVersions) - 1; i >= 0; i-- {
+		fv := featureVersions[i]
+
 		featureValue := languageFeatureMap[fv.Feature.Location]
 		if fv.AddedBy.Name == featureValue.layer {
 			feature := featureFromDatabaseModel(fv, uncertifiedRHEL, nil)

@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	errNotesMismatch       = errors.New("Number of notes in proto and Go are not equal")
+	errNotesMismatch = errors.New("Number of notes in proto and Go are not equal")
 
 	noteToProtoMap = func() map[apiV1.Note]v1.Note {
 		numNotes := int(apiV1.SentinelNote)

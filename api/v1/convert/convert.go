@@ -17,6 +17,7 @@ import (
 var (
 	errSourceTypesMismatch = errors.New("Number of source types in proto and Go are not equal")
 
+	// SourceTypeToProtoMap converts a component.SourceType to a v1.SourceType.
 	SourceTypeToProtoMap = func() map[component.SourceType]v1.SourceType {
 		numComponentSourceTypes := int(component.SentinelEndSourceType) - int(component.UnsetSourceType)
 		if numComponentSourceTypes != len(v1.SourceType_value) {
