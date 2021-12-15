@@ -461,8 +461,6 @@ commands:
 
       - fetch-and-upload-scanner-metrics
 
-      - run-db-integration-tests
-
       - run:
           name: Collect k8s logs
           command: |

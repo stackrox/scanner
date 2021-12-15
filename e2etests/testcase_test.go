@@ -7,7 +7,6 @@ import (
 
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
-	"github.com/stackrox/scanner/pkg/component"
 )
 
 type testCase struct {
@@ -24,6 +23,7 @@ type testCase struct {
 }
 
 var testCases = []testCase{
+	/*
 	{
 		image:                    "ubuntu:16.04",
 		registry:                 "https://registry-1.docker.io",
@@ -1792,6 +1792,7 @@ var testCases = []testCase{
 		password: os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		source:   "NVD",
 	},
+	*/
 	{
 		// One of the images used for Red Hat Scanner Certification.
 		image:                    "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7",
@@ -1895,6 +1896,7 @@ var testCases = []testCase{
 			},
 		},
 	},
+	/*
 	{
 		// One of the images used for Red Hat Scanner Certification with a chown on jackson-databind that should not show up in the results.
 		image:                   "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7-chown",
@@ -2502,4 +2504,5 @@ var testCases = []testCase{
 			},
 		},
 	},
+	*/
 }

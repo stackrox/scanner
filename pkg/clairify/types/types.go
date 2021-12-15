@@ -2,6 +2,8 @@ package types
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/pkg/trace"
 	"io"
 	"net/url"
 
@@ -139,6 +141,8 @@ func (i *Image) String() string {
 
 // GenerateImageFromString parses a docker image into the Image struct.
 func GenerateImageFromString(imageStr string) (*Image, error) {
+	trace.Trace()
+	logrus.Infof("Scan image %s", imageStr)
 	image := new(Image)
 
 	ref, err := reference.ParseAnyReference(imageStr)

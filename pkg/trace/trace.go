@@ -1,7 +1,7 @@
 package trace
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 	"runtime"
 )
 
@@ -11,5 +11,5 @@ func Trace() {
 	runtime.Callers(2, pc)
 	f := runtime.FuncForPC(pc[0])
 	file, line := f.FileLine(pc[0])
-	fmt.Printf("%s:%d %s\n", file, line, f.Name())
+	logrus.Infof("%s:%d %s\n", file, line, f.Name())
 }

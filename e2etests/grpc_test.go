@@ -227,6 +227,7 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 	}
 }
 
+/*
 func TestGRPCVulnDefsMetadata(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewVulnDefsServiceClient(conn)
@@ -234,3 +235,4 @@ func TestGRPCVulnDefsMetadata(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, metadata.GetLastUpdatedTime())
 }
+*/
