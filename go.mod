@@ -8,9 +8,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/ckaznocha/protoc-gen-lint v0.2.4
 	github.com/containers/image/v5 v5.11.1
-	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
-	github.com/docker/docker-credential-helpers v0.6.3
 	github.com/facebookincubator/nvdtools v0.1.4
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.0.0
