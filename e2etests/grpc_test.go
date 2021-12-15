@@ -113,7 +113,10 @@ func getMatchingGRPCFeature(t *testing.T, features []*v1.Feature, featureToFind 
 	if allowNotFound && candidateIdx == -1 {
 		return nil
 	}
-	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list: %v", featureToFind, features)
+	if candidateIdx == -1 {
+		fmt.Printf("Feature %+v not in list: %v", featureToFind, features)
+	}
+	require.NotEqual(t, -1, candidateIdx)
 	return features[candidateIdx]
 }
 
