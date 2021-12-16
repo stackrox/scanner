@@ -2328,13 +2328,11 @@ var testCases = []testCase{
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "log4j",
-				NamespaceName: "centos:7",
-				VersionFormat: "rpm",
+				VersionFormat: "JavaSourceType",
 				Version:       "2.9.1",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2020-9488",
-						NamespaceName: "centos:7",
 						Description:   "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2020-9488",
 						Severity:      "Low",
@@ -2358,7 +2356,6 @@ var testCases = []testCase{
 					},
 					{
 						Name:          "CVE-2021-44228",
-						NamespaceName: "centos:7",
 						Description:   "In Apache Log4j2 versions up to and including 2.14.1 (excluding security release 2.12.2), the JNDI features used in configurations, log messages, and parameters do not protect against attacker-controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
 						Severity:      "Critical",
@@ -2382,7 +2379,6 @@ var testCases = []testCase{
 					},
 					{
 						Name:          "CVE-2021-45046",
-						NamespaceName: "centos:7",
 						Description:   "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. This could allows attackers with control over Thread Context Map (MDC) input data when the logging configuration uses a non-default Pattern Layout with either a Context Lookup (for example, $${ctx:loginId}) or a Thread Context Map pattern (%X, %mdc, or %MDC) to craft malicious input data using a JNDI Lookup pattern resulting in a denial of service (DOS) attack. Log4j 2.15.0 restricts JNDI LDAP lookups to localhost by default. Note that previous mitigations involving configuration such as to set the system property log4j2.formatMsgNoLookups to true do NOT mitigate this specific vulnerability.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
 						Severity:      "Low",
@@ -2405,18 +2401,17 @@ var testCases = []testCase{
 						FixedBy: "2.12.2",
 					},
 				},
-				AddedBy: "sha256:59bf1c3509f33515622619af21ed55bbe26d24913cedbca106468a5fb37a50c3",
-				FixedBy: "2.13.2",
+				AddedBy:  "sha256:c46de89b745ad8ba4400323d4ebc230a4b88cbbdbc92a862c92a743478abd617",
+				Location: "usr/share/logstash/vendor/bundle/jruby/2.5.0/gems/logstash-input-tcp-6.0.10-java/vendor/jar-dependencies/org/logstash/inputs/logstash-input-tcp/6.0.10/logstash-input-tcp-6.0.10.jar:log4j-core",
+				FixedBy:  "2.13.2",
 			},
 			{
 				Name:          "log4j",
-				NamespaceName: "centos:7",
-				VersionFormat: "rpm",
+				VersionFormat: "JavaSourceType",
 				Version:       "2.14.0",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-44228",
-						NamespaceName: "centos:7",
 						Description:   "In Apache Log4j2 versions up to and including 2.14.1 (excluding security release 2.12.2), the JNDI features used in configurations, log messages, and parameters do not protect against attacker-controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
 						Severity:      "Critical",
@@ -2440,7 +2435,6 @@ var testCases = []testCase{
 					},
 					{
 						Name:          "CVE-2021-45046",
-						NamespaceName: "centos:7",
 						Description:   "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. This could allows attackers with control over Thread Context Map (MDC) input data when the logging configuration uses a non-default Pattern Layout with either a Context Lookup (for example, $${ctx:loginId}) or a Thread Context Map pattern (%X, %mdc, or %MDC) to craft malicious input data using a JNDI Lookup pattern resulting in a denial of service (DOS) attack. Log4j 2.15.0 restricts JNDI LDAP lookups to localhost by default. Note that previous mitigations involving configuration such as to set the system property log4j2.formatMsgNoLookups to true do NOT mitigate this specific vulnerability.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
 						Severity:      "Low",
@@ -2463,8 +2457,9 @@ var testCases = []testCase{
 						FixedBy: "2.16.0",
 					},
 				},
-				AddedBy: "sha256:59bf1c3509f33515622619af21ed55bbe26d24913cedbca106468a5fb37a50c3",
-				FixedBy: "2.16.0",
+				AddedBy:  "sha256:c46de89b745ad8ba4400323d4ebc230a4b88cbbdbc92a862c92a743478abd617",
+				Location: "usr/share/logstash/logstash-core/lib/jars/log4j-core-2.14.0.jar",
+				FixedBy:  "2.16.0",
 			},
 		},
 	},
@@ -2476,7 +2471,6 @@ var testCases = []testCase{
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "log4j",
-				NamespaceName: "ubuntu:20.04",
 				VersionFormat: "dpkg",
 				Version:       "2.12.2",
 				Vulnerabilities: []apiV1.Vulnerability{
@@ -2505,8 +2499,9 @@ var testCases = []testCase{
 						FixedBy: "2.13.2",
 					},
 				},
-				AddedBy: "sha256:59bf1c3509f33515622619af21ed55bbe26d24913cedbca106468a5fb37a50c3",
-				FixedBy: "2.13.2",
+				AddedBy:  "sha256:d84ba7ea7803fa43fca06730523d264b31c562968cfd7020f0584f5ec1b26225",
+				Location: "log4j-core-2.12.2.jar",
+				FixedBy:  "2.13.2",
 			},
 		},
 	},
