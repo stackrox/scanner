@@ -2,6 +2,7 @@ package pgsql
 
 import (
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/trace"
 )
 
 // GetLayerBySHA fetches the latest layer for an image by the image SHA.
@@ -37,6 +38,7 @@ func (pgSQL *pgSQL) GetLayerByName(name string, opts *database.DatastoreOptions)
 // AddImage inserts an image and its latest layer into the database.
 // Duplicate entries are ignored.
 func (pgSQL *pgSQL) AddImage(layer, digest, lineage, name string, opts *database.DatastoreOptions) error {
+	trace.Trace()
 	_, err := pgSQL.Exec(`INSERT INTO ImageToLayer(layer, name, lineage, sha, uncertified_rhel)
 	VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING;`, layer, name, lineage, digest, opts.GetUncertifiedRHEL())
 	return err

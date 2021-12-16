@@ -34,6 +34,7 @@ import (
 	"github.com/stackrox/scanner/pkg/matcher"
 	rhelv2 "github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/trace"
 	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 	"github.com/stackrox/scanner/pkg/whiteout"
 	"github.com/stackrox/scanner/singletons/analyzers"
@@ -129,6 +130,23 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 	if err != nil {
 		return err
 	}
+	if layer.Features != nil {
+		for _, feature := range layer.Features {
+			if feature.Feature.Name == "vim-minimal" {
+				log.Infof("vim-minimal feature lib %+v", feature.LibraryToDependencies)
+				log.Infof("vim-minimal feature exec %+v", feature.ExecutableToDependencies)
+			}
+		}
+	}
+	if rhelv2Components.Packages != nil {
+		for _, pkg := range rhelv2Components.Packages {
+			if pkg.Name == "vim-minimal" {
+				log.Infof("vim-minimal feature lib %+v", pkg.LibraryToDependencies)
+				log.Infof("vim-minimal feature exec %+v", pkg.ExecutableToDependencies)
+			}
+		}
+	}
+	log.Info("Ready to insert")
 
 	if rhelv2Components != nil {
 		// Go this path for Red Hat Certified scans.
@@ -166,6 +184,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 }
 
 func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+	trace.Trace()
 	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
 
 	distroless := isDistroless(files) || (parent != nil && parent.Distroless)
@@ -243,6 +262,7 @@ func (m *analyzingMatcher) Match(filePath string, fi os.FileInfo, contents io.Re
 
 // DetectContentFromReader detects scanning content in the given reader.
 func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+	trace.Trace()
 	// Create a "matcher" that actually calls `ProcessFile` on each analyzer, before delegating
 	// to the actual matcher for operating system-level feature extraction.
 	// TODO: this is ugly. A matcher should not have side-effects; but the `analyzingMatcher`s
@@ -254,6 +274,9 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 	}
 
 	files, err := imagefmt.ExtractFromReader(reader, format, m)
+	for k, file := range files {
+		log.Infof("file %s is Elf %v", k, file.ELFMetadata != nil)
+	}
 	if err != nil {
 		return nil, false, nil, nil, nil, nil, err
 	}

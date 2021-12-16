@@ -24,8 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackrox/scanner/pkg/trace"
-
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -37,6 +35,7 @@ import (
 	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/trace"
 )
 
 const (

@@ -30,6 +30,7 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/rhel"
+	"github.com/stackrox/scanner/pkg/trace"
 	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
@@ -341,6 +342,7 @@ func hasKernelPrefix(name string) bool {
 
 // LayerFromDatabaseModel returns the scan data for the given layer based on the data in the given datastore.
 func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, lineage string, depMap map[string]common.FeatureKeySet, opts *database.DatastoreOptions) (Layer, []Note, error) {
+	trace.Trace()
 	withFeatures := opts.GetWithFeatures()
 	withVulnerabilities := opts.GetWithVulnerabilities()
 	uncertifiedRHEL := opts.GetUncertifiedRHEL()
@@ -362,7 +364,6 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL(), depMap)
-			log.Infof("feature %+v", feature)
 
 			if hasKernelPrefix(feature.Name) {
 				continue

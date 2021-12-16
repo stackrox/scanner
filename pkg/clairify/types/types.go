@@ -2,8 +2,6 @@ package types
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"github.com/stackrox/scanner/pkg/trace"
 	"io"
 	"net/url"
 
@@ -14,7 +12,9 @@ import (
 	"github.com/heroku/docker-registry-client/registry"
 	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	v1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/pkg/trace"
 )
 
 // ClairClient interface.

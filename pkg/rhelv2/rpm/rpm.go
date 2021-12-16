@@ -17,8 +17,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackrox/scanner/pkg/trace"
-
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -31,6 +29,7 @@ import (
 	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/trace"
 )
 
 const (
@@ -211,7 +210,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			// Rename to make it clear what the line represents.
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
-			fileData := files[filename[1:]]
+			fileData, ok := files[filename[1:]]
 			if fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
 				deps := set.NewStringSet()
 				if fileData.ELFMetadata != nil {
@@ -229,6 +228,8 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
 					libToDeps[soname] = deps
 				}
+			} else {
+				log.Infof("file %s skip, found %v", filename, ok)
 			}
 		}
 	}

@@ -15,6 +15,7 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	server "github.com/stackrox/scanner/pkg/scan"
+	"github.com/stackrox/scanner/pkg/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -136,6 +137,7 @@ func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string
 }
 
 func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest) (*v1.GetImageComponentsResponse, error) {
+	trace.Trace()
 	// Attempt to get image results assuming the image is within RHEL Certification scope (or is a non-RHEL image).
 	imgComponents, err := s.getImageComponents(ctx, req, false)
 	if err != nil {
