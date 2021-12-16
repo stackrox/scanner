@@ -2476,7 +2476,6 @@ var testCases = []testCase{
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2020-9488",
-						NamespaceName: "ubuntu:20.04",
 						Description:   "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2020-9488",
 						Severity:      "Low",
