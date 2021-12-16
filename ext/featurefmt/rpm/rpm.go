@@ -180,9 +180,9 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 					deps, ok := libToDeps[soname]
 					if !ok {
 						deps = set.NewStringSet()
+						libToDeps[soname] = deps
 					}
 					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
-					libToDeps[soname] = deps
 				}
 			}
 		}

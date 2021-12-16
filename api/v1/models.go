@@ -371,7 +371,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			layer.Features = append(layer.Features, *feature)
 		}
 		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
-			certified, err := addRHELv2Vulns(db, &layer, depMap)
+			certified, err := addRHELv2Vulns(db, &layer)
 			if err != nil {
 				return layer, notes, err
 			}
@@ -455,6 +455,8 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 	}
 
 	return &ComponentsEnvelope{
+		Namespace: namespaceName,
+
 		Features:           features,
 		RHELv2PkgEnvs:      rhelv2PkgEnvs,
 		LanguageComponents: components,
@@ -587,6 +589,8 @@ type FeatureEnvelope struct {
 
 // ComponentsEnvelope envelopes component data (OS-packages and language-level-packages).
 type ComponentsEnvelope struct {
+	Namespace string
+
 	Features []Feature
 	// RHELv2PkgEnvs maps the package ID to the related package environment.
 	RHELv2PkgEnvs      map[int]*database.RHELv2PackageEnv

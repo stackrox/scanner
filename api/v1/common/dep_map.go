@@ -33,7 +33,7 @@ func GetDepMapRHEL(pkgEnvs map[int]*database.RHELv2PackageEnv) map[string]Featur
 	for _, pkgEnv := range pkgEnvs {
 		fvKey := featurefmt.PackageKey{
 			Name:    pkgEnv.Pkg.Name,
-			Version: pkgEnv.Pkg.Version,
+			Version: pkgEnv.Pkg.GetPackageVersion(),
 		}
 		// Populate libraries with all direct imports.
 		for lib, deps := range pkgEnv.Pkg.LibraryToDependencies {

@@ -28,7 +28,7 @@ const (
 // certified as part of Red Hat's Scanner Certification Program.
 // The returned bool indicates if full certified scanning was performed.
 // This is typically only `false` for images without proper CPE information.
-func addRHELv2Vulns(db database.Datastore, layer *Layer, depMap map[string]common.FeatureKeySet) (bool, error) {
+func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 	pkgEnvs, cpesExist, err := getRHELv2PkgEnvs(db, layer.Name)
 	if err != nil {
 		return false, err
@@ -41,17 +41,15 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer, depMap map[string]commo
 		return false, err
 	}
 
+	depMap := common.GetDepMapRHEL(pkgEnvs)
 	for _, pkgEnv := range pkgEnvs {
 		pkg := pkgEnv.Pkg
 		if hasKernelPrefix(pkg.Name) {
 			continue
 		}
-		version := pkg.Version
-		if pkg.Arch != "" {
-			version += "." + pkg.Arch
-		}
 
-		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: pkg.Version}
+		version := pkg.GetPackageVersion()
+		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: version}
 		executables := common.CreateExecutablesFromDependencies(pkgKey, pkg.ExecutableToDependencies, depMap)
 		feature := Feature{
 			Name:          pkg.Name,

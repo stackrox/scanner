@@ -185,13 +185,13 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 				{
 					Path: "/exec/me",
 					RequiredFeatures: []*v1.FeatureNameVersion{
-						{Name: "pkg", Version: "2"},
+						{Name: "pkg", Version: "2.x86_64"},
 					},
 				},
 				{
 					Path: "/pls/exec/me",
 					RequiredFeatures: []*v1.FeatureNameVersion{
-						{Name: "pkg", Version: "2"},
+						{Name: "pkg", Version: "2.x86_64"},
 					},
 				},
 			},
