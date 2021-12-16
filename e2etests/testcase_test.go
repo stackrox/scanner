@@ -2471,7 +2471,7 @@ var testCases = []testCase{
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "log4j",
-				VersionFormat: "dpkg",
+				VersionFormat: "JavaSourceType",
 				Version:       "2.12.2",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
