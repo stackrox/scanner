@@ -84,7 +84,8 @@ func (s *serviceImpl) GetImageScan(_ context.Context, req *v1.GetImageScanReques
 	return &v1.GetImageScanResponse{
 		Status: v1.ScanStatus_SUCCEEDED,
 		Image: &v1.Image{
-			Features: ConvertFeatures(layer.Features),
+			Namespace: layer.NamespaceName,
+			Features:  ConvertFeatures(layer.Features),
 		},
 		Notes: convertNotes(notes),
 	}, nil

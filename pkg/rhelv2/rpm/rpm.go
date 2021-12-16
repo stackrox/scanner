@@ -217,17 +217,18 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 				execToDeps[filename] = deps
 			}
 			if fileData.ELFMetadata != nil {
-				log.Infof("file %s has sonames %v", filename, fileData.ELFMetadata.Sonames)
 				for _, soname := range fileData.ELFMetadata.Sonames {
 					deps, ok := libToDeps[soname]
 					if !ok {
 						deps = set.NewStringSet()
+						libToDeps[soname] = deps
 					}
 					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
-					libToDeps[soname] = deps
 				}
 			} else {
-				log.Infof("file %s skip, found %v", filename, ok)
+				if strings.Contains(filename, "so") || strings.Contains(filename, "lib") {
+					log.Infof("file %s skip, found %v", filename, ok)
+				}
 			}
 		}
 	}

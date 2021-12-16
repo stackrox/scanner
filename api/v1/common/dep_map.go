@@ -66,7 +66,6 @@ func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
 			Name:    feature.Feature.Name,
 			Version: feature.Version,
 		}
-		logrus.Infof("Create dep map for %v", fvKey)
 		// Populate libraries with all direct imports.
 		for lib, deps := range feature.LibraryToDependencies {
 			if node, ok := libNodes[lib]; ok {
@@ -81,6 +80,7 @@ func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
 			}
 		}
 	}
+	// logrus.Infof("Create dep map for %v", libNodes)
 	return createDepMap(libNodes)
 }
 

@@ -32,6 +32,7 @@ runOnAllTagsWithRedHatCtx: &runOnAllTagsWithRedHatCtx
 # https://circleci.com/developer/orbs/orb/circleci/slack
 orbs:
   slack: circleci/slack@4.4.2
+  ci-artifacts: stackrox/ci-artifacts-orb@0.0.11
 
 slackTemplateTestFailure: &slackTemplateTestFailure
   custom: |
@@ -468,7 +469,7 @@ commands:
             .circleci/collect-service-logs.sh kube-system
           when: always
 
-      - store_artifacts:
+      - ci-artifacts/store:
           path: /tmp/k8s-service-logs
           destination: k8s-service-logs-<< parameters.cluster-id >>
 
@@ -541,7 +542,7 @@ commands:
           no_output_timeout: 20m
           command: make scale-tests
 
-      - store_artifacts:
+      - ci-artifacts/store:
           path: /tmp/pprof.zip
           destination: pprof.zip
 
@@ -571,7 +572,7 @@ commands:
             .circleci/collect-service-logs.sh kube-system
           when: always
 
-      - store_artifacts:
+      - ci-artifacts/store:
           path: /tmp/k8s-service-logs
           destination: k8s-service-logs-<< parameters.cluster-id >>
 
@@ -613,7 +614,7 @@ commands:
             sleep 5
             mkdir -p /tmp/metrics
             curl localhost:9090/metrics > /tmp/metrics/metrics.prom
-      - store_artifacts:
+      - ci-artifacts/store:
           path: /tmp/metrics
           destination: metrics
 
@@ -683,7 +684,7 @@ jobs:
           command: |
             ./bin/updater print-stats /tmp/genesis-dump/dump.zip
 
-      - store_artifacts:
+      - ci-artifacts/store:
           path: /tmp/genesis-dump/dump.zip
           destination: genesis-dump.zip
 
@@ -724,7 +725,7 @@ jobs:
             pg_dump -U postgres postgres://127.0.0.1:5432 > /tmp/postgres/pg-definitions.sql
             gzip --best /tmp/postgres/pg-definitions.sql
 
-      - store_artifacts:
+      - ci-artifacts/store:
           path: /tmp/postgres/pg-definitions.sql.gz
           destination: pg-definitions.sql.gz
 
@@ -867,7 +868,7 @@ jobs:
           paths:
             - diff-dumps
 
-      - store_artifacts:
+      - ci-artifacts/store:
           path: /tmp/diff-dumps
 
   upload-diff-dumps-and-offline-dumps:
@@ -990,7 +991,7 @@ jobs:
       - run:
           name: Check scanner vulnerability updates
           command: ./tests/sanity-check-vuln-updates.sh
-      - store_artifacts:
+      - ci-artifacts/store:
           path: /tmp/ROX-7271
       - slack/notify:
           branch_pattern: master
