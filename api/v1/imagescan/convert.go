@@ -157,7 +157,7 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 	rhelv2Components := make([]*v1.RHELComponent, 0, len(imgComponents.RHELv2PkgEnvs))
 	for _, rhelv2PkgEnv := range imgComponents.RHELv2PkgEnvs {
 		pkg := rhelv2PkgEnv.Pkg
-		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: pkg.Version}
+		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: pkg.GetPackageVersion()}
 		rhelv2Components = append(rhelv2Components, &v1.RHELComponent{
 			Id:          int64(pkg.ID),
 			Name:        pkg.Name,
