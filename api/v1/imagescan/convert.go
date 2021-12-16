@@ -220,6 +220,7 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 	}
 
 	return &v1.Components{
+		Namespace:          imgComponents.Namespace,
 		OsComponents:       osComponents,
 		RhelComponents:     rhelv2Components,
 		LanguageComponents: languageComponents,

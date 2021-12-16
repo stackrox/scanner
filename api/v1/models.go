@@ -455,6 +455,8 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 	}
 
 	return &ComponentsEnvelope{
+		Namespace: namespaceName,
+
 		Features:           features,
 		RHELv2PkgEnvs:      rhelv2PkgEnvs,
 		LanguageComponents: components,
@@ -587,6 +589,8 @@ type FeatureEnvelope struct {
 
 // ComponentsEnvelope envelopes component data (OS-packages and language-level-packages).
 type ComponentsEnvelope struct {
+	Namespace string
+
 	Features []Feature
 	// RHELv2PkgEnvs maps the package ID to the related package environment.
 	RHELv2PkgEnvs      map[int]*database.RHELv2PackageEnv
