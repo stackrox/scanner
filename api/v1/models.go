@@ -261,6 +261,11 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 	if uncertified {
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
+	if dbFeatureVersion.Feature.Name == "vim-minimal" {
+		log.Infof("db featureversion %+v", dbFeatureVersion)
+		log.Infof("lib len %d, exec len %d: %v", len(dbFeatureVersion.LibraryToDependencies), len(dbFeatureVersion.ExecutableToDependencies))
+		log.Infof("depmap len %d", len(depMap))
+	}
 
 	featureKey := featurefmt.PackageKey{Name: dbFeatureVersion.Feature.Name, Version: dbFeatureVersion.Version}
 	executables := common.CreateExecutablesFromDependencies(featureKey, dbFeatureVersion.ExecutableToDependencies, depMap)
@@ -363,6 +368,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 
 	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
+
 			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL(), depMap)
 
 			if hasKernelPrefix(feature.Name) {

@@ -29,7 +29,6 @@ import (
 	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
-	"github.com/stackrox/scanner/pkg/trace"
 )
 
 const (
@@ -149,7 +148,6 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 }
 
 func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Package, error) {
-	trace.Trace()
 	var pkgs []*database.RHELv2Package
 
 	p := &database.RHELv2Package{}

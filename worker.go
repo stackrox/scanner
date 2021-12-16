@@ -146,7 +146,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 			}
 		}
 	}
-	log.Info("Ready to insert")
+	log.Info("Ready to insert: len featureversion %d", len(layer.Features))
 
 	if rhelv2Components != nil {
 		// Go this path for Red Hat Certified scans.
@@ -275,7 +275,9 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 
 	files, err := imagefmt.ExtractFromReader(reader, format, m)
 	for k, file := range files {
-		log.Infof("file %s is Elf %v", k, file.ELFMetadata != nil)
+		if strings.Contains(k, "so") || strings.Contains(k, "vi") {
+			log.Infof("file %s is Elf %v", k, file.ELFMetadata != nil)
+		}
 	}
 	if err != nil {
 		return nil, false, nil, nil, nil, nil, err
