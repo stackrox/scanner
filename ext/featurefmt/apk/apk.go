@@ -121,9 +121,9 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 					deps, ok := libToDeps[soname]
 					if !ok {
 						deps = set.NewStringSet()
+						libToDeps[soname] = deps
 					}
 					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
-					libToDeps[soname] = deps
 				}
 			}
 		}
