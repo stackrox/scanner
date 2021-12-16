@@ -262,8 +262,8 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 	if dbFeatureVersion.Feature.Name == "vim-minimal" {
-		log.Infof("db featureversion %+v", dbFeatureVersion)
-		log.Infof("lib len %d, exec len %d: %v", len(dbFeatureVersion.LibraryToDependencies), len(dbFeatureVersion.ExecutableToDependencies))
+		log.Infof("featureFromDatabaseModel db featureversion %+v", dbFeatureVersion)
+		log.Infof("lib len %d, exec len %d", len(dbFeatureVersion.LibraryToDependencies), len(dbFeatureVersion.ExecutableToDependencies))
 		log.Infof("depmap len %d", len(depMap))
 	}
 
@@ -377,9 +377,13 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, dbFeatureVersion.Feature.Namespace.VersionFormat)
 			layer.Features = append(layer.Features, *feature)
+			if dbFeatureVersion.Feature.Name == "vim-minimal" {
+				log.Infof("feature %+v", feature)
+			}
 		}
+		log.Info("midpoint len depmap", len(depMap))
 		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
-			certified, err := addRHELv2Vulns(db, &layer, depMap)
+			certified, err := addRHELv2Vulns(db, &layer, nil)
 			if err != nil {
 				return layer, notes, err
 			}

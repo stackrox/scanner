@@ -40,6 +40,9 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer, depMap map[string]commo
 	if err != nil {
 		return false, err
 	}
+	if depMap == nil {
+		depMap = common.GetDepMapRHEL(pkgEnvs)
+	}
 
 	for _, pkgEnv := range pkgEnvs {
 		pkg := pkgEnv.Pkg

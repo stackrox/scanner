@@ -146,7 +146,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 			}
 		}
 	}
-	log.Info("Ready to insert: len featureversion %d", len(layer.Features))
+	log.Infof("Ready to insert: len featureversion %d", len(layer.Features))
 
 	if rhelv2Components != nil {
 		// Go this path for Red Hat Certified scans.
