@@ -1856,6 +1856,14 @@ var testCases = []testCase{
 					{
 						Path: "/usr/bin/vi",
 						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "libacl", Version: "2.2.51-15.el7.x86_64"},
+							{Name: "libattr", Version: "2.4.46-13.el7.i686"},
+							{Name: "libattr", Version: "2.4.46-13.el7.x86_64"},
+							{Name: "libselinux", Version: "2.5-15.el7.i686"},
+							{Name: "libselinux", Version: "2.5-15.el7.x86_64"},
+							{Name: "ncurses-libs", Version: "5.9-14.20130511.el7_4.x86_64"},
+							{Name: "pcre", Version: "8.32-17.el7.i686"},
+							{Name: "pcre", Version: "8.32-17.el7.x86_64"},
 							{Name: "vim-minimal", Version: "2:7.4.629-6.el7.x86_64"},
 						},
 					},

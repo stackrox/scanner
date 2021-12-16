@@ -371,7 +371,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			layer.Features = append(layer.Features, *feature)
 		}
 		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
-			certified, err := addRHELv2Vulns(db, &layer, depMap)
+			certified, err := addRHELv2Vulns(db, &layer)
 			if err != nil {
 				return layer, notes, err
 			}
