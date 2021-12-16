@@ -138,11 +138,11 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 			}
 		}
 	}
-	if rhelv2Components.Packages != nil {
+	if rhelv2Components != nil && rhelv2Components.Packages != nil {
 		for _, pkg := range rhelv2Components.Packages {
 			if pkg.Name == "vim-minimal" {
-				log.Infof("vim-minimal feature lib %+v", pkg.LibraryToDependencies)
-				log.Infof("vim-minimal feature exec %+v", pkg.ExecutableToDependencies)
+				log.Infof("vim-minimal feature lib rhel %+v", pkg.LibraryToDependencies)
+				log.Infof("vim-minimal feature exec rhel %+v", pkg.ExecutableToDependencies)
 			}
 		}
 	}
