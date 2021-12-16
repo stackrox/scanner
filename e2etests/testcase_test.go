@@ -2321,10 +2321,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:                   "elastic/logstash:7.13.3",
-		registry:                "https://registry-1.docker.io",
-		source:                  "NVD",
-		namespace:               "centos:7",
+		image:     "elastic/logstash:7.13.3",
+		registry:  "https://registry-1.docker.io",
+		source:    "NVD",
+		namespace: "centos:7",
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "log4j",
@@ -2469,10 +2469,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:                   "stackrox/sandbox:log4j-2-12-2",
-		registry:                "https://registry-1.docker.io",
-		source:                  "NVD",
-		namespace:               "ubuntu:20.04",
+		image:     "stackrox/sandbox:log4j-2-12-2",
+		registry:  "https://registry-1.docker.io",
+		source:    "NVD",
+		namespace: "ubuntu:20.04",
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "log4j",
