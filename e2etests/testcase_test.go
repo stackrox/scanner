@@ -2346,6 +2346,28 @@ var testCases = []testCase{
 				},
 				AddedBy: "sha256:596ba82af5aaa3e2fd9d6f955b8b94f0744a2b60710e3c243ba3e4a467f051d1",
 				FixedBy: "2.12.6-r0",
+				Executables: []*v1.Executable{
+					{
+						Path: "/lib/libapk.so.3.12.0",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apk-tools", Version: "2.12.0-r4"},
+							{Name: "libcrypto1.1", Version: "1.1.1i-r0"},
+							{Name: "libssl1.1", Version: "1.1.1i-r0"},
+							{Name: "musl", Version: "1.2.2_pre7-r0"},
+							{Name: "zlib", Version: "1.2.11-r3"},
+						},
+					},
+					{
+						Path: "/sbin/apk",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "apk-tools", Version: "2.12.0-r4"},
+							{Name: "libcrypto1.1", Version: "1.1.1i-r0"},
+							{Name: "libssl1.1", Version: "1.1.1i-r0"},
+							{Name: "musl", Version: "1.2.2_pre7-r0"},
+							{Name: "zlib", Version: "1.2.11-r3"},
+						},
+					},
+				},
 			},
 			{
 				Name:          "busybox",
@@ -2380,6 +2402,27 @@ var testCases = []testCase{
 				},
 				AddedBy: "sha256:596ba82af5aaa3e2fd9d6f955b8b94f0744a2b60710e3c243ba3e4a467f051d1",
 				FixedBy: "1.32.1-r7",
+				Executables: []*v1.Executable{
+					{
+						Path: "/etc/network/if-up.d/dad",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "busybox", Version: "1.32.1-r0"},
+						},
+					},
+					{
+						Path: "/usr/share/udhcpc/default.script",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "busybox", Version: "1.32.1-r0"},
+						},
+					},
+					{
+						Path: "/bin/busybox",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "busybox", Version: "1.32.1-r0"},
+							{Name: "musl", Version: "1.2.2_pre7-r0"},
+						},
+					},
+				},
 			},
 		},
 	},
