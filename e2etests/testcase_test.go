@@ -2324,7 +2324,6 @@ var testCases = []testCase{
 		image:                   "elastic/logstash:7.13.3",
 		registry:                "https://registry-1.docker.io",
 		source:                  "NVD",
-		onlyCheckSpecifiedVulns: true,
 		namespace:               "centos:7",
 		expectedFeatures: []apiV1.Feature{
 			{
@@ -2473,7 +2472,6 @@ var testCases = []testCase{
 		image:                   "stackrox/sandbox:log4j-2-12-2",
 		registry:                "https://registry-1.docker.io",
 		source:                  "NVD",
-		onlyCheckSpecifiedVulns: true,
 		namespace:               "ubuntu:20.04",
 		expectedFeatures: []apiV1.Feature{
 			{
