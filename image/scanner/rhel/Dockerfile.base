@@ -4,7 +4,7 @@ ARG BASE_TAG=8.5
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
-LABEL name="scanner-rhel" \
+LABEL name="scanner" \
       vendor="StackRox" \
       maintainer="support@stackrox.com" \
       summary="Image scanner for the StackRox Kubernetes Security Platform" \
@@ -31,5 +31,3 @@ RUN dnf upgrade -y && \
     chown -R 65534:65534 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl
 
 ENTRYPOINT ["/entrypoint.sh"]
-
-HEALTHCHECK CMD curl --insecure --fail https://127.0.0.1:8080/clarify/ping
