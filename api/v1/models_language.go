@@ -2,12 +2,12 @@ package v1
 
 import (
 	"fmt"
-	"github.com/stackrox/scanner/ext/versionfmt/language"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/versionfmt/language"
 	"github.com/stackrox/scanner/pkg/component"
 )
 

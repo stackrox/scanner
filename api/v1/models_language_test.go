@@ -2,16 +2,16 @@ package v1
 
 import (
 	"fmt"
-	"github.com/stackrox/scanner/cpe/nvdtoolscache"
-	"github.com/stackrox/scanner/pkg/testutils"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
+	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDedupeVersionMatcher(t *testing.T) {

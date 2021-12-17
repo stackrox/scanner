@@ -10,6 +10,7 @@ import (
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
+
 	// Register the CPE validators.
 	_ "github.com/stackrox/scanner/cpe/validation/all"
 	// Register the version format parsers.
