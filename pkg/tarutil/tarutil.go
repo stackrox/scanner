@@ -21,10 +21,11 @@ import (
 	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
-	"github.com/stackrox/rox/pkg/set"
 	"io"
 	"os/exec"
 	"strings"
+
+	"github.com/stackrox/rox/pkg/set"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -69,8 +70,9 @@ type FileData struct {
 	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
 	ELFMetadata *elf.Metadata
 }
+
 var (
-	elfs = set.NewStringSet()
+	elfs    = set.NewStringSet()
 	nonelfs = set.NewStringSet()
 )
 

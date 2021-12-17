@@ -226,7 +226,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
 				}
 			} else {
-				if strings.Contains(filename, "so") || strings.Contains(filename, "lib") {
+				if strings.Contains(p.Name, "lib") && (strings.Contains(filename, "so") || strings.Contains(filename, "lib")) {
 					log.Infof("file %s skip, found %v", filename, ok)
 				}
 			}

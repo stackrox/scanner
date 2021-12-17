@@ -179,7 +179,6 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 				execToDeps[filename] = deps
 			}
 			if fileData.ELFMetadata != nil {
-				log.Infof("file %s has sonames %v", filename, fileData.ELFMetadata.Sonames)
 				for _, soname := range fileData.ELFMetadata.Sonames {
 					deps, ok := libToDeps[soname]
 					if !ok {

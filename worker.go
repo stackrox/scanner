@@ -16,7 +16,6 @@ package clair
 
 import (
 	"fmt"
-	"github.com/stackrox/rox/pkg/set"
 	"io"
 	"os"
 	"path/filepath"
@@ -131,7 +130,6 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 	if err != nil {
 		return err
 	}
-	log.Infof("Ready to insert: len featureversion %d", len(layer.Features))
 
 	if rhelv2Components != nil {
 		// Go this path for Red Hat Certified scans.
@@ -259,6 +257,7 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 	}
 
 	files, err := imagefmt.ExtractFromReader(reader, format, m)
+	/*
 	elfs := set.NewStringSet()
 	nonelfs := set.NewStringSet()
 	for k, file := range files {
@@ -272,6 +271,7 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 	}
 	log.Infof("elf %+v", elfs)
 	log.Infof("nonelf %+v", nonelfs)
+	 */
 	if err != nil {
 		return nil, false, nil, nil, nil, nil, err
 	}
