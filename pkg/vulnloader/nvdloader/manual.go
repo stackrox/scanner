@@ -15,7 +15,7 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 				DescriptionData: []*schema.CVEJSON40LangString{
 					{
 						Lang:  "en",
-						Value: `Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled. From log4j 2.15.0, this behavior has been disabled by default. In previous releases (>2.10) this behavior can be mitigated by setting system property "log4j2.formatMsgNoLookups" to “true” or by removing the JndiLookup class from the classpath (example: zip -q -d log4j-core-*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class). Java 8u121 (see https://www.oracle.com/java/technologies/javase/8u121-relnotes.html) protects against remote code execution by defaulting "com.sun.jndi.rmi.object.trustURLCodebase" and "com.sun.jndi.cosnaming.object.trustURLCodebase" to "false".`,
+						Value: `In Apache Log4j2 versions up to and including 2.14.1 (excluding security release 2.12.2), the JNDI features used in configurations, log messages, and parameters do not protect against attacker-controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled.`,
 					},
 				},
 			},
@@ -35,6 +35,11 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 						{
 							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
 							VersionEndExcluding:   "2.15.0",
+							VersionStartIncluding: "2.13.0",
+						},
+						{
+							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "2.12.2",
 							VersionStartIncluding: "2.0.0", // Red Hat says 2.0.0, and I trust them more.
 						},
 					},
@@ -61,7 +66,7 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 				ImpactScore:         6.0,
 			},
 		},
-		LastModifiedDate: "2021-12-13T00:00Z",
+		LastModifiedDate: "2021-12-16T00:00Z",
 		PublishedDate:    "2021-12-10T00:00Z",
 	},
 	"CVE-2021-45046": {
@@ -76,7 +81,7 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 				DescriptionData: []*schema.CVEJSON40LangString{
 					{
 						Lang:  "en",
-						Value: `It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. This could allows attackers with control over Thread Context Map (MDC) input data when the logging configuration uses a non-default Pattern Layout with either a Context Lookup (for example, $${ctx:loginId}) or a Thread Context Map pattern (%X, %mdc, or %MDC) to craft malicious input data using a JNDI Lookup pattern resulting in a denial of service (DOS) attack. Log4j 2.15.0 restricts JNDI LDAP lookups to localhost by default. Note that previous mitigations involving configuration such as to set the system property log4j2.noFormatMsgLookup to true do NOT mitigate this specific vulnerability.`,
+						Value: `It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. This could allows attackers with control over Thread Context Map (MDC) input data when the logging configuration uses a non-default Pattern Layout with either a Context Lookup (for example, $${ctx:loginId}) or a Thread Context Map pattern (%X, %mdc, or %MDC) to craft malicious input data using a JNDI Lookup pattern resulting in a denial of service (DOS) attack. Log4j 2.15.0 restricts JNDI LDAP lookups to localhost by default. Note that previous mitigations involving configuration such as to set the system property log4j2.formatMsgNoLookups to true do NOT mitigate this specific vulnerability.`,
 					},
 				},
 			},
@@ -96,6 +101,11 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 						{
 							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
 							VersionEndExcluding:   "2.16.0",
+							VersionStartIncluding: "2.13.0",
+						},
+						{
+							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "2.12.2",
 							VersionStartIncluding: "2.0.0", // Red Hat says 2.0.0, and I trust them more.
 						},
 					},
@@ -122,7 +132,7 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 				ImpactScore:         1.4,
 			},
 		},
-		LastModifiedDate: "2021-12-13T00:00Z",
+		LastModifiedDate: "2021-12-16T00:00Z",
 		PublishedDate:    "2021-12-13T00:00Z",
 	},
 }
