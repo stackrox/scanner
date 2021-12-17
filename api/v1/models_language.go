@@ -13,6 +13,12 @@ import (
 	"github.com/stackrox/scanner/pkg/component"
 )
 
+// These are possible package prefixes or suffixes. Package managers sometimes annotate
+// the packages with these e.g. urllib-python
+var possiblePythonPrefixesOrSuffixes = []string{
+	"python", "python2", "python3",
+}
+
 // languageFeatureValue is the value for a map of language features.
 type languageFeatureValue struct {
 	name, version, layer string

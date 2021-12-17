@@ -30,12 +30,6 @@ import (
 	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
 
-// These are possible package prefixes or suffixes. Package managers sometimes annotate
-// the packages with these e.g. urllib-python
-var possiblePythonPrefixesOrSuffixes = []string{
-	"python", "python2", "python3",
-}
-
 // Linux and kernel packages that are not applicable to images
 var kernelPrefixes = []string{
 	"linux",
