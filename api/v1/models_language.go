@@ -138,6 +138,57 @@ func getLanguageData(db database.Datastore, layerName, lineage string, uncertifi
 	return filtered, nil
 }
 
+// getLanguageComponents returns the language components present in the image whose top layer is indicated by the given layerName.
+func getLanguageComponents(db database.Datastore, layerName, lineage string, uncertifiedRHEL bool) []*component.Component {
+	layersToComponents, err := db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
+		UncertifiedRHEL: uncertifiedRHEL,
+	})
+	if err != nil {
+		log.Errorf("error getting language data: %v", err)
+		return nil
+	}
+
+	var components []*component.Component
+	var removedLanguageComponentLocations []string
+	ignoredLanguageComponents := getIgnoredLanguageComponents(layersToComponents)
+	// Loop from the highest layer to lowest.
+	for i := len(layersToComponents) - 1; i >= 0; i-- {
+		layerToComponents := layersToComponents[i]
+
+		// Ignore components which were removed in higher layers.
+		layerComponents := layerToComponents.Components[:0]
+		for _, c := range layerToComponents.Components {
+			if c.FromPackageManager {
+				continue
+			}
+			if lfv, ok := ignoredLanguageComponents[c.Location]; ok && lfv.name == c.Name && lfv.version == c.Version {
+				continue
+			}
+			include := true
+			for _, removedLocation := range removedLanguageComponentLocations {
+				if strings.HasPrefix(c.Location, removedLocation) {
+					include = false
+					break
+				}
+			}
+
+			if include {
+				c.AddedBy = layerToComponents.Layer
+				layerComponents = append(layerComponents, c)
+			}
+		}
+
+		removedLanguageComponentLocations = append(removedLanguageComponentLocations, layerToComponents.Removed...)
+
+		components = append(components, layerComponents...)
+	}
+
+	// Keep the components in reverse-layer order, as this will be useful when performing
+	// vulnerability matching.
+
+	return components
+}
+
 func dedupeVersionMatcher(v1, v2 string) bool {
 	if v1 == v2 {
 		return true
@@ -192,57 +243,6 @@ func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncer
 		}
 	}
 	layer.Features = append(layer.Features, languageFeatures...)
-}
-
-// getLanguageComponents returns the language components present in the image whose top layer is indicated by the given layerName.
-func getLanguageComponents(db database.Datastore, layerName, lineage string, uncertifiedRHEL bool) []*component.Component {
-	layersToComponents, err := db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
-		UncertifiedRHEL: uncertifiedRHEL,
-	})
-	if err != nil {
-		log.Errorf("error getting language data: %v", err)
-		return nil
-	}
-
-	var components []*component.Component
-	var removedLanguageComponentLocations []string
-	ignoredLanguageComponents := getIgnoredLanguageComponents(layersToComponents)
-	// Loop from the highest layer to lowest.
-	for i := len(layersToComponents) - 1; i >= 0; i-- {
-		layerToComponents := layersToComponents[i]
-
-		// Ignore components which were removed in higher layers.
-		layerComponents := layerToComponents.Components[:0]
-		for _, c := range layerToComponents.Components {
-			if c.FromPackageManager {
-				continue
-			}
-			if lfv, ok := ignoredLanguageComponents[c.Location]; ok && lfv.name == c.Name && lfv.version == c.Version {
-				continue
-			}
-			include := true
-			for _, removedLocation := range removedLanguageComponentLocations {
-				if strings.HasPrefix(c.Location, removedLocation) {
-					include = false
-					break
-				}
-			}
-
-			if include {
-				c.AddedBy = layerToComponents.Layer
-				layerComponents = append(layerComponents, c)
-			}
-		}
-
-		removedLanguageComponentLocations = append(removedLanguageComponentLocations, layerToComponents.Removed...)
-
-		components = append(components, layerComponents...)
-	}
-
-	// Keep the components in reverse-layer order, as this will be useful when performing
-	// vulnerability matching.
-
-	return components
 }
 
 func getLanguageFeatures(osFeatures []Feature, components []*v1.LanguageComponent, uncertifiedRHEL bool) ([]Feature, error) {
