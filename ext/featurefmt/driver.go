@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/stackrox/rox/pkg/set"
-
 	"github.com/stackrox/scanner/database"
 	rhelv2 "github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
