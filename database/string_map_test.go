@@ -12,11 +12,17 @@ func TestStringMapValueAndScan(t *testing.T) {
 		"libc.so.6": set.NewStringSet("/usr/bin/mawk"),
 		"libm.so.6": set.NewStringSet("/usr/bin/mawk", "/usr/bin/abcd"),
 	}
+	stringMapValueAndScan(t, aMap)
+	var nilMap StringToStringsMap
+	stringMapValueAndScan(t, nilMap)
+}
+
+func stringMapValueAndScan(t *testing.T, aMap StringToStringsMap) {
 	value, err := aMap.Value()
 	assert.NoError(t, err)
 	var scanned StringToStringsMap
 	assert.NoError(t, scanned.Scan(value.([]byte)))
-	assert.Equal(t, scanned, aMap)
+	assert.Equal(t, aMap, scanned)
 }
 
 func TestMerge(t *testing.T) {

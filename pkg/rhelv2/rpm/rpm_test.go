@@ -95,9 +95,9 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 			Name:    "zlib",
 			Version: "1.2.11-16.el8_2",
 			Arch:    "x86_64",
-			ProvidedExecutables: []string{
-				"/usr/lib64/libz.so.1",
-				"/usr/lib64/libz.so.1.2.11",
+			ExecutableToDependencies: database.StringToStringsMap{
+				"/usr/lib64/libz.so.1":      {},
+				"/usr/lib64/libz.so.1.2.11": {},
 			},
 		},
 		{
@@ -109,10 +109,10 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 			Name:    "ncurses-libs",
 			Version: "6.1-7.20180224.el8",
 			Arch:    "x86_64",
-			ProvidedExecutables: []string{
-				"/usr/lib64/libform.so.6",
-				"/usr/lib64/libncursesw.so.6.1",
-				"/usr/lib64/libpanelw.so.6",
+			ExecutableToDependencies: database.StringToStringsMap{
+				"/usr/lib64/libform.so.6":       {},
+				"/usr/lib64/libncursesw.so.6.1": {},
+				"/usr/lib64/libpanelw.so.6":     {},
 			},
 		},
 		{

@@ -24,6 +24,9 @@ type internalMap map[string][]string
 
 // Value returns the JSON-encoded representation
 func (m StringToStringsMap) Value() (driver.Value, error) {
+	if m == nil {
+		return json.Marshal(nil)
+	}
 	converted := make(internalMap, len(m))
 	for k, v := range m {
 		converted[k] = v.AsSortedSlice(func(i, j string) bool {
@@ -46,6 +49,10 @@ func (m *StringToStringsMap) Scan(value interface{}) error {
 	var raw internalMap
 	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
+	}
+	if raw == nil {
+		*m = nil
+		return nil
 	}
 	scanned := make(StringToStringsMap, len(raw))
 	for k, v := range raw {

@@ -6,6 +6,7 @@
 package v1
 
 import (
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"strconv"
 
 	rpmVersion "github.com/knqyf263/go-rpm-version"
@@ -16,7 +17,6 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 )
 
@@ -35,7 +35,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 		return false, err
 	}
 
-	features, err := getFullRHELv2Features(db, pkgEnvs)
+	features, err := getFullRHELv2Features(db, pkgEnvs, false)
 	if err != nil {
 		return false, err
 	}
@@ -45,7 +45,7 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 	return cpesExist, nil
 }
 
-func getFullRHELv2Features(db database.Datastore, pkgEnvs map[int]*database.RHELv2PackageEnv) ([]Feature, error) {
+func getFullRHELv2Features(db database.Datastore, pkgEnvs map[int]*database.RHELv2PackageEnv, execsPopulated bool) ([]Feature, error) {
 	records := getRHELv2Records(pkgEnvs)
 	vulns, err := db.GetRHELv2Vulnerabilities(records)
 	if err != nil {
@@ -53,6 +53,10 @@ func getFullRHELv2Features(db database.Datastore, pkgEnvs map[int]*database.RHEL
 	}
 
 	var features []Feature
+	var depMap map[string]common.FeatureKeySet
+	if !execsPopulated {
+		depMap = common.GetDepMapRHEL(pkgEnvs)
+	}
 	for _, pkgEnv := range pkgEnvs {
 		pkg := pkgEnv.Pkg
 
@@ -60,25 +64,12 @@ func getFullRHELv2Features(db database.Datastore, pkgEnvs map[int]*database.RHEL
 			continue
 		}
 
-		version := pkg.Version
-		if pkg.Arch != "" {
-			version += "." + pkg.Arch
+		version := pkg.GetPackageVersion()
+		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: version}
+		executables := pkg.Executables
+		if !execsPopulated {
+			executables = common.CreateExecutablesFromDependencies(pkgKey, pkg.ExecutableToDependencies, depMap)
 		}
-
-		requiredFeatures := []*v1.FeatureNameVersion{
-			{
-				Name:    pkg.Name,
-				Version: version,
-			},
-		}
-		executables := make([]*v1.Executable, 0, len(pkg.ProvidedExecutables))
-		for _, exec := range pkg.ProvidedExecutables {
-			executables = append(executables, &v1.Executable{
-				Path:             exec,
-				RequiredFeatures: requiredFeatures,
-			})
-		}
-
 		feature := Feature{
 			Name:          pkg.Name,
 			NamespaceName: pkgEnv.Namespace,
@@ -99,11 +90,6 @@ func getFullRHELv2Features(db database.Datastore, pkgEnvs map[int]*database.RHEL
 func getFullFeaturesForRHELv2Packages(db database.Datastore, pkgs []*v1.RHELComponent) ([]Feature, error) {
 	pkgEnvs := make(map[int]*database.RHELv2PackageEnv, len(pkgs))
 	for _, pkg := range pkgs {
-		paths := make([]string, 0, len(pkg.GetExecutables()))
-		for _, executable := range pkg.GetExecutables() {
-			paths = append(paths, executable.GetPath())
-		}
-
 		pkgEnvs[int(pkg.GetId())] = &database.RHELv2PackageEnv{
 			Pkg: &database.RHELv2Package{
 				Model:               database.Model{ID: int(pkg.GetId())},
@@ -111,7 +97,7 @@ func getFullFeaturesForRHELv2Packages(db database.Datastore, pkgs []*v1.RHELComp
 				Version:             pkg.GetVersion(),
 				Module:              pkg.GetModule(),
 				Arch:                pkg.GetArch(),
-				ProvidedExecutables: paths,
+				Executables:         pkg.GetExecutables(),
 			},
 			Namespace: pkg.GetNamespace(),
 			AddedBy:   pkg.GetAddedBy(),
@@ -119,7 +105,7 @@ func getFullFeaturesForRHELv2Packages(db database.Datastore, pkgs []*v1.RHELComp
 		}
 	}
 
-	return getFullRHELv2Features(db, pkgEnvs)
+	return getFullRHELv2Features(db, pkgEnvs, true)
 }
 
 // getRHELv2Vulns gets the vulnerabilities and fixedBy version found during RHELv2 scanning.
@@ -365,33 +351,4 @@ func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		// It is guaranteed there is 1 and only one element in `vuln.PackageInfos`.
 		FixedBy: vuln.PackageInfos[0].FixedInVersion, // Empty string if not fixed.
 	}
-}
-
-func createExecutablesFromDependencies(dbFeatureVersion database.FeatureVersion, depMap map[string]common.FeatureKeySet) []*v1.Executable {
-	executableToDependencies := dbFeatureVersion.ExecutableToDependencies
-	featureKey := featurefmt.PackageKey{Name: dbFeatureVersion.Feature.Name, Version: dbFeatureVersion.Version}
-	executables := make([]*v1.Executable, 0, len(executableToDependencies))
-	for exec, libs := range executableToDependencies {
-		features := make(common.FeatureKeySet)
-		features.Add(featureKey)
-		for lib := range libs {
-			features.Merge(depMap[lib])
-		}
-		executables = append(executables, &v1.Executable{
-			Path:             exec,
-			RequiredFeatures: toFeatureNameVersions(features),
-		})
-	}
-	return executables
-}
-
-func toFeatureNameVersions(keys common.FeatureKeySet) []*v1.FeatureNameVersion {
-	if len(keys) == 0 {
-		return nil
-	}
-	features := make([]*v1.FeatureNameVersion, 0, len(keys))
-	for k := range keys {
-		features = append(features, &v1.FeatureNameVersion{Name: k.Name, Version: k.Version})
-	}
-	return features
 }
