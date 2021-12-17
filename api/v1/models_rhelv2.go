@@ -345,3 +345,14 @@ func createExecutablesFromDependencies(dbFeatureVersion database.FeatureVersion,
 	}
 	return executables
 }
+
+func toFeatureNameVersions(keys common.FeatureKeySet) []*v1.FeatureNameVersion {
+	if len(keys) == 0 {
+		return nil
+	}
+	features := make([]*v1.FeatureNameVersion, 0, len(keys))
+	for k := range keys {
+		features = append(features, &v1.FeatureNameVersion{Name: k.Name, Version: k.Version})
+	}
+	return features
+}
