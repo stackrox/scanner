@@ -85,7 +85,7 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability 
 	return vulns
 }
 
-// ConvertFeatures converts api Features into v1 (proto) FeatureForDependency pointers.
+// ConvertFeatures converts api Features into v1 (proto) Feature pointers.
 func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 	features := make([]*v1.Feature, 0, len(apiFeatures))
 	for _, a := range apiFeatures {
