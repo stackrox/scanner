@@ -207,28 +207,33 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			// Rename to make it clear what the line represents.
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
-			fileData := files[filename[1:]]
-			if fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
-				deps := set.NewStringSet()
-				if fileData.ELFMetadata != nil {
-					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
-				}
-				execToDeps[filename] = deps
-			}
-			if fileData.ELFMetadata != nil {
-				for _, soname := range fileData.ELFMetadata.Sonames {
-					deps, ok := libToDeps[soname]
-					if !ok {
-						deps = set.NewStringSet()
-						libToDeps[soname] = deps
-					}
-					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
-				}
-			}
+			AddToDependencyMap(filename, files[filename[1:]], execToDeps, libToDeps)
 		}
 	}
 
 	return pkgs, s.Err()
+}
+
+// AddToDependencyMap checks and adds files to executable and library dependency for RHEL package
+func AddToDependencyMap(filename string, fileData tarutil.FileData, execToDeps, libToDeps database.StringToStringsMap) {
+	// The first character is always "/", which is removed when inserted into the files maps.
+	if fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
+		deps := set.NewStringSet()
+		if fileData.ELFMetadata != nil {
+			deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+		}
+		execToDeps[filename] = deps
+	}
+	if fileData.ELFMetadata != nil {
+		for _, soname := range fileData.ELFMetadata.Sonames {
+			deps, ok := libToDeps[soname]
+			if !ok {
+				deps = set.NewStringSet()
+				libToDeps[soname] = deps
+			}
+			deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+		}
+	}
 }
 
 func getCPEsUsingEmbeddedContentSets(files tarutil.FilesMap) ([]string, error) {
