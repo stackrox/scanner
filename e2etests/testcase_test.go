@@ -2464,8 +2464,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:     "stackrox/sandbox:log4j-2-12-2",
+		image:     "docker.io/stackrox/sandbox:log4j-2-12-2",
 		registry:  "https://registry-1.docker.io",
+		username:  os.Getenv("DOCKER_IO_PULL_USERNAME"),
+		password:  os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		source:    "NVD",
 		namespace: "ubuntu:20.04",
 		expectedFeatures: []apiV1.Feature{
