@@ -293,8 +293,8 @@ func getLanguageFeatures(osFeatures []Feature, components []*v1.LanguageComponen
 	return features, nil
 }
 
-// getLayerToComponents gets a slice of LayerToComponents from teh given components.
-// It is assumed the given components are sorted in order from the lowest layer to the highest layer.
+// getLayerToComponents gets a slice of LayerToComponents from the given components.
+// It is assumed the given components are sorted in order from the highest layer to the lowest layer.
 func getLayerToComponents(components []*v1.LanguageComponent) []*component.LayerToComponents {
 	var layers []*component.LayerToComponents
 	var prevLayer string
@@ -337,8 +337,8 @@ func getLayerToComponents(components []*v1.LanguageComponent) []*component.Layer
 			})
 		}
 
-		topLayer := layers[len(layers)-1]
-		topLayer.Components = append(topLayer.Components, c)
+		bottomLayer := layers[len(layers)-1]
+		bottomLayer.Components = append(bottomLayer.Components, c)
 	}
 
 	return layers
