@@ -23,6 +23,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	rhelv2 "github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -130,6 +131,27 @@ func TestLister(t *testing.T, l Lister, testData []TestData) {
 			for _, expectedFeatureVersion := range td.FeatureVersions {
 				assert.Contains(t, featureVersions, expectedFeatureVersion)
 			}
+		}
+	}
+}
+
+// AddToDependencyMap checks and adds files to executable and library dependency
+func AddToDependencyMap(filename string, fileData tarutil.FileData, execToDeps, libToDeps database.StringToStringsMap) {
+	if fileData.Executable {
+		deps := set.NewStringSet()
+		if fileData.ELFMetadata != nil {
+			deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+		}
+		execToDeps[filename] = deps
+	}
+	if fileData.ELFMetadata != nil {
+		for _, soname := range fileData.ELFMetadata.Sonames {
+			deps, ok := libToDeps[soname]
+			if !ok {
+				deps = set.NewStringSet()
+				libToDeps[soname] = deps
+			}
+			deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
 		}
 	}
 }
