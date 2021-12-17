@@ -26,6 +26,10 @@ type cycle struct {
 	members set.StringSet
 }
 
+var (
+	unresolved = set.NewStringSet()
+)
+
 // GetDepMapRHEL creates a dependency map from a library to the features it uses.
 func GetDepMapRHEL(pkgEnvs map[int]*database.RHELv2PackageEnv) map[string]FeatureKeySet {
 	trace.Trace()
@@ -37,7 +41,6 @@ func GetDepMapRHEL(pkgEnvs map[int]*database.RHELv2PackageEnv) map[string]Featur
 			Name:    pkgEnv.Pkg.Name,
 			Version: pkgEnv.Pkg.GetPackageVersion(),
 		}
-		logrus.Infof("Create dep map for rhel %v", fvKey)
 		// Populate libraries with all direct imports.
 		for lib, deps := range pkgEnv.Pkg.LibraryToDependencies {
 			if node, ok := libNodes[lib]; ok {
@@ -80,12 +83,12 @@ func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
 			}
 		}
 	}
-	// logrus.Infof("Create dep map for %v", libNodes)
 	return createDepMap(libNodes)
 }
 
 // Traverse map of lib dep nodes and create a dependency map
 func createDepMap(libNodes map[string]*libDepNode) map[string]FeatureKeySet {
+	logrus.Infof("Create dep map for %v", libNodes)
 	depMap := make(map[string]FeatureKeySet)
 	for k, v := range libNodes {
 		var c *cycle
@@ -98,6 +101,7 @@ func createDepMap(libNodes map[string]*libDepNode) map[string]FeatureKeySet {
 			}
 		}
 	}
+	logrus.Infof("Unresolved sonames %+v", unresolved)
 	return depMap
 }
 
@@ -109,7 +113,7 @@ func fillIn(libToDep map[string]*libDepNode, depname string, dep *libDepNode, pa
 	for lib := range dep.libraries {
 		execs, ok := libToDep[lib]
 		if !ok {
-			logrus.Warnf("Unresolved soname %s", lib)
+			unresolved.Add(lib)
 			continue
 		}
 		if seq, ok := path[lib]; ok {

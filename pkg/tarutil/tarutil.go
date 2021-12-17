@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
+	"github.com/stackrox/rox/pkg/set"
 	"io"
 	"os/exec"
 	"strings"
@@ -68,6 +69,10 @@ type FileData struct {
 	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
 	ELFMetadata *elf.Metadata
 }
+var (
+	elfs = set.NewStringSet()
+	nonelfs = set.NewStringSet()
+)
 
 // FilesMap is a map of files' paths to their contents.
 type FilesMap map[string]FileData
@@ -138,10 +143,24 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 			elfFile := elf.OpenIfELFExecutable(contents)
 			if elfFile != nil {
+				if strings.Contains(filename, "so") || strings.Contains(filename, "lib") {
+					elfs.Add(filename)
+					if len(elfs) > 30 {
+						log.Infof("Elf files: %v", elfs)
+						elfs = set.NewStringSet()
+					}
+				}
 				if elfMetadata, err := elf.GetELFMetadata(elfFile); err != nil {
 					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 				} else {
 					fileData.ELFMetadata = elfMetadata
+				}
+			} else {
+				nonelfs.Add(filename)
+				if len(elfs) > 30 {
+					log.Infof("non Elf files: %v", nonelfs)
+					nonelfs = set.NewStringSet()
+					log.Errorf("elf error %v", err)
 				}
 			}
 
