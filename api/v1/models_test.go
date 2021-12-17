@@ -1,19 +1,15 @@
 package v1
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
 	"testing"
 
-	"github.com/stackrox/scanner/cpe/nvdtoolscache"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	// Register the CPE validators.
 	_ "github.com/stackrox/scanner/cpe/validation/all"
@@ -23,112 +19,21 @@ import (
 	_ "github.com/stackrox/scanner/ext/versionfmt/rpm"
 )
 
-func TestDedupeVersionMatcher(t *testing.T) {
-	cases := []struct {
-		v1, v2   string
-		expected bool
-	}{
-		{
-			v1:       "diff1",
-			v2:       "diff2",
-			expected: false,
-		},
-		{
-			v1:       "3.5.13",
-			v2:       "3.5.13",
-			expected: true,
-		},
-		{
-			v1:       "3.5.13",
-			v2:       "3.5.13-1",
-			expected: true,
-		},
-	}
-	for _, c := range cases {
-		t.Run(fmt.Sprintf("%s-%s", c.v1, c.v2), func(t *testing.T) {
-			assert.Equal(t, c.expected, dedupeVersionMatcher(c.v1, c.v2))
-		})
-	}
-}
-
-func TestShouldDedupeLanguageFeature(t *testing.T) {
-	cases := []struct {
-		name       string
-		feature    Feature
-		osFeatures []Feature
-		dedupe     bool
-	}{
-		{
-			name: "jinja-individual",
-			feature: Feature{
-				Name:          "jinja2",
-				VersionFormat: "Python",
-				Version:       "2.10",
-			},
-			dedupe: false,
-		},
-		{
-			name: "jinja-duplicate",
-			feature: Feature{
-				Name:          "jinja2",
-				VersionFormat: "Python",
-				Version:       "2.10",
-			},
-			osFeatures: []Feature{
-				{
-					Name:          "jinja2",
-					VersionFormat: "dpkg",
-					Version:       "2.10-2",
-				},
-			},
-			dedupe: true,
-		},
-		{
-			name: "python-werkzeug",
-			feature: Feature{
-				Name:          "werkzeug",
-				VersionFormat: component.PythonSourceType.String(),
-				Version:       "0.14.1",
-			},
-			osFeatures: []Feature{
-				{
-					Name:          "python-werkzeug",
-					VersionFormat: "dpkg",
-					Version:       "0.14.1+dfsg1-4",
-				},
-			},
-			dedupe: true,
-		},
-		{
-			name: "libsass",
-			feature: Feature{
-				Name:          "libsass",
-				VersionFormat: component.PythonSourceType.String(),
-				Version:       "0.17.1",
-			},
-			osFeatures: []Feature{
-				{
-					Name:          "libsass-python",
-					VersionFormat: "dpkg",
-					Version:       "0.17.1-1",
-				},
-			},
-			dedupe: true,
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			assert.Equal(t, c.dedupe, shouldDedupeLanguageFeature(c.feature, c.osFeatures))
-		})
-	}
-}
-
 func TestLatestUbuntuFeatureVersion(t *testing.T) {
 	envIsolator := testutils.NewEnvIsolator(t)
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
-	providedExecs := []string{"/exec/me", "/pls/exec/me"}
+	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
+	expectedExecs := make([]*v1.Executable, 0, len(providedExecs))
+	for exec := range providedExecs {
+		expectedExecs = append(expectedExecs, &v1.Executable{Path: exec, RequiredFeatures: []*v1.FeatureNameVersion{
+			{
+				Name:    "curl",
+				Version: "7.35.0-1ubuntu2.20",
+			},
+		}})
+	}
 
 	dbLayer := database.Layer{
 		Name:          "example",
@@ -161,17 +66,17 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 						FixedBy: "7.35.0-1ubuntu2.20+esm2",
 					},
 				},
-				ProvidedExecutables: providedExecs,
+				ExecutableToDependencies: providedExecs,
 			},
 		},
 	}
-	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "7.35.0-1ubuntu2.20+esm3", layer.Features[0].FixedBy)
-	assert.ElementsMatch(t, providedExecs, layer.Features[0].ProvidedExecutables)
+	assert.ElementsMatch(t, expectedExecs, layer.Features[0].Executables)
 }
 
 func TestLatestCentOSFeatureVersion(t *testing.T) {
@@ -179,7 +84,16 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
-	providedExecs := []string{"/exec/me", "/pls/exec/me"}
+	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
+	expectedExecs := make([]*v1.Executable, 0, len(providedExecs))
+	for exec := range providedExecs {
+		expectedExecs = append(expectedExecs, &v1.Executable{Path: exec, RequiredFeatures: []*v1.FeatureNameVersion{
+			{
+				Name:    "sqlite-libs",
+				Version: "3.26.0-6.el8",
+			},
+		}})
+	}
 
 	dbLayer := database.Layer{
 		Name:          "example",
@@ -224,60 +138,17 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 						FixedBy: "0:3.26.0-11.el8",
 					},
 				},
-				ProvidedExecutables: providedExecs,
+				ExecutableToDependencies: providedExecs,
 			},
 		},
 	}
-	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", &database.DatastoreOptions{
+	layer, _, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, &database.DatastoreOptions{
 		WithVulnerabilities: true,
 		WithFeatures:        true,
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "0:3.27.1-12.el8", layer.Features[0].FixedBy)
-	assert.ElementsMatch(t, providedExecs, layer.Features[0].ProvidedExecutables)
-}
-
-func TestLatestLanguageFeatureVersion(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
-	_, filename, _, _ := runtime.Caller(0)
-	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	envIsolator.Setenv("NVD_DEFINITIONS_DIR", defsDir)
-
-	prevBoltPath := nvdtoolscache.BoltPath
-	defer func() {
-		nvdtoolscache.BoltPath = prevBoltPath
-	}()
-
-	dir, err := os.MkdirTemp("", "bolt")
-	require.NoError(t, err)
-	defer func() {
-		_ = os.RemoveAll(dir)
-	}()
-	nvdtoolscache.BoltPath = filepath.Join(dir, "temp.db")
-
-	db := newMockDatastore()
-	db.layers["layer"] = []*component.LayerToComponents{
-		{
-			Layer: "layer",
-			Components: []*component.Component{
-				{
-					SourceType:      component.JavaSourceType,
-					Name:            "struts",
-					Version:         "2.3.12",
-					Location:        "usr/local/tomcat/webapps/ROOT.war:WEB-INF/lib/struts2-core2.3.12.jar",
-					JavaPkgMetadata: &component.JavaPkgMetadata{},
-				},
-			},
-		},
-	}
-	dbLayer := &Layer{
-		Name: "layer",
-	}
-
-	addLanguageVulns(db, dbLayer, "", false)
-	assert.Equal(t, "2.3.29", dbLayer.Features[0].FixedBy)
+	assert.ElementsMatch(t, expectedExecs, layer.Features[0].Executables)
 }
 
 func TestNotesNoLanguageVulns(t *testing.T) {
@@ -295,7 +166,7 @@ func TestNotesNoLanguageVulns(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, LanguageCVEsUnavailable)
@@ -312,7 +183,7 @@ func TestNotesStaleCVEs(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsStale)
@@ -329,7 +200,7 @@ func TestNotesUnavailableCVEs(t *testing.T) {
 		},
 		Features: nil,
 	}
-	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil)
+	_, notes, err := LayerFromDatabaseModel(nil, dbLayer, "", nil, nil)
 	assert.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Contains(t, notes, OSCVEsUnavailable)
@@ -350,168 +221,167 @@ func newMockDatastore() *mockDatastore {
 	return db
 }
 
-func TestAddLanguageVulns(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
-	_, filename, _, _ := runtime.Caller(0)
-	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	envIsolator.Setenv("NVD_DEFINITIONS_DIR", defsDir)
-
-	prevBoltPath := nvdtoolscache.BoltPath
-	defer func() {
-		nvdtoolscache.BoltPath = prevBoltPath
-	}()
-
-	dir, err := os.MkdirTemp("", "bolt")
-	require.NoError(t, err)
-	defer func() {
-		_ = os.RemoveAll(dir)
-	}()
-	nvdtoolscache.BoltPath = filepath.Join(dir, "temp.db")
-
+func TestComponentsFromDatabaseModel(t *testing.T) {
 	db := newMockDatastore()
-	// 2 layers. First layer's features are deleted in the 2nd layer. 2nd layer adds a new feature.
-	db.layers["layer2"] = []*component.LayerToComponents{
-		{
-			Layer: "layer1",
-			Components: []*component.Component{
-				{
-					SourceType: component.DotNetCoreRuntimeSourceType,
-					Name:       "microsoft.dotnetcore.app",
-					Version:    "3.1.2",
-					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/",
-				},
-			},
+
+	dbLayer := database.Layer{
+		Name: "layer1",
+		Namespace: &database.Namespace{
+			Name:          "centos:8",
+			VersionFormat: "rpm",
 		},
-		{
-			Layer: "layer2",
-			Components: []*component.Component{
-				{
-					SourceType: component.DotNetCoreRuntimeSourceType,
-					Name:       "microsoft.dotnetcore.app",
-					Version:    "3.2.0",
-					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/",
+		Features: []database.FeatureVersion{
+			{
+				Version: "3.26.0-6.el8",
+				Feature: database.Feature{
+					Name: "sqlite-libs",
+					Namespace: database.Namespace{
+						Name:          "centos:8",
+						VersionFormat: "rpm",
+					},
+				},
+				AddedBy: database.Layer{
+					Name: "layer1",
+				},
+				AffectedBy: []database.Vulnerability{
+					{
+						Name:    "CVE-2020-15358",
+						FixedBy: "",
+					},
+					{
+						Name:    "CVE-2020-13632",
+						FixedBy: "0:3.26.0-11.el8",
+					},
+					{
+						Name:    "CVE-2021-1234",
+						FixedBy: "",
+					},
+					{
+						Name:    "CVE-2021-1235",
+						FixedBy: "0:3.27.1-12.el8",
+					},
+					{
+						Name:    "CVE-2020-13630",
+						FixedBy: "0:3.26.0-11.el8",
+					},
+				},
+				ExecutableToDependencies: database.StringToStringsMap{
+					"/usr/bin/showdb": {"sqlite3.so": {}},
+				},
+				LibraryToDependencies: database.StringToStringsMap{
+					"sqlite3.so": {},
 				},
 			},
-			Removed: []string{"usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/"},
 		},
 	}
-	// 2 layers. First layer's features are removed in the second. All features from the same file.
-	layer4 := []*component.LayerToComponents{
+
+	db.layers["layer1"] = []*component.LayerToComponents{
 		{
-			Layer: "layer3",
+			Layer: "layer0",
 			Components: []*component.Component{
 				{
-					SourceType:      component.JavaSourceType,
-					Name:            "zookeeper",
-					Version:         "3.4.13",
-					Location:        "zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar",
-					JavaPkgMetadata: &component.JavaPkgMetadata{},
+					Name:       "javapkg",
+					Version:    "1.2.3",
+					SourceType: component.JavaSourceType,
+					Location:   "/opt/java/pkg/location",
+					JavaPkgMetadata: &component.JavaPkgMetadata{
+						ImplementationVersion: "1",
+						MavenVersion:          "2",
+						Origins:               []string{"idk"},
+						SpecificationVersion:  "something",
+						BundleName:            "bundle",
+					},
 				},
 				{
-					SourceType: component.JavaSourceType,
-					Name:       "guava",
-					Version:    "18.0",
-					Location:   "zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar:guava",
-					JavaPkgMetadata: &component.JavaPkgMetadata{
-						Origins: []string{"google"},
+					Name:               "ospkg",
+					Version:            "1.2.3",
+					FromPackageManager: true,
+					SourceType:         component.DotNetCoreRuntimeSourceType,
+				},
+				{
+					Name:       "pythonpkg",
+					Version:    "2.2.3",
+					SourceType: component.PythonSourceType,
+					Location:   "/opt/python/pkg/location",
+					PythonPkgMetadata: &component.PythonPkgMetadata{
+						Homepage:    "pkg.com",
+						AuthorEmail: "stackrox",
+						DownloadURL: "pkg.com/stackrox",
+						Summary:     "this is the coolest package ever",
+						Description: "something something something",
+					},
+				},
+				{
+					Name:       "removedpkg",
+					Version:    "1.2.3",
+					SourceType: component.GemSourceType,
+					Location:   "/something/removed",
+				},
+			},
+		},
+		{
+			Layer:   "layer1",
+			Removed: []string{"/something/removed"},
+		},
+	}
+
+	imgComponents, err := ComponentsFromDatabaseModel(db, &dbLayer, "", true)
+	assert.NoError(t, err)
+
+	expectedFeatures := []Feature{
+		{
+			Name:          "sqlite-libs",
+			NamespaceName: "centos:8",
+			VersionFormat: "rpm",
+			Version:       "3.26.0-6.el8",
+			AddedBy:       "layer1",
+			Executables: []*v1.Executable{
+				{
+					Path: "/usr/bin/showdb",
+					RequiredFeatures: []*v1.FeatureNameVersion{
+						{
+							Name:    "sqlite-libs",
+							Version: "3.26.0-6.el8",
+						},
 					},
 				},
 			},
 		},
-		{
-			Layer:      "layer4",
-			Components: []*component.Component{},
-			Removed:    []string{"zookeeper-3.4.13/contrib/fatjar/zookeeper-3.4.13-fatjar.jar"},
-		},
 	}
-	db.layers["layer3"] = layer4[:1]
-	db.layers["layer4"] = layer4
-	// 2 layers. 2nd layer symbolizes a chown or touch to the file. AddedBy should be the first layer.
-	db.layers["layer6"] = []*component.LayerToComponents{
+	expectedComponents := []*component.Component{
 		{
-			Layer: "layer5",
-			Components: []*component.Component{
-				{
-					SourceType: component.DotNetCoreRuntimeSourceType,
-					Name:       "microsoft.dotnetcore.app",
-					Version:    "3.2.0",
-					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/",
-				},
+			Name:       "javapkg",
+			Version:    "1.2.3",
+			SourceType: component.JavaSourceType,
+			Location:   "/opt/java/pkg/location",
+			JavaPkgMetadata: &component.JavaPkgMetadata{
+				ImplementationVersion: "1",
+				MavenVersion:          "2",
+				Origins:               []string{"idk"},
+				SpecificationVersion:  "something",
+				BundleName:            "bundle",
 			},
+			AddedBy: "layer0",
 		},
 		{
-			Layer: "layer6",
-			Components: []*component.Component{
-				{
-					SourceType: component.DotNetCoreRuntimeSourceType,
-					Name:       "microsoft.dotnetcore.app",
-					Version:    "3.2.0",
-					Location:   "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/",
-				},
+			Name:       "pythonpkg",
+			Version:    "2.2.3",
+			SourceType: component.PythonSourceType,
+			Location:   "/opt/python/pkg/location",
+			PythonPkgMetadata: &component.PythonPkgMetadata{
+				Homepage:    "pkg.com",
+				AuthorEmail: "stackrox",
+				DownloadURL: "pkg.com/stackrox",
+				Summary:     "this is the coolest package ever",
+				Description: "something something something",
 			},
+			AddedBy: "layer0",
 		},
 	}
-	// Simplified version of real image seen in the wild.
-	db.layers["layer8"] = []*component.LayerToComponents{
-		{
-			Layer: "layer7",
-			Components: []*component.Component{
-				{
-					SourceType: component.NPMSourceType,
-					Name:       "websocket-extensions",
-					Version:    "0.1.3",
-					Location:   "usr/local/share/.cache/yarn/v4/npm-websocket-extensions-0.1.3-5d2ff22977003ec687a4b87073dfbbac146ccf29/node_modules/websocket-extensions/package.json",
-				},
-			},
-		},
-		{
-			Layer:   "layer8",
-			Removed: []string{"usr/local/share/.cache/yarn"},
-		},
-	}
+	expectedNotes := []Note{CertifiedRHELScanUnavailable}
 
-	layer := &Layer{
-		Name: "layer2",
-	}
-	addLanguageVulns(db, layer, "", false)
-	assert.Len(t, layer.Features, 1)
-	feature := layer.Features[0]
-	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
-	assert.Equal(t, "3.2.0", feature.Version)
-	assert.Equal(t, "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/", feature.Location)
-	assert.Len(t, feature.Vulnerabilities, 1)
-	assert.Equal(t, "layer2", feature.AddedBy)
-	vuln := feature.Vulnerabilities[0]
-	assert.Equal(t, "CVE-2020-123123123", vuln.Name)
-
-	layer = &Layer{
-		Name: "layer3",
-	}
-	addLanguageVulns(db, layer, "", false)
-	assert.Len(t, layer.Features, 2)
-
-	layer = &Layer{
-		Name: "layer4",
-	}
-	addLanguageVulns(db, layer, "", false)
-	assert.Empty(t, layer.Features)
-
-	layer = &Layer{
-		Name: "layer6",
-	}
-	addLanguageVulns(db, layer, "", false)
-	assert.Len(t, layer.Features, 1)
-	feature = layer.Features[0]
-	assert.Equal(t, "microsoft.dotnetcore.app", feature.Name)
-	assert.Equal(t, "3.2.0", feature.Version)
-	assert.Equal(t, "usr/share/dotnet/shared/Microsoft.NETCore.App/3.2.0/", feature.Location)
-	assert.Equal(t, "layer5", feature.AddedBy)
-
-	layer = &Layer{
-		Name: "layer8",
-	}
-	addLanguageVulns(db, layer, "", false)
-	assert.Empty(t, layer.Features)
+	assert.ElementsMatch(t, expectedFeatures, imgComponents.Features)
+	assert.Empty(t, imgComponents.RHELv2PkgEnvs)
+	assert.ElementsMatch(t, expectedComponents, imgComponents.LanguageComponents)
+	assert.ElementsMatch(t, expectedNotes, imgComponents.Notes)
 }

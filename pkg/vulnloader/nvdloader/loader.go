@@ -10,7 +10,9 @@ import (
 	"time"
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
+	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/vulndump"
@@ -53,6 +55,30 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 	return nil
 }
 
+func removeInvalidCPEs(item *schema.NVDCVEFeedJSON10DefNode) {
+	cpeMatches := item.CPEMatch[:0]
+	for _, cpeMatch := range item.CPEMatch {
+		if cpeMatch.Cpe23Uri == "" {
+			cpeMatches = append(cpeMatches, cpeMatch)
+			continue
+		}
+		attr, err := wfn.UnbindFmtString(cpeMatch.Cpe23Uri)
+		if err != nil {
+			log.Errorf("error parsing %+v", item)
+			continue
+		}
+		if attr.Product == wfn.Any {
+			log.Warnf("Filtering out CPE: %+v", attr)
+			continue
+		}
+		cpeMatches = append(cpeMatches, cpeMatch)
+	}
+	item.CPEMatch = cpeMatches
+	for _, child := range item.Children {
+		removeInvalidCPEs(child)
+	}
+}
+
 func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir string, year int) error {
 	url := jsonFeedURLForYear(year)
 	resp, err := client.Get(url)
@@ -72,7 +98,15 @@ func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir 
 		return errors.Wrapf(err, "could not decode json for year %d", year)
 	}
 
+	cveItems := dump.CVEItems[:0]
 	for _, item := range dump.CVEItems {
+		if _, ok := manuallyEnrichedVulns[item.CVE.CVEDataMeta.ID]; ok {
+			log.Warnf("Skipping vuln %s because it is being manually enriched", item.CVE.CVEDataMeta.ID)
+			continue
+		}
+		for _, node := range item.Configurations.Nodes {
+			removeInvalidCPEs(node)
+		}
 		if enrichedEntry, ok := enrichmentMap[item.CVE.CVEDataMeta.ID]; ok {
 			// Add the CPE matches instead of removing for backwards compatibility purposes
 			item.Configurations.Nodes = append(item.Configurations.Nodes, &schema.NVDCVEFeedJSON10DefNode{
@@ -81,7 +115,12 @@ func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir 
 			})
 			item.LastModifiedDate = enrichedEntry.LastUpdated
 		}
+		cveItems = append(cveItems, item)
 	}
+	for _, item := range manuallyEnrichedVulns {
+		cveItems = append(cveItems, item)
+	}
+	dump.CVEItems = cveItems
 
 	outF, err := os.Create(filepath.Join(outputDir, fmt.Sprintf("%d.json", year)))
 	if err != nil {

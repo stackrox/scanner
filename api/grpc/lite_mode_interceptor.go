@@ -14,6 +14,7 @@ var (
 	// Method name(s) taken from the respective generated pb.go file(s).
 	liteModeMethodsAllowlist = set.NewFrozenStringSet(
 		"/scannerV1.PingService/Ping",
+		"/scannerV1.ImageScanService/GetImageComponents",
 	)
 )
 

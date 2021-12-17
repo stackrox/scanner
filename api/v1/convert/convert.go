@@ -3,6 +3,7 @@ package convert
 import (
 	"encoding/json"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/nvd"
@@ -11,6 +12,9 @@ import (
 
 // Metadata converts from types.Metadata to v1.Metadata
 func Metadata(m *types.Metadata) *v1.Metadata {
+	if m.IsNilOrEmpty() {
+		return nil
+	}
 	metadata := &v1.Metadata{
 		PublishedDateTime:    m.PublishedDateTime,
 		LastModifiedDateTime: m.LastModifiedDateTime,
@@ -63,6 +67,10 @@ func NVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vulnerabil
 	vulns := make([]*v1.Vulnerability, 0, len(nvdVulns))
 	for _, vuln := range nvdVulns {
 		m := types.ConvertNVDMetadata(vuln.NVDCVEFeedJSON10DefCVEItem)
+		if m.IsNilOrEmpty() {
+			logrus.Warnf("Metadata empty or nil for %v; skipping...", vuln.CVE.CVEDataMeta.ID)
+			continue
+		}
 		vulns = append(vulns, &v1.Vulnerability{
 			Name:        vuln.CVE.CVEDataMeta.ID,
 			Description: types.ConvertNVDSummary(vuln.NVDCVEFeedJSON10DefCVEItem),

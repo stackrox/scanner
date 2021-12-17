@@ -14,7 +14,7 @@ import (
 var (
 	instance         matcher.Matcher
 	once             sync.Once
-	dynamicLibRegexp = regexp.MustCompile(`(^|/)lib[^/.]+\.so(\.[^/.]+)*$`)
+	dynamicLibRegexp = regexp.MustCompile(`(^|/)(lib|ld-)[^/.-][^/]*\.so(\.[^/.]+)*$`)
 )
 
 // SingletonMatcher returns the singleton matcher instance to use for extracting

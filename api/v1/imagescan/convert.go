@@ -3,18 +3,24 @@ package imagescan
 import (
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
+	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
 var (
+	errSourceTypesMismatch = errors.New("Number of source types in proto and Go are not equal")
+	errNotesMismatch       = errors.New("Number of notes in proto and Go are not equal")
+
 	sourceTypeToProtoMap = func() map[component.SourceType]v1.SourceType {
 		numComponentSourceTypes := int(component.SentinelEndSourceType) - int(component.UnsetSourceType)
 		if numComponentSourceTypes != len(v1.SourceType_value) {
-			panic("Number of source types in proto and Go are not equal")
+			utils.CrashOnError(errSourceTypesMismatch)
 		}
 
 		m := make(map[component.SourceType]v1.SourceType, numComponentSourceTypes)
@@ -27,7 +33,28 @@ var (
 			}
 		}
 		if len(m) != numComponentSourceTypes {
-			panic("Mismatch in source types in proto and code")
+			utils.CrashOnError(errSourceTypesMismatch)
+		}
+		return m
+	}()
+
+	noteToProtoMap = func() map[apiV1.Note]v1.Note {
+		numNotes := int(apiV1.SentinelNote)
+		if numNotes != len(v1.Note_value) {
+			utils.CrashOnError(errNotesMismatch)
+		}
+
+		m := make(map[apiV1.Note]v1.Note, numNotes)
+		for name, val := range v1.Note_value {
+			normalizedName := strings.ToLower(strings.Replace(name, "_", "", -1))
+			for note := apiV1.OSCVEsUnavailable; note < apiV1.SentinelNote; note++ {
+				if strings.HasPrefix(strings.ToLower(note.String()), normalizedName) {
+					m[note] = v1.Note(val)
+				}
+			}
+		}
+		if len(m) != numNotes {
+			utils.CrashOnError(errNotesMismatch)
 		}
 		return m
 	}()
@@ -39,6 +66,10 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability 
 		metadata, err := convert.MetadataMap(v.Metadata)
 		if err != nil {
 			log.Errorf("error converting metadata map: %v", err)
+			continue
+		}
+		if metadata == nil {
+			log.Warnf("metadata is nil for %s; skipping...", v.Name)
 			continue
 		}
 
@@ -53,22 +84,25 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability 
 	return vulns
 }
 
-func convertProvidedExecutables(paths []string) []*v1.Executable {
+func convertProvidedExecutables(pkg *database.RHELv2Package) []*v1.Executable {
+	paths := pkg.ProvidedExecutables
+	requiredFeatures := []*v1.FeatureNameVersion{{Name: pkg.Name, Version: pkg.Version}}
 	executables := make([]*v1.Executable, 0, len(paths))
 	for _, path := range paths {
 		executables = append(executables, &v1.Executable{
-			Path: path,
+			Path:             path,
+			RequiredFeatures: requiredFeatures,
 		})
 	}
 
 	return executables
 }
 
-func convertFeatures(apiFeatures []apiV1.Feature) ([]*v1.Feature, error) {
+// ConvertFeatures converts api Features into v1 (proto) Feature pointers.
+func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 	features := make([]*v1.Feature, 0, len(apiFeatures))
 	for _, a := range apiFeatures {
 		vulns := convertVulnerabilities(a.Vulnerabilities)
-		executables := convertProvidedExecutables(a.ProvidedExecutables)
 
 		features = append(features, &v1.Feature{
 			Name:                a.Name,
@@ -77,35 +111,129 @@ func convertFeatures(apiFeatures []apiV1.Feature) ([]*v1.Feature, error) {
 			FeatureType:         a.VersionFormat,
 			AddedByLayer:        a.AddedBy,
 			Location:            a.Location,
-			ProvidedExecutables: executables,
+			ProvidedExecutables: a.Executables,
 		})
 	}
-	return features, nil
+	return features
 }
 
-func convertComponents(layersToComponents []*component.LayerToComponents) map[string]*v1.LanguageLevelComponents {
+func convertLanguageLevelComponents(layersToComponents []*component.LayerToComponents) map[string]*v1.LanguageLevelComponents {
 	converted := make(map[string]*v1.LanguageLevelComponents, len(layersToComponents))
 	for _, layerToComponents := range layersToComponents {
-		converted[layerToComponents.Layer] = convertComponentsSlice(layerToComponents.Components)
+		converted[layerToComponents.Layer] = convertLanguageLevelComponentsSlice(layerToComponents.Components)
 	}
 	return converted
 }
 
-func convertComponentsSlice(components []*component.Component) *v1.LanguageLevelComponents {
+func convertLanguageLevelComponentsSlice(components []*component.Component) *v1.LanguageLevelComponents {
 	converted := make([]*v1.LanguageLevelComponent, 0, len(components))
 	for _, c := range components {
-		converted = append(converted, convertComponent(c))
+		converted = append(converted, convertLanguageLevelComponent(c))
 	}
 	return &v1.LanguageLevelComponents{
 		Components: converted,
 	}
 }
 
-func convertComponent(c *component.Component) *v1.LanguageLevelComponent {
+func convertLanguageLevelComponent(c *component.Component) *v1.LanguageLevelComponent {
 	return &v1.LanguageLevelComponent{
 		SourceType: sourceTypeToProtoMap[c.SourceType],
 		Name:       c.Name,
 		Version:    c.Version,
 		Location:   c.Location,
+	}
+}
+
+func convertNotes(notes []apiV1.Note) []v1.Note {
+	v1Notes := make([]v1.Note, 0, len(notes))
+	for _, note := range notes {
+		v1Notes = append(v1Notes, noteToProtoMap[note])
+	}
+	return v1Notes
+}
+
+// convertImageComponents converts the given OS-level features and language-level components into
+// Components.
+func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Components {
+	osComponents := make([]*v1.OSComponent, 0, len(imgComponents.Features))
+	for _, feature := range imgComponents.Features {
+		osComponents = append(osComponents, &v1.OSComponent{
+			Name:        feature.Name,
+			Namespace:   feature.NamespaceName,
+			Version:     feature.Version,
+			AddedBy:     feature.AddedBy,
+			Executables: feature.Executables,
+		})
+	}
+
+	rhelv2Components := make([]*v1.RHELComponent, 0, len(imgComponents.RHELv2PkgEnvs))
+	for _, rhelv2PkgEnv := range imgComponents.RHELv2PkgEnvs {
+		pkg := rhelv2PkgEnv.Pkg
+		rhelv2Components = append(rhelv2Components, &v1.RHELComponent{
+			Id:          int64(pkg.ID),
+			Name:        pkg.Name,
+			Namespace:   rhelv2PkgEnv.Namespace,
+			Version:     pkg.Version,
+			Arch:        pkg.Arch,
+			Module:      pkg.Module,
+			Cpes:        rhelv2PkgEnv.CPEs,
+			AddedBy:     rhelv2PkgEnv.AddedBy,
+			Executables: convertProvidedExecutables(pkg),
+		})
+	}
+
+	languageComponents := make([]*v1.LanguageComponent, 0, len(imgComponents.LanguageComponents))
+	for _, c := range imgComponents.LanguageComponents {
+		languageComponent := &v1.LanguageComponent{
+			Type:     sourceTypeToProtoMap[c.SourceType],
+			Name:     c.Name,
+			Version:  c.Version,
+			Location: c.Location,
+			AddedBy:  c.AddedBy,
+		}
+
+		switch c.SourceType {
+		case component.JavaSourceType:
+			javaMetadata := c.JavaPkgMetadata
+			if javaMetadata == nil {
+				log.Warnf("Java package %s:%s at %s is invalid; skipping...", c.Name, c.Version, c.Location)
+				continue
+			} else {
+				languageComponent.Language = &v1.LanguageComponent_Java{
+					Java: &v1.JavaComponent{
+						ImplementationVersion: javaMetadata.ImplementationVersion,
+						MavenVersion:          javaMetadata.MavenVersion,
+						Origins:               javaMetadata.Origins,
+						SpecificationVersion:  javaMetadata.SpecificationVersion,
+						BundleName:            javaMetadata.BundleName,
+					},
+				}
+			}
+		case component.PythonSourceType:
+			pythonMetadata := c.PythonPkgMetadata
+			if pythonMetadata == nil {
+				log.Warnf("Python package %s:%s at %s is invalid; skipping...", c.Name, c.Version, c.Location)
+				continue
+			} else {
+				languageComponent.Language = &v1.LanguageComponent_Python{
+					Python: &v1.PythonComponent{
+						Homepage:    pythonMetadata.Homepage,
+						AuthorEmail: pythonMetadata.AuthorEmail,
+						DownloadUrl: pythonMetadata.DownloadURL,
+						Summary:     pythonMetadata.Summary,
+						Description: pythonMetadata.Description,
+					},
+				}
+			}
+		}
+
+		languageComponents = append(languageComponents, languageComponent)
+	}
+
+	return &v1.Components{
+		Namespace:          imgComponents.Namespace,
+		OsComponents:       osComponents,
+		RhelComponents:     rhelv2Components,
+		LanguageComponents: languageComponents,
 	}
 }

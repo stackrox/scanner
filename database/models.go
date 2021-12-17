@@ -67,8 +67,12 @@ type FeatureVersion struct {
 	Feature    Feature
 	Version    string
 	AffectedBy []Vulnerability
-	// ProvidedExecutables indicates which regular executable files this feature provided.
-	ProvidedExecutables []string
+	// ExecutableToDependencies maps a feature provided executable to its dependencies.
+	// Eg, If executable E is provided by this feature, and it imports a library B, we will have a map for E -> [B]
+	ExecutableToDependencies StringToStringsMap
+	// LibraryToDependencies maps a feature provided library to its dependencies.
+	// Eg, If library A is provided by this feature, and it imports a library B, we will have a map for A -> [B]
+	LibraryToDependencies StringToStringsMap
 
 	// For output purposes. Only make sense when the feature version is in the context of an image.
 	AddedBy Layer
@@ -208,9 +212,10 @@ func (r *RHELv2Components) String() string {
 // RHELv2PackageEnv contains a RHELv2Package plus
 // data about the environment surrounding a particular package.
 type RHELv2PackageEnv struct {
-	Pkg     *RHELv2Package
-	AddedBy string
-	CPEs    []string
+	Pkg       *RHELv2Package
+	Namespace string
+	AddedBy   string
+	CPEs      []string
 }
 
 // RHELv2Record is used for querying RHELv2 vulnerabilities from the database.

@@ -134,10 +134,13 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			// Ensure the current feature is well-formed.
 			// If it is, add it to the return slice.
 			if fv.Feature.Name != "" && fv.Version != "" {
-				fv.ProvidedExecutables = executablesSet.AsSortedSlice(func(i, j string) bool {
-					return i < j
-				})
-
+				if len(executablesSet) > 0 {
+					execToDeps := make(database.StringToStringsMap, len(executablesSet))
+					for exec := range executablesSet {
+						execToDeps[exec] = set.NewStringSet()
+					}
+					fv.ExecutableToDependencies = execToDeps
+				}
 				featureVersions = append(featureVersions, fv)
 			}
 

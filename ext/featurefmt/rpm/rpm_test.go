@@ -73,10 +73,10 @@ func TestRpmFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				{
 					Feature: database.Feature{Name: "filesystem"},
 					Version: "3.2-18.el7",
-					ProvidedExecutables: []string{
-						"/usr/games",
-						"/usr/include",
-						"/usr/lib/debug",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/usr/games":     {},
+						"/usr/include":   {},
+						"/usr/lib/debug": {},
 					},
 				},
 			},
