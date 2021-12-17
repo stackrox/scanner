@@ -107,7 +107,6 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())
-	logrus.Infof("cdu: Analyzing %s uncertifiedRHEL %v", sha, uncertifiedRHEL)
 	layer, lineage, exists, err := s.storage.GetLayerBySHA(sha, &database.DatastoreOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})

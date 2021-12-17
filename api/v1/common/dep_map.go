@@ -88,7 +88,6 @@ func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
 
 // Traverse map of lib dep nodes and create a dependency map
 func createDepMap(libNodes map[string]*libDepNode) map[string]FeatureKeySet {
-	logrus.Infof("Create dep map for %v", libNodes)
 	depMap := make(map[string]FeatureKeySet)
 	for k, v := range libNodes {
 		var c *cycle

@@ -16,6 +16,7 @@ package clair
 
 import (
 	"fmt"
+	"github.com/stackrox/rox/pkg/set"
 	"io"
 	"os"
 	"path/filepath"
@@ -258,11 +259,19 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 	}
 
 	files, err := imagefmt.ExtractFromReader(reader, format, m)
+	elfs := set.NewStringSet()
+	nonelfs := set.NewStringSet()
 	for k, file := range files {
-		if strings.Contains(k, "so") || strings.Contains(k, "vi") {
-			log.Infof("file %s is Elf %v", k, file.ELFMetadata != nil)
+		if strings.Contains(k, ".so") {
+			if file.ELFMetadata != nil {
+				elfs.Add(k)
+			} else {
+				nonelfs.Add(k)
+			}
 		}
 	}
+	log.Infof("elf %+v", elfs)
+	log.Infof("nonelf %+v", nonelfs)
 	if err != nil {
 		return nil, false, nil, nil, nil, nil, err
 	}
