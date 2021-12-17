@@ -698,7 +698,7 @@ var testCases = []testCase{
 									"ExploitabilityScore": 0.8,
 									"ImpactScore":         5.9,
 									"Score":               6.7,
-									"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
 								},
 								"LastModifiedDateTime": "2019-03-21T23:29Z",
 								"PublishedDateTime":    "2017-06-09T16:29Z",
@@ -2379,16 +2379,16 @@ var testCases = []testCase{
 					},
 					{
 						Name:          "CVE-2021-45046",
-						Description:   "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. This could allows attackers with control over Thread Context Map (MDC) input data when the logging configuration uses a non-default Pattern Layout with either a Context Lookup (for example, $${ctx:loginId}) or a Thread Context Map pattern (%X, %mdc, or %MDC) to craft malicious input data using a JNDI Lookup pattern resulting in a denial of service (DOS) attack. Log4j 2.15.0 restricts JNDI LDAP lookups to localhost by default. Note that previous mitigations involving configuration such as to set the system property log4j2.formatMsgNoLookups to true do NOT mitigate this specific vulnerability.",
+						Description:   "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data using a JNDI Lookup pattern, resulting in an information leak and remote code execution in some environments and local code execution in all environments; remote code execution has been demonstrated on macOS but no other tested environments.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
-						Severity:      "Low",
+						Severity:      "Critical",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
 									"ExploitabilityScore": 2.2,
-									"ImpactScore":         1.4,
-									"Score":               3.7,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+									"ImpactScore":         6.0,
+									"Score":               9.0,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H",
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
@@ -2435,16 +2435,16 @@ var testCases = []testCase{
 					},
 					{
 						Name:          "CVE-2021-45046",
-						Description:   "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. This could allows attackers with control over Thread Context Map (MDC) input data when the logging configuration uses a non-default Pattern Layout with either a Context Lookup (for example, $${ctx:loginId}) or a Thread Context Map pattern (%X, %mdc, or %MDC) to craft malicious input data using a JNDI Lookup pattern resulting in a denial of service (DOS) attack. Log4j 2.15.0 restricts JNDI LDAP lookups to localhost by default. Note that previous mitigations involving configuration such as to set the system property log4j2.formatMsgNoLookups to true do NOT mitigate this specific vulnerability.",
+						Description:   "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data using a JNDI Lookup pattern, resulting in an information leak and remote code execution in some environments and local code execution in all environments; remote code execution has been demonstrated on macOS but no other tested environments.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
-						Severity:      "Low",
+						Severity:      "Critical",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
 									"ExploitabilityScore": 2.2,
-									"ImpactScore":         1.4,
-									"Score":               3.7,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+									"ImpactScore":         6.0,
+									"Score":               9.0,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H",
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
