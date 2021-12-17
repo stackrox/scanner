@@ -141,26 +141,28 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
 			var fileData FileData
 
-			elfFile := elf.OpenIfELFExecutable(contents)
-			if elfFile != nil {
-				if strings.Contains(filename, "so") || strings.Contains(filename, "lib") {
-					elfs.Add(filename)
-					if len(elfs) > 30 {
-						log.Infof("Elf files: %v", elfs)
-						elfs = set.NewStringSet()
+			if hdr.Typeflag != tar.TypeSymlink {
+				elfFile := elf.OpenIfELFExecutable(contents)
+				if elfFile != nil {
+					if strings.Contains(filename, "so") || strings.Contains(filename, "lib") {
+						elfs.Add(filename)
+						if len(elfs) > 30 {
+							log.Infof("Elf files: %v", elfs)
+							elfs = set.NewStringSet()
+						}
 					}
-				}
-				if elfMetadata, err := elf.GetELFMetadata(elfFile); err != nil {
-					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
+					if elfMetadata, err := elf.GetELFMetadata(elfFile); err != nil {
+						log.Errorf("Failed to get dependencies for %s: %v", filename, err)
+					} else {
+						fileData.ELFMetadata = elfMetadata
+					}
 				} else {
-					fileData.ELFMetadata = elfMetadata
-				}
-			} else {
-				nonelfs.Add(filename)
-				if len(elfs) > 30 {
-					log.Infof("non Elf files: %v", nonelfs)
-					nonelfs = set.NewStringSet()
-					log.Errorf("elf error %v", err)
+					nonelfs.Add(filename)
+					if len(elfs) > 30 {
+						log.Infof("non Elf files: %v", nonelfs)
+						nonelfs = set.NewStringSet()
+						log.Errorf("elf error %v", err)
+					}
 				}
 			}
 
