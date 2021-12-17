@@ -22,7 +22,6 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
@@ -108,24 +107,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the files maps.
-			fileData := files[filename[1:]]
-			if fileData.Executable {
-				deps := set.NewStringSet()
-				if fileData.ELFMetadata != nil {
-					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
-				}
-				execToDeps[filename] = deps
-			}
-			if fileData.ELFMetadata != nil {
-				for _, soname := range fileData.ELFMetadata.Sonames {
-					deps, ok := libToDeps[soname]
-					if !ok {
-						deps = set.NewStringSet()
-						libToDeps[soname] = deps
-					}
-					deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
-				}
-			}
+			featurefmt.AddToDependencyMap(filename, files[filename[1:]], execToDeps, libToDeps)
 		}
 	}
 
