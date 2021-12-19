@@ -164,11 +164,25 @@ type RHELv2Package struct {
 	Module  string `json:"module,omitempty"`
 	Arch    string `json:"arch,omitempty"`
 
-	ProvidedExecutables []string `json:"provided_executables,omitempty"`
+	// ExecutableToDependencies maps a feature provided executable to its dependencies.
+	// Eg, If executable E is provided by this feature, and it imports a library B, we will have a map for E -> [B]
+	ExecutableToDependencies StringToStringsMap `json:"executable_to_dependencies,omitempty"`
+	// LibraryToDependencies maps a feature provided library to its dependencies.
+	// Eg, If library A is provided by this feature, and it imports a library B, we will have a map for A -> [B]
+	LibraryToDependencies StringToStringsMap `json:"library_to_dependencies,omitempty"`
 }
 
 func (p *RHELv2Package) String() string {
 	return strings.Join([]string{p.Name, p.Version, p.Module, p.Arch}, ":")
+}
+
+// GetPackageVersion concatenates version and arch and returns package version
+func (p *RHELv2Package) GetPackageVersion() string {
+	version := p.Version
+	if p.Arch != "" {
+		version = version + "." + p.Arch
+	}
+	return version
 }
 
 // RHELv2Layer defines a RHEL image layer.

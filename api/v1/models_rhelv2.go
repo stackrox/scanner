@@ -16,7 +16,6 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 )
 
@@ -42,30 +41,16 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 		return false, err
 	}
 
+	depMap := common.GetDepMapRHEL(pkgEnvs)
 	for _, pkgEnv := range pkgEnvs {
 		pkg := pkgEnv.Pkg
 		if hasKernelPrefix(pkg.Name) {
 			continue
 		}
-		version := pkg.Version
-		if pkg.Arch != "" {
-			version += "." + pkg.Arch
-		}
 
-		requiredFeatures := []*v1.FeatureNameVersion{
-			{
-				Name:    pkg.Name,
-				Version: version,
-			},
-		}
-		executables := make([]*v1.Executable, 0, len(pkg.ProvidedExecutables))
-		for _, exec := range pkg.ProvidedExecutables {
-			executables = append(executables, &v1.Executable{
-				Path:             exec,
-				RequiredFeatures: requiredFeatures,
-			})
-		}
-
+		version := pkg.GetPackageVersion()
+		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: version}
+		executables := common.CreateExecutablesFromDependencies(pkgKey, pkg.ExecutableToDependencies, depMap)
 		feature := Feature{
 			Name:          pkg.Name,
 			NamespaceName: layer.NamespaceName,
@@ -326,33 +311,4 @@ func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		// It is guaranteed there is 1 and only one element in `vuln.PackageInfos`.
 		FixedBy: vuln.PackageInfos[0].FixedInVersion, // Empty string if not fixed.
 	}
-}
-
-func createExecutablesFromDependencies(dbFeatureVersion database.FeatureVersion, depMap map[string]common.FeatureKeySet) []*v1.Executable {
-	executableToDependencies := dbFeatureVersion.ExecutableToDependencies
-	featureKey := featurefmt.PackageKey{Name: dbFeatureVersion.Feature.Name, Version: dbFeatureVersion.Version}
-	executables := make([]*v1.Executable, 0, len(executableToDependencies))
-	for exec, libs := range executableToDependencies {
-		features := make(common.FeatureKeySet)
-		features.Add(featureKey)
-		for lib := range libs {
-			features.Merge(depMap[lib])
-		}
-		executables = append(executables, &v1.Executable{
-			Path:             exec,
-			RequiredFeatures: toFeatureNameVersions(features),
-		})
-	}
-	return executables
-}
-
-func toFeatureNameVersions(keys common.FeatureKeySet) []*v1.FeatureNameVersion {
-	if len(keys) == 0 {
-		return nil
-	}
-	features := make([]*v1.FeatureNameVersion, 0, len(keys))
-	for k := range keys {
-		features = append(features, &v1.FeatureNameVersion{Name: k.Name, Version: k.Version})
-	}
-	return features
 }
