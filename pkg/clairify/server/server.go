@@ -263,7 +263,7 @@ func (s *Server) Start() error {
 	r.Use(
 		// Ensure the user is authorized before doing anything else.
 		middleware.VerifyPeerCerts(),
-		middleware.LiteMode(),
+		middleware.SlimMode(),
 	)
 
 	apiRoots := []string{"clairify", "scanner"}

@@ -12,22 +12,22 @@ import (
 )
 
 var (
-	errLiteMode = errors.New("request not available in lite-mode")
+	errSlimMode = errors.New("request not available in slim-mode")
 
-	liteModeAllowList = set.NewFrozenStringSet(
+	slimModeAllowList = set.NewFrozenStringSet(
 		"/clairify/ping",
 		"/scanner/ping",
 	)
 )
 
-// LiteMode returns middleware which only allows the request to continue when NOT in lite-mode.
-func LiteMode() mux.MiddlewareFunc {
-	liteMode := env.LiteMode.Enabled()
+// SlimMode returns middleware which only allows the request to continue when NOT in slim-mode.
+func SlimMode() mux.MiddlewareFunc {
+	slimMode := env.SlimMode.Enabled()
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if liteMode && !liteModeAllowList.Contains(r.RequestURI) {
-				httputil.WriteGRPCStyleError(w, codes.NotFound, errLiteMode)
+			if slimMode && !slimModeAllowList.Contains(r.RequestURI) {
+				httputil.WriteGRPCStyleError(w, codes.NotFound, errSlimMode)
 				return
 			}
 
