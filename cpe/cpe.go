@@ -132,26 +132,8 @@ func CheckForVulnerabilities(layer string, components []*component.Component) []
 			log.Errorf("error getting vulns for products: %v", err)
 			continue
 		}
-		var clonedAttr []*wfn.Attributes
-		for _, a := range attributes {
-			if a.Vendor != "apache" || a.Product != "log4j" {
-				continue
-			}
-			log.Infof("Attrs: %+v", a)
-
-			clonedAttr = append(clonedAttr, a)
-		}
-
 		for _, v := range vulns {
-			if !set.NewStringSet("CVE-2021-44228").Contains(v.ID()) {
-				continue
-			}
-
-			for _, cpe := range v.Config() {
-				log.Infof("CPE: %+v", cpe)
-			}
-
-			if matchesWithFixed := v.MatchWithFixedIn(clonedAttr, false); len(matchesWithFixed) > 0 {
+			if matchesWithFixed := v.MatchWithFixedIn(attributes, false); len(matchesWithFixed) > 0 {
 				result := match.Result{
 					CVE:       v,
 					CPE:       cpeutils.GetMostSpecificCPE(matchesWithFixed),
