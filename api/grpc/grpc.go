@@ -127,7 +127,7 @@ func (a *apiImpl) unaryInterceptors() []grpc.UnaryServerInterceptor {
 	return []grpc.UnaryServerInterceptor{
 		// Ensure the user is authorized before doing anything else.
 		verifyPeerCertsUnaryServerInterceptor(),
-		liteModeUnaryServerInterceptor(),
+		slimModeUnaryServerInterceptor(),
 		grpcprometheus.UnaryServerInterceptor,
 	}
 }
