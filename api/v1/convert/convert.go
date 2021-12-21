@@ -2,12 +2,42 @@ package convert
 
 import (
 	"encoding/json"
+	"strings"
 
-	"github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/nvd"
 	"github.com/stackrox/scanner/pkg/types"
+)
+
+var (
+	errSourceTypesMismatch = errors.New("Number of source types in proto and Go are not equal")
+
+	// SourceTypeToProtoMap converts a component.SourceType to a v1.SourceType.
+	SourceTypeToProtoMap = func() map[component.SourceType]v1.SourceType {
+		numComponentSourceTypes := int(component.SentinelEndSourceType) - int(component.UnsetSourceType)
+		if numComponentSourceTypes != len(v1.SourceType_value) {
+			utils.CrashOnError(errSourceTypesMismatch)
+		}
+
+		m := make(map[component.SourceType]v1.SourceType, numComponentSourceTypes)
+		for name, val := range v1.SourceType_value {
+			normalizedName := strings.ToLower(strings.TrimSuffix(name, "_SOURCE_TYPE"))
+			for sourceType := component.UnsetSourceType; sourceType < component.SentinelEndSourceType; sourceType++ {
+				if strings.HasPrefix(strings.ToLower(sourceType.String()), normalizedName) {
+					m[sourceType] = v1.SourceType(val)
+				}
+			}
+		}
+		if len(m) != numComponentSourceTypes {
+			utils.CrashOnError(errSourceTypesMismatch)
+		}
+		return m
+	}()
 )
 
 // Metadata converts from types.Metadata to v1.Metadata
@@ -68,7 +98,7 @@ func NVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vulnerabil
 	for _, vuln := range nvdVulns {
 		m := types.ConvertNVDMetadata(vuln.NVDCVEFeedJSON10DefCVEItem)
 		if m.IsNilOrEmpty() {
-			logrus.Warnf("Metadata empty or nil for %v; skipping...", vuln.CVE.CVEDataMeta.ID)
+			log.Warnf("Metadata empty or nil for %v; skipping...", vuln.CVE.CVEDataMeta.ID)
 			continue
 		}
 		vulns = append(vulns, &v1.Vulnerability{
@@ -81,4 +111,57 @@ func NVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vulnerabil
 	}
 
 	return vulns, nil
+}
+
+// LanguageComponents converts components into gRPC language components.
+func LanguageComponents(components []*component.Component) []*v1.LanguageComponent {
+	languageComponents := make([]*v1.LanguageComponent, 0, len(components))
+	for _, c := range components {
+		languageComponent := &v1.LanguageComponent{
+			Type:     SourceTypeToProtoMap[c.SourceType],
+			Name:     c.Name,
+			Version:  c.Version,
+			Location: c.Location,
+			AddedBy:  c.AddedBy,
+		}
+
+		switch c.SourceType {
+		case component.JavaSourceType:
+			javaMetadata := c.JavaPkgMetadata
+			if javaMetadata == nil {
+				log.Warnf("Java package %s:%s at %s is invalid; skipping...", c.Name, c.Version, c.Location)
+				continue
+			} else {
+				languageComponent.Language = &v1.LanguageComponent_Java{
+					Java: &v1.JavaComponent{
+						ImplementationVersion: javaMetadata.ImplementationVersion,
+						MavenVersion:          javaMetadata.MavenVersion,
+						Origins:               javaMetadata.Origins,
+						SpecificationVersion:  javaMetadata.SpecificationVersion,
+						BundleName:            javaMetadata.BundleName,
+					},
+				}
+			}
+		case component.PythonSourceType:
+			pythonMetadata := c.PythonPkgMetadata
+			if pythonMetadata == nil {
+				log.Warnf("Python package %s:%s at %s is invalid; skipping...", c.Name, c.Version, c.Location)
+				continue
+			} else {
+				languageComponent.Language = &v1.LanguageComponent_Python{
+					Python: &v1.PythonComponent{
+						Homepage:    pythonMetadata.Homepage,
+						AuthorEmail: pythonMetadata.AuthorEmail,
+						DownloadUrl: pythonMetadata.DownloadURL,
+						Summary:     pythonMetadata.Summary,
+						Description: pythonMetadata.Description,
+					},
+				}
+			}
+		}
+
+		languageComponents = append(languageComponents, languageComponent)
+	}
+
+	return languageComponents
 }

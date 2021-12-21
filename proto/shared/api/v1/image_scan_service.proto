@@ -55,6 +55,16 @@ message GetImageComponentsResponse {
     repeated Note notes      = 3;
 }
 
+message GetImageVulnerabilitiesRequest {
+    Components    components = 1;
+    repeated Note notes      = 2;
+}
+
+message GetImageVulnerabilitiesResponse {
+    ScanStatus status = 1;
+    Image      image  = 2;
+}
+
 message GetLanguageLevelComponentsRequest {
     // Only one of the fields in ImageSpec needs to be set for the request to be properly formed
     // If both are set, then digest is used
@@ -124,6 +134,8 @@ service ImageScanService {
     }
 
     rpc GetImageComponents(GetImageComponentsRequest) returns (GetImageComponentsResponse) {}
+
+    rpc GetImageVulnerabilities(GetImageVulnerabilitiesRequest) returns (GetImageVulnerabilitiesResponse) {}
 
     rpc GetLanguageLevelComponents(GetLanguageLevelComponentsRequest) returns (GetLanguageLevelComponentsResponse) {
         option (google.api.http) = {

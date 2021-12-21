@@ -16,6 +16,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 )
 
@@ -34,26 +35,44 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 		return false, err
 	}
 
-	records := getRHELv2Records(pkgEnvs)
-
-	vulns, err := db.GetRHELv2Vulnerabilities(records)
+	features, err := getFullRHELv2Features(db, pkgEnvs, false)
 	if err != nil {
 		return false, err
 	}
 
-	depMap := common.GetDepMapRHEL(pkgEnvs)
+	layer.Features = append(layer.Features, features...)
+
+	return cpesExist, nil
+}
+
+func getFullRHELv2Features(db database.Datastore, pkgEnvs map[int]*database.RHELv2PackageEnv, execsPopulated bool) ([]Feature, error) {
+	records := getRHELv2Records(pkgEnvs)
+	vulns, err := db.GetRHELv2Vulnerabilities(records)
+	if err != nil {
+		return nil, err
+	}
+
+	var features []Feature
+	var depMap map[string]common.FeatureKeySet
+	if !execsPopulated {
+		depMap = common.GetDepMapRHEL(pkgEnvs)
+	}
 	for _, pkgEnv := range pkgEnvs {
 		pkg := pkgEnv.Pkg
+
 		if hasKernelPrefix(pkg.Name) {
 			continue
 		}
 
 		version := pkg.GetPackageVersion()
 		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: version}
-		executables := common.CreateExecutablesFromDependencies(pkgKey, pkg.ExecutableToDependencies, depMap)
+		executables := pkg.Executables
+		if !execsPopulated {
+			executables = common.CreateExecutablesFromDependencies(pkgKey, pkg.ExecutableToDependencies, depMap)
+		}
 		feature := Feature{
 			Name:          pkg.Name,
-			NamespaceName: layer.NamespaceName,
+			NamespaceName: pkgEnv.Namespace,
 			VersionFormat: rpm.ParserName,
 			Version:       version,
 			AddedBy:       pkgEnv.AddedBy,
@@ -62,10 +81,31 @@ func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
 
 		feature.FixedBy, feature.Vulnerabilities = getRHELv2Vulns(vulns, pkg, feature.NamespaceName)
 
-		layer.Features = append(layer.Features, feature)
+		features = append(features, feature)
 	}
 
-	return cpesExist, nil
+	return features, nil
+}
+
+func getFullFeaturesForRHELv2Packages(db database.Datastore, pkgs []*v1.RHELComponent) ([]Feature, error) {
+	pkgEnvs := make(map[int]*database.RHELv2PackageEnv, len(pkgs))
+	for _, pkg := range pkgs {
+		pkgEnvs[int(pkg.GetId())] = &database.RHELv2PackageEnv{
+			Pkg: &database.RHELv2Package{
+				Model:       database.Model{ID: int(pkg.GetId())},
+				Name:        pkg.GetName(),
+				Version:     pkg.GetVersion(),
+				Module:      pkg.GetModule(),
+				Arch:        pkg.GetArch(),
+				Executables: pkg.GetExecutables(),
+			},
+			Namespace: pkg.GetNamespace(),
+			AddedBy:   pkg.GetAddedBy(),
+			CPEs:      pkg.GetCpes(),
+		}
+	}
+
+	return getFullRHELv2Features(db, pkgEnvs, true)
 }
 
 // getRHELv2Vulns gets the vulnerabilities and fixedBy version found during RHELv2 scanning.

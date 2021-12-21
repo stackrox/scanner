@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/archop"
 )
 
@@ -73,6 +74,9 @@ type FeatureVersion struct {
 	// LibraryToDependencies maps a feature provided library to its dependencies.
 	// Eg, If library A is provided by this feature, and it imports a library B, we will have a map for A -> [B]
 	LibraryToDependencies StringToStringsMap
+
+	// For internal purposes, only.
+	Executables []*v1.Executable
 
 	// For output purposes. Only make sense when the feature version is in the context of an image.
 	AddedBy Layer
@@ -170,6 +174,10 @@ type RHELv2Package struct {
 	// LibraryToDependencies maps a feature provided library to its dependencies.
 	// Eg, If library A is provided by this feature, and it imports a library B, we will have a map for A -> [B]
 	LibraryToDependencies StringToStringsMap `json:"library_to_dependencies,omitempty"`
+	// Executables lists the executables determined from ExecutableToDependencies and
+	// LibraryToDependencies. This is only populated when both ExecutableToDependencies and
+	// LibraryToDependencies are empty.
+	Executables []*v1.Executable `json:"executables,omitempty"`
 }
 
 func (p *RHELv2Package) String() string {
