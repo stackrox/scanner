@@ -263,11 +263,13 @@ func GetVulnerabilitiesForComponents(db database.Datastore, components *v1.Compo
 	}
 	layer.Features = append(layer.Features, osFeatures...)
 
-	rhelv2Features, err := getFullFeaturesForRHELv2Packages(db, components.GetRhelComponents())
-	if err != nil {
-		return nil, errors.Wrap(err, "getting RHELv2 features")
+	if !uncertifiedRHEL {
+		rhelv2Features, err := getFullFeaturesForRHELv2Packages(db, components.GetRhelComponents())
+		if err != nil {
+			return nil, errors.Wrap(err, "getting RHELv2 features")
+		}
+		layer.Features = append(layer.Features, rhelv2Features...)
 	}
-	layer.Features = append(layer.Features, rhelv2Features...)
 
 	languageFeatures, err := getLanguageFeatures(layer.Features, components.GetLanguageComponents(), uncertifiedRHEL)
 	if err != nil {
@@ -279,25 +281,11 @@ func GetVulnerabilitiesForComponents(db database.Datastore, components *v1.Compo
 }
 
 func getOSFeatures(db database.Datastore, components []*v1.OSComponent) ([]Feature, error) {
-	featureVersions := make([]database.FeatureVersion, 0, len(components))
-	for _, c := range components {
-		featureVersions = append(featureVersions, database.FeatureVersion{
-			Feature: database.Feature{
-				Name: c.GetName(),
-				Namespace: database.Namespace{
-					Name:          c.GetNamespace(),
-					VersionFormat: versionfmt.GetVersionFormatForNamespace(c.GetNamespace()),
-				},
-			},
-			Version:     c.GetVersion(),
-			Executables: c.GetExecutables(),
-			AddedBy:     database.Layer{Name: c.GetAddedBy()},
-		})
-	}
+	featureVersions := osComponentsToFeatureVersions(components)
 
 	err := db.LoadVulnerabilities(featureVersions)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "loading OS vulnerabilities from database")
 	}
 
 	features := make([]Feature, 0, len(featureVersions))
@@ -316,6 +304,26 @@ func getOSFeatures(db database.Datastore, components []*v1.OSComponent) ([]Featu
 	}
 
 	return features, nil
+}
+
+func osComponentsToFeatureVersions(components []*v1.OSComponent) []database.FeatureVersion {
+	featureVersions := make([]database.FeatureVersion, 0, len(components))
+	for _, c := range components {
+		featureVersions = append(featureVersions, database.FeatureVersion{
+			Feature: database.Feature{
+				Name: c.GetName(),
+				Namespace: database.Namespace{
+					Name:          c.GetNamespace(),
+					VersionFormat: versionfmt.GetVersionFormatForNamespace(c.GetNamespace()),
+				},
+			},
+			Version:     c.GetVersion(),
+			Executables: c.GetExecutables(),
+			AddedBy:     database.Layer{Name: c.GetAddedBy()},
+		})
+	}
+
+	return featureVersions
 }
 
 // Namespace is the image's base OS.

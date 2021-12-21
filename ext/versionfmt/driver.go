@@ -19,6 +19,7 @@ package versionfmt
 import (
 	"errors"
 	"fmt"
+	"github.com/stackrox/rox/pkg/stringutils"
 	"strings"
 	"sync"
 )
@@ -150,9 +151,9 @@ func GetHigherVersion(format, a, b string) (string, error) {
 // associated with this namespace.
 // For example: if "rhel" is given, then "rpm" is returned.
 func GetVersionFormatForNamespace(namespace string) string {
-	idx := strings.Index(namespace, ":")
-	if idx >= 0 {
-		namespace = namespace[:idx]
+	distro := stringutils.GetUpTo(namespace, ":")
+	if distro != "" {
+		namespace = distro
 	}
 
 	parsersM.Lock()
