@@ -22,7 +22,7 @@ var (
 	// KnownSupportedNamespaces is the set of base namespaces we support.
 	// If you add a new Debian or Ubuntu version, be sure to add it to
 	// database/namespace_mapping.go as well.
-	// If a new distro is added, consider adding a versionfmt parser as well.
+	// If a new distro is added, consider adding it to a versionfmt parser as well.
 	KnownSupportedNamespaces = set.NewFrozenStringSet(
 		"alpine:v3.2",
 		"alpine:v3.3",
