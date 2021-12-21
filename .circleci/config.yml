@@ -387,7 +387,7 @@ commands:
             ./scripts/push-as-manifest-list.sh "${dockerhub_scanner_slim_image}"
 
             dockerhub_db_slim_image="stackrox/${db_image_name}:${tag}-slim"
-            docker tag "${gcr_db_lite_image}" "${dockerhub_db_slim_image}"
+            docker tag "${gcr_db_slim_image}" "${dockerhub_db_slim_image}"
             ./scripts/push-as-manifest-list.sh "${dockerhub_db_slim_image}"
 
             # Retag for quay.io
