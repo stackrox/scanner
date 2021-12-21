@@ -19,9 +19,10 @@ package versionfmt
 import (
 	"errors"
 	"fmt"
-	"github.com/stackrox/rox/pkg/stringutils"
 	"strings"
 	"sync"
+
+	"github.com/stackrox/rox/pkg/stringutils"
 )
 
 const (
