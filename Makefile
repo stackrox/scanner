@@ -196,7 +196,7 @@ scanner-image: scanner-image-base $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@docker build --build-arg BASE_REGISTRY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=scanner --build-arg BASE_TAG=$(TAG)-base -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: scanner-image-slim
-scanner-image-lite: scanner-image-base $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image-slim: scanner-image-base $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@docker build --build-arg BASE_REGISTRY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=scanner --build-arg BASE_TAG=$(TAG)-base -t us.gcr.io/stackrox-ci/scanner:$(TAG)-slim -f image/scanner/rhel/Dockerfile-slim image/scanner/rhel
 
@@ -212,7 +212,7 @@ db-image: db-image-base $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@docker build --build-arg BASE_REGISTRY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=scanner-db --build-arg BASE_TAG=$(TAG)-base -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: db-image-slim
-db-image-lite: db-image-base
+db-image-slim: db-image-base
 	@echo "+ $@"
 	@docker build --build-arg BASE_REGISTRY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=scanner-db --build-arg BASE_TAG=$(TAG)-base -t us.gcr.io/stackrox-ci/scanner-db:$(TAG)-slim -f image/db/rhel/Dockerfile-slim image/db/rhel
 
