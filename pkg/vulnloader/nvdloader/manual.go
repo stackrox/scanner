@@ -40,6 +40,11 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 						{
 							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
 							VersionEndExcluding:   "2.12.2",
+							VersionStartIncluding: "2.4.0",
+						},
+						{
+							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "2.3.1",
 							VersionStartIncluding: "2.0.0", // Red Hat says 2.0.0, and I trust them more.
 						},
 					},
@@ -66,7 +71,7 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 				ImpactScore:         6.0,
 			},
 		},
-		LastModifiedDate: "2021-12-16T00:00Z",
+		LastModifiedDate: "2021-12-26T00:00Z",
 		PublishedDate:    "2021-12-10T00:00Z",
 	},
 	"CVE-2021-45046": {
@@ -106,6 +111,11 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 						{
 							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
 							VersionEndExcluding:   "2.12.2",
+							VersionStartIncluding: "2.4.0",
+						},
+						{
+							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "2.3.1",
 							VersionStartIncluding: "2.0.0", // Red Hat says 2.0.0, and I trust them more.
 						},
 					},
@@ -132,7 +142,7 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 				ImpactScore:         6.0,
 			},
 		},
-		LastModifiedDate: "2021-12-17T00:00Z",
+		LastModifiedDate: "2021-12-26T00:00Z",
 		PublishedDate:    "2021-12-13T00:00Z",
 	},
 	"CVE-2021-45105": {
@@ -167,7 +177,17 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 						{
 							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
 							VersionEndExcluding:   "2.17.0",
-							VersionStartIncluding: "2.0.0",
+							VersionStartIncluding: "2.13.0",
+						},
+						{
+							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "2.12.3",
+							VersionStartIncluding: "2.4.0",
+						},
+						{
+							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "2.3.1",
+							VersionStartIncluding: "2.0.0", // Red Hat says 2.0.0, and I trust them more.
 						},
 					},
 					Operator: "OR",
@@ -193,7 +213,7 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 				ImpactScore:         3.6,
 			},
 		},
-		LastModifiedDate: "2021-12-19T00:00Z",
+		LastModifiedDate: "2021-12-26T00:00Z",
 		PublishedDate:    "2021-12-19T00:00Z",
 	},
 }
