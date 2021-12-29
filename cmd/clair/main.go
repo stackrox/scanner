@@ -98,8 +98,8 @@ func waitForSignals(signals ...os.Signal) {
 	<-interrupts
 }
 
-// Boot starts Clair instance with the provided config.
-func Boot(config *Config, liteMode bool) {
+// Boot starts a Clair instance with the provided config.
+func Boot(config *Config, slimMode bool) {
 	rand.Seed(time.Now().UnixNano())
 
 	// Open database and initialize vuln caches in parallel, prior to making the API available.
@@ -119,7 +119,7 @@ func Boot(config *Config, liteMode bool) {
 	var nvdVulnCache nvdtoolscache.Cache
 	var k8sVulnCache k8scache.Cache
 	var repoToCPE *repo2cpe.Mapping
-	if !liteMode {
+	if !slimMode {
 		wg.Add(1)
 		go func() {
 			defer wg.Add(-1)
@@ -143,7 +143,7 @@ func Boot(config *Config, liteMode bool) {
 	wg.Wait()
 	defer db.Close()
 
-	if !liteMode {
+	if !slimMode {
 		u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdVulnCache, k8sVulnCache)
 		if err != nil {
 			log.WithError(err).Fatal("Failed to initialize updater")
@@ -228,13 +228,13 @@ func main() {
 		imagefmt.SetInsecureTLS(*flagInsecureTLS)
 	}
 
-	liteMode := env.LiteMode.Enabled()
+	slimMode := env.SlimMode.Enabled()
 
 	scannerName := "Scanner"
-	if liteMode {
-		scannerName = "Scanner-lite"
+	if slimMode {
+		scannerName = "Scanner-Slim"
 	}
 	log.Infof("Running %s version: %s", scannerName, version.Version)
 
-	Boot(config, liteMode)
+	Boot(config, slimMode)
 }

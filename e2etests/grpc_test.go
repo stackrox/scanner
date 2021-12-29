@@ -31,6 +31,8 @@ func TestGRPCScanImage(t *testing.T) {
 }
 
 func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
+	assert.Equal(t, test.namespace, imgScan.GetNamespace())
+
 	// Filter out vulnerabilities with no metadata
 	for _, feature := range imgScan.Features {
 		filteredVulns := feature.Vulnerabilities[:0]
@@ -52,6 +54,12 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 			}
 
 			if test.checkProvidedExecutables {
+				for _, exec := range matching.ProvidedExecutables {
+					sort.Slice(exec.RequiredFeatures, func(i, j int) bool {
+						return exec.RequiredFeatures[i].GetName() < exec.RequiredFeatures[j].GetName() ||
+							exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()
+					})
+				}
 				assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
 			}
 			feature.ProvidedExecutables = nil
@@ -105,7 +113,14 @@ func getMatchingGRPCFeature(t *testing.T, features []*v1.Feature, featureToFind 
 	if allowNotFound && candidateIdx == -1 {
 		return nil
 	}
-	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list: %v", featureToFind, features)
+	if candidateIdx == -1 {
+		featureToFind.Vulnerabilities = nil
+		for _, feature := range features {
+			feature.Vulnerabilities = nil
+		}
+		fmt.Printf("Feature %+v not in list: %v", featureToFind, features)
+	}
+	require.NotEqual(t, -1, candidateIdx)
 	return features[candidateIdx]
 }
 
@@ -130,7 +145,7 @@ func checkGRPCMatch(t *testing.T, expectedVuln, matchingVuln *v1.Vulnerability) 
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
-func isUncertifiedRHEL(notes []v1.Note) bool {
+func hasUncertifiedRHEL(notes []v1.Note) bool {
 	for _, note := range notes {
 		if note == v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE {
 			return true
@@ -147,27 +162,31 @@ func TestGRPCGetImageComponents(t *testing.T) {
 	_, inCIRun := os.LookupEnv("CI")
 
 	for _, testCase := range testCases {
-		if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
-			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
-			testCase.registry = "https://quay.io"
-			testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
-			testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
-		}
+		t.Run(testCase.image, func(t *testing.T) {
+			if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
+				testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
+				testCase.registry = "https://quay.io"
+				testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
+				testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
+			}
 
-		imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
-			Image: testCase.image,
-			Registry: &v1.RegistryData{
-				Url:      testCase.registry,
-				Username: testCase.username,
-				Password: testCase.password,
-				Insecure: true,
-			},
+			imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
+				Image: testCase.image,
+				Registry: &v1.RegistryData{
+					Url:      testCase.registry,
+					Username: testCase.username,
+					Password: testCase.password,
+					Insecure: true,
+				},
+			})
+			require.NoError(t, err)
+			require.NotNil(t, imgComponentsResp.GetStatus())
+
+			assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
+			assert.Equal(t, testCase.uncertifiedRHEL, hasUncertifiedRHEL(imgComponentsResp.GetNotes()), "Image %s", testCase.image)
+			assert.Equal(t, testCase.namespace, imgComponentsResp.GetComponents().GetNamespace())
+			verifyComponents(t, imgComponentsResp.GetComponents(), testCase)
 		})
-		require.Nil(t, err)
-
-		assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
-		assert.Equal(t, testCase.uncertifiedRHEL, isUncertifiedRHEL(imgComponentsResp.Notes), "Image %s", testCase.image)
-		verifyComponents(t, imgComponentsResp.GetComponents(), testCase)
 	}
 }
 
@@ -198,11 +217,6 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 		})
 	}
 	for _, c := range components.RhelComponents {
-		for _, exec := range c.Executables {
-			for _, rf := range exec.RequiredFeatures {
-				rf.Version = rf.Version + "." + c.Arch
-			}
-		}
 		features = append(features, apiV1.Feature{
 			Name:          c.Name,
 			NamespaceName: c.Namespace,
@@ -229,6 +243,42 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 		f.Executables = nil
 
 		assert.Equal(t, expectedFeature, *f)
+	}
+}
+
+func TestGRPCGetImageVulnerabilities(t *testing.T) {
+	conn := connectToScanner(t)
+	client := v1.NewImageScanServiceClient(conn)
+
+	_, inCIRun := os.LookupEnv("CI")
+
+	for _, testCase := range testCases {
+		if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
+			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
+			testCase.registry = "https://quay.io"
+			testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
+			testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
+		}
+
+		imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
+			Image: testCase.image,
+			Registry: &v1.RegistryData{
+				Url:      testCase.registry,
+				Username: testCase.username,
+				Password: testCase.password,
+				Insecure: true,
+			},
+		})
+		require.NoError(t, err)
+
+		// This test assumes TestGRPCGetImageComponents passes, so there is no need to check the component response.
+
+		vulnsResp, err := client.GetImageVulnerabilities(context.Background(), &v1.GetImageVulnerabilitiesRequest{
+			Components: imgComponentsResp.GetComponents(),
+			Notes:      imgComponentsResp.GetNotes(),
+		})
+		require.NoError(t, err)
+		verifyImage(t, vulnsResp.GetImage(), testCase)
 	}
 }
 

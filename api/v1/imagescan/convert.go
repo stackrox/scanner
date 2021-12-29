@@ -7,36 +7,15 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
 	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/api/v1/convert"
-	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurefmt"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
 var (
-	errSourceTypesMismatch = errors.New("Number of source types in proto and Go are not equal")
-	errNotesMismatch       = errors.New("Number of notes in proto and Go are not equal")
-
-	sourceTypeToProtoMap = func() map[component.SourceType]v1.SourceType {
-		numComponentSourceTypes := int(component.SentinelEndSourceType) - int(component.UnsetSourceType)
-		if numComponentSourceTypes != len(v1.SourceType_value) {
-			utils.CrashOnError(errSourceTypesMismatch)
-		}
-
-		m := make(map[component.SourceType]v1.SourceType, numComponentSourceTypes)
-		for name, val := range v1.SourceType_value {
-			normalizedName := strings.ToLower(strings.TrimSuffix(name, "_SOURCE_TYPE"))
-			for sourceType := component.UnsetSourceType; sourceType < component.SentinelEndSourceType; sourceType++ {
-				if strings.HasPrefix(strings.ToLower(sourceType.String()), normalizedName) {
-					m[sourceType] = v1.SourceType(val)
-				}
-			}
-		}
-		if len(m) != numComponentSourceTypes {
-			utils.CrashOnError(errSourceTypesMismatch)
-		}
-		return m
-	}()
+	errNotesMismatch = errors.New("Number of notes in proto and Go are not equal")
 
 	noteToProtoMap = func() map[apiV1.Note]v1.Note {
 		numNotes := int(apiV1.SentinelNote)
@@ -84,20 +63,6 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability 
 	return vulns
 }
 
-func convertProvidedExecutables(pkg *database.RHELv2Package) []*v1.Executable {
-	paths := pkg.ProvidedExecutables
-	requiredFeatures := []*v1.FeatureNameVersion{{Name: pkg.Name, Version: pkg.Version}}
-	executables := make([]*v1.Executable, 0, len(paths))
-	for _, path := range paths {
-		executables = append(executables, &v1.Executable{
-			Path:             path,
-			RequiredFeatures: requiredFeatures,
-		})
-	}
-
-	return executables
-}
-
 // ConvertFeatures converts api Features into v1 (proto) Feature pointers.
 func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 	features := make([]*v1.Feature, 0, len(apiFeatures))
@@ -137,7 +102,7 @@ func convertLanguageLevelComponentsSlice(components []*component.Component) *v1.
 
 func convertLanguageLevelComponent(c *component.Component) *v1.LanguageLevelComponent {
 	return &v1.LanguageLevelComponent{
-		SourceType: sourceTypeToProtoMap[c.SourceType],
+		SourceType: convert.SourceTypeToProtoMap[c.SourceType],
 		Name:       c.Name,
 		Version:    c.Version,
 		Location:   c.Location,
@@ -166,9 +131,11 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 		})
 	}
 
+	depMap := common.GetDepMapRHEL(imgComponents.RHELv2PkgEnvs)
 	rhelv2Components := make([]*v1.RHELComponent, 0, len(imgComponents.RHELv2PkgEnvs))
 	for _, rhelv2PkgEnv := range imgComponents.RHELv2PkgEnvs {
 		pkg := rhelv2PkgEnv.Pkg
+		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: pkg.GetPackageVersion()}
 		rhelv2Components = append(rhelv2Components, &v1.RHELComponent{
 			Id:          int64(pkg.ID),
 			Name:        pkg.Name,
@@ -178,59 +145,14 @@ func convertImageComponents(imgComponents *apiV1.ComponentsEnvelope) *v1.Compone
 			Module:      pkg.Module,
 			Cpes:        rhelv2PkgEnv.CPEs,
 			AddedBy:     rhelv2PkgEnv.AddedBy,
-			Executables: convertProvidedExecutables(pkg),
+			Executables: common.CreateExecutablesFromDependencies(pkgKey, pkg.ExecutableToDependencies, depMap),
 		})
 	}
 
-	languageComponents := make([]*v1.LanguageComponent, 0, len(imgComponents.LanguageComponents))
-	for _, c := range imgComponents.LanguageComponents {
-		languageComponent := &v1.LanguageComponent{
-			Type:     sourceTypeToProtoMap[c.SourceType],
-			Name:     c.Name,
-			Version:  c.Version,
-			Location: c.Location,
-			AddedBy:  c.AddedBy,
-		}
-
-		switch c.SourceType {
-		case component.JavaSourceType:
-			javaMetadata := c.JavaPkgMetadata
-			if javaMetadata == nil {
-				log.Warnf("Java package %s:%s at %s is invalid; skipping...", c.Name, c.Version, c.Location)
-				continue
-			} else {
-				languageComponent.Language = &v1.LanguageComponent_Java{
-					Java: &v1.JavaComponent{
-						ImplementationVersion: javaMetadata.ImplementationVersion,
-						MavenVersion:          javaMetadata.MavenVersion,
-						Origins:               javaMetadata.Origins,
-						SpecificationVersion:  javaMetadata.SpecificationVersion,
-						BundleName:            javaMetadata.BundleName,
-					},
-				}
-			}
-		case component.PythonSourceType:
-			pythonMetadata := c.PythonPkgMetadata
-			if pythonMetadata == nil {
-				log.Warnf("Python package %s:%s at %s is invalid; skipping...", c.Name, c.Version, c.Location)
-				continue
-			} else {
-				languageComponent.Language = &v1.LanguageComponent_Python{
-					Python: &v1.PythonComponent{
-						Homepage:    pythonMetadata.Homepage,
-						AuthorEmail: pythonMetadata.AuthorEmail,
-						DownloadUrl: pythonMetadata.DownloadURL,
-						Summary:     pythonMetadata.Summary,
-						Description: pythonMetadata.Description,
-					},
-				}
-			}
-		}
-
-		languageComponents = append(languageComponents, languageComponent)
-	}
+	languageComponents := convert.LanguageComponents(imgComponents.LanguageComponents)
 
 	return &v1.Components{
+		Namespace:          imgComponents.Namespace,
 		OsComponents:       osComponents,
 		RhelComponents:     rhelv2Components,
 		LanguageComponents: languageComponents,

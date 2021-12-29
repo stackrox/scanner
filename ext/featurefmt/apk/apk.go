@@ -22,7 +22,6 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
@@ -55,8 +54,9 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// uniqueness.
 	pkgSet := make(map[featurefmt.PackageKey]database.FeatureVersion)
 	var pkg database.FeatureVersion
-	// executablesSet ensures only unique executables are stored per package.
-	executablesSet := set.NewStringSet()
+	// Use map to ensures only unique executables or libraries are stored per package.
+	execToDeps := make(database.StringToStringsMap)
+	libToDeps := make(database.StringToStringsMap)
 	scanner := bufio.NewScanner(bytes.NewBuffer(file.Contents))
 	var dir string
 	for scanner.Scan() {
@@ -69,12 +69,11 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 
 			// Protect the map from entries with invalid versions.
 			if pkg.Feature.Name != "" && pkg.Version != "" {
-				if len(executablesSet) != 0 {
-					execToDeps := make(database.StringToStringsMap, len(executablesSet))
-					for exec := range executablesSet {
-						execToDeps[exec] = set.NewStringSet()
-					}
+				if len(execToDeps) != 0 {
 					pkg.ExecutableToDependencies = execToDeps
+				}
+				if len(libToDeps) != 0 {
+					pkg.LibraryToDependencies = libToDeps
 				}
 
 				key := featurefmt.PackageKey{
@@ -85,7 +84,8 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			}
 
 			pkg = database.FeatureVersion{}
-			executablesSet.Clear()
+			execToDeps = make(database.StringToStringsMap)
+			libToDeps = make(database.StringToStringsMap)
 		case len(line) < 2:
 			// Invalid line.
 			continue
@@ -107,9 +107,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the files maps.
-			if fileData := files[filename[1:]]; fileData.Executable {
-				executablesSet.Add(filename)
-			}
+			featurefmt.AddToDependencyMap(filename, files[filename[1:]], execToDeps, libToDeps)
 		}
 	}
 

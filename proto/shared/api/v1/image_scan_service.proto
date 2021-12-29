@@ -11,7 +11,8 @@ import "shared/api/v1/vulnerability.proto";
 package scannerV1;
 
 message Image {
-    repeated Feature features = 1;
+    string           namespace = 2;
+    repeated Feature features  = 1;
 }
 
 message ScanImageRequest {
@@ -52,6 +53,16 @@ message GetImageComponentsResponse {
     ScanStatus    status     = 1;
     Components    components = 2;
     repeated Note notes      = 3;
+}
+
+message GetImageVulnerabilitiesRequest {
+    Components    components = 1;
+    repeated Note notes      = 2;
+}
+
+message GetImageVulnerabilitiesResponse {
+    ScanStatus status = 1;
+    Image      image  = 2;
 }
 
 message GetLanguageLevelComponentsRequest {
@@ -123,6 +134,8 @@ service ImageScanService {
     }
 
     rpc GetImageComponents(GetImageComponentsRequest) returns (GetImageComponentsResponse) {}
+
+    rpc GetImageVulnerabilities(GetImageVulnerabilitiesRequest) returns (GetImageVulnerabilitiesResponse) {}
 
     rpc GetLanguageLevelComponents(GetLanguageLevelComponentsRequest) returns (GetLanguageLevelComponentsResponse) {
         option (google.api.http) = {

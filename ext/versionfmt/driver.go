@@ -18,7 +18,11 @@ package versionfmt
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 	"sync"
+
+	"github.com/stackrox/rox/pkg/stringutils"
 )
 
 const (
@@ -40,6 +44,8 @@ var (
 
 	parsersM sync.Mutex
 	parsers  = make(map[string]Parser)
+
+	namespaceToVersionFmt = make(map[string]string)
 )
 
 // Parser represents any format that can compare two version strings.
@@ -50,6 +56,8 @@ type Parser interface {
 	// Compare parses two different version strings.
 	// Returns 0 when equal, -1 when a < b, 1 when b < a.
 	Compare(a, b string) (int, error)
+
+	Namespaces() []string
 }
 
 // RegisterParser provides a way to dynamically register an implementation of a
@@ -74,6 +82,13 @@ func RegisterParser(name string, p Parser) {
 	}
 
 	parsers[name] = p
+
+	for _, namespace := range p.Namespaces() {
+		if _, exists := namespaceToVersionFmt[namespace]; exists {
+			panic(fmt.Sprintf("versionfmt: Namespace %s already associated multiple version formats", namespace))
+		}
+		namespaceToVersionFmt[namespace] = name
+	}
 }
 
 // GetParser returns the registered Parser with a provided name.
@@ -131,4 +146,19 @@ func GetHigherVersion(format, a, b string) (string, error) {
 
 	// a >= b, so return a.
 	return a, nil
+}
+
+// GetVersionFormatForNamespace returns the version format
+// associated with this namespace.
+// For example: if "rhel" is given, then "rpm" is returned.
+func GetVersionFormatForNamespace(namespace string) string {
+	distro := stringutils.GetUpTo(namespace, ":")
+	if distro != "" {
+		namespace = distro
+	}
+
+	parsersM.Lock()
+	defer parsersM.Unlock()
+
+	return namespaceToVersionFmt[strings.ToLower(namespace)]
 }

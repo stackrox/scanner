@@ -15,28 +15,21 @@
 package v1
 
 import (
-	"fmt"
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/api/v1/common"
-	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
-	"github.com/stackrox/scanner/ext/versionfmt/language"
 	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/rhel"
 	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
-
-// These are possible package prefixes or suffixes. Package managers sometimes annotate
-// the packages with these e.g. urllib-python
-var possiblePythonPrefixesOrSuffixes = []string{
-	"python", "python2", "python3",
-}
 
 // Linux and kernel packages that are not applicable to images
 var kernelPrefixes = []string{
@@ -61,180 +54,8 @@ type Layer struct {
 	Features         []Feature         `json:"Features,omitempty"`
 }
 
-// languageFeatureValue is the value for a map of language features.
-type languageFeatureValue struct {
-	name, version, layer string
-}
-
-// getIgnoredLanguageComponents returns a map of language components to ignore.
-// The map keeps track of the language components that were ignored because
-// they came from the package manager.
-//
-// It is assumed the given layersToComponents is sorted in lowest (base layer) to highest layer.
-// This is because modifications to the files in later layers may not have a package manager change associated (e.g. chown a JAR).
-func getIgnoredLanguageComponents(layersToComponents []*component.LayerToComponents) map[string]languageFeatureValue {
-	ignoredLanguageComponents := make(map[string]languageFeatureValue)
-	for _, layerToComponent := range layersToComponents {
-		for _, c := range layerToComponent.Components {
-			if c.FromPackageManager {
-				ignoredLanguageComponents[c.Location] = languageFeatureValue{
-					name:    c.Name,
-					version: c.Version,
-				}
-			}
-		}
-	}
-
-	return ignoredLanguageComponents
-}
-
-// getLanguageData returns all application (language) features in the given layer.
-// This data includes features which were introduced in lower (parent) layers.
-// Since an image is based on a layered-filesystem, this function recognizes when files/locations
-// have been removed, and does not return features from files from lower (parent) levels which have been deleted
-// in higher (child) levels.
-//
-// A returned feature's AddedBy is the first (parent) layer that introduced the feature. For example,
-// if a file was modified between layers in a way that the features it describes are untouched
-// (ex: chown, touch), then the higher layer's features from that file are unused.
-//
-// A known issue is if a file defines multiple features, and the file is modified between layers in a way
-// that does affect the features it describes (adds, updates, or removes features), which is currently only a
-// concern for the Java source type. However, this event is unlikely, which is why it is not considered at this time.
-func getLanguageData(db database.Datastore, layerName, lineage string, uncertifiedRHEL bool) ([]database.FeatureVersion, error) {
-	layersToComponents, err := db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
-		UncertifiedRHEL: uncertifiedRHEL,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	ignoredLanguageComponents := getIgnoredLanguageComponents(layersToComponents)
-
-	languageFeatureMap := make(map[string]languageFeatureValue)
-	var removedLanguageComponentLocations []string
-	var features []database.FeatureVersion
-
-	// Loop from the highest layer to lowest.
-	for i := len(layersToComponents) - 1; i >= 0; i-- {
-		layerToComponents := layersToComponents[i]
-
-		// Ignore components which were removed in higher layers.
-		components := layerToComponents.Components[:0]
-		for _, c := range layerToComponents.Components {
-			if c.FromPackageManager {
-				continue
-			}
-			if lfv, ok := ignoredLanguageComponents[c.Location]; ok && lfv.name == c.Name && lfv.version == c.Version {
-				continue
-			}
-			include := true
-			for _, removedLocation := range removedLanguageComponentLocations {
-				if strings.HasPrefix(c.Location, removedLocation) {
-					include = false
-					break
-				}
-			}
-
-			if include {
-				components = append(components, c)
-			}
-		}
-
-		newFeatures := cpe.CheckForVulnerabilities(layerToComponents.Layer, components)
-		for _, fv := range newFeatures {
-			location := fv.Feature.Location
-			featureValue := languageFeatureValue{
-				name:    fv.Feature.Name,
-				version: fv.Version,
-				layer:   layerToComponents.Layer,
-			}
-			if existing, ok := languageFeatureMap[location]; ok {
-				if featureValue.name != existing.name || featureValue.version != existing.version {
-					// The contents at this location have changed between layers.
-					// Use the higher layer's.
-					continue
-				}
-			}
-
-			features = append(features, fv)
-			languageFeatureMap[location] = featureValue
-		}
-
-		removedLanguageComponentLocations = append(removedLanguageComponentLocations, layerToComponents.Removed...)
-	}
-
-	// We want to output the features in layer-order, so we must reverse the feature slice.
-	// At the same time, we want to be sure to remove any repeat features that were not filtered previously
-	// (this would be due us detecting a feature was introduced into the image at a lower level than originally thought).
-	filtered := make([]database.FeatureVersion, 0, len(features))
-	for i := len(features) - 1; i >= 0; i-- {
-		feature := features[i]
-
-		featureValue := languageFeatureMap[feature.Feature.Location]
-		if feature.AddedBy.Name == featureValue.layer {
-			filtered = append(filtered, feature)
-		}
-	}
-
-	return filtered, nil
-}
-
-// getLanguageComponents returns the language components present in the image whose top layer is indicated by the given layerName.
-func getLanguageComponents(db database.Datastore, layerName, lineage string, uncertifiedRHEL bool) []*component.Component {
-	layersToComponents, err := db.GetLayerLanguageComponents(layerName, lineage, &database.DatastoreOptions{
-		UncertifiedRHEL: uncertifiedRHEL,
-	})
-	if err != nil {
-		log.Errorf("error getting language data: %v", err)
-		return nil
-	}
-
-	var components []*component.Component
-	var removedLanguageComponentLocations []string
-	ignoredLanguageComponents := getIgnoredLanguageComponents(layersToComponents)
-	// Loop from the highest layer to lowest.
-	for i := len(layersToComponents) - 1; i >= 0; i-- {
-		layerToComponents := layersToComponents[i]
-
-		// Ignore components which were removed in higher layers.
-		layerComponents := layerToComponents.Components[:0]
-		for _, c := range layerToComponents.Components {
-			if c.FromPackageManager {
-				continue
-			}
-			if lfv, ok := ignoredLanguageComponents[c.Location]; ok && lfv.name == c.Name && lfv.version == c.Version {
-				continue
-			}
-			include := true
-			for _, removedLocation := range removedLanguageComponentLocations {
-				if strings.HasPrefix(c.Location, removedLocation) {
-					include = false
-					break
-				}
-			}
-
-			if include {
-				c.AddedBy = layerToComponents.Layer
-				layerComponents = append(layerComponents, c)
-			}
-		}
-
-		removedLanguageComponentLocations = append(removedLanguageComponentLocations, layerToComponents.Removed...)
-
-		components = append(components, layerComponents...)
-	}
-
-	// We want to output the components in layer-order, so we must reverse the components slice.
-	for i, j := 0, len(components)-1; i < j; i, j = i+1, j-1 {
-		components[i], components[j] = components[j], components[i]
-	}
-
-	return components
-}
-
-// VulnerabilityFromDatabaseModel converts the given database.Vulnerability into a Vulnerability.
-func VulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability {
+// vulnerabilityFromDatabaseModel converts the given database.Vulnerability into a Vulnerability.
+func vulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability {
 	vuln := Vulnerability{
 		Name:          dbVuln.Name,
 		NamespaceName: dbVuln.Namespace.Name,
@@ -260,7 +81,8 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		addedBy = rhel.GetOriginalLayerName(addedBy)
 	}
 
-	executables := createExecutablesFromDependencies(dbFeatureVersion, depMap)
+	featureKey := featurefmt.PackageKey{Name: dbFeatureVersion.Feature.Name, Version: dbFeatureVersion.Version}
+	executables := common.CreateExecutablesFromDependencies(featureKey, dbFeatureVersion.ExecutableToDependencies, depMap)
 	return &Feature{
 		Name:          dbFeatureVersion.Feature.Name,
 		NamespaceName: dbFeatureVersion.Feature.Namespace.Name,
@@ -270,73 +92,6 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 		Location:      dbFeatureVersion.Feature.Location,
 		Executables:   executables,
 	}
-}
-
-func toFeatureNameVersions(keys common.FeatureKeySet) []*v1.FeatureNameVersion {
-	if len(keys) == 0 {
-		return nil
-	}
-	features := make([]*v1.FeatureNameVersion, 0, len(keys))
-	for k := range keys {
-		features = append(features, &v1.FeatureNameVersion{Name: k.Name, Version: k.Version})
-	}
-	return features
-}
-
-func dedupeVersionMatcher(v1, v2 string) bool {
-	if v1 == v2 {
-		return true
-	}
-	return strings.HasPrefix(v2, v1)
-}
-
-func dedupeFeatureNameMatcher(feature Feature, osFeature Feature) bool {
-	if feature.Name == osFeature.Name {
-		return true
-	}
-
-	if feature.VersionFormat == component.PythonSourceType.String() {
-		for _, ext := range possiblePythonPrefixesOrSuffixes {
-			if feature.Name == strings.TrimPrefix(osFeature.Name, fmt.Sprintf("%s-", ext)) {
-				return true
-			}
-			if feature.Name == strings.TrimSuffix(osFeature.Name, fmt.Sprintf("-%s", ext)) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func shouldDedupeLanguageFeature(feature Feature, osFeatures []Feature) bool {
-	// Can probably sort this and it'll be faster
-	for _, osFeature := range osFeatures {
-		if dedupeFeatureNameMatcher(feature, osFeature) && dedupeVersionMatcher(feature.Version, osFeature.Version) {
-			return true
-		}
-	}
-	return false
-}
-
-// addLanguageVulns adds language-based features into the given layer.
-// Assumes layer is not nil.
-func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncertifiedRHEL bool) {
-	// Add Language Features
-	languageFeatureVersions, err := getLanguageData(db, layer.Name, lineage, uncertifiedRHEL)
-	if err != nil {
-		log.Errorf("error getting language data: %v", err)
-		return
-	}
-
-	var languageFeatures []Feature
-	for _, dbFeatureVersion := range languageFeatureVersions {
-		feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL, nil)
-		if !shouldDedupeLanguageFeature(*feature, layer.Features) {
-			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, language.ParserName)
-			languageFeatures = append(languageFeatures, *feature)
-		}
-	}
-	layer.Features = append(layer.Features, languageFeatures...)
 }
 
 func hasKernelPrefix(name string) bool {
@@ -400,7 +155,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, versionFormat string) {
 	allVulnsFixedBy := feature.FixedBy
 	for _, dbVuln := range dbVulns {
-		vuln := VulnerabilityFromDatabaseModel(dbVuln)
+		vuln := vulnerabilityFromDatabaseModel(dbVuln)
 		feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
 
 		// If at least one vulnerability is not fixable, then we mark it the component as not fixable.
@@ -464,6 +219,8 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 	}
 
 	return &ComponentsEnvelope{
+		Namespace: namespaceName,
+
 		Features:           features,
 		RHELv2PkgEnvs:      rhelv2PkgEnvs,
 		LanguageComponents: components,
@@ -492,6 +249,81 @@ func getNotes(namespaceName string, uncertifiedRHEL bool) []Note {
 	}
 
 	return notes
+}
+
+// GetVulnerabilitiesForComponents retrieves the vulnerabilities for the given components.
+func GetVulnerabilitiesForComponents(db database.Datastore, components *v1.Components, uncertifiedRHEL bool) (*Layer, error) {
+	layer := &Layer{
+		NamespaceName: components.GetNamespace(),
+	}
+
+	osFeatures, err := getOSFeatures(db, components.GetOsComponents())
+	if err != nil {
+		return nil, errors.Wrap(err, "getting OS features")
+	}
+	layer.Features = append(layer.Features, osFeatures...)
+
+	if !uncertifiedRHEL {
+		rhelv2Features, err := getFullFeaturesForRHELv2Packages(db, components.GetRhelComponents())
+		if err != nil {
+			return nil, errors.Wrap(err, "getting RHELv2 features")
+		}
+		layer.Features = append(layer.Features, rhelv2Features...)
+	}
+
+	languageFeatures, err := getLanguageFeatures(layer.Features, components.GetLanguageComponents(), uncertifiedRHEL)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting language features")
+	}
+	layer.Features = append(layer.Features, languageFeatures...)
+
+	return layer, nil
+}
+
+func getOSFeatures(db database.Datastore, components []*v1.OSComponent) ([]Feature, error) {
+	featureVersions := osComponentsToFeatureVersions(components)
+
+	err := db.LoadVulnerabilities(featureVersions)
+	if err != nil {
+		return nil, errors.Wrap(err, "loading OS vulnerabilities from database")
+	}
+
+	features := make([]Feature, 0, len(featureVersions))
+	for _, fv := range featureVersions {
+		feature := Feature{
+			Name:          fv.Feature.Name,
+			NamespaceName: fv.Feature.Namespace.Name,
+			VersionFormat: versionfmt.GetVersionFormatForNamespace(fv.Feature.Namespace.Name),
+			Version:       fv.Version,
+			AddedBy:       fv.AddedBy.Name,
+			Executables:   fv.Executables,
+		}
+		updateFeatureWithVulns(&feature, fv.AffectedBy, feature.VersionFormat)
+
+		features = append(features, feature)
+	}
+
+	return features, nil
+}
+
+func osComponentsToFeatureVersions(components []*v1.OSComponent) []database.FeatureVersion {
+	featureVersions := make([]database.FeatureVersion, 0, len(components))
+	for _, c := range components {
+		featureVersions = append(featureVersions, database.FeatureVersion{
+			Feature: database.Feature{
+				Name: c.GetName(),
+				Namespace: database.Namespace{
+					Name:          c.GetNamespace(),
+					VersionFormat: versionfmt.GetVersionFormatForNamespace(c.GetNamespace()),
+				},
+			},
+			Version:     c.GetVersion(),
+			Executables: c.GetExecutables(),
+			AddedBy:     database.Layer{Name: c.GetAddedBy()},
+		})
+	}
+
+	return featureVersions
 }
 
 // Namespace is the image's base OS.
@@ -596,6 +428,8 @@ type FeatureEnvelope struct {
 
 // ComponentsEnvelope envelopes component data (OS-packages and language-level-packages).
 type ComponentsEnvelope struct {
+	Namespace string
+
 	Features []Feature
 	// RHELv2PkgEnvs maps the package ID to the related package environment.
 	RHELv2PkgEnvs      map[int]*database.RHELv2PackageEnv
