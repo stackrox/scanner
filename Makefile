@@ -198,7 +198,7 @@ scanner-image: scanner-image-base $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 .PHONY: scanner-image-slim
 scanner-image-slim: scanner-image-base $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build --build-arg BASE_REGISTRY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=scanner --build-arg BASE_TAG=$(TAG)-base -t us.gcr.io/stackrox-ci/scanner:$(TAG)-slim -f image/scanner/rhel/Dockerfile-slim image/scanner/rhel
+	@docker build --build-arg BASE_REGISTRY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=scanner --build-arg BASE_TAG=$(TAG)-base -t us.gcr.io/stackrox-ci/scanner-slim:$(TAG) -f image/scanner/rhel/Dockerfile-slim image/scanner/rhel
 
 .PHONY: db-image-base
 db-image-base: $(CURDIR)/image/db/rhel/bundle.tar.gz
@@ -214,7 +214,7 @@ db-image: db-image-base $(CURDIR)/image/db/rhel/bundle.tar.gz
 .PHONY: db-image-slim
 db-image-slim: db-image-base
 	@echo "+ $@"
-	@docker build --build-arg BASE_REGISTRY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=scanner-db --build-arg BASE_TAG=$(TAG)-base -t us.gcr.io/stackrox-ci/scanner-db:$(TAG)-slim -f image/db/rhel/Dockerfile-slim image/db/rhel
+	@docker build --build-arg BASE_REGISTRY=us.gcr.io/stackrox-ci --build-arg BASE_IMAGE=scanner-db --build-arg BASE_TAG=$(TAG)-base -t us.gcr.io/stackrox-ci/scanner-db-slim:$(TAG) -f image/db/rhel/Dockerfile-slim image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered
