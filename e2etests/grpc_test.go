@@ -54,6 +54,12 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 			}
 
 			if test.checkProvidedExecutables {
+				for _, exec := range matching.ProvidedExecutables {
+					sort.Slice(exec.RequiredFeatures, func(i, j int) bool {
+						return exec.RequiredFeatures[i].GetName() < exec.RequiredFeatures[j].GetName() ||
+							exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()
+					})
+				}
 				assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
 			}
 			feature.ProvidedExecutables = nil
@@ -107,7 +113,14 @@ func getMatchingGRPCFeature(t *testing.T, features []*v1.Feature, featureToFind 
 	if allowNotFound && candidateIdx == -1 {
 		return nil
 	}
-	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list: %v", featureToFind, features)
+	if candidateIdx == -1 {
+		featureToFind.Vulnerabilities = nil
+		for _, feature := range features {
+			feature.Vulnerabilities = nil
+		}
+		fmt.Printf("Feature %+v not in list: %v", featureToFind, features)
+	}
+	require.NotEqual(t, -1, candidateIdx)
 	return features[candidateIdx]
 }
 
@@ -166,7 +179,7 @@ func TestGRPCGetImageComponents(t *testing.T) {
 					Insecure: true,
 				},
 			})
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.NotNil(t, imgComponentsResp.GetStatus())
 
 			assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
@@ -230,6 +243,42 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 		f.Executables = nil
 
 		assert.Equal(t, expectedFeature, *f)
+	}
+}
+
+func TestGRPCGetImageVulnerabilities(t *testing.T) {
+	conn := connectToScanner(t)
+	client := v1.NewImageScanServiceClient(conn)
+
+	_, inCIRun := os.LookupEnv("CI")
+
+	for _, testCase := range testCases {
+		if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
+			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
+			testCase.registry = "https://quay.io"
+			testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
+			testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
+		}
+
+		imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
+			Image: testCase.image,
+			Registry: &v1.RegistryData{
+				Url:      testCase.registry,
+				Username: testCase.username,
+				Password: testCase.password,
+				Insecure: true,
+			},
+		})
+		require.NoError(t, err)
+
+		// This test assumes TestGRPCGetImageComponents passes, so there is no need to check the component response.
+
+		vulnsResp, err := client.GetImageVulnerabilities(context.Background(), &v1.GetImageVulnerabilitiesRequest{
+			Components: imgComponentsResp.GetComponents(),
+			Notes:      imgComponentsResp.GetNotes(),
+		})
+		require.NoError(t, err)
+		verifyImage(t, vulnsResp.GetImage(), testCase)
 	}
 }
 

@@ -17,6 +17,7 @@ package v1
 import (
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/api/v1/common"
@@ -248,6 +249,81 @@ func getNotes(namespaceName string, uncertifiedRHEL bool) []Note {
 	}
 
 	return notes
+}
+
+// GetVulnerabilitiesForComponents retrieves the vulnerabilities for the given components.
+func GetVulnerabilitiesForComponents(db database.Datastore, components *v1.Components, uncertifiedRHEL bool) (*Layer, error) {
+	layer := &Layer{
+		NamespaceName: components.GetNamespace(),
+	}
+
+	osFeatures, err := getOSFeatures(db, components.GetOsComponents())
+	if err != nil {
+		return nil, errors.Wrap(err, "getting OS features")
+	}
+	layer.Features = append(layer.Features, osFeatures...)
+
+	if !uncertifiedRHEL {
+		rhelv2Features, err := getFullFeaturesForRHELv2Packages(db, components.GetRhelComponents())
+		if err != nil {
+			return nil, errors.Wrap(err, "getting RHELv2 features")
+		}
+		layer.Features = append(layer.Features, rhelv2Features...)
+	}
+
+	languageFeatures, err := getLanguageFeatures(layer.Features, components.GetLanguageComponents(), uncertifiedRHEL)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting language features")
+	}
+	layer.Features = append(layer.Features, languageFeatures...)
+
+	return layer, nil
+}
+
+func getOSFeatures(db database.Datastore, components []*v1.OSComponent) ([]Feature, error) {
+	featureVersions := osComponentsToFeatureVersions(components)
+
+	err := db.LoadVulnerabilities(featureVersions)
+	if err != nil {
+		return nil, errors.Wrap(err, "loading OS vulnerabilities from database")
+	}
+
+	features := make([]Feature, 0, len(featureVersions))
+	for _, fv := range featureVersions {
+		feature := Feature{
+			Name:          fv.Feature.Name,
+			NamespaceName: fv.Feature.Namespace.Name,
+			VersionFormat: versionfmt.GetVersionFormatForNamespace(fv.Feature.Namespace.Name),
+			Version:       fv.Version,
+			AddedBy:       fv.AddedBy.Name,
+			Executables:   fv.Executables,
+		}
+		updateFeatureWithVulns(&feature, fv.AffectedBy, feature.VersionFormat)
+
+		features = append(features, feature)
+	}
+
+	return features, nil
+}
+
+func osComponentsToFeatureVersions(components []*v1.OSComponent) []database.FeatureVersion {
+	featureVersions := make([]database.FeatureVersion, 0, len(components))
+	for _, c := range components {
+		featureVersions = append(featureVersions, database.FeatureVersion{
+			Feature: database.Feature{
+				Name: c.GetName(),
+				Namespace: database.Namespace{
+					Name:          c.GetNamespace(),
+					VersionFormat: versionfmt.GetVersionFormatForNamespace(c.GetNamespace()),
+				},
+			},
+			Version:     c.GetVersion(),
+			Executables: c.GetExecutables(),
+			AddedBy:     database.Layer{Name: c.GetAddedBy()},
+		})
+	}
+
+	return featureVersions
 }
 
 // Namespace is the image's base OS.

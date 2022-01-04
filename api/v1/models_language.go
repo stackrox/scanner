@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/cpe"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt/language"
+	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 )
 
@@ -181,10 +183,8 @@ func getLanguageComponents(db database.Datastore, layerName, lineage string, unc
 		components = append(components, layerComponents...)
 	}
 
-	// We want to output the components in layer-order, so we must reverse the components slice.
-	for i, j := 0, len(components)-1; i < j; i, j = i+1, j-1 {
-		components[i], components[j] = components[j], components[i]
-	}
+	// Keep the components in reverse-layer order, as this will be useful when performing
+	// vulnerability matching.
 
 	return components
 }
@@ -243,4 +243,129 @@ func addLanguageVulns(db database.Datastore, layer *Layer, lineage string, uncer
 		}
 	}
 	layer.Features = append(layer.Features, languageFeatures...)
+}
+
+func getLanguageFeatures(osFeatures []Feature, components []*v1.LanguageComponent, uncertifiedRHEL bool) ([]Feature, error) {
+	layerToComponents := getLayerToComponents(components)
+
+	languageFeatureMap := make(map[string]languageFeatureValue)
+	var featureVersions []database.FeatureVersion
+
+	for _, layer := range layerToComponents {
+		fvs := cpe.CheckForVulnerabilities(layer.Layer, layer.Components)
+		for _, fv := range fvs {
+			location := fv.Feature.Location
+			featureValue := languageFeatureValue{
+				name:    fv.Feature.Name,
+				version: fv.Version,
+				layer:   layer.Layer,
+			}
+			if existing, ok := languageFeatureMap[location]; ok {
+				if featureValue.name != existing.name || featureValue.version != existing.version {
+					// The contents at this location have changed between layers.
+					// Use the higher layer's.
+					continue
+				}
+			}
+
+			featureVersions = append(featureVersions, fv)
+			languageFeatureMap[location] = featureValue
+		}
+	}
+
+	// We want to output the features in layer-order, so we must reverse the feature slice.
+	// At the same time, we want to be sure to remove any repeat features that were not filtered previously
+	// (this would be due us detecting a feature was introduced into the image at a lower level than originally thought).
+	features := make([]Feature, 0, len(featureVersions))
+	for i := len(featureVersions) - 1; i >= 0; i-- {
+		fv := featureVersions[i]
+
+		featureValue := languageFeatureMap[fv.Feature.Location]
+		if fv.AddedBy.Name == featureValue.layer {
+			feature := featureFromDatabaseModel(fv, uncertifiedRHEL, nil)
+			if !shouldDedupeLanguageFeature(*feature, osFeatures) {
+				updateFeatureWithVulns(feature, fv.AffectedBy, language.ParserName)
+				features = append(features, *feature)
+			}
+		}
+	}
+
+	return features, nil
+}
+
+// getLayerToComponents gets a slice of LayerToComponents from the given components.
+// It is assumed the given components are sorted in order from the highest layer to the lowest layer.
+func getLayerToComponents(components []*v1.LanguageComponent) []*component.LayerToComponents {
+	var layers []*component.LayerToComponents
+	var prevLayer string
+	for _, languageComponent := range components {
+		c := &component.Component{
+			Name:     languageComponent.GetName(),
+			Version:  languageComponent.GetVersion(),
+			Location: languageComponent.GetLocation(),
+			AddedBy:  languageComponent.GetAddedBy(),
+		}
+
+		var err error
+		switch languageComponent.GetType() {
+		case v1.SourceType_JAVA:
+			c.SourceType = component.JavaSourceType
+			c.JavaPkgMetadata, err = getJavaPkgMetadata(languageComponent.GetJava())
+			if err != nil {
+				log.Warnf("Unable to parse Java metadata: %v. skipping...", err)
+				continue
+			}
+		case v1.SourceType_PYTHON:
+			c.SourceType = component.PythonSourceType
+			c.PythonPkgMetadata, err = getPythonPkgMetadata(languageComponent.GetPython())
+			if err != nil {
+				log.Warnf("Unable to parse Java metadata: %v. skipping...", err)
+				continue
+			}
+		case v1.SourceType_NPM:
+			c.SourceType = component.NPMSourceType
+		case v1.SourceType_GEM:
+			c.SourceType = component.GemSourceType
+		case v1.SourceType_DOTNETCORERUNTIME:
+			c.SourceType = component.DotNetCoreRuntimeSourceType
+		}
+
+		if prevLayer == "" || prevLayer != languageComponent.GetAddedBy() {
+			prevLayer = languageComponent.GetAddedBy()
+			layers = append(layers, &component.LayerToComponents{
+				Layer: languageComponent.GetAddedBy(),
+			})
+		}
+
+		bottomLayer := layers[len(layers)-1]
+		bottomLayer.Components = append(bottomLayer.Components, c)
+	}
+
+	return layers
+}
+
+func getJavaPkgMetadata(java *v1.JavaComponent) (*component.JavaPkgMetadata, error) {
+	if java == nil {
+		return nil, errors.New("Java component is empty")
+	}
+	return &component.JavaPkgMetadata{
+		ImplementationVersion: java.GetImplementationVersion(),
+		MavenVersion:          java.GetMavenVersion(),
+		Origins:               java.GetOrigins(),
+		SpecificationVersion:  java.GetSpecificationVersion(),
+		BundleName:            java.GetBundleName(),
+	}, nil
+}
+
+func getPythonPkgMetadata(python *v1.PythonComponent) (*component.PythonPkgMetadata, error) {
+	if python == nil {
+		return nil, errors.New("Python component is empty")
+	}
+	return &component.PythonPkgMetadata{
+		Homepage:    python.GetHomepage(),
+		AuthorEmail: python.GetAuthorEmail(),
+		DownloadURL: python.GetDownloadUrl(),
+		Summary:     python.GetSummary(),
+		Description: python.GetDescription(),
+	}, nil
 }

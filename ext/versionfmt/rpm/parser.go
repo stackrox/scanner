@@ -269,6 +269,10 @@ func containsRune(s []rune, e rune) bool {
 	return false
 }
 
+func (p parser) Namespaces() []string {
+	return []string{"amzn", "centos", "rhel"}
+}
+
 func init() {
 	versionfmt.RegisterParser(ParserName, parser{})
 }
