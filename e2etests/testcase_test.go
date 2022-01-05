@@ -2899,7 +2899,7 @@ var testCases = []testCase{
 				},
 				AddedBy:  "sha256:d84ba7ea7803fa43fca06730523d264b31c562968cfd7020f0584f5ec1b26225",
 				Location: "log4j-core-2.12.2.jar",
-				FixedBy:  "2.12.4",
+				FixedBy:  "2.13.2",
 			},
 		},
 	},
