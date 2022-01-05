@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "scannerV1";
+
+option java_package = "io.stackrox.proto.api.scanner.v1";
+
+import "scanner/api/v1/vulnerability.proto";
+
+package scannerV1;
+
+message Image {
+  string           namespace = 2;
+  repeated Feature features  = 1;
+}
