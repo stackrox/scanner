@@ -20,6 +20,8 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 COPY scripts /
 
+COPY --from=extracted_bundle /bundle/scanner ./
+
 COPY ./THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
 RUN dnf upgrade -y && \
@@ -34,7 +36,8 @@ RUN dnf upgrade -y && \
     # by the script `save-dir-contents` during the image build. The directory
     # contents are then restored by the script `restore-all-dir-contents`
     # during the container start.
-    chown -R 65534:65534 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl
+    chown -R 65534:65534 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl && \
+    chmod +rx /scanner
 
 ENTRYPOINT ["/entrypoint.sh"]
 
@@ -44,24 +47,19 @@ ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
-COPY --from=extracted_bundle /bundle/genesis_manifests.json /bundle/scanner ./
+COPY --from=extracted_bundle /bundle/genesis_manifests.json ./
 COPY --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
 COPY --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
 COPY --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 
 RUN chown -R 65534:65534 "${NVD_DEFINITIONS_DIR}" && \
     chown -R 65534:65534 "${K8S_DEFINITIONS_DIR}" && \
-    chown -R 65534:65534 "${REPO_TO_CPE_DIR}" && \
-    chmod +rx /scanner
+    chown -R 65534:65534 "${REPO_TO_CPE_DIR}"
 
 USER 65534:65534
 
 FROM base AS scanner-slim
 
 ENV ROX_LITE_MODE="true"
-
-COPY --from=extracted_bundle /bundle/scanner ./
-
-RUN chmod +rx /scanner
 
 USER 65534:65534
