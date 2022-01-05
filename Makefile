@@ -186,12 +186,12 @@ $(CURDIR)/image/db/rhel/bundle.tar.gz:
 	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $(CURDIR)/image/db/rhel
 
 .PHONY: scanner-image
-scanner-image: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@docker build --target scanner -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: scanner-image-slim
-scanner-image-slim: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image-slim: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@docker build --target scanner-slim -t us.gcr.io/stackrox-ci/scanner-slim:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
