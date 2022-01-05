@@ -5,7 +5,7 @@ option go_package = "scannerV1";
 option java_package = "io.stackrox.proto.api.scanner.v1";
 
 import weak "google/api/annotations.proto";
-import "shared/api/v1/empty.proto";
+import "scanner/api/v1/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 package scannerV1;
