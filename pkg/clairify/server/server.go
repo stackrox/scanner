@@ -20,7 +20,7 @@ import (
 	v1 "github.com/stackrox/scanner/api/v1"
 	v1common "github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/database"
-	protoV1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	protoV1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/server/middleware"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
