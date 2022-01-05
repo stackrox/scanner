@@ -10,7 +10,7 @@ import (
 	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/api/v1/convert"
 	"github.com/stackrox/scanner/ext/featurefmt"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 )
 

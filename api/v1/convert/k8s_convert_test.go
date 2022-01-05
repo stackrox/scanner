@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stackrox/k8s-cves/pkg/validation"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stretchr/testify/assert"
 )
 
