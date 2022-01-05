@@ -2680,7 +2680,7 @@ var testCases = []testCase{
 								},
 							},
 						},
-						FixedBy: "2.17.0",
+						FixedBy: "2.12.3",
 					},
 					{
 						Name:          "CVE-2021-44832",
@@ -2703,12 +2703,12 @@ var testCases = []testCase{
 								},
 							},
 						},
-						FixedBy: "2.17.1",
+						FixedBy: "2.12.4",
 					},
 				},
 				AddedBy:  "sha256:c46de89b745ad8ba4400323d4ebc230a4b88cbbdbc92a862c92a743478abd617",
 				Location: "usr/share/logstash/vendor/bundle/jruby/2.5.0/gems/logstash-input-tcp-6.0.10-java/vendor/jar-dependencies/org/logstash/inputs/logstash-input-tcp/6.0.10/logstash-input-tcp-6.0.10.jar:log4j-core",
-				FixedBy:  "2.17.1",
+				FixedBy:  "2.13.2",
 			},
 			{
 				Name:          "log4j",
