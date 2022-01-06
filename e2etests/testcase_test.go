@@ -2640,7 +2640,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-44832",
 						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack where an attacker with permission to modify the logging configuration file can construct a malicious configuration using a JDBC Appender with a data source referencing a JNDI URI which can execute remote code. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
-						Severity:      "MODERATE",
+						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2742,7 +2742,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-44832",
 						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack where an attacker with permission to modify the logging configuration file can construct a malicious configuration using a JDBC Appender with a data source referencing a JNDI URI which can execute remote code. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
-						Severity:      "MODERATE",
+						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2854,7 +2854,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-44832",
 						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack where an attacker with permission to modify the logging configuration file can construct a malicious configuration using a JDBC Appender with a data source referencing a JNDI URI which can execute remote code. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
-						Severity:      "MODERATE",
+						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
