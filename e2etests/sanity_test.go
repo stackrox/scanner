@@ -2149,6 +2149,29 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "2.12.2",
 						},
 						{
+							Name:          "CVE-2021-44832",
+							Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack where an attacker with permission to modify the logging configuration file can construct a malicious configuration using a JDBC Appender with a data source referencing a JNDI URI which can execute remote code. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
+							Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
+							Severity:      "Moderate",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 0.7,
+										"ImpactScore":         5.9,
+										"Score":               6.6,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "2.12.4",
+						},
+						{
 							Name:          "CVE-2021-45046",
 							Description:   "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data using a JNDI Lookup pattern, resulting in an information leak and remote code execution in some environments and local code execution in all environments; remote code execution has been demonstrated on macOS but no other tested environments.",
 							Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
@@ -2192,12 +2215,12 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "2.17.0",
+							FixedBy: "2.12.3",
 						},
 					},
 					AddedBy:  "sha256:c46de89b745ad8ba4400323d4ebc230a4b88cbbdbc92a862c92a743478abd617",
 					Location: "usr/share/logstash/vendor/bundle/jruby/2.5.0/gems/logstash-input-tcp-6.0.10-java/vendor/jar-dependencies/org/logstash/inputs/logstash-input-tcp/6.0.10/logstash-input-tcp-6.0.10.jar:log4j-core",
-					FixedBy:  "2.17.0",
+					FixedBy:  "2.13.2",
 				},
 				{
 					Name:          "log4j",
@@ -2226,6 +2249,29 @@ func TestImageSanity(t *testing.T) {
 								},
 							},
 							FixedBy: "2.15.0",
+						},
+						{
+							Name:          "CVE-2021-44832",
+							Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack where an attacker with permission to modify the logging configuration file can construct a malicious configuration using a JDBC Appender with a data source referencing a JNDI URI which can execute remote code. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
+							Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
+							Severity:      "Moderate",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 0.7,
+										"ImpactScore":         5.9,
+										"Score":               6.6,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "2.17.1",
 						},
 						{
 							Name:          "CVE-2021-45046",
@@ -2276,7 +2322,7 @@ func TestImageSanity(t *testing.T) {
 					},
 					AddedBy:  "sha256:c46de89b745ad8ba4400323d4ebc230a4b88cbbdbc92a862c92a743478abd617",
 					Location: "usr/share/logstash/logstash-core/lib/jars/log4j-core-2.14.0.jar",
-					FixedBy:  "2.17.0",
+					FixedBy:  "2.17.1",
 				},
 			},
 		},
@@ -2317,6 +2363,29 @@ func TestImageSanity(t *testing.T) {
 							FixedBy: "2.13.2",
 						},
 						{
+							Name:          "CVE-2021-44832",
+							Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack where an attacker with permission to modify the logging configuration file can construct a malicious configuration using a JDBC Appender with a data source referencing a JNDI URI which can execute remote code. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
+							Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
+							Severity:      "Moderate",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 0.7,
+										"ImpactScore":         5.9,
+										"Score":               6.6,
+										"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H",
+									},
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 0.0,
+										"ImpactScore":         0.0,
+										"Score":               0.0,
+										"Vectors":             "",
+									},
+								},
+							},
+							FixedBy: "2.12.4",
+						},
+						{
 							Name:          "CVE-2021-45105",
 							Description:   "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 did not protect from uncontrolled recursion from self-referential lookups. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data that contains a recursive lookup, resulting in a StackOverflowError that will terminate the process. This is also known as a DOS (Denial of Service) attack.",
 							Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
@@ -2337,12 +2406,12 @@ func TestImageSanity(t *testing.T) {
 									},
 								},
 							},
-							FixedBy: "2.17.0",
+							FixedBy: "2.12.3",
 						},
 					},
 					AddedBy:  "sha256:d84ba7ea7803fa43fca06730523d264b31c562968cfd7020f0584f5ec1b26225",
 					Location: "log4j-core-2.12.2.jar",
-					FixedBy:  "2.17.0",
+					FixedBy:  "2.13.2",
 				},
 			},
 		},
