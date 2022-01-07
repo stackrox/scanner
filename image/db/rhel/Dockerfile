@@ -49,14 +49,14 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 EXPOSE 5432
 CMD ["postgres"]
 
-FROM base AS scanner-db
-
-COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
-
-USER 70:70
-
 FROM base AS scanner-db-slim
 
 ENV ROX_SLIM_MODE="true"
+
+USER 70:70
+
+FROM base AS scanner-db
+
+COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
 USER 70:70

@@ -41,6 +41,12 @@ RUN dnf upgrade -y && \
 
 ENTRYPOINT ["/entrypoint.sh"]
 
+FROM base AS scanner-slim
+
+ENV ROX_LITE_MODE="true"
+
+USER 65534:65534
+
 FROM base AS scanner
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
@@ -55,11 +61,5 @@ COPY --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 RUN chown -R 65534:65534 "${NVD_DEFINITIONS_DIR}" && \
     chown -R 65534:65534 "${K8S_DEFINITIONS_DIR}" && \
     chown -R 65534:65534 "${REPO_TO_CPE_DIR}"
-
-USER 65534:65534
-
-FROM base AS scanner-slim
-
-ENV ROX_LITE_MODE="true"
 
 USER 65534:65534
