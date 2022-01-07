@@ -11,7 +11,7 @@ import (
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
 	"github.com/stackrox/scanner/database"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

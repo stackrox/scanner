@@ -1,6 +1,6 @@
 package imagescan
 
-import v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+import v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 
 // imageRequest is an interface wrapper for a v1 image-related request.
 type imageRequest interface {

@@ -5,15 +5,11 @@ option go_package = "scannerV1";
 option java_package = "io.stackrox.proto.api.scanner.v1";
 
 import weak "google/api/annotations.proto";
-import "shared/api/v1/component.proto";
-import "shared/api/v1/vulnerability.proto";
+import "scanner/api/v1/component.proto";
+import "scanner/api/v1/image.proto";
+import "scanner/api/v1/note.proto";
 
 package scannerV1;
-
-message Image {
-    string           namespace = 2;
-    repeated Feature features  = 1;
-}
 
 message ScanImageRequest {
     string image          = 1;
@@ -109,13 +105,6 @@ message LanguageLevelComponent {
     string     location    = 4;
 
     // TODO: consider adding more specific version information here (like all the stuff we have for Java).
-}
-
-enum Note {
-    OS_CVES_UNAVAILABLE             = 0;
-    OS_CVES_STALE                   = 1;
-    LANGUAGE_CVES_UNAVAILABLE       = 2;
-    CERTIFIED_RHEL_SCAN_UNAVAILABLE = 3;
 }
 
 // ImageScanService APIs can be used to scan images.
