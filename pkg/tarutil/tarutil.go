@@ -23,10 +23,12 @@ import (
 	"compress/gzip"
 	"io"
 	"os/exec"
+	"path"
 	"strings"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
@@ -67,10 +69,58 @@ type FileData struct {
 	Executable bool
 	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
 	ELFMetadata *elf.Metadata
+	// LinkTo contains the link target if the file is a symbolic link.
+	LinkTo string
 }
 
 // FilesMap is a map of files' paths to their contents.
 type FilesMap map[string]FileData
+
+// ResolveSymlinks Resolves the targets of all symbolic links
+func (f FilesMap) ResolveSymlinks() {
+	for fileName, fileData := range f {
+		if fileData.LinkTo != "" {
+			fileData.LinkTo = f.resolve(fileData.LinkTo)
+			f[fileName] = fileData
+		}
+	}
+}
+
+// Get gets FileData for the path
+func (f FilesMap) Get(path string) FileData {
+	resolved := f.resolve(path)
+	if strings.HasSuffix(path, "/") {
+		resolved = resolved + "/"
+	}
+	return f[resolved]
+}
+
+func (f FilesMap) resolve(path string) string {
+	list := strings.Split(path, "/")
+	resolved := path
+	traversed := set.NewStringSet(resolved)
+	for i, max, curr := 0, len(list), list[0]; i < max; {
+		fileData, ok := f[curr]
+		if ok && fileData.LinkTo != "" {
+			list = append(strings.Split(fileData.LinkTo, "/"), list[i+1:]...)
+			i = 0
+			curr = list[0]
+			max = len(list)
+			resolved = strings.Join(list, "/")
+			if traversed.Contains(resolved) {
+				// Detect a loop and return its current resolved path as best effort
+				return resolved
+			}
+			traversed.Add(resolved)
+		} else {
+			i++
+			if i < max {
+				curr = curr + "/" + list[i]
+			}
+		}
+	}
+	return resolved
+}
 
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
@@ -133,7 +183,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		}
 
 		// Extract the element
-		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
+		switch hdr.Typeflag {
+		case tar.TypeReg, tar.TypeLink:
 			var fileData FileData
 
 			elfFile := elf.OpenIfELFExecutable(contents)
@@ -164,14 +215,18 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			data[filename] = fileData
 
 			numExtractedContentBytes += len(d)
-		}
-		if hdr.Typeflag == tar.TypeDir {
+		case tar.TypeSymlink:
+			var fileData FileData
+			fileData.LinkTo = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+			data[filename] = fileData
+		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
 			// However, add to the map, so the entry will exist.
 			data[filename] = FileData{}
 		}
 	}
+	FilesMap(data).ResolveSymlinks()
 
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
