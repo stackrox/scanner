@@ -43,7 +43,7 @@ func init() {
 }
 
 func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
-	f, hasFile := files["etc/lsb-release"]
+	f, hasFile := files.Get("etc/lsb-release")
 	if !hasFile {
 		return nil
 	}

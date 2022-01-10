@@ -266,7 +266,7 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 }
 
 func isDistroless(filesMap tarutil.FilesMap) bool {
-	_, ok := filesMap["var/lib/dpkg/status.d/"]
+	_, ok := filesMap.Get("var/lib/dpkg/status.d/")
 	return ok
 }
 

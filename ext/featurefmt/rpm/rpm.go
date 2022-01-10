@@ -55,7 +55,7 @@ func init() {
 }
 
 func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
-	f, hasFile := files[dbPath]
+	f, hasFile := files.Get(dbPath)
 	if !hasFile {
 		return []database.FeatureVersion{}, nil
 	}
@@ -166,7 +166,8 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			// Rename to make it clear what the line represents.
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
-			rpm.AddToDependencyMap(filename, files[filename[1:]], execToDeps, libToDeps)
+			fileData, _ := files.Get(filename[1:])
+			rpm.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
 		}
 	}
 

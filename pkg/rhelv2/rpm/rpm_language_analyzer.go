@@ -16,7 +16,7 @@ func AnnotateComponentsWithPackageManagerInfo(files tarutil.FilesMap, components
 	if len(components) == 0 {
 		return nil
 	}
-	f, hasFile := files[dbPath]
+	f, hasFile := files.Get(dbPath)
 	if !hasFile {
 		return nil
 	}

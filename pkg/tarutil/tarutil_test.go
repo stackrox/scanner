@@ -16,7 +16,6 @@ package tarutil
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -95,18 +94,19 @@ func TestExtractWithSymlink(t *testing.T) {
 		"dirlink":     "dir",
 		"opt/dirlink": "dir",
 		// Link to files
-		"opt/symlink": "dir/dir_file",
-		"dir/symlink": "dir/dir_file",
+		"opt/symlink":     "dir/dir_file",
+		"dir/symlink":     "dir/dir_file",
+		"1/2/3/4/symlink": "dir/dir_file",
 		// Multiple level symlinks
 		"link/symlink": "dir/dir_file",
 		// This is a loop of symlinks
 		"link/link1": "link/link2",
 		"link/link2": "link/link1",
-		"l1": "1",
-		"1/l2": "1/2",
-		"1/2/l3": "1/2/3",
-		"1/2/3/l4": "1/2/3/4",
-		"l4": "1/2/3/4",
+		"l1":         "1",
+		"1/l2":       "1/2",
+		"1/2/l3":     "1/2/3",
+		"1/2/3/l4":   "1/2/3/4",
+		"l4":         "1/2/3/4",
 	}
 
 	contents, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher(""))
@@ -114,13 +114,20 @@ func TestExtractWithSymlink(t *testing.T) {
 	assert.Len(t, contents, 22)
 
 	for fileName, fileData := range contents {
-		fmt.Println(fileName)
 		if target, ok := expected[fileName]; ok {
 			assert.Equal(t, target, fileData.LinkTo)
 		} else {
 			assert.Equal(t, "", fileData.LinkTo)
 		}
 	}
-	assert.Equal(t, "test\n", string(contents.Get("opt/dirlink/symlink").Contents))
-	assert.Equal(t, "file\n", string(contents.Get("l1/l2/l3/l4/file").Contents))
+	verifyContent(t, contents, "opt/dirlink/symlink")
+	verifyContent(t, contents, "l1/l2/l3/l4/symlink")
+	verifyContent(t, contents, "l1/2/l3/4/symlink")
+	verifyContent(t, contents, "opt/dirlink/dir_file")
+}
+
+func verifyContent(t *testing.T, contents FilesMap, p string) {
+	fileData, exists := contents.Get(p)
+	assert.True(t, exists)
+	assert.Equal(t, "test\n", string(fileData.Contents))
 }

@@ -87,36 +87,32 @@ func (f FilesMap) ResolveSymlinks() {
 }
 
 // Get gets FileData for the path
-func (f FilesMap) Get(path string) FileData {
+func (f FilesMap) Get(path string) (FileData, bool) {
 	resolved := f.resolve(path)
 	if strings.HasSuffix(path, "/") {
 		resolved = resolved + "/"
 	}
-	return f[resolved]
+	fileData, exists := f[resolved]
+	return fileData, exists
 }
 
-func (f FilesMap) resolve(path string) string {
-	list := strings.Split(path, "/")
-	resolved := path
-	traversed := set.NewStringSet(resolved)
-	for i, max, curr := 0, len(list), list[0]; i < max; {
+func (f FilesMap) resolve(linkTo string) string {
+	resolved := linkTo
+	visited := set.NewStringSet(resolved)
+	for curr, list := ".", strings.Split(linkTo, "/"); len(list) > 0; {
+		curr = path.Clean(curr + "/" + list[0])
+		list = list[1:]
+
 		fileData, ok := f[curr]
 		if ok && fileData.LinkTo != "" {
-			list = append(strings.Split(fileData.LinkTo, "/"), list[i+1:]...)
-			i = 0
-			curr = list[0]
-			max = len(list)
+			list = append(strings.Split(fileData.LinkTo, "/"), list...)
+			curr = "."
 			resolved = strings.Join(list, "/")
-			if traversed.Contains(resolved) {
+			if visited.Contains(resolved) {
 				// Detect a loop and return its current resolved path as best effort
 				return resolved
 			}
-			traversed.Add(resolved)
-		} else {
-			i++
-			if i < max {
-				curr = curr + "/" + list[i]
-			}
+			visited.Add(resolved)
 		}
 	}
 	return resolved

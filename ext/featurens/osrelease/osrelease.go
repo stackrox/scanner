@@ -51,13 +51,13 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 	var OS, version string
 
 	for _, filePath := range blocklistFilenames {
-		if _, hasFile := files[filePath]; hasFile {
+		if _, hasFile := files.Get(filePath); hasFile {
 			return nil
 		}
 	}
 
 	for _, filePath := range d.RequiredFilenames() {
-		f, hasFile := files[filePath]
+		f, hasFile := files.Get(filePath)
 		if !hasFile {
 			continue
 		}

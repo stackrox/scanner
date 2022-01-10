@@ -91,7 +91,7 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 		return nil, nil, err
 	}
 
-	f, hasFile := files[dbPath]
+	f, hasFile := files.Get(dbPath)
 	if !hasFile {
 		return nil, cpes, nil
 	}
@@ -207,7 +207,8 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			// Rename to make it clear what the line represents.
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
-			AddToDependencyMap(filename, files[filename[1:]], execToDeps, libToDeps)
+			fileData, _ := files.Get(filename[1:])
+			AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
 		}
 	}
 

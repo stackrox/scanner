@@ -168,9 +168,9 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		filenamesArchList := dpkgInfoPrefix + pkgMetadata.name + ":" + pkgMetadata.arch + dpkgFilenamesSuffix
 
 		// Read the list of files provided by the current package.
-		filenamesFileData := files[filenamesList]
+		filenamesFileData, _ := files.Get(filenamesList)
 		if len(filenamesFileData.Contents) == 0 {
-			filenamesFileData = files[filenamesArchList]
+			filenamesFileData, _ = files.Get(filenamesArchList)
 		}
 
 		filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.Contents))
@@ -178,7 +178,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 			filename := filenamesFileScanner.Text()
 
 			// The first character is always "/", which is removed when inserted into the files maps.
-			featurefmt.AddToDependencyMap(filename, files[filename[1:]], execToDeps, libToDeps)
+			fileData, _ := files.Get(filename[1:])
+			featurefmt.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
 		}
 		if err := filenamesFileScanner.Err(); err != nil {
 			log.WithError(err).WithFields(log.Fields{"name": pkgMetadata.name, "version": pkgMetadata.version}).Warning("could not parse provided file list")
@@ -226,7 +227,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// TODO: This may not be needed cross-file...
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
-	if f, hasFile := files[statusFile]; hasFile {
+	if f, hasFile := files.Get(statusFile); hasFile {
 		if err := l.parseComponents(files, f.Contents, packagesMap, removedPackages, false); err != nil {
 			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", statusFile)
 		}
