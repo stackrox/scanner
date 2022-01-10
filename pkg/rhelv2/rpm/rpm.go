@@ -207,8 +207,10 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 			// Rename to make it clear what the line represents.
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
-			fileData, _ := files.Get(filename[1:])
-			AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
+			fileData, hasFile := files.Get(filename[1:])
+			if hasFile {
+				AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
+			}
 		}
 	}
 

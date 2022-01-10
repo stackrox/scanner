@@ -107,8 +107,10 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the files maps.
-			fileData, _ := files.Get(filename[1:])
-			featurefmt.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
+			fileData, hasFile := files.Get(filename[1:])
+			if hasFile {
+				featurefmt.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
+			}
 		}
 	}
 

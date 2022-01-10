@@ -178,8 +178,10 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 			filename := filenamesFileScanner.Text()
 
 			// The first character is always "/", which is removed when inserted into the files maps.
-			fileData, _ := files.Get(filename[1:])
-			featurefmt.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
+			fileData, hasFile := files.Get(filename[1:])
+			if hasFile {
+				featurefmt.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
+			}
 		}
 		if err := filenamesFileScanner.Err(); err != nil {
 			log.WithError(err).WithFields(log.Fields{"name": pkgMetadata.name, "version": pkgMetadata.version}).Warning("could not parse provided file list")
