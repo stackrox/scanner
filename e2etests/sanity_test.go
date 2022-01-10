@@ -1,14 +1,16 @@
+// +build e2e
+
 package e2etests
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stackrox/rox/pkg/set"
 	"os"
 	"sort"
 	"strings"
 	"testing"
 
+	"github.com/stackrox/rox/pkg/set"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
@@ -110,7 +112,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 
 				assert.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
 				expectedNames := set.NewStringSet()
-				for j, expected := range feature.Vulnerabilities {
+				for _, expected := range feature.Vulnerabilities {
 					expectedNames.Add(expected.Name)
 				}
 				for i, matchingVuln := range matching.Vulnerabilities {
