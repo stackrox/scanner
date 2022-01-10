@@ -96,7 +96,7 @@ func (f FilesMap) Get(path string) (FileData, bool) {
 	if resolved != path {
 		log.Warnf("Resolve %s to %s", path, resolved)
 	}
-	if !exist {
+	if !exists {
 	    log.Warnf("file not found path %s: %s", path, resolved)
 	}
 	return fileData, exists
