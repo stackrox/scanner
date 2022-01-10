@@ -89,7 +89,7 @@ func (f FilesMap) ResolveSymlinks() {
 // Get gets FileData for the path
 func (f FilesMap) Get(path string) (FileData, bool) {
 	resolved := f.resolve(path)
-	if strings.HasSuffix(path, "/") {
+	if !string.HasSuffix(resolved, "/") && strings.HasSuffix(path, "/") {
 		resolved = resolved + "/"
 	}
 	fileData, exists := f[resolved]
