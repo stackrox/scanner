@@ -11,7 +11,7 @@ import (
 	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	server "github.com/stackrox/scanner/pkg/scan"

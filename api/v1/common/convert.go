@@ -3,7 +3,7 @@ package common
 import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
-	scannerV1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	scannerV1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 )
 
 // CreateExecutablesFromDependencies creates an array of v1.Executable from a feature and its dependencies.

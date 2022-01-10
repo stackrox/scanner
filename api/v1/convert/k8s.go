@@ -4,7 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/stringutils"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 )
 
