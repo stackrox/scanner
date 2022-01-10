@@ -43,7 +43,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 FROM base AS scanner-slim
 
-ENV ROX_LITE_MODE="true"
+ENV ROX_SLIM_MODE="true"
 
 USER 65534:65534
 
