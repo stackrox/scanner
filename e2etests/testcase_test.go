@@ -1,4 +1,3 @@
-// +build e2e
 
 package e2etests
 
@@ -762,6 +761,24 @@ var testCases = []testCase{
 					},
 					{
 						Path: "/usr/lib64/libprocps.so.4.0.0",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "bzip2-libs", Version: "1.0.6-13.el7"},
+							{Name: "elfutils-libelf", Version: "0.176-2.el7"},
+							{Name: "elfutils-libs", Version: "0.176-2.el7"},
+							{Name: "libattr", Version: "2.4.46-13.el7"},
+							{Name: "libcap", Version: "2.22-10.el7"},
+							{Name: "libgcrypt", Version: "1.5.3-14.el7"},
+							{Name: "libselinux", Version: "2.5-14.1.el7"},
+							{Name: "lz4", Version: "1.7.5-3.el7"},
+							{Name: "pcre", Version: "8.32-17.el7"},
+							{Name: "procps-ng", Version: "3.3.10-26.el7"},
+							{Name: "systemd-libs", Version: "219-67.el7_7.1"},
+							{Name: "xz-libs", Version: "5.2.2-1.el7"},
+							{Name: "zlib", Version: "1.2.7-18.el7"},
+						},
+					},
+					{
+						Path: "/usr/lib64/libprocps.so.4",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "bzip2-libs", Version: "1.0.6-13.el7"},
 							{Name: "elfutils-libelf", Version: "0.176-2.el7"},

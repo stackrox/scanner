@@ -1,10 +1,9 @@
-// +build e2e
-
 package e2etests
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stackrox/rox/pkg/set"
 	"os"
 	"sort"
 	"strings"
@@ -109,8 +108,15 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 					fmt.Printf("Expected Feature: %s\n", featureVulnsBytes)
 				}
 
-				require.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
+				assert.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
+				expectedNames := set.NewStringSet()
+				for j, expected := range feature.Vulnerabilities {
+					expectedNames.Add(expected.Name)
+				}
 				for i, matchingVuln := range matching.Vulnerabilities {
+					if !expectedNames.Contains(matchingVuln.Name) {
+						assert.Nil(t, nil, matchingVuln)
+					}
 					expectedVuln := feature.Vulnerabilities[i]
 					checkMatch(t, test.source, expectedVuln, matchingVuln)
 				}
