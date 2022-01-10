@@ -104,7 +104,7 @@ func fillIn(libToDep map[string]*libDepNode, depname string, dep *libDepNode, pa
 	for lib := range dep.libraries {
 		execs, ok := libToDep[lib]
 		if !ok {
-			logrus.Debugf("Unresolved soname %s", lib)
+			logrus.Warn("Unresolved soname %s", lib)
 			continue
 		}
 		if seq, ok := path[lib]; ok {

@@ -93,6 +93,9 @@ func (f FilesMap) Get(path string) (FileData, bool) {
 		resolved = resolved + "/"
 	}
 	fileData, exists := f[resolved]
+	if resolved != path {
+		log.Warnf("Resolve %s to %s", path, resolved)
+	}
 	return fileData, exists
 }
 
