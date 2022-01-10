@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stackrox/rox/pkg/set"
 	v1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/clairify/client"
 	"github.com/stackrox/scanner/pkg/clairify/types"
@@ -110,15 +109,8 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 					fmt.Printf("Expected Feature: %s\n", featureVulnsBytes)
 				}
 
-				assert.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
-				expectedNames := set.NewStringSet()
-				for _, expected := range feature.Vulnerabilities {
-					expectedNames.Add(expected.Name)
-				}
+				require.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
 				for i, matchingVuln := range matching.Vulnerabilities {
-					if !expectedNames.Contains(matchingVuln.Name) {
-						assert.Nil(t, nil, matchingVuln)
-					}
 					expectedVuln := feature.Vulnerabilities[i]
 					checkMatch(t, test.source, expectedVuln, matchingVuln)
 				}

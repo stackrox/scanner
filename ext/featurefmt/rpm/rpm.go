@@ -166,8 +166,8 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 			// Rename to make it clear what the line represents.
 			filename := line
 			// The first character is always "/", which is removed when inserted into the files maps.
-			fileData, exists := files.Get(filename[1:])
-			if exists {
+			fileData, hasFile := files.Get(filename[1:])
+			if hasFile {
 				rpm.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
 			}
 		}
