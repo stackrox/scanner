@@ -54,12 +54,12 @@ ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
 COPY --from=extracted_bundle /bundle/genesis_manifests.json ./
-COPY --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
-COPY --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
-COPY --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
+COPY --chown=65534:65534 --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 
-RUN chown -R 65534:65534 "${NVD_DEFINITIONS_DIR}" && \
-    chown -R 65534:65534 "${K8S_DEFINITIONS_DIR}" && \
-    chown -R 65534:65534 "${REPO_TO_CPE_DIR}"
+#RUN chown -R 65534:65534 "${NVD_DEFINITIONS_DIR}" && \
+#    chown -R 65534:65534 "${K8S_DEFINITIONS_DIR}" && \
+#    chown -R 65534:65534 "${REPO_TO_CPE_DIR}"
 
 USER 65534:65534
