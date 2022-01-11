@@ -360,11 +360,13 @@ commands:
             tag="$(make --quiet --no-print-directory tag)"
             scanner_image_name="scanner"
             db_image_name="scanner-db"
+            scanner_slim_image_name="scanner-slim"
+            db_slim_image_name="scanner-db-slim"
 
             gcr_scanner_image="us.gcr.io/stackrox-ci/${scanner_image_name}:${tag}"
             gcr_db_image="us.gcr.io/stackrox-ci/${db_image_name}:${tag}"
-            gcr_scanner_slim_image="us.gcr.io/stackrox-ci/${scanner_image_name}-slim:${tag}"
-            gcr_db_slim_image="us.gcr.io/stackrox-ci/${db_image_name}-slim:${tag}"
+            gcr_scanner_slim_image="us.gcr.io/stackrox-ci/${scanner_slim_image_name}:${tag}"
+            gcr_db_slim_image="us.gcr.io/stackrox-ci/${db_slim_image_name}:${tag}"
 
             ./scripts/push-as-manifest-list.sh "${gcr_scanner_image}"
             ./scripts/push-as-manifest-list.sh "${gcr_db_image}"
@@ -382,11 +384,11 @@ commands:
             docker tag "${gcr_db_image}" "${dockerhub_db_image}"
             ./scripts/push-as-manifest-list.sh "${dockerhub_db_image}"
 
-            dockerhub_scanner_slim_image="stackrox/${scanner_image_name}-slim:${tag}"
+            dockerhub_scanner_slim_image="stackrox/${scanner_slim_image_name}:${tag}"
             docker tag "${gcr_scanner_slim_image}" "${dockerhub_scanner_slim_image}"
             ./scripts/push-as-manifest-list.sh "${dockerhub_scanner_slim_image}"
 
-            dockerhub_db_slim_image="stackrox/${db_image_name}-slim:${tag}"
+            dockerhub_db_slim_image="stackrox/${db_slim_image_name}:${tag}"
             docker tag "${gcr_db_slim_image}" "${dockerhub_db_slim_image}"
             ./scripts/push-as-manifest-list.sh "${dockerhub_db_slim_image}"
 
@@ -403,11 +405,11 @@ commands:
             docker tag "${gcr_db_image}" "${quay_db_image}"
             ./scripts/push-as-manifest-list.sh "${quay_db_image}"
 
-            quay_scanner_slim_image="quay.io/$QUAY_REPO/${scanner_image_name}-slim:${tag}"
+            quay_scanner_slim_image="quay.io/$QUAY_REPO/${scanner_slim_image_name}:${tag}"
             docker tag "${gcr_scanner_slim_image}" "${quay_scanner_slim_image}"
             ./scripts/push-as-manifest-list.sh "${quay_scanner_slim_image}"
 
-            quay_db_slim_image="quay.io/$QUAY_REPO/${db_image_name}-slim:${tag}"
+            quay_db_slim_image="quay.io/$QUAY_REPO/${db_slim_image_name}:${tag}"
             docker tag "${gcr_db_slim_image}" "${quay_db_slim_image}"
             ./scripts/push-as-manifest-list.sh "${quay_db_slim_image}"
 
