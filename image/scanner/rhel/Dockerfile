@@ -49,6 +49,8 @@ USER 65534:65534
 
 FROM base AS scanner
 
+ENV ROX_SLIM_MODE="false"
+
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"

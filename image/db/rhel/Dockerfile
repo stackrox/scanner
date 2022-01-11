@@ -57,6 +57,8 @@ USER 70:70
 
 FROM base AS scanner-db
 
+ENV ROX_SLIM_MODE="false"
+
 COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
 USER 70:70
