@@ -41,11 +41,11 @@ RUN dnf upgrade -y && \
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-USER 65534:65534
-
 FROM base AS scanner-slim
 
 ENV ROX_SLIM_MODE="true"
+
+USER 65534:65534
 
 FROM base AS scanner
 
@@ -53,7 +53,9 @@ ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
-COPY --chown=65534:65534 --from=extracted_bundle /bundle/genesis_manifests.json ./
+COPY --from=extracted_bundle /bundle/genesis_manifests.json ./
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
+
+USER 65534:65534
