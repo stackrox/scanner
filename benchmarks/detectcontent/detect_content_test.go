@@ -3,12 +3,11 @@ package detectconent
 import (
 	"testing"
 
-	"github.com/stackrox/scanner/pkg/tarutil"
-
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/benchmarks"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/require"
 
