@@ -48,12 +48,12 @@ func TestExtract(t *testing.T) {
 		data, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test/"))
 		assert.Nil(t, err)
 
-		if c, n := data["test/test.txt"]; !n {
+		if c, n := data.Get("test/test.txt"); !n {
 			assert.Fail(t, "test/test.txt should have been extracted")
 		} else {
 			assert.NotEqual(t, 0, len(c.Contents) > 0, "test/test.txt file is empty")
 		}
-		if _, n := data["test.txt"]; n {
+		if _, n := data.Get("test.txt"); n {
 			assert.Fail(t, "test.txt should not be extracted")
 		}
 	}
@@ -74,15 +74,15 @@ func TestMaxExtractableFileSize(t *testing.T) {
 	f, err := os.Open(testfilepath("utils_test.tar.gz"))
 	assert.Nil(t, err)
 	defer utils.IgnoreError(f.Close)
-	contents, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test_big.txt"))
+	files, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test_big.txt"))
 	assert.NoError(t, err)
 	// test_big.txt is of size 57 bytes.
-	assert.Contains(t, contents, "test_big.txt")
+	assert.Contains(t, files.data, "test_big.txt")
 
 	SetMaxExtractableFileSize(50)
-	contents, err = ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test_big.txt"))
+	files, err = ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test_big.txt"))
 	assert.NoError(t, err)
-	assert.Empty(t, contents)
+	assert.Empty(t, files.data)
 }
 
 func TestExtractWithSymlink(t *testing.T) {
@@ -107,27 +107,31 @@ func TestExtractWithSymlink(t *testing.T) {
 		"1/2/l3":     "1/2/3",
 		"1/2/3/l4":   "1/2/3/4",
 		"l4":         "1/2/3/4",
+		"lib64":      "1",
 	}
 
-	contents, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher(""))
+	files, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher(""))
+	base := FilesMap{data: make(map[string]FileData), links: map[string]string{"lib64": "l1"}}
+	files.MergeBaseAndResolveSymlinks(&base)
 	assert.NoError(t, err)
-	assert.Len(t, contents, 22)
+	assert.Len(t, files.data, 9)
+	assert.Len(t, files.links, 14)
 
-	for fileName, fileData := range contents {
+	for fileName, linkTo := range files.links {
 		if target, ok := expected[fileName]; ok {
-			assert.Equal(t, target, fileData.LinkTo)
-		} else {
-			assert.Equal(t, "", fileData.LinkTo)
+			assert.Equal(t, target, linkTo)
 		}
 	}
-	verifyContent(t, contents, "opt/dirlink/symlink")
-	verifyContent(t, contents, "l1/l2/l3/l4/symlink")
-	verifyContent(t, contents, "l1/2/l3/4/symlink")
-	verifyContent(t, contents, "opt/dirlink/dir_file")
+	verifyContent(t, files, "opt/dirlink/symlink")
+	verifyContent(t, files, "l1/l2/l3/l4/symlink")
+	verifyContent(t, files, "l1/2/l3/4/symlink")
+	verifyContent(t, files, "opt/dirlink/dir_file")
+
+	verifyContent(t, files, "lib64/2/l3/4/symlink")
 }
 
-func verifyContent(t *testing.T, contents FilesMap, p string) {
-	fileData, exists := contents.Get(p)
+func verifyContent(t *testing.T, files FilesMap, p string) {
+	fileData, exists := files.Get(p)
 	assert.True(t, exists)
 	assert.Equal(t, "test\n", string(fileData.Contents))
 }

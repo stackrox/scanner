@@ -75,10 +75,10 @@ func TestRPMFeatureDetection(t *testing.T) {
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
 	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
-	pkgs, cpes, err := ListFeaturesTest(tarutil.FilesMap{
-		"var/lib/rpm/Packages":                       tarutil.FileData{Contents: d},
-		"root/buildinfo/content_manifests/test.json": tarutil.FileData{Contents: manifest},
-	})
+	pkgs, cpes, err := ListFeaturesTest(tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+		"var/lib/rpm/Packages":                       {Contents: d},
+		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
+	}, nil, nil))
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, cpes, expectedCPEs)
 	assert.Subset(t, pkgs, sampleExpectedPkgs)
@@ -146,18 +146,18 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
 	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
-	pkgs, cpes, err := ListFeaturesTest(tarutil.FilesMap{
-		"var/lib/rpm/Packages":                       tarutil.FileData{Contents: d},
-		"root/buildinfo/content_manifests/test.json": tarutil.FileData{Contents: manifest},
-		"usr/lib64/libz.so.1":                        tarutil.FileData{Executable: true},
-		"usr/lib64/libz.so.1.2.11":                   tarutil.FileData{Executable: true},
-		"usr/lib64/libform.so.6":                     tarutil.FileData{Executable: true},
-		"usr/lib64/libncursesw.so.6.1":               tarutil.FileData{Executable: true},
-		"usr/lib64/libpanelw.so.6":                   tarutil.FileData{Executable: true},
-		"etc/redhat-release":                         tarutil.FileData{Executable: true},
-		"etc/os-release":                             tarutil.FileData{Executable: true},
-		"usr/lib/redhat-release":                     tarutil.FileData{Executable: true},
-	})
+	pkgs, cpes, err := ListFeaturesTest(tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+		"var/lib/rpm/Packages":                       {Contents: d},
+		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
+		"usr/lib64/libz.so.1":                        {Executable: true},
+		"usr/lib64/libz.so.1.2.11":                   {Executable: true},
+		"usr/lib64/libform.so.6":                     {Executable: true},
+		"usr/lib64/libncursesw.so.6.1":               {Executable: true},
+		"usr/lib64/libpanelw.so.6":                   {Executable: true},
+		"etc/redhat-release":                         {Executable: true},
+		"etc/os-release":                             {Executable: true},
+		"usr/lib/redhat-release":                     {Executable: true},
+	}, nil, nil))
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, cpes, expectedCPEs)
 	assert.Subset(t, pkgs, sampleExpectedPkgs)

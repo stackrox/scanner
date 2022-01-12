@@ -259,7 +259,7 @@ func getCPEsUsingEmbeddedContentSets(files tarutil.FilesMap) ([]string, error) {
 }
 
 func getContentManifestFileContents(files tarutil.FilesMap) []byte {
-	for file, contents := range files {
+	for file, contents := range files.GetFileData() {
 		if !contentManifestPattern.MatchString(file) {
 			continue
 		}

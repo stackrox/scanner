@@ -27,68 +27,68 @@ func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
 			ExpectedNamespace: &database.Namespace{Name: "amzn:2", VersionFormat: rpm.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/system-release": tarutil.FileData{Contents: []byte(`Amazon Linux release 2 (Karoo)`)},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/system-release": {Contents: []byte(`Amazon Linux release 2 (Karoo)`)},
+			}, nil, nil),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "amzn:2018.03", VersionFormat: rpm.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/system-release": tarutil.FileData{Contents: []byte(`Amazon Linux AMI release 2018.03`)},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/system-release": {Contents: []byte(`Amazon Linux AMI release 2018.03`)},
+			}, nil, nil),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "oracle:6", VersionFormat: rpm.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/oracle-release": tarutil.FileData{Contents: []byte(`Oracle Linux Server release 6.8`)},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/oracle-release": {Contents: []byte(`Oracle Linux Server release 6.8`)},
+			}, nil, nil),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "oracle:7", VersionFormat: rpm.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/oracle-release": tarutil.FileData{Contents: []byte(`Oracle Linux Server release 7.2`)},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/oracle-release": {Contents: []byte(`Oracle Linux Server release 7.2`)},
+			}, nil, nil),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "centos:6", VersionFormat: rpm.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/centos-release": tarutil.FileData{Contents: []byte(`CentOS release 6.6 (Final)`)},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/centos-release": {Contents: []byte(`CentOS release 6.6 (Final)`)},
+			}, nil, nil),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "rhel:7", VersionFormat: rpm.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/redhat-release": tarutil.FileData{Contents: []byte(`Red Hat Enterprise Linux Server release 7.2 (Maipo)`)},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/redhat-release": {Contents: []byte(`Red Hat Enterprise Linux Server release 7.2 (Maipo)`)},
+			}, nil, nil),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "rhel:8", VersionFormat: rpm.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/redhat-release": tarutil.FileData{Contents: []byte(`Red Hat Enterprise Linux release 8.0 (Ootpa)`)},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/redhat-release": {Contents: []byte(`Red Hat Enterprise Linux release 8.0 (Ootpa)`)},
+			}, nil, nil),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "centos:8", VersionFormat: rpm.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/redhat-release": tarutil.FileData{Contents: []byte(`Red Hat Enterprise Linux release 8.0 (Ootpa)`)},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/redhat-release": {Contents: []byte(`Red Hat Enterprise Linux release 8.0 (Ootpa)`)},
+			}, nil, nil),
 			Options: &featurens.DetectorOptions{UncertifiedRHEL: true},
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "centos:8", VersionFormat: rpm.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/redhat-release": tarutil.FileData{Contents: []byte(`CentOS Linux release 8.3.2011`)},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/redhat-release": {Contents: []byte(`CentOS Linux release 8.3.2011`)},
+			}, nil, nil),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "centos:7", VersionFormat: rpm.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/system-release": tarutil.FileData{Contents: []byte(`CentOS Linux release 7.1.1503 (Core)`)},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/system-release": {Contents: []byte(`CentOS Linux release 7.1.1503 (Core)`)},
+			}, nil, nil),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files:             tarutil.FilesMap{},
+			Files:             tarutil.CreateNewFilesMap(nil, nil, nil),
 		},
 	}
 

@@ -102,7 +102,7 @@ func UnregisterExtractor(name string) {
 }
 
 // ExtractFromReader extracts the files from a reader which is in the format of a .tar.gz
-func ExtractFromReader(reader io.ReadCloser, format string, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error) {
+func ExtractFromReader(reader io.ReadCloser, format string, filenameMatcher matcher.Matcher) (*tarutil.FilesMap, error) {
 	defer reader.Close()
 
 	if extractor, exists := Extractors()[strings.ToLower(format)]; exists {
@@ -110,7 +110,7 @@ func ExtractFromReader(reader io.ReadCloser, format string, filenameMatcher matc
 		if err != nil {
 			return nil, err
 		}
-		return files, nil
+		return &files, nil
 	}
 
 	return nil, commonerr.NewBadRequestError(fmt.Sprintf("unsupported image format %q", format))
@@ -118,7 +118,7 @@ func ExtractFromReader(reader io.ReadCloser, format string, filenameMatcher matc
 
 // Extract streams an image layer from disk or over HTTP, determines the
 // image format, then extracts the files specified.
-func Extract(format, path string, headers map[string]string, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error) {
+func Extract(format, path string, headers map[string]string, filenameMatcher matcher.Matcher) (*tarutil.FilesMap, error) {
 	var layerReader io.ReadCloser
 	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
 		// Create a new HTTP request object.

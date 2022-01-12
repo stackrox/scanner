@@ -27,20 +27,19 @@ func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
 			ExpectedNamespace: &database.Namespace{Name: "debian:unstable", VersionFormat: dpkg.ParserName},
-			Files: tarutil.FilesMap{
-				"etc/os-release": tarutil.FileData{Contents: []byte(
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"etc/os-release": {Contents: []byte(
 					`PRETTY_NAME="Debian GNU/Linux stretch/sid"
 NAME="Debian GNU/Linux"
 ID=debian
 HOME_URL="https://www.debian.org/"
 SUPPORT_URL="https://www.debian.org/support/"
 BUG_REPORT_URL="https://bugs.debian.org/"`)},
-				"etc/apt/sources.list": tarutil.FileData{Contents: []byte(`deb http://httpredir.debian.org/debian unstable main`)},
-			},
+				"etc/apt/sources.list": {Contents: []byte(`deb http://httpredir.debian.org/debian unstable main`)}}, nil, nil),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files:             tarutil.FilesMap{},
+			Files:             tarutil.CreateNewFilesMap(nil, nil, nil),
 		},
 	}
 

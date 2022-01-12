@@ -91,9 +91,12 @@ func TestProcessWithDistUpgrade(t *testing.T) {
 	// wheezy.tar: FROM debian:wheezy
 	// jessie.tar: RUN sed -i "s/precise/trusty/" /etc/apt/sources.list && apt-get update &&
 	//             apt-get -y dist-upgrade
-	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "blank", "", "", "", getTestDataReader(t, testDataPath+"blank.tar.gz"), false))
-	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "wheezy", "", "blank", "", getTestDataReader(t, testDataPath+"wheezy.tar.gz"), false))
-	assert.Nil(t, ProcessLayerFromReader(datastore, "Docker", "jessie", "", "wheezy", "", getTestDataReader(t, testDataPath+"jessie.tar.gz"), false))
+	_, err := ProcessLayerFromReader(datastore, "Docker", "blank", "", "", "", getTestDataReader(t, testDataPath+"blank.tar.gz"), nil, false)
+	assert.Nil(t, err)
+	_, err = ProcessLayerFromReader(datastore, "Docker", "wheezy", "", "blank", "", getTestDataReader(t, testDataPath+"wheezy.tar.gz"), nil, false)
+	assert.Nil(t, err)
+	_, err = ProcessLayerFromReader(datastore, "Docker", "jessie", "", "wheezy", "", getTestDataReader(t, testDataPath+"jessie.tar.gz"), nil, false)
+	assert.Nil(t, err)
 
 	// Ensure that the 'wheezy' layer has the expected namespace and features.
 	wheezy, ok := datastore.layers["wheezy"]

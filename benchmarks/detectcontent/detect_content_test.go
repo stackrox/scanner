@@ -3,6 +3,8 @@ package detectconent
 import (
 	"testing"
 
+	"github.com/stackrox/scanner/pkg/tarutil"
+
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/benchmarks"
 	"github.com/stackrox/scanner/database"
@@ -56,8 +58,9 @@ func runBenchmarkDetectContent(b *testing.B, imageName string) {
 	for i := 0; i < b.N; i++ {
 		var namespace *database.Namespace
 		var err error
+		var fileMap *tarutil.FilesMap
 		for _, l := range layers {
-			namespace, _, _, _, _, _, err = clair.DetectContentFromReader(l, "Docker", l.Name, &database.Layer{Namespace: namespace}, false)
+			namespace, _, _, _, _, fileMap, err = clair.DetectContentFromReader(l, "Docker", l.Name, &database.Layer{Namespace: namespace}, fileMap, false)
 			require.NoError(b, err)
 		}
 	}

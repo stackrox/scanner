@@ -78,9 +78,10 @@ func TestAPKFeatureDetection(t *testing.T) {
 					Version: "0.7-r0",
 				},
 			},
-			Files: tarutil.FilesMap{
-				"lib/apk/db/installed": tarutil.FileData{Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
-			},
+			Files: tarutil.CreateNewFilesMap(
+				map[string]tarutil.FileData{
+					"lib/apk/db/installed": {Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
+				}, nil, nil),
 		},
 	}
 	featurefmt.TestLister(t, &lister{}, testData)
@@ -154,14 +155,14 @@ func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Version: "0.7-r0",
 				},
 			},
-			Files: tarutil.FilesMap{
-				"lib/apk/db/installed":      tarutil.FileData{Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
-				"lib/libc.musl-x86_64.so.1": tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{"c.so.1"}, ImportedLibraries: []string{"ld.so.1"}}},
-				"lib/ld-musl-x86_64.so.1":   tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{"ld.so.1"}}},
-				"bin/busybox":               tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{}, ImportedLibraries: []string{"c.so.1", "ld.so.1"}}},
-				"etc/hosts":                 tarutil.FileData{Executable: true},
-				"etc/crontabs/root":         tarutil.FileData{Executable: true},
-			},
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"lib/apk/db/installed":      {Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
+				"lib/libc.musl-x86_64.so.1": {Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{"c.so.1"}, ImportedLibraries: []string{"ld.so.1"}}},
+				"lib/ld-musl-x86_64.so.1":   {Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{"ld.so.1"}}},
+				"bin/busybox":               {Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{}, ImportedLibraries: []string{"c.so.1", "ld.so.1"}}},
+				"etc/hosts":                 {Executable: true},
+				"etc/crontabs/root":         {Executable: true},
+			}, nil, nil),
 		},
 	}
 	featurefmt.TestLister(t, &lister{}, testData)

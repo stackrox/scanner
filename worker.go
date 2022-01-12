@@ -15,11 +15,8 @@
 package clair
 
 import (
-	"fmt"
 	"io"
 	"os"
-	"path/filepath"
-	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
@@ -35,7 +32,6 @@ import (
 	rhelv2 "github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
-	"github.com/stackrox/scanner/pkg/whiteout"
 	"github.com/stackrox/scanner/singletons/analyzers"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
 )
@@ -112,22 +108,24 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, lineage, p
 //
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
-func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lineage, parentName, parentLineage string, reader io.ReadCloser, uncertifiedRHEL bool) error {
+func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lineage, parentName, parentLineage string, reader io.ReadCloser, base *tarutil.FilesMap, uncertifiedRHEL bool) (*tarutil.FilesMap, error) {
+	log.Warnf("Process layer %s::::%s", name, lineage)
 	layer, exists, err := preProcessLayer(datastore, imageFormat, name, lineage, parentName, parentLineage, uncertifiedRHEL)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if exists {
-		return nil
+		log.Warnf("layer %s exists", layer.Name)
+		return nil, nil
 	}
 
 	// Analyze the content.
 	var rhelv2Components *database.RHELv2Components
 	var languageComponents []*component.Component
-	var removedFiles []string
-	layer.Namespace, layer.Distroless, layer.Features, rhelv2Components, languageComponents, removedFiles, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent, uncertifiedRHEL)
+	var files *tarutil.FilesMap
+	layer.Namespace, layer.Distroless, layer.Features, rhelv2Components, languageComponents, files, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent, base, uncertifiedRHEL)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if rhelv2Components != nil {
@@ -145,7 +143,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 		}
 
 		if err := datastore.InsertRHELv2Layer(rhelv2Layer); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -157,15 +155,15 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 	// relies on the original layer table.
 	if err := datastore.InsertLayer(layer, lineage, opts); err != nil {
 		if err == commonerr.ErrNoNeedToInsert {
-			return nil
+			return nil, nil
 		}
-		return err
+		return nil, err
 	}
 
-	return datastore.InsertLayerComponents(layer.Name, lineage, languageComponents, removedFiles, opts)
+	return files, datastore.InsertLayerComponents(layer.Name, lineage, languageComponents, files.GetRemovedFiles(), opts)
 }
 
-func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
 	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
 
 	distroless := isDistroless(files) || (parent != nil && parent.Distroless)
@@ -178,7 +176,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		// Use the RHELv2 scanner instead.
 		packages, cpes, err := rhelv2.ListFeatures(files)
 		if err != nil {
-			return nil, distroless, nil, nil, nil, nil, err
+			return nil, distroless, nil, nil, nil, err
 		}
 		rhelfeatures = &database.RHELv2Components{
 			Dist:     namespace.Name,
@@ -194,7 +192,7 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 		// Detect features.
 		featureVersions, err = detectFeatureVersions(name, files, namespace, parent)
 		if err != nil {
-			return nil, distroless, nil, nil, nil, nil, err
+			return nil, distroless, nil, nil, nil, err
 		}
 		if len(featureVersions) > 0 {
 			log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
@@ -202,27 +200,10 @@ func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer
 	}
 
 	if !env.LanguageVulns.Enabled() {
-		return namespace, distroless, featureVersions, rhelfeatures, nil, nil, nil
+		return namespace, distroless, featureVersions, rhelfeatures, nil, nil
 	}
 
-	var removedFiles []string
-	for filePath := range files {
-		base := filepath.Base(filePath)
-		if base == whiteout.OpaqueDirectory {
-			// The entire directory does not exist in lower layers.
-			removedFiles = append(removedFiles, filepath.Dir(filePath))
-		} else if strings.HasPrefix(base, whiteout.Prefix) {
-			removed := base[len(whiteout.Prefix):]
-			// Only prepend filepath.Dir if the directory is not `./`.
-			if filePath != base {
-				// We assume we only have Linux containers, so the path separator will be `/`.
-				removed = fmt.Sprintf("%s/%s", filepath.Dir(filePath), removed)
-			}
-			removedFiles = append(removedFiles, removed)
-		}
-	}
-
-	return namespace, distroless, featureVersions, rhelfeatures, languageComponents, removedFiles, nil
+	return namespace, distroless, featureVersions, rhelfeatures, languageComponents, nil
 }
 
 // analyzingMatcher is a Matcher implementation that calls ProcessFile on each analyzer,
@@ -242,7 +223,7 @@ func (m *analyzingMatcher) Match(filePath string, fi os.FileInfo, contents io.Re
 }
 
 // DetectContentFromReader detects scanning content in the given reader.
-func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, []string, error) {
+func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, base *tarutil.FilesMap, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, *tarutil.FilesMap, error) {
 	// Create a "matcher" that actually calls `ProcessFile` on each analyzer, before delegating
 	// to the actual matcher for operating system-level feature extraction.
 	// TODO: this is ugly. A matcher should not have side-effects; but the `analyzingMatcher`s
@@ -257,12 +238,14 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 	if err != nil {
 		return nil, false, nil, nil, nil, nil, err
 	}
+	files.MergeBaseAndResolveSymlinks(base)
 
 	if len(m.components) > 0 {
 		log.WithFields(log.Fields{logLayerName: name, "component count": len(m.components)}).Debug("detected components")
 	}
 
-	return detectFromFiles(files, name, parent, m.components, uncertifiedRHEL)
+	namespace, distroless, features, rhelv2Components, languageComponents, err := detectFromFiles(*files, name, parent, m.components, uncertifiedRHEL)
+	return namespace, distroless, features, rhelv2Components, languageComponents, files, err
 }
 
 func isDistroless(filesMap tarutil.FilesMap) bool {

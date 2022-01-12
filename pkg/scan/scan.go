@@ -17,6 +17,7 @@ import (
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/types"
+	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 const (
@@ -28,15 +29,17 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	var prevLayer string
 
 	var prevLineage, lineage string
+	var baseMap *tarutil.FilesMap
 	h := sha256.New()
 	for _, layer := range layers {
+		var err error
 		layerReadCloser := &LayerDownloadReadCloser{
 			Downloader: func() (io.ReadCloser, error) {
 				return registry.DownloadLayer(image.Remote, digest.Digest(layer))
 			},
 		}
 
-		err := clair.ProcessLayerFromReader(storage, "Docker", layer, lineage, prevLayer, prevLineage, layerReadCloser, uncertifiedRHEL)
+		baseMap, err = clair.ProcessLayerFromReader(storage, "Docker", layer, lineage, prevLayer, prevLineage, layerReadCloser, baseMap, uncertifiedRHEL)
 		if err != nil {
 			logrus.Errorf("Error analyzing layer: %v", err)
 			return "", err

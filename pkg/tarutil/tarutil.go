@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"os/exec"
 	"path"
@@ -33,6 +34,7 @@ import (
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
+	"github.com/stackrox/scanner/pkg/whiteout"
 )
 
 const (
@@ -69,46 +71,95 @@ type FileData struct {
 	Executable bool
 	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
 	ELFMetadata *elf.Metadata
-	// LinkTo contains the link target if the file is a symbolic link.
-	LinkTo string
 }
 
-// FilesMap is a map of files' paths to their contents.
-type FilesMap map[string]FileData
+// FilesMap contains a map of files' paths to their contents and the link map to resolve it.
+type FilesMap struct {
+	data map[string]FileData
+	// links maps a symbolic link to link target.
+	links   map[string]string
+	removed set.StringSet
+}
 
-// ResolveSymlinks Resolves the targets of all symbolic links
-func (f FilesMap) ResolveSymlinks() {
-	for fileName, fileData := range f {
-		if fileData.LinkTo != "" {
-			fileData.LinkTo = f.resolve(fileData.LinkTo)
-			f[fileName] = fileData
-		}
+// CreateNewFilesMap creates a FilesMap
+func CreateNewFilesMap(data map[string]FileData, links map[string]string, removed set.StringSet) FilesMap {
+	if data == nil {
+		data = make(map[string]FileData)
 	}
+	if links == nil {
+		links = make(map[string]string)
+	}
+	if removed == nil {
+		removed = set.NewStringSet()
+	}
+	return FilesMap{data: data, links: links, removed: removed}
 }
 
-// Get gets FileData for the path
+// GetFileData returns the files to file data map.
+func (f FilesMap) GetFileData() map[string]FileData {
+	return f.data
+}
+
+// Get resolves and gets FileData for the path
 func (f FilesMap) Get(path string) (FileData, bool) {
 	resolved := f.resolve(path)
 	if !strings.HasSuffix(resolved, "/") && strings.HasSuffix(path, "/") {
 		resolved = resolved + "/"
 	}
-	fileData, exists := f[resolved]
-	if resolved != path {
+	fileData, exists := f.data[resolved]
+	if resolved != path && strings.Contains(path, "pthread") {
 		log.Warnf("Resolve %s to %s", path, resolved)
 	}
 	return fileData, exists
 }
 
-func (f FilesMap) resolve(linkTo string) string {
-	resolved := linkTo
+// MergeBaseAndResolveSymlinks merges base to this FilesMap and resolves all symbolic links
+func (f *FilesMap) MergeBaseAndResolveSymlinks(base *FilesMap) {
+	if base != nil {
+		for fileName, linkTo := range base.links {
+			if _, exists := f.links[fileName]; exists || f.removed.Contains(fileName) {
+				continue
+			}
+			f.links[fileName] = linkTo
+		}
+	}
+	for fileName, linkTo := range f.links {
+		f.links[fileName] = f.resolve(linkTo)
+	}
+}
+
+// GetRemovedFiles fetches the files removed
+func (f FilesMap) GetRemovedFiles() []string {
+	return f.removed.AsSlice()
+}
+
+func (f FilesMap) detectRemovedFiles() {
+	for filePath := range f.data {
+		base := path.Base(filePath)
+		if base == whiteout.OpaqueDirectory {
+			// The entire directory does not exist in lower layers.
+			f.removed.Add(path.Dir(filePath))
+		} else if strings.HasPrefix(base, whiteout.Prefix) {
+			removed := base[len(whiteout.Prefix):]
+			// Only prepend path.Dir if the directory is not `./`.
+			if filePath != base {
+				// We assume we only have Linux containers, so the path separator will be `/`.
+				removed = fmt.Sprintf("%s/%s", path.Dir(filePath), removed)
+			}
+			f.removed.Add(removed)
+		}
+	}
+}
+
+func (f FilesMap) resolve(symLink string) string {
+	resolved := symLink
 	visited := set.NewStringSet(resolved)
-	for curr, list := ".", strings.Split(linkTo, "/"); len(list) > 0; {
+	for curr, list := ".", strings.Split(symLink, "/"); len(list) > 0; {
 		curr = path.Clean(curr + "/" + list[0])
 		list = list[1:]
 
-		fileData, ok := f[curr]
-		if ok && fileData.LinkTo != "" {
-			list = append(strings.Split(fileData.LinkTo, "/"), list...)
+		if linkTo, ok := f.links[curr]; ok {
+			list = append(strings.Split(linkTo, "/"), list...)
 			curr = "."
 			resolved = strings.Join(list, "/")
 			if visited.Contains(resolved) {
@@ -124,7 +175,7 @@ func (f FilesMap) resolve(linkTo string) string {
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
 func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error) {
-	data := make(map[string]FileData)
+	fileMap := CreateNewFilesMap(nil, nil, nil)
 
 	// executableMatcher indicates if the given file is executable
 	// for the FileData struct.
@@ -133,7 +184,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
 	if err != nil {
-		return data, errors.Wrap(err, "could not extract tar archive")
+		return fileMap, errors.Wrap(err, "could not extract tar archive")
 	}
 	defer tr.Close()
 
@@ -149,7 +200,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			break
 		}
 		if err != nil {
-			return data, errors.Wrap(err, "could not advance in the tar archive")
+			return fileMap, errors.Wrap(err, "could not advance in the tar archive")
 		}
 		numFiles++
 
@@ -198,7 +249,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
 			if !extractContents || hdr.Typeflag != tar.TypeReg {
 				fileData.Executable = executable
-				data[filename] = fileData
+				fileMap.data[filename] = fileData
 				continue
 			}
 
@@ -211,27 +262,25 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			// Put the file directly
 			fileData.Contents = d
 			fileData.Executable = executable
-			data[filename] = fileData
+			fileMap.data[filename] = fileData
 
 			numExtractedContentBytes += len(d)
 		case tar.TypeSymlink:
-			var fileData FileData
-			fileData.LinkTo = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
-			data[filename] = fileData
+			fileMap.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
 		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
 			// However, add to the map, so the entry will exist.
-			data[filename] = FileData{}
+			fileMap.data[filename] = FileData{}
 		}
 	}
-	FilesMap(data).ResolveSymlinks()
+	fileMap.detectRemovedFiles()
 
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
 
-	return data, nil
+	return fileMap, nil
 }
 
 // XzReader implements io.ReadCloser for data compressed via `xz`.

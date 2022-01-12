@@ -235,7 +235,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		}
 	}
 
-	for filename, file := range files {
+	for filename, file := range files.GetFileData() {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		// The var/lib/dpkg/status.d directory holds the files which define packages.
