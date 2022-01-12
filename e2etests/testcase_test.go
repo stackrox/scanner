@@ -1984,6 +1984,7 @@ var testCases = []testCase{
 					{
 						Path: "/usr/bin/vi",
 						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "glibc", Version: "2.17-307.el7.1.i686"},
 							{Name: "glibc", Version: "2.17-307.el7.1.x86_64"},
 							{Name: "libacl", Version: "2.2.51-15.el7.x86_64"},
 							{Name: "libattr", Version: "2.4.46-13.el7.i686"},
