@@ -107,9 +107,6 @@ func (f FilesMap) Get(path string) (FileData, bool) {
 		resolved = resolved + "/"
 	}
 	fileData, exists := f.data[resolved]
-	if resolved != path && strings.Contains(path, "pthread") {
-		log.Warnf("Resolve %s to %s", path, resolved)
-	}
 	return fileData, exists
 }
 
