@@ -2690,10 +2690,10 @@ var testCases = []testCase{
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
+									"ExploitabilityScore": 2.2,
 									"ImpactScore":         3.6,
-									"Score":               7.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									"Score":               5.9,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
@@ -2792,10 +2792,10 @@ var testCases = []testCase{
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
+									"ExploitabilityScore": 2.2,
 									"ImpactScore":         3.6,
-									"Score":               7.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									"Score":               5.9,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
@@ -2881,10 +2881,10 @@ var testCases = []testCase{
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
+									"ExploitabilityScore": 2.2,
 									"ImpactScore":         3.6,
-									"Score":               7.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+									"Score":               5.9,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
