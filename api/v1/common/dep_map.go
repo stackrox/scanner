@@ -54,6 +54,13 @@ func GetDepMapRHEL(pkgEnvs map[int]*database.RHELv2PackageEnv) map[string]Featur
 
 // GetDepMap creates a dependency map from a library to the features it uses.
 func GetDepMap(features []database.FeatureVersion) map[string]FeatureKeySet {
+	for _, fv := range features {
+		keys := ""
+		for k := range fv.LibraryToDependencies {
+			keys = keys + " " + k
+		}
+		logrus.Infof("GetDepMap id %d, %s:%s keys: %s", fv.ID, fv.Feature.Name, fv.Version, keys)
+	}
 	// Map from a library to its dependency data
 	libNodes := make(map[string]*libDepNode)
 	// Build the map

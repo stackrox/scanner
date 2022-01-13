@@ -245,6 +245,12 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 	}
 
 	namespace, distroless, features, rhelv2Components, languageComponents, err := detectFromFiles(*files, name, parent, m.components, uncertifiedRHEL)
+	log.Infof("features: len %d", len(features))
+	for _, f := range features {
+		if f.Feature.Name == "glibc" {
+			log.Infof("feature: %s:%s libs %d", f.Feature.Name, f.Version, len(f.LibraryToDependencies))
+		}
+	}
 	return namespace, distroless, features, rhelv2Components, languageComponents, files, err
 }
 
@@ -290,6 +296,7 @@ func detectFeatureVersions(name string, files tarutil.FilesMap, namespace *datab
 	// their parent's FeatureVersions. It would be useful for detectors that can't find their entire
 	// result using one Layer.
 	if len(features) == 0 && parent != nil {
+		log.Infof("taking parent feature versions")
 		features = parent.Features
 		return
 	}

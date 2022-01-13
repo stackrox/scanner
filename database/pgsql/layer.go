@@ -16,6 +16,7 @@ package pgsql
 
 import (
 	"database/sql"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -120,6 +121,17 @@ func (pgSQL *pgSQL) FindLayer(name string, lineage string, opts *database.Datast
 
 		t = time.Now()
 		featureVersions, err := getLayerFeatureVersions(tx, layer.ID, lineage)
+		var buf string
+		for _, fv := range featureVersions {
+			keys := ""
+			if fv.Feature.Name == "glibc" {
+				for k := range fv.LibraryToDependencies {
+					keys = keys + " " + k
+				}
+				buf += fmt.Sprintf(" %d, %s:%s keys: %s", fv.ID, fv.Feature.Name, fv.Version, keys)
+			}
+		}
+		log.Infof("Fetched id: %s", buf)
 		metrics.ObserveQueryTime("FindLayer", "getLayerFeatureVersions", t)
 
 		if err != nil {

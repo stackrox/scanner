@@ -168,9 +168,12 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		filenamesArchList := dpkgInfoPrefix + pkgMetadata.name + ":" + pkgMetadata.arch + dpkgFilenamesSuffix
 
 		// Read the list of files provided by the current package.
-		filenamesFileData, _ := files.Get(filenamesList)
-		if len(filenamesFileData.Contents) == 0 {
-			filenamesFileData, _ = files.Get(filenamesArchList)
+		filenamesFileData, hasFile := files.Get(filenamesList)
+		if !hasFile || len(filenamesFileData.Contents) == 0 {
+			filenamesFileData, hasFile = files.Get(filenamesArchList)
+		}
+		if pkgName == "glibc" {
+			log.Infof("glibc hasFile %v", hasFile)
 		}
 
 		filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.Contents))
@@ -229,18 +232,22 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	// TODO: This may not be needed cross-file...
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
-	if f, hasFile := files.Get(statusFile); hasFile {
+	f, hasFile := files.Get(statusFile)
+	if hasFile {
 		if err := l.parseComponents(files, f.Contents, packagesMap, removedPackages, false); err != nil {
 			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", statusFile)
 		}
 	}
+	log.Infof("status file %s exists: %v", statusFile, hasFile)
 
 	for filename, file := range files.GetFileData() {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		// The var/lib/dpkg/status.d directory holds the files which define packages.
 		if strings.HasPrefix(filename, statusDir) && filename != statusDir {
+			log.Infof("status dir file %s", filename)
 			if err := l.parseComponents(files, append(file.Contents, '\n'), packagesMap, removedPackages, true); err != nil {
+				log.Infof("Removed packages %v", removedPackages)
 				return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", filename)
 			}
 		}

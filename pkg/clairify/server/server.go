@@ -116,6 +116,7 @@ func (s *Server) GetResultsBySHA(w http.ResponseWriter, r *http.Request) {
 		clairErrorString(w, http.StatusNotFound, "Could not find sha %q", sha)
 		return
 	}
+	logrus.Info("Get by sha")
 	s.getClairLayer(w, layer, lineage, uncertifiedRHEL)
 }
 
