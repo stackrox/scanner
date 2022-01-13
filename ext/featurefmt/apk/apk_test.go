@@ -78,10 +78,9 @@ func TestAPKFeatureDetection(t *testing.T) {
 					Version: "0.7-r0",
 				},
 			},
-			Files: tarutil.CreateNewFilesMap(
-				map[string]tarutil.FileData{
-					"lib/apk/db/installed": {Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
-				}, nil, nil),
+			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+				"lib/apk/db/installed": {Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
+			}, nil, nil),
 		},
 	}
 	featurefmt.TestLister(t, &lister{}, testData)

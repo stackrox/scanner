@@ -73,7 +73,7 @@ type FileData struct {
 	ELFMetadata *elf.Metadata
 }
 
-// FilesMap contains a map of files' paths to their contents and the link map to resolve it.
+// FilesMap contains a map of files' paths to their contents and the information to resolve it.
 type FilesMap struct {
 	data map[string]FileData
 	// links maps a symbolic link to link target.
@@ -95,7 +95,7 @@ func CreateNewFilesMap(data map[string]FileData, links map[string]string, remove
 	return FilesMap{data: data, links: links, removed: removed}
 }
 
-// GetFileData returns the files to file data map.
+// GetFileData returns the map of files to their data
 func (f FilesMap) GetFileData() map[string]FileData {
 	return f.data
 }
@@ -107,13 +107,10 @@ func (f FilesMap) Get(path string) (FileData, bool) {
 		resolved = resolved + "/"
 	}
 	fileData, exists := f.data[resolved]
-	if resolved != path && strings.Contains(path, "pthread") {
-		log.Warnf("Resolve %s to %s", path, resolved)
-	}
 	return fileData, exists
 }
 
-// MergeBaseAndResolveSymlinks merges base to this FilesMap and resolves all symbolic links
+// MergeBaseAndResolveSymlinks merges a base map to this and resolves all symbolic links
 func (f *FilesMap) MergeBaseAndResolveSymlinks(base *FilesMap) {
 	if base != nil {
 		for fileName, linkTo := range base.links {
@@ -128,7 +125,7 @@ func (f *FilesMap) MergeBaseAndResolveSymlinks(base *FilesMap) {
 	}
 }
 
-// GetRemovedFiles fetches the files removed
+// GetRemovedFiles returns the files removed
 func (f FilesMap) GetRemovedFiles() []string {
 	return f.removed.AsSlice()
 }
@@ -175,7 +172,7 @@ func (f FilesMap) resolve(symLink string) string {
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
 func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error) {
-	fileMap := CreateNewFilesMap(nil, nil, nil)
+	filesMap := CreateNewFilesMap(nil, nil, nil)
 
 	// executableMatcher indicates if the given file is executable
 	// for the FileData struct.
@@ -184,7 +181,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
 	if err != nil {
-		return fileMap, errors.Wrap(err, "could not extract tar archive")
+		return filesMap, errors.Wrap(err, "could not extract tar archive")
 	}
 	defer tr.Close()
 
@@ -200,7 +197,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			break
 		}
 		if err != nil {
-			return fileMap, errors.Wrap(err, "could not advance in the tar archive")
+			return filesMap, errors.Wrap(err, "could not advance in the tar archive")
 		}
 		numFiles++
 
@@ -249,7 +246,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
 			if !extractContents || hdr.Typeflag != tar.TypeReg {
 				fileData.Executable = executable
-				fileMap.data[filename] = fileData
+				filesMap.data[filename] = fileData
 				continue
 			}
 
@@ -262,25 +259,25 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			// Put the file directly
 			fileData.Contents = d
 			fileData.Executable = executable
-			fileMap.data[filename] = fileData
+			filesMap.data[filename] = fileData
 
 			numExtractedContentBytes += len(d)
 		case tar.TypeSymlink:
-			fileMap.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+			filesMap.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
 		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
 			// However, add to the map, so the entry will exist.
-			fileMap.data[filename] = FileData{}
+			filesMap.data[filename] = FileData{}
 		}
 	}
-	fileMap.detectRemovedFiles()
+	filesMap.detectRemovedFiles()
 
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
 
-	return fileMap, nil
+	return filesMap, nil
 }
 
 // XzReader implements io.ReadCloser for data compressed via `xz`.

@@ -109,13 +109,11 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, lineage, p
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
 func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lineage, parentName, parentLineage string, reader io.ReadCloser, base *tarutil.FilesMap, uncertifiedRHEL bool) (*tarutil.FilesMap, error) {
-	log.Warnf("Process layer %s::::%s", name, lineage)
 	layer, exists, err := preProcessLayer(datastore, imageFormat, name, lineage, parentName, parentLineage, uncertifiedRHEL)
 	if err != nil {
 		return nil, err
 	}
 	if exists {
-		log.Warnf("layer %s exists", layer.Name)
 		return nil, nil
 	}
 

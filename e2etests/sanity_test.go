@@ -172,16 +172,3 @@ func deepGet(m map[string]interface{}, keys ...string) interface{} {
 	}
 	return currVal
 }
-
-func TestImageSanity1(t *testing.T) {
-	cli := client.New(getScannerHTTPEndpoint(), true)
-	imageRequest := &types.ImageRequest{Image: "docker.io/elastic/logstash:7.13.3", Registry: "https://registry-1.docker.io", UncertifiedRHELScan: false}
-	img, err := cli.AddImage("", "", imageRequest)
-	require.NoError(t, err)
-	env, err := cli.RetrieveImageDataBySHA(img.SHA, &types.GetImageDataOpts{
-		UncertifiedRHELResults: imageRequest.UncertifiedRHELScan,
-	})
-	require.NoError(t, err)
-	require.Nil(t, env.Error)
-	require.NotNil(t, env.Layer)
-}

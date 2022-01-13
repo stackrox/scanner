@@ -57,9 +57,9 @@ func runBenchmarkDetectContent(b *testing.B, imageName string) {
 	for i := 0; i < b.N; i++ {
 		var namespace *database.Namespace
 		var err error
-		var fileMap *tarutil.FilesMap
+		var files *tarutil.FilesMap
 		for _, l := range layers {
-			namespace, _, _, _, _, fileMap, err = clair.DetectContentFromReader(l, "Docker", l.Name, &database.Layer{Namespace: namespace}, fileMap, false)
+			namespace, _, _, _, _, files, err = clair.DetectContentFromReader(l, "Docker", l.Name, &database.Layer{Namespace: namespace}, files, false)
 			require.NoError(b, err)
 		}
 	}

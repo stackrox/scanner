@@ -168,8 +168,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		filenamesArchList := dpkgInfoPrefix + pkgMetadata.name + ":" + pkgMetadata.arch + dpkgFilenamesSuffix
 
 		// Read the list of files provided by the current package.
-		filenamesFileData, _ := files.Get(filenamesList)
-		if len(filenamesFileData.Contents) == 0 {
+		filenamesFileData, hasFile := files.Get(filenamesList)
+		if !hasFile || len(filenamesFileData.Contents) == 0 {
 			filenamesFileData, _ = files.Get(filenamesArchList)
 		}
 
