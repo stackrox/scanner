@@ -2624,7 +2624,7 @@ var testCases = []testCase{
 									"ExploitabilityScore": 3.9,
 									"ImpactScore":         6.0,
 									"Score":               10.0,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+									"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
@@ -2726,7 +2726,7 @@ var testCases = []testCase{
 									"ExploitabilityScore": 3.9,
 									"ImpactScore":         6.0,
 									"Score":               10.0,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+									"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
