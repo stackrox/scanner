@@ -64,8 +64,8 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 					PrivilegesRequired:    "NONE",
 					Scope:                 "CHANGED",
 					UserInteraction:       "NONE",
-					VectorString:          "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
-					Version:               "3.1",
+					VectorString:          "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+					Version:               "3.0",
 				},
 				ExploitabilityScore: 3.9,
 				ImpactScore:         6.0,
@@ -73,77 +73,6 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 		},
 		LastModifiedDate: "2021-12-26T00:00Z",
 		PublishedDate:    "2021-12-10T00:00Z",
-	},
-	"CVE-2021-44832": {
-		CVE: &schema.CVEJSON40{
-			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
-				ID: "CVE-2021-44832",
-			},
-			DataFormat:  "MITRE",
-			DataType:    "CVE",
-			DataVersion: "4.0",
-			Description: &schema.CVEJSON40Description{
-				DescriptionData: []*schema.CVEJSON40LangString{
-					{
-						Lang:  "en",
-						Value: `Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack where an attacker with permission to modify the logging configuration file can construct a malicious configuration using a JDBC Appender with a data source referencing a JNDI URI which can execute remote code. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.`,
-					},
-				},
-			},
-			References: &schema.CVEJSON40References{
-				ReferenceData: []*schema.CVEJSON40Reference{
-					{
-						Name: "https://logging.apache.org/log4j/2.x/security.html",
-					},
-				},
-			},
-		},
-		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
-			CVEDataVersion: "4.0",
-			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
-				{
-					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
-						{
-							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
-							VersionEndExcluding:   "2.17.1",
-							VersionStartIncluding: "2.13.0",
-						},
-						{
-							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
-							VersionEndExcluding:   "2.12.4",
-							VersionStartIncluding: "2.4.0",
-						},
-						{
-							Cpe23Uri:              "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
-							VersionEndExcluding:   "2.3.2",
-							VersionStartIncluding: "2.0.0", // Red Hat says 2.0.0, and I trust them more.
-						},
-					},
-					Operator: "OR",
-				},
-			},
-		},
-		Impact: &schema.NVDCVEFeedJSON10DefImpact{
-			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
-				CVSSV3: &schema.CVSSV30{
-					AttackComplexity:      "HIGH",
-					AttackVector:          "NETWORK",
-					AvailabilityImpact:    "HIGH",
-					BaseScore:             6.6,
-					ConfidentialityImpact: "HIGH",
-					IntegrityImpact:       "HIGH",
-					PrivilegesRequired:    "HIGH",
-					Scope:                 "UNCHANGED",
-					UserInteraction:       "NONE",
-					VectorString:          "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H",
-					Version:               "3.1",
-				},
-				ExploitabilityScore: 0.7,
-				ImpactScore:         5.9,
-			},
-		},
-		LastModifiedDate: "2021-12-28T00:00Z",
-		PublishedDate:    "2021-12-28T00:00Z",
 	},
 	"CVE-2021-45046": {
 		CVE: &schema.CVEJSON40{
@@ -268,23 +197,23 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 		Impact: &schema.NVDCVEFeedJSON10DefImpact{
 			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
 				CVSSV3: &schema.CVSSV30{
-					AttackComplexity:      "LOW",
+					AttackComplexity:      "HIGH",
 					AttackVector:          "NETWORK",
 					AvailabilityImpact:    "HIGH",
-					BaseScore:             7.5,
+					BaseScore:             5.9,
 					ConfidentialityImpact: "NONE",
 					IntegrityImpact:       "NONE",
 					PrivilegesRequired:    "NONE",
 					Scope:                 "UNCHANGED",
 					UserInteraction:       "NONE",
-					VectorString:          "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+					VectorString:          "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
 					Version:               "3.1",
 				},
-				ExploitabilityScore: 3.9,
+				ExploitabilityScore: 2.2,
 				ImpactScore:         3.6,
 			},
 		},
-		LastModifiedDate: "2021-12-26T00:00Z",
+		LastModifiedDate: "2022-01-13T00:00Z",
 		PublishedDate:    "2021-12-19T00:00Z",
 	},
 }
