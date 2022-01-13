@@ -2638,7 +2638,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:          "CVE-2021-44832",
-						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack where an attacker with permission to modify the logging configuration file can construct a malicious configuration using a JDBC Appender with a data source referencing a JNDI URI which can execute remote code. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
+						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
 						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
@@ -2686,7 +2686,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-45105",
 						Description:   "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 did not protect from uncontrolled recursion from self-referential lookups. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data that contains a recursive lookup, resulting in a StackOverflowError that will terminate the process. This is also known as a DOS (Denial of Service) attack.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
-						Severity:      "Important",
+						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2740,7 +2740,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:          "CVE-2021-44832",
-						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack where an attacker with permission to modify the logging configuration file can construct a malicious configuration using a JDBC Appender with a data source referencing a JNDI URI which can execute remote code. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
+						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
 						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
@@ -2788,7 +2788,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-45105",
 						Description:   "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 did not protect from uncontrolled recursion from self-referential lookups. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data that contains a recursive lookup, resulting in a StackOverflowError that will terminate the process. This is also known as a DOS (Denial of Service) attack.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
-						Severity:      "Important",
+						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2852,7 +2852,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:          "CVE-2021-44832",
-						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack where an attacker with permission to modify the logging configuration file can construct a malicious configuration using a JDBC Appender with a data source referencing a JNDI URI which can execute remote code. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
+						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
 						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
@@ -2877,7 +2877,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-45105",
 						Description:   "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 did not protect from uncontrolled recursion from self-referential lookups. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data that contains a recursive lookup, resulting in a StackOverflowError that will terminate the process. This is also known as a DOS (Denial of Service) attack.",
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
-						Severity:      "Important",
+						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
