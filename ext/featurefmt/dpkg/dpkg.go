@@ -172,8 +172,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		if !hasFile || len(filenamesFileData.Contents) == 0 {
 			filenamesFileData, hasFile = files.Get(filenamesArchList)
 		}
-		if pkgName == "glibc" {
-			log.Infof("glibc hasFile %v", hasFile)
+		if pkgName == "nettle" {
+			log.Infof("nettle hasFile %v", hasFile)
 		}
 
 		filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.Contents))

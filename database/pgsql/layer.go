@@ -124,7 +124,7 @@ func (pgSQL *pgSQL) FindLayer(name string, lineage string, opts *database.Datast
 		var buf string
 		for _, fv := range featureVersions {
 			keys := ""
-			if fv.Feature.Name == "glibc" {
+			if fv.Feature.Name == "nettle" {
 				for k := range fv.LibraryToDependencies {
 					keys = keys + " " + k
 				}
