@@ -9,9 +9,9 @@ COPY bundle.tar.gz /
 WORKDIR /bundle
 RUN tar -xzf /bundle.tar.gz
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
-LABEL name="scanner-db-rhel" \
+LABEL name="scanner-db" \
       vendor="StackRox" \
       maintainer="support@stackrox.com" \
       summary="Image scanner database for the StackRox Kubernetes Security Platform" \
@@ -26,7 +26,6 @@ COPY signatures/RPM-GPG-KEY-PGDG-12 /
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/postgres.rpm /bundle/postgres-libs.rpm /bundle/postgres-server.rpm /tmp/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
-COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
 RUN groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
@@ -50,6 +49,16 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 EXPOSE 5432
 CMD ["postgres"]
 
-HEALTHCHECK --interval=10s --timeout=5s CMD pg_isready -U postgres
+FROM base AS scanner-db-slim
+
+ENV ROX_SLIM_MODE="true"
+
+USER 70:70
+
+FROM base AS scanner-db
+
+ENV ROX_SLIM_MODE="false"
+
+COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
 USER 70:70
