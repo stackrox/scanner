@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
-	"fmt"
 	"io"
 	"os/exec"
 	"path"
@@ -29,12 +28,10 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
-	"github.com/stackrox/scanner/pkg/whiteout"
 )
 
 const (
@@ -63,116 +60,10 @@ func SetMaxExtractableFileSize(val int64) {
 	maxExtractableFileSize = val
 }
 
-// FileData is the contents of a file and relevant metadata.
-type FileData struct {
-	// Contents is the contents of the file.
-	Contents []byte
-	// Executable indicates if the file is executable.
-	Executable bool
-	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
-	ELFMetadata *elf.Metadata
-}
-
-// FilesMap contains a map of files' paths to their contents and the information to resolve it.
-type FilesMap struct {
-	data map[string]FileData
-	// links maps a symbolic link to link target.
-	links   map[string]string
-	removed set.StringSet
-}
-
-// CreateNewFilesMap creates a FilesMap
-func CreateNewFilesMap(data map[string]FileData, links map[string]string, removed set.StringSet) FilesMap {
-	if data == nil {
-		data = make(map[string]FileData)
-	}
-	if links == nil {
-		links = make(map[string]string)
-	}
-	if removed == nil {
-		removed = set.NewStringSet()
-	}
-	return FilesMap{data: data, links: links, removed: removed}
-}
-
-// GetFileData returns the map of files to their data
-func (f FilesMap) GetFileData() map[string]FileData {
-	return f.data
-}
-
-// Get resolves and gets FileData for the path
-func (f FilesMap) Get(path string) (FileData, bool) {
-	resolved := f.resolve(path)
-	if !strings.HasSuffix(resolved, "/") && strings.HasSuffix(path, "/") {
-		resolved = resolved + "/"
-	}
-	fileData, exists := f.data[resolved]
-	return fileData, exists
-}
-
-// MergeBaseAndResolveSymlinks merges a base map to this and resolves all symbolic links
-func (f *FilesMap) MergeBaseAndResolveSymlinks(base *FilesMap) {
-	if base != nil {
-		for fileName, linkTo := range base.links {
-			if _, exists := f.links[fileName]; exists || f.removed.Contains(fileName) {
-				continue
-			}
-			f.links[fileName] = linkTo
-		}
-	}
-	for fileName, linkTo := range f.links {
-		f.links[fileName] = f.resolve(linkTo)
-	}
-}
-
-// GetRemovedFiles returns the files removed
-func (f FilesMap) GetRemovedFiles() []string {
-	return f.removed.AsSlice()
-}
-
-func (f FilesMap) detectRemovedFiles() {
-	for filePath := range f.data {
-		base := path.Base(filePath)
-		if base == whiteout.OpaqueDirectory {
-			// The entire directory does not exist in lower layers.
-			f.removed.Add(path.Dir(filePath))
-		} else if strings.HasPrefix(base, whiteout.Prefix) {
-			removed := base[len(whiteout.Prefix):]
-			// Only prepend path.Dir if the directory is not `./`.
-			if filePath != base {
-				// We assume we only have Linux containers, so the path separator will be `/`.
-				removed = fmt.Sprintf("%s/%s", path.Dir(filePath), removed)
-			}
-			f.removed.Add(removed)
-		}
-	}
-}
-
-func (f FilesMap) resolve(symLink string) string {
-	resolved := symLink
-	visited := set.NewStringSet(resolved)
-	for curr, list := ".", strings.Split(symLink, "/"); len(list) > 0; {
-		curr = path.Clean(curr + "/" + list[0])
-		list = list[1:]
-
-		if linkTo, ok := f.links[curr]; ok {
-			list = append(strings.Split(linkTo, "/"), list...)
-			curr = "."
-			resolved = strings.Join(list, "/")
-			if visited.Contains(resolved) {
-				// Detect a loop and return its current resolved path as best effort
-				return resolved
-			}
-			visited.Add(resolved)
-		}
-	}
-	return resolved
-}
-
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
 func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error) {
-	filesMap := CreateNewFilesMap(nil, nil, nil)
+	filesMap := CreateNewFilesMap(nil)
 
 	// executableMatcher indicates if the given file is executable
 	// for the FileData struct.

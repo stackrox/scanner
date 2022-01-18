@@ -29,7 +29,7 @@ func BenchmarkListFeaturesNoActiveVulnMgmt(b *testing.B) {
 	filemap := tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
 		"var/lib/rpm/Packages":                       {Contents: d},
 		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
-	}, nil, nil)
+	})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -62,7 +62,7 @@ func BenchmarkListFeatures(b *testing.B) {
 		"etc/redhat-release":                         {Executable: true},
 		"etc/os-release":                             {Executable: true},
 		"usr/lib/redhat-release":                     {Executable: true},
-	}, nil, nil)
+	})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

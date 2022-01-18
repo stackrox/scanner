@@ -78,7 +78,7 @@ func TestRPMFeatureDetection(t *testing.T) {
 	pkgs, cpes, err := ListFeaturesTest(tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
 		"var/lib/rpm/Packages":                       {Contents: d},
 		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
-	}, nil, nil))
+	}))
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, cpes, expectedCPEs)
 	assert.Subset(t, pkgs, sampleExpectedPkgs)
@@ -157,7 +157,7 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 		"etc/redhat-release":                         {Executable: true},
 		"etc/os-release":                             {Executable: true},
 		"usr/lib/redhat-release":                     {Executable: true},
-	}, nil, nil))
+	}))
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, cpes, expectedCPEs)
 	assert.Subset(t, pkgs, sampleExpectedPkgs)

@@ -17,7 +17,6 @@ package dpkg
 import (
 	"testing"
 
-	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -66,7 +65,7 @@ func TestDpkgFeatureDetection(t *testing.T) {
 				"var/lib/dpkg/status.d":         {},
 				"var/lib/dpkg/status.d/base":    {Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
 				"var/lib/dpkg/status.d/netbase": {Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase")},
-			}, nil, nil),
+			}),
 		},
 	}
 
@@ -136,8 +135,6 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					"lib/linux/libgcc5.so.1":                    {ELFMetadata: &elf.Metadata{Sonames: []string{"gcc5.so.1"}}},
 					"lib/linux/libsomelib.so.1":                 {ELFMetadata: &elf.Metadata{Sonames: []string{"somelib.so.1"}, ImportedLibraries: []string{"gcc5.so.1"}}},
 				},
-				make(map[string]string),
-				set.NewStringSet(),
 			),
 		},
 	}

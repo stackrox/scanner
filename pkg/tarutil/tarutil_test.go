@@ -42,11 +42,11 @@ func testfilepath(filename string) string {
 func TestExtract(t *testing.T) {
 	for _, filename := range testTarballs {
 		f, err := os.Open(testfilepath(filename))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		defer f.Close()
 
 		data, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test/"))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		if c, n := data.Get("test/test.txt"); !n {
 			assert.Fail(t, "test/test.txt should have been extracted")
@@ -62,7 +62,7 @@ func TestExtract(t *testing.T) {
 func TestExtractUncompressedData(t *testing.T) {
 	for _, filename := range testTarballs {
 		f, err := os.Open(testfilepath(filename))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		defer f.Close()
 
 		_, err = ExtractFiles(bytes.NewReader([]byte("that string does not represent a tar or tar-gzip file")), matcher.NewPrefixAllowlistMatcher())
@@ -72,7 +72,7 @@ func TestExtractUncompressedData(t *testing.T) {
 
 func TestMaxExtractableFileSize(t *testing.T) {
 	f, err := os.Open(testfilepath("utils_test.tar.gz"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	defer utils.IgnoreError(f.Close)
 	files, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test_big.txt"))
 	assert.NoError(t, err)
@@ -87,7 +87,7 @@ func TestMaxExtractableFileSize(t *testing.T) {
 
 func TestExtractWithSymlink(t *testing.T) {
 	f, err := os.Open(testfilepath("symlink.tar.gz"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	defer utils.IgnoreError(f.Close)
 	expected := map[string]string{
 		// Link to directory

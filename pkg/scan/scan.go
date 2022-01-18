@@ -32,13 +32,13 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	var baseMap *tarutil.FilesMap
 	h := sha256.New()
 	for _, layer := range layers {
-		var err error
 		layerReadCloser := &LayerDownloadReadCloser{
 			Downloader: func() (io.ReadCloser, error) {
 				return registry.DownloadLayer(image.Remote, digest.Digest(layer))
 			},
 		}
 
+		var err error
 		baseMap, err = clair.ProcessLayerFromReader(storage, "Docker", layer, lineage, prevLayer, prevLineage, layerReadCloser, baseMap, uncertifiedRHEL)
 		if err != nil {
 			logrus.Errorf("Error analyzing layer: %v", err)

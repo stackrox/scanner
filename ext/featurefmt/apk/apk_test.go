@@ -80,7 +80,7 @@ func TestAPKFeatureDetection(t *testing.T) {
 			},
 			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
 				"lib/apk/db/installed": {Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
-			}, nil, nil),
+			}),
 		},
 	}
 	featurefmt.TestLister(t, &lister{}, testData)
@@ -161,7 +161,7 @@ func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				"bin/busybox":               {Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{}, ImportedLibraries: []string{"c.so.1", "ld.so.1"}}},
 				"etc/hosts":                 {Executable: true},
 				"etc/crontabs/root":         {Executable: true},
-			}, nil, nil),
+			}),
 		},
 	}
 	featurefmt.TestLister(t, &lister{}, testData)

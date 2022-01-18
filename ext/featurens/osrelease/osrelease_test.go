@@ -38,7 +38,7 @@ ID=debian
 HOME_URL="http://www.debian.org/"
 SUPPORT_URL="http://www.debian.org/support/"
 BUG_REPORT_URL="https://bugs.debian.org/"`)},
-			}, nil, nil),
+			}),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "ubuntu:15.10", VersionFormat: dpkg.ParserName},
@@ -53,7 +53,7 @@ VERSION_ID="15.10"
 HOME_URL="http://www.ubuntu.com/"
 SUPPORT_URL="http://help.ubuntu.com/"
 BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"`)},
-			}, nil, nil),
+			}),
 		},
 		{ // Doesn't have quotes around VERSION_ID
 			ExpectedNamespace: &database.Namespace{Name: "fedora:20", VersionFormat: rpm.ParserName},
@@ -72,11 +72,11 @@ REDHAT_BUGZILLA_PRODUCT="Fedora"
 REDHAT_BUGZILLA_PRODUCT_VERSION=20
 REDHAT_SUPPORT_PRODUCT="Fedora"
 REDHAT_SUPPORT_PRODUCT_VERSION=20`)},
-			}, nil, nil),
+			}),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files:             tarutil.CreateNewFilesMap(nil, nil, nil),
+			Files:             tarutil.CreateNewFilesMap(nil),
 		},
 	}
 

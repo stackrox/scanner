@@ -12,9 +12,12 @@ import (
 )
 
 var (
-	instance         matcher.Matcher
-	once             sync.Once
+	instance matcher.Matcher
+	once     sync.Once
+	// dynamicLibRegexp matches all dynamic libraries.
 	dynamicLibRegexp = regexp.MustCompile(`(^|/)(lib|ld-)[^/.-][^/]*\.so(\.[^/.]+)*$`)
+	// libraryDirRegexp matches all files under directories where the dynamic libraries are commonly found.
+	// This is to filter for symbolic links needed to resolve dynamic library paths.
 	libraryDirRegexp = regexp.MustCompile(`^(usr/(local/)?)?lib(32|64)?(/.+|$)`)
 )
 
@@ -30,7 +33,7 @@ func SingletonMatcher() matcher.Matcher {
 		whiteoutMatcher := matcher.NewWhiteoutMatcher()
 
 		// Allocate extra spaces for the feature-flagged matchers.
-		allMatchers := make([]matcher.Matcher, 0, 5)
+		allMatchers := make([]matcher.Matcher, 0, 6)
 		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
 
 		if features.ActiveVulnMgmt.Enabled() {

@@ -35,7 +35,7 @@ DISTRIB_RELEASE=12.04
 DISTRIB_CODENAME=precise
 DISTRIB_DESCRIPTION="Ubuntu 12.04 LTS"`),
 				},
-			}, nil, nil),
+			}),
 		},
 		{ // We don't care about the minor version of Debian
 			ExpectedNamespace: &database.Namespace{Name: "debian:7", VersionFormat: dpkg.ParserName},
@@ -47,7 +47,7 @@ DISTRIB_RELEASE=7.1
 DISTRIB_CODENAME=wheezy
 DISTRIB_DESCRIPTION="Debian 7.1"`),
 				},
-			}, nil, nil),
+			}),
 		},
 		{
 			ExpectedNamespace: nil,

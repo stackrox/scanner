@@ -52,7 +52,7 @@ func TestRpmFeatureDetection(t *testing.T) {
 			},
 			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
 				"var/lib/rpm/Packages": {Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
-			}, nil, nil),
+			}),
 		},
 	}
 
@@ -106,7 +106,7 @@ func TestRpmFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				"usr/bin/mock_exec":      {Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{}}},
 				"usr/lib64/libmock.so.1": {ELFMetadata: &elf.Metadata{Sonames: []string{"mock.so.1", "mock.so.1.0"}, ImportedLibraries: []string{"base.so.1"}}},
 				"usr/lib64/libbase.so.1": {ELFMetadata: &elf.Metadata{Sonames: []string{"base.so.1"}}},
-			}, nil, nil),
+			}),
 		},
 	}
 

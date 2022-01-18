@@ -35,11 +35,11 @@ ID=debian
 HOME_URL="https://www.debian.org/"
 SUPPORT_URL="https://www.debian.org/support/"
 BUG_REPORT_URL="https://bugs.debian.org/"`)},
-				"etc/apt/sources.list": {Contents: []byte(`deb http://httpredir.debian.org/debian unstable main`)}}, nil, nil),
+				"etc/apt/sources.list": {Contents: []byte(`deb http://httpredir.debian.org/debian unstable main`)}}),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files:             tarutil.CreateNewFilesMap(nil, nil, nil),
+			Files:             tarutil.CreateNewFilesMap(nil),
 		},
 	}
 
