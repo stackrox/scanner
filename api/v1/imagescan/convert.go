@@ -72,10 +72,11 @@ func ConvertFeatures(apiFeatures []apiV1.Feature) []*v1.Feature {
 		features = append(features, &v1.Feature{
 			Name:                a.Name,
 			Version:             a.Version,
-			Vulnerabilities:     vulns,
 			FeatureType:         a.VersionFormat,
 			AddedByLayer:        a.AddedBy,
 			Location:            a.Location,
+			Vulnerabilities:     vulns,
+			FixedBy:             a.FixedBy,
 			ProvidedExecutables: a.Executables,
 		})
 	}
