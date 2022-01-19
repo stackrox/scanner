@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/archop"
 )
 
@@ -67,8 +68,15 @@ type FeatureVersion struct {
 	Feature    Feature
 	Version    string
 	AffectedBy []Vulnerability
-	// ProvidedExecutables indicates which regular executable files this feature provided.
-	ProvidedExecutables []string
+	// ExecutableToDependencies maps a feature provided executable to its dependencies.
+	// Eg, If executable E is provided by this feature, and it imports a library B, we will have a map for E -> [B]
+	ExecutableToDependencies StringToStringsMap
+	// LibraryToDependencies maps a feature provided library to its dependencies.
+	// Eg, If library A is provided by this feature, and it imports a library B, we will have a map for A -> [B]
+	LibraryToDependencies StringToStringsMap
+
+	// For internal purposes, only.
+	Executables []*v1.Executable
 
 	// For output purposes. Only make sense when the feature version is in the context of an image.
 	AddedBy Layer
@@ -160,11 +168,29 @@ type RHELv2Package struct {
 	Module  string `json:"module,omitempty"`
 	Arch    string `json:"arch,omitempty"`
 
-	ProvidedExecutables []string `json:"provided_executables,omitempty"`
+	// ExecutableToDependencies maps a feature provided executable to its dependencies.
+	// Eg, If executable E is provided by this feature, and it imports a library B, we will have a map for E -> [B]
+	ExecutableToDependencies StringToStringsMap `json:"executable_to_dependencies,omitempty"`
+	// LibraryToDependencies maps a feature provided library to its dependencies.
+	// Eg, If library A is provided by this feature, and it imports a library B, we will have a map for A -> [B]
+	LibraryToDependencies StringToStringsMap `json:"library_to_dependencies,omitempty"`
+	// Executables lists the executables determined from ExecutableToDependencies and
+	// LibraryToDependencies. This is only populated when both ExecutableToDependencies and
+	// LibraryToDependencies are empty.
+	Executables []*v1.Executable `json:"executables,omitempty"`
 }
 
 func (p *RHELv2Package) String() string {
 	return strings.Join([]string{p.Name, p.Version, p.Module, p.Arch}, ":")
+}
+
+// GetPackageVersion concatenates version and arch and returns package version
+func (p *RHELv2Package) GetPackageVersion() string {
+	version := p.Version
+	if p.Arch != "" {
+		version = version + "." + p.Arch
+	}
+	return version
 }
 
 // RHELv2Layer defines a RHEL image layer.
@@ -208,9 +234,10 @@ func (r *RHELv2Components) String() string {
 // RHELv2PackageEnv contains a RHELv2Package plus
 // data about the environment surrounding a particular package.
 type RHELv2PackageEnv struct {
-	Pkg     *RHELv2Package
-	AddedBy string
-	CPEs    []string
+	Pkg       *RHELv2Package
+	Namespace string
+	AddedBy   string
+	CPEs      []string
 }
 
 // RHELv2Record is used for querying RHELv2 vulnerabilities from the database.

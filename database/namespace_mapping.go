@@ -57,4 +57,5 @@ var UbuntuReleasesMapping = map[string]string{
 	"focal":   "20.04",
 	"groovy":  "20.10",
 	"hirsute": "21.04",
+	"impish":  "21.10",
 }

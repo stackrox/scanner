@@ -18,6 +18,10 @@ func (p parser) Compare(a, b string) (int, error) {
 	return nvd.SmartVerCmp(a, b), nil
 }
 
+func (p parser) Namespaces() []string {
+	return []string{"language"}
+}
+
 func init() {
 	versionfmt.RegisterParser(ParserName, parser{})
 }

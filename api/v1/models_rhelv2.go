@@ -12,8 +12,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/types"
 )
 
@@ -27,90 +30,137 @@ const (
 // The returned bool indicates if full certified scanning was performed.
 // This is typically only `false` for images without proper CPE information.
 func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
-	layers, err := db.GetRHELv2Layers(layer.Name)
+	pkgEnvs, cpesExist, err := getRHELv2PkgEnvs(db, layer.Name)
 	if err != nil {
 		return false, err
 	}
 
-	cpesExist := shareCPEs(layers)
+	features, err := getFullRHELv2Features(db, pkgEnvs, false)
+	if err != nil {
+		return false, err
+	}
 
-	pkgEnvs, records := getRHELv2PkgData(layers)
+	layer.Features = append(layer.Features, features...)
 
+	return cpesExist, nil
+}
+
+func getFullRHELv2Features(db database.Datastore, pkgEnvs map[int]*database.RHELv2PackageEnv, execsPopulated bool) ([]Feature, error) {
+	records := getRHELv2Records(pkgEnvs)
 	vulns, err := db.GetRHELv2Vulnerabilities(records)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
+	var features []Feature
+	var depMap map[string]common.FeatureKeySet
+	if !execsPopulated {
+		depMap = common.GetDepMapRHEL(pkgEnvs)
+	}
 	for _, pkgEnv := range pkgEnvs {
 		pkg := pkgEnv.Pkg
+
 		if hasKernelPrefix(pkg.Name) {
 			continue
 		}
-		version := pkg.Version
-		if pkg.Arch != "" {
-			version += "." + pkg.Arch
-		}
 
+		version := pkg.GetPackageVersion()
+		pkgKey := featurefmt.PackageKey{Name: pkg.Name, Version: version}
+		executables := pkg.Executables
+		if !execsPopulated {
+			executables = common.CreateExecutablesFromDependencies(pkgKey, pkg.ExecutableToDependencies, depMap)
+		}
 		feature := Feature{
-			Name:                pkg.Name,
-			NamespaceName:       layer.NamespaceName,
-			VersionFormat:       rpm.ParserName,
-			Version:             version,
-			AddedBy:             pkgEnv.AddedBy,
-			ProvidedExecutables: pkg.ProvidedExecutables,
+			Name:          pkg.Name,
+			NamespaceName: pkgEnv.Namespace,
+			VersionFormat: rpm.ParserName,
+			Version:       version,
+			AddedBy:       pkgEnv.AddedBy,
+			Executables:   executables,
 		}
 
-		pkgVersion := rpmVersion.NewVersion(pkg.Version)
-		pkgArch := pkg.Arch
-		fixedBy := pkgVersion
+		feature.FixedBy, feature.Vulnerabilities = getRHELv2Vulns(vulns, pkg, feature.NamespaceName)
 
-		// Database query results need more filtering.
-		// Need to ensure:
-		// 1. The package's version is less than the vuln's fixed-in version, if present.
-		// 2. The ArchOperation passes.
-		for _, vuln := range vulns[pkg.ID] {
-			if len(vuln.PackageInfos) != 1 {
-				log.Warnf("Unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
-				continue
-			}
-			vulnPkgInfo := vuln.PackageInfos[0]
-
-			if len(vulnPkgInfo.Packages) != 1 {
-				log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vulnPkgInfo.Packages), 1)
-				continue
-			}
-			vulnPkg := vulnPkgInfo.Packages[0]
-
-			// Assume the vulnerability is not fixed.
-			// In that case, all versions are affected.
-			affectedVersion := true
-			var vulnVersion *rpmVersion.Version
-			if vulnPkgInfo.FixedInVersion != "" {
-				// The vulnerability is fixed. Determine if this package is affected.
-				vulnVersion = rpmVersionPtr(rpmVersion.NewVersion(vulnPkgInfo.FixedInVersion))
-				affectedVersion = pkgVersion.LessThan(*vulnVersion)
-			}
-
-			// Compare the package's architecture to the affected architecture.
-			affectedArch := vulnPkgInfo.ArchOperation.Cmp(pkgArch, vulnPkg.Arch)
-
-			if affectedVersion && affectedArch {
-				feature.Vulnerabilities = append(feature.Vulnerabilities, RHELv2ToVulnerability(vuln, feature.NamespaceName))
-
-				if vulnVersion != nil && vulnVersion.GreaterThan(fixedBy) {
-					fixedBy = *vulnVersion
-				}
-			}
-		}
-
-		if fixedBy.GreaterThan(pkgVersion) {
-			feature.FixedBy = fixedBy.String()
-		}
-
-		layer.Features = append(layer.Features, feature)
+		features = append(features, feature)
 	}
 
-	return cpesExist, nil
+	return features, nil
+}
+
+func getFullFeaturesForRHELv2Packages(db database.Datastore, pkgs []*v1.RHELComponent) ([]Feature, error) {
+	pkgEnvs := make(map[int]*database.RHELv2PackageEnv, len(pkgs))
+	for _, pkg := range pkgs {
+		pkgEnvs[int(pkg.GetId())] = &database.RHELv2PackageEnv{
+			Pkg: &database.RHELv2Package{
+				Model:       database.Model{ID: int(pkg.GetId())},
+				Name:        pkg.GetName(),
+				Version:     pkg.GetVersion(),
+				Module:      pkg.GetModule(),
+				Arch:        pkg.GetArch(),
+				Executables: pkg.GetExecutables(),
+			},
+			Namespace: pkg.GetNamespace(),
+			AddedBy:   pkg.GetAddedBy(),
+			CPEs:      pkg.GetCpes(),
+		}
+	}
+
+	return getFullRHELv2Features(db, pkgEnvs, true)
+}
+
+// getRHELv2Vulns gets the vulnerabilities and fixedBy version found during RHELv2 scanning.
+func getRHELv2Vulns(vulns map[int][]*database.RHELv2Vulnerability, pkg *database.RHELv2Package, namespaceName string) (string, []Vulnerability) {
+	pkgVersion := rpmVersion.NewVersion(pkg.Version)
+	pkgArch := pkg.Arch
+	fixedBy := pkgVersion
+
+	var vulnerabilities []Vulnerability
+
+	// Database query results need more filtering.
+	// Need to ensure:
+	// 1. The package's version is less than the vuln's fixed-in version, if present.
+	// 2. The ArchOperation passes.
+	for _, vuln := range vulns[pkg.ID] {
+		if len(vuln.PackageInfos) != 1 {
+			log.Warnf("Unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
+			continue
+		}
+		vulnPkgInfo := vuln.PackageInfos[0]
+
+		if len(vulnPkgInfo.Packages) != 1 {
+			log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vulnPkgInfo.Packages), 1)
+			continue
+		}
+		vulnPkg := vulnPkgInfo.Packages[0]
+
+		// Assume the vulnerability is not fixed.
+		// In that case, all versions are affected.
+		affectedVersion := true
+		var vulnVersion *rpmVersion.Version
+		if vulnPkgInfo.FixedInVersion != "" {
+			// The vulnerability is fixed. Determine if this package is affected.
+			vulnVersion = rpmVersionPtr(rpmVersion.NewVersion(vulnPkgInfo.FixedInVersion))
+			affectedVersion = pkgVersion.LessThan(*vulnVersion)
+		}
+
+		// Compare the package's architecture to the affected architecture.
+		affectedArch := vulnPkgInfo.ArchOperation.Cmp(pkgArch, vulnPkg.Arch)
+
+		if affectedVersion && affectedArch {
+			vulnerabilities = append(vulnerabilities, RHELv2ToVulnerability(vuln, namespaceName))
+
+			if vulnVersion != nil && vulnVersion.GreaterThan(fixedBy) {
+				fixedBy = *vulnVersion
+			}
+		}
+	}
+
+	var fixedByStr string
+	if fixedBy.GreaterThan(pkgVersion) {
+		fixedByStr = fixedBy.String()
+	}
+
+	return fixedByStr, vulnerabilities
 }
 
 func rpmVersionPtr(ver rpmVersion.Version) *rpmVersion.Version {
@@ -123,8 +173,8 @@ func rpmVersionPtr(ver rpmVersion.Version) *rpmVersion.Version {
 func shareCPEs(layers []*database.RHELv2Layer) bool {
 	var cpesExist bool
 
-	// User's layers build on top of Red Hat images doesn't have a repository definition.
-	// We need to share CPE repo definition to all layer where CPEs are missing
+	// Users' layers built on top of Red Hat images don't have repository definitions.
+	// We need to share CPE repo definitions to all layers where CPEs are missing.
 	var previousCPEs []string
 	for i := 0; i < len(layers); i++ {
 		if len(layers[i].CPEs) != 0 {
@@ -139,7 +189,7 @@ func shareCPEs(layers []*database.RHELv2Layer) bool {
 
 	// The same thing has to be done in reverse
 	// example:
-	//   Red Hat's base images doesn't have repository definition
+	//   Red Hat's base image doesn't have repository definition
 	//   We need to get them from layer[i+1]
 	for i := len(layers) - 1; i >= 0; i-- {
 		if len(layers[i].CPEs) != 0 {
@@ -152,46 +202,61 @@ func shareCPEs(layers []*database.RHELv2Layer) bool {
 	return cpesExist
 }
 
-func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2PackageEnv, []*database.RHELv2Record) {
+// getRHELv2PkgEnvs returns a map from package ID to package environment and a bool to indicate CPEs exist in the image.
+func getRHELv2PkgEnvs(db database.Datastore, layerName string) (map[int]*database.RHELv2PackageEnv, bool, error) {
+	layers, err := db.GetRHELv2Layers(layerName)
+	if err != nil {
+		return nil, false, err
+	}
+
+	cpesExist := shareCPEs(layers)
+
 	pkgEnvs := make(map[int]*database.RHELv2PackageEnv)
 
-	// Find all packages that were ever added to the image
-	// labelled with the layer hash that introduced it.
+	// Find all packages which were ever added to the image,
+	// labeled with the layer hash which introduced it.
 	for _, layer := range layers {
 		for _, pkg := range layer.Pkgs {
 			if _, ok := pkgEnvs[pkg.ID]; !ok {
 				pkgEnvs[pkg.ID] = &database.RHELv2PackageEnv{
-					Pkg:     pkg,
-					AddedBy: layer.Hash,
-					CPEs:    layer.CPEs,
+					Pkg:       pkg,
+					Namespace: layer.Dist,
+					AddedBy:   layer.Hash,
+					CPEs:      layer.CPEs,
 				}
 			}
 		}
 	}
 
-	// Look for the packages that still remain in the final image.
-	// Loop from highest layer to base in search of the latest version of
-	// the packages database.
+	// Look for the packages which still remain in the final image.
+	// Loop from the highest layer to base in search of the latest version of
+	// the package database.
 	for i := len(layers) - 1; i >= 0; i-- {
-		if len(layers[i].Pkgs) != 0 {
-			// Found the latest version of `var/lib/rpm/Packages`
-			// This has the final version of all the packages in this image.
-			finalPkgs := set.NewIntSet()
-			for _, pkg := range layers[i].Pkgs {
-				finalPkgs.Add(pkg.ID)
-			}
-
-			for pkgID := range pkgEnvs {
-				// Remove packages that were in lower layers, but not at the highest.
-				if !finalPkgs.Contains(pkgID) {
-					delete(pkgEnvs, pkgID)
-				}
-			}
-
-			break
+		if len(layers[i].Pkgs) == 0 {
+			continue
 		}
+
+		// Found the latest version of `var/lib/rpm/Packages`
+		// This has the final version of all the packages in this image.
+		finalPkgs := set.NewIntSet()
+		for _, pkg := range layers[i].Pkgs {
+			finalPkgs.Add(pkg.ID)
+		}
+
+		for pkgID := range pkgEnvs {
+			// Remove packages which were in lower layers, but not in the highest.
+			if !finalPkgs.Contains(pkgID) {
+				delete(pkgEnvs, pkgID)
+			}
+		}
+
+		break
 	}
 
+	return pkgEnvs, cpesExist, nil
+}
+
+func getRHELv2Records(pkgEnvs map[int]*database.RHELv2PackageEnv) []*database.RHELv2Record {
 	// Create a record for each pkgEnvironment for each CPE.
 	var records []*database.RHELv2Record
 
@@ -212,7 +277,7 @@ func getRHELv2PkgData(layers []*database.RHELv2Layer) (map[int]*database.RHELv2P
 		}
 	}
 
-	return pkgEnvs, records
+	return records
 }
 
 // RHELv2ToVulnerability converts the given database.RHELv2Vulnerability into a Vulnerability.

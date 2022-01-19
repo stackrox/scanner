@@ -20,7 +20,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lib/pq"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/ext/versionfmt"
@@ -142,7 +141,12 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	}
 
 	t = time.Now()
-	err = tx.QueryRow(insertFeatureVersion, featureID, fv.Version, pq.Array(fv.ProvidedExecutables)).Scan(&fv.ID)
+	err = tx.QueryRow(insertFeatureVersion,
+		featureID,
+		fv.Version,
+		fv.ExecutableToDependencies,
+		fv.LibraryToDependencies,
+	).Scan(&fv.ID)
 	metrics.ObserveQueryTime("insertFeatureVersion", "insertFeatureVersion", t)
 
 	if err != nil && err != sql.ErrNoRows {

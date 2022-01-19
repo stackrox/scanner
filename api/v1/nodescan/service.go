@@ -16,7 +16,7 @@ import (
 	"github.com/stackrox/scanner/ext/kernelparser"
 	"github.com/stackrox/scanner/ext/kernelparser/ubuntu"
 	"github.com/stackrox/scanner/ext/versionfmt"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
@@ -145,6 +145,10 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 		metadata, err := convert.MetadataMap(affected.Metadata)
 		if err != nil {
 			log.Warnf("error converting metadata: %v. Skipping...", err)
+			continue
+		}
+		if metadata == nil {
+			log.Warnf("metadata is nil for %s. Skipping...", affected.Name)
 			continue
 		}
 

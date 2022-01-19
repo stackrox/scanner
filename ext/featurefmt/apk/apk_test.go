@@ -20,6 +20,7 @@ import (
 	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -96,24 +97,28 @@ func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				{
 					Feature: database.Feature{Name: "musl"},
 					Version: "1.1.14-r10",
-					ProvidedExecutables: []string{
-						"/lib/ld-musl-x86_64.so.1",
-						"/lib/libc.musl-x86_64.so.1",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/lib/ld-musl-x86_64.so.1":   {},
+						"/lib/libc.musl-x86_64.so.1": {"ld.so.1": {}},
+					},
+					LibraryToDependencies: database.StringToStringsMap{
+						"c.so.1":  {"ld.so.1": {}},
+						"ld.so.1": {},
 					},
 				},
 				{
 					Feature: database.Feature{Name: "busybox"},
 					Version: "1.24.2-r9",
-					ProvidedExecutables: []string{
-						"/bin/busybox",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/bin/busybox": {"c.so.1": {}, "ld.so.1": {}},
 					},
 				},
 				{
 					Feature: database.Feature{Name: "alpine-baselayout"},
 					Version: "3.0.3-r0",
-					ProvidedExecutables: []string{
-						"/etc/crontabs/root",
-						"/etc/hosts",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/etc/crontabs/root": {},
+						"/etc/hosts":         {},
 					},
 				},
 				{
@@ -151,9 +156,9 @@ func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 			},
 			Files: tarutil.FilesMap{
 				"lib/apk/db/installed":      tarutil.FileData{Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
-				"lib/libc.musl-x86_64.so.1": tarutil.FileData{Executable: true},
-				"lib/ld-musl-x86_64.so.1":   tarutil.FileData{Executable: true},
-				"bin/busybox":               tarutil.FileData{Executable: true},
+				"lib/libc.musl-x86_64.so.1": tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{"c.so.1"}, ImportedLibraries: []string{"ld.so.1"}}},
+				"lib/ld-musl-x86_64.so.1":   tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{"ld.so.1"}}},
+				"bin/busybox":               tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{}, ImportedLibraries: []string{"c.so.1", "ld.so.1"}}},
 				"etc/hosts":                 tarutil.FileData{Executable: true},
 				"etc/crontabs/root":         tarutil.FileData{Executable: true},
 			},

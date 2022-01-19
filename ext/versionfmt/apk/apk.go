@@ -54,6 +54,10 @@ func (p parser) Compare(a, b string) (int, error) {
 	return v1.Compare(v2), nil
 }
 
+func (p parser) Namespaces() []string {
+	return []string{"alpine"}
+}
+
 func init() {
 	versionfmt.RegisterParser(ParserName, parser{})
 }

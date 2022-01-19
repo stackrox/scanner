@@ -19,6 +19,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -26,8 +27,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// File represents a YAML configuration file that namespaces all configuration
-// configuration under the top-level "scanner" key.
+// File represents a YAML configuration file that namespaces all
+// configurations under the top-level "scanner" key.
 type File struct {
 	Scanner Config `yaml:"scanner"`
 }
@@ -40,7 +41,7 @@ type Config struct {
 	LogLevel                 string                              `yaml:"logLevel"`
 	MaxExtractableFileSizeMB int64                               `yaml:"maxExtractableFileSizeMB"`
 
-	// CentralEndpoint is the endpoint that central can be reached at. Defaults to central.stackrox if not present in the config.
+	// CentralEndpoint is the endpoint that central can be reached at. Defaults to https://central.stackrox.svc if not present in the config.
 	CentralEndpoint string `yaml:"centralEndpoint"`
 }
 
@@ -76,7 +77,7 @@ func LoadConfig(path string) (config *Config, err error) {
 	if err != nil {
 		return
 	}
-	defer f.Close()
+	defer utils.IgnoreError(f.Close)
 
 	d, err := io.ReadAll(f)
 	if err != nil {

@@ -43,6 +43,7 @@ import (
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/clairify/metrics"
 	"github.com/stackrox/scanner/pkg/clairify/server"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/formatter"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -97,8 +98,8 @@ func waitForSignals(signals ...os.Signal) {
 	<-interrupts
 }
 
-// Boot starts Clair instance with the provided config.
-func Boot(config *Config) {
+// Boot starts a Clair instance with the provided config.
+func Boot(config *Config, slimMode bool) {
 	rand.Seed(time.Now().UnixNano())
 
 	// Open database and initialize vuln caches in parallel, prior to making the API available.
@@ -116,37 +117,44 @@ func Boot(config *Config) {
 	}()
 
 	var nvdVulnCache nvdtoolscache.Cache
-	wg.Add(1)
-	go func() {
-		defer wg.Add(-1)
-		nvdVulnCache = nvdtoolscache.Singleton()
-	}()
-
 	var k8sVulnCache k8scache.Cache
-	wg.Add(1)
-	go func() {
-		defer wg.Add(-1)
-		k8sVulnCache = k8scache.Singleton()
-	}()
-
 	var repoToCPE *repo2cpe.Mapping
-	wg.Add(1)
-	go func() {
-		defer wg.Add(-1)
-		repoToCPE = repo2cpe.Singleton()
-	}()
+	if !slimMode {
+		wg.Add(1)
+		go func() {
+			defer wg.Add(-1)
+			nvdVulnCache = nvdtoolscache.Singleton()
+		}()
 
-	// Initialize the vulnerability caches prior to making the API available
+		wg.Add(1)
+		go func() {
+			defer wg.Add(-1)
+			k8sVulnCache = k8scache.Singleton()
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Add(-1)
+			repoToCPE = repo2cpe.Singleton()
+		}()
+	}
+
+	// Initialize the datastores prior to making the API available
 	wg.Wait()
 	defer db.Close()
 
-	u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdVulnCache, k8sVulnCache)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to initialize updater")
-	}
+	if !slimMode {
+		u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdVulnCache, k8sVulnCache)
+		if err != nil {
+			log.WithError(err).Fatal("Failed to initialize updater")
+		}
 
-	// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up to date
-	u.UpdateApplicationCachesOnly()
+		// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up-to-date
+		u.UpdateApplicationCachesOnly()
+
+		go u.RunForever()
+		defer u.Stop()
+	}
 
 	metricsServ := metrics.NewHTTPServer(config.API)
 	go metricsServ.RunForever()
@@ -168,13 +176,11 @@ func Boot(config *Config) {
 	)
 	go grpcAPI.Start()
 
-	go u.RunForever()
-
 	// Wait for interruption and shutdown gracefully.
 	waitForSignals(os.Interrupt, unix.SIGTERM)
 	log.Info("Received interruption, gracefully stopping ...")
+	// Do not defer this, as we should close the API immediately upon receiving interrupt signal.
 	serv.Close()
-	u.Stop()
 }
 
 func main() {
@@ -222,7 +228,13 @@ func main() {
 		imagefmt.SetInsecureTLS(*flagInsecureTLS)
 	}
 
-	log.Infof("Running Scanner version: %s", version.Version)
+	slimMode := env.SlimMode.Enabled()
 
-	Boot(config)
+	scannerName := "Scanner"
+	if slimMode {
+		scannerName = "Scanner-Slim"
+	}
+	log.Infof("Running %s version: %s", scannerName, version.Version)
+
+	Boot(config, slimMode)
 }

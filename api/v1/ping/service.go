@@ -5,7 +5,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
 )

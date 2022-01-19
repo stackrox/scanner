@@ -40,6 +40,7 @@ var (
 // RegistrableComponentConfig is a configuration block that can be used to
 // determine which registrable component should be initialized and pass custom
 // configuration to it.
+// Any updates to this should be tested in cmd/clair/config_test.go.
 type RegistrableComponentConfig struct {
 	Type    string
 	Options map[string]interface{}
@@ -190,7 +191,8 @@ type Datastore interface {
 
 	GetLayerLanguageComponents(layer, lineage string, opts *DatastoreOptions) ([]*component.LayerToComponents, error)
 
-	GetVulnerabilitiesForFeatureVersion(featureVersions FeatureVersion) ([]Vulnerability, error)
+	GetVulnerabilitiesForFeatureVersion(featureVersion FeatureVersion) ([]Vulnerability, error)
+	LoadVulnerabilities(featureVersions []FeatureVersion) error
 
 	FeatureExists(namespace, feature string) (bool, error)
 }

@@ -278,6 +278,10 @@ func signum(a int) int {
 	return 0
 }
 
+func (p parser) Namespaces() []string {
+	return []string{"debian", "ubuntu"}
+}
+
 func init() {
 	versionfmt.RegisterParser(ParserName, parser{})
 }

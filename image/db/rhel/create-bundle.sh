@@ -30,7 +30,7 @@ chmod -R 755 "${bundle_root}"
 
 postgres_repo_url="https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
 postgres_major="12"
-pg_rhel_version="8.3"
+pg_rhel_version="8.5"
 
 build_dir="$(mktemp -d)"
 docker build -q -t postgres-minor-image "${build_dir}" -f - <<EOF

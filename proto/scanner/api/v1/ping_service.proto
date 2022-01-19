@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "scannerV1";
+option java_package = "io.stackrox.proto.api.scanner.v1";
+
+import weak "google/api/annotations.proto";
+import "scanner/api/v1/empty.proto";
+
+package scannerV1;
+
+message PongMessage {
+    string scanner_version = 2;
+    string status          = 1;
+}
+
+service PingService {
+    rpc Ping(Empty) returns (PongMessage) {
+        option (google.api.http) = {
+            get: "/v1/ping"
+        };
+    }
+}

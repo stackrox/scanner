@@ -56,8 +56,8 @@ const (
 		SELECT id FROM FeatureVersion WHERE feature_id = $1 AND version = $2`
 
 	insertFeatureVersion = `
-		INSERT INTO FeatureVersion(feature_id, version, executables)
-		VALUES($1, $2, $3)
+		INSERT INTO FeatureVersion(feature_id, version, executable_to_dependencies, library_to_dependencies)
+		VALUES($1, $2, $3, $4)
 		ON CONFLICT (feature_id, version)
 		DO NOTHING
 		RETURNING id
@@ -89,7 +89,20 @@ const (
 			FROM Layer l, layer_tree lt
 			WHERE l.id = lt.parent_id
 		)
-		SELECT ldf.featureversion_id, ldf.modification, fn.id, fn.name, fn.version_format, f.id, f.name, fv.id, fv.version, fv.executables, ltree.id, ltree.name
+		SELECT
+			ldf.featureversion_id,
+			ldf.modification,
+			fn.id,
+			fn.name,
+			fn.version_format,
+			f.id,
+			f.name,
+			fv.id,
+			fv.version,
+			fv.executable_to_dependencies,
+			fv.library_to_dependencies,
+			ltree.id,
+			ltree.name
 		FROM Layer_diff_FeatureVersion ldf
 		JOIN (
 			SELECT row_number() over (ORDER BY depth DESC), id, name FROM layer_tree
@@ -273,8 +286,8 @@ const (
 		FROM layers;`
 
 	insertRHELv2Package = `
-		INSERT INTO rhelv2_package (name, version, module, arch, executables)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO rhelv2_package (name, version, module, arch, executable_to_dependencies, library_to_dependencies)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		ON CONFLICT (name, version, module, arch) DO NOTHING;`
 
 	insertRHELv2PackageArtifact = `
@@ -303,7 +316,8 @@ const (
 			rhelv2_package.version,
 			rhelv2_package.module,
 			rhelv2_package.arch,
-			rhelv2_package.executables
+			rhelv2_package.executable_to_dependencies,
+			rhelv2_package.library_to_dependencies
 		FROM
 			rhelv2_package_scanartifact
 			LEFT JOIN rhelv2_package ON

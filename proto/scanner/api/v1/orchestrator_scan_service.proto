@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+option go_package = "scannerV1";
+
+option java_package = "io.stackrox.proto.api.scanner.v1";
+
+import weak "google/api/annotations.proto";
+import "scanner/api/v1/vulnerability.proto";
+
+package scannerV1;
+
+message GetKubeVulnerabilitiesRequest {
+    string kubernetes_version = 1;
+}
+
+// Next tag: 7
+message GetKubeVulnerabilitiesResponse {
+    string                 scanner_version                    = 6;
+    repeated Vulnerability aggregator_vulnerabilities         = 1;
+    repeated Vulnerability apiserver_vulnerabilities          = 2;
+    repeated Vulnerability controller_manager_vulnerabilities = 3;
+    repeated Vulnerability scheduler_vulnerabilities          = 4;
+    repeated Vulnerability generic_vulnerabilities            = 5;
+}
+
+message GetOpenShiftVulnerabilitiesRequest {
+    string openShift_version = 1;
+}
+
+message GetOpenShiftVulnerabilitiesResponse {
+    string                 scanner_version = 2;
+    repeated Vulnerability vulnerabilities = 1;
+}
+
+// OrchestratorScanService APIs can be used to get vulnerabilities for Kubernetes and Openshift components.
+service OrchestratorScanService {
+    rpc GetKubeVulnerabilities(GetKubeVulnerabilitiesRequest) returns (GetKubeVulnerabilitiesResponse) {
+        option (google.api.http) = {
+            get: "/v1/orchestrator/kube/vulnerabilities"
+        };
+    }
+
+    rpc GetOpenShiftVulnerabilities(GetOpenShiftVulnerabilitiesRequest) returns (GetOpenShiftVulnerabilitiesResponse) {
+        option (google.api.http) = {
+            get: "/v1/orchestrator/openshift/vulnerabilities"
+        };
+    }
+}

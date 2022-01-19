@@ -11,7 +11,7 @@ import (
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
 	"github.com/stackrox/scanner/database"
-	v1 "github.com/stackrox/scanner/generated/shared/api/v1"
+	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
@@ -178,6 +178,10 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		metadata, err := convert.MetadataMap(v1Vuln.Metadata)
 		if err != nil {
 			log.Errorf("error converting metadata for %s: %v. Skipping...", vuln.Name, err)
+			continue
+		}
+		if metadata == nil {
+			log.Warnf("metadata is nil for %s; Skipping...", vuln.Name)
 			continue
 		}
 

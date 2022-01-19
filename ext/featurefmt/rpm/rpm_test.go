@@ -20,6 +20,7 @@ import (
 	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -43,6 +44,10 @@ func TestRpmFeatureDetection(t *testing.T) {
 				{
 					Feature: database.Feature{Name: "filesystem"},
 					Version: "3.2-18.el7",
+				},
+				{
+					Feature: database.Feature{Name: "libmock"},
+					Version: "0.0.1-el7",
 				},
 			},
 			Files: tarutil.FilesMap{
@@ -73,19 +78,34 @@ func TestRpmFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				{
 					Feature: database.Feature{Name: "filesystem"},
 					Version: "3.2-18.el7",
-					ProvidedExecutables: []string{
-						"/usr/games",
-						"/usr/include",
-						"/usr/lib/debug",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/usr/games":     {"base.so.1": {}, "mock.so.1.0": {}},
+						"/usr/include":   {},
+						"/usr/lib/debug": {},
+					},
+				},
+				{
+					Feature: database.Feature{Name: "libmock"},
+					Version: "0.0.1-el7",
+					ExecutableToDependencies: database.StringToStringsMap{
+						"/usr/bin/mock_exec": {},
+					},
+					LibraryToDependencies: database.StringToStringsMap{
+						"base.so.1":   {},
+						"mock.so.1":   {"base.so.1": {}},
+						"mock.so.1.0": {"base.so.1": {}},
 					},
 				},
 			},
 			Files: tarutil.FilesMap{
-				"var/lib/rpm/Packages": tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
-				"etc/centos-release":   tarutil.FileData{Executable: true},
-				"usr/games":            tarutil.FileData{Executable: true},
-				"usr/include":          tarutil.FileData{Executable: true},
-				"usr/lib/debug":        tarutil.FileData{Executable: true},
+				"var/lib/rpm/Packages":   tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
+				"etc/centos-release":     tarutil.FileData{Executable: true},
+				"usr/games":              tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{ImportedLibraries: []string{"base.so.1", "mock.so.1.0"}}},
+				"usr/include":            tarutil.FileData{Executable: true},
+				"usr/lib/debug":          tarutil.FileData{Executable: true},
+				"usr/bin/mock_exec":      tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{}}},
+				"usr/lib64/libmock.so.1": tarutil.FileData{ELFMetadata: &elf.Metadata{Sonames: []string{"mock.so.1", "mock.so.1.0"}, ImportedLibraries: []string{"base.so.1"}}},
+				"usr/lib64/libbase.so.1": tarutil.FileData{ELFMetadata: &elf.Metadata{Sonames: []string{"base.so.1"}}},
 			},
 		},
 	}

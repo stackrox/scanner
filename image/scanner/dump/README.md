@@ -10,7 +10,7 @@ genesis dumps we currently maintain. The format is as follows:
       "dumpLocationInGS": "Location of Genesis Dump in GCS (ie: gs://stackrox-scanner-ci-vuln-dump/genesis-YYYYMMDDHHMMSS.zip)",
       "timestamp": "'Until' time in the dump's manifest.json",
       "baseForOfflineDumps": true,
-      "diffLocation": "Location of the diff between the current state of vulns and the vulns embedded in the image from 'baseForOfflineDumps' (ie. gs://definitions.stackrox.io/<UUID>/diff.zip)",
+      "uuid": "UUID of the diff between the current state of vulns and the vulns embedded in the image from 'baseForOfflineDumps' (ie. gs://definitions.stackrox.io/<UUID>/diff.zip)",
       "config": {
         "skipFixableCentOSVulns": true,
         "ignoreKubernetesVulns": true

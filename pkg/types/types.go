@@ -8,6 +8,7 @@ import (
 	"github.com/facebookincubator/nvdtools/cvss2"
 	"github.com/facebookincubator/nvdtools/cvss3"
 	"github.com/stackrox/k8s-cves/pkg/validation"
+	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 )
 
@@ -194,4 +195,13 @@ func ConvertCVSSv3(cvss3Vector string) (*MetadataCVSSv3, error) {
 // roundTo1Decimal returns the given float64 rounded to the nearest tenth place.
 func roundTo1Decimal(x float64) float64 {
 	return math.Round(x*10) / 10
+}
+
+// IsNilOrEmpty returns "true" if the passed Metadata is nil or its contents are empty
+func (m *Metadata) IsNilOrEmpty() bool {
+	if m == nil {
+		return true
+	}
+
+	return stringutils.AllEmpty(m.LastModifiedDateTime, m.PublishedDateTime, m.CVSSv2.Vectors, m.CVSSv3.Vectors)
 }

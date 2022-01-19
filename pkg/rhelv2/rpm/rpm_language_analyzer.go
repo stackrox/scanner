@@ -4,28 +4,11 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/osrelease"
 	"github.com/stackrox/scanner/pkg/tarutil"
-	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
-
-var (
-	scannerOperatingSystem string
-)
-
-func init() {
-	data, err := os.ReadFile("/etc/os-release")
-	if err != nil {
-		log.WithError(err).Error("UNEXPECTED: /etc/os-release cannot be read")
-		return
-	}
-
-	scannerOperatingSystem, _ = osrelease.GetOSAndVersionFromOSRelease(data)
-}
 
 // AnnotateComponentsWithPackageManagerInfo checks for each component if it was installed by the package manager,
 // and sets the `FromPackageManager` attribute accordingly.
@@ -84,15 +67,6 @@ func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, 
 	}
 
 	finishFn := func() { _ = os.RemoveAll(tmpDir) }
-
-	if !wellknownnamespaces.IsRHELNamespace(scannerOperatingSystem) {
-		log.Info("Rebuilding Package database for a RHEL image. This may be better optimized on the RHEL-based Scanner image")
-		cmd := exec.Command("rpmdb", `--rebuilddb`, `--dbpath`, tmpDir)
-		if err := cmd.Run(); err != nil {
-			finishFn()
-			return nil, nil, errors.Wrap(err, "rebuilding RPM DB")
-		}
-	}
 
 	return func(path string) bool {
 		// We need the full path of the file.

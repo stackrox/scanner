@@ -19,7 +19,6 @@ import (
 	"bufio"
 	"bytes"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 
@@ -159,7 +158,8 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		return
 	}
 
-	var executables []string
+	execToDeps := make(database.StringToStringsMap)
+	libToDeps := make(database.StringToStringsMap)
 	// Distroless containers do not provide executable files the same way distro containers do.
 	if !distroless && features.ActiveVulnMgmt.Enabled() {
 		// for example: var/lib/dpkg/info/vim.list
@@ -178,9 +178,7 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 			filename := filenamesFileScanner.Text()
 
 			// The first character is always "/", which is removed when inserted into the files maps.
-			if fileData := files[filename[1:]]; fileData.Executable {
-				executables = append(executables, filename)
-			}
+			featurefmt.AddToDependencyMap(filename, files[filename[1:]], execToDeps, libToDeps)
 		}
 		if err := filenamesFileScanner.Err(); err != nil {
 			log.WithError(err).WithFields(log.Fields{"name": pkgMetadata.name, "version": pkgMetadata.version}).Warning("could not parse provided file list")
@@ -199,16 +197,25 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	// with multiple associated packages.
 	if feature, exists := packagesMap[key]; exists {
 		// Append the executable files for the associated package to the source package.
-		feature.ProvidedExecutables = append(feature.ProvidedExecutables, executables...)
+		feature.ExecutableToDependencies.Merge(execToDeps)
+		feature.LibraryToDependencies.Merge(libToDeps)
 		return
+	}
+
+	if len(libToDeps) == 0 {
+		libToDeps = nil
+	}
+	if len(execToDeps) == 0 {
+		execToDeps = nil
 	}
 
 	packagesMap[key] = &database.FeatureVersion{
 		Feature: database.Feature{
 			Name: pkgName,
 		},
-		Version:             pkgVersion,
-		ProvidedExecutables: executables,
+		Version:                  pkgVersion,
+		ExecutableToDependencies: execToDeps,
+		LibraryToDependencies:    libToDeps,
 	}
 }
 
@@ -240,18 +247,6 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	packages := make([]database.FeatureVersion, 0, len(packagesMap))
 	for _, pkg := range packagesMap {
 		if !removedPackages.Contains(pkg.Feature.Name) {
-			// Sort the provided executables and only allow unique executables.
-			sort.Strings(pkg.ProvidedExecutables)
-			filtered := pkg.ProvidedExecutables[:0]
-			prev := ""
-			for _, executable := range pkg.ProvidedExecutables {
-				if executable != prev {
-					filtered = append(filtered, executable)
-				}
-				prev = executable
-			}
-			pkg.ProvidedExecutables = filtered
-
 			packages = append(packages, *pkg)
 		}
 	}
