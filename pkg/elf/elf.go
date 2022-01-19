@@ -21,6 +21,7 @@ type Metadata struct {
 }
 
 // GetMetadata extracts and returns ELF Metadata if the input is in ELF format.
+// It is *not* an error if the passed in io.ReaderAt is not an ELF binary.
 func GetMetadata(r io.ReaderAt) (*Metadata, error) {
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
