@@ -28,7 +28,7 @@ func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
 			ExpectedNamespace: &database.Namespace{Name: "debian:8", VersionFormat: dpkg.ParserName},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"etc/os-release": {Contents: []byte(
 					`PRETTY_NAME="Debian GNU/Linux 8 (jessie)"
 NAME="Debian GNU/Linux"
@@ -42,7 +42,7 @@ BUG_REPORT_URL="https://bugs.debian.org/"`)},
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "ubuntu:15.10", VersionFormat: dpkg.ParserName},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"etc/os-release": {Contents: []byte(
 					`NAME="Ubuntu"
 VERSION="15.10 (Wily Werewolf)"
@@ -57,7 +57,7 @@ BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"`)},
 		},
 		{ // Doesn't have quotes around VERSION_ID
 			ExpectedNamespace: &database.Namespace{Name: "fedora:20", VersionFormat: rpm.ParserName},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"etc/os-release": {Contents: []byte(
 					`NAME=Fedora
 VERSION="20 (Heisenbug)"
@@ -76,7 +76,7 @@ REDHAT_SUPPORT_PRODUCT_VERSION=20`)},
 		},
 		{
 			ExpectedNamespace: nil,
-			Files:             tarutil.CreateNewFilesMap(nil),
+			Files:             tarutil.CreateNewLayerFiles(nil),
 		},
 	}
 

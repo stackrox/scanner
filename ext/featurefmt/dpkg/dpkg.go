@@ -67,7 +67,7 @@ type componentMetadata struct {
 	arch          string
 }
 
-func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) error {
+func (l lister) parseComponents(files tarutil.LayerFiles, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) error {
 	pkgFmt := `dpkg`
 	if distroless {
 		pkgFmt = `distroless`
@@ -147,7 +147,7 @@ func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap
 	return scanner.Err()
 }
 
-func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) {
+func handleComponent(files tarutil.LayerFiles, pkgMetadata *componentMetadata, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) {
 	// Debian and Ubuntu vulnerability feeds only have entries for source packages,
 	// and not the package binaries, though usually only the binaries are installed.
 	pkgName := stringutils.FirstNonEmpty(pkgMetadata.sourceName, pkgMetadata.name)
@@ -177,7 +177,7 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		for filenamesFileScanner.Scan() {
 			filename := filenamesFileScanner.Text()
 
-			// The first character is always "/", which is removed when inserted into the files maps.
+			// The first character is always "/", which is removed when inserted into the layer files.
 			fileData, hasFile := files.Get(filename[1:])
 			if hasFile {
 				featurefmt.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
@@ -222,7 +222,7 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	}
 }
 
-func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
+func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
 	packagesMap := make(map[featurefmt.PackageKey]*database.FeatureVersion)
 	// Create a set to store removed packages to ensure it holds between files.
@@ -235,7 +235,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 		}
 	}
 
-	for filename, file := range files.GetFileData() {
+	for filename, file := range files.GetFilesMap() {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		// The var/lib/dpkg/status.d directory holds the files which define packages.

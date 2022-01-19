@@ -43,7 +43,7 @@ func init() {
 
 type detector struct{}
 
-func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
+func (d detector) Detect(files tarutil.LayerFiles, _ *featurens.DetectorOptions) *database.Namespace {
 	file, exists := files.Get(alpineReleasePath)
 	if !exists {
 		return nil

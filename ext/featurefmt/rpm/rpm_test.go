@@ -50,7 +50,7 @@ func TestRpmFeatureDetection(t *testing.T) {
 					Version: "0.0.1-el7",
 				},
 			},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"var/lib/rpm/Packages": {Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
 			}),
 		},
@@ -97,7 +97,7 @@ func TestRpmFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					},
 				},
 			},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"var/lib/rpm/Packages":   {Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
 				"etc/centos-release":     {Executable: true},
 				"usr/games":              {Executable: true, ELFMetadata: &elf.Metadata{ImportedLibraries: []string{"base.so.1", "mock.so.1.0"}}},

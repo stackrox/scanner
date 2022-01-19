@@ -16,7 +16,7 @@ import (
 )
 
 // ListFeaturesTest does the same as ListFeatures but should only be used for testing.
-func ListFeaturesTest(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
+func ListFeaturesTest(files tarutil.LayerFiles) ([]*database.RHELv2Package, []string, error) {
 	if features.ActiveVulnMgmt.Enabled() {
 		return listFeatures(files, queryFmtActiveVulnMgmtTest)
 	}
@@ -75,7 +75,7 @@ func TestRPMFeatureDetection(t *testing.T) {
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
 	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
-	pkgs, cpes, err := ListFeaturesTest(tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+	pkgs, cpes, err := ListFeaturesTest(tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 		"var/lib/rpm/Packages":                       {Contents: d},
 		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
 	}))
@@ -146,7 +146,7 @@ func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
 	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
-	pkgs, cpes, err := ListFeaturesTest(tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+	pkgs, cpes, err := ListFeaturesTest(tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 		"var/lib/rpm/Packages":                       {Contents: d},
 		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
 		"usr/lib64/libz.so.1":                        {Executable: true},

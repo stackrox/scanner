@@ -26,7 +26,7 @@ func BenchmarkListFeaturesNoActiveVulnMgmt(b *testing.B) {
 	envIsolator.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
-	filemap := tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+	filemap := tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 		"var/lib/rpm/Packages":                       {Contents: d},
 		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
 	})
@@ -51,7 +51,7 @@ func BenchmarkListFeatures(b *testing.B) {
 	envIsolator.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
 	defer envIsolator.RestoreAll()
 
-	filemap := tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+	filemap := tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 		"var/lib/rpm/Packages":                       {Contents: d},
 		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
 		"usr/lib64/libz.so.1":                        {Executable: true},

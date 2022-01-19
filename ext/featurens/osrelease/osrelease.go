@@ -47,7 +47,7 @@ func init() {
 	featurens.RegisterDetector("os-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
+func (d detector) Detect(files tarutil.LayerFiles, _ *featurens.DetectorOptions) *database.Namespace {
 	var OS, version string
 
 	for _, filePath := range blocklistFilenames {

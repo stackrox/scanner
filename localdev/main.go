@@ -113,7 +113,7 @@ func analyzeLocalImage(path string) {
 	}
 	fmt.Println(namespace)
 	var total time.Duration
-	var baseMap *tarutil.FilesMap
+	var baseMap *tarutil.LayerFiles
 	for _, l := range config.Layers {
 		fileData, _ = filemap.Get(l)
 		layerTarReader := io.NopCloser(bytes.NewBuffer(fileData.Contents))

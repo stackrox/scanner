@@ -41,7 +41,7 @@ func init() {
 
 type lister struct{}
 
-func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
+func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
 	file, exists := files.Get(dbPath)
 	if !exists {
 		return []database.FeatureVersion{}, nil
@@ -106,7 +106,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 			dir = line[2:]
 		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
-			// The first character is always "/", which is removed when inserted into the files maps.
+			// The first character is always "/", which is removed when inserted into the layer files.
 			fileData, hasFile := files.Get(filename[1:])
 			if hasFile {
 				featurefmt.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)

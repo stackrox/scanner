@@ -20,29 +20,30 @@ type FileData struct {
 	ELFMetadata *elf.Metadata
 }
 
-// FilesMap contains a map of files' paths to their contents and the information to resolve it.
-type FilesMap struct {
+// LayerFiles represent the files in an image layer.
+// It contains a map of the files' paths to their data and the information to resolve them.
+type LayerFiles struct {
 	data map[string]FileData
 	// links maps a symbolic link to link target.
 	links   map[string]string
 	removed set.StringSet
 }
 
-// CreateNewFilesMap creates a FilesMap
-func CreateNewFilesMap(data map[string]FileData) FilesMap {
+// CreateNewLayerFiles creates a LayerFiles
+func CreateNewLayerFiles(data map[string]FileData) LayerFiles {
 	if data == nil {
 		data = make(map[string]FileData)
 	}
-	return FilesMap{data: data, links: make(map[string]string), removed: set.NewStringSet()}
+	return LayerFiles{data: data, links: make(map[string]string), removed: set.NewStringSet()}
 }
 
-// GetFileData returns the map of files to their data
-func (f FilesMap) GetFileData() map[string]FileData {
+// GetFilesMap returns the map of files to their data
+func (f LayerFiles) GetFilesMap() map[string]FileData {
 	return f.data
 }
 
 // Get resolves and gets FileData for the path
-func (f FilesMap) Get(path string) (FileData, bool) {
+func (f LayerFiles) Get(path string) (FileData, bool) {
 	resolved := f.resolve(path)
 	if !strings.HasSuffix(resolved, "/") && strings.HasSuffix(path, "/") {
 		resolved += "/"
@@ -51,11 +52,15 @@ func (f FilesMap) Get(path string) (FileData, bool) {
 	return fileData, exists
 }
 
-// MergeBaseAndResolveSymlinks merges a base map to this and resolves all symbolic links
-func (f FilesMap) MergeBaseAndResolveSymlinks(base *FilesMap) {
+// MergeBaseAndResolveSymlinks merges a base LayerFiles to this and resolves all symbolic links
+// The symbolic links are merged only for resolving paths and the files' data are not merged.
+func (f LayerFiles) MergeBaseAndResolveSymlinks(base *LayerFiles) {
 	if base != nil {
 		for fileName, linkTo := range base.links {
-			if _, exists := f.links[fileName]; exists || f.removed.Contains(fileName) {
+			if f.removed.Contains(fileName) {
+				continue
+			}
+			if _, exists := f.links[fileName]; exists {
 				continue
 			}
 			f.links[fileName] = linkTo
@@ -67,11 +72,11 @@ func (f FilesMap) MergeBaseAndResolveSymlinks(base *FilesMap) {
 }
 
 // GetRemovedFiles returns the files removed
-func (f FilesMap) GetRemovedFiles() []string {
+func (f LayerFiles) GetRemovedFiles() []string {
 	return f.removed.AsSlice()
 }
 
-func (f FilesMap) detectRemovedFiles() {
+func (f LayerFiles) detectRemovedFiles() {
 	for filePath := range f.data {
 		base := path.Base(filePath)
 		if base == whiteout.OpaqueDirectory {
@@ -93,7 +98,7 @@ func (f FilesMap) detectRemovedFiles() {
 // symbolic links if it is resolvable.
 // Eg. symlink -> file, and dirlink -> dir
 // Resolve /dir/symlink to /dir/file and /dirlink/symlink to /dir/file
-func (f FilesMap) resolve(symLink string) string {
+func (f LayerFiles) resolve(symLink string) string {
 	resolved := symLink
 	visited := set.NewStringSet(resolved)
 	for curr, list := ".", strings.Split(symLink, "/"); len(list) > 0; {

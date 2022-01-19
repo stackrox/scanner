@@ -27,7 +27,7 @@ func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
 			ExpectedNamespace: &database.Namespace{Name: "ubuntu:12.04", VersionFormat: dpkg.ParserName},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"etc/lsb-release": {
 					Contents: []byte(
 						`DISTRIB_ID=Ubuntu
@@ -39,7 +39,7 @@ DISTRIB_DESCRIPTION="Ubuntu 12.04 LTS"`),
 		},
 		{ // We don't care about the minor version of Debian
 			ExpectedNamespace: &database.Namespace{Name: "debian:7", VersionFormat: dpkg.ParserName},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"etc/lsb-release": {
 					Contents: []byte(
 						`DISTRIB_ID=Debian
@@ -51,7 +51,7 @@ DISTRIB_DESCRIPTION="Debian 7.1"`),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files:             tarutil.FilesMap{},
+			Files:             tarutil.LayerFiles{},
 		},
 	}
 

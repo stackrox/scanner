@@ -27,7 +27,7 @@ func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
 			ExpectedNamespace: &database.Namespace{Name: "debian:unstable", VersionFormat: dpkg.ParserName},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"etc/os-release": {Contents: []byte(
 					`PRETTY_NAME="Debian GNU/Linux stretch/sid"
 NAME="Debian GNU/Linux"
@@ -39,7 +39,7 @@ BUG_REPORT_URL="https://bugs.debian.org/"`)},
 		},
 		{
 			ExpectedNamespace: nil,
-			Files:             tarutil.CreateNewFilesMap(nil),
+			Files:             tarutil.CreateNewLayerFiles(nil),
 		},
 	}
 

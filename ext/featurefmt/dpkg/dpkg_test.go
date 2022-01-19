@@ -60,7 +60,7 @@ func TestDpkgFeatureDetection(t *testing.T) {
 					Version: "1.1.8-3.1ubuntu3",
 				},
 			},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"var/lib/dpkg/status":           {Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
 				"var/lib/dpkg/status.d":         {},
 				"var/lib/dpkg/status.d/base":    {Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
@@ -112,7 +112,7 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					LibraryToDependencies:    database.StringToStringsMap{"somelib.so.1": {"gcc5.so.1": {}}},
 				},
 			},
-			Files: tarutil.CreateNewFilesMap(
+			Files: tarutil.CreateNewLayerFiles(
 				map[string]tarutil.FileData{
 					"var/lib/dpkg/status":                       {Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
 					"var/lib/dpkg/status.d":                     {},

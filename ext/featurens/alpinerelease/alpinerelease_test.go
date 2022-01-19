@@ -27,25 +27,25 @@ func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v3.3", VersionFormat: apk.ParserName},
-			Files:             tarutil.CreateNewFilesMap(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`3.3.4`)}}),
+			Files:             tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`3.3.4`)}}),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v3.4", VersionFormat: apk.ParserName},
-			Files:             tarutil.CreateNewFilesMap(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`3.4.0`)}}),
+			Files:             tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`3.4.0`)}}),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v0.3", VersionFormat: apk.ParserName},
-			Files:             tarutil.CreateNewFilesMap(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`0.3.4`)}}),
+			Files:             tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`0.3.4`)}}),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v0.3", VersionFormat: apk.ParserName},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`
 0.3.4
 `)}}),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:edge", VersionFormat: apk.ParserName},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"etc/alpine-release": {Contents: []byte(`3.14.0_alpha20210212`)},
 				"etc/os-release": {Contents: []byte(
 					`NAME="Alpine Linux"
@@ -58,7 +58,7 @@ BUG_REPORT_URL="https://bugs.alpinelinux.org/"`)},
 		},
 		{
 			ExpectedNamespace: nil,
-			Files:             tarutil.CreateNewFilesMap(nil),
+			Files:             tarutil.CreateNewLayerFiles(nil),
 		},
 	}
 

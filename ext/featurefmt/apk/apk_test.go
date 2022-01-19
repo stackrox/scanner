@@ -78,7 +78,7 @@ func TestAPKFeatureDetection(t *testing.T) {
 					Version: "0.7-r0",
 				},
 			},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"lib/apk/db/installed": {Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
 			}),
 		},
@@ -154,7 +154,7 @@ func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					Version: "0.7-r0",
 				},
 			},
-			Files: tarutil.CreateNewFilesMap(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"lib/apk/db/installed":      {Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
 				"lib/libc.musl-x86_64.so.1": {Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{"c.so.1"}, ImportedLibraries: []string{"ld.so.1"}}},
 				"lib/ld-musl-x86_64.so.1":   {Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{"ld.so.1"}}},

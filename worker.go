@@ -108,7 +108,7 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, lineage, p
 //
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
-func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lineage, parentName, parentLineage string, reader io.ReadCloser, base *tarutil.FilesMap, uncertifiedRHEL bool) (*tarutil.FilesMap, error) {
+func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lineage, parentName, parentLineage string, reader io.ReadCloser, base *tarutil.LayerFiles, uncertifiedRHEL bool) (*tarutil.LayerFiles, error) {
 	layer, exists, err := preProcessLayer(datastore, imageFormat, name, lineage, parentName, parentLineage, uncertifiedRHEL)
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 	// Analyze the content.
 	var rhelv2Components *database.RHELv2Components
 	var languageComponents []*component.Component
-	var files *tarutil.FilesMap
+	var files *tarutil.LayerFiles
 	layer.Namespace, layer.Distroless, layer.Features, rhelv2Components, languageComponents, files, err = DetectContentFromReader(reader, imageFormat, name, layer.Parent, base, uncertifiedRHEL)
 	if err != nil {
 		return nil, err
@@ -161,7 +161,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 	return files, datastore.InsertLayerComponents(layer.Name, lineage, languageComponents, files.GetRemovedFiles(), opts)
 }
 
-func detectFromFiles(files tarutil.FilesMap, name string, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
+func detectFromFiles(files tarutil.LayerFiles, name string, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
 	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
 
 	distroless := isDistroless(files) || (parent != nil && parent.Distroless)
@@ -221,7 +221,7 @@ func (m *analyzingMatcher) Match(filePath string, fi os.FileInfo, contents io.Re
 }
 
 // DetectContentFromReader detects scanning content in the given reader.
-func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, base *tarutil.FilesMap, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, *tarutil.FilesMap, error) {
+func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, base *tarutil.LayerFiles, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, *tarutil.LayerFiles, error) {
 	// Create a "matcher" that actually calls `ProcessFile` on each analyzer, before delegating
 	// to the actual matcher for operating system-level feature extraction.
 	// TODO: this is ugly. A matcher should not have side-effects; but the `analyzingMatcher`s
@@ -246,13 +246,13 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 	return namespace, distroless, features, rhelv2Components, languageComponents, files, err
 }
 
-func isDistroless(filesMap tarutil.FilesMap) bool {
+func isDistroless(filesMap tarutil.LayerFiles) bool {
 	_, ok := filesMap.Get("var/lib/dpkg/status.d/")
 	return ok
 }
 
 // DetectNamespace detects the layer's namespace.
-func DetectNamespace(name string, files tarutil.FilesMap, parent *database.Layer, uncertifiedRHEL bool) *database.Namespace {
+func DetectNamespace(name string, files tarutil.LayerFiles, parent *database.Layer, uncertifiedRHEL bool) *database.Namespace {
 	namespace := featurens.Detect(files, &featurens.DetectorOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
@@ -273,7 +273,7 @@ func DetectNamespace(name string, files tarutil.FilesMap, parent *database.Layer
 	return nil
 }
 
-func detectFeatureVersions(name string, files tarutil.FilesMap, namespace *database.Namespace, parent *database.Layer) (features []database.FeatureVersion, err error) {
+func detectFeatureVersions(name string, files tarutil.LayerFiles, namespace *database.Namespace, parent *database.Layer) (features []database.FeatureVersion, err error) {
 	// TODO(Quentin-M): We need to pass the parent image to DetectFeatures because it's possible that
 	// some detectors would need it in order to produce the entire feature list (if they can only
 	// detect a diff). Also, we should probably pass the detected namespace so detectors could

@@ -62,8 +62,8 @@ func SetMaxExtractableFileSize(val int64) {
 
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
-func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error) {
-	filesMap := CreateNewFilesMap(nil)
+func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, error) {
+	filesMap := CreateNewLayerFiles(nil)
 
 	// executableMatcher indicates if the given file is executable
 	// for the FileData struct.

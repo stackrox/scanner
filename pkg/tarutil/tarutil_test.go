@@ -111,7 +111,7 @@ func TestExtractWithSymlink(t *testing.T) {
 	}
 
 	files, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher(""))
-	base := FilesMap{data: make(map[string]FileData), links: map[string]string{"lib64": "l1"}}
+	base := LayerFiles{data: make(map[string]FileData), links: map[string]string{"lib64": "l1"}}
 	files.MergeBaseAndResolveSymlinks(&base)
 	assert.NoError(t, err)
 	assert.Len(t, files.data, 9)
@@ -130,7 +130,7 @@ func TestExtractWithSymlink(t *testing.T) {
 	verifyContent(t, files, "lib64/2/l3/4/symlink")
 }
 
-func verifyContent(t *testing.T, files FilesMap, p string) {
+func verifyContent(t *testing.T, files LayerFiles, p string) {
 	fileData, exists := files.Get(p)
 	assert.True(t, exists)
 	assert.Equal(t, "test\n", string(fileData.Contents))
