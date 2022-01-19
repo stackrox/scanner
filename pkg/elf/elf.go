@@ -20,7 +20,7 @@ type Metadata struct {
 }
 
 // GetMetadataIfELFExecutable extracts and returns ELF metadata if the input
-// is in ELF format.
+// is an executable in ELF format.
 func GetMetadataIfELFExecutable(r io.ReaderAt) (*Metadata, error) {
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
