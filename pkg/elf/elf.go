@@ -2,6 +2,7 @@ package elf
 
 import (
 	"debug/elf"
+	"github.com/stackrox/rox/pkg/utils"
 	"io"
 
 	"github.com/pkg/errors"
@@ -9,7 +10,7 @@ import (
 )
 
 var (
-	allowedELFTypeList = set.NewFrozenIntSet(int(elf.ET_EXEC), int(elf.ET_DYN))
+	allowedELFTypeList = set.NewFrozenIntSet(elf.ET_EXEC, elf.ET_DYN)
 )
 
 // Metadata contains the exacted metadata from ELF file
@@ -19,17 +20,16 @@ type Metadata struct {
 	ImportedLibraries []string
 }
 
-// GetMetadataIfELFExecutable extracts and returns ELF metadata if the input
-// is an executable in ELF format.
-func GetMetadataIfELFExecutable(r io.ReaderAt) (*Metadata, error) {
+// GetMetadata extracts and returns ELF Metadata if the input is in ELF format.
+func GetMetadata(r io.ReaderAt) (*Metadata, error) {
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
 		return nil, nil
 	}
-	defer elfFile.Close()
+	defer utils.IgnoreError(elfFile.Close)
 
-	// Exclude core and other unknown elf file.
-	if !allowedELFTypeList.Contains(int(elfFile.Type)) {
+	// Exclude core and other unknown ELF file.
+	if !allowedELFTypeList.Contains(elfFile.Type) {
 		return nil, nil
 	}
 

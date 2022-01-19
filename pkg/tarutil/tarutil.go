@@ -136,7 +136,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
 			var fileData FileData
 
-			fileData.ELFMetadata, err = elf.GetMetadataIfELFExecutable(contents)
+			fileData.ELFMetadata, err = elf.GetMetadata(contents)
 			if err != nil {
 				log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 			}
