@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	allowedELFTypeList = set.NewFrozenIntSet(elf.ET_EXEC, elf.ET_DYN)
+	allowedELFTypeList = set.NewFrozenIntSet(int(elf.ET_EXEC), int(elf.ET_DYN))
 )
 
 // Metadata contains the exacted metadata from ELF file
@@ -30,7 +30,7 @@ func GetExecutableMetadata(r io.ReaderAt) (*Metadata, error) {
 	defer utils.IgnoreError(elfFile.Close)
 
 	// Exclude core and other unknown ELF file.
-	if !allowedELFTypeList.Contains(elfFile.Type) {
+	if !allowedELFTypeList.Contains(int(elfFile.Type)) {
 		return nil, nil
 	}
 
