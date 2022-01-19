@@ -19,22 +19,20 @@ type Metadata struct {
 	ImportedLibraries []string
 }
 
-// OpenIfELFExecutable returns an ELF file if the data is in ELF format
-func OpenIfELFExecutable(r io.ReaderAt) *elf.File {
+// GetMetadataIfELFExecutable extracts and returns ELF metadata if the input
+// is an executable in ELF format.
+func GetMetadataIfELFExecutable(r io.ReaderAt) (*Metadata, error) {
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
-		return nil
+		return nil, nil
 	}
+	defer elfFile.Close()
 
 	// Exclude core and other unknown elf file.
-	if allowedELFTypeList.Contains(int(elfFile.Type)) {
-		return elfFile
+	if !allowedELFTypeList.Contains(int(elfFile.Type)) {
+		return nil, nil
 	}
-	return nil
-}
 
-// GetELFMetadata extracts and returns ELF metadata
-func GetELFMetadata(elfFile *elf.File) (*Metadata, error) {
 	sonames, err := elfFile.DynString(elf.DT_SONAME)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get sonames from ELF executable")
