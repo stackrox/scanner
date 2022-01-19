@@ -22,7 +22,7 @@ message ScanImageRequest {
 message ScanImageResponse {
     string     scanner_version = 3;
     ScanStatus status          = 1;
-    ImageSpec image            = 2;
+    ImageSpec  image           = 2;
 }
 
 message GetImageScanRequest {
