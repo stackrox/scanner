@@ -125,13 +125,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 		case tar.TypeReg, tar.TypeLink:
 			var fileData FileData
 
-			elfFile := elf.OpenIfELFExecutable(contents)
-			if elfFile != nil {
-				if elfMetadata, err := elf.GetELFMetadata(elfFile); err != nil {
-					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
-				} else {
-					fileData.ELFMetadata = elfMetadata
-				}
+			fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
+			if err != nil {
+				log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
