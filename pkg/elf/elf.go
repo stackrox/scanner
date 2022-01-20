@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/rox/pkg/utils"
 )
 
 var (
@@ -19,16 +20,16 @@ type Metadata struct {
 	ImportedLibraries []string
 }
 
-// GetMetadataIfELFExecutable extracts and returns ELF metadata if the input
-// is an executable in ELF format.
-func GetMetadataIfELFExecutable(r io.ReaderAt) (*Metadata, error) {
+// GetExecutableMetadata extracts and returns Metadata if the input is an executable ELF binary.
+// It is **not** an error if the passed in io.ReaderAt is not an ELF binary.
+func GetExecutableMetadata(r io.ReaderAt) (*Metadata, error) {
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
 		return nil, nil
 	}
-	defer elfFile.Close()
+	defer utils.IgnoreError(elfFile.Close)
 
-	// Exclude core and other unknown elf file.
+	// Exclude core and other unknown ELF file.
 	if !allowedELFTypeList.Contains(int(elfFile.Type)) {
 		return nil, nil
 	}
