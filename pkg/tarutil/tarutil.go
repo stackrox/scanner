@@ -63,7 +63,7 @@ func SetMaxExtractableFileSize(val int64) {
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
 func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, error) {
-	filesMap := CreateNewLayerFiles(nil)
+	files := CreateNewLayerFiles(nil)
 
 	// executableMatcher indicates if the given file is executable
 	// for the FileData struct.
@@ -72,7 +72,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
 	if err != nil {
-		return filesMap, errors.Wrap(err, "could not extract tar archive")
+		return files, errors.Wrap(err, "could not extract tar archive")
 	}
 	defer tr.Close()
 
@@ -88,7 +88,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			break
 		}
 		if err != nil {
-			return filesMap, errors.Wrap(err, "could not advance in the tar archive")
+			return files, errors.Wrap(err, "could not advance in the tar archive")
 		}
 		numFiles++
 
@@ -137,7 +137,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
 			if !extractContents || hdr.Typeflag != tar.TypeReg {
 				fileData.Executable = executable
-				filesMap.data[filename] = fileData
+				files.data[filename] = fileData
 				continue
 			}
 
@@ -150,25 +150,25 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			// Put the file directly
 			fileData.Contents = d
 			fileData.Executable = executable
-			filesMap.data[filename] = fileData
+			files.data[filename] = fileData
 
 			numExtractedContentBytes += len(d)
 		case tar.TypeSymlink:
-			filesMap.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
 		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
 			// However, add to the map, so the entry will exist.
-			filesMap.data[filename] = FileData{}
+			files.data[filename] = FileData{}
 		}
 	}
-	filesMap.detectRemovedFiles()
+	files.detectRemovedFiles()
 
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
 
-	return filesMap, nil
+	return files, nil
 }
 
 // XzReader implements io.ReadCloser for data compressed via `xz`.

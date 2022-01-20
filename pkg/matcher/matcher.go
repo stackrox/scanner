@@ -114,8 +114,8 @@ type andMatcher struct {
 	matchers []Matcher
 }
 
-func (a *andMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (bool, bool) {
-	extract := true
+func (a *andMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (matches bool, extract bool) {
+	extract = true
 	for _, subMatcher := range a.matchers {
 		match, extractable := subMatcher.Match(fullPath, fileInfo, contents)
 		if !match {

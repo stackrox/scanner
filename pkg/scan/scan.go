@@ -29,7 +29,7 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	var prevLayer string
 
 	var prevLineage, lineage string
-	var baseMap *tarutil.LayerFiles
+	var baseFiles *tarutil.LayerFiles
 	h := sha256.New()
 	for _, layer := range layers {
 		layerReadCloser := &LayerDownloadReadCloser{
@@ -39,8 +39,8 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 		}
 
 		var err error
-		// baseMap tracks the files from previous layer to help resolve paths
-		baseMap, err = clair.ProcessLayerFromReader(storage, "Docker", layer, lineage, prevLayer, prevLineage, layerReadCloser, baseMap, uncertifiedRHEL)
+		// baseFiles tracks the files from previous layer to help resolve paths
+		baseFiles, err = clair.ProcessLayerFromReader(storage, "Docker", layer, lineage, prevLayer, prevLineage, layerReadCloser, baseFiles, uncertifiedRHEL)
 		if err != nil {
 			logrus.Errorf("Error analyzing layer: %v", err)
 			return "", err
