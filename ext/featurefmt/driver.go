@@ -44,9 +44,9 @@ type PackageKey struct {
 // Lister represents an ability to list the features present in an image layer.
 type Lister interface {
 	// ListFeatures produces a list of FeatureVersions present in an image layer.
-	ListFeatures(tarutil.FilesMap) ([]database.FeatureVersion, error)
+	ListFeatures(tarutil.LayerFiles) ([]database.FeatureVersion, error)
 
-	// RequiredFilenames returns the list of files required to be in the FilesMap
+	// RequiredFilenames returns the list of files required to be in the LayerFiles
 	// provided to the ListFeatures method.
 	//
 	// Filenames must not begin with "/".
@@ -77,7 +77,7 @@ func RegisterLister(name string, l Lister) {
 
 // ListFeatures produces the list of FeatureVersions in an image layer using
 // every registered Lister.
-func ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
+func ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
 	listersM.RLock()
 	defer listersM.RUnlock()
 
@@ -110,7 +110,7 @@ func RequiredFilenames() (files []string) {
 
 // TestData represents the data used to test an implementation of Lister.
 type TestData struct {
-	Files           tarutil.FilesMap
+	Files           tarutil.LayerFiles
 	FeatureVersions []database.FeatureVersion
 }
 

@@ -83,12 +83,13 @@ func analyzeLocalImage(path string) {
 		panic(err)
 	}
 
-	if _, ok := filemap["manifest.json"]; !ok {
+	if _, ok := filemap.Get("manifest.json"); !ok {
 		panic("malformed .tar does not contain manifest.json")
 	}
 
 	var configs []Config
-	if err := json.Unmarshal(filemap["manifest.json"].Contents, &configs); err != nil {
+	fileData, _ := filemap.Get("manifest.json")
+	if err := json.Unmarshal(fileData.Contents, &configs); err != nil {
 		panic(err)
 	}
 	if len(configs) == 0 {
@@ -99,21 +100,25 @@ func analyzeLocalImage(path string) {
 	// detect namespace
 	var namespace *database.Namespace
 	for _, l := range config.Layers {
-		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l].Contents))
+		fileData, _ = filemap.Get(l)
+		layerTarReader := io.NopCloser(bytes.NewBuffer(fileData.Contents))
 		files, err := imagefmt.ExtractFromReader(layerTarReader, "Docker", requiredfilenames.SingletonMatcher())
 		if err != nil {
 			panic(err)
 		}
-		namespace = clair.DetectNamespace(l, files, nil, false)
+		namespace = clair.DetectNamespace(l, *files, nil, false)
 		if namespace != nil {
 			break
 		}
 	}
 	fmt.Println(namespace)
 	var total time.Duration
+	var baseMap *tarutil.LayerFiles
 	for _, l := range config.Layers {
-		layerTarReader := io.NopCloser(bytes.NewBuffer(filemap[l].Contents))
-		_, _, _, rhelv2Components, languageComponents, removedComponents, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace}, false)
+		fileData, _ = filemap.Get(l)
+		layerTarReader := io.NopCloser(bytes.NewBuffer(fileData.Contents))
+		_, _, _, rhelv2Components, languageComponents, files, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace}, baseMap, false)
+		baseMap = files
 		if err != nil {
 			fmt.Println(err.Error())
 			return
@@ -123,7 +128,7 @@ func analyzeLocalImage(path string) {
 			fmt.Printf("RHELv2 Components (%d): %s\n", len(rhelv2Components.Packages), rhelv2Components)
 		}
 
-		fmt.Printf("Removed components: %v\n", removedComponents)
+		fmt.Printf("Removed components: %v\n", baseMap.GetRemovedFiles())
 
 		languageComponents = filterComponentsByName(languageComponents, "")
 

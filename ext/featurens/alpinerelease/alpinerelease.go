@@ -43,8 +43,8 @@ func init() {
 
 type detector struct{}
 
-func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
-	file, exists := files[alpineReleasePath]
+func (d detector) Detect(files tarutil.LayerFiles, _ *featurens.DetectorOptions) *database.Namespace {
+	file, exists := files.Get(alpineReleasePath)
 	if !exists {
 		return nil
 	}
@@ -64,7 +64,7 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 
 	// It is possible this is an alpine:edge image.
 	// Verify this.
-	file, exists = files[osReleasePath]
+	file, exists = files.Get(osReleasePath)
 	if !exists {
 		return nil
 	}

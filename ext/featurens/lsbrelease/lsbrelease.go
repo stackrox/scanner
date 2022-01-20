@@ -42,8 +42,8 @@ func init() {
 	featurens.RegisterDetector("lsb-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
-	f, hasFile := files["etc/lsb-release"]
+func (d detector) Detect(files tarutil.LayerFiles, _ *featurens.DetectorOptions) *database.Namespace {
+	f, hasFile := files.Get("etc/lsb-release")
 	if !hasFile {
 		return nil
 	}

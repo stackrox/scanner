@@ -26,10 +26,10 @@ func BenchmarkListFeaturesNoActiveVulnMgmt(b *testing.B) {
 	envIsolator.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
 	defer envIsolator.RestoreAll()
 
-	filemap := tarutil.FilesMap{
-		"var/lib/rpm/Packages":                       tarutil.FileData{Contents: d},
-		"root/buildinfo/content_manifests/test.json": tarutil.FileData{Contents: manifest},
-	}
+	filemap := tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+		"var/lib/rpm/Packages":                       {Contents: d},
+		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
+	})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -51,18 +51,18 @@ func BenchmarkListFeatures(b *testing.B) {
 	envIsolator.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
 	defer envIsolator.RestoreAll()
 
-	filemap := tarutil.FilesMap{
-		"var/lib/rpm/Packages":                       tarutil.FileData{Contents: d},
-		"root/buildinfo/content_manifests/test.json": tarutil.FileData{Contents: manifest},
-		"usr/lib64/libz.so.1":                        tarutil.FileData{Executable: true},
-		"usr/lib64/libz.so.1.2.11":                   tarutil.FileData{Executable: true},
-		"usr/lib64/libform.so.6":                     tarutil.FileData{Executable: true},
-		"usr/lib64/libncursesw.so.6.1":               tarutil.FileData{Executable: true},
-		"usr/lib64/libpanelw.so.6":                   tarutil.FileData{Executable: true},
-		"etc/redhat-release":                         tarutil.FileData{Executable: true},
-		"etc/os-release":                             tarutil.FileData{Executable: true},
-		"usr/lib/redhat-release":                     tarutil.FileData{Executable: true},
-	}
+	filemap := tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+		"var/lib/rpm/Packages":                       {Contents: d},
+		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
+		"usr/lib64/libz.so.1":                        {Executable: true},
+		"usr/lib64/libz.so.1.2.11":                   {Executable: true},
+		"usr/lib64/libform.so.6":                     {Executable: true},
+		"usr/lib64/libncursesw.so.6.1":               {Executable: true},
+		"usr/lib64/libpanelw.so.6":                   {Executable: true},
+		"etc/redhat-release":                         {Executable: true},
+		"etc/os-release":                             {Executable: true},
+		"usr/lib/redhat-release":                     {Executable: true},
+	})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

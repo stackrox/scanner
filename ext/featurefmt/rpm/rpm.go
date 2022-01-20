@@ -54,8 +54,8 @@ func init() {
 	featurefmt.RegisterLister("rpm", &lister{})
 }
 
-func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
-	f, hasFile := files[dbPath]
+func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
+	f, hasFile := files.Get(dbPath)
 	if !hasFile {
 		return []database.FeatureVersion{}, nil
 	}
@@ -114,7 +114,7 @@ func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion,
 	return featureVersions, nil
 }
 
-func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersion, error) {
+func parseFeatures(r io.Reader, files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
 	var featureVersions []database.FeatureVersion
 
 	var fv database.FeatureVersion
@@ -165,8 +165,11 @@ func parseFeatures(r io.Reader, files tarutil.FilesMap) ([]database.FeatureVersi
 
 			// Rename to make it clear what the line represents.
 			filename := line
-			// The first character is always "/", which is removed when inserted into the files maps.
-			rpm.AddToDependencyMap(filename, files[filename[1:]], execToDeps, libToDeps)
+			// The first character is always "/", which is removed when inserted into the layer files.
+			fileData, hasFile := files.Get(filename[1:])
+			if hasFile {
+				rpm.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
+			}
 		}
 	}
 
