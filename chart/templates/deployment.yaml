@@ -28,7 +28,7 @@ spec:
           - name: ROX_SKIP_PEER_VALIDATION
             value: "true"
           - name: ROX_ACTIVE_VULN_MANAGEMENT
-            value: "false"
+            value: "true"
           resources:
             limits:
               cpu: 2
