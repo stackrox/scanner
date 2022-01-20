@@ -249,7 +249,7 @@ db-integration-tests: deps
 scale-tests: deps
 	@echo "+ $@"
 	mkdir /tmp/pprof
-	go run ./scale/... /tmp/pprof
+	go run ./scale/... /tmp/pprof || true
 	zip -r /tmp/pprof.zip /tmp/pprof
 
 ####################
