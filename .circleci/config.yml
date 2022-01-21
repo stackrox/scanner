@@ -556,7 +556,7 @@ commands:
           name: Deploy into the cluster
           command: |
             cci-export LOGLEVEL "INFO"
-            make deploy
+            make deploy-scale
 
       - wait-for-scanner-and-pf:
           condition: Ready

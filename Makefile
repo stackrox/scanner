@@ -214,6 +214,13 @@ deploy: clean-helm-rendered
 	helm template scanner chart/ --set tag=$(TAG),logLevel=$(LOGLEVEL),updateInterval=2m --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
+.PHONY: deploy-scale
+deploy-scale: clean-helm-rendered
+	@echo "+ $@"
+	kubectl create namespace stackrox || true
+	helm template scanner chart/ --set tag=$(TAG),logLevel=$(LOGLEVEL),updateInterval=2m,cpuRequest=2,cpuLimit=4 --output-dir rendered-chart
+	kubectl apply -R -f rendered-chart
+
 .PHONY: deploy-dockerhub
 deploy-dockerhub: clean-helm-rendered
 	@echo "+ $@"

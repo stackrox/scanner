@@ -31,10 +31,10 @@ spec:
             value: "true"
           resources:
             limits:
-              cpu: 2
+              cpu: {{ .Values.cpuLimit }}
               memory: 4Gi
             requests:
-              cpu: 200m
+              cpu: {{ .Values.cpuRequest }}
               memory: 200Mi
           securityContext:
             runAsUser: 65534

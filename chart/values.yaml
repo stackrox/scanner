@@ -6,3 +6,6 @@ tag: latest
 
 logLevel: info
 updateInterval: 1h
+
+cpuRequest: 200m
+cpuLimit: 2
