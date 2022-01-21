@@ -116,7 +116,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 
 		// File size limit
 		if extractContents && hdr.Size > maxExtractableFileSize {
-			log.Errorf("Skipping file %q because it was too large (%d bytes)", filename, hdr.Size)
+			log.Errorf("Skipping file %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, maxExtractableFileSize)
 			continue
 		}
 
