@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/stackrox/rox/pkg/errorhelpers"
 	"io"
 	"net"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/fixtures"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/sync"
