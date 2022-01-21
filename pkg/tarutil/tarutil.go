@@ -130,6 +130,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 				if err != nil {
 					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 				}
+			} else {
+				log.Warnf("Skipping checking executable for file %q because it was too large (%d bytes)", filename, hdr.Size)
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
