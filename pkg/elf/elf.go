@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/rox/pkg/utils"
 )
 
 var (
@@ -26,6 +27,7 @@ func GetExecutableMetadata(r io.ReaderAt) (*Metadata, error) {
 	if err != nil {
 		return nil, nil
 	}
+	defer utils.IgnoreError(elfFile.Close)
 
 	// Exclude core and other unknown ELF file.
 	if !allowedELFTypeList.Contains(int(elfFile.Type)) {
