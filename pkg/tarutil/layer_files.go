@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/stackrox/rox/pkg/set"
-	elf "github.com/stackrox/scanner/pkg/elf"
+	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/whiteout"
 )
 
