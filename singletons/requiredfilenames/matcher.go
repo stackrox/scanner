@@ -37,9 +37,9 @@ func SingletonMatcher() matcher.Matcher {
 		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
 
 		if features.ActiveVulnMgmt.Enabled() {
-			dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp)
-			dynamicLibMatcher := matcher.NewRegexpMatcher(dynamicLibRegexp)
-			libDirSymlinkMatcher := matcher.NewAndMatcher(matcher.NewRegexpMatcher(libraryDirRegexp), matcher.NewSymbolicLinkMatcher())
+			dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp, true)
+			dynamicLibMatcher := matcher.NewRegexpMatcher(dynamicLibRegexp, false)
+			libDirSymlinkMatcher := matcher.NewAndMatcher(matcher.NewRegexpMatcher(libraryDirRegexp, false), matcher.NewSymbolicLinkMatcher())
 			// All other matchers take precedence over this matcher.
 			// For example, an executable python file should be matched by
 			// the Python matcher. This matcher should be used for any
