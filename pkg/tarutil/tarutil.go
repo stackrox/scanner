@@ -98,7 +98,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 		var contents io.ReaderAt
 		if hdr.FileInfo().Mode().IsRegular() {
 			// Recycle the buffer, if possible.
-			var buf []byte
+			var buf = make([]byte, 0, 1024)
 			if prevLazyReader != nil {
 				buf = prevLazyReader.StealBuffer()
 			}
@@ -125,9 +125,11 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 		case tar.TypeReg, tar.TypeLink:
 			var fileData FileData
 
-			fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
-			if err != nil {
-				log.Errorf("Failed to get dependencies for %s: %v", filename, err)
+			if hdr.Size <= maxExtractableFileSize {
+				fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
+				if err != nil {
+					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
+				}
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
@@ -163,6 +165,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
+	if prevLazyReader != nil {
+		_ = prevLazyReader.StealBuffer()
+	}
 
 	return files, nil
 }
