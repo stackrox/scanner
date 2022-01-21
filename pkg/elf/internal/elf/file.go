@@ -243,7 +243,7 @@ func NewFile(r io.ReaderAt) (*File, error) {
 				return nil, err
 			}
 			// For our purposes, we do not care about any other section.
-			if SectionType(sh.Type) != SHT_DYNAMIC {
+			if SectionType(sh.Type) != SHT_DYNAMIC && i != shstrndx {
 				continue
 			}
 			names[i] = sh.Name
