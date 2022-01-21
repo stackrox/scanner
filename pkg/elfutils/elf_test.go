@@ -1,4 +1,4 @@
-package elf
+package elfutils
 
 import (
 	"os"

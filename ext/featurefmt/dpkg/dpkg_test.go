@@ -20,7 +20,7 @@ import (
 	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
-	"github.com/stackrox/scanner/pkg/elf"
+	"github.com/stackrox/scanner/pkg/elfutils"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -129,10 +129,10 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 				"var/lib/dpkg/info/pkg1:amd64.list":         tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg1:amd64.list")},
 				"var/lib/dpkg/info/pkg2.list":               tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg2.list")},
 				"exec-me":                                   tarutil.FileData{Executable: true},
-				"exec-me-2":                                 tarutil.FileData{Executable: true, ELFMetadata: &elf.Metadata{ImportedLibraries: []string{"gcc5.so.1"}}},
+				"exec-me-2":                                 tarutil.FileData{Executable: true, ELFMetadata: &elfutils.Metadata{ImportedLibraries: []string{"gcc5.so.1"}}},
 				"my-jar.jar":                                tarutil.FileData{Contents: []byte("jar contents")},
-				"lib/linux/libgcc5.so.1":                    tarutil.FileData{ELFMetadata: &elf.Metadata{Sonames: []string{"gcc5.so.1"}}},
-				"lib/linux/libsomelib.so.1":                 tarutil.FileData{ELFMetadata: &elf.Metadata{Sonames: []string{"somelib.so.1"}, ImportedLibraries: []string{"gcc5.so.1"}}},
+				"lib/linux/libgcc5.so.1":                    tarutil.FileData{ELFMetadata: &elfutils.Metadata{Sonames: []string{"gcc5.so.1"}}},
+				"lib/linux/libsomelib.so.1":                 tarutil.FileData{ELFMetadata: &elfutils.Metadata{Sonames: []string{"somelib.so.1"}, ImportedLibraries: []string{"gcc5.so.1"}}},
 			},
 		},
 	}

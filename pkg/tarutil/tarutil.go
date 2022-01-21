@@ -27,7 +27,7 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/scanner/pkg/elf"
+	"github.com/stackrox/scanner/pkg/elfutils"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
@@ -66,7 +66,7 @@ type FileData struct {
 	// Executable indicates if the file is executable.
 	Executable bool
 	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
-	ELFMetadata *elf.Metadata
+	ELFMetadata *elfutils.Metadata
 }
 
 // FilesMap is a map of files' paths to their contents.
@@ -136,7 +136,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
 			var fileData FileData
 
-			fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
+			fileData.ELFMetadata, err = elfutils.GetExecutableMetadata(contents)
 			if err != nil {
 				log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 			}
