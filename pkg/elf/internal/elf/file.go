@@ -406,11 +406,12 @@ func NewFile(r io.ReaderAt) (*File, error) {
 		break
 	}
 
-	if len(f.Sections) == 0 {
+	linkIdx := f.Sections[idx].Link
+
+	if linkIdx < 0 || int(linkIdx) >= len(f.Sections) {
 		return f, nil
 	}
 
-	linkIdx := f.Sections[idx].Link
 	for i := 0; i < shnum; i++ {
 		if int(linkIdx) != i {
 			continue
