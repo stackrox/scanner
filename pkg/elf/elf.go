@@ -1,12 +1,13 @@
 package elf
 
 import (
-	"debug/elf"
+	//"debug/elf"
 	"io"
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/elf/internal/elf"
 )
 
 var (
