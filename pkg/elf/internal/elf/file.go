@@ -326,7 +326,7 @@ func NewFile(r io.ReaderAt) (*File, error) {
 	// Read section headers
 	f.Sections = make([]*Section, shnum)
 	names := make([]uint32, shnum)
-	var idx int
+	idx := -1
 	for i := 0; i < shnum; i++ {
 		off := shoff + int64(i)*int64(shentsize)
 		sr.Seek(off, seekStart)
@@ -404,6 +404,10 @@ func NewFile(r io.ReaderAt) (*File, error) {
 		f.Sections[i] = s
 		idx = i
 		break
+	}
+
+	if idx < 0 {
+		return f, nil
 	}
 
 	linkIdx := f.Sections[idx].Link
