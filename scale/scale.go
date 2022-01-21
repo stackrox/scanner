@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/fixtures"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/sync"
@@ -143,7 +144,8 @@ func profileForever(cli *http.Client, dir string, stopC chan struct{}) {
 		cpuResp, cpuErr := cli.Do(cpuReq)
 		goroutineResp, goroutineErr := cli.Do(goroutineReq)
 		if heapErr != nil || cpuErr != nil || goroutineErr != nil {
-			logrus.Fatal("unable to get profile(s) from Scanner")
+			errors := errorhelpers.NewErrorListWithErrors("retrieving Scanner profiles", []error{heapErr, cpuErr, goroutineErr})
+			logrus.Fatalf("unable to get profile(s) from Scanner: %v", errors.ToError())
 		}
 
 		now := time.Now()
