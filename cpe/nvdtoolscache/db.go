@@ -1,6 +1,7 @@
 package nvdtoolscache
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -32,6 +33,11 @@ func newWithDB(db *bbolt.DB) Cache {
 	return &cacheImpl{DB: db, dir: vulndump.NVDDirName}
 }
 
+// removeDB removes the BoltDB located at the given path.
+func removeDB(path string) {
+	_ = os.Remove(path)
+}
+
 func initializeDB(db *bbolt.DB) error {
 	return db.Update(func(tx *bbolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(cveToProductBucket)
@@ -41,6 +47,8 @@ func initializeDB(db *bbolt.DB) error {
 
 // New returns a new NVD vulnerability cache.
 func New() (Cache, error) {
+	// Start from fresh.
+	removeDB(BoltPath)
 	opts := bbolt.Options{
 		NoFreelistSync: true,
 		FreelistType:   bbolt.FreelistMapType,
