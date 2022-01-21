@@ -24,7 +24,7 @@ import (
 
 type detector struct{}
 
-var busyboxVersionMatcher = regexp.MustCompile(`BusyBox v[\d.]+`)
+var busyboxVersionMatcher = regexp.MustCompile(`BusyBox v(\d)+\.(\d)+\.(\d)+`)
 
 func init() {
 	featurens.RegisterDetector("busybox", &detector{})

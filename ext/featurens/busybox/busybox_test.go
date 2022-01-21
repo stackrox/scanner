@@ -10,26 +10,25 @@ import (
 )
 
 func Test_detector_Detect(t *testing.T) {
-	randomContent := "foobar"
 	testData := []featurens.TestData{
 		{
 			ExpectedNamespace: &database.Namespace{
-				Name:          "busybox:1.2.3",
+				Name:          "busybox:v1.2.3",
 				VersionFormat: language.ParserName,
 			},
 			Files: tarutil.FilesMap{
-				"bin/busybox": tarutil.FileData{Contents: []byte(randomContent)},
-				"bin/sh":      tarutil.FileData{Contents: []byte(randomContent)},
-				"bin/ls":      tarutil.FileData{Contents: []byte(randomContent)},
+				"bin/[":       tarutil.FileData{Contents: []byte("yadda yadda BusyBox v1.2.3.git")},
+				"bin/busybox": tarutil.FileData{LinkName: "bin/["},
+				"bin/sh":      tarutil.FileData{LinkName: "bin/["},
 			},
 		},
 		{
 			ExpectedNamespace: nil,
 			Files: tarutil.FilesMap{
-				"etc/os-release": tarutil.FileData{Contents: []byte(randomContent)},
-				"bin/busybox":    tarutil.FileData{Contents: []byte(randomContent)},
-				"bin/sh":         tarutil.FileData{Contents: []byte(randomContent)},
-				"bin/ls":         tarutil.FileData{Contents: []byte(randomContent)},
+				"etc/os-release": tarutil.FileData{},
+				"bin/busybox":    tarutil.FileData{},
+				"bin/sh":         tarutil.FileData{},
+				"bin/[":          tarutil.FileData{},
 			},
 		},
 	}
