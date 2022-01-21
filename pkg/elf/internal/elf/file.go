@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package elf implements access to ELF object files.
+//nolint:golint,ST1021
 package elf
 
 import (
@@ -325,8 +326,8 @@ func NewFile(r io.ReaderAt) (*File, error) {
 	// Read section headers
 	f.Sections = make([]*Section, shnum)
 	names := make([]uint32, shnum)
-	var i int
-	for i = 0; i < shnum; i++ {
+	var idx int
+	for i := 0; i < shnum; i++ {
 		off := shoff + int64(i)*int64(shentsize)
 		sr.Seek(off, seekStart)
 		s := new(Section)
@@ -401,6 +402,7 @@ func NewFile(r io.ReaderAt) (*File, error) {
 		}
 
 		f.Sections[i] = s
+		idx = i
 		break
 	}
 
@@ -408,7 +410,7 @@ func NewFile(r io.ReaderAt) (*File, error) {
 		return f, nil
 	}
 
-	linkIdx := f.Sections[i].Link
+	linkIdx := f.Sections[idx].Link
 	for i := 0; i < shnum; i++ {
 		if int(linkIdx) != i {
 			continue

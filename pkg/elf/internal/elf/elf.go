@@ -42,6 +42,7 @@
  * SUCH DAMAGE.
  */
 
+//nolint:golint,ST1021
 package elf
 
 import "strconv"
