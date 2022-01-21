@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/stackrox/rox/pkg/errorhelpers"
 	"io"
 	"net"
 	"net/http"
@@ -143,7 +144,8 @@ func profileForever(cli *http.Client, dir string, stopC chan struct{}) {
 		cpuResp, cpuErr := cli.Do(cpuReq)
 		goroutineResp, goroutineErr := cli.Do(goroutineReq)
 		if heapErr != nil || cpuErr != nil || goroutineErr != nil {
-			logrus.Fatal("unable to get profile(s) from Scanner")
+			errors := errorhelpers.NewErrorListWithErrors("retrieving Scanner profiles", []error{heapErr, cpuErr, goroutineErr})
+			logrus.Fatalf("unable to get profile(s) from Scanner: %v", errors.ToError())
 		}
 
 		now := time.Now()
