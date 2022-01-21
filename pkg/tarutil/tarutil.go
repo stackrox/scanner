@@ -67,6 +67,8 @@ type FileData struct {
 	Executable bool
 	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
 	ELFMetadata *elf.Metadata
+	// Name of link (valid for tar.TypeLink or tar.TypeSymlink).
+	LinkName string
 }
 
 // FilesMap is a map of files' paths to their contents.
@@ -142,6 +144,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
+			if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink {
+				fileData.LinkName = hdr.Linkname
+			}
 			if !extractContents || hdr.Typeflag != tar.TypeReg {
 				fileData.Executable = executable
 				data[filename] = fileData
