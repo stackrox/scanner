@@ -142,7 +142,9 @@ func profileForever(cli *http.Client, dir string, stopC chan struct{}) {
 		heapResp, heapErr := cli.Do(heapReq)
 		cpuResp, cpuErr := cli.Do(cpuReq)
 		goroutineResp, goroutineErr := cli.Do(goroutineReq)
-		utils.CrashOnError(heapErr, cpuErr, goroutineErr)
+		if heapErr != nil || cpuErr != nil || goroutineErr != nil {
+			logrus.Fatal("unable to get profile(s) from Scanner")
+		}
 
 		now := time.Now()
 		heapF, heapErr := os.Create(fmt.Sprintf("%s/heap_%s.tar.gz", dir, now.Format(layout)))
