@@ -45,6 +45,14 @@ func doFetch(uri string) (string, io.ReadCloser, error) {
 	if err != nil {
 		return "", nil, retry.MakeRetryable(err)
 	}
+
+	bodyToClose := res.Body
+	defer func() {
+		if bodyToClose != nil {
+			_ = bodyToClose.Close()
+		}
+	}()
+
 	if res.StatusCode != http.StatusOK {
 		return "", nil, retry.MakeRetryable(errors.Errorf("rhelv2: fetcher got unexpected HTTP response for %s: %d (%s)", uri, res.StatusCode, res.Status))
 	}
@@ -57,6 +65,7 @@ func doFetch(uri string) (string, io.ReadCloser, error) {
 		}
 	}
 
+	bodyToClose = nil
 	return res.Header.Get("last-modified"), newReadCloser(res.Body), nil
 }
 
