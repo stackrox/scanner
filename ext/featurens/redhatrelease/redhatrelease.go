@@ -45,9 +45,9 @@ func init() {
 	featurens.RegisterDetector("redhat-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap, opts *featurens.DetectorOptions) *database.Namespace {
+func (d detector) Detect(files tarutil.LayerFiles, opts *featurens.DetectorOptions) *database.Namespace {
 	for _, filePath := range d.RequiredFilenames() {
-		f, hasFile := files[filePath]
+		f, hasFile := files.Get(filePath)
 		if !hasFile {
 			continue
 		}

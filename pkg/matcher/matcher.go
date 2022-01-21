@@ -2,6 +2,7 @@ package matcher
 
 import (
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -93,4 +94,39 @@ func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.Rea
 // NewOrMatcher returns a matcher that matches if and only if any of the passed submatchers does.
 func NewOrMatcher(subMatchers ...Matcher) Matcher {
 	return &orMatcher{matchers: subMatchers}
+}
+
+type symlinkMatcher struct{}
+
+func (o *symlinkMatcher) Match(fullPath string, fileInfo os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
+	if fileInfo.Mode()&fs.ModeSymlink != 0 {
+		return true, false
+	}
+	return false, false
+}
+
+// NewSymbolicLinkMatcher returns a matcher that matches symbolic links
+func NewSymbolicLinkMatcher(subMatchers ...Matcher) Matcher {
+	return &symlinkMatcher{}
+}
+
+type andMatcher struct {
+	matchers []Matcher
+}
+
+func (a *andMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (matches bool, extract bool) {
+	extract = true
+	for _, subMatcher := range a.matchers {
+		match, extractable := subMatcher.Match(fullPath, fileInfo, contents)
+		if !match {
+			return false, false
+		}
+		extract = extract && extractable
+	}
+	return true, extract
+}
+
+// NewAndMatcher returns a matcher that matches if all the passed submatchers match.
+func NewAndMatcher(subMatchers ...Matcher) Matcher {
+	return &andMatcher{matchers: subMatchers}
 }

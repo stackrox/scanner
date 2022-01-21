@@ -20,7 +20,7 @@ import (
 	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
-	"github.com/stackrox/scanner/pkg/elfutils"
+	elf "github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -50,9 +50,9 @@ func TestRpmFeatureDetection(t *testing.T) {
 					Version: "0.0.1-el7",
 				},
 			},
-			Files: tarutil.FilesMap{
-				"var/lib/rpm/Packages": tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
-			},
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"var/lib/rpm/Packages": {Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
+			}),
 		},
 	}
 
@@ -97,16 +97,16 @@ func TestRpmFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					},
 				},
 			},
-			Files: tarutil.FilesMap{
-				"var/lib/rpm/Packages":   tarutil.FileData{Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
-				"etc/centos-release":     tarutil.FileData{Executable: true},
-				"usr/games":              tarutil.FileData{Executable: true, ELFMetadata: &elfutils.Metadata{ImportedLibraries: []string{"base.so.1", "mock.so.1.0"}}},
-				"usr/include":            tarutil.FileData{Executable: true},
-				"usr/lib/debug":          tarutil.FileData{Executable: true},
-				"usr/bin/mock_exec":      tarutil.FileData{Executable: true, ELFMetadata: &elfutils.Metadata{Sonames: []string{}}},
-				"usr/lib64/libmock.so.1": tarutil.FileData{ELFMetadata: &elfutils.Metadata{Sonames: []string{"mock.so.1", "mock.so.1.0"}, ImportedLibraries: []string{"base.so.1"}}},
-				"usr/lib64/libbase.so.1": tarutil.FileData{ELFMetadata: &elfutils.Metadata{Sonames: []string{"base.so.1"}}},
-			},
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"var/lib/rpm/Packages":   {Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
+				"etc/centos-release":     {Executable: true},
+				"usr/games":              {Executable: true, ELFMetadata: &elf.Metadata{ImportedLibraries: []string{"base.so.1", "mock.so.1.0"}}},
+				"usr/include":            {Executable: true},
+				"usr/lib/debug":          {Executable: true},
+				"usr/bin/mock_exec":      {Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{}}},
+				"usr/lib64/libmock.so.1": {ELFMetadata: &elf.Metadata{Sonames: []string{"mock.so.1", "mock.so.1.0"}, ImportedLibraries: []string{"base.so.1"}}},
+				"usr/lib64/libbase.so.1": {ELFMetadata: &elf.Metadata{Sonames: []string{"base.so.1"}}},
+			}),
 		},
 	}
 

@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package elf implements access to ELF object files.
+//nolint:golint
 package elf
 
 import (
@@ -30,27 +31,27 @@ const (
 
 // A FileHeader represents an ELF file header.
 type FileHeader struct {
-	Class      Class
-	Data       Data
-	Version    Version
-	ByteOrder  binary.ByteOrder
-	Type       Type
+	Class     Class
+	Data      Data
+	Version   Version
+	ByteOrder binary.ByteOrder
+	Type      Type
 }
 
 // A File represents an open ELF file.
 type File struct {
 	FileHeader
-	Sections  []*Section
+	Sections []*Section
 }
 
 // A SectionHeader represents a single ELF section header.
 type SectionHeader struct {
-	Name      string
-	Type      SectionType
-	Flags     SectionFlag
-	Offset    uint64
-	Size      uint64
-	Link      uint32
+	Name   string
+	Type   SectionType
+	Flags  SectionFlag
+	Offset uint64
+	Size   uint64
+	Link   uint32
 
 	// FileSize is the size of this section in the file in bytes.
 	// If a section is compressed, FileSize is the size of the
@@ -247,11 +248,11 @@ func NewFile(r io.ReaderAt) (*File, error) {
 			}
 			names[i] = sh.Name
 			s.SectionHeader = SectionHeader{
-				Type:      SectionType(sh.Type),
-				Flags:     SectionFlag(sh.Flags),
-				Offset:    uint64(sh.Off),
-				FileSize:  uint64(sh.Size),
-				Link:      sh.Link,
+				Type:     SectionType(sh.Type),
+				Flags:    SectionFlag(sh.Flags),
+				Offset:   uint64(sh.Off),
+				FileSize: uint64(sh.Size),
+				Link:     sh.Link,
 			}
 		case ELFCLASS64:
 			sh := new(Section64)
@@ -264,11 +265,11 @@ func NewFile(r io.ReaderAt) (*File, error) {
 				continue
 			}
 			s.SectionHeader = SectionHeader{
-				Type:      SectionType(sh.Type),
-				Flags:     SectionFlag(sh.Flags),
-				Offset:    sh.Off,
-				FileSize:  sh.Size,
-				Link:      sh.Link,
+				Type:     SectionType(sh.Type),
+				Flags:    SectionFlag(sh.Flags),
+				Offset:   sh.Off,
+				FileSize: sh.Size,
+				Link:     sh.Link,
 			}
 		}
 		s.sr = io.NewSectionReader(r, int64(s.Offset), int64(s.FileSize))

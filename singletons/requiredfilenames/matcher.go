@@ -12,9 +12,13 @@ import (
 )
 
 var (
-	instance         matcher.Matcher
-	once             sync.Once
+	instance matcher.Matcher
+	once     sync.Once
+	// dynamicLibRegexp matches all dynamic libraries.
 	dynamicLibRegexp = regexp.MustCompile(`(^|/)(lib|ld-)[^/.-][^/]*\.so(\.[^/.]+)*$`)
+	// libraryDirRegexp matches all files under directories where the dynamic libraries are commonly found.
+	// This is to filter for symbolic links needed to resolve dynamic library paths.
+	libraryDirRegexp = regexp.MustCompile(`^(usr/(local/)?)?lib(32|64)?(/.+|$)`)
 )
 
 // SingletonMatcher returns the singleton matcher instance to use for extracting
@@ -29,12 +33,13 @@ func SingletonMatcher() matcher.Matcher {
 		whiteoutMatcher := matcher.NewWhiteoutMatcher()
 
 		// Allocate extra spaces for the feature-flagged matchers.
-		allMatchers := make([]matcher.Matcher, 0, 5)
+		allMatchers := make([]matcher.Matcher, 0, 6)
 		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
 
 		if features.ActiveVulnMgmt.Enabled() {
 			dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp)
 			dynamicLibMatcher := matcher.NewRegexpMatcher(dynamicLibRegexp)
+			libDirSymlinkMatcher := matcher.NewAndMatcher(matcher.NewRegexpMatcher(libraryDirRegexp), matcher.NewSymbolicLinkMatcher())
 			// All other matchers take precedence over this matcher.
 			// For example, an executable python file should be matched by
 			// the Python matcher. This matcher should be used for any
@@ -42,7 +47,7 @@ func SingletonMatcher() matcher.Matcher {
 			// Therefore, this matcher MUST be the last matcher.
 			executableMatcher := matcher.NewExecutableMatcher()
 
-			allMatchers = append(allMatchers, dpkgFilenamesMatcher, dynamicLibMatcher, executableMatcher)
+			allMatchers = append(allMatchers, dpkgFilenamesMatcher, dynamicLibMatcher, libDirSymlinkMatcher, executableMatcher)
 		}
 
 		instance = matcher.NewOrMatcher(allMatchers...)

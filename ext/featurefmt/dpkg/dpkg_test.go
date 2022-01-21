@@ -20,7 +20,7 @@ import (
 	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
-	"github.com/stackrox/scanner/pkg/elfutils"
+	elf "github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -60,12 +60,12 @@ func TestDpkgFeatureDetection(t *testing.T) {
 					Version: "1.1.8-3.1ubuntu3",
 				},
 			},
-			Files: tarutil.FilesMap{
-				"var/lib/dpkg/status":           tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
-				"var/lib/dpkg/status.d":         tarutil.FileData{},
-				"var/lib/dpkg/status.d/base":    tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
-				"var/lib/dpkg/status.d/netbase": tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase")},
-			},
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"var/lib/dpkg/status":           {Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
+				"var/lib/dpkg/status.d":         {},
+				"var/lib/dpkg/status.d/base":    {Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
+				"var/lib/dpkg/status.d/netbase": {Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase")},
+			}),
 		},
 	}
 
@@ -112,28 +112,30 @@ func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
 					LibraryToDependencies:    database.StringToStringsMap{"somelib.so.1": {"gcc5.so.1": {}}},
 				},
 			},
-			Files: tarutil.FilesMap{
-				"var/lib/dpkg/status":                       tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
-				"var/lib/dpkg/status.d":                     tarutil.FileData{},
-				"var/lib/dpkg/status.d/base":                tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
-				"var/lib/dpkg/info/base-files.list":         tarutil.FileData{Contents: []byte{}},
-				"var/lib/dpkg/status.d/netbase":             tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase")},
-				"var/lib/dpkg/info/netbase.list":            tarutil.FileData{Contents: []byte{}},
-				"var/lib/dpkg/info/libpam-runtime.list":     tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/libpam-runtime.list")},
-				"var/lib/dpkg/info/libpam-modules-bin.list": tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/libpam-modules-bin.list")},
-				"var/lib/dpkg/info/libgcc1:amd64.list":      tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/libgcc1:amd64.list")},
-				"test/executable":                           tarutil.FileData{Executable: true},
-				"another/one":                               tarutil.FileData{Executable: true},
-				"i/am/an/executable":                        tarutil.FileData{Executable: true},
-				"var/lib/dpkg/info/pkg-source.list":         tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg-source.list")},
-				"var/lib/dpkg/info/pkg1:amd64.list":         tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg1:amd64.list")},
-				"var/lib/dpkg/info/pkg2.list":               tarutil.FileData{Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg2.list")},
-				"exec-me":                                   tarutil.FileData{Executable: true},
-				"exec-me-2":                                 tarutil.FileData{Executable: true, ELFMetadata: &elfutils.Metadata{ImportedLibraries: []string{"gcc5.so.1"}}},
-				"my-jar.jar":                                tarutil.FileData{Contents: []byte("jar contents")},
-				"lib/linux/libgcc5.so.1":                    tarutil.FileData{ELFMetadata: &elfutils.Metadata{Sonames: []string{"gcc5.so.1"}}},
-				"lib/linux/libsomelib.so.1":                 tarutil.FileData{ELFMetadata: &elfutils.Metadata{Sonames: []string{"somelib.so.1"}, ImportedLibraries: []string{"gcc5.so.1"}}},
-			},
+			Files: tarutil.CreateNewLayerFiles(
+				map[string]tarutil.FileData{
+					"var/lib/dpkg/status":                       {Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
+					"var/lib/dpkg/status.d":                     {},
+					"var/lib/dpkg/status.d/base":                {Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
+					"var/lib/dpkg/info/base-files.list":         {Contents: []byte{}},
+					"var/lib/dpkg/status.d/netbase":             {Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase")},
+					"var/lib/dpkg/info/netbase.list":            {Contents: []byte{}},
+					"var/lib/dpkg/info/libpam-runtime.list":     {Contents: featurefmt.LoadFileForTest("dpkg/testdata/libpam-runtime.list")},
+					"var/lib/dpkg/info/libpam-modules-bin.list": {Contents: featurefmt.LoadFileForTest("dpkg/testdata/libpam-modules-bin.list")},
+					"var/lib/dpkg/info/libgcc1:amd64.list":      {Contents: featurefmt.LoadFileForTest("dpkg/testdata/libgcc1:amd64.list")},
+					"test/executable":                           {Executable: true},
+					"another/one":                               {Executable: true},
+					"i/am/an/executable":                        {Executable: true},
+					"var/lib/dpkg/info/pkg-source.list":         {Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg-source.list")},
+					"var/lib/dpkg/info/pkg1:amd64.list":         {Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg1:amd64.list")},
+					"var/lib/dpkg/info/pkg2.list":               {Contents: featurefmt.LoadFileForTest("dpkg/testdata/pkg2.list")},
+					"exec-me":                                   {Executable: true},
+					"exec-me-2":                                 {Executable: true, ELFMetadata: &elf.Metadata{ImportedLibraries: []string{"gcc5.so.1"}}},
+					"my-jar.jar":                                {Contents: []byte("jar contents")},
+					"lib/linux/libgcc5.so.1":                    {ELFMetadata: &elf.Metadata{Sonames: []string{"gcc5.so.1"}}},
+					"lib/linux/libsomelib.so.1":                 {ELFMetadata: &elf.Metadata{Sonames: []string{"somelib.so.1"}, ImportedLibraries: []string{"gcc5.so.1"}}},
+				},
+			),
 		},
 	}
 
