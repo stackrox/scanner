@@ -105,7 +105,7 @@ func (r *lazyReaderAt) readUntil(pos int64) {
 	}
 
 	if int64(cap(r.buf)) < pos {
-		newBuf := make([]byte, len(r.buf), r.size)
+		newBuf := make([]byte, len(r.buf), pos)
 		copy(newBuf, r.buf)
 		r.buf = newBuf
 	}
