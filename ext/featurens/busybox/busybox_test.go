@@ -1,11 +1,12 @@
 package busybox
 
 import (
+	"testing"
+
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/language"
 	"github.com/stackrox/scanner/pkg/tarutil"
-	"testing"
 )
 
 func Test_detector_Detect(t *testing.T) {

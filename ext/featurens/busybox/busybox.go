@@ -10,16 +10,16 @@
 // 2. `/bin/sh` and `/bin/busybox` are hard-links to `/bin/[`, the actual regular file
 //    shipping Busybox, as observed in the container image.
 //
-
 package busybox
 
 import (
+	"regexp"
+	"strings"
+
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/language"
 	"github.com/stackrox/scanner/pkg/tarutil"
-	"regexp"
-	"strings"
 )
 
 type detector struct{}
