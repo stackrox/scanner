@@ -185,6 +185,11 @@ func New(config Config, centralEndpoint string, db database.Datastore, repoToCPE
 	}
 	client.Transport = &http.Transport{
 		TLSClientConfig: clientConfig,
+		MaxIdleConns:    5,
+		// Values are taken from http.DefaultTransport, Go 1.17.3
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
 	}
 
 	lastUpdatedTime, err := GetLastUpdatedTime(db)
