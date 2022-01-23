@@ -137,8 +137,8 @@ func Extract(format, path string, headers map[string]string, filenameMatcher mat
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureTLS},
 			Proxy:           proxy.TransportFunc,
-			MaxIdleConns:    5,
 			// Values are taken from http.DefaultTransport, Go 1.17.3
+			MaxIdleConns:          100,
 			IdleConnTimeout:       90 * time.Second,
 			TLSHandshakeTimeout:   10 * time.Second,
 			ExpectContinueTimeout: 1 * time.Second,

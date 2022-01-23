@@ -42,8 +42,8 @@ func New(endpoint string, insecure bool) *Clairify {
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
 			Proxy:           proxy.TransportFunc,
-			MaxIdleConns:    5,
 			// Values are taken from http.DefaultTransport, Go 1.17.3
+			MaxIdleConns:          100,
 			IdleConnTimeout:       90 * time.Second,
 			TLSHandshakeTimeout:   10 * time.Second,
 			ExpectContinueTimeout: 1 * time.Second,
