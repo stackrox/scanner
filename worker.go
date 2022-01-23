@@ -18,8 +18,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/stackrox/rox/pkg/utils"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/featurens"
