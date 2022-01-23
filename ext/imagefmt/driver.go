@@ -143,6 +143,12 @@ func Extract(format, path string, headers map[string]string, filenameMatcher mat
 			log.WithError(err).Warning("could not download layer")
 			return nil, ErrCouldNotFindLayer
 		}
+		bodyToClose := r.Body
+		defer func() {
+			if bodyToClose != nil {
+				_ = bodyToClose.Close()
+			}
+		}()
 
 		// Fail if we don't receive a 2xx HTTP status code.
 		if r.StatusCode/100 != 2 {
@@ -151,6 +157,7 @@ func Extract(format, path string, headers map[string]string, filenameMatcher mat
 		}
 
 		layerReader = r.Body
+		bodyToClose = nil
 	} else {
 		var err error
 		layerReader, err = os.Open(path)

@@ -19,6 +19,7 @@ import (
 	"os"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/featurens"
@@ -109,6 +110,10 @@ func preProcessLayer(datastore database.Datastore, imageFormat, name, lineage, p
 // TODO(Quentin-M): We could have a goroutine that looks for layers that have
 // been analyzed with an older engine version and that processes them.
 func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lineage, parentName, parentLineage string, reader io.ReadCloser, base *tarutil.LayerFiles, uncertifiedRHEL bool) (*tarutil.LayerFiles, error) {
+	// Ensure the reader is closed. This *should* happen on all paths, but better safe
+	// than sorry.
+	defer utils.IgnoreError(reader.Close)
+
 	layer, exists, err := preProcessLayer(datastore, imageFormat, name, lineage, parentName, parentLineage, uncertifiedRHEL)
 	if err != nil {
 		return nil, err
