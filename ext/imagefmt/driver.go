@@ -25,7 +25,6 @@ import (
 	"io"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/commonerr"
