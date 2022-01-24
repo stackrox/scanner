@@ -200,8 +200,8 @@ func handleComponent(files tarutil.LayerFiles, pkgMetadata *componentMetadata, p
 	// with multiple associated packages.
 	if feature, exists := packagesMap[key]; exists {
 		// Append the executable files for the associated package to the source package.
-		feature.ExecutableToDependencies.Merge(execToDeps)
-		feature.LibraryToDependencies.Merge(libToDeps)
+		_ = feature.ExecutableToDependencies.Merge(execToDeps)
+		_ = feature.LibraryToDependencies.Merge(libToDeps)
 		return
 	}
 

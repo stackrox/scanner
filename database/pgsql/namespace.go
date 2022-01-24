@@ -61,3 +61,31 @@ func (pgSQL *pgSQL) insertNamespace(namespace database.Namespace) (int, error) {
 
 	return id, nil
 }
+
+func (pgSQL *pgSQL) searchNamespace(namespace database.Namespace) (id int, exists bool, err error) {
+	if namespace.Name == "" {
+		return 0, false, commonerr.NewBadRequestError("could not find invalid Namespace")
+	}
+
+	namespaceKey := "namespace:" + namespace.Name
+	if id, exists = pgSQL.getFromCache("namespace", namespaceKey); exists {
+		return id, exists, nil
+	}
+
+	// We do `defer metrics.ObserveQueryTime` here because we don't want to observe cached namespaces.
+	defer metrics.ObserveQueryTime("searchNamespace", "all", time.Now())
+
+	// Query Namespace for the ID
+	err = pgSQL.QueryRow(searchNamespace, namespace.Name).Scan(&id)
+	switch err {
+	case nil:
+		if pgSQL.cache != nil {
+			pgSQL.cache.Add(namespaceKey, id)
+		}
+		return id, true, nil
+	case sql.ErrNoRows:
+		return 0, false, nil
+	default:
+		return 0, false, handleError("searchNamespace", err)
+	}
+}

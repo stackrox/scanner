@@ -62,6 +62,7 @@ const (
 		DO NOTHING
 		RETURNING id
 	`
+	updateFeatureVersion = `UPDATE FeatureVersion SET executable_to_dependencies = $2, library_to_dependencies = $3 WHERE id = $1`
 
 	searchVulnerabilityFixedInFeature = `
 		SELECT id, vulnerability_id, version FROM Vulnerability_FixedIn_Feature

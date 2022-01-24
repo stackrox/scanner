@@ -31,6 +31,7 @@ func TestMerge(t *testing.T) {
 		aMap     StringToStringsMap
 		bMap     StringToStringsMap
 		expected StringToStringsMap
+		updated  bool
 	}{
 		{
 			desc: "new libraries and new execs",
@@ -48,6 +49,7 @@ func TestMerge(t *testing.T) {
 				"libm.so.6": set.NewStringSet("/usr/bin/mawk", "/usr/bin/abcd"),
 				"libd.so.1": set.NewStringSet("/usr/bin/some"),
 			},
+			updated: true,
 		},
 		{
 			desc: "identical",
@@ -63,6 +65,7 @@ func TestMerge(t *testing.T) {
 				"libc.so.6": set.NewStringSet("/usr/bin/mawk"),
 				"libm.so.6": set.NewStringSet("/usr/bin/mawk", "/usr/bin/abcd"),
 			},
+			updated: false,
 		},
 		{
 			desc: "merge with nil",
@@ -75,6 +78,7 @@ func TestMerge(t *testing.T) {
 				"libc.so.6": set.NewStringSet("/usr/bin/mawk"),
 				"libm.so.6": set.NewStringSet("/usr/bin/mawk", "/usr/bin/abcd"),
 			},
+			updated: false,
 		},
 		{
 			desc: "merge from nil",
@@ -87,12 +91,14 @@ func TestMerge(t *testing.T) {
 				"libc.so.6": set.NewStringSet("/usr/bin/mawk"),
 				"libm.so.6": set.NewStringSet("/usr/bin/mawk", "/usr/bin/abcd"),
 			},
+			updated: true,
 		},
 	}
 	for _, c := range testCases {
 		t.Run(c.desc, func(t *testing.T) {
-			c.aMap.Merge(c.bMap)
+			updated := c.aMap.Merge(c.bMap)
 			assert.Equal(t, c.expected, c.aMap)
+			assert.Equal(t, c.updated, updated)
 		})
 	}
 }

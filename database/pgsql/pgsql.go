@@ -83,6 +83,18 @@ type Config struct {
 	FixturePath             string
 }
 
+func (pgSQL *pgSQL) getFromCache(label string, cacheKey string) (int, bool) {
+	if pgSQL.cache != nil {
+		metrics.IncCacheQueries(label)
+		id, found := pgSQL.cache.Get(cacheKey)
+		if found {
+			metrics.IncCacheHits(label)
+			return id.(int), true
+		}
+	}
+	return 0, false
+}
+
 // openDatabase opens a PostgresSQL-backed Datastore using the given
 // configuration.
 //
