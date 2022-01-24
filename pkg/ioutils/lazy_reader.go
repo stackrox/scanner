@@ -106,6 +106,8 @@ func (r *lazyReaderAt) readUntil(pos int64) {
 	}
 
 	if bufSize := int64(cap(r.buf)); bufSize < pos {
+		// Adaptively size the buffer to limit the total number of allocations
+		// but allow for small reads to allocate less memory
 		newSize := mathutil.MinInt64(r.size, mathutil.MaxInt64(bufSize*2, pos))
 		newBuf := make([]byte, len(r.buf), newSize)
 		copy(newBuf, r.buf)
