@@ -128,12 +128,19 @@ func httpGet(url string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	bodyToClose := resp.Body
+	defer func() {
+		if bodyToClose != nil {
+			_ = bodyToClose.Close()
+		}
+	}()
 
 	if !httputil.Status2xx(resp) {
 		log.WithField("StatusCode", resp.StatusCode).Error("Failed to update RHEL")
 		return nil, fmt.Errorf("failed to update RHEL: got status code %d", resp.StatusCode)
 	}
 
+	bodyToClose = nil
 	return resp, nil
 }
 
@@ -177,7 +184,7 @@ func (u *updater) Update(_ vulnsrc.DataStore) (vulnsrc.UpdateResponse, error) {
 			return finalResp, commonerr.ErrCouldNotDownload
 		}
 		previouslyCovered := len(coveredIDs)
-		vulns, err := parseBzip(rhsaResp.Body, osVersion)
+		vulns, err := parseBzip(rhsaResp.Body, osVersion) // closes rhsaResp.Body
 		if err != nil {
 			log.WithError(err).Errorf("could not prase RHEL's OVAL file from %s", url)
 			return finalResp, commonerr.ErrCouldNotParse

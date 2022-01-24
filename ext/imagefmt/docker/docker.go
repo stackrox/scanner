@@ -30,6 +30,6 @@ func init() {
 	imagefmt.RegisterExtractor("docker", &format{})
 }
 
-func (f format) ExtractFiles(layerReader io.ReadCloser, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error) {
+func (f format) ExtractFiles(layerReader io.ReadCloser, filenameMatcher matcher.Matcher) (tarutil.LayerFiles, error) {
 	return tarutil.ExtractFiles(layerReader, filenameMatcher)
 }

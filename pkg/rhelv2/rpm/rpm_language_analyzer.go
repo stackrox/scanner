@@ -12,11 +12,11 @@ import (
 
 // AnnotateComponentsWithPackageManagerInfo checks for each component if it was installed by the package manager,
 // and sets the `FromPackageManager` attribute accordingly.
-func AnnotateComponentsWithPackageManagerInfo(files tarutil.FilesMap, components []*component.Component) error {
+func AnnotateComponentsWithPackageManagerInfo(files tarutil.LayerFiles, components []*component.Component) error {
 	if len(components) == 0 {
 		return nil
 	}
-	f, hasFile := files[dbPath]
+	f, hasFile := files.Get(dbPath)
 	if !hasFile {
 		return nil
 	}
