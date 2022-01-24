@@ -153,7 +153,8 @@ type Image struct {
 
 // ImageEnvelope is returned from a scan request.
 type ImageEnvelope struct {
-	Image *Image `json:"image"`
+	ScannerVersion string `json:"scannerVersion,omitempty"`
+	Image          *Image `json:"image"`
 }
 
 // TaggedName returns the name with a tag if it exists
@@ -213,3 +214,9 @@ type GetImageDataOpts struct {
 
 // UncertifiedRHELResultsKey it the key used for HTTP requests.
 const UncertifiedRHELResultsKey = "uncertifiedRHELResults"
+
+// Pong is the return type for a "Ping" request.
+type Pong struct {
+	ScannerVersion string `json:"scannerVersion,omitempty"`
+	Status         string `json:"status,omitempty"`
+}
