@@ -7,7 +7,6 @@ require (
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/ckaznocha/protoc-gen-lint v0.2.4
-	github.com/cloudflare/cfssl v0.0.0-20190510060611-9c027c93ba9e
 	github.com/containers/image/v5 v5.11.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible
