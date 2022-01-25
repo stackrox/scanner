@@ -389,7 +389,7 @@ func fvToKey(fv database.FeatureVersion) key {
 	}
 }
 
-func diffFeatures(childFeatures, parentFeatures []database.FeatureVersion, distroless bool) (added, deleted, updated []database.FeatureVersion) {
+func diffFeatures(childFeatures, parentFeatures []database.FeatureVersion, distroless bool) (added, deleted []database.FeatureVersion) {
 	childMap := make(map[key]database.FeatureVersion)
 	for _, fv := range childFeatures {
 		childMap[fvToKey(fv)] = fv
@@ -401,11 +401,8 @@ func diffFeatures(childFeatures, parentFeatures []database.FeatureVersion, distr
 	}
 
 	for k, childFV := range childMap {
-		if parentFV, ok := parentMap[k]; !ok {
+		if _, ok := parentMap[k]; !ok {
 			added = append(added, childFV)
-		} else if mergedFV := featureUpdate(childFV, parentFV); mergedFV != nil {
-			log.Infof("Update fv %v, child %v, parent %v, merged %v", k, childFV, parentFV, mergedFV)
-			updated = append(updated, *mergedFV)
 		}
 	}
 	// Need to check for distroless because there isn't a single COW package database
@@ -416,25 +413,13 @@ func diffFeatures(childFeatures, parentFeatures []database.FeatureVersion, distr
 			}
 		}
 	}
-	return added, deleted, updated
-}
-
-// Create feature update if parent and child feature are different.
-// Update includes all possible executables and libraries from parent and child.
-func featureUpdate(childFV, parentFV database.FeatureVersion) *database.FeatureVersion {
-	updated := parentFV.ExecutableToDependencies.Merge(childFV.ExecutableToDependencies)
-	updated = updated || parentFV.LibraryToDependencies.Merge(childFV.LibraryToDependencies)
-	if updated || len(parentFV.ExecutableToDependencies) > len(childFV.ExecutableToDependencies) || len(parentFV.LibraryToDependencies) > len(childFV.LibraryToDependencies) {
-		return &parentFV
-	}
-	return nil
+	return added, deleted
 }
 
 func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer *database.Layer, lineage string) error {
 	// add and del are the FeatureVersion diff we should insert.
 	var add []database.FeatureVersion
 	var del []database.FeatureVersion
-	var update []database.FeatureVersion
 
 	if layer.Parent == nil {
 		// There is no parent, every Features are added.
@@ -443,7 +428,7 @@ func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer *database.Layer,
 		// There is a parent, we need to diff the Features with it.
 
 		// Calculate the added and deleted FeatureVersions name:version.
-		add, del, update = diffFeatures(layer.Features, layer.Parent.Features, layer.Distroless)
+		add, del = diffFeatures(layer.Features, layer.Parent.Features, layer.Distroless)
 	}
 
 	// Insert FeatureVersions in the database.
@@ -451,10 +436,12 @@ func (pgSQL *pgSQL) updateDiffFeatureVersions(tx *sql.Tx, layer *database.Layer,
 	if err != nil {
 		return err
 	}
-	_, err = pgSQL.updateFeatureVersions(update)
-	if err != nil {
-		return err
-	}
+	/*
+		_, err = pgSQL.updateFeatureVersions(update)
+		if err != nil {
+			return err
+		}
+	*/
 	delIDs, err := pgSQL.insertFeatureVersions(del)
 	if err != nil {
 		return err

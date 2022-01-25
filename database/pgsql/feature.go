@@ -15,8 +15,11 @@
 package pgsql
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
+	"hash/fnv"
+	"sort"
 	"strings"
 	"time"
 
@@ -76,39 +79,33 @@ func (pgSQL *pgSQL) insertFeature(feature database.Feature) (int, error) {
 	return id, nil
 }
 
-func (pgSQL *pgSQL) searchFeature(feature database.Feature) (id int, exists bool, err error) {
-	if feature.Name == "" {
-		return 0, false, commonerr.NewBadRequestError("could not search invalid Feature")
-	}
+type fvCacheEntry struct {
+	id   int
+	hash uint64
+}
 
-	// Do cache lookup.
-	featureKey := "feature:" + feature.Namespace.Name + ":" + feature.Name
-	if id, exists = pgSQL.getFromCache("feature", featureKey); exists {
-		return id, exists, nil
+func fvHash(fv *database.FeatureVersion) uint64 {
+	if fv.Feature.Namespace.VersionFormat == dpkg.ParserName {
+		return 0
 	}
-
-	// We do `defer metrics.ObserveQueryTime` here because we don't want to observe cached features.
-	defer metrics.ObserveQueryTime("searchFeature", "all", time.Now())
-
-	// Find Namespace.
-	var namespaceID int
-	namespaceID, exists, err = pgSQL.searchNamespace(feature.Namespace)
-	if err != nil || !exists {
-		return 0, exists, err
+	h := fnv.New64()
+	str := make([]string, 0, len(fv.ExecutableToDependencies)+len(fv.LibraryToDependencies))
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%d,", len(fv.ExecutableToDependencies)))
+	for k := range fv.ExecutableToDependencies {
+		str = append(str, k)
 	}
-
-	err = pgSQL.QueryRow(searchFeature, feature.Name, namespaceID).Scan(&id)
-	switch err {
-	case sql.ErrNoRows:
-		return 0, false, nil
-	case nil:
-		if pgSQL.cache != nil {
-			pgSQL.cache.Add(featureKey, id)
-		}
-		return id, true, nil
-	default:
-		return 0, false, handleError("searchFeature", err)
+	sort.Strings(str)
+	buf.WriteString(strings.Join(str, ","))
+	str = str[:0]
+	buf.WriteString(fmt.Sprintf("%d", len(fv.LibraryToDependencies)))
+	for k := range fv.LibraryToDependencies {
+		str = append(str, k)
 	}
+	sort.Strings(str)
+	buf.WriteString(strings.Join(str, ","))
+	h.Write(buf.Bytes())
+	return h.Sum64()
 }
 
 func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, err error) {
@@ -119,12 +116,16 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 
 	// Do cache lookup.
 	cacheIndex := strings.Join([]string{"featureversion", fv.Feature.Namespace.Name, fv.Feature.Name, fv.Version}, ":")
+	hash := fvHash(&fv)
 	if pgSQL.cache != nil {
 		metrics.IncCacheQueries("featureversion")
-		id, found := pgSQL.cache.Get(cacheIndex)
+		entry, found := pgSQL.cache.Get(cacheIndex)
 		if found {
 			metrics.IncCacheHits("featureversion")
-			return id.(int), nil
+			e := entry.(fvCacheEntry)
+			if hash == e.hash {
+				return e.id, nil
+			}
 		}
 	}
 
@@ -146,16 +147,22 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	//
 	// In a populated database, the likelihood of the FeatureVersion already being there is high.
 	// If we can find it here, we then avoid using a transaction and locking the database.
-	err = pgSQL.QueryRow(searchFeatureVersion, featureID, fv.Version).Scan(&fv.ID)
+	var existingFv database.FeatureVersion
+	err = pgSQL.QueryRow(searchFeatureVersion, featureID, fv.Version).Scan(
+		&existingFv.ID,
+		&existingFv.ExecutableToDependencies,
+		&existingFv.LibraryToDependencies)
 	if err != nil && err != sql.ErrNoRows {
 		return 0, handleError("searchFeatureVersion", err)
 	}
-	if err == nil {
-		if pgSQL.cache != nil {
-			pgSQL.cache.Add(cacheIndex, fv.ID)
-		}
 
-		return fv.ID, nil
+	if err == nil {
+		updated := existingFv.LibraryToDependencies.Merge(fv.LibraryToDependencies)
+		updated = existingFv.ExecutableToDependencies.Merge(fv.ExecutableToDependencies) || updated
+		if updated {
+			err = pgSQL.updateFv(existingFv)
+		}
+		return fv.ID, err
 	}
 
 	// Begin transaction.
@@ -209,7 +216,7 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 		tx.Commit()
 
 		if pgSQL.cache != nil {
-			pgSQL.cache.Add(cacheIndex, fv.ID)
+			pgSQL.cache.Add(cacheIndex, fvCacheEntry{fv.ID, hash})
 		}
 
 		return fv.ID, nil
@@ -233,88 +240,35 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	}
 
 	if pgSQL.cache != nil {
-		pgSQL.cache.Add(cacheIndex, fv.ID)
+		pgSQL.cache.Add(cacheIndex, fvCacheEntry{fv.ID, hash})
 	}
 
 	return fv.ID, nil
 }
 
-func (pgSQL *pgSQL) searchFeatureVersion(fv database.FeatureVersion) (id int, exists bool, err error) {
-	err = versionfmt.Valid(fv.Feature.Namespace.VersionFormat, fv.Version)
-	if err != nil {
-		return 0, false, commonerr.NewBadRequestError("could not search invalid FeatureVersion")
-	}
-
-	// Do cache lookup.
-	cacheKey := strings.Join([]string{"featureversion", fv.Feature.Namespace.Name, fv.Feature.Name, fv.Version}, ":")
-	if id, exists = pgSQL.getFromCache("featureversion", cacheKey); exists {
-		return id, exists, nil
-	}
-
-	// We do `defer metrics.ObserveQueryTime` here because we don't want to observe cached features.
-	defer metrics.ObserveQueryTime("searchFeatureVersion", "all", time.Now())
-	// Find Feature.
-	var featureID int
-	featureID, exists, err = pgSQL.searchFeature(fv.Feature)
-	if err != nil || !exists {
-		return 0, exists, err
-	}
-
-	err = pgSQL.QueryRow(searchFeatureVersion, featureID, fv.Version).Scan(&id)
-	switch err {
-	case sql.ErrNoRows:
-		return 0, false, nil
-	case nil:
-		if pgSQL.cache != nil {
-			pgSQL.cache.Add(cacheKey, id)
-		}
-		return id, true, nil
-	default:
-		return 0, false, handleError("searchFeature", err)
-	}
-}
-
-// Update a featureversion. return id 0 and no error if the featureversion does not exist
-func (pgSQL *pgSQL) updateFeatureVersion(fv database.FeatureVersion) (id int, err error) {
-	err = versionfmt.Valid(fv.Feature.Namespace.VersionFormat, fv.Version)
-	if err != nil {
-		return 0, commonerr.NewBadRequestError("could not update invalid FeatureVersion")
-	}
-	if fv.Feature.Namespace.VersionFormat == dpkg.ParserName {
-		return 0, nil
-	}
-
-	var exists bool
-	id, exists, err = pgSQL.searchFeatureVersion(fv)
-	if err != nil {
-		return 0, err
-	}
-	if !exists {
-		return 0, nil
-	}
-
+func (pgSQL *pgSQL) updateFv(fv database.FeatureVersion) error {
 	t := time.Now()
 	metrics.ObserveQueryTime("updateFeatureVersion", "all", t)
 
 	// Begin transaction.
 	tx, err := pgSQL.Begin()
 	if err != nil {
-		return 0, handleError("updateFeatureVersion.Begin()", err)
+		return handleError("updateFeatureVersion.Begin()", err)
 	}
 
 	// Update an existing featureversion
-	_, err = tx.Exec(updateFeatureVersion, id, fv.ExecutableToDependencies, fv.LibraryToDependencies)
+	_, err = tx.Exec(updateFeatureVersion, fv.ID, fv.ExecutableToDependencies, fv.LibraryToDependencies)
 	if err != nil {
-		return 0, handleError("updateFeatureVersion", err)
+		return handleError("updateFeatureVersion", err)
 	}
 
 	// Commit transaction.
 	err = tx.Commit()
 	if err != nil {
-		return 0, handleError("updateFeatureVersion.Commit()", err)
+		return handleError("updateFeatureVersion.Commit()", err)
 	}
 
-	return fv.ID, nil
+	return nil
 }
 
 // TODO(Quentin-M): Batch me
@@ -327,21 +281,6 @@ func (pgSQL *pgSQL) insertFeatureVersions(featureVersions []database.FeatureVers
 			return IDs, err
 		}
 		IDs = append(IDs, id)
-	}
-
-	return IDs, nil
-}
-
-func (pgSQL *pgSQL) updateFeatureVersions(featureVersions []database.FeatureVersion) ([]int, error) {
-	IDs := make([]int, 0, len(featureVersions))
-	for i := 0; i < len(featureVersions); i++ {
-		id, err := pgSQL.updateFeatureVersion(featureVersions[i])
-		if err != nil {
-			return IDs, err
-		}
-		if id != 0 {
-			IDs = append(IDs, id)
-		}
 	}
 
 	return IDs, nil

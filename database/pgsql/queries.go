@@ -53,7 +53,7 @@ const (
 	searchFeature = `SELECT id FROM Feature WHERE name = $1 AND namespace_id = $2`
 
 	searchFeatureVersion = `
-		SELECT id FROM FeatureVersion WHERE feature_id = $1 AND version = $2`
+		SELECT id, executable_to_dependencies, library_to_dependencies FROM FeatureVersion WHERE feature_id = $1 AND version = $2`
 
 	insertFeatureVersion = `
 		INSERT INTO FeatureVersion(feature_id, version, executable_to_dependencies, library_to_dependencies)
