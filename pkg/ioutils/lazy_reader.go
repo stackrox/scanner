@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
+	"github.com/stackrox/rox/pkg/mathutil"
 )
 
 type lazyReaderAt struct {
@@ -104,8 +105,11 @@ func (r *lazyReaderAt) readUntil(pos int64) {
 		return
 	}
 
-	if int64(cap(r.buf)) < pos {
-		newBuf := make([]byte, len(r.buf), r.size)
+	if bufSize := int64(cap(r.buf)); bufSize < pos {
+		// Adaptively size the buffer to limit the total number of allocations
+		// but allow for small reads to allocate less memory
+		newSize := mathutil.MinInt64(r.size, mathutil.MaxInt64(bufSize*2, pos))
+		newBuf := make([]byte, len(r.buf), newSize)
 		copy(newBuf, r.buf)
 		r.buf = newBuf
 	}

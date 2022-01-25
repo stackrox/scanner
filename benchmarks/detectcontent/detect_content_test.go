@@ -7,6 +7,7 @@ import (
 	"github.com/stackrox/scanner/benchmarks"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/require"
 
@@ -56,8 +57,9 @@ func runBenchmarkDetectContent(b *testing.B, imageName string) {
 	for i := 0; i < b.N; i++ {
 		var namespace *database.Namespace
 		var err error
+		var files *tarutil.LayerFiles
 		for _, l := range layers {
-			namespace, _, _, _, _, _, err = clair.DetectContentFromReader(l, "Docker", l.Name, &database.Layer{Namespace: namespace}, false)
+			namespace, _, _, _, _, files, err = clair.DetectContentFromReader(l, "Docker", l.Name, &database.Layer{Namespace: namespace}, files, false)
 			require.NoError(b, err)
 		}
 	}

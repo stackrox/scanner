@@ -23,6 +23,7 @@ import (
 	"compress/gzip"
 	"io"
 	"os/exec"
+	"path"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -59,25 +60,10 @@ func SetMaxExtractableFileSize(val int64) {
 	maxExtractableFileSize = val
 }
 
-// FileData is the contents of a file and relevant metadata.
-type FileData struct {
-	// Contents is the contents of the file.
-	Contents []byte
-	// Executable indicates if the file is executable.
-	Executable bool
-	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
-	ELFMetadata *elf.Metadata
-	// Name of link (valid for tar.TypeLink or tar.TypeSymlink).
-	LinkName string
-}
-
-// FilesMap is a map of files' paths to their contents.
-type FilesMap map[string]FileData
-
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
-func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error) {
-	data := make(map[string]FileData)
+func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, error) {
+	files := CreateNewLayerFiles(nil)
 
 	// executableMatcher indicates if the given file is executable
 	// for the FileData struct.
@@ -86,7 +72,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
 	if err != nil {
-		return data, errors.Wrap(err, "could not extract tar archive")
+		return files, errors.Wrap(err, "could not extract tar archive")
 	}
 	defer tr.Close()
 
@@ -102,7 +88,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			break
 		}
 		if err != nil {
-			return data, errors.Wrap(err, "could not advance in the tar archive")
+			return files, errors.Wrap(err, "could not advance in the tar archive")
 		}
 		numFiles++
 
@@ -130,15 +116,16 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 		// File size limit
 		if extractContents && hdr.Size > maxExtractableFileSize {
-			log.Errorf("Skipping file %q because it was too large (%d bytes)", filename, hdr.Size)
+			log.Errorf("Skipping file %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, maxExtractableFileSize)
 			continue
 		}
 
 		// Extract the element
-		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
+		switch hdr.Typeflag {
+		case tar.TypeReg, tar.TypeLink:
 			var fileData FileData
 
-			fileData.ELFMetadata, err = elf.GetMetadataIfELFExecutable(contents)
+			fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
 			if err != nil {
 				log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 			}
@@ -149,7 +136,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			}
 			if !extractContents || hdr.Typeflag != tar.TypeReg {
 				fileData.Executable = executable
-				data[filename] = fileData
+				files.data[filename] = fileData
 				continue
 			}
 
@@ -162,23 +149,25 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			// Put the file directly
 			fileData.Contents = d
 			fileData.Executable = executable
-			data[filename] = fileData
+			files.data[filename] = fileData
 
 			numExtractedContentBytes += len(d)
-		}
-		if hdr.Typeflag == tar.TypeDir {
+		case tar.TypeSymlink:
+			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
 			// However, add to the map, so the entry will exist.
-			data[filename] = FileData{}
+			files.data[filename] = FileData{}
 		}
 	}
+	files.detectRemovedFiles()
 
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
 
-	return data, nil
+	return files, nil
 }
 
 // XzReader implements io.ReadCloser for data compressed via `xz`.

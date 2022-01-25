@@ -39,7 +39,6 @@ import (
 	"github.com/stackrox/scanner/api/v1/vulndefs"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/ext/imagefmt"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/clairify/metrics"
 	"github.com/stackrox/scanner/pkg/clairify/server"
@@ -188,7 +187,6 @@ func main() {
 	// Parse command-line arguments
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	flagConfigPath := flag.String("config", "/etc/scanner/config.yaml", "Load configuration from the specified file.")
-	flagInsecureTLS := flag.Bool("insecure-tls", true, "Disable TLS server's certificate chain and hostname verification when pulling layers.")
 	flag.Parse()
 
 	proxy.WatchProxyConfig(context.Background(), proxyConfigPath, proxyConfigFile, true)
@@ -221,12 +219,6 @@ func main() {
 	if config.MaxExtractableFileSizeMB > 0 {
 		tarutil.SetMaxExtractableFileSize(config.MaxExtractableFileSizeMB * 1024 * 1024)
 		log.Infof("Max extractable file size set to %d MB", config.MaxExtractableFileSizeMB)
-	}
-
-	// Enable TLS server's certificate chain and hostname verification
-	// when pulling layers if specified
-	if *flagInsecureTLS {
-		imagefmt.SetInsecureTLS(*flagInsecureTLS)
 	}
 
 	slimMode := env.SlimMode.Enabled()

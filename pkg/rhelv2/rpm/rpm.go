@@ -78,20 +78,20 @@ func init() {
 // ListFeatures returns the features found from the given files.
 // returns a slice of packages found via rpm and a slice of CPEs found in
 // /root/buildinfo/content_manifests.
-func ListFeatures(files tarutil.FilesMap) ([]*database.RHELv2Package, []string, error) {
+func ListFeatures(files tarutil.LayerFiles) ([]*database.RHELv2Package, []string, error) {
 	if features.ActiveVulnMgmt.Enabled() {
 		return listFeatures(files, queryFmtActiveVulnMgmt)
 	}
 	return listFeatures(files, queryFmt)
 }
 
-func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Package, []string, error) {
+func listFeatures(files tarutil.LayerFiles, queryFmt string) ([]*database.RHELv2Package, []string, error) {
 	cpes, err := getCPEsUsingEmbeddedContentSets(files)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	f, hasFile := files[dbPath]
+	f, hasFile := files.Get(dbPath)
 	if !hasFile {
 		return nil, cpes, nil
 	}
@@ -147,7 +147,7 @@ func listFeatures(files tarutil.FilesMap, queryFmt string) ([]*database.RHELv2Pa
 	return pkgs, cpes, nil
 }
 
-func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Package, error) {
+func parsePackages(r io.Reader, files tarutil.LayerFiles) ([]*database.RHELv2Package, error) {
 	var pkgs []*database.RHELv2Package
 
 	p := &database.RHELv2Package{}
@@ -206,8 +206,11 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 
 			// Rename to make it clear what the line represents.
 			filename := line
-			// The first character is always "/", which is removed when inserted into the files maps.
-			AddToDependencyMap(filename, files[filename[1:]], execToDeps, libToDeps)
+			// The first character is always "/", which is removed when inserted into the layer files.
+			fileData, hasFile := files.Get(filename[1:])
+			if hasFile {
+				AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
+			}
 		}
 	}
 
@@ -216,7 +219,7 @@ func parsePackages(r io.Reader, files tarutil.FilesMap) ([]*database.RHELv2Packa
 
 // AddToDependencyMap checks and adds files to executable and library dependency for RHEL package
 func AddToDependencyMap(filename string, fileData tarutil.FileData, execToDeps, libToDeps database.StringToStringsMap) {
-	// The first character is always "/", which is removed when inserted into the files maps.
+	// The first character is always "/", which is removed when inserted into the layer files.
 	if fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
 		deps := set.NewStringSet()
 		if fileData.ELFMetadata != nil {
@@ -236,7 +239,7 @@ func AddToDependencyMap(filename string, fileData tarutil.FileData, execToDeps, 
 	}
 }
 
-func getCPEsUsingEmbeddedContentSets(files tarutil.FilesMap) ([]string, error) {
+func getCPEsUsingEmbeddedContentSets(files tarutil.LayerFiles) ([]string, error) {
 	defer metrics.ObserveListFeaturesTime(pkgFmt, "cpes", time.Now())
 
 	// Get CPEs using embedded content-set files.
@@ -255,8 +258,8 @@ func getCPEsUsingEmbeddedContentSets(files tarutil.FilesMap) ([]string, error) {
 	return repo2cpe.Singleton().Get(contentManifest.ContentSets)
 }
 
-func getContentManifestFileContents(files tarutil.FilesMap) []byte {
-	for file, contents := range files {
+func getContentManifestFileContents(files tarutil.LayerFiles) []byte {
+	for file, contents := range files.GetFilesMap() {
 		if !contentManifestPattern.MatchString(file) {
 			continue
 		}
