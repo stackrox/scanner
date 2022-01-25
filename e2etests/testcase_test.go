@@ -3021,4 +3021,18 @@ var testCases = []testCase{
 			},
 		},
 	},
+	{
+		image:                   "fedora:33",
+		registry:                "https://registry-1.docker.io",
+		source:                  "Red Hat",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "fedora:33",
+	},
+	{
+		image:                   "fedora:35",
+		registry:                "https://registry-1.docker.io",
+		source:                  "Red Hat",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "fedora:33",
+	},
 }
