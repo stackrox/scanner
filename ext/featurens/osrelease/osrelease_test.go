@@ -20,7 +20,6 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
-	"github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -56,7 +55,21 @@ BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"`)},
 			}),
 		},
 		{ // Doesn't have quotes around VERSION_ID
-			ExpectedNamespace: &database.Namespace{Name: "fedora:20", VersionFormat: rpm.ParserName},
+			ExpectedNamespace: &database.Namespace{Name: "ubuntu:15.10", VersionFormat: dpkg.ParserName},
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"etc/os-release": {Contents: []byte(
+					`NAME="Ubuntu"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu Wily Werewolf (development branch)"
+VERSION_ID=15.10
+HOME_URL="http://www.ubuntu.com/"
+SUPPORT_URL="http://help.ubuntu.com/"
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"`)},
+			}),
+		},
+		{ // We do not support Fedora.
+			ExpectedNamespace: nil,
 			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"etc/os-release": {Contents: []byte(
 					`NAME=Fedora
