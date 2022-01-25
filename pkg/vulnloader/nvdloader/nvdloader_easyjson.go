@@ -29,7 +29,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgVulnloaderNvdloader(in *jl
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -87,12 +87,7 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(out *j
 	_ = first
 	{
 		const prefix string = ",\"cve\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.CVE == nil {
 			out.RawString("null")
 		} else {
@@ -101,42 +96,22 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(out *j
 	}
 	if in.Configurations != nil {
 		const prefix string = ",\"configurations\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(out, *in.Configurations)
 	}
 	if in.Impact != nil {
 		const prefix string = ",\"impact\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(out, *in.Impact)
 	}
 	if in.LastModifiedDate != "" {
 		const prefix string = ",\"lastModifiedDate\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.LastModifiedDate))
 	}
 	if in.PublishedDate != "" {
 		const prefix string = ",\"publishedDate\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.PublishedDate))
 	}
 	out.RawByte('}')
@@ -176,7 +151,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(i
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -220,12 +195,8 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(o
 	_ = first
 	if in.BaseMetricV2 != nil {
 		const prefix string = ",\"baseMetricV2\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(out, *in.BaseMetricV2)
 	}
 	if in.BaseMetricV3 != nil {
@@ -251,7 +222,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(i
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -289,12 +260,8 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(o
 	_ = first
 	if in.CVSSV3 != nil {
 		const prefix string = ",\"cvssV3\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(out, *in.CVSSV3)
 	}
 	if in.ExploitabilityScore != 0 {
@@ -330,7 +297,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(i
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -414,12 +381,8 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(o
 	_ = first
 	if in.AttackComplexity != "" {
 		const prefix string = ",\"attackComplexity\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(in.AttackComplexity))
 	}
 	if in.AttackVector != "" {
@@ -464,252 +427,127 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(o
 	}
 	{
 		const prefix string = ",\"baseSeverity\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.BaseSeverity))
 	}
 	if in.ConfidentialityImpact != "" {
 		const prefix string = ",\"confidentialityImpact\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ConfidentialityImpact))
 	}
 	if in.ConfidentialityRequirement != "" {
 		const prefix string = ",\"confidentialityRequirement\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ConfidentialityRequirement))
 	}
 	if in.EnvironmentalScore != 0 {
 		const prefix string = ",\"environmentalScore\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Float64(float64(in.EnvironmentalScore))
 	}
 	if in.EnvironmentalSeverity != "" {
 		const prefix string = ",\"environmentalSeverity\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.EnvironmentalSeverity))
 	}
 	if in.ExploitCodeMaturity != "" {
 		const prefix string = ",\"exploitCodeMaturity\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ExploitCodeMaturity))
 	}
 	if in.IntegrityImpact != "" {
 		const prefix string = ",\"integrityImpact\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.IntegrityImpact))
 	}
 	if in.IntegrityRequirement != "" {
 		const prefix string = ",\"integrityRequirement\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.IntegrityRequirement))
 	}
 	if in.ModifiedAttackComplexity != "" {
 		const prefix string = ",\"modifiedAttackComplexity\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ModifiedAttackComplexity))
 	}
 	if in.ModifiedAttackVector != "" {
 		const prefix string = ",\"modifiedAttackVector\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ModifiedAttackVector))
 	}
 	if in.ModifiedAvailabilityImpact != "" {
 		const prefix string = ",\"modifiedAvailabilityImpact\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ModifiedAvailabilityImpact))
 	}
 	if in.ModifiedConfidentialityImpact != "" {
 		const prefix string = ",\"modifiedConfidentialityImpact\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ModifiedConfidentialityImpact))
 	}
 	if in.ModifiedIntegrityImpact != "" {
 		const prefix string = ",\"modifiedIntegrityImpact\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ModifiedIntegrityImpact))
 	}
 	if in.ModifiedPrivilegesRequired != "" {
 		const prefix string = ",\"modifiedPrivilegesRequired\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ModifiedPrivilegesRequired))
 	}
 	if in.ModifiedScope != "" {
 		const prefix string = ",\"modifiedScope\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ModifiedScope))
 	}
 	if in.ModifiedUserInteraction != "" {
 		const prefix string = ",\"modifiedUserInteraction\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ModifiedUserInteraction))
 	}
 	if in.PrivilegesRequired != "" {
 		const prefix string = ",\"privilegesRequired\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.PrivilegesRequired))
 	}
 	if in.RemediationLevel != "" {
 		const prefix string = ",\"remediationLevel\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.RemediationLevel))
 	}
 	if in.ReportConfidence != "" {
 		const prefix string = ",\"reportConfidence\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ReportConfidence))
 	}
 	if in.Scope != "" {
 		const prefix string = ",\"scope\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Scope))
 	}
 	if in.TemporalScore != 0 {
 		const prefix string = ",\"temporalScore\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Float64(float64(in.TemporalScore))
 	}
 	if in.TemporalSeverity != "" {
 		const prefix string = ",\"temporalSeverity\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.TemporalSeverity))
 	}
 	if in.UserInteraction != "" {
 		const prefix string = ",\"userInteraction\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.UserInteraction))
 	}
 	{
 		const prefix string = ",\"vectorString\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.VectorString))
 	}
 	{
 		const prefix string = ",\"version\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Version))
 	}
 	out.RawByte('}')
@@ -725,7 +563,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(i
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -775,12 +613,8 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(o
 	_ = first
 	if in.AcInsufInfo {
 		const prefix string = ",\"acInsufInfo\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Bool(bool(in.AcInsufInfo))
 	}
 	if in.CVSSV2 != nil {
@@ -876,7 +710,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema6(i
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -938,12 +772,8 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema6(o
 	_ = first
 	if in.AccessComplexity != "" {
 		const prefix string = ",\"accessComplexity\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(in.AccessComplexity))
 	}
 	if in.AccessVector != "" {
@@ -998,132 +828,67 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema6(o
 	}
 	if in.CollateralDamagePotential != "" {
 		const prefix string = ",\"collateralDamagePotential\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.CollateralDamagePotential))
 	}
 	if in.ConfidentialityImpact != "" {
 		const prefix string = ",\"confidentialityImpact\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ConfidentialityImpact))
 	}
 	if in.ConfidentialityRequirement != "" {
 		const prefix string = ",\"confidentialityRequirement\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ConfidentialityRequirement))
 	}
 	if in.EnvironmentalScore != 0 {
 		const prefix string = ",\"environmentalScore\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Float64(float64(in.EnvironmentalScore))
 	}
 	if in.Exploitability != "" {
 		const prefix string = ",\"exploitability\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Exploitability))
 	}
 	if in.IntegrityImpact != "" {
 		const prefix string = ",\"integrityImpact\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.IntegrityImpact))
 	}
 	if in.IntegrityRequirement != "" {
 		const prefix string = ",\"integrityRequirement\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.IntegrityRequirement))
 	}
 	if in.RemediationLevel != "" {
 		const prefix string = ",\"remediationLevel\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.RemediationLevel))
 	}
 	if in.ReportConfidence != "" {
 		const prefix string = ",\"reportConfidence\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ReportConfidence))
 	}
 	if in.TargetDistribution != "" {
 		const prefix string = ",\"targetDistribution\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.TargetDistribution))
 	}
 	if in.TemporalScore != 0 {
 		const prefix string = ",\"temporalScore\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Float64(float64(in.TemporalScore))
 	}
 	{
 		const prefix string = ",\"vectorString\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.VectorString))
 	}
 	{
 		const prefix string = ",\"version\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Version))
 	}
 	out.RawByte('}')
@@ -1139,7 +904,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(i
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -1196,22 +961,12 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(o
 	_ = first
 	{
 		const prefix string = ",\"CVE_data_version\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.CVEDataVersion))
 	}
 	if len(in.Nodes) != 0 {
 		const prefix string = ",\"nodes\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('[')
 			for v2, v3 := range in.Nodes {
@@ -1240,7 +995,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(i
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -1330,12 +1085,8 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(o
 	_ = first
 	if len(in.CPEMatch) != 0 {
 		const prefix string = ",\"cpe_match\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		{
 			out.RawByte('[')
 			for v6, v7 := range in.CPEMatch {
@@ -1407,7 +1158,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(i
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -1476,12 +1227,8 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(o
 	_ = first
 	if len(in.CPEName) != 0 {
 		const prefix string = ",\"cpe_name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		{
 			out.RawByte('[')
 			for v11, v12 := range in.CPEName {
@@ -1519,52 +1266,27 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(o
 	}
 	if in.VersionEndExcluding != "" {
 		const prefix string = ",\"versionEndExcluding\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.VersionEndExcluding))
 	}
 	if in.VersionEndIncluding != "" {
 		const prefix string = ",\"versionEndIncluding\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.VersionEndIncluding))
 	}
 	if in.VersionStartExcluding != "" {
 		const prefix string = ",\"versionStartExcluding\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.VersionStartExcluding))
 	}
 	if in.VersionStartIncluding != "" {
 		const prefix string = ",\"versionStartIncluding\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.VersionStartIncluding))
 	}
 	{
 		const prefix string = ",\"vulnerable\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(in.Vulnerable))
 	}
 	out.RawByte('}')
@@ -1580,7 +1302,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(i
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -1608,12 +1330,8 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(o
 	_ = first
 	if in.Cpe22Uri != "" {
 		const prefix string = ",\"cpe22Uri\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(in.Cpe22Uri))
 	}
 	{
@@ -1639,7 +1357,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -1719,12 +1437,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(ou
 	_ = first
 	{
 		const prefix string = ",\"affects\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Affects == nil {
 			out.RawString("null")
 		} else {
@@ -1733,12 +1446,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(ou
 	}
 	{
 		const prefix string = ",\"CVE_data_meta\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.CVEDataMeta == nil {
 			out.RawString("null")
 		} else {
@@ -1747,42 +1455,22 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(ou
 	}
 	{
 		const prefix string = ",\"data_format\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.DataFormat))
 	}
 	{
 		const prefix string = ",\"data_type\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.DataType))
 	}
 	{
 		const prefix string = ",\"data_version\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.DataVersion))
 	}
 	{
 		const prefix string = ",\"description\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.Description == nil {
 			out.RawString("null")
 		} else {
@@ -1791,12 +1479,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(ou
 	}
 	{
 		const prefix string = ",\"problemtype\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.Problemtype == nil {
 			out.RawString("null")
 		} else {
@@ -1805,12 +1488,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(ou
 	}
 	{
 		const prefix string = ",\"references\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.References == nil {
 			out.RawString("null")
 		} else {
@@ -1830,7 +1508,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -1885,12 +1563,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(
 	_ = first
 	{
 		const prefix string = ",\"reference_data\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.ReferenceData == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -1921,7 +1594,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -1974,12 +1647,8 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(
 	_ = first
 	if in.Name != "" {
 		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(in.Name))
 	}
 	if in.Refsource != "" {
@@ -2034,7 +1703,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2089,12 +1758,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(
 	_ = first
 	{
 		const prefix string = ",\"problemtype_data\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.ProblemtypeData == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -2125,7 +1789,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2180,12 +1844,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(
 	_ = first
 	{
 		const prefix string = ",\"description\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Description == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -2216,7 +1875,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2244,22 +1903,12 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(
 	_ = first
 	{
 		const prefix string = ",\"lang\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Lang))
 	}
 	{
 		const prefix string = ",\"value\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Value))
 	}
 	out.RawByte('}')
@@ -2275,7 +1924,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2330,12 +1979,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(
 	_ = first
 	{
 		const prefix string = ",\"description_data\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.DescriptionData == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -2366,7 +2010,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema11(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2396,32 +2040,17 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema11(
 	_ = first
 	{
 		const prefix string = ",\"ASSIGNER\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.ASSIGNER))
 	}
 	{
 		const prefix string = ",\"ID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ID))
 	}
 	if in.STATE != "" {
 		const prefix string = ",\"STATE\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.STATE))
 	}
 	out.RawByte('}')
@@ -2437,7 +2066,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2471,12 +2100,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(
 	_ = first
 	{
 		const prefix string = ",\"vendor\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Vendor == nil {
 			out.RawString("null")
 		} else {
@@ -2496,7 +2120,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2551,12 +2175,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(
 	_ = first
 	{
 		const prefix string = ",\"vendor_data\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.VendorData == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -2587,7 +2206,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2623,12 +2242,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(
 	_ = first
 	{
 		const prefix string = ",\"product\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Product == nil {
 			out.RawString("null")
 		} else {
@@ -2637,12 +2251,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(
 	}
 	{
 		const prefix string = ",\"vendor_name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.VendorName))
 	}
 	out.RawByte('}')
@@ -2658,7 +2267,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2713,12 +2322,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(
 	_ = first
 	{
 		const prefix string = ",\"product_data\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.ProductData == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -2749,7 +2353,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2785,22 +2389,12 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(
 	_ = first
 	{
 		const prefix string = ",\"product_name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.ProductName))
 	}
 	{
 		const prefix string = ",\"version\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.Version == nil {
 			out.RawString("null")
 		} else {
@@ -2820,7 +2414,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2875,12 +2469,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(
 	_ = first
 	{
 		const prefix string = ",\"version_data\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.VersionData == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -2911,7 +2500,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -2939,12 +2528,8 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(
 	_ = first
 	if in.VersionAffected != "" {
 		const prefix string = ",\"version_affected\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(in.VersionAffected))
 	}
 	{
@@ -2970,7 +2555,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgVulnloaderNvdloader1(in *j
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -3035,62 +2620,32 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(out *
 	_ = first
 	{
 		const prefix string = ",\"CVE_data_format\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.CVEDataFormat))
 	}
 	if in.CVEDataNumberOfCVEs != "" {
 		const prefix string = ",\"CVE_data_numberOfCVEs\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.CVEDataNumberOfCVEs))
 	}
 	if in.CVEDataTimestamp != "" {
 		const prefix string = ",\"CVE_data_timestamp\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.CVEDataTimestamp))
 	}
 	{
 		const prefix string = ",\"CVE_data_type\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.CVEDataType))
 	}
 	{
 		const prefix string = ",\"CVE_data_version\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.CVEDataVersion))
 	}
 	{
 		const prefix string = ",\"CVE_Items\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.CVEItems == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -3145,7 +2700,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -3203,12 +2758,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(
 	_ = first
 	{
 		const prefix string = ",\"cve\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.CVE == nil {
 			out.RawString("null")
 		} else {
@@ -3217,42 +2767,22 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(
 	}
 	if in.Configurations != nil {
 		const prefix string = ",\"configurations\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(out, *in.Configurations)
 	}
 	if in.Impact != nil {
 		const prefix string = ",\"impact\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(out, *in.Impact)
 	}
 	if in.LastModifiedDate != "" {
 		const prefix string = ",\"lastModifiedDate\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.LastModifiedDate))
 	}
 	if in.PublishedDate != "" {
 		const prefix string = ",\"publishedDate\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.PublishedDate))
 	}
 	out.RawByte('}')

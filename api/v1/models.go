@@ -384,6 +384,7 @@ func (f Feature) DatabaseModel() (fv database.FeatureVersion, err error) {
 }
 
 // LayerEnvelope envelopes complete scan data to return to the client.
+// easyjson:json
 type LayerEnvelope struct {
 	ScannerVersion string `json:"ScannerVersion,omitempty"`
 	Layer          *Layer `json:"Layer,omitempty"`

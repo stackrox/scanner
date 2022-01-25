@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	v1 "github.com/stackrox/scanner/api/v1"
@@ -160,7 +161,8 @@ func (c *Clairify) RetrieveImageDataBySHA(sha string, opts *types.GetImageDataOp
 		return nil, err
 	}
 	var layerEnvelope v1.LayerEnvelope
-	if err := json.Unmarshal(envelopeData, &layerEnvelope); err != nil {
+
+	if err := easyjson.Unmarshal(envelopeData, &layerEnvelope); err != nil {
 		return nil, err
 	}
 	return &layerEnvelope, err
@@ -180,7 +182,7 @@ func (c *Clairify) RetrieveImageDataByName(image *types.Image, opts *types.GetIm
 		return nil, err
 	}
 	var layerEnvelope v1.LayerEnvelope
-	if err := json.Unmarshal(envelopeData, &layerEnvelope); err != nil {
+	if err := easyjson.Unmarshal(envelopeData, &layerEnvelope); err != nil {
 		return nil, err
 	}
 	return &layerEnvelope, err
