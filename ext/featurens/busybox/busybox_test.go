@@ -23,51 +23,51 @@ func Test_detector_Detect(t *testing.T) {
 				VersionFormat: language.ParserName,
 			},
 			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
-				"bin/busybox": tarutil.FileData{Contents: []byte(bbContent)},
-				"bin/sh":      tarutil.FileData{Contents: []byte(bbContent)},
+				"bin/busybox": {Contents: []byte(bbContent)},
+				"bin/sh":      {Contents: []byte(bbContent)},
 			}),
 		},
 		{
 			// Busybox, but failed to parse the version.
 			ExpectedNamespace: nil,
 			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
-				"bin/busybox": tarutil.FileData{Contents: []byte(bbContentNoVersion)},
-				"bin/sh":      tarutil.FileData{Contents: []byte(bbContentNoVersion)},
+				"bin/busybox": {Contents: []byte(bbContentNoVersion)},
+				"bin/sh":      {Contents: []byte(bbContentNoVersion)},
 			}),
 		},
 		{
 			ExpectedNamespace: nil,
 			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
-				"bin/busybox": tarutil.FileData{Contents: []byte("something else")},
-				"bin/sh":      tarutil.FileData{Contents: []byte(bbContent)},
+				"bin/busybox": {Contents: []byte("something else")},
+				"bin/sh":      {Contents: []byte(bbContent)},
 			}),
 		},
 		{
 			ExpectedNamespace: nil,
 			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
-				"bin/busybox": tarutil.FileData{Contents: []byte(bbContent)},
-				"bin/sh":      tarutil.FileData{Contents: []byte("something else")},
+				"bin/busybox": {Contents: []byte(bbContent)},
+				"bin/sh":      {Contents: []byte("something else")},
 			}),
 		},
 		{
 			ExpectedNamespace: nil,
 			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
-				"bin/busybox": tarutil.FileData{Contents: []byte(bbContent)},
+				"bin/busybox": {Contents: []byte(bbContent)},
 			}),
 		},
 		{
 			ExpectedNamespace: nil,
 			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
-				"bin/sh": tarutil.FileData{Contents: []byte(bbContent)},
+				"bin/sh": {Contents: []byte(bbContent)},
 			}),
 		},
 		{
 			ExpectedNamespace: nil,
 			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
-				"etc/os-release": tarutil.FileData{},
-				"bin/busybox":    tarutil.FileData{},
-				"bin/sh":         tarutil.FileData{},
-				"bin/[":          tarutil.FileData{},
+				"etc/os-release": {},
+				"bin/busybox":    {},
+				"bin/sh":         {},
+				"bin/[":          {},
 			}),
 		},
 	}
