@@ -23,11 +23,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
-
+	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/ext/versionfmt"
+	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/pkg/commonerr"
 )
 
@@ -85,7 +85,7 @@ type fvCacheEntry struct {
 }
 
 func fvHash(fv *database.FeatureVersion) uint64 {
-	if fv.Feature.Namespace.VersionFormat == dpkg.ParserName {
+	if fv.Feature.Namespace.VersionFormat != dpkg.ParserName {
 		return 0
 	}
 	h := fnv.New64()
@@ -104,6 +104,7 @@ func fvHash(fv *database.FeatureVersion) uint64 {
 	}
 	sort.Strings(str)
 	buf.WriteString(strings.Join(str, ","))
+	logrus.Infof("%s:%s %s", fv.Feature.Name, fv.Version, buf.String())
 	h.Write(buf.Bytes())
 	return h.Sum64()
 }
@@ -117,12 +118,14 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	// Do cache lookup.
 	cacheIndex := strings.Join([]string{"featureversion", fv.Feature.Namespace.Name, fv.Feature.Name, fv.Version}, ":")
 	hash := fvHash(&fv)
+	logrus.Infof("Hash for index %s: %d", cacheIndex, hash)
 	if pgSQL.cache != nil {
 		metrics.IncCacheQueries("featureversion")
 		entry, found := pgSQL.cache.Get(cacheIndex)
 		if found {
 			metrics.IncCacheHits("featureversion")
 			e := entry.(fvCacheEntry)
+			logrus.Infof("found index %s: %d", cacheIndex, e.hash)
 			if hash == e.hash {
 				return e.id, nil
 			}
@@ -159,8 +162,12 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	if err == nil {
 		updated := existingFv.LibraryToDependencies.Merge(fv.LibraryToDependencies)
 		updated = existingFv.ExecutableToDependencies.Merge(fv.ExecutableToDependencies) || updated
+		logrus.Infof("Found %s, updated %v", cacheIndex, updated)
 		if updated {
 			err = pgSQL.updateFv(existingFv)
+		}
+		if err != nil {
+			logrus.Errorf("update fail %v", err)
 		}
 		return fv.ID, err
 	}
