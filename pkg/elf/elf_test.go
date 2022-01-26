@@ -30,7 +30,7 @@ func TestIsELFExecutable(t *testing.T) {
 		t.Run(c.path, func(t *testing.T) {
 			elfFile, err := os.Open(c.path)
 			require.NoError(t, err)
-			metadata, err := GetExecutableMetadata(elfFile)
+			metadata, err := GetExecutableMetadata(elfFile, 0)
 			assert.NoError(t, err)
 			if c.isELF {
 				assert.NotNil(t, metadata)
@@ -44,7 +44,7 @@ func TestIsELFExecutable(t *testing.T) {
 func TestGetImportedLibraries(t *testing.T) {
 	file, err := os.Open("testdata/elf_exec")
 	assert.NoError(t, err)
-	elfMetadata, err := GetExecutableMetadata(file)
+	elfMetadata, err := GetExecutableMetadata(file, 0)
 	assert.NoError(t, err)
 	assert.NotZero(t, len(elfMetadata.ImportedLibraries))
 	assert.Zero(t, len(elfMetadata.Sonames))

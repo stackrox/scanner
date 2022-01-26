@@ -39,14 +39,14 @@ const (
 	DefaultMaxExtractableFileSizeMB = 200
 	// DefaultMaxELFExecutableFileSizeMB is the default value for the max ELF executable file we analyze.
 	DefaultMaxELFExecutableFileSizeMB = 300
-	maxELFExecutableFileSize          = DefaultMaxELFExecutableFileSizeMB * 1024 * 1024
 )
 
 var (
 	// maxExtractableFileSize enforces the maximum size of a single file within a
 	// tarball that will be extracted. This protects against malicious files that
 	// may used in an attempt to perform a Denial of Service attack.
-	maxExtractableFileSize int64 = DefaultMaxExtractableFileSizeMB * 1024 * 1024
+	maxExtractableFileSize   int64 = DefaultMaxExtractableFileSizeMB * 1024 * 1024
+	maxELFExecutableFileSize int64 = DefaultMaxELFExecutableFileSizeMB * 1024 * 1024
 
 	readLen     = 6 // max bytes to sniff
 	gzipHeader  = []byte{0x1f, 0x8b}
@@ -130,7 +130,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 
 			// ELF file size limit
 			if hdr.Size < maxELFExecutableFileSize {
-				fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
+				fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents, hdr.Size)
 				if err != nil {
 					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 				}

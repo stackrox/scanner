@@ -17,6 +17,7 @@ import (
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/types"
+	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -53,6 +54,9 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 		prevLayer = layer
 	}
 	logrus.Infof("Finished analyzing all layers for image %s", image)
+	logrus.Infof("analyzed %d executables and max distance is %d", elf.NumElfExecutables, elf.MaxDistToEnd)
+	logrus.Infof("Elf stats: %v", elf.Sizes)
+
 	return prevLineage, nil
 }
 
