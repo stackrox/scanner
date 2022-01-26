@@ -10,26 +10,65 @@ import (
 )
 
 func Test_detector_Detect(t *testing.T) {
+	const (
+		bbContent          = "yadda yadda BusyBox v1.2.3.git yadda"
+		expectedName       = "busybox:1.2.3"
+		bbContentNoVersion = "busybox"
+	)
 	testData := []featurens.TestData{
 		{
+			// Happy Case.
 			ExpectedNamespace: &database.Namespace{
-				Name:          "busybox:v1.2.3",
+				Name:          expectedName,
 				VersionFormat: language.ParserName,
 			},
-			Files: tarutil.FilesMap{
-				"bin/[":       tarutil.FileData{Contents: []byte("yadda yadda BusyBox v1.2.3.git")},
-				"bin/busybox": tarutil.FileData{LinkName: "bin/["},
-				"bin/sh":      tarutil.FileData{LinkName: "bin/["},
-			},
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"bin/busybox": tarutil.FileData{Contents: []byte(bbContent)},
+				"bin/sh":      tarutil.FileData{Contents: []byte(bbContent)},
+			}),
+		},
+		{
+			// Busybox, but failed to parse the version.
+			ExpectedNamespace: nil,
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"bin/busybox": tarutil.FileData{Contents: []byte(bbContentNoVersion)},
+				"bin/sh":      tarutil.FileData{Contents: []byte(bbContentNoVersion)},
+			}),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files: tarutil.FilesMap{
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"bin/busybox": tarutil.FileData{Contents: []byte("something else")},
+				"bin/sh":      tarutil.FileData{Contents: []byte(bbContent)},
+			}),
+		},
+		{
+			ExpectedNamespace: nil,
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"bin/busybox": tarutil.FileData{Contents: []byte(bbContent)},
+				"bin/sh":      tarutil.FileData{Contents: []byte("something else")},
+			}),
+		},
+		{
+			ExpectedNamespace: nil,
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"bin/busybox": tarutil.FileData{Contents: []byte(bbContent)},
+			}),
+		},
+		{
+			ExpectedNamespace: nil,
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"bin/sh": tarutil.FileData{Contents: []byte(bbContent)},
+			}),
+		},
+		{
+			ExpectedNamespace: nil,
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"etc/os-release": tarutil.FileData{},
 				"bin/busybox":    tarutil.FileData{},
 				"bin/sh":         tarutil.FileData{},
 				"bin/[":          tarutil.FileData{},
-			},
+			}),
 		},
 	}
 	featurens.TestDetector(t, &detector{}, testData)

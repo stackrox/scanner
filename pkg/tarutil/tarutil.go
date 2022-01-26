@@ -122,7 +122,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 
 		// Extract the element
 		switch hdr.Typeflag {
-		case tar.TypeReg, tar.TypeLink:
+		case tar.TypeReg:
 			var fileData FileData
 
 			fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
@@ -131,10 +131,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
-			if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink {
-				fileData.LinkName = hdr.Linkname
-			}
-			if !extractContents || hdr.Typeflag != tar.TypeReg {
+
+			if !extractContents {
 				fileData.Executable = executable
 				files.data[filename] = fileData
 				continue
@@ -154,6 +152,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			numExtractedContentBytes += len(d)
 		case tar.TypeSymlink:
 			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+		case tar.TypeLink:
+			// Hard links name are path to files that were already archived.
+			files.links[filename] = hdr.Linkname
 		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.

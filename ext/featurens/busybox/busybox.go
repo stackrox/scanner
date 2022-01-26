@@ -7,12 +7,15 @@
 //
 // 1. Does not contain any freedesktop standard release file (os-release, lsb-release).
 //
-// 2. `/bin/sh` and `/bin/busybox` are hard-links to `/bin/[`, the actual regular file
-//    shipping Busybox, as observed in the container image.
+// 2. `/bin/sh` and `/bin/busybox` are hard-links. In the image tarball their content is
+//    stored in `/bin/[`.
+//
+// 3. The busybox binary contains a version string on the form "BusyBox vX.Y.Z"
 //
 package busybox
 
 import (
+	"bytes"
 	"regexp"
 	"strings"
 
@@ -24,7 +27,15 @@ import (
 
 type detector struct{}
 
-var busyboxVersionMatcher = regexp.MustCompile(`BusyBox v(\d)+\.(\d)+\.(\d)+`)
+var (
+	busyboxVersionMatcher = regexp.MustCompile(`BusyBox v(\d)+\.(\d)+\.(\d)+`)
+	blockedFiles          = []string{
+		"etc/os-release",
+		"etc/lsb-release",
+		"usr/lib/os-release",
+		"usr/lib/lsb-release",
+	}
+)
 
 func init() {
 	featurens.RegisterDetector("busybox", &detector{})
@@ -40,49 +51,43 @@ func parseBusyBoxVersion(contents []byte) string {
 	return ""
 }
 
-func (detector) Detect(filesMap tarutil.FilesMap, options *featurens.DetectorOptions) *database.Namespace {
-	var blockedFiles = []string{
-		"etc/os-release",
-		"etc/lsb-release",
-		"usr/lib/os-release",
-		"usr/lib/lsb-release",
-	}
+func (detector) Detect(files tarutil.LayerFiles, options *featurens.DetectorOptions) *database.Namespace {
 	for _, filePath := range blockedFiles {
-		if _, hasFile := filesMap[filePath]; hasFile {
+		if _, hasFile := files.Get(filePath); hasFile {
 			return nil
 		}
 	}
 
-	// Check the actual busybox path, notice `bin/busybox` itself might be a link
-	// to another file, and that's OK.
-
-	var busyboxPath = "bin/busybox"
-	if filesMap[busyboxPath].LinkName != "" {
-		actualPath := filesMap[busyboxPath].LinkName
-		if _, ok := filesMap[actualPath]; !ok {
-			return nil
-		}
-		busyboxPath = actualPath
+	busyboxData, ok := files.Get("bin/busybox")
+	if !ok {
+		return nil
 	}
-
-	// We assume /bin/sh should link to busybox, to guard against the odds of an
-	// image shipping different coreutils being classified as busybox.
-	if filesMap["bin/sh"].LinkName != busyboxPath {
+	shData, ok := files.Get("bin/sh")
+	if !ok {
 		return nil
 	}
 
-	// Get busybox version, if not found we report unknown, but assume busybox.
-	var version = parseBusyBoxVersion(filesMap[busyboxPath].Contents)
+	// We assume ``/bin/sh`` hard links to busybox, to guard against the odds of an
+	// image shipping different coreutils being classified as busybox.
+	if !bytes.Equal(busyboxData.Contents, shData.Contents) {
+		return nil
+	}
+
+	// Validate busybox binary and extract version.
+	var version = parseBusyBoxVersion(busyboxData.Contents)
 	if version == "" {
-		version = "unknown"
+		return nil
 	}
 
 	return &database.Namespace{
-		Name:          "busybox" + ":v" + version,
+		Name:          "busybox" + ":" + version,
 		VersionFormat: language.ParserName,
 	}
 }
 
 func (detector) RequiredFilenames() []string {
-	return []string{"bin/sh", "bin/[", "bin/busybox"}
+	// FIXME Currently we cannot extract contents of hard links unless we explicitly
+	//       whitelist its target; In tar that's a previously archived file, which
+	//       we observed to be ``/bin/[``.
+	return []string{"bin/sh", "bin/busybox"}
 }
