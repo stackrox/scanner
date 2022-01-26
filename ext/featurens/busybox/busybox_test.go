@@ -11,9 +11,11 @@ import (
 
 func Test_detector_Detect(t *testing.T) {
 	const (
-		bbContent          = "yadda yadda BusyBox v1.2.3.git yadda"
-		expectedName       = "busybox:1.2.3"
-		bbContentNoVersion = "busybox"
+		bbContent               = "yadda yadda BusyBox v1.2.3.git yadda"
+		bbContentBadVersion     = "foo Busybox vbar"
+		bbContentNoVersion      = "busybox"
+		bbContentPartialVersion = "foo Busybox v1.2"
+		expectedName            = "busybox:1.2.3"
 	)
 	testData := []featurens.TestData{
 		{
@@ -27,12 +29,26 @@ func Test_detector_Detect(t *testing.T) {
 				"bin/sh":      {Contents: []byte(bbContent)},
 			}),
 		},
+		// Busybox, but failed to parse the version.
 		{
-			// Busybox, but failed to parse the version.
 			ExpectedNamespace: nil,
 			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
 				"bin/busybox": {Contents: []byte(bbContentNoVersion)},
 				"bin/sh":      {Contents: []byte(bbContentNoVersion)},
+			}),
+		},
+		{
+			ExpectedNamespace: nil,
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"bin/busybox": {Contents: []byte(bbContentBadVersion)},
+				"bin/sh":      {Contents: []byte(bbContentBadVersion)},
+			}),
+		},
+		{
+			ExpectedNamespace: nil,
+			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+				"bin/busybox": {Contents: []byte(bbContentPartialVersion)},
+				"bin/sh":      {Contents: []byte(bbContentPartialVersion)},
 			}),
 		},
 		{

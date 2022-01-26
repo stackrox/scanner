@@ -153,7 +153,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 		case tar.TypeSymlink:
 			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
 		case tar.TypeLink:
-			// Hard links name are path to files that were already archived.
+			// A hard-link necessarily points to absolute paths inside the archive.
 			files.links[filename] = hdr.Linkname
 		case tar.TypeDir:
 			// Do not bother saving the contents,
