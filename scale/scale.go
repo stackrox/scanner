@@ -29,7 +29,7 @@ const (
 
 	registry = "https://registry-1.docker.io"
 
-	maxConcurrentScans = 6
+	maxConcurrentScans = 15
 )
 
 func main() {
