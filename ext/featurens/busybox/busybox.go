@@ -89,5 +89,5 @@ func (detector) RequiredFilenames() []string {
 	// FIXME Currently we cannot extract contents of hard links unless we explicitly
 	//       whitelist its target; In tar that's a previously archived file, which
 	//       we observed to be ``/bin/[``.
-	return []string{"bin/sh", "bin/busybox"}
+	return []string{"bin/[", "bin/sh", "bin/busybox"}
 }
