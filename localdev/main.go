@@ -32,6 +32,7 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurefmt/rpm"
 	_ "github.com/stackrox/scanner/ext/featurens/alpinerelease"
 	_ "github.com/stackrox/scanner/ext/featurens/aptsources"
+	_ "github.com/stackrox/scanner/ext/featurens/busybox"
 	_ "github.com/stackrox/scanner/ext/featurens/lsbrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/redhatrelease"
@@ -164,7 +165,7 @@ func main() {
 	utils.Must(os.Setenv("NVD_DEFINITIONS_DIR", nvdPath))
 	nvdtoolscache.Singleton()
 
-	path := "TODO: Absolute path to local image tar.gz files"
+	path := "/home/jvdm/src/stackrox-rox-7520/"
 
 	fis, err := os.ReadDir(path)
 	if err != nil {
