@@ -25,6 +25,10 @@ scanner:
 
   logLevel: INFO
 
-  # The max size of files in images that are extracted. The scanner intentionally avoids extracting any files
-  # larger than this to prevent DoS attacks. Leave commmented to use a reasonable default.
+  # The scanner intentionally avoids extracting or analyzing any files
+  # larger than the following default sizes to prevent DoS attacks.
+  # Leave commmented to use a reasonable default.
+  # The max size of files in images that are extracted.
   # maxExtractableFileSizeMB: 200
+  # The max size of ELF executable files that are analyzed.
+  # maxELFExecutableFileSizeMB: 300

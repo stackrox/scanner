@@ -35,11 +35,12 @@ type File struct {
 
 // Config is the global configuration for an instance of Clair.
 type Config struct {
-	Database                 database.RegistrableComponentConfig `yaml:"database"`
-	API                      *api.Config                         `yaml:"api"`
-	Updater                  updater.Config                      `yaml:"updater"`
-	LogLevel                 string                              `yaml:"logLevel"`
-	MaxExtractableFileSizeMB int64                               `yaml:"maxExtractableFileSizeMB"`
+	Database                   database.RegistrableComponentConfig `yaml:"database"`
+	API                        *api.Config                         `yaml:"api"`
+	Updater                    updater.Config                      `yaml:"updater"`
+	LogLevel                   string                              `yaml:"logLevel"`
+	MaxExtractableFileSizeMB   int64                               `yaml:"maxExtractableFileSizeMB"`
+	MaxELFExecutableFileSizeMB int64                               `yaml:"MaxELFExecutableFileSizeMB"`
 
 	// CentralEndpoint is the endpoint that central can be reached at. Defaults to https://central.stackrox.svc if not present in the config.
 	CentralEndpoint string `yaml:"centralEndpoint"`
@@ -58,8 +59,9 @@ func DefaultConfig() Config {
 			HTTPSPort: 8080,
 			GRPCPort:  8443,
 		},
-		LogLevel:                 "info",
-		MaxExtractableFileSizeMB: tarutil.DefaultMaxExtractableFileSizeMB,
+		LogLevel:                   "info",
+		MaxExtractableFileSizeMB:   tarutil.DefaultMaxExtractableFileSizeMB,
+		MaxELFExecutableFileSizeMB: tarutil.DefaultMaxELFExecutableFileSizeMB,
 	}
 }
 

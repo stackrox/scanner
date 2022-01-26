@@ -37,6 +37,9 @@ import (
 const (
 	// DefaultMaxExtractableFileSizeMB is the default value for the max extractable file size.
 	DefaultMaxExtractableFileSizeMB = 200
+	// DefaultMaxELFExecutableFileSizeMB is the default value for the max ELF executable file we analyze.
+	DefaultMaxELFExecutableFileSizeMB = 300
+	maxELFExecutableFileSize          = DefaultMaxELFExecutableFileSizeMB * 1024 * 1024
 )
 
 var (
@@ -116,7 +119,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 
 		// File size limit
 		if extractContents && hdr.Size > maxExtractableFileSize {
-			log.Errorf("Skipping file %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, maxExtractableFileSize)
+			log.Errorf("Skipping file %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, DefaultMaxExtractableFileSizeMB)
 			continue
 		}
 
@@ -125,9 +128,14 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 		case tar.TypeReg, tar.TypeLink:
 			var fileData FileData
 
-			fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
-			if err != nil {
-				log.Errorf("Failed to get dependencies for %s: %v", filename, err)
+			// ELF file size limit
+			if hdr.Size < maxELFExecutableFileSize {
+				fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
+				if err != nil {
+					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
+				}
+			} else {
+				log.Errorf("Skipping file %q (%d bytes) because it was greater than the configured maxELFExecutableFileSizeMB of %d", filename, hdr.Size, DefaultMaxELFExecutableFileSizeMB)
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
