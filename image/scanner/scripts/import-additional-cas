@@ -2,7 +2,10 @@
 
 set -euo pipefail
 
-[ -d /usr/local/share/ca-certificates ] || exit 0
-[ "$(find /usr/local/share/ca-certificates -maxdepth 1 -name '*.crt' | wc -l)" -gt 0 ] || exit 0
-cp -L /usr/local/share/ca-certificates/* /etc/pki/ca-trust/source/anchors
-update-ca-trust
+lines=$(for d in /usr/local/share/ca-certificates /etc/pki/injected-ca-trust
+do
+    [ -d "$d" ] && find "$d" -maxdepth 1 -name '*.crt' -o -name '*.pem' \
+         -print -exec cp -L {} /etc/pki/ca-trust/source/anchors \;
+done | wc -l)
+
+[ "$lines" -gt 0 ] && update-ca-trust
