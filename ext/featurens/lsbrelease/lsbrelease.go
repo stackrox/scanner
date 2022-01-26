@@ -80,7 +80,7 @@ func (d detector) Detect(files tarutil.LayerFiles, _ *featurens.DetectorOptions)
 	switch OS {
 	case "debian", "ubuntu":
 		versionFormat = dpkg.ParserName
-	case "centos", "rhel", "fedora", "amzn", "oracle":
+	case "centos", "rhel", "amzn", "oracle":
 		versionFormat = rpm.ParserName
 	default:
 		return nil
