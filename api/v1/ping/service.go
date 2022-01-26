@@ -6,6 +6,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
+	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
 )
 
@@ -18,14 +19,19 @@ type Service interface {
 
 // NewService returns a new Ping service.
 func NewService() Service {
-	return &serviceImpl{}
+	return &serviceImpl{
+		version: version.Version,
+	}
 }
 
-type serviceImpl struct{}
+type serviceImpl struct {
+	version string
+}
 
 func (s *serviceImpl) Ping(context.Context, *v1.Empty) (*v1.PongMessage, error) {
 	return &v1.PongMessage{
-		Status: "OK",
+		ScannerVersion: s.version,
+		Status:         "OK",
 	}, nil
 }
 

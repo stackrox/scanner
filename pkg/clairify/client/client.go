@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	v1 "github.com/stackrox/scanner/api/v1"
@@ -42,6 +43,11 @@ func New(endpoint string, insecure bool) *Clairify {
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
 			Proxy:           proxy.TransportFunc,
+			// Values are taken from http.DefaultTransport, Go 1.17.3
+			MaxIdleConns:          100,
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
 		},
 	}
 	return &Clairify{
@@ -155,7 +161,8 @@ func (c *Clairify) RetrieveImageDataBySHA(sha string, opts *types.GetImageDataOp
 		return nil, err
 	}
 	var layerEnvelope v1.LayerEnvelope
-	if err := json.Unmarshal(envelopeData, &layerEnvelope); err != nil {
+
+	if err := easyjson.Unmarshal(envelopeData, &layerEnvelope); err != nil {
 		return nil, err
 	}
 	return &layerEnvelope, err
@@ -175,7 +182,7 @@ func (c *Clairify) RetrieveImageDataByName(image *types.Image, opts *types.GetIm
 		return nil, err
 	}
 	var layerEnvelope v1.LayerEnvelope
-	if err := json.Unmarshal(envelopeData, &layerEnvelope); err != nil {
+	if err := easyjson.Unmarshal(envelopeData, &layerEnvelope); err != nil {
 		return nil, err
 	}
 	return &layerEnvelope, err

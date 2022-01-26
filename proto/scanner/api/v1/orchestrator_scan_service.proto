@@ -13,7 +13,9 @@ message GetKubeVulnerabilitiesRequest {
     string kubernetes_version = 1;
 }
 
+// Next tag: 7
 message GetKubeVulnerabilitiesResponse {
+    string                 scanner_version                    = 6;
     repeated Vulnerability aggregator_vulnerabilities         = 1;
     repeated Vulnerability apiserver_vulnerabilities          = 2;
     repeated Vulnerability controller_manager_vulnerabilities = 3;
@@ -26,6 +28,7 @@ message GetOpenShiftVulnerabilitiesRequest {
 }
 
 message GetOpenShiftVulnerabilitiesResponse {
+    string                 scanner_version = 2;
     repeated Vulnerability vulnerabilities = 1;
 }
 

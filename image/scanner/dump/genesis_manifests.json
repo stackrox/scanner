@@ -286,6 +286,11 @@
       "config": {
         "useLegacyUbuntuCVEURLPrefix": true
       }
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20220124200451.zip",
+      "timestamp": "2022-01-24T20:04:51.981143049Z",
+      "uuid": "76920bf9-d0d2-47cd-9d53-ae4943edc02a"
     }
   ]
 }
