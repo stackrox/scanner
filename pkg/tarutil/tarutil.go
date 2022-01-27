@@ -38,7 +38,7 @@ const (
 	// DefaultMaxExtractableFileSizeMB is the default value for the max extractable file size.
 	DefaultMaxExtractableFileSizeMB = 200
 	// DefaultMaxELFExecutableFileSizeMB is the default value for the max ELF executable file we analyze.
-	DefaultMaxELFExecutableFileSizeMB = 300
+	DefaultMaxELFExecutableFileSizeMB = 250
 )
 
 var (
