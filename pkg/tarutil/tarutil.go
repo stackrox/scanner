@@ -121,7 +121,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			if prevLazyReader != nil {
 				buf = prevLazyReader.StealBuffer()
 			}
-			prevLazyReader = ioutils.NewDiskBackedLazyReaderAtWithBuffer(tr, hdr.Size, buf, maxExtractableFileSize)
+			prevLazyReader = ioutils.NewDiskBackedLazyReaderAtWithBuffer(tr, hdr.Size, buf, 100*1024*1024)
 			contents = prevLazyReader
 		} else {
 			contents = bytes.NewReader(nil)
