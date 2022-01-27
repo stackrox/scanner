@@ -30,7 +30,7 @@ func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) 
 			return true, true
 		}
 	}
-	return false, false
+	return false, true
 }
 
 // NewPrefixAllowlistMatcher returns a matcher that matches all filenames which have any
@@ -80,6 +80,17 @@ func NewRegexpMatcher(expr *regexp.Regexp, extractable bool) Matcher {
 	}
 }
 
+type symlinkMatcher struct{}
+
+func (o *symlinkMatcher) Match(_ string, fileInfo os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
+	return fileInfo.Mode()&fs.ModeSymlink != 0, false
+}
+
+// NewSymbolicLinkMatcher returns a matcher that matches symbolic links
+func NewSymbolicLinkMatcher() Matcher {
+	return &symlinkMatcher{}
+}
+
 type orMatcher struct {
 	matchers []Matcher
 }
@@ -96,20 +107,6 @@ func (o *orMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.Rea
 // NewOrMatcher returns a matcher that matches if any of the passed submatchers does.
 func NewOrMatcher(subMatchers ...Matcher) Matcher {
 	return &orMatcher{matchers: subMatchers}
-}
-
-type symlinkMatcher struct{}
-
-func (o *symlinkMatcher) Match(_ string, fileInfo os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
-	if fileInfo.Mode()&fs.ModeSymlink != 0 {
-		return true, false
-	}
-	return false, false
-}
-
-// NewSymbolicLinkMatcher returns a matcher that matches symbolic links
-func NewSymbolicLinkMatcher() Matcher {
-	return &symlinkMatcher{}
 }
 
 type andMatcher struct {
