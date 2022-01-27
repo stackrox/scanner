@@ -39,6 +39,8 @@ const (
 	DefaultMaxExtractableFileSizeMB = 200
 	// DefaultMaxELFExecutableFileSizeMB is the default value for the max ELF executable file we analyze.
 	DefaultMaxELFExecutableFileSizeMB = 250
+	// maxBufferSizeMB is the maximum buffer used by lazy reader.
+	maxBufferSizeMB = 100
 )
 
 var (
@@ -121,7 +123,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			if prevLazyReader != nil {
 				buf = prevLazyReader.StealBuffer()
 			}
-			prevLazyReader = ioutils.NewDiskBackedLazyReaderAtWithBuffer(tr, hdr.Size, buf, 100*1024*1024)
+			prevLazyReader = ioutils.NewDiskBackedLazyReaderAtWithBuffer(tr, hdr.Size, buf, maxBufferSizeMB*1024*1024)
 			contents = prevLazyReader
 		} else {
 			contents = bytes.NewReader(nil)
@@ -134,7 +136,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 		numMatchedFiles++
 
 		// File size limit
-		if extractContents && hdr.Size >= maxExtractableFileSize {
+		if extractContents && hdr.Size > maxExtractableFileSize {
 			log.Errorf("Skipping file %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, maxExtractableFileSize/1024/1024)
 			continue
 		}
@@ -145,7 +147,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			var fileData FileData
 
 			// ELF file size limit
-			if hdr.Size < maxELFExecutableFileSize {
+			if hdr.Size <= maxELFExecutableFileSize {
 				fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
 				if err != nil {
 					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
