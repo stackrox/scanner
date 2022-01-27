@@ -54,7 +54,7 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 		prevLayer = layer
 	}
 	logrus.Infof("Finished analyzing all layers for image %s", image)
-	logrus.Infof("analyzed %d executables and max distance is %d", elf.NumElfExecutables, elf.MaxDistToEnd)
+	logrus.Infof("analyzed %d executables and max distance is %d at %f", elf.NumElfExecutables, elf.MaxDistToEnd, elf.MaxPercentage)
 	logrus.Infof("Elf stats: %v", elf.Sizes)
 
 	return prevLineage, nil

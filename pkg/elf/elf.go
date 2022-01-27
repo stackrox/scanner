@@ -15,6 +15,8 @@ var (
 	NumElfExecutables = 0
 	// MaxDistToEnd xxx
 	MaxDistToEnd int64 = 1024 * 1024
+	// MaxPercentage xxx
+	MaxPercentage float64 = 0
 	// Sizes xx
 	Sizes StatSizes
 	m     int64 = 1024 * 1024
@@ -24,7 +26,8 @@ var (
 type StatSizes struct {
 	lessThan100M int
 	f100To200M   int
-	f200To300M   int
+	f200To250M   int
+	f250To300M   int
 	f300To500M   int
 	morethan500M int
 }
@@ -54,8 +57,10 @@ func GetExecutableMetadata(r io.ReaderAt, size int64) (*Metadata, error) {
 		Sizes.lessThan100M++
 	case size < 200*m:
 		Sizes.f100To200M++
+	case size < 250*m:
+		Sizes.f200To250M++
 	case size < 300*m:
-		Sizes.f200To300M++
+		Sizes.f250To300M++
 	case size < 500*m:
 		Sizes.f300To500M++
 	default:
@@ -65,6 +70,7 @@ func GetExecutableMetadata(r io.ReaderAt, size int64) (*Metadata, error) {
 	ds := elfFile.SectionByType(elf.SHT_DYNAMIC)
 	if ds != nil && size-int64(ds.Addr) > MaxDistToEnd {
 		MaxDistToEnd = size - int64(ds.Addr)
+		MaxPercentage = float64(ds.Addr) / float64(size)
 	}
 
 	sonames, err := elfFile.DynString(elf.DT_SONAME)
