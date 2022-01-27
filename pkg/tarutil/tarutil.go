@@ -133,6 +133,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
 			if !extractContents || hdr.Typeflag != tar.TypeReg {
 				fileData.Executable = executable
+				log.Infof("Putting %s into the map. Size %d", filename, len(fileData.Contents))
 				files.data[filename] = fileData
 				continue
 			}
@@ -146,6 +147,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			// Put the file directly
 			fileData.Contents = d
 			fileData.Executable = executable
+			log.Infof("Putting %s into the map. Size %d", filename, len(fileData.Contents))
 			files.data[filename] = fileData
 
 			numExtractedContentBytes += len(d)
