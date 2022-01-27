@@ -77,7 +77,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	defer tr.Close()
 
 	// Telemetry variables.
-	var numFiles, numMatchedFiles, numExtractedContentBytes int
+	var numFiles, numMatchedFiles, numMatchedGreaterThanMax, numExtractedContentBytes int
 
 	var prevLazyReader ioutils.LazyReaderAt
 
@@ -116,6 +116,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 
 		// File size limit
 		if extractContents && hdr.Size > maxExtractableFileSize {
+			numMatchedGreaterThanMax++
 			log.Errorf("Skipping file %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, maxExtractableFileSize)
 			continue
 		}
@@ -133,7 +134,6 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
 			if !extractContents || hdr.Typeflag != tar.TypeReg {
 				fileData.Executable = executable
-				log.Infof("Putting %s into the map. Size %d", filename, len(fileData.Contents))
 				files.data[filename] = fileData
 				continue
 			}
@@ -147,7 +147,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			// Put the file directly
 			fileData.Contents = d
 			fileData.Executable = executable
-			log.Infof("Putting %s into the map. Size %d", filename, len(fileData.Contents))
+			if int64(len(fileData.Contents)) >= maxExtractableFileSize {
+				log.Infof("Putting %s into the map. Size %d", filename, len(fileData.Contents))
+			}
 			files.data[filename] = fileData
 
 			numExtractedContentBytes += len(d)
@@ -165,6 +167,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
+
+	log.Infof("Files - %d, Matched - %d, More than Max - %d, Bytes - %d", numFiles, numMatchedFiles, numMatchedGreaterThanMax, numExtractedContentBytes)
 
 	return files, nil
 }
