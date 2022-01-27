@@ -38,9 +38,9 @@ const (
 	// DefaultMaxExtractableFileSizeMB is the default value for the max extractable file size.
 	DefaultMaxExtractableFileSizeMB = 200
 	// DefaultMaxELFExecutableFileSizeMB is the default value for the max ELF executable file we analyze.
-	DefaultMaxELFExecutableFileSizeMB = 250
+	DefaultMaxELFExecutableFileSizeMB = 1024
 	// maxBufferSizeMB is the maximum buffer used by lazy reader.
-	maxBufferSizeMB = 100
+	maxBufferSizeMB = 50
 )
 
 var (
