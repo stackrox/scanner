@@ -63,7 +63,7 @@ func GetExecutableMetadata(r io.ReaderAt, size int64) (*Metadata, error) {
 	}
 	NumElfExecutables++
 	ds := elfFile.SectionByType(elf.SHT_DYNAMIC)
-	if size-int64(ds.Addr) > MaxDistToEnd {
+	if ds != nil && size-int64(ds.Addr) > MaxDistToEnd {
 		MaxDistToEnd = size - int64(ds.Addr)
 	}
 
