@@ -1,7 +1,6 @@
 package elf
 
 import (
-	"github.com/stackrox/scanner/pkg/ioutils"
 	//"github.com/stackrox/scanner/pkg/ioutils"
 	"os"
 	"testing"
@@ -44,13 +43,9 @@ func TestIsELFExecutable(t *testing.T) {
 }
 
 func TestGetImportedLibraries(t *testing.T) {
-	file, err := os.Open("/Users/cong/go/src/github.com/stackrox/scanner/scc")
+	file, err := os.Open("testdata/elf_exec")
 	assert.NoError(t, err)
-	stat, _ := file.Stat()
-	var buf []byte
-	lzReader := ioutils.NewDiskBackedLazyReaderAtWithBuffer(file, stat.Size(), buf, 1024)
-	// lzReader := ioutils.NewLazyReaderAtWithBuffer(file, stat.Size(), buf)
-	elfMetadata, err := GetExecutableMetadata(lzReader)
+	elfMetadata, err := GetExecutableMetadata(file)
 	assert.NoError(t, err)
 	assert.NotZero(t, len(elfMetadata.ImportedLibraries))
 	assert.Zero(t, len(elfMetadata.Sonames))
