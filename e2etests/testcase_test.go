@@ -3096,4 +3096,10 @@ var testCases = []testCase{
 			},
 		},
 	},
+	{
+		image:     "docker.io/busybox:1.35.0",
+		registry:  "https://registry-1.docker.io",
+		source:    "NVD",
+		namespace: "busybox:1.35.0",
+	},
 }
