@@ -1,6 +1,11 @@
 package elf
 
 import (
+	"fmt"
+
+	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/ioutils"
+
 	//"github.com/stackrox/scanner/pkg/ioutils"
 	"os"
 	"testing"
@@ -43,10 +48,23 @@ func TestIsELFExecutable(t *testing.T) {
 }
 
 func TestGetImportedLibraries(t *testing.T) {
-	file, err := os.Open("testdata/elf_exec")
-	assert.NoError(t, err)
-	elfMetadata, err := GetExecutableMetadata(file)
-	assert.NoError(t, err)
-	assert.NotZero(t, len(elfMetadata.ImportedLibraries))
-	assert.Zero(t, len(elfMetadata.Sonames))
+	elfFile := "testdata/elf_exec"
+	stat, err := os.Stat(elfFile)
+	require.NoError(t, err)
+	fileSize := stat.Size()
+
+	bufSizes := []int64{64, 1024, fileSize + 128, fileSize - 64, fileSize, 1024, 64}
+	for _, bufSize := range bufSizes {
+		file, err := os.Open("testdata/elf_exec")
+		defer utils.IgnoreError(file.Close)
+		fmt.Printf("Testing with max buffer size: %d\n", bufSize)
+		var buf []byte
+		lzReader := ioutils.NewDiskBackedLazyReaderAtWithBuffer(file, fileSize, buf, bufSize)
+		assert.NoError(t, err)
+		elfMetadata, err := GetExecutableMetadata(lzReader)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(elfMetadata.ImportedLibraries))
+		assert.Zero(t, len(elfMetadata.Sonames))
+		file.Close()
+	}
 }
