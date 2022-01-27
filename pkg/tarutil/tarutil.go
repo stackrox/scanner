@@ -94,6 +94,11 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	var numFiles, numMatchedFiles, numExtractedContentBytes int
 
 	var prevLazyReader ioutils.LazyReaderAt
+	defer func() {
+		if prevLazyReader != nil {
+			_ = prevLazyReader.StealBuffer()
+		}
+	}()
 
 	// For each element in the archive
 	for {
@@ -116,7 +121,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			if prevLazyReader != nil {
 				buf = prevLazyReader.StealBuffer()
 			}
-			prevLazyReader = ioutils.NewLazyReaderAtWithBuffer(tr, hdr.Size, buf)
+			prevLazyReader = ioutils.NewDiskBackedLazyReaderAtWithBuffer(tr, hdr.Size, buf, maxExtractableFileSize)
 			contents = prevLazyReader
 		} else {
 			contents = bytes.NewReader(nil)

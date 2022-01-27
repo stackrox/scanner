@@ -1,0 +1,108 @@
+package ioutils
+
+import (
+	"io"
+	"os"
+	"path/filepath"
+
+	"github.com/pkg/errors"
+	"github.com/stackrox/rox/pkg/utils"
+)
+
+const (
+	tmpFileName = "reader_overflow"
+	tmpDirName  = "lazy_reader_disk"
+)
+
+type diskBackedLazyReaderAt struct {
+	reader        io.Reader
+	lzReader      LazyReaderAt
+	size          int64
+	maxBufferSize int64
+
+	file    *os.File
+	dirPath string
+}
+
+// NewDiskBackedLazyReaderAtWithBuffer creates a LazyBuffer buffer implementation that limits the size of max buffer needed
+// and offload the remaining data to file on disk.
+func NewDiskBackedLazyReaderAtWithBuffer(reader io.Reader, size int64, buf []byte, maxBufferSize int64) LazyReaderAt {
+	bufferedSize := size
+	if size > maxBufferSize {
+		bufferedSize = maxBufferSize
+	}
+	return &diskBackedLazyReaderAt{
+		reader:        reader,
+		lzReader:      NewLazyReaderAtWithBuffer(reader, bufferedSize, buf),
+		size:          size,
+		maxBufferSize: maxBufferSize,
+	}
+}
+
+func (r *diskBackedLazyReaderAt) StealBuffer() []byte {
+	// Clean up
+	if r.file != nil {
+		_ = r.file.Close()
+	}
+	if r.dirPath != "" {
+		_ = os.Remove(r.dirPath)
+	}
+	return r.lzReader.StealBuffer()
+}
+
+func (r *diskBackedLazyReaderAt) ReadAt(p []byte, off int64) (int, error) {
+	if len(p) == 0 {
+		return 0, nil
+	}
+	if off >= r.size {
+		return 0, io.EOF
+	}
+
+	if off < r.maxBufferSize {
+		return r.lzReader.ReadAt(p, off)
+	}
+
+	if r.dirPath == "" {
+		var err error
+		r.dirPath, err = os.MkdirTemp("", tmpDirName)
+		if err != nil {
+			return 0, errors.Wrap(err, "failed to create temp dir")
+		}
+	}
+
+	if r.file == nil {
+		outF, err := os.Create(filepath.Join(r.dirPath, tmpFileName))
+		if err != nil {
+			return 0, err
+		}
+		defer func() {
+			if r.file == nil {
+				_ = os.RemoveAll(r.dirPath)
+				r.dirPath = ""
+			}
+		}()
+		defer utils.IgnoreError(outF.Close)
+
+		// Forcefully fill up the lazyReader buffer.
+		buf := make([]byte, 1)
+		_, err = r.lzReader.ReadAt(buf, r.maxBufferSize-1)
+		if err != nil {
+			return 0, err
+		}
+
+		_, err = io.Copy(outF, r.reader)
+		if err != nil {
+			return 0, err
+		}
+		err = outF.Close()
+		if err != nil {
+			return 0, err
+		}
+		inF, err := os.Open(filepath.Join(r.dirPath, tmpFileName))
+		if err != nil {
+			return 0, err
+		}
+		r.file = inF
+	}
+	return r.file.ReadAt(p, off-r.maxBufferSize)
+}
