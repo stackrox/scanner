@@ -118,7 +118,13 @@ func analyzeLocalImage(path string) {
 	for _, l := range config.Layers {
 		fileData, _ = filemap.Get(l)
 		layerTarReader := io.NopCloser(bytes.NewBuffer(fileData.Contents))
-		_, _, _, rhelv2Components, languageComponents, files, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace}, baseMap, false)
+		_, distroless, featuresFromReader, rhelv2Components, languageComponents, files, err := clair.DetectContentFromReader(layerTarReader, "Docker", l, &database.Layer{Namespace: namespace}, baseMap, false)
+		fmt.Println(distroless)
+		for _, feat := range featuresFromReader {
+			if feat.Executables != nil {
+				fmt.Println(feat)
+			}
+		}
 		baseMap = files
 		if err != nil {
 			fmt.Println(err.Error())

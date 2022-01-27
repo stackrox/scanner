@@ -692,7 +692,7 @@ var testCases = []testCase{
 							{Name: "libgpg-error", Version: "1.12-3.el7"},
 							{Name: "libselinux", Version: "2.5-14.1.el7"},
 							{Name: "lz4", Version: "1.7.5-3.el7"},
-							{Name: "ncurses-libs", Version:  "5.9-14.20130511.el7_4"},
+							{Name: "ncurses-libs", Version: "5.9-14.20130511.el7_4"},
 							{Name: "pcre", Version: "8.32-17.el7"},
 							{Name: "procps-ng", Version: "3.3.10-26.el7"},
 							{Name: "systemd-libs", Version: "219-67.el7_7.1"},
@@ -756,7 +756,7 @@ var testCases = []testCase{
 							{Name: "libgpg-error", Version: "1.12-3.el7"},
 							{Name: "libselinux", Version: "2.5-14.1.el7"},
 							{Name: "lz4", Version: "1.7.5-3.el7"},
-							{Name: "ncurses-libs", Version:  "5.9-14.20130511.el7_4"},
+							{Name: "ncurses-libs", Version: "5.9-14.20130511.el7_4"},
 							{Name: "pcre", Version: "8.32-17.el7"},
 							{Name: "procps-ng", Version: "3.3.10-26.el7"},
 							{Name: "systemd-libs", Version: "219-67.el7_7.1"},
@@ -841,7 +841,7 @@ var testCases = []testCase{
 							{Name: "libgpg-error", Version: "1.12-3.el7"},
 							{Name: "libselinux", Version: "2.5-14.1.el7"},
 							{Name: "lz4", Version: "1.7.5-3.el7"},
-							{Name: "ncurses-libs", Version:  "5.9-14.20130511.el7_4"},
+							{Name: "ncurses-libs", Version: "5.9-14.20130511.el7_4"},
 							{Name: "pcre", Version: "8.32-17.el7"},
 							{Name: "procps-ng", Version: "3.3.10-26.el7"},
 							{Name: "systemd-libs", Version: "219-67.el7_7.1"},
@@ -2709,10 +2709,10 @@ var testCases = []testCase{
 				Version:       "2.9.1",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2020-9488",
-						Description:   "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2020-9488",
-						Severity:      "Low",
+						Name:        "CVE-2020-9488",
+						Description: "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-9488",
+						Severity:    "Low",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2732,10 +2732,10 @@ var testCases = []testCase{
 						FixedBy: "2.13.2",
 					},
 					{
-						Name:          "CVE-2021-44228",
-						Description:   "In Apache Log4j2 versions up to and including 2.14.1 (excluding security release 2.12.2), the JNDI features used in configurations, log messages, and parameters do not protect against attacker-controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
-						Severity:      "Critical",
+						Name:        "CVE-2021-44228",
+						Description: "In Apache Log4j2 versions up to and including 2.14.1 (excluding security release 2.12.2), the JNDI features used in configurations, log messages, and parameters do not protect against attacker-controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
+						Severity:    "Critical",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2755,10 +2755,10 @@ var testCases = []testCase{
 						FixedBy: "2.12.2",
 					},
 					{
-						Name:          "CVE-2021-44832",
-						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
-						Severity:      "Moderate",
+						Name:        "CVE-2021-44832",
+						Description: "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
+						Severity:    "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2778,10 +2778,10 @@ var testCases = []testCase{
 						FixedBy: "2.12.4",
 					},
 					{
-						Name:          "CVE-2021-45046",
-						Description:   "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data using a JNDI Lookup pattern, resulting in an information leak and remote code execution in some environments and local code execution in all environments; remote code execution has been demonstrated on macOS but no other tested environments.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
-						Severity:      "Critical",
+						Name:        "CVE-2021-45046",
+						Description: "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data using a JNDI Lookup pattern, resulting in an information leak and remote code execution in some environments and local code execution in all environments; remote code execution has been demonstrated on macOS but no other tested environments.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
+						Severity:    "Critical",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2801,10 +2801,10 @@ var testCases = []testCase{
 						FixedBy: "2.12.2",
 					},
 					{
-						Name:          "CVE-2021-45105",
-						Description:   "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 did not protect from uncontrolled recursion from self-referential lookups. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data that contains a recursive lookup, resulting in a StackOverflowError that will terminate the process. This is also known as a DOS (Denial of Service) attack.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
-						Severity:      "Moderate",
+						Name:        "CVE-2021-45105",
+						Description: "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 did not protect from uncontrolled recursion from self-referential lookups. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data that contains a recursive lookup, resulting in a StackOverflowError that will terminate the process. This is also known as a DOS (Denial of Service) attack.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
+						Severity:    "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2834,10 +2834,10 @@ var testCases = []testCase{
 				Version:       "2.14.0",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2021-44228",
-						Description:   "In Apache Log4j2 versions up to and including 2.14.1 (excluding security release 2.12.2), the JNDI features used in configurations, log messages, and parameters do not protect against attacker-controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
-						Severity:      "Critical",
+						Name:        "CVE-2021-44228",
+						Description: "In Apache Log4j2 versions up to and including 2.14.1 (excluding security release 2.12.2), the JNDI features used in configurations, log messages, and parameters do not protect against attacker-controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
+						Severity:    "Critical",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2857,10 +2857,10 @@ var testCases = []testCase{
 						FixedBy: "2.15.0",
 					},
 					{
-						Name:          "CVE-2021-44832",
-						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
-						Severity:      "Moderate",
+						Name:        "CVE-2021-44832",
+						Description: "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
+						Severity:    "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2880,10 +2880,10 @@ var testCases = []testCase{
 						FixedBy: "2.17.1",
 					},
 					{
-						Name:          "CVE-2021-45046",
-						Description:   "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data using a JNDI Lookup pattern, resulting in an information leak and remote code execution in some environments and local code execution in all environments; remote code execution has been demonstrated on macOS but no other tested environments.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
-						Severity:      "Critical",
+						Name:        "CVE-2021-45046",
+						Description: "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data using a JNDI Lookup pattern, resulting in an information leak and remote code execution in some environments and local code execution in all environments; remote code execution has been demonstrated on macOS but no other tested environments.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
+						Severity:    "Critical",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2903,10 +2903,10 @@ var testCases = []testCase{
 						FixedBy: "2.16.0",
 					},
 					{
-						Name:          "CVE-2021-45105",
-						Description:   "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 did not protect from uncontrolled recursion from self-referential lookups. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data that contains a recursive lookup, resulting in a StackOverflowError that will terminate the process. This is also known as a DOS (Denial of Service) attack.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
-						Severity:      "Moderate",
+						Name:        "CVE-2021-45105",
+						Description: "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 did not protect from uncontrolled recursion from self-referential lookups. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data that contains a recursive lookup, resulting in a StackOverflowError that will terminate the process. This is also known as a DOS (Denial of Service) attack.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
+						Severity:    "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2946,10 +2946,10 @@ var testCases = []testCase{
 				Version:       "2.12.2",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2020-9488",
-						Description:   "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2020-9488",
-						Severity:      "Low",
+						Name:        "CVE-2020-9488",
+						Description: "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-9488",
+						Severity:    "Low",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2969,10 +2969,10 @@ var testCases = []testCase{
 						FixedBy: "2.13.2",
 					},
 					{
-						Name:          "CVE-2021-44832",
-						Description:   "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
-						Severity:      "Moderate",
+						Name:        "CVE-2021-44832",
+						Description: "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
+						Severity:    "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -2992,10 +2992,10 @@ var testCases = []testCase{
 						FixedBy: "2.12.4",
 					},
 					{
-						Name:          "CVE-2021-45105",
-						Description:   "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 did not protect from uncontrolled recursion from self-referential lookups. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data that contains a recursive lookup, resulting in a StackOverflowError that will terminate the process. This is also known as a DOS (Denial of Service) attack.",
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
-						Severity:      "Moderate",
+						Name:        "CVE-2021-45105",
+						Description: "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 did not protect from uncontrolled recursion from self-referential lookups. When the logging configuration uses a non-default Pattern Layout with a Context Lookup (for example, $${ctx:loginId}), attackers with control over Thread Context Map (MDC) input data can craft malicious input data that contains a recursive lookup, resulting in a StackOverflowError that will terminate the process. This is also known as a DOS (Denial of Service) attack.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
+						Severity:    "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv3": map[string]interface{}{
@@ -3020,11 +3020,5 @@ var testCases = []testCase{
 				FixedBy:  "2.13.2",
 			},
 		},
-	},
-	{
-		image:     "docker.io/busybox:1.35.0",
-		registry:  "https://registry-1.docker.io",
-		source:    "NVD",
-		namespace: "busybox:1.35.0",
 	},
 }

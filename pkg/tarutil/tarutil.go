@@ -122,7 +122,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 
 		// Extract the element
 		switch hdr.Typeflag {
-		case tar.TypeReg:
+		case tar.TypeReg, tar.TypeLink:
 			var fileData FileData
 
 			fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
@@ -132,29 +132,25 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
 
-			if !extractContents {
-				fileData.Executable = executable
-				files.data[filename] = fileData
-				continue
-			}
+			if extractContents {
+				d := make([]byte, hdr.Size)
+				if nRead, err := contents.ReadAt(d, 0); err != nil {
+					log.Errorf("error reading %q: %v", hdr.Name, err)
+					d = d[:nRead]
+				}
 
-			d := make([]byte, hdr.Size)
-			if nRead, err := contents.ReadAt(d, 0); err != nil {
-				log.Errorf("error reading %q: %v", hdr.Name, err)
-				d = d[:nRead]
+				// Put the file directly
+				fileData.Contents = d
+				numExtractedContentBytes += len(d)
 			}
-
-			// Put the file directly
-			fileData.Contents = d
+			if hdr.Typeflag == tar.TypeLink {
+				// A hard-link necessarily points to absolute paths inside the archive.
+				files.links[filename] = hdr.Linkname
+			}
 			fileData.Executable = executable
 			files.data[filename] = fileData
-
-			numExtractedContentBytes += len(d)
 		case tar.TypeSymlink:
 			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
-		case tar.TypeLink:
-			// A hard-link necessarily points to absolute paths inside the archive.
-			files.links[filename] = hdr.Linkname
 		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.

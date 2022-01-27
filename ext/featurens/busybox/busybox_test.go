@@ -1,6 +1,7 @@
 package busybox
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stackrox/scanner/database"
@@ -88,4 +89,24 @@ func Test_detector_Detect(t *testing.T) {
 		},
 	}
 	featurens.TestDetector(t, &detector{}, testData)
+}
+
+func Test_detector_RequiredFilenames(t *testing.T) {
+	tests := []struct {
+		name string
+		want []string
+	}{
+		{
+			name: "required files",
+			want: []string{"bin/[", "bin/sh", "bin/busybox"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			de := detector{}
+			if got := de.RequiredFilenames(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("RequiredFilenames() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
