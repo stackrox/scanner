@@ -220,6 +220,12 @@ func main() {
 		log.Infof("Max extractable file size set to %d MB", config.MaxExtractableFileSizeMB)
 	}
 
+	// Set the max ELF executable file size from the config.
+	if config.MaxELFExecutableFileSizeMB > 0 {
+		tarutil.SetMaxELFExecutableFileSize(config.MaxELFExecutableFileSizeMB * 1024 * 1024)
+		log.Infof("Max ELF executable file size set to %d MB", config.MaxELFExecutableFileSizeMB)
+	}
+
 	slimMode := env.SlimMode.Enabled()
 
 	scannerName := "Scanner"

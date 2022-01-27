@@ -40,7 +40,7 @@ type Config struct {
 	Updater                    updater.Config                      `yaml:"updater"`
 	LogLevel                   string                              `yaml:"logLevel"`
 	MaxExtractableFileSizeMB   int64                               `yaml:"maxExtractableFileSizeMB"`
-	MaxELFExecutableFileSizeMB int64                               `yaml:"MaxELFExecutableFileSizeMB"`
+	MaxELFExecutableFileSizeMB int64                               `yaml:"maxELFExecutableFileSizeMB"`
 
 	// CentralEndpoint is the endpoint that central can be reached at. Defaults to https://central.stackrox.svc if not present in the config.
 	CentralEndpoint string `yaml:"centralEndpoint"`
