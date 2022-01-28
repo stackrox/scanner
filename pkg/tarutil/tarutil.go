@@ -40,7 +40,7 @@ const (
 	// DefaultMaxELFExecutableFileSizeMB is the default value for the max ELF executable file we analyze.
 	DefaultMaxELFExecutableFileSizeMB = 1024
 	// maxBufferSizeMB is the maximum buffer used by lazy reader.
-	maxBufferSizeMB = 50
+	maxBufferSizeMB = 10
 )
 
 var (

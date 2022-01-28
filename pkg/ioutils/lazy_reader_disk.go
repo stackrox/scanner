@@ -47,7 +47,7 @@ func (r *diskBackedLazyReaderAt) StealBuffer() []byte {
 		_ = r.file.Close()
 	}
 	if r.dirPath != "" {
-		_ = os.Remove(r.dirPath)
+		_ = os.RemoveAll(r.dirPath)
 	}
 	return r.lzReader.StealBuffer()
 }
