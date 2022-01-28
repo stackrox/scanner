@@ -36,7 +36,7 @@ import (
 
 const (
 	// DefaultMaxExtractableFileSizeMB is the default value for the max extractable file size.
-	DefaultMaxExtractableFileSizeMB = 500
+	DefaultMaxExtractableFileSizeMB = 400
 )
 
 var (
