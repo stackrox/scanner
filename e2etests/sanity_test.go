@@ -2100,7 +2100,7 @@ func TestImageSanity(t *testing.T) {
 					Name:          "log4j",
 					VersionFormat: "JavaSourceType",
 					Version:       "2.9.1",
-					Vulnerabilities: []apiV1.Vulnerability{
+					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2020-9488",
 							Description:   "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
@@ -2225,7 +2225,7 @@ func TestImageSanity(t *testing.T) {
 					Name:          "log4j",
 					VersionFormat: "JavaSourceType",
 					Version:       "2.14.0",
-					Vulnerabilities: []apiV1.Vulnerability{
+					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2021-44228",
 							Description:   "In Apache Log4j2 versions up to and including 2.14.1 (excluding security release 2.12.2), the JNDI features used in configurations, log messages, and parameters do not protect against attacker-controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled.",
@@ -2336,7 +2336,7 @@ func TestImageSanity(t *testing.T) {
 					Name:          "log4j",
 					VersionFormat: "JavaSourceType",
 					Version:       "2.12.2",
-					Vulnerabilities: []apiV1.Vulnerability{
+					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:          "CVE-2020-9488",
 							Description:   "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
