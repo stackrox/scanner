@@ -2095,8 +2095,7 @@ func TestImageSanity(t *testing.T) {
 			image:     "elastic/logstash:7.13.3",
 			registry:  "https://registry-1.docker.io",
 			source:    "NVD",
-			namespace: "centos:7",
-			expectedFeatures: []apiV1.Feature{
+			expectedFeatures: []v1.Feature{
 				{
 					Name:          "log4j",
 					VersionFormat: "JavaSourceType",
@@ -2332,8 +2331,7 @@ func TestImageSanity(t *testing.T) {
 			username:  os.Getenv("DOCKER_IO_PULL_USERNAME"),
 			password:  os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 			source:    "NVD",
-			namespace: "ubuntu:20.04",
-			expectedFeatures: []apiV1.Feature{
+			expectedFeatures: []v1.Feature{
 				{
 					Name:          "log4j",
 					VersionFormat: "JavaSourceType",
