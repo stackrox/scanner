@@ -228,7 +228,6 @@ func (r *TarReadCloser) Close() error {
 // NewTarReadCloser attempts to detect the compression algorithm for an
 // io.Reader and returns a TarReadCloser wrapping the Reader to transparently
 // decompress the contents.
-//
 // Gzip/Bzip2/XZ detection is done by using the magic numbers:
 // Gzip: the first two bytes should be 0x1f and 0x8b. Defined in the RFC1952.
 // Bzip2: the first three bytes should be 0x42, 0x5a and 0x68. No RFC.
