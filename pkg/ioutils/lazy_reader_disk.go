@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
+	"github.com/stackrox/rox/pkg/mathutil"
 	"github.com/stackrox/rox/pkg/utils"
 )
 
@@ -61,7 +62,8 @@ func (r *diskBackedLazyReaderAt) ReadAt(p []byte, off int64) (int, error) {
 	}
 
 	if off < r.maxBufferSize {
-		return r.lzReader.ReadAt(p, off)
+		bufSize := len(p)
+		return r.lzReader.ReadAt(p[:mathutil.MinInt64(int64(bufSize), r.maxBufferSize)], off)
 	}
 
 	if r.dirPath == "" {
