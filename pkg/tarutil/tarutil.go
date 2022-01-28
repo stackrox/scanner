@@ -150,24 +150,29 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
-			if !extractContents || hdr.Typeflag != tar.TypeReg {
-				fileData.Executable = executable
-				files.data[filename] = fileData
-				continue
-			}
 
-			d := make([]byte, hdr.Size)
-			if nRead, err := contents.ReadAt(d, 0); err != nil {
-				log.Errorf("error reading %q: %v", hdr.Name, err)
-				d = d[:nRead]
-			}
+			if extractContents {
+				if hdr.Typeflag == tar.TypeLink {
+					// A hard-link necessarily points to a previous absolute path in the
+					// archive which we look if it was already extracted.
+					linkedFile, ok := files.data[hdr.Linkname]
+					if ok {
+						fileData.Contents = linkedFile.Contents
+					}
+				} else {
+					d := make([]byte, hdr.Size)
+					if nRead, err := contents.ReadAt(d, 0); err != nil {
+						log.Errorf("error reading %q: %v", hdr.Name, err)
+						d = d[:nRead]
+					}
 
-			// Put the file directly
-			fileData.Contents = d
+					// Put the file directly
+					fileData.Contents = d
+					numExtractedContentBytes += len(d)
+				}
+			}
 			fileData.Executable = executable
 			files.data[filename] = fileData
-
-			numExtractedContentBytes += len(d)
 		case tar.TypeSymlink:
 			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
 		case tar.TypeDir:
