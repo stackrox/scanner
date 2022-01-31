@@ -527,7 +527,7 @@ func TestImageSanity(t *testing.T) {
 										"ExploitabilityScore": 0.8,
 										"ImpactScore":         5.9,
 										"Score":               6.7,
-										"Vectors":             "CVSS:3.0/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+										"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
 									},
 									"LastModifiedDateTime": "2019-03-21T23:29Z",
 									"PublishedDateTime":    "2017-06-09T16:29Z",
