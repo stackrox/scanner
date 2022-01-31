@@ -534,6 +534,81 @@ func TestImageSanity(t *testing.T) {
 								},
 							},
 						},
+						{
+							Name:          "CVE-2019-9704",
+							NamespaceName: "ubuntu:14.04",
+							Description:   "Vixie Cron before the 3.0pl1-133 Debian package allows local users to cause a denial of service (daemon crash) via a large crontab file because the calloc return value is not checked.",
+							Link:          "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-9704",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         2.9,
+										"Score":               2.1,
+										"Vectors":             "AV:L/AC:L/Au:N/C:N/I:N/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         3.6,
+										"Score":               5.5,
+										"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"LastModifiedDateTime": "2021-11-30T19:53Z",
+									"PublishedDateTime":    "2019-03-12T01:29Z",
+								},
+							},
+						},
+						{
+							Name:          "CVE-2019-9705",
+							NamespaceName: "ubuntu:14.04",
+							Description:   "Vixie Cron before the 3.0pl1-133 Debian package allows local users to cause a denial of service (memory consumption) via a large crontab file because an unlimited number of lines is accepted.",
+							Link:          "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-9705",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         2.9,
+										"Score":               2.1,
+										"Vectors":             "AV:L/AC:L/Au:N/C:N/I:N/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         3.6,
+										"Score":               5.5,
+										"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"LastModifiedDateTime": "2021-11-30T18:50Z",
+									"PublishedDateTime":    "2019-03-12T01:29Z",
+								},
+							},
+						},
+						{
+							Name:          "CVE-2019-9706",
+							NamespaceName: "ubuntu:14.04",
+							Description:   "Vixie Cron before the 3.0pl1-133 Debian package allows local users to cause a denial of service (use-after-free and daemon crash) because of a force_rescan_user error.",
+							Link:          "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-9706",
+							Severity:      "Low",
+							Metadata: map[string]interface{}{
+								"NVD": map[string]interface{}{
+									"CVSSv2": map[string]interface{}{
+										"ExploitabilityScore": 3.9,
+										"ImpactScore":         2.9,
+										"Score":               2.1,
+										"Vectors":             "AV:L/AC:L/Au:N/C:N/I:N/A:P",
+									},
+									"CVSSv3": map[string]interface{}{
+										"ExploitabilityScore": 1.8,
+										"ImpactScore":         3.6,
+										"Score":               5.5,
+										"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+									},
+									"LastModifiedDateTime": "2021-11-30T18:50Z",
+									"PublishedDateTime":    "2019-03-12T01:29Z",
+								},
+							},
+						},
 					},
 				},
 			},
