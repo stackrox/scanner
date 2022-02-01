@@ -159,12 +159,16 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 		}
 	}
 
-	return &v1.GetImageComponentsResponse{
+	resp := &v1.GetImageComponentsResponse{
 		ScannerVersion: s.version,
 		Status:         v1.ScanStatus_SUCCEEDED,
 		Components:     convertImageComponents(imgComponents),
 		Notes:          convertNotes(imgComponents.Notes),
-	}, nil
+	}
+
+	logrus.Info("Size of response for %s: %d", req.GetImage(), resp.Size())
+
+	return resp, nil
 }
 
 func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*apiV1.ComponentsEnvelope, error) {
