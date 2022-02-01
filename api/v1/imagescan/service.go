@@ -166,7 +166,7 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 		Notes:          convertNotes(imgComponents.Notes),
 	}
 
-	logrus.Info("Size of response for %s: %d", req.GetImage(), resp.Size())
+	logrus.Infof("Size of response for %s: %d", req.GetImage(), resp.Size())
 
 	return resp, nil
 }
