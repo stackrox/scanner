@@ -36,7 +36,7 @@ type BufferPool struct {
 	reservationChan chan *reservationRequest
 	freeChan        chan *freeRequest
 
-	freeBufferIndexes *list.List // will be a list of int
+	freeBufferIndexes list.List // will be a list of int
 
 	totalSizeBytes    int64
 	denominationBytes int64
@@ -54,11 +54,17 @@ func NewBufferPool(totalSizeBytes, denominationBytes int64) (*BufferPool, error)
 
 	numBuffers := totalSizeBytes / denominationBytes
 	b := &BufferPool{
-		denominationBytes: denominationBytes,
 		underlyingBuffers: make([][]byte, numBuffers),
-		freeBufferIndexes: list.New(),
+
+		reservationChan: make(chan *reservationRequest),
+		freeChan:        make(chan *freeRequest, 5),
+
+		totalSizeBytes:    totalSizeBytes,
+		denominationBytes: denominationBytes,
+
+		stopSig: concurrency.NewSignal(),
 	}
-	for i := int64(0); i < numBuffers; i++ {
+	for i := 0; int64(i) < numBuffers; i++ {
 		b.underlyingBuffers[i] = make([]byte, denominationBytes)
 		b.freeBufferIndexes.PushBack(i)
 	}
