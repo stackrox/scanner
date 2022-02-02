@@ -3,6 +3,7 @@ package ioutils
 import (
 	"container/list"
 	"context"
+	"io"
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/concurrency"
@@ -18,7 +19,7 @@ type reservationResponse struct {
 }
 
 type reservationRequest struct {
-	bytesRequested int
+	bytesRequested int64
 	responseChan   chan<- *reservationResponse
 	cancelSig      *concurrency.Signal
 }
@@ -37,13 +38,13 @@ type BufferPool struct {
 
 	freeBufferIndexes *list.List // will be a list of int
 
-	totalSizeBytes    int
-	denominationBytes int
+	totalSizeBytes    int64
+	denominationBytes int64
 
 	stopSig concurrency.Signal
 }
 
-func NewBufferPool(totalSizeBytes, denominationBytes int) (*BufferPool, error) {
+func NewBufferPool(totalSizeBytes, denominationBytes int64) (*BufferPool, error) {
 	if totalSizeBytes <= 0 || denominationBytes <= 0 {
 		return nil, errors.New("total size and denomination must both be >0")
 	}
@@ -57,7 +58,7 @@ func NewBufferPool(totalSizeBytes, denominationBytes int) (*BufferPool, error) {
 		underlyingBuffers: make([][]byte, numBuffers),
 		freeBufferIndexes: list.New(),
 	}
-	for i := 0; i < numBuffers; i++ {
+	for i := int64(0); i < numBuffers; i++ {
 		b.underlyingBuffers[i] = make([]byte, denominationBytes)
 		b.freeBufferIndexes.PushBack(i)
 	}
@@ -77,12 +78,12 @@ func (b *BufferPool) fulfillRequestIfPossible(resReq *reservationRequest) (reque
 		numBuffersRequired++
 	}
 	// We cannot fill the request, unfortunately.
-	if b.freeBufferIndexes.Len() < numBuffersRequired {
+	if int64(b.freeBufferIndexes.Len()) < numBuffersRequired {
 		return false
 	}
 	indexesForBuffer := make([]int, 0, numBuffersRequired)
 	elem := b.freeBufferIndexes.Front()
-	for i := 0; i < numBuffersRequired; i++ {
+	for i := int64(0); i < numBuffersRequired; i++ {
 		indexesForBuffer = append(indexesForBuffer, elem.Value.(int))
 		nextElem := elem.Next()
 		b.freeBufferIndexes.Remove(elem)
@@ -140,7 +141,7 @@ func (b *BufferPool) Stop() {
 	b.stopSig.Signal()
 }
 
-func (b *BufferPool) alloc(ctx context.Context, capacity int) ([]int, error) {
+func (b *BufferPool) alloc(ctx context.Context, capacity int64) ([]int, error) {
 	if b.stopSig.IsDone() {
 		return nil, ErrBufferPoolStopped
 	}
@@ -185,26 +186,111 @@ func (b *BufferPool) free(indexes []int) {
 	}
 }
 
-func (b *BufferPool) MakeBuffer(ctx context.Context, capacity int) (*Buffer, error) {
-	indexes, err := b.alloc(ctx, capacity)
-	if err != nil {
-		return nil, err
+func (b *BufferPool) MakeBuffer() (*Buffer, error) {
+	if b.stopSig.IsDone() {
+		return nil, ErrBufferPoolStopped
 	}
-	return &Buffer{heldBufferIndexes: indexes, pool: b}, nil
+	return &Buffer{pool: b}, nil
 }
+
+var (
+	errBufferFreed = errors.New("buffer was freed")
+)
 
 type Buffer struct {
 	pool *BufferPool
 
 	heldBufferIndexes []int
-	length            int
+	length            int64
+
+	finished bool
 }
 
-func (b *Buffer) Grow(ctx context.Context, additionalCapacity int) error {
+func (b *Buffer) Grow(ctx context.Context, additionalCapacity int64) error {
+	if b.finished {
+		return errBufferFreed
+	}
 	additionalIndexes, err := b.pool.alloc(ctx, additionalCapacity)
 	if err != nil {
 		return err
 	}
 	b.heldBufferIndexes = append(b.heldBufferIndexes, additionalIndexes...)
 	return nil
+}
+
+func (b *Buffer) Free() {
+	b.pool.free(b.heldBufferIndexes)
+	b.finished = true
+}
+
+func (b *Buffer) Len() int64 {
+	return b.length
+}
+
+func (b *Buffer) Cap() int64 {
+	return b.pool.denominationBytes * int64(len(b.heldBufferIndexes))
+}
+
+func (b *Buffer) byteOffsetToCoordinates(byteOffset int64) (int, int64) {
+	return int(byteOffset / b.pool.denominationBytes), byteOffset % b.pool.denominationBytes
+}
+
+func (b *Buffer) getBufferAt(index int) []byte {
+	return b.pool.underlyingBuffers[b.heldBufferIndexes[index]]
+}
+
+func (b *Buffer) Copy(destination []byte, startingOff int64) int {
+	if startingOff >= b.length {
+		return 0
+	}
+	curBufIdx, curIdxWithinBuf := b.byteOffsetToCoordinates(startingOff)
+	copiedUpto := 0
+	for {
+		curBuf := b.getBufferAt(curBufIdx)
+		copied := copy(destination[copiedUpto:], curBuf[curIdxWithinBuf:])
+		copiedUpto += copied
+		// We've exhausted the buffer.
+		if copied < int(b.pool.denominationBytes)-curBufIdx {
+			break
+		}
+		if copiedUpto == len(destination) {
+			break
+		}
+		curBufIdx++
+		curIdxWithinBuf = 0
+		if curBufIdx > len(b.heldBufferIndexes) {
+			break
+		}
+	}
+	return copiedUpto
+}
+
+func (b *Buffer) ReadFullFromReader(r io.Reader, startingOff, readUptoOff int64) (int, error) {
+	if startingOff >= b.Cap() {
+		return 0, nil
+	}
+	curBufIdx, curIdxWithinBuf := b.byteOffsetToCoordinates(startingOff)
+	finalBufIdx, idxWithinFinalBuf := b.byteOffsetToCoordinates(readUptoOff)
+	totalRead := 0
+	for {
+		curBuf := b.getBufferAt(curBufIdx)
+		var n int
+		var err error
+		if curBufIdx == finalBufIdx {
+			n, err = io.ReadFull(r, curBuf[curIdxWithinBuf:idxWithinFinalBuf])
+		} else {
+			n, err = io.ReadFull(r, curBuf[curIdxWithinBuf:])
+		}
+		totalRead += n
+		b.length += int64(n)
+		if err != nil {
+			return totalRead, err
+		}
+		curBufIdx++
+		curIdxWithinBuf = 0
+		if curBufIdx > len(b.heldBufferIndexes) || curBufIdx > finalBufIdx {
+			break
+		}
+	}
+	return totalRead, nil
 }

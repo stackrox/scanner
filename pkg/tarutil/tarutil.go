@@ -51,6 +51,16 @@ var (
 	xzHeader    = []byte{0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00}
 )
 
+var (
+	bufferPool = func() *ioutils.BufferPool {
+		b, err := ioutils.NewBufferPool(400*1024*1024, 1024*1024)
+		if err != nil {
+			panic(err)
+		}
+		return b
+	}()
+)
+
 // SetMaxExtractableFileSize sets the max extractable file size.
 // It is NOT thread-safe, and callers must ensure that it is called
 // only when no scans are in progress (ex: during initialization).
@@ -58,6 +68,89 @@ var (
 // more details on its purpose.
 func SetMaxExtractableFileSize(val int64) {
 	maxExtractableFileSize = val
+}
+
+func extractIndividualFile(files *LayerFiles, tr *TarReadCloser, executableMatcher matcher.Matcher, filenameMatcher matcher.Matcher) (fileFound, fileMatched bool, numExtractedContentBytes int, err error) {
+	hdr, err := tr.Next()
+	if err == io.EOF {
+		return false, false, 0, nil
+	}
+	if err != nil {
+		return false, false, 0, errors.Wrap(err, "could not advance in the tar archive")
+	}
+
+	// Get element filename
+	filename := strings.TrimPrefix(hdr.Name, "./")
+
+	var contents io.ReaderAt
+	if hdr.FileInfo().Mode().IsRegular() {
+		lazyReader, err := ioutils.NewLazyReaderAtWithBufferPool(tr, hdr.Size, bufferPool)
+		if err != nil {
+			log.Errorf("could not create lazy reader: %v", err)
+			return true, false, 0, nil
+		}
+		defer func() {
+			lazyReader.FreeBuffer()
+		}()
+		contents = lazyReader
+	} else {
+		contents = bytes.NewReader(nil)
+	}
+
+	match, extractContents := filenameMatcher.Match(filename, hdr.FileInfo(), contents)
+	if !match {
+		return true, false, 0, nil
+	}
+
+	// File size limit
+	if extractContents && hdr.Size > maxExtractableFileSize {
+		log.Errorf("Skipping file %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, maxExtractableFileSize)
+		return true, true, 0, nil
+	}
+
+	// Extract the element
+	switch hdr.Typeflag {
+	case tar.TypeReg, tar.TypeLink:
+		var fileData FileData
+
+		fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
+		if err != nil {
+			log.Errorf("Failed to get dependencies for %s: %v", filename, err)
+		}
+
+		executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
+
+		if extractContents {
+			if hdr.Typeflag == tar.TypeLink {
+				// A hard-link necessarily points to a previous absolute path in the
+				// archive which we look if it was already extracted.
+				linkedFile, ok := files.data[hdr.Linkname]
+				if ok {
+					fileData.Contents = linkedFile.Contents
+				}
+			} else {
+				d := make([]byte, hdr.Size)
+				if nRead, err := contents.ReadAt(d, 0); err != nil {
+					log.Errorf("error reading %q: %v", hdr.Name, err)
+					d = d[:nRead]
+				}
+
+				// Put the file directly
+				fileData.Contents = d
+				numExtractedContentBytes += len(d)
+			}
+		}
+		fileData.Executable = executable
+		files.data[filename] = fileData
+	case tar.TypeSymlink:
+		files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+	case tar.TypeDir:
+		// Do not bother saving the contents,
+		// and directories are NOT considered executable.
+		// However, add to the map, so the entry will exist.
+		files.data[filename] = FileData{}
+	}
+	return true, true, numExtractedContentBytes, nil
 }
 
 // ExtractFiles decompresses and extracts only the specified files from an
@@ -79,89 +172,20 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	// Telemetry variables.
 	var numFiles, numMatchedFiles, numExtractedContentBytes int
 
-	var prevLazyReader ioutils.LazyReaderAt
-
 	// For each element in the archive
 	for {
-		hdr, err := tr.Next()
-		if err == io.EOF {
+		fileFound, fileMatched, bytesExtracted, err := extractIndividualFile(&files, tr, executableMatcher, filenameMatcher)
+		if err != nil {
+			return files, err
+		}
+		if !fileFound {
 			break
 		}
-		if err != nil {
-			return files, errors.Wrap(err, "could not advance in the tar archive")
-		}
 		numFiles++
-
-		// Get element filename
-		filename := strings.TrimPrefix(hdr.Name, "./")
-
-		var contents io.ReaderAt
-		if hdr.FileInfo().Mode().IsRegular() {
-			// Recycle the buffer, if possible.
-			var buf []byte
-			if prevLazyReader != nil {
-				buf = prevLazyReader.StealBuffer()
-			}
-			prevLazyReader = ioutils.NewLazyReaderAtWithBuffer(tr, hdr.Size, buf)
-			contents = prevLazyReader
-		} else {
-			contents = bytes.NewReader(nil)
+		if fileMatched {
+			numMatchedFiles++
 		}
-
-		match, extractContents := filenameMatcher.Match(filename, hdr.FileInfo(), contents)
-		if !match {
-			continue
-		}
-		numMatchedFiles++
-
-		// File size limit
-		if extractContents && hdr.Size > maxExtractableFileSize {
-			log.Errorf("Skipping file %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, maxExtractableFileSize)
-			continue
-		}
-
-		// Extract the element
-		switch hdr.Typeflag {
-		case tar.TypeReg, tar.TypeLink:
-			var fileData FileData
-
-			fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
-			if err != nil {
-				log.Errorf("Failed to get dependencies for %s: %v", filename, err)
-			}
-
-			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
-
-			if extractContents {
-				if hdr.Typeflag == tar.TypeLink {
-					// A hard-link necessarily points to a previous absolute path in the
-					// archive which we look if it was already extracted.
-					linkedFile, ok := files.data[hdr.Linkname]
-					if ok {
-						fileData.Contents = linkedFile.Contents
-					}
-				} else {
-					d := make([]byte, hdr.Size)
-					if nRead, err := contents.ReadAt(d, 0); err != nil {
-						log.Errorf("error reading %q: %v", hdr.Name, err)
-						d = d[:nRead]
-					}
-
-					// Put the file directly
-					fileData.Contents = d
-					numExtractedContentBytes += len(d)
-				}
-			}
-			fileData.Executable = executable
-			files.data[filename] = fileData
-		case tar.TypeSymlink:
-			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
-		case tar.TypeDir:
-			// Do not bother saving the contents,
-			// and directories are NOT considered executable.
-			// However, add to the map, so the entry will exist.
-			files.data[filename] = FileData{}
-		}
+		numExtractedContentBytes += bytesExtracted
 	}
 	files.detectRemovedFiles()
 
