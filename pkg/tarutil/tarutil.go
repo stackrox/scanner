@@ -25,7 +25,6 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-	"sync"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -58,8 +57,6 @@ var (
 // See comments on the maxExtractableFileSize variable for
 // more details on its purpose.
 func SetMaxExtractableFileSize(val int64) {
-	a := new(sync.Pool)
-	a.Get()
 	maxExtractableFileSize = val
 }
 
