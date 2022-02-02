@@ -132,7 +132,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 				}
 			} else {
-				log.Errorf("Skipping ELF executable file %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, maxExtractableFileSize/1024/1024)
+				log.Errorf("Skipping ELF executable file check for %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, maxExtractableFileSize/1024/1024)
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
