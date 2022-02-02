@@ -140,7 +140,10 @@ func (b *BufferPool) Stop() {
 	b.stopSig.Signal()
 }
 
-func (b *BufferPool) Alloc(ctx context.Context, capacity int) ([]int, error) {
+func (b *BufferPool) alloc(ctx context.Context, capacity int) ([]int, error) {
+	if b.stopSig.IsDone() {
+		return nil, ErrBufferPoolStopped
+	}
 	if capacity > b.totalSizeBytes {
 		return nil, errors.Errorf("requested capacity (%d) exceeds the total capacity in the pool (%d)", capacity, b.totalSizeBytes)
 	}
@@ -162,7 +165,7 @@ func (b *BufferPool) Alloc(ctx context.Context, capacity int) ([]int, error) {
 			select {
 			case resp, ok := <-responseChan:
 				if ok && resp.err == nil {
-					b.Free(resp.indexesReleased)
+					b.free(resp.indexesReleased)
 				}
 			case <-b.stopSig.Done():
 			}
@@ -175,14 +178,33 @@ func (b *BufferPool) Alloc(ctx context.Context, capacity int) ([]int, error) {
 	}
 }
 
-func (b *BufferPool) Free(indexes []int) {
+func (b *BufferPool) free(indexes []int) {
 	select {
 	case b.freeChan <- &freeRequest{indexesToFree: indexes}:
 	case <-b.stopSig.Done():
 	}
 }
 
+func (b *BufferPool) MakeBuffer(ctx context.Context, capacity int) (*Buffer, error) {
+	indexes, err := b.alloc(ctx, capacity)
+	if err != nil {
+		return nil, err
+	}
+	return &Buffer{heldBufferIndexes: indexes, pool: b}, nil
+}
+
 type Buffer struct {
-	pool              *BufferPool
+	pool *BufferPool
+
 	heldBufferIndexes []int
+	length            int
+}
+
+func (b *Buffer) Grow(ctx context.Context, additionalCapacity int) error {
+	additionalIndexes, err := b.pool.alloc(ctx, additionalCapacity)
+	if err != nil {
+		return err
+	}
+	b.heldBufferIndexes = append(b.heldBufferIndexes, additionalIndexes...)
+	return nil
 }
