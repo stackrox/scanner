@@ -44,9 +44,9 @@ func (f *fileInfo) ModTime() time.Time {
 	return time.Now()
 }
 
-// IsDir just returns true. This is the only one we really care about.
+// IsDir just returns true.
 func (f *fileInfo) IsDir() bool {
-	return true
+	return f.Mode().IsDir()
 }
 
 func (f *fileInfo) Sys() interface{} {
