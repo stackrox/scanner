@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	// ErrBufferPoolStopped indicates that the buffer pool was stopped.
 	ErrBufferPoolStopped = errors.New("buffer pool was stopped")
 )
 
@@ -28,6 +29,12 @@ type freeRequest struct {
 	indexesToFree []int
 }
 
+// BufferPool is an in-mem pool of byte arrays. It is thread-safe. It is of fixed size -- allocation is done at creation time.
+// It allows callers to construct Buffers from the pool of a given capacity and grow those buffers.
+// Callers will eventually have to free buffers once they're done, so as to release them back to the pool.
+// If there is insufficient capacity in the BufferPool for a buffer request, the request will block until
+// there is enough capacity. (But if the requested capacity is more than the total capacity of the BufferPool,
+// an error is returned immediately.)
 type BufferPool struct {
 	underlyingBuffers [][]byte
 
@@ -44,6 +51,7 @@ type BufferPool struct {
 	stopSig concurrency.Signal
 }
 
+// NewBufferPool returns a ready-to-use buffer pool, with the given capacity and denomination.
 func NewBufferPool(totalSizeBytes, denominationBytes int64) (*BufferPool, error) {
 	if totalSizeBytes <= 0 || denominationBytes <= 0 {
 		return nil, errors.New("total size and denomination must both be >0")
@@ -143,8 +151,12 @@ func (b *BufferPool) manageReservations() {
 	}
 }
 
+// Stop stops the buffer pool. All goroutines associated with the BufferPool will cease almost immediately.
+// It releases the memory immediately. Note that all operations on Buffers created from this pool may panic
+// after Stop is called. It is the caller's responsibility to make sure not to use those Buffers after this is called.
 func (b *BufferPool) Stop() {
 	b.stopSig.Signal()
+	b.underlyingBuffers = nil
 }
 
 func (b *BufferPool) alloc(ctx context.Context, capacity int64) ([]int, error) {
@@ -192,6 +204,8 @@ func (b *BufferPool) free(indexes []int) {
 	}
 }
 
+// MakeBuffer creates a buffer out of the pool. The created buffer initially
+// has zero length and capacity.
 func (b *BufferPool) MakeBuffer() (*Buffer, error) {
 	if b.stopSig.IsDone() {
 		return nil, ErrBufferPoolStopped
@@ -203,6 +217,10 @@ var (
 	errBufferFreed = errors.New("buffer was freed")
 )
 
+// Buffer represents a buffer extracted out of a pool.
+// It is a pointer into a subset of the underlying buffers in the pool,
+// and knows how to chain through these buffers so that callers can treat it
+// as one giant []byte.
 type Buffer struct {
 	pool *BufferPool
 
@@ -212,6 +230,7 @@ type Buffer struct {
 	finished bool
 }
 
+// Grow grows the capacity of the buffer.
 func (b *Buffer) Grow(ctx context.Context, additionalCapacity int64) error {
 	if b.finished {
 		return errBufferFreed
@@ -224,15 +243,18 @@ func (b *Buffer) Grow(ctx context.Context, additionalCapacity int64) error {
 	return nil
 }
 
+// Free frees up the indexes held by the buffer.
 func (b *Buffer) Free() {
 	b.pool.free(b.heldBufferIndexes)
 	b.finished = true
 }
 
+// Len returns the length of the buffer.
 func (b *Buffer) Len() int64 {
 	return b.length
 }
 
+// Cap returns the capacity of the buffer.
 func (b *Buffer) Cap() int64 {
 	return b.pool.denominationBytes * int64(len(b.heldBufferIndexes))
 }
@@ -245,8 +267,10 @@ func (b *Buffer) getBufferAt(index int) []byte {
 	return b.pool.underlyingBuffers[b.heldBufferIndexes[index]]
 }
 
+// Copy copies from the buffer, starting at the byte offset specified by startingOff, into the destination slice.
+// The return value is exactly like the return value of the built-in copy function.
 func (b *Buffer) Copy(destination []byte, startingOff int64) int {
-	if startingOff >= b.length {
+	if b.finished || startingOff >= b.length {
 		return 0
 	}
 	curBufIdx, curIdxWithinBuf := b.byteOffsetToCoordinates(startingOff)
@@ -271,7 +295,12 @@ func (b *Buffer) Copy(destination []byte, startingOff int64) int {
 	return copiedUpto
 }
 
+// ReadFullFromReader is like calling io.ReadFull(r, buf[startingOff:readUptoOff]), except that
+// it works on this Buffer.
 func (b *Buffer) ReadFullFromReader(r io.Reader, startingOff, readUptoOff int64) (int, error) {
+	if b.finished {
+		return 0, errBufferFreed
+	}
 	if startingOff >= b.Cap() {
 		return 0, nil
 	}

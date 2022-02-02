@@ -16,11 +16,16 @@ type lazyReaderAtWithBufferPool struct {
 	buffer *Buffer
 }
 
+// LazyReaderAtWithBufferPool is like LazyReaderAt, but uses a passed BufferPool under the hood to derive its buffer.
 type LazyReaderAtWithBufferPool interface {
 	io.ReaderAt
+	// FreeBuffer frees the buffer associated with this reader. After this, reads from the buffer will fail.
+	// It is the caller's responsibility to call this when it no longer needs the leader; otherwise, the buffer space
+	// will not be freed up for future callers.
 	FreeBuffer()
 }
 
+// NewLazyReaderAtWithBufferPool returns a ready-to-use LazyReaderAtWithBufferPool with the given bufferPool.
 func NewLazyReaderAtWithBufferPool(reader io.Reader, size int64, bufferPool *BufferPool) (LazyReaderAtWithBufferPool, error) {
 	buf, err := bufferPool.MakeBuffer()
 	if err != nil {
