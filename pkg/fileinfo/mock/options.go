@@ -6,6 +6,7 @@ type options struct {
 	mode os.FileMode
 }
 
+// FileInfoOption represents a configuration option for a mock os.FileInfo.
 type FileInfoOption interface {
 	apply(*options)
 }

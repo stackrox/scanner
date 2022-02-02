@@ -1,9 +1,10 @@
 package dotnetcoreruntime
 
 import (
+	"testing"
+
 	"github.com/stackrox/scanner/pkg/fileinfo/mock"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestMatching(t *testing.T) {

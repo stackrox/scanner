@@ -5,10 +5,8 @@ import (
 	"time"
 )
 
-
-
 // fileInfo is a dummy implementation for os.FileInfo.
-type fileInfo struct{
+type fileInfo struct {
 	mode os.FileMode
 }
 
