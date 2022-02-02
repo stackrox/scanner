@@ -3,6 +3,7 @@ package ioutils
 import (
 	"container/list"
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/pkg/errors"
@@ -298,6 +299,12 @@ func (b *Buffer) Copy(destination []byte, startingOff int64) int {
 // ReadFullFromReader is like calling io.ReadFull(r, buf[startingOff:readUptoOff]), except that
 // it works on this Buffer.
 func (b *Buffer) ReadFullFromReader(r io.Reader, startingOff, readUptoOff int64) (int, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Caught panic: %+v, %d, %d", b, startingOff, readUptoOff)
+			panic(r)
+		}
+	}()
 	if b.finished {
 		return 0, errBufferFreed
 	}
