@@ -142,9 +142,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 					}
 				} else {
 					d := make([]byte, hdr.Size)
-					if nRead, err := contents.ReadAt(d, 0); err != nil {
+					rd := io.NewSectionReader(contents, 0, hdr.Size)
+					if _, err = io.ReadFull(rd, d); err != nil {
 						log.Errorf("error reading %q: %v", hdr.Name, err)
-						d = d[:nRead]
 					}
 
 					// Put the file directly

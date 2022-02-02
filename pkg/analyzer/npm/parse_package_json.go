@@ -24,7 +24,8 @@ func parsePackageJSON(filePath string, fi os.FileInfo, contents io.ReaderAt) *co
 	// If the prefix is a function, then we can ignore it as it will have a different package.json
 	// that is actually in JSON format
 	var first7Bytes [7]byte
-	if _, err := contents.ReadAt(first7Bytes[:], 0); err == nil && bytes.Equal(first7Bytes[:], functionBytes) {
+	rd := io.NewSectionReader(contents, 0, 7)
+	if _, err := io.ReadFull(rd, first7Bytes[:]); err == nil && bytes.Equal(first7Bytes[:], functionBytes) {
 		return nil
 	}
 	var pkgJSON packageJSON
