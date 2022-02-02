@@ -5,30 +5,52 @@ import (
 	"time"
 )
 
-// FileInfo is a dummy implementation for os.FileInfo.
-type FileInfo struct{}
 
-func (f *FileInfo) Name() string {
+
+// fileInfo is a dummy implementation for os.FileInfo.
+type fileInfo struct{
+	mode os.FileMode
+}
+
+// NewFileInfo creates a new mock os.FileInfo.
+// By default, the returned *os.FileInfo is a directory.
+func NewFileInfo(opts ...FileInfoOption) *fileInfo {
+	var o options
+	for _, opt := range opts {
+		opt.apply(&o)
+	}
+
+	mode := os.ModeDir
+	if o.mode != 0 {
+		mode = o.mode
+	}
+
+	return &fileInfo{
+		mode: mode,
+	}
+}
+
+func (f *fileInfo) Name() string {
 	return ""
 }
 
-func (f *FileInfo) Size() int64 {
+func (f *fileInfo) Size() int64 {
 	return 0
 }
 
-func (f *FileInfo) Mode() os.FileMode {
-	return os.ModeDir
+func (f *fileInfo) Mode() os.FileMode {
+	return f.mode
 }
 
-func (f *FileInfo) ModTime() time.Time {
+func (f *fileInfo) ModTime() time.Time {
 	return time.Now()
 }
 
 // IsDir just returns true. This is the only one we really care about.
-func (f *FileInfo) IsDir() bool {
+func (f *fileInfo) IsDir() bool {
 	return true
 }
 
-func (f *FileInfo) Sys() interface{} {
+func (f *fileInfo) Sys() interface{} {
 	return nil
 }
