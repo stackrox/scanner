@@ -16,15 +16,17 @@ type packageJSON struct {
 	Version string `json:"version"`
 }
 
+const function = "function"
+
 var (
-	functionBytes = []byte("function")
+	functionBytes = []byte(function)
 )
 
 func parsePackageJSON(filePath string, fi os.FileInfo, contents io.ReaderAt) *component.Component {
 	// If the prefix is a function, then we can ignore it as it will have a different package.json
 	// that is actually in JSON format
-	var first8Bytes [8]byte
-	if _, err := contents.ReadAt(first8Bytes[:], 0); err == nil && bytes.Equal(first8Bytes[:], functionBytes) {
+	var functionHeader [len(function)]byte
+	if _, err := contents.ReadAt(functionHeader[:], 0); err == nil && bytes.Equal(functionHeader[:], functionBytes) {
 		return nil
 	}
 	var pkgJSON packageJSON
