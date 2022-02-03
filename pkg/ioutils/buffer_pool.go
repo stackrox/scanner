@@ -235,6 +235,10 @@ func (b *Buffer) Grow(ctx context.Context, additionalCapacity int64) error {
 	if b.finished {
 		return errBufferFreed
 	}
+	if b.Cap()+additionalCapacity > b.pool.totalSizeBytes {
+		return errors.Errorf("cannot grow buffer of cap %d"+
+			" by %d: total size would exceed max capacity of the buffer pool (%d)", b.Cap(), additionalCapacity, b.pool.totalSizeBytes)
+	}
 	additionalIndexes, err := b.pool.alloc(ctx, additionalCapacity)
 	if err != nil {
 		return err
