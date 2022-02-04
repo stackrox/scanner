@@ -58,6 +58,7 @@ func convertVulnerabilities(apiVulns []apiV1.Vulnerability) []*v1.Vulnerability 
 			Link:        v.Link,
 			MetadataV2:  metadata,
 			FixedBy:     v.FixedBy,
+			Severity:    v.Severity,
 		})
 	}
 	return vulns
