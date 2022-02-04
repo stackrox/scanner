@@ -13,7 +13,7 @@ import (
 const (
 	// The temp file is like "/tmp/<tmpDirName>111111/<tmpFileName>"
 	tmpFileName = "buffer-overflow"
-	tmpDirName  = "disk-lazy-reader-"
+	tmpDirName  = "disk-lazy-reader"
 )
 
 // diskBackedLazyReaderAt is a lazy reader backed by disk.
@@ -27,6 +27,11 @@ type diskBackedLazyReaderAt struct {
 	file    *os.File
 	dirPath string
 	err     error
+}
+
+// CleanUpDiskTempFiles removes the temporary overflow files.
+func CleanUpDiskTempFiles() {
+	_ = os.RemoveAll(filepath.Join(os.TempDir(), tmpDirName))
 }
 
 // NewLazyReaderAtWithDiskBackedBuffer creates a LazyBuffer implementation with the size of buffer limited.
@@ -125,7 +130,7 @@ func (r *diskBackedLazyReaderAt) overflowToDisk() {
 		return
 	}
 
-	r.dirPath, err = os.MkdirTemp("", tmpDirName)
+	r.dirPath, err = os.MkdirTemp(tmpDirName, tmpDirName+"-")
 	if err != nil {
 		r.err = errors.Wrap(err, "failed to create temp dir for overflow")
 		return
