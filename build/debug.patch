@@ -59,7 +59,7 @@ diff -u -r ./crypto/tls/tls.go /tmp/go/go/src/crypto/tls/tls.go
  		conn:     conn,
  		config:   config,
  		isClient: true,
-+		creationStack: debug.Stack()
++		creationStack: debug.Stack(),
  	}
 +	runtime.SetFinalizer(c, ensureConnClosed)
  	c.handshakeFn = c.clientHandshake
