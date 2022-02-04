@@ -27,6 +27,7 @@ type diskBackedLazyReaderAt struct {
 	maxBufferSize int64
 
 	mutex        sync.RWMutex
+	pos          int64
 	overFlowFile *os.File
 	dirPath      string
 	err          error
@@ -84,8 +85,9 @@ func (r *diskBackedLazyReaderAt) ReadAt(p []byte, off int64) (int, error) {
 	}
 
 	// Both LazyReader and os.File handle EOF. So we do not check reading overflow here.
-	if r.size > r.maxBufferSize && off+int64(len(p)) > r.maxBufferSize {
-		r.overflowToDisk()
+	until := off + int64(len(p))
+	if r.size > r.maxBufferSize && until > r.maxBufferSize {
+		r.overflowToDisk(until)
 	}
 
 	return r.readAt(p, off)
@@ -127,41 +129,55 @@ func (r *diskBackedLazyReaderAt) readAt(p []byte, off int64) (n int, err error) 
 	return n, nil
 }
 
-func (r *diskBackedLazyReaderAt) overflowToDisk() {
+func (r *diskBackedLazyReaderAt) overflowToDisk(till int64) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
-	if r.err != nil || r.overFlowFile != nil {
+	if r.err != nil || till <= r.pos {
 		return
 	}
 
-	// Forcefully fill up the lazyReader buffer by reading the last byte in r.lazyBuffer's buffer.
-	buf := make([]byte, 1)
-	_, err := r.lzReader.ReadAt(buf, r.maxBufferSize-1)
-	if err != nil {
-		r.err = err
-		return
-	}
-
-	r.dirPath, err = os.MkdirTemp("", tmpDirName)
-	if err != nil {
-		r.err = errors.Wrap(err, "failed to create temp dir for overflow")
-		return
-	}
-	defer func() {
-		if r.overFlowFile == nil {
-			_ = os.RemoveAll(r.dirPath)
-			r.dirPath = ""
+	if r.pos == 0 {
+		// Forcefully fill up the lazyReader buffer by reading the last byte in r.lazyBuffer's buffer.
+		buf := make([]byte, 1)
+		_, err := r.lzReader.ReadAt(buf, r.maxBufferSize-1)
+		if err != nil {
+			r.err = err
+			return
 		}
-	}()
-
-	// Prepare overflow overFlowFile
-	filePath := filepath.Join(r.dirPath, tmpFileName)
-	r.overFlowFile, err = os.Create(filePath)
-	if err != nil {
-		r.err = errors.Wrapf(err, "create overflow overFlowFile %s", filePath)
-		return
+		r.pos = r.maxBufferSize
 	}
 
-	_, r.err = io.CopyN(r.overFlowFile, r.reader, r.size-r.maxBufferSize+1)
+	if r.overFlowFile == nil {
+		var err error
+		r.dirPath, err = os.MkdirTemp("", tmpDirName)
+		if err != nil {
+			r.err = errors.Wrap(err, "failed to create temp dir for overflow")
+			return
+		}
+		defer func() {
+			if r.overFlowFile == nil {
+				_ = os.RemoveAll(r.dirPath)
+				r.dirPath = ""
+			}
+		}()
+
+		// Prepare overflow overFlowFile
+		filePath := filepath.Join(r.dirPath, tmpFileName)
+		r.overFlowFile, err = os.Create(filePath)
+		if err != nil {
+			r.err = errors.Wrapf(err, "create overflow overFlowFile %s", filePath)
+			return
+		}
+	}
+
+	// Copy until next block align with size r.maxBufferSize or the size of file.
+	// Request to copy an extra byte to ensure EOF is recorded.
+	to := mathutil.MinInt64(((till-1)/r.maxBufferSize+1)*r.maxBufferSize, r.size)
+	if to == r.size {
+		to++
+	}
+	var n int64
+	n, r.err = io.CopyN(r.overFlowFile, r.reader, to-r.pos)
+	r.pos += n
 }
