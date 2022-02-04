@@ -37,9 +37,9 @@ import (
 const (
 	// DefaultMaxExtractableFileSizeMB is the default value for the max extractable file size.
 	DefaultMaxExtractableFileSizeMB = 200
-	// maxLazyReaderBufferSize is the maximum buffer size in memory. Any file data beyond this
+	// maxLazyReaderBufferSizeMB is the maximum buffer size in memory. Any file data beyond this
 	// limit is backed by temporary files on disk.
-	maxLazyReaderBufferSize = 200
+	maxLazyReaderBufferSizeMB = 200
 )
 
 var (
@@ -110,7 +110,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			if prevLazyReader != nil {
 				buf = prevLazyReader.StealBuffer()
 			}
-			prevLazyReader = ioutils.NewLazyReaderAtWithDiskBackedBuffer(tr, hdr.Size, buf, maxLazyReaderBufferSize*1024*1024)
+			prevLazyReader = ioutils.NewLazyReaderAtWithDiskBackedBuffer(tr, hdr.Size, buf, maxLazyReaderBufferSizeMB*1024*1024)
 			contents = prevLazyReader
 		} else {
 			contents = bytes.NewReader(nil)

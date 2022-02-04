@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	// The temp file is like "/tmp/<tmpDirName>111111/<tmpFileName>"
+	// The temp overFlowFile is like "/tmp/<tmpDirName>111111/<tmpFileName>"
 	tmpFileName = "buffer-overflow"
 	tmpDirName  = "disk-lazy-reader-"
 )
@@ -26,10 +26,10 @@ type diskBackedLazyReaderAt struct {
 	size          int64
 	maxBufferSize int64
 
-	mutex   sync.RWMutex
-	file    *os.File
-	dirPath string
-	err     error
+	mutex        sync.RWMutex
+	overFlowFile *os.File
+	dirPath      string
+	err          error
 }
 
 // CleanUpDiskTempFiles removes the temporary overflow files.
@@ -44,7 +44,7 @@ func CleanUpDiskTempFiles() {
 }
 
 // NewLazyReaderAtWithDiskBackedBuffer creates a LazyBuffer implementation with the size of buffer limited.
-// We cache the first maxBufferSize of data in the buffer and offload the remaining data to a file on disk.
+// We cache the first maxBufferSize of data in the buffer and offload the remaining data to a overFlowFile on disk.
 func NewLazyReaderAtWithDiskBackedBuffer(reader io.Reader, size int64, buf []byte, maxBufferSize int64) LazyReaderAt {
 	bufferedSize := size
 	if size > maxBufferSize {
@@ -63,9 +63,9 @@ func (r *diskBackedLazyReaderAt) StealBuffer() []byte {
 	defer r.mutex.Unlock()
 
 	// Clean up
-	if r.file != nil {
-		_ = r.file.Close()
-		r.file = nil
+	if r.overFlowFile != nil {
+		_ = r.overFlowFile.Close()
+		r.overFlowFile = nil
 	}
 	if r.dirPath != "" {
 		_ = os.RemoveAll(r.dirPath)
@@ -98,13 +98,13 @@ func (r *diskBackedLazyReaderAt) readAt(p []byte, off int64) (n int, err error) 
 	if off < r.maxBufferSize {
 		n, err = r.lzReader.ReadAt(p[:mathutil.MinInt64(int64(len(p)), r.maxBufferSize-off)], off)
 		if err != nil || n == len(p) {
-			return
+			return n, err
 		}
 	}
-	if r.file != nil {
+	if r.overFlowFile != nil {
 		// Fill the rest from disk. Offset is relative to r.maxBufferSize.
 		var nFromDisk int
-		nFromDisk, err = r.file.ReadAt(p[n:], off+int64(n)-r.maxBufferSize)
+		nFromDisk, err = r.overFlowFile.ReadAt(p[n:], off+int64(n)-r.maxBufferSize)
 		n += nFromDisk
 	}
 
@@ -117,21 +117,25 @@ func (r *diskBackedLazyReaderAt) readAt(p []byte, off int64) (n int, err error) 
 		return n, r.err
 	}
 
+	if err != nil {
+		return n, err
+	}
+
 	if off+int64(len(p)) > r.size {
 		return n, io.EOF
 	}
-	return
+	return n, nil
 }
 
 func (r *diskBackedLazyReaderAt) overflowToDisk() {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
-	if r.err != nil || r.file != nil {
+	if r.err != nil || r.overFlowFile != nil {
 		return
 	}
 
-	// Forcefully fill up the lazyReader buffer by reading the last byte.
+	// Forcefully fill up the lazyReader buffer by reading the last byte in r.lazyBuffer's buffer.
 	buf := make([]byte, 1)
 	_, err := r.lzReader.ReadAt(buf, r.maxBufferSize-1)
 	if err != nil {
@@ -145,19 +149,19 @@ func (r *diskBackedLazyReaderAt) overflowToDisk() {
 		return
 	}
 	defer func() {
-		if r.file == nil {
+		if r.overFlowFile == nil {
 			_ = os.RemoveAll(r.dirPath)
 			r.dirPath = ""
 		}
 	}()
 
-	// Prepare overflow file
+	// Prepare overflow overFlowFile
 	filePath := filepath.Join(r.dirPath, tmpFileName)
-	r.file, err = os.Create(filePath)
+	r.overFlowFile, err = os.Create(filePath)
 	if err != nil {
-		r.err = errors.Wrapf(err, "create overflow file %s", filePath)
+		r.err = errors.Wrapf(err, "create overflow overFlowFile %s", filePath)
 		return
 	}
 
-	_, r.err = io.CopyN(r.file, r.reader, r.size-r.maxBufferSize)
+	_, r.err = io.CopyN(r.overFlowFile, r.reader, r.size-r.maxBufferSize+1)
 }
