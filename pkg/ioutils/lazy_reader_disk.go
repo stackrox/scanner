@@ -2,18 +2,21 @@ package ioutils
 
 import (
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/mathutil"
+	"github.com/stackrox/rox/pkg/utils"
 )
 
 const (
 	// The temp file is like "/tmp/<tmpDirName>111111/<tmpFileName>"
 	tmpFileName = "buffer-overflow"
-	tmpDirName  = "disk-lazy-reader"
+	tmpDirName  = "disk-lazy-reader-"
 )
 
 // diskBackedLazyReaderAt is a lazy reader backed by disk.
@@ -31,7 +34,13 @@ type diskBackedLazyReaderAt struct {
 
 // CleanUpDiskTempFiles removes the temporary overflow files.
 func CleanUpDiskTempFiles() {
-	_ = os.RemoveAll(filepath.Join(os.TempDir(), tmpDirName))
+	dir, err := ioutil.ReadDir(os.TempDir())
+	utils.Should(err)
+	for _, d := range dir {
+		if d.IsDir() && strings.HasPrefix(d.Name(), tmpDirName) {
+			_ = os.RemoveAll(filepath.Join(os.TempDir(), d.Name()))
+		}
+	}
 }
 
 // NewLazyReaderAtWithDiskBackedBuffer creates a LazyBuffer implementation with the size of buffer limited.
@@ -130,7 +139,7 @@ func (r *diskBackedLazyReaderAt) overflowToDisk() {
 		return
 	}
 
-	r.dirPath, err = os.MkdirTemp(tmpDirName, tmpDirName+"-")
+	r.dirPath, err = os.MkdirTemp("", tmpDirName)
 	if err != nil {
 		r.err = errors.Wrap(err, "failed to create temp dir for overflow")
 		return
