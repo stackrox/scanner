@@ -1,4 +1,4 @@
-FROM centos:8
+FROM quay.io/centos/centos:stream8
 
 ENV GOLANG_VERSION "1.17.2"
 
