@@ -19,6 +19,14 @@ const (
 	tmpDirName  = "disk-lazy-reader-"
 )
 
+// LazyReaderAtWithDiskBackedBuffer is a LazyReader which uses a temporary file on disk
+// to store extra data beyond the maximum buffer size requested.
+type LazyReaderAtWithDiskBackedBuffer interface {
+	LazyReaderAt
+	// Close closes the lazy reader and free any allocated resources.
+	Close()
+}
+
 // diskBackedLazyReaderAt is a lazy reader backed by disk.
 type diskBackedLazyReaderAt struct {
 	reader        io.Reader
@@ -46,7 +54,7 @@ func CleanUpDiskTempFiles() {
 
 // NewLazyReaderAtWithDiskBackedBuffer creates a LazyBuffer implementation with the size of buffer limited.
 // We cache the first maxBufferSize of data in the buffer and offload the remaining data to a overFlowFile on disk.
-func NewLazyReaderAtWithDiskBackedBuffer(reader io.Reader, size int64, buf []byte, maxBufferSize int64) LazyReaderAt {
+func NewLazyReaderAtWithDiskBackedBuffer(reader io.Reader, size int64, buf []byte, maxBufferSize int64) LazyReaderAtWithDiskBackedBuffer {
 	bufferedSize := size
 	if size > maxBufferSize {
 		bufferedSize = maxBufferSize
@@ -57,6 +65,10 @@ func NewLazyReaderAtWithDiskBackedBuffer(reader io.Reader, size int64, buf []byt
 		size:          size,
 		maxBufferSize: maxBufferSize,
 	}
+}
+
+func (r *diskBackedLazyReaderAt) Close() {
+	_ = r.StealBuffer()
 }
 
 func (r *diskBackedLazyReaderAt) StealBuffer() []byte {
@@ -70,6 +82,7 @@ func (r *diskBackedLazyReaderAt) StealBuffer() []byte {
 	}
 	if r.dirPath != "" {
 		_ = os.RemoveAll(r.dirPath)
+		r.dirPath = ""
 	}
 
 	r.err = errBufferStolen

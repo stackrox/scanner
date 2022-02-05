@@ -50,7 +50,11 @@ func TestDiskLazyReader(t *testing.T) {
 			assert.EqualValues(t, fetched[:10], bytes[dataSize-20:dataSize-10])
 			assert.EqualValues(t, 10, n)
 
-			_ = lazyReader.StealBuffer()
+			lazyReader.Close()
+			n, err = lazyReader.ReadAt(fetched[:10], dataSize-10)
+			assert.Equal(t, err, errBufferStolen)
+			assert.Zero(t, 0, n)
+			lazyReader.Close()
 		})
 	}
 }

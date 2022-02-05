@@ -82,10 +82,10 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	// Telemetry variables.
 	var numFiles, numMatchedFiles, numExtractedContentBytes int
 
-	var prevLazyReader ioutils.LazyReaderAt
+	var prevLazyReader ioutils.LazyReaderAtWithDiskBackedBuffer
 	defer func() {
 		if prevLazyReader != nil {
-			_ = prevLazyReader.StealBuffer()
+			prevLazyReader.Close()
 		}
 	}()
 
