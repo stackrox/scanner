@@ -18,21 +18,20 @@ func TestDiskLazyReader(t *testing.T) {
 	for _, c := range testCases {
 		t.Run(fmt.Sprintf("MaxBufferSize-%d", c), func(t *testing.T) {
 			var buf []byte
-			abs, err := reader.Seek(0, io.SeekStart)
+			_, err := reader.Seek(0, io.SeekStart)
 			assert.NoError(t, err)
-			assert.EqualValues(t, 0, abs)
-			lazyReader := NewLazyReaderAtWithDiskBackedBuffer(reader, reader.Size(), buf, c)
+			lazyReader := NewLazyReaderAtWithDiskBackedBuffer(reader, dataSize, buf, c)
 
 			fetched := make([]byte, dataSize)
 
 			n, err := lazyReader.ReadAt(fetched[:2], 2)
 			assert.NoError(t, err)
-			assert.EqualValues(t, fetched[:2], bytes[2:4])
+			assert.Equal(t, fetched[:2], bytes[2:4])
 			assert.EqualValues(t, 2, n)
 
 			n, err = lazyReader.ReadAt(fetched[:5], dataSize-5)
 			assert.NoError(t, err)
-			assert.EqualValues(t, fetched[:5], bytes[dataSize-5:])
+			assert.Equal(t, fetched[:5], bytes[dataSize-5:])
 			assert.EqualValues(t, 5, n)
 
 			n, err = lazyReader.ReadAt(fetched, 0)
@@ -42,12 +41,12 @@ func TestDiskLazyReader(t *testing.T) {
 
 			n, err = lazyReader.ReadAt(fetched[:10], dataSize-5)
 			assert.Equal(t, io.EOF, err)
-			assert.EqualValues(t, fetched[:5], bytes[dataSize-5:])
+			assert.Equal(t, fetched[:5], bytes[dataSize-5:])
 			assert.EqualValues(t, 5, n)
 
 			n, err = lazyReader.ReadAt(fetched[:10], dataSize-20)
 			assert.NoError(t, err)
-			assert.EqualValues(t, fetched[:10], bytes[dataSize-20:dataSize-10])
+			assert.Equal(t, fetched[:10], bytes[dataSize-20:dataSize-10])
 			assert.EqualValues(t, 10, n)
 
 			lazyReader.Close()

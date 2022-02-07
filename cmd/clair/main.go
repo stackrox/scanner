@@ -222,7 +222,7 @@ func main() {
 		log.Infof("Max extractable file size set to %d MB", config.MaxExtractableFileSizeMB)
 	}
 	// Cleanup any residue temporary files.
-	ioutils.CleanUpDiskTempFiles()
+	ioutils.CleanUpTempFiles()
 
 	slimMode := env.SlimMode.Enabled()
 
