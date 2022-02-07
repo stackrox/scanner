@@ -26,6 +26,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/stackrox/rox/pkg/utils"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/elf"
@@ -85,7 +87,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	var prevLazyReader ioutils.LazyReaderAtWithDiskBackedBuffer
 	defer func() {
 		if prevLazyReader != nil {
-			prevLazyReader.Close()
+			utils.IgnoreError(prevLazyReader.Close)
 		}
 	}()
 
@@ -109,7 +111,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			var buf []byte
 			if prevLazyReader != nil {
 				buf = prevLazyReader.StealBuffer()
-				_ = prevLazyReader.Close()
+				utils.IgnoreError(prevLazyReader.Close)
 			}
 			prevLazyReader = ioutils.NewLazyReaderAtWithDiskBackedBuffer(tr, hdr.Size, buf, maxLazyReaderBufferSizeMB*1024*1024)
 			contents = prevLazyReader

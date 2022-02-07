@@ -44,6 +44,7 @@ type diskBackedLazyReaderAt struct {
 
 // CleanUpTempFiles removes the temporary overflow files.
 func CleanUpTempFiles() {
+	// Clean up the directory created with os.MkdirTemp
 	dir, err := ioutil.ReadDir(os.TempDir())
 	utils.Should(err)
 	for _, d := range dir {
