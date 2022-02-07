@@ -2,11 +2,11 @@ package elf
 
 import (
 	"fmt"
-	"github.com/stackrox/rox/pkg/utils"
 	"io"
 	"os"
 	"testing"
 
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
