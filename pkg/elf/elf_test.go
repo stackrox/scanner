@@ -61,6 +61,7 @@ func TestGetImportedLibraries(t *testing.T) {
 		}
 	}()
 	file, err := os.Open("testdata/elf_exec")
+	assert.NoError(t, err)
 	defer utils.IgnoreError(file.Close)
 	for _, bufSize := range bufSizes {
 		_, err := file.Seek(0, io.SeekStart)
