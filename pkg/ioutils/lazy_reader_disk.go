@@ -56,7 +56,7 @@ func CleanUpDiskTempFiles() {
 // We cache the first maxBufferSize of data in the buffer and offload the remaining data to a overFlowFile on disk.
 func NewLazyReaderAtWithDiskBackedBuffer(reader io.Reader, size int64, buf []byte, maxBufferSize int64) LazyReaderAtWithDiskBackedBuffer {
 	bufferedSize := size
-	if size > maxBufferSize {
+	if bufferedSize > maxBufferSize {
 		bufferedSize = maxBufferSize
 	}
 	return &diskBackedLazyReaderAt{
