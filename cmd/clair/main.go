@@ -27,8 +27,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackrox/scanner/pkg/ioutils"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/sync"
@@ -46,6 +44,7 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/formatter"
+	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
