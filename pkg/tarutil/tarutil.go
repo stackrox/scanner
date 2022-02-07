@@ -41,6 +41,9 @@ const (
 	DefaultMaxELFExecutableFileSizeMB = 1024
 	// maxBufferSizeMB is the maximum buffer used by lazy reader.
 	maxBufferSizeMB = 10
+	// maxLazyReaderBufferSizeMB is the maximum buffer size in memory. Any file data beyond this
+	// limit is backed by temporary files on disk.
+	maxLazyReaderBufferSizeMB = 200
 )
 
 var (
@@ -95,10 +98,10 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	// Telemetry variables.
 	var numFiles, numMatchedFiles, numExtractedContentBytes int
 
-	var prevLazyReader ioutils.LazyReaderAt
+	var prevLazyReader ioutils.LazyReaderAtWithDiskBackedBuffer
 	defer func() {
 		if prevLazyReader != nil {
-			_ = prevLazyReader.StealBuffer()
+			prevLazyReader.Close()
 		}
 	}()
 
@@ -123,7 +126,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			if prevLazyReader != nil {
 				buf = prevLazyReader.StealBuffer()
 			}
-			prevLazyReader = ioutils.NewDiskBackedLazyReaderAtWithBuffer(tr, hdr.Size, buf, maxBufferSizeMB*1024*1024)
+			prevLazyReader = ioutils.NewLazyReaderAtWithDiskBackedBuffer(tr, hdr.Size, buf, maxLazyReaderBufferSizeMB*1024*1024)
 			contents = prevLazyReader
 		} else {
 			contents = bytes.NewReader(nil)
@@ -157,24 +160,29 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
-			if !extractContents || hdr.Typeflag != tar.TypeReg {
-				fileData.Executable = executable
-				files.data[filename] = fileData
-				continue
-			}
 
-			d := make([]byte, hdr.Size)
-			rd := io.NewSectionReader(contents, 0, hdr.Size)
-			if _, err = io.ReadFull(rd, d); err != nil {
-				log.Errorf("error reading %q: %v", hdr.Name, err)
-			}
+			if extractContents {
+				if hdr.Typeflag == tar.TypeLink {
+					// A hard-link necessarily points to a previous absolute path in the
+					// archive which we look if it was already extracted.
+					linkedFile, ok := files.data[hdr.Linkname]
+					if ok {
+						fileData.Contents = linkedFile.Contents
+					}
+				} else {
+					d := make([]byte, hdr.Size)
+					if nRead, err := contents.ReadAt(d, 0); err != nil {
+						log.Errorf("error reading %q: %v", hdr.Name, err)
+						d = d[:nRead]
+					}
 
-			// Put the file directly
-			fileData.Contents = d
+					// Put the file directly
+					fileData.Contents = d
+					numExtractedContentBytes += len(d)
+				}
+			}
 			fileData.Executable = executable
 			files.data[filename] = fileData
-
-			numExtractedContentBytes += len(d)
 		case tar.TypeSymlink:
 			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
 		case tar.TypeDir:

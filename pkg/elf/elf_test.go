@@ -50,9 +50,14 @@ func TestGetImportedLibraries(t *testing.T) {
 	require.NoError(t, err)
 	fileSize := stat.Size()
 
-	bufSizes := []int64{64, 1024, fileSize + 128, fileSize - 64, fileSize, 1024, 64}
+	bufSizes := []int64{10, 63, 64, 1024, fileSize + 128, fileSize - 1, fileSize - 64, fileSize, 1024, 64, 1}
 	var buf []byte
-	var lzReader ioutils.LazyReaderAt
+	var lzReader ioutils.LazyReaderAtWithDiskBackedBuffer
+	defer func() {
+		if lzReader != nil {
+			lzReader.Close()
+		}
+	}()
 	for _, bufSize := range bufSizes {
 		file, err := os.Open("testdata/elf_exec")
 		defer utils.IgnoreError(file.Close)
@@ -60,7 +65,7 @@ func TestGetImportedLibraries(t *testing.T) {
 		if lzReader != nil {
 			buf = lzReader.StealBuffer()
 		}
-		lzReader = ioutils.NewDiskBackedLazyReaderAtWithBuffer(file, fileSize, buf, bufSize)
+		lzReader = ioutils.NewLazyReaderAtWithDiskBackedBuffer(file, fileSize, buf, bufSize)
 		assert.NoError(t, err)
 		elfMetadata, err := GetExecutableMetadata(lzReader)
 		assert.NoError(t, err)
@@ -68,5 +73,4 @@ func TestGetImportedLibraries(t *testing.T) {
 		assert.Zero(t, len(elfMetadata.Sonames))
 		file.Close()
 	}
-	_ = lzReader.StealBuffer()
 }
