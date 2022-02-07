@@ -26,10 +26,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/stackrox/rox/pkg/utils"
-
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
