@@ -41,7 +41,7 @@ const (
 	DefaultMaxELFExecutableFileSizeMB = 800
 	// DefaultMaxLazyReaderBufferSizeMB is the default maximum lazy reader buffer size. Any file data beyond this
 	// limit is backed by temporary files on disk.
-	DefaultMaxLazyReaderBufferSizeMB = 200
+	DefaultMaxLazyReaderBufferSizeMB = 100
 )
 
 var (
