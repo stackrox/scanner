@@ -25,4 +25,5 @@ func TestLoadConfig(t *testing.T) {
 	assert.Equal(t, 5*time.Minute, cfg.Updater.Interval)
 	assert.Equal(t, int64(tarutil.DefaultMaxExtractableFileSizeMB), cfg.MaxExtractableFileSizeMB)
 	assert.Equal(t, int64(400), cfg.MaxELFExecutableFileSizeMB)
+	assert.Equal(t, int64(150), cfg.MaxLazyReaderBufferSizeMB)
 }

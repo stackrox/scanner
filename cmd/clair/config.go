@@ -41,6 +41,7 @@ type Config struct {
 	LogLevel                   string                              `yaml:"logLevel"`
 	MaxExtractableFileSizeMB   int64                               `yaml:"maxExtractableFileSizeMB"`
 	MaxELFExecutableFileSizeMB int64                               `yaml:"maxELFExecutableFileSizeMB"`
+	MaxLazyReaderBufferSizeMB  int64                               `yaml:"maxLazyReaderBufferSizeMB"`
 
 	// CentralEndpoint is the endpoint that central can be reached at. Defaults to https://central.stackrox.svc if not present in the config.
 	CentralEndpoint string `yaml:"centralEndpoint"`
@@ -62,6 +63,7 @@ func DefaultConfig() Config {
 		LogLevel:                   "info",
 		MaxExtractableFileSizeMB:   tarutil.DefaultMaxExtractableFileSizeMB,
 		MaxELFExecutableFileSizeMB: tarutil.DefaultMaxELFExecutableFileSizeMB,
+		MaxLazyReaderBufferSizeMB:  tarutil.DefaultMaxLazyReaderBufferSizeMB,
 	}
 }
 

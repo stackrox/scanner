@@ -39,4 +39,6 @@ data:
       # The max size of files in images that are extracted.
       # maxExtractableFileSizeMB: 200
       # The max size of ELF executable files that are analyzed.
-      # maxELFExecutableFileSizeMB: 250
+      # maxELFExecutableFileSizeMB: 800
+      # The max size of lazy reader buffer. Image file data beyond this limit are overflowed to temporary files on disk.
+      # maxLazyReaderBufferSizeMB: 200

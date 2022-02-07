@@ -27,6 +27,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackrox/scanner/pkg/ioutils"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/sync"
@@ -44,7 +46,6 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/formatter"
-	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
@@ -221,14 +222,21 @@ func main() {
 		tarutil.SetMaxExtractableFileSize(config.MaxExtractableFileSizeMB * 1024 * 1024)
 		log.Infof("Max extractable file size set to %d MB", config.MaxExtractableFileSizeMB)
 	}
-	// Cleanup any residue temporary files.
-	ioutils.CleanUpDiskTempFiles()
 
 	// Set the max ELF executable file size from the config.
 	if config.MaxELFExecutableFileSizeMB > 0 {
 		tarutil.SetMaxELFExecutableFileSize(config.MaxELFExecutableFileSizeMB * 1024 * 1024)
 		log.Infof("Max ELF executable file size set to %d MB", config.MaxELFExecutableFileSizeMB)
 	}
+
+	// Set the max lazy reader buffer size from the config.
+	if config.MaxLazyReaderBufferSizeMB > 0 {
+		tarutil.SetMaxLazyReaderBufferSize(config.MaxLazyReaderBufferSizeMB * 1024 * 1024)
+		log.Infof("Max lazy reader buffer size set to %d MB", config.MaxLazyReaderBufferSizeMB)
+	}
+
+	// Cleanup any residue temporary files.
+	ioutils.CleanUpDiskTempFiles()
 
 	slimMode := env.SlimMode.Enabled()
 

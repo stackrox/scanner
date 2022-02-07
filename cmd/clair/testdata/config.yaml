@@ -32,3 +32,5 @@ scanner:
   # maxExtractableFileSizeMB: 200
   # The max size of ELF executable files that are analyzed.
   maxELFExecutableFileSizeMB: 400
+  # The max size of lazy reader buffer.
+  maxLazyReaderBufferSizeMB: 150
