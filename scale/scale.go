@@ -30,7 +30,7 @@ const (
 
 	registry = "https://registry-1.docker.io"
 
-	maxConcurrentScans    = 30
+	maxConcurrentScans    = 25
 	maxAllowedScanFailure = 180
 	scanTimeOut           = 8
 )
