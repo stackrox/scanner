@@ -78,6 +78,7 @@ func analyzeLocalImage(path string) {
 	// Extract
 	var matcher manifestMatcher
 	tarutil.SetMaxExtractableFileSize(1024 * 1024 * 1024)
+	tarutil.SetMaxELFExecutableFileSize(1024 * 1024 * 1024)
 	filemap, err := tarutil.ExtractFiles(f, &matcher)
 	if err != nil {
 		panic(err)
