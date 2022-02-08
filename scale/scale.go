@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/pkg/errors"
@@ -63,7 +64,7 @@ func main() {
 
 	// scanFailures is the number of failed image scans.
 	// This is a sanity check to validate the test result.
-	var scanFailures int
+	var scanFailures uint64
 	var wg sync.WaitGroup
 	imagesC := make(chan fixtures.ImageAndID)
 	for i := 0; i < maxConcurrentScans; i++ {
@@ -74,7 +75,7 @@ func main() {
 			for image := range imagesC {
 				err := scanImage(cli, &image)
 				if err != nil {
-					scanFailures++
+					atomic.AddUint64(&scanFailures, 1)
 				}
 			}
 		}(imagesC)
