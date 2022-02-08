@@ -193,6 +193,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 					numExtractedContentBytes += len(d)
 				}
 			}
+			if hdr.Size > 1024*1024*5 {
+				log.Infof("new data with content %d %v", len(fileData.Contents), &fileData.Contents)
+			}
 			fileData.Executable = executable
 			files.data[filename] = fileData
 		case tar.TypeSymlink:
@@ -209,8 +212,21 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
+	printFileMapSize(files)
 
 	return files, nil
+}
+
+func printFileMapSize(files LayerFiles) {
+	var total int64
+	var numContent int
+	for _, f := range files.data {
+		total += int64(len(f.Contents))
+		if f.Contents != nil {
+			numContent++
+		}
+	}
+	log.Infof("%d files %d links %d content, total: %d", len(files.data), len(files.links), numContent, total)
 }
 
 // XzReader implements io.ReadCloser for data compressed via `xz`.

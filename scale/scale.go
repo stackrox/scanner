@@ -12,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/errorhelpers"
-	"github.com/stackrox/rox/pkg/fixtures"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/sync"
 	"github.com/stackrox/rox/pkg/urlfmt"
@@ -68,10 +67,11 @@ func main() {
 	client.ScanTimeout = scanTimeOut * time.Minute
 
 	var wg sync.WaitGroup
-	imagesC := make(chan fixtures.ImageAndID)
+	imagesC := make(chan ImageAndID)
+	client.ScanTimeout = 5 * time.Minute
 	for i := 0; i < maxConcurrentScans; i++ {
 		wg.Add(1)
-		go func(imagesC <-chan fixtures.ImageAndID) {
+		go func(imagesC <-chan ImageAndID) {
 			defer wg.Done()
 
 			for image := range imagesC {
@@ -80,7 +80,7 @@ func main() {
 		}(imagesC)
 	}
 
-	for _, image := range fixtures.ImageNames[:1800] {
+	for _, image := range ImageNames {
 		imagesC <- image
 	}
 	// Signal there are no more images to scan.
@@ -100,7 +100,7 @@ func main() {
 }
 
 // scanImage scans the given image with the client Clairify client.
-func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
+func scanImage(cli *client.Clairify, image *ImageAndID) {
 	for _, b := range []bool{false, true} {
 		req := &types.ImageRequest{Image: image.FullName(), Registry: registry, UncertifiedRHELScan: b}
 
