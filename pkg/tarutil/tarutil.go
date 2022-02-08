@@ -191,10 +191,10 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 					// Put the file directly
 					fileData.Contents = d
 					numExtractedContentBytes += len(d)
+					if hdr.Size > 1024*1024*5 {
+						log.Infof("new data with content %d %p", len(fileData.Contents), &fileData.Contents)
+					}
 				}
-			}
-			if hdr.Size > 1024*1024*5 {
-				log.Infof("new data with content %d %v", len(fileData.Contents), &fileData.Contents)
 			}
 			fileData.Executable = executable
 			files.data[filename] = fileData
@@ -212,6 +212,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
+	log.Infof("extracted bytes: %d", numExtractedContentBytes)
 	printFileMapSize(files)
 
 	return files, nil

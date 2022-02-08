@@ -77,7 +77,7 @@ func (detector) Detect(files tarutil.LayerFiles, options *featurens.DetectorOpti
 	if !bytes.Equal(busyboxData.Contents, sbData.Contents) {
 		return nil
 	}
-	log.Infof("busybox content %d, sb %d, address %v vs %v", len(busyboxData.Contents), len(sbData.Contents), &busyboxData.Contents, &sbData.Contents)
+	log.Infof("busybox content %d, sb %d, address %p vs %p", len(busyboxData.Contents), len(sbData.Contents), &busyboxData.Contents, &sbData.Contents)
 
 	// Validate busybox binary and extract version.
 	var version = parseBusyBoxVersion(busyboxData.Contents)
