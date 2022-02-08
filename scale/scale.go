@@ -29,7 +29,7 @@ const (
 
 	registry = "https://registry-1.docker.io"
 
-	maxConcurrentScans = 22
+	maxConcurrentScans = 25
 )
 
 func main() {
@@ -56,6 +56,7 @@ func main() {
 
 	endpoint := urlfmt.FormatURL(scannerHTTPEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 	cli := client.NewWithClient(endpoint, httpClient)
+	client.ScanTimeout = 6 * time.Minute
 
 	var wg sync.WaitGroup
 	imagesC := make(chan fixtures.ImageAndID)
