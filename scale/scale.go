@@ -56,7 +56,7 @@ func main() {
 
 	endpoint := urlfmt.FormatURL(scannerHTTPEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 	cli := client.NewWithClient(endpoint, httpClient)
-	client.ScanTimeout = 6 * time.Minute
+	client.ScanTimeout = 8 * time.Minute
 
 	var wg sync.WaitGroup
 	imagesC := make(chan fixtures.ImageAndID)
