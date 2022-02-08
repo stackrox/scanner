@@ -2,6 +2,7 @@ package elf
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"testing"
 
@@ -50,20 +51,25 @@ func TestGetImportedLibraries(t *testing.T) {
 	require.NoError(t, err)
 	fileSize := stat.Size()
 
-	bufSizes := []int64{10, 63, 64, 1024, fileSize + 128, fileSize - 1, fileSize - 64, fileSize, 1024, 64, 1}
+	// Emulate analyzing files with different initial buffer capacity.
+	bufSizes := []int64{63, 64, fileSize - 1, fileSize - 64, fileSize, 64, 1}
 	var buf []byte
 	var lzReader ioutils.LazyReaderAtWithDiskBackedBuffer
 	defer func() {
 		if lzReader != nil {
-			lzReader.Close()
+			_ = lzReader.Close()
 		}
 	}()
+	file, err := os.Open("testdata/elf_exec")
+	assert.NoError(t, err)
+	defer utils.IgnoreError(file.Close)
 	for _, bufSize := range bufSizes {
-		file, err := os.Open("testdata/elf_exec")
-		defer utils.IgnoreError(file.Close)
+		_, err := file.Seek(0, io.SeekStart)
+		assert.NoError(t, err)
 		fmt.Printf("Testing with max buffer size: %d\n", bufSize)
 		if lzReader != nil {
 			buf = lzReader.StealBuffer()
+			_ = lzReader.Close()
 		}
 		lzReader = ioutils.NewLazyReaderAtWithDiskBackedBuffer(file, fileSize, buf, bufSize)
 		assert.NoError(t, err)
@@ -71,6 +77,5 @@ func TestGetImportedLibraries(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(elfMetadata.ImportedLibraries))
 		assert.Zero(t, len(elfMetadata.Sonames))
-		file.Close()
 	}
 }

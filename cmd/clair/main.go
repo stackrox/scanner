@@ -235,7 +235,7 @@ func main() {
 	}
 
 	// Cleanup any residue temporary files.
-	ioutils.CleanUpDiskTempFiles()
+	ioutils.CleanUpTempFiles()
 
 	slimMode := env.SlimMode.Enabled()
 
