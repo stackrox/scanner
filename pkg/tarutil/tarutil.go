@@ -40,7 +40,7 @@ const (
 	DefaultMaxExtractableFileSizeMB = 200
 	// maxLazyReaderBufferSizeMB is the maximum buffer size in memory. Any file data beyond this
 	// limit is backed by temporary files on disk.
-	maxLazyReaderBufferSizeMB = 20
+	maxLazyReaderBufferSizeMB = 200
 )
 
 var (
