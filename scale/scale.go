@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/fixtures"
@@ -29,7 +30,15 @@ const (
 
 	registry = "https://registry-1.docker.io"
 
-	maxConcurrentScans = 6
+	maxConcurrentScans    = 30
+	maxAllowedScanFailure = 180
+	scanTimeOut           = 8
+)
+
+var (
+	// scanFailures is the number of failed image scans.
+	// This is a sanity check to validate the test result.
+	scanFailures int
 )
 
 func main() {
@@ -56,6 +65,7 @@ func main() {
 
 	endpoint := urlfmt.FormatURL(scannerHTTPEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 	cli := client.NewWithClient(endpoint, httpClient)
+	client.ScanTimeout = scanTimeOut * time.Minute
 
 	var wg sync.WaitGroup
 	imagesC := make(chan fixtures.ImageAndID)
@@ -83,6 +93,11 @@ func main() {
 
 	// Wait for profiler to terminate gracefully.
 	<-stopC
+
+	if scanFailures > maxAllowedScanFailure {
+		err := errors.Errorf("%d scans failed which is more than the defined %d allowd", scanFailures, maxAllowedScanFailure)
+		utils.Must(err)
+	}
 }
 
 // scanImage scans the given image with the client Clairify client.
@@ -93,6 +108,7 @@ func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 		img, err := cli.AddImage("", "", req)
 		if err != nil {
 			logrus.WithField("image", image.FullName()).WithError(err).Error("Unable to scan image")
+			scanFailures++
 			return
 		}
 
@@ -101,6 +117,7 @@ func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 		})
 		if err != nil {
 			logrus.WithField("image", image.FullName()).WithError(err).Error("Unable to retrieve scan results")
+			scanFailures++
 			return
 		}
 
