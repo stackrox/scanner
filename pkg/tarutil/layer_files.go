@@ -2,6 +2,7 @@ package tarutil
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"path"
 	"strings"
 
@@ -44,6 +45,7 @@ func (f LayerFiles) GetFilesMap() map[string]FileData {
 
 // Get resolves and gets FileData for the path
 func (f LayerFiles) Get(path string) (FileData, bool) {
+	logrus.Infof("Get %s", path)
 	resolved := f.resolve(path)
 	if !strings.HasSuffix(resolved, "/") && strings.HasSuffix(path, "/") {
 		resolved += "/"
@@ -66,8 +68,16 @@ func (f LayerFiles) MergeBaseAndResolveSymlinks(base *LayerFiles) {
 			f.links[fileName] = linkTo
 		}
 	}
+	m := make(map[string]string, len(f.data))
+	for fileName := range f.data {
+		m[fileName] = fileName
+	}
 	for fileName, linkTo := range f.links {
-		f.links[fileName] = f.resolve(linkTo)
+		logrus.Infof("Resolve link %s", fileName)
+		r := f.resolve(linkTo)
+		if fN, ok := m[r]; ok {
+			f.links[fileName] = fN
+		}
 	}
 }
 
@@ -99,6 +109,7 @@ func (f LayerFiles) detectRemovedFiles() {
 // Eg. symlink -> file, and dirlink -> dir
 // Resolve /dir/symlink to /dir/file and /dirlink/symlink to /dir/file
 func (f LayerFiles) resolve(symLink string) string {
+	var count int
 	resolved := symLink
 	visited := set.NewStringSet(resolved)
 	for curr, list := ".", strings.Split(symLink, "/"); len(list) > 0; {
@@ -108,10 +119,12 @@ func (f LayerFiles) resolve(symLink string) string {
 		if linkTo, ok := f.links[curr]; ok {
 			list = append(strings.Split(linkTo, "/"), list...)
 			curr = "."
+			count++
 			resolved = strings.Join(list, "/")
 			if visited.Contains(resolved) {
 				// Detect a loop and return its current resolved path as best effort
 				// like symlink1 <=> symlink2
+				logrus.Infof("x Resolved %s to %s loop %d", symLink, resolved, count)
 				return resolved
 			}
 			visited.Add(resolved)

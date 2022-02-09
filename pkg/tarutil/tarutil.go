@@ -99,6 +99,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	// for the FileData struct.
 	executableMatcher := matcher.NewExecutableMatcher()
 
+	libDirSymlinkMatcher := matcher.NewSymbolicLinkMatcher()
+
+
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
 	if err != nil {
@@ -199,7 +202,11 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			fileData.Executable = executable
 			files.data[filename] = fileData
 		case tar.TypeSymlink:
-			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+			if matches, _ := libDirSymlinkMatcher.Match(filename, hdr.FileInfo(), contents); matches {
+				files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+			} else {
+				log.Infof("filename %s is not expected", filename)
+			}
 		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
