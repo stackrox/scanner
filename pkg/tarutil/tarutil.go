@@ -196,7 +196,11 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			fileData.Executable = executable
 			files.data[filename] = fileData
 		case tar.TypeSymlink:
-			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+			if path.IsAbs(hdr.Linkname) {
+				files.links[filename] = path.Clean(hdr.Linkname)[1:]
+			} else {
+				files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+			}
 		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
