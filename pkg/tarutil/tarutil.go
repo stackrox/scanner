@@ -201,14 +201,10 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			fileData.Executable = executable
 			files.data[filename] = fileData
 		case tar.TypeSymlink:
-			if matches, _ := libDirSymlinkMatcher.Match(filename, hdr.FileInfo(), contents); matches {
-				if strings.Contains(filename, "busybox") {
-					log.Infof("file %s added", filename)
-				}
-				files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
-			} else {
-				log.Infof("filename %s is not expected", filename)
+			if strings.Contains(filename, "busybox") {
+				log.Infof("file %s added", filename)
 			}
+			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
 		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
