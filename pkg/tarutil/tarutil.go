@@ -99,8 +99,6 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	// for the FileData struct.
 	executableMatcher := matcher.NewExecutableMatcher()
 
-	libDirSymlinkMatcher := matcher.NewSymbolicLinkMatcher()
-
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
 	if err != nil {
