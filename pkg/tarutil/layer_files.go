@@ -44,15 +44,11 @@ func (f LayerFiles) GetFilesMap() map[string]FileData {
 
 // Get resolves and gets FileData for the path
 func (f LayerFiles) Get(path string) (FileData, bool) {
-	fileData, exists := f.data[path]
-	if exists {
-		return fileData, exists
-	}
 	resolved := f.resolve(path)
 	if !strings.HasSuffix(resolved, "/") && strings.HasSuffix(path, "/") {
 		resolved += "/"
 	}
-	fileData, exists = f.data[resolved]
+	fileData, exists := f.data[resolved]
 	return fileData, exists
 }
 
