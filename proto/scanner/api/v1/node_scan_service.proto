@@ -21,7 +21,9 @@ message GetNodeVulnerabilitiesRequest {
     ContainerRuntime runtime              = 5;
 }
 
+// Next tag: 8
 message GetNodeVulnerabilitiesResponse {
+    string   scanner_version                         = 7;
     string   operating_system                        = 6;
     repeated Vulnerability kernel_vulnerabilities    = 1;
     repeated Vulnerability kubelet_vulnerabilities   = 2;

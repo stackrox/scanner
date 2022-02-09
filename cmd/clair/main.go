@@ -39,12 +39,12 @@ import (
 	"github.com/stackrox/scanner/api/v1/vulndefs"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/ext/imagefmt"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/clairify/metrics"
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/formatter"
+	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
@@ -60,6 +60,7 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurefmt/rpm"
 	_ "github.com/stackrox/scanner/ext/featurens/alpinerelease"
 	_ "github.com/stackrox/scanner/ext/featurens/aptsources"
+	_ "github.com/stackrox/scanner/ext/featurens/busybox"
 	_ "github.com/stackrox/scanner/ext/featurens/lsbrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/redhatrelease"
@@ -187,7 +188,6 @@ func main() {
 	// Parse command-line arguments
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	flagConfigPath := flag.String("config", "/etc/scanner/config.yaml", "Load configuration from the specified file.")
-	flagInsecureTLS := flag.Bool("insecure-tls", true, "Disable TLS server's certificate chain and hostname verification when pulling layers.")
 	flag.Parse()
 
 	proxy.WatchProxyConfig(context.Background(), proxyConfigPath, proxyConfigFile, true)
@@ -221,12 +221,8 @@ func main() {
 		tarutil.SetMaxExtractableFileSize(config.MaxExtractableFileSizeMB * 1024 * 1024)
 		log.Infof("Max extractable file size set to %d MB", config.MaxExtractableFileSizeMB)
 	}
-
-	// Enable TLS server's certificate chain and hostname verification
-	// when pulling layers if specified
-	if *flagInsecureTLS {
-		imagefmt.SetInsecureTLS(*flagInsecureTLS)
-	}
+	// Cleanup any residue temporary files.
+	ioutils.CleanUpTempFiles()
 
 	slimMode := env.SlimMode.Enabled()
 

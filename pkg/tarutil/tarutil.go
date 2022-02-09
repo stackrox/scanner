@@ -23,10 +23,12 @@ import (
 	"compress/gzip"
 	"io"
 	"os/exec"
+	"path"
 	"strings"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
@@ -36,6 +38,9 @@ import (
 const (
 	// DefaultMaxExtractableFileSizeMB is the default value for the max extractable file size.
 	DefaultMaxExtractableFileSizeMB = 200
+	// maxLazyReaderBufferSizeMB is the maximum buffer size in memory. Any file data beyond this
+	// limit is backed by temporary files on disk.
+	maxLazyReaderBufferSizeMB = 200
 )
 
 var (
@@ -59,23 +64,10 @@ func SetMaxExtractableFileSize(val int64) {
 	maxExtractableFileSize = val
 }
 
-// FileData is the contents of a file and relevant metadata.
-type FileData struct {
-	// Contents is the contents of the file.
-	Contents []byte
-	// Executable indicates if the file is executable.
-	Executable bool
-	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
-	ELFMetadata *elf.Metadata
-}
-
-// FilesMap is a map of files' paths to their contents.
-type FilesMap map[string]FileData
-
 // ExtractFiles decompresses and extracts only the specified files from an
 // io.Reader representing an archive.
-func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error) {
-	data := make(map[string]FileData)
+func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, error) {
+	files := CreateNewLayerFiles(nil)
 
 	// executableMatcher indicates if the given file is executable
 	// for the FileData struct.
@@ -84,14 +76,19 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
 	if err != nil {
-		return data, errors.Wrap(err, "could not extract tar archive")
+		return files, errors.Wrap(err, "could not extract tar archive")
 	}
 	defer tr.Close()
 
 	// Telemetry variables.
 	var numFiles, numMatchedFiles, numExtractedContentBytes int
 
-	var prevLazyReader ioutils.LazyReaderAt
+	var prevLazyReader ioutils.LazyReaderAtWithDiskBackedBuffer
+	defer func() {
+		if prevLazyReader != nil {
+			utils.IgnoreError(prevLazyReader.Close)
+		}
+	}()
 
 	// For each element in the archive
 	for {
@@ -100,7 +97,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			break
 		}
 		if err != nil {
-			return data, errors.Wrap(err, "could not advance in the tar archive")
+			return files, errors.Wrap(err, "could not advance in the tar archive")
 		}
 		numFiles++
 
@@ -113,8 +110,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 			var buf []byte
 			if prevLazyReader != nil {
 				buf = prevLazyReader.StealBuffer()
+				utils.IgnoreError(prevLazyReader.Close)
 			}
-			prevLazyReader = ioutils.NewLazyReaderAtWithBuffer(tr, hdr.Size, buf)
+			prevLazyReader = ioutils.NewLazyReaderAtWithDiskBackedBuffer(tr, hdr.Size, buf, maxLazyReaderBufferSizeMB*1024*1024)
 			contents = prevLazyReader
 		} else {
 			contents = bytes.NewReader(nil)
@@ -128,56 +126,60 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (FilesMap, error
 
 		// File size limit
 		if extractContents && hdr.Size > maxExtractableFileSize {
-			log.Errorf("Skipping file %q because it was too large (%d bytes)", filename, hdr.Size)
+			log.Errorf("Skipping file %q (%d bytes) because it was greater than the configured maxExtractableFileSizeMB of %d", filename, hdr.Size, maxExtractableFileSize)
 			continue
 		}
 
 		// Extract the element
-		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink || hdr.Typeflag == tar.TypeReg {
+		switch hdr.Typeflag {
+		case tar.TypeReg, tar.TypeLink:
 			var fileData FileData
 
-			elfFile := elf.OpenIfELFExecutable(contents)
-			if elfFile != nil {
-				if elfMetadata, err := elf.GetELFMetadata(elfFile); err != nil {
-					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
-				} else {
-					fileData.ELFMetadata = elfMetadata
-				}
+			fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
+			if err != nil {
+				log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
-			if !extractContents || hdr.Typeflag != tar.TypeReg {
-				fileData.Executable = executable
-				data[filename] = fileData
-				continue
-			}
 
-			d := make([]byte, hdr.Size)
-			if nRead, err := contents.ReadAt(d, 0); err != nil {
-				log.Errorf("error reading %q: %v", hdr.Name, err)
-				d = d[:nRead]
-			}
+			if extractContents {
+				if hdr.Typeflag == tar.TypeLink {
+					// A hard-link necessarily points to a previous absolute path in the
+					// archive which we look if it was already extracted.
+					linkedFile, ok := files.data[hdr.Linkname]
+					if ok {
+						fileData.Contents = linkedFile.Contents
+					}
+				} else {
+					d := make([]byte, hdr.Size)
+					if nRead, err := contents.ReadAt(d, 0); err != nil {
+						log.Errorf("error reading %q: %v", hdr.Name, err)
+						d = d[:nRead]
+					}
 
-			// Put the file directly
-			fileData.Contents = d
+					// Put the file directly
+					fileData.Contents = d
+					numExtractedContentBytes += len(d)
+				}
+			}
 			fileData.Executable = executable
-			data[filename] = fileData
-
-			numExtractedContentBytes += len(d)
-		}
-		if hdr.Typeflag == tar.TypeDir {
+			files.data[filename] = fileData
+		case tar.TypeSymlink:
+			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
 			// However, add to the map, so the entry will exist.
-			data[filename] = FileData{}
+			files.data[filename] = FileData{}
 		}
 	}
+	files.detectRemovedFiles()
 
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
 
-	return data, nil
+	return files, nil
 }
 
 // XzReader implements io.ReadCloser for data compressed via `xz`.

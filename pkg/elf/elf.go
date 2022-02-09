@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/rox/pkg/utils"
 )
 
 var (
@@ -19,22 +20,20 @@ type Metadata struct {
 	ImportedLibraries []string
 }
 
-// OpenIfELFExecutable returns an ELF file if the data is in ELF format
-func OpenIfELFExecutable(r io.ReaderAt) *elf.File {
+// GetExecutableMetadata extracts and returns Metadata if the input is an executable ELF binary.
+// It is **not** an error if the passed in io.ReaderAt is not an ELF binary.
+func GetExecutableMetadata(r io.ReaderAt) (*Metadata, error) {
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
-		return nil
+		return nil, nil
+	}
+	defer utils.IgnoreError(elfFile.Close)
+
+	// Exclude core and other unknown ELF file.
+	if !allowedELFTypeList.Contains(int(elfFile.Type)) {
+		return nil, nil
 	}
 
-	// Exclude core and other unknown elf file.
-	if allowedELFTypeList.Contains(int(elfFile.Type)) {
-		return elfFile
-	}
-	return nil
-}
-
-// GetELFMetadata extracts and returns ELF metadata
-func GetELFMetadata(elfFile *elf.File) (*Metadata, error) {
 	sonames, err := elfFile.DynString(elf.DT_SONAME)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get sonames from ELF executable")

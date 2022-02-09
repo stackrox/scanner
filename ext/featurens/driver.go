@@ -34,11 +34,11 @@ var (
 // Detector represents an ability to detect a namespace used for organizing
 // features present in an image layer.
 type Detector interface {
-	// Detect attempts to determine a Namespace from a FilesMap of an image
+	// Detect attempts to determine a Namespace from a LayerFiles of an image
 	// layer.
-	Detect(tarutil.FilesMap, *DetectorOptions) *database.Namespace
+	Detect(tarutil.LayerFiles, *DetectorOptions) *database.Namespace
 
-	// RequiredFilenames returns the list of files required to be in the FilesMap
+	// RequiredFilenames returns the list of files required to be in the LayerFiles
 	// provided to the Detect method.
 	//
 	// Filenames must not begin with "/".
@@ -69,7 +69,7 @@ func RegisterDetector(name string, d Detector) {
 
 // Detect iterators through all registered Detectors and returns the first
 // non-nil detected namespace.
-func Detect(files tarutil.FilesMap, opts *DetectorOptions) *database.Namespace {
+func Detect(files tarutil.LayerFiles, opts *DetectorOptions) *database.Namespace {
 	detectorsM.RLock()
 	defer detectorsM.RUnlock()
 
@@ -100,7 +100,7 @@ func RequiredFilenames() (files []string) {
 
 // TestData represents the data used to test an implementation of Detector.
 type TestData struct {
-	Files             tarutil.FilesMap
+	Files             tarutil.LayerFiles
 	ExpectedNamespace *database.Namespace
 	Options           *DetectorOptions
 }

@@ -21,29 +21,18 @@
 package imagefmt
 
 import (
-	"crypto/tls"
 	"fmt"
 	"io"
-	"net/http"
-	"os"
 	"strings"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/pkg/httputil/proxy"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 var (
-	// ErrCouldNotFindLayer is returned when we could not download or open the layer file.
-	ErrCouldNotFindLayer = commonerr.NewBadRequestError("could not find layer")
-
-	// insecureTLS controls whether TLS server's certificate chain and hostname are verified
-	// when pulling layers, verified in default.
-	insecureTLS = false
-
 	extractorsM sync.RWMutex
 	extractors  = make(map[string]Extractor)
 )
@@ -51,8 +40,8 @@ var (
 // Extractor represents an ability to extract files from a particular container
 // image format.
 type Extractor interface {
-	// ExtractFiles produces a tarutil.FilesMap from a image layer.
-	ExtractFiles(layer io.ReadCloser, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error)
+	// ExtractFiles produces a tarutil.LayerFiles from a image layer.
+	ExtractFiles(layer io.ReadCloser, filenameMatcher matcher.Matcher) (tarutil.LayerFiles, error)
 }
 
 // RegisterExtractor makes an extractor available by the provided name.
@@ -94,75 +83,17 @@ func Extractors() map[string]Extractor {
 	return ret
 }
 
-// UnregisterExtractor removes a Extractor with a particular name from the list.
-func UnregisterExtractor(name string) {
-	extractorsM.Lock()
-	defer extractorsM.Unlock()
-	delete(extractors, name)
-}
-
 // ExtractFromReader extracts the files from a reader which is in the format of a .tar.gz
-func ExtractFromReader(reader io.ReadCloser, format string, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error) {
-	defer reader.Close()
+func ExtractFromReader(reader io.ReadCloser, format string, filenameMatcher matcher.Matcher) (*tarutil.LayerFiles, error) {
+	defer utils.IgnoreError(reader.Close)
 
 	if extractor, exists := Extractors()[strings.ToLower(format)]; exists {
 		files, err := extractor.ExtractFiles(reader, filenameMatcher)
 		if err != nil {
 			return nil, err
 		}
-		return files, nil
+		return &files, nil
 	}
 
 	return nil, commonerr.NewBadRequestError(fmt.Sprintf("unsupported image format %q", format))
-}
-
-// Extract streams an image layer from disk or over HTTP, determines the
-// image format, then extracts the files specified.
-func Extract(format, path string, headers map[string]string, filenameMatcher matcher.Matcher) (tarutil.FilesMap, error) {
-	var layerReader io.ReadCloser
-	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
-		// Create a new HTTP request object.
-		request, err := http.NewRequest("GET", path, nil)
-		if err != nil {
-			return nil, ErrCouldNotFindLayer
-		}
-
-		// Set any provided HTTP Headers.
-		for k, v := range headers {
-			request.Header.Set(k, v)
-		}
-
-		// Send the request and handle the response.
-		tr := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureTLS},
-			Proxy:           proxy.TransportFunc,
-		}
-		client := &http.Client{Transport: tr}
-		r, err := client.Do(request)
-		if err != nil {
-			log.WithError(err).Warning("could not download layer")
-			return nil, ErrCouldNotFindLayer
-		}
-
-		// Fail if we don't receive a 2xx HTTP status code.
-		if r.StatusCode/100 != 2 {
-			log.WithField("status code", r.StatusCode).Warning("could not download layer: expected 2XX")
-			return nil, ErrCouldNotFindLayer
-		}
-
-		layerReader = r.Body
-	} else {
-		var err error
-		layerReader, err = os.Open(path)
-		if err != nil {
-			return nil, ErrCouldNotFindLayer
-		}
-	}
-	return ExtractFromReader(layerReader, format, filenameMatcher)
-}
-
-// SetInsecureTLS sets the insecureTLS to control whether TLS server's certificate chain
-// and hostname are verified when pulling layers.
-func SetInsecureTLS(insecure bool) {
-	insecureTLS = insecure
 }

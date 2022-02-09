@@ -67,7 +67,7 @@ type componentMetadata struct {
 	arch          string
 }
 
-func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) error {
+func (l lister) parseComponents(files tarutil.LayerFiles, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) error {
 	pkgFmt := `dpkg`
 	if distroless {
 		pkgFmt = `distroless`
@@ -147,7 +147,7 @@ func (l lister) parseComponents(files tarutil.FilesMap, file []byte, packagesMap
 	return scanner.Err()
 }
 
-func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) {
+func handleComponent(files tarutil.LayerFiles, pkgMetadata *componentMetadata, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) {
 	// Debian and Ubuntu vulnerability feeds only have entries for source packages,
 	// and not the package binaries, though usually only the binaries are installed.
 	pkgName := stringutils.FirstNonEmpty(pkgMetadata.sourceName, pkgMetadata.name)
@@ -168,17 +168,20 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 		filenamesArchList := dpkgInfoPrefix + pkgMetadata.name + ":" + pkgMetadata.arch + dpkgFilenamesSuffix
 
 		// Read the list of files provided by the current package.
-		filenamesFileData := files[filenamesList]
-		if len(filenamesFileData.Contents) == 0 {
-			filenamesFileData = files[filenamesArchList]
+		filenamesFileData, hasFile := files.Get(filenamesList)
+		if !hasFile || len(filenamesFileData.Contents) == 0 {
+			filenamesFileData, _ = files.Get(filenamesArchList)
 		}
 
 		filenamesFileScanner := bufio.NewScanner(bytes.NewReader(filenamesFileData.Contents))
 		for filenamesFileScanner.Scan() {
 			filename := filenamesFileScanner.Text()
 
-			// The first character is always "/", which is removed when inserted into the files maps.
-			featurefmt.AddToDependencyMap(filename, files[filename[1:]], execToDeps, libToDeps)
+			// The first character is always "/", which is removed when inserted into the layer files.
+			fileData, hasFile := files.Get(filename[1:])
+			if hasFile {
+				featurefmt.AddToDependencyMap(filename, fileData, execToDeps, libToDeps)
+			}
 		}
 		if err := filenamesFileScanner.Err(); err != nil {
 			log.WithError(err).WithFields(log.Fields{"name": pkgMetadata.name, "version": pkgMetadata.version}).Warning("could not parse provided file list")
@@ -219,20 +222,20 @@ func handleComponent(files tarutil.FilesMap, pkgMetadata *componentMetadata, pac
 	}
 }
 
-func (l lister) ListFeatures(files tarutil.FilesMap) ([]database.FeatureVersion, error) {
+func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
 	packagesMap := make(map[featurefmt.PackageKey]*database.FeatureVersion)
 	// Create a set to store removed packages to ensure it holds between files.
 	// TODO: This may not be needed cross-file...
 	removedPackages := set.NewStringSet()
 	// For general images using dpkg.
-	if f, hasFile := files[statusFile]; hasFile {
+	if f, hasFile := files.Get(statusFile); hasFile {
 		if err := l.parseComponents(files, f.Contents, packagesMap, removedPackages, false); err != nil {
 			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", statusFile)
 		}
 	}
 
-	for filename, file := range files {
+	for filename, file := range files.GetFilesMap() {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		// The var/lib/dpkg/status.d directory holds the files which define packages.

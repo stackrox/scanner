@@ -13,6 +13,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
+	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -28,12 +29,14 @@ type Service interface {
 // NewService returns the service for scanning
 func NewService(db database.Datastore, k8sCache k8scache.Cache) Service {
 	return &serviceImpl{
+		version:  version.Version,
 		db:       db,
 		k8sCache: k8sCache,
 	}
 }
 
 type serviceImpl struct {
+	version  string
 	db       database.Datastore
 	k8sCache k8scache.Cache
 }
@@ -70,7 +73,9 @@ func (s *serviceImpl) getKubernetesVuln(name, version string) ([]*v1.Vulnerabili
 // GetKubeVulnerabilities returns Kubernetes vulnerabilities for requested Kubernetes version.
 func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeVulnerabilitiesRequest) (*v1.GetKubeVulnerabilitiesResponse, error) {
 	var err error
-	var resp v1.GetKubeVulnerabilitiesResponse
+	resp := &v1.GetKubeVulnerabilitiesResponse{
+		ScannerVersion: s.version,
+	}
 
 	resp.AggregatorVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeAggregator, req.GetKubernetesVersion())
 	if err != nil {
@@ -97,7 +102,7 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &resp, nil
+	return resp, nil
 }
 
 func (s *serviceImpl) getOpenShiftVulns(version *openShiftVersion) ([]*database.RHELv2Vulnerability, error) {
@@ -135,7 +140,9 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		return nil, err
 	}
 
-	var resp v1.GetOpenShiftVulnerabilitiesResponse
+	resp := &v1.GetOpenShiftVulnerabilitiesResponse{
+		ScannerVersion: s.version,
+	}
 	for _, vuln := range vulns {
 		if len(vuln.PackageInfos) != 1 {
 			log.Warnf("unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
@@ -188,7 +195,7 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		})
 	}
 	resp.Vulnerabilities = filterInvalidVulns(resp.Vulnerabilities)
-	return &resp, err
+	return resp, err
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.

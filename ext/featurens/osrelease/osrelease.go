@@ -30,11 +30,12 @@ import (
 var (
 	// blocklistFilenames are files that should exclude this detector.
 	blocklistFilenames = []string{
+		"etc/alpine-release",
+		"etc/centos-release",
+		"etc/fedora-release",
 		"etc/oracle-release",
 		"etc/redhat-release",
-		"etc/centos-release",
 		"usr/lib/centos-release",
-		"etc/alpine-release",
 	}
 
 	// RequiredFilenames defines the names of the files required to identify the release.
@@ -47,17 +48,17 @@ func init() {
 	featurens.RegisterDetector("os-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *database.Namespace {
+func (d detector) Detect(files tarutil.LayerFiles, _ *featurens.DetectorOptions) *database.Namespace {
 	var OS, version string
 
 	for _, filePath := range blocklistFilenames {
-		if _, hasFile := files[filePath]; hasFile {
+		if _, hasFile := files.Get(filePath); hasFile {
 			return nil
 		}
 	}
 
 	for _, filePath := range d.RequiredFilenames() {
-		f, hasFile := files[filePath]
+		f, hasFile := files.Get(filePath)
 		if !hasFile {
 			continue
 		}
@@ -72,7 +73,7 @@ func (d detector) Detect(files tarutil.FilesMap, _ *featurens.DetectorOptions) *
 	switch OS {
 	case "debian", "ubuntu":
 		versionFormat = dpkg.ParserName
-	case "centos", "rhel", "fedora", "amzn", "oracle":
+	case "centos", "rhel", "amzn", "oracle":
 		versionFormat = rpm.ParserName
 	default:
 		return nil

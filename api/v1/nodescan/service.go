@@ -18,6 +18,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
+	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -33,6 +34,7 @@ type Service interface {
 // NewService returns the service for node scanning
 func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8scache.Cache) Service {
 	return &serviceImpl{
+		version:  version.Version,
 		db:       db,
 		nvdCache: nvdCache,
 		k8sCache: k8sCache,
@@ -40,6 +42,7 @@ func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8
 }
 
 type serviceImpl struct {
+	version  string
 	db       database.Datastore
 	nvdCache nvdtoolscache.Cache
 	k8sCache k8scache.Cache
@@ -218,7 +221,9 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	}
 
 	var err error
-	var resp v1.GetNodeVulnerabilitiesResponse
+	resp := &v1.GetNodeVulnerabilitiesResponse{
+		ScannerVersion: s.version,
+	}
 
 	resp.OperatingSystem, resp.KernelVulnerabilities, resp.KernelComponent, err = s.evaluateLinuxKernelVulns(req)
 	if err != nil {
@@ -240,7 +245,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &resp, nil
+	return resp, nil
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.

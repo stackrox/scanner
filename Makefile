@@ -249,7 +249,7 @@ db-integration-tests: deps
 scale-tests: deps
 	@echo "+ $@"
 	mkdir /tmp/pprof
-	go run ./scale/... /tmp/pprof
+	go run ./scale/... /tmp/pprof || true
 	zip -r /tmp/pprof.zip /tmp/pprof
 
 ####################
@@ -274,6 +274,7 @@ proto-generated-srcs: $(PROTO_GENERATED_SRCS)
 go-easyjson-srcs: $(EASYJSON_BIN)
 	@echo "+ $@"
 	@easyjson -pkg pkg/vulnloader/nvdloader
+	@easyjson -pkg api/v1
 
 clean-proto-generated-srcs:
 	@echo "+ $@"

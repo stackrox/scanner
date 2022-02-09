@@ -20,8 +20,9 @@ message ScanImageRequest {
 }
 
 message ScanImageResponse {
-    ScanStatus status = 1;
-    ImageSpec image   = 2;
+    string     scanner_version = 3;
+    ScanStatus status          = 1;
+    ImageSpec  image           = 2;
 }
 
 message GetImageScanRequest {
@@ -34,10 +35,12 @@ message GetImageScanRequest {
     bool uncertifiedRHEL = 2;
 }
 
+// Next tag: 5
 message GetImageScanResponse {
-    ScanStatus    status = 1;
-    Image         image  = 2;
-    repeated Note notes  = 3;
+    string        scanner_version = 4;
+    ScanStatus    status          = 1;
+    Image         image           = 2;
+    repeated Note notes           = 3;
 }
 
 message GetImageComponentsRequest {
@@ -45,10 +48,12 @@ message GetImageComponentsRequest {
     RegistryData registry     = 2;
 }
 
+// Next tag: 5
 message GetImageComponentsResponse {
-    ScanStatus    status     = 1;
-    Components    components = 2;
-    repeated Note notes      = 3;
+    string        scanner_version = 4;
+    ScanStatus    status          = 1;
+    Components    components      = 2;
+    repeated Note notes           = 3;
 }
 
 message GetImageVulnerabilitiesRequest {
@@ -57,8 +62,9 @@ message GetImageVulnerabilitiesRequest {
 }
 
 message GetImageVulnerabilitiesResponse {
-    ScanStatus status = 1;
-    Image      image  = 2;
+    string     scanner_version = 3;
+    ScanStatus status          = 1;
+    Image      image           = 2;
 }
 
 message GetLanguageLevelComponentsRequest {
@@ -72,6 +78,7 @@ message GetLanguageLevelComponentsRequest {
 }
 
 message GetLanguageLevelComponentsResponse {
+    string                                scanner_version     = 2;
     map <string, LanguageLevelComponents> layer_to_components = 1;
 }
 

@@ -1,9 +1,13 @@
 package types
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
+	"strings"
+	"time"
 
 	"github.com/docker/distribution/manifest/ocischema"
 	manifestV1 "github.com/docker/distribution/manifest/schema1"
@@ -13,6 +17,27 @@ import (
 	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
 	v1 "github.com/stackrox/scanner/api/v1"
+)
+
+var (
+	// http.Transport uses connection pooling under the hood, and by default has no limits
+	// on the number of existing connections, nor on the time they can be kept alive.
+	// Unfortunately, the Docker client library instantiates one new transport (with its
+	// own connection pool, thus defeating the purpose of pooling) per insecure registry
+	// created.
+	// We therefore avoid the standard route of creating new registries, and do so ourselves
+	// using the lower-level NewFromTransport, using a shared insecure transport instance
+	// with some reasonable defaults.
+	insecureTransport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+		// Values are taken from http.DefaultTransport, Go 1.17.3
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
 )
 
 // ClairClient interface.
@@ -85,7 +110,8 @@ func DockerRegistryCreator(url, username, password string) (Registry, error) {
 
 // InsecureDockerRegistryCreator allows for registries to be interfaced.
 func InsecureDockerRegistryCreator(url, username, password string) (Registry, error) {
-	reg, err := registry.NewInsecure(url, username, password)
+	reg, err := newInsecure(url, username, password)
+
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +121,14 @@ func InsecureDockerRegistryCreator(url, username, password string) (Registry, er
 
 		Registry: reg,
 	}, nil
+}
+
+// newInsecure replaces registry.NewInsecure, avoiding the shortcomings described
+// in the documentation of insecureTransport above.
+func newInsecure(registryURL, username, password string) (*registry.Registry, error) {
+	url := strings.TrimSuffix(registryURL, "/")
+	wrappedTransport := registry.WrapTransport(insecureTransport, url, username, password)
+	return registry.NewFromTransport(registryURL, wrappedTransport, registry.Log)
 }
 
 // ImageRequest is sent to add an image to Clair.
@@ -119,7 +153,8 @@ type Image struct {
 
 // ImageEnvelope is returned from a scan request.
 type ImageEnvelope struct {
-	Image *Image `json:"image"`
+	ScannerVersion string `json:"scannerVersion,omitempty"`
+	Image          *Image `json:"image"`
 }
 
 // TaggedName returns the name with a tag if it exists
@@ -179,3 +214,9 @@ type GetImageDataOpts struct {
 
 // UncertifiedRHELResultsKey it the key used for HTTP requests.
 const UncertifiedRHELResultsKey = "uncertifiedRHELResults"
+
+// Pong is the return type for a "Ping" request.
+type Pong struct {
+	ScannerVersion string `json:"scannerVersion,omitempty"`
+	Status         string `json:"status,omitempty"`
+}
