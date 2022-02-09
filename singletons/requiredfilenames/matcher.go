@@ -54,7 +54,3 @@ func SingletonMatcher() matcher.Matcher {
 	})
 	return instance
 }
-
-func NewLibraryDirMatcher() matcher.Matcher {
-	return matcher.NewRegexpMatcher(libraryDirRegexp, false)
-}

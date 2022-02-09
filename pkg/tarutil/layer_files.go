@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/whiteout"
