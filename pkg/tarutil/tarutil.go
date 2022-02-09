@@ -101,7 +101,6 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 
 	libDirSymlinkMatcher := matcher.NewSymbolicLinkMatcher()
 
-
 	// Decompress the archive.
 	tr, err := NewTarReadCloser(r)
 	if err != nil {
@@ -203,6 +202,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			files.data[filename] = fileData
 		case tar.TypeSymlink:
 			if matches, _ := libDirSymlinkMatcher.Match(filename, hdr.FileInfo(), contents); matches {
+				if strings.Contains(filename, "busybox") {
+					log.Infof("file %s added", filename)
+				}
 				files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
 			} else {
 				log.Infof("filename %s is not expected", filename)
@@ -235,6 +237,7 @@ func printFileMapSize(files LayerFiles) {
 		}
 	}
 	log.Infof("%d files %d links %d content, total: %d", len(files.data), len(files.links), numContent, total)
+	log.Infof("links %v", files.links)
 }
 
 // XzReader implements io.ReadCloser for data compressed via `xz`.
