@@ -73,16 +73,9 @@ func (f LayerFiles) MergeBaseAndResolveSymlinks(base *LayerFiles) {
 		}
 	}
 	logrus.Infof("After merge %v", f.links)
-	m := make(map[string]string, len(f.data))
-	for fileName := range f.data {
-		m[fileName] = fileName
-	}
 	for fileName, linkTo := range f.links {
 		logrus.Infof("Resolve link %s", fileName)
-		r := f.resolve(linkTo)
-		if fN, ok := m[r]; ok {
-			f.links[fileName] = fN
-		}
+		f.links[fileName] = f.resolve(linkTo)
 	}
 }
 

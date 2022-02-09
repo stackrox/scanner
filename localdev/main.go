@@ -165,7 +165,7 @@ func main() {
 	utils.Must(os.Setenv("NVD_DEFINITIONS_DIR", nvdPath))
 	nvdtoolscache.Singleton()
 
-	path := "TODO: Absolute path to local image tar.gz files"
+	path := "/Users/cong/go/src/github.com/stackrox/scanner/ac"
 
 	fis, err := os.ReadDir(path)
 	if err != nil {
