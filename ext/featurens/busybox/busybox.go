@@ -18,7 +18,6 @@ import (
 	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/language"
@@ -77,7 +76,6 @@ func (detector) Detect(files tarutil.LayerFiles, options *featurens.DetectorOpti
 	if !bytes.Equal(busyboxData.Contents, sbData.Contents) {
 		return nil
 	}
-	log.Infof("busybox content %d, sb %d, address %p vs %p", len(busyboxData.Contents), len(sbData.Contents), &busyboxData.Contents, &sbData.Contents)
 
 	// Validate busybox binary and extract version.
 	var version = parseBusyBoxVersion(busyboxData.Contents)

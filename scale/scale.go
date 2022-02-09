@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/errorhelpers"
+	"github.com/stackrox/rox/pkg/fixtures"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/sync"
 	"github.com/stackrox/rox/pkg/urlfmt"
@@ -29,7 +30,7 @@ const (
 
 	registry = "https://registry-1.docker.io"
 
-	maxConcurrentScans    = 1
+	maxConcurrentScans    = 15
 	maxAllowedScanFailure = 180
 	scanTimeOut           = 8
 )
@@ -67,11 +68,10 @@ func main() {
 	client.ScanTimeout = scanTimeOut * time.Minute
 
 	var wg sync.WaitGroup
-	imagesC := make(chan ImageAndID)
-	client.ScanTimeout = 5 * time.Minute
+	imagesC := make(chan fixtures.ImageAndID)
 	for i := 0; i < maxConcurrentScans; i++ {
 		wg.Add(1)
-		go func(imagesC <-chan ImageAndID) {
+		go func(imagesC <-chan fixtures.ImageAndID) {
 			defer wg.Done()
 
 			for image := range imagesC {
@@ -80,7 +80,7 @@ func main() {
 		}(imagesC)
 	}
 
-	for _, image := range ImageNames {
+	for _, image := range fixtures.ImageNames[:1800] {
 		imagesC <- image
 	}
 	// Signal there are no more images to scan.
@@ -93,6 +93,7 @@ func main() {
 
 	// Wait for profiler to terminate gracefully.
 	<-stopC
+
 	if scanFailures > maxAllowedScanFailure {
 		err := errors.Errorf("%d scans failed which is more than the defined %d allowd", scanFailures, maxAllowedScanFailure)
 		utils.Must(err)
@@ -100,7 +101,7 @@ func main() {
 }
 
 // scanImage scans the given image with the client Clairify client.
-func scanImage(cli *client.Clairify, image *ImageAndID) {
+func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 	for _, b := range []bool{false, true} {
 		req := &types.ImageRequest{Image: image.FullName(), Registry: registry, UncertifiedRHELScan: b}
 

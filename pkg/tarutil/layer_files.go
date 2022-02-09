@@ -5,7 +5,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/whiteout"
@@ -49,7 +48,6 @@ func (f LayerFiles) Get(path string) (FileData, bool) {
 	if exists {
 		return fileData, exists
 	}
-	logrus.Infof("Get %s", path)
 	resolved := f.resolve(path)
 	if !strings.HasSuffix(resolved, "/") && strings.HasSuffix(path, "/") {
 		resolved += "/"
@@ -72,9 +70,7 @@ func (f LayerFiles) MergeBaseAndResolveSymlinks(base *LayerFiles) {
 			f.links[fileName] = linkTo
 		}
 	}
-	logrus.Infof("After merge %v", f.links)
 	for fileName, linkTo := range f.links {
-		logrus.Infof("Resolve link %s", fileName)
 		f.links[fileName] = f.resolve(linkTo)
 	}
 }
@@ -108,22 +104,21 @@ func (f LayerFiles) detectRemovedFiles() {
 // Resolve /dir/symlink to /dir/file and /dirlink/symlink to /dir/file
 func (f LayerFiles) resolve(symLink string) string {
 	resolved := symLink
-	visited := set.NewStringSet(resolved)
+	visited := set.NewStringSet()
 	for curr, list := ".", strings.Split(symLink, "/"); len(list) > 0; {
 		curr = path.Clean(curr + "/" + list[0])
 		list = list[1:]
 
 		if linkTo, ok := f.links[curr]; ok {
-			list = append(strings.Split(linkTo, "/"), list...)
-			curr = "."
-			logrus.Infof("Resolve .. %v, resolved %v", list, resolved)
-			resolved = strings.Join(list, "/")
-			if visited.Contains(resolved) {
+			if visited.Contains(curr) {
 				// Detect a loop and return its current resolved path as best effort
 				// like symlink1 <=> symlink2
 				return resolved
 			}
-			visited.Add(resolved)
+			visited.Add(curr)
+			list = append(strings.Split(linkTo, "/"), list...)
+			curr = "."
+			resolved = strings.Join(list, "/")
 		}
 	}
 	return resolved

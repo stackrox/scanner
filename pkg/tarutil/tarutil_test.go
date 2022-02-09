@@ -115,7 +115,7 @@ func TestExtractWithSymlink(t *testing.T) {
 	files.MergeBaseAndResolveSymlinks(&base)
 	assert.NoError(t, err)
 	assert.Len(t, files.data, 9)
-	assert.Len(t, files.links, 14)
+	assert.Len(t, files.links, 16)
 
 	for fileName, linkTo := range files.links {
 		if target, ok := expected[fileName]; ok {

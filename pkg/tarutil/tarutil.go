@@ -191,18 +191,16 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 					// Put the file directly
 					fileData.Contents = d
 					numExtractedContentBytes += len(d)
-					if hdr.Size > 1024*1024*5 {
-						log.Infof("new data with content %d %p", len(fileData.Contents), &fileData.Contents)
-					}
 				}
 			}
 			fileData.Executable = executable
 			files.data[filename] = fileData
 		case tar.TypeSymlink:
-			if strings.Contains(filename, "busybox") {
-				log.Infof("file %s added", filename)
+			if path.IsAbs(hdr.Linkname) {
+				files.links[filename] = path.Clean(hdr.Linkname)[1:]
+			} else {
+				files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
 			}
-			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
 		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
@@ -215,23 +213,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	metrics.ObserveFileCount(numFiles)
 	metrics.ObserveMatchedFileCount(numMatchedFiles)
 	metrics.ObserveExtractedContentBytes(numExtractedContentBytes)
-	log.Infof("extracted bytes: %d", numExtractedContentBytes)
-	printFileMapSize(files)
 
 	return files, nil
-}
-
-func printFileMapSize(files LayerFiles) {
-	var total int64
-	var numContent int
-	for _, f := range files.data {
-		total += int64(len(f.Contents))
-		if f.Contents != nil {
-			numContent++
-		}
-	}
-	log.Infof("%d files %d links %d content, total: %d", len(files.data), len(files.links), numContent, total)
-	log.Infof("links %v", files.links)
 }
 
 // XzReader implements io.ReadCloser for data compressed via `xz`.
