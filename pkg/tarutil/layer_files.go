@@ -100,21 +100,21 @@ func (f LayerFiles) detectRemovedFiles() {
 // Resolve /dir/symlink to /dir/file and /dirlink/symlink to /dir/file
 func (f LayerFiles) resolve(symLink string) string {
 	resolved := symLink
-	visited := set.NewStringSet(resolved)
+	visited := set.NewStringSet()
 	for curr, list := ".", strings.Split(symLink, "/"); len(list) > 0; {
 		curr = path.Clean(curr + "/" + list[0])
 		list = list[1:]
 
 		if linkTo, ok := f.links[curr]; ok {
-			list = append(strings.Split(linkTo, "/"), list...)
-			curr = "."
-			resolved = strings.Join(list, "/")
-			if visited.Contains(resolved) {
+			if visited.Contains(curr) {
 				// Detect a loop and return its current resolved path as best effort
 				// like symlink1 <=> symlink2
 				return resolved
 			}
-			visited.Add(resolved)
+			visited.Add(curr)
+			list = append(strings.Split(linkTo, "/"), list...)
+			curr = "."
+			resolved = strings.Join(list, "/")
 		}
 	}
 	return resolved
