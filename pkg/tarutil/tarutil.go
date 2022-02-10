@@ -28,6 +28,7 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
@@ -37,6 +38,9 @@ import (
 const (
 	// DefaultMaxExtractableFileSizeMB is the default value for the max extractable file size.
 	DefaultMaxExtractableFileSizeMB = 200
+	// maxLazyReaderBufferSizeMB is the maximum buffer size in memory. Any file data beyond this
+	// limit is backed by temporary files on disk.
+	maxLazyReaderBufferSizeMB = 200
 )
 
 var (
@@ -79,7 +83,12 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	// Telemetry variables.
 	var numFiles, numMatchedFiles, numExtractedContentBytes int
 
-	var prevLazyReader ioutils.LazyReaderAt
+	var prevLazyReader ioutils.LazyReaderAtWithDiskBackedBuffer
+	defer func() {
+		if prevLazyReader != nil {
+			utils.IgnoreError(prevLazyReader.Close)
+		}
+	}()
 
 	// For each element in the archive
 	for {
@@ -101,8 +110,9 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			var buf []byte
 			if prevLazyReader != nil {
 				buf = prevLazyReader.StealBuffer()
+				utils.IgnoreError(prevLazyReader.Close)
 			}
-			prevLazyReader = ioutils.NewLazyReaderAtWithBuffer(tr, hdr.Size, buf)
+			prevLazyReader = ioutils.NewLazyReaderAtWithDiskBackedBuffer(tr, hdr.Size, buf, maxLazyReaderBufferSizeMB*1024*1024)
 			contents = prevLazyReader
 		} else {
 			contents = bytes.NewReader(nil)
@@ -155,7 +165,11 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			fileData.Executable = executable
 			files.data[filename] = fileData
 		case tar.TypeSymlink:
-			files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+			if path.IsAbs(hdr.Linkname) {
+				files.links[filename] = path.Clean(hdr.Linkname)[1:]
+			} else {
+				files.links[filename] = path.Clean(path.Join(path.Dir(filename), hdr.Linkname))
+			}
 		case tar.TypeDir:
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
