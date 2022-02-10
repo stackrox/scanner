@@ -7,8 +7,10 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"sync/atomic"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/errorhelpers"
 	"github.com/stackrox/rox/pkg/fixtures"
@@ -29,7 +31,9 @@ const (
 
 	registry = "https://registry-1.docker.io"
 
-	maxConcurrentScans = 6
+	maxConcurrentScans    = 6
+	maxAllowedScanFailure = 180
+	scanTimeOut           = 8
 )
 
 func main() {
@@ -56,7 +60,11 @@ func main() {
 
 	endpoint := urlfmt.FormatURL(scannerHTTPEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 	cli := client.NewWithClient(endpoint, httpClient)
+	client.ScanTimeout = scanTimeOut * time.Minute
 
+	// scanFailures is the number of failed image scans.
+	// This is a sanity check to validate the test result.
+	var scanFailures uint64
 	var wg sync.WaitGroup
 	imagesC := make(chan fixtures.ImageAndID)
 	for i := 0; i < maxConcurrentScans; i++ {
@@ -65,7 +73,10 @@ func main() {
 			defer wg.Done()
 
 			for image := range imagesC {
-				scanImage(cli, &image)
+				err := scanImage(cli, &image)
+				if err != nil {
+					atomic.AddUint64(&scanFailures, 1)
+				}
 			}
 		}(imagesC)
 	}
@@ -83,17 +94,22 @@ func main() {
 
 	// Wait for profiler to terminate gracefully.
 	<-stopC
+
+	if scanFailures > maxAllowedScanFailure {
+		err := errors.Errorf("%d (> %d) scans failed.", scanFailures, maxAllowedScanFailure)
+		utils.CrashOnError(err)
+	}
 }
 
 // scanImage scans the given image with the client Clairify client.
-func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
+func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) error {
 	for _, b := range []bool{false, true} {
 		req := &types.ImageRequest{Image: image.FullName(), Registry: registry, UncertifiedRHELScan: b}
 
 		img, err := cli.AddImage("", "", req)
 		if err != nil {
 			logrus.WithField("image", image.FullName()).WithError(err).Error("Unable to scan image")
-			return
+			return err
 		}
 
 		env, err := cli.RetrieveImageDataBySHA(img.SHA, &types.GetImageDataOpts{
@@ -101,7 +117,7 @@ func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 		})
 		if err != nil {
 			logrus.WithField("image", image.FullName()).WithError(err).Error("Unable to retrieve scan results")
-			return
+			return err
 		}
 
 		for _, note := range env.Notes {
@@ -115,6 +131,7 @@ func scanImage(cli *client.Clairify, image *fixtures.ImageAndID) {
 	}
 
 	logrus.WithField("image", image.FullName()).Info("Successfully scanned image")
+	return nil
 }
 
 // profileForever queries the scanner at the given endpoint with the given client
