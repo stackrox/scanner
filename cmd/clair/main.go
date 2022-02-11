@@ -221,6 +221,19 @@ func main() {
 		tarutil.SetMaxExtractableFileSize(config.MaxExtractableFileSizeMB * 1024 * 1024)
 		log.Infof("Max extractable file size set to %d MB", config.MaxExtractableFileSizeMB)
 	}
+
+	// Set the max ELF executable file size from the config.
+	if config.MaxELFExecutableFileSizeMB > 0 {
+		tarutil.SetMaxELFExecutableFileSize(config.MaxELFExecutableFileSizeMB * 1024 * 1024)
+		log.Infof("Max ELF executable file size set to %d MB", config.MaxELFExecutableFileSizeMB)
+	}
+
+	// Set the max lazy reader buffer size from the config.
+	if config.MaxImageFileReaderBufferSizeMB > 0 {
+		tarutil.SetMaxLazyReaderBufferSize(config.MaxImageFileReaderBufferSizeMB * 1024 * 1024)
+		log.Infof("Max image file reader buffer size set to %d MB", config.MaxImageFileReaderBufferSizeMB)
+	}
+
 	// Cleanup any residue temporary files.
 	ioutils.CleanUpTempFiles()
 
