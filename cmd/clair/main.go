@@ -229,9 +229,9 @@ func main() {
 	}
 
 	// Set the max lazy reader buffer size from the config.
-	if config.MaxLazyReaderBufferSizeMB > 0 {
-		tarutil.SetMaxLazyReaderBufferSize(config.MaxLazyReaderBufferSizeMB * 1024 * 1024)
-		log.Infof("Max lazy reader buffer size set to %d MB", config.MaxLazyReaderBufferSizeMB)
+	if config.MaxImageFileReaderBufferSizeMB > 0 {
+		tarutil.SetMaxLazyReaderBufferSize(config.MaxImageFileReaderBufferSizeMB * 1024 * 1024)
+		log.Infof("Max image file reader buffer size set to %d MB", config.MaxImageFileReaderBufferSizeMB)
 	}
 
 	// Cleanup any residue temporary files.
