@@ -23,6 +23,11 @@ var (
 func verifyPeerCertsUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	skipPeerValidation := env.SkipPeerValidation.Enabled()
 
+	verifyPeerCertificate := mtls.VerifyCentralPeerCertificate
+	if env.SlimMode.Enabled() {
+		verifyPeerCertificate = mtls.VerifySensorPeerCertificate
+	}
+
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		if !skipPeerValidation && !verifyPeerCertsMethodsAllowList.Contains(info.FullMethod) {
 			peerInfo, exists := peer.FromContext(ctx)
@@ -34,7 +39,7 @@ func verifyPeerCertsUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 				return nil, status.Error(codes.InvalidArgument, "peer auth info is not TLS info")
 			}
 
-			if err := mtls.VerifyCentralPeerCertificate(&tlsInfo.State); err != nil {
+			if err := verifyPeerCertificate(&tlsInfo.State); err != nil {
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 		}
