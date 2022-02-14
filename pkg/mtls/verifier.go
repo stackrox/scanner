@@ -9,7 +9,7 @@ import (
 
 const (
 	centralCN = "CENTRAL_SERVICE: "
-	sensorCN = "SENSOR_SERVICE: "
+	sensorCN  = "SENSOR_SERVICE: "
 )
 
 // VerifyCentralPeerCertificate verifies that the peer certificate has the Central Common Name.
