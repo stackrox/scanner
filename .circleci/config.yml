@@ -2,7 +2,7 @@
 version: 2.1
 
 defaultImage: &defaultImage
-  image: "quay.io/rhacs-eng/apollo-ci:snapshot-0.3.28-41-g11914d9392" # TODO(do not merge): After upstream PR is merged, cut a tag and update this
+  image: "quay.io/rhacs-eng/apollo-ci:snapshot-0.3.28-44-g293a07ed81" # TODO(do not merge): After upstream PR is merged, cut a tag and update this
   auth:
     username: $QUAY_RHACS_ENG_RO_USERNAME
     password: $QUAY_RHACS_ENG_RO_PASSWORD
