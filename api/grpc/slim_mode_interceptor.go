@@ -22,7 +22,9 @@ var (
 func slimModeUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	slimMode := env.SlimMode.Enabled()
 
-	logrus.Error("SCANNER IS HERE TOO YAYAYAY")
+	logrus.WithFields(map[string]interface{}{
+		"Slim Mode": env.SlimMode.Enabled(),
+	}).Error("SCANNER IS HERE TOO YAYAYAY")
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		if slimMode && !slimModeMethodsAllowlist.Contains(info.FullMethod) {

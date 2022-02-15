@@ -29,9 +29,15 @@ func verifyPeerCertsUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 		verifyPeerCertificate = mtls.VerifySensorPeerCertificate
 	}
 
-	logrus.Error("SCANNER IS HERE YAYAYAY")
+	logrus.WithFields(map[string]interface{}{
+		"Skip Peer Validation": skipPeerValidation,
+	}).Error("SCANNER IS HERE YAYAYAY")
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		logrus.WithFields(map[string]interface{}{
+			"Endpoint": info.FullMethod,
+		}).Error("SCANNER CHECKING PEER CERT YAYAYAY")
+
 		if !skipPeerValidation && !verifyPeerCertsMethodsAllowList.Contains(info.FullMethod) {
 			peerInfo, exists := peer.FromContext(ctx)
 			if !exists {
@@ -46,6 +52,10 @@ func verifyPeerCertsUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 		}
+
+		logrus.WithFields(map[string]interface{}{
+			"Endpoint": info.FullMethod,
+		}).Error("SCANNER ALLOWED PEER CERT YAYAYAY")
 
 		return handler(ctx, req)
 	}
