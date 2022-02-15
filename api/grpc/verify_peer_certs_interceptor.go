@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/env"
@@ -27,6 +28,8 @@ func verifyPeerCertsUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	if env.SlimMode.Enabled() {
 		verifyPeerCertificate = mtls.VerifySensorPeerCertificate
 	}
+
+	logrus.Error("SCANNER IS HERE YAYAYAY")
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		if !skipPeerValidation && !verifyPeerCertsMethodsAllowList.Contains(info.FullMethod) {

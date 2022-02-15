@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/env"
@@ -20,6 +21,8 @@ var (
 
 func slimModeUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	slimMode := env.SlimMode.Enabled()
+
+	logrus.Error("SCANNER IS HERE TOO YAYAYAY")
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		if slimMode && !slimModeMethodsAllowlist.Contains(info.FullMethod) {
