@@ -70,3 +70,6 @@ spec:
         - name: scanner-db-password
           secret:
             secretName: scanner-db-password
+        - name: scanner-tmp
+          emptyDir:
+            sizeLimit: "10Gi"

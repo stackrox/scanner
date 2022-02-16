@@ -564,7 +564,30 @@ commands:
       - run:
           name: Run scale tests and collect profile
           no_output_timeout: 20m
-          command: make scale-tests
+          command: |
+            POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner")].metadata.name}')"
+            [[ -n "${POD}" ]]
+            echo "Before scanner"
+            kubectl -n stackrox exec "pod/${POD}" df
+            kubectl -n stackrox exec "pod/${POD}" -- du  /tmp
+            POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner-db")].metadata.name}')"
+            [[ -n "${POD}" ]]
+            echo "Before scanner-db"
+            kubectl -n stackrox exec "pod/${POD}" df
+            kubectl -n stackrox exec "pod/${POD}" -- du  /tmp
+
+            make scale-tests
+
+            POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner")].metadata.name}')"
+            [[ -n "${POD}" ]]
+            echo "After scanner"
+            kubectl -n stackrox exec "pod/${POD}" df
+            kubectl -n stackrox exec "pod/${POD}" -- du  /tmp
+            POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner-db")].metadata.name}')"
+            [[ -n "${POD}" ]]
+            echo "After scanner-db"
+            kubectl -n stackrox exec "pod/${POD}" df
+            kubectl -n stackrox exec "pod/${POD}" -- du  /tmp
 
       - ci-artifacts/store:
           path: /tmp/pprof.zip
