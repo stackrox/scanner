@@ -574,7 +574,8 @@ commands:
             [[ -n "${POD}" ]]
             echo "Before scanner-db"
             kubectl -n stackrox exec "pod/${POD}" df
-            kubectl -n stackrox exec "pod/${POD}" -- du  /tmp
+            kubectl -n stackrox exec "pod/${POD}" -- du -k /var/lib/postgresql/data
+            kubectl -n stackrox exec "pod/${POD}" -- du -k /var/lib/pgsql
 
             make scale-tests
 
@@ -582,12 +583,13 @@ commands:
             [[ -n "${POD}" ]]
             echo "After scanner"
             kubectl -n stackrox exec "pod/${POD}" df
-            kubectl -n stackrox exec "pod/${POD}" -- du  /tmp
+            kubectl -n stackrox exec "pod/${POD}" -- du -k /tmp
             POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner-db")].metadata.name}')"
             [[ -n "${POD}" ]]
             echo "After scanner-db"
             kubectl -n stackrox exec "pod/${POD}" df
-            kubectl -n stackrox exec "pod/${POD}" -- du  /tmp
+            kubectl -n stackrox exec "pod/${POD}" -- du -k /var/lib/postgresql/data
+            kubectl -n stackrox exec "pod/${POD}" -- du -k /var/lib/pgsql
 
       - ci-artifacts/store:
           path: /tmp/pprof.zip
