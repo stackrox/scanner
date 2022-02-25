@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestVerifyCentralPeerCertificate(t *testing.T) {
-	tlsState := &tls.ConnectionState{
+var (
+	centralTLSState = &tls.ConnectionState{
 		PeerCertificates: []*x509.Certificate{
 			{
 				Subject: pkix.Name{
@@ -20,11 +20,7 @@ func TestVerifyCentralPeerCertificate(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, VerifyCentralPeerCertificate(tlsState))
-}
-
-func TestVerifySensorPeerCertificate(t *testing.T) {
-	tlsState := &tls.ConnectionState{
+	sensorTLSState = &tls.ConnectionState{
 		PeerCertificates: []*x509.Certificate{
 			{
 				Subject: pkix.Name{
@@ -33,6 +29,19 @@ func TestVerifySensorPeerCertificate(t *testing.T) {
 			},
 		},
 	}
+)
 
-	assert.NoError(t, VerifySensorPeerCertificate(tlsState))
+func TestVerifyCentralAndSensorPeerCertificates(t *testing.T) {
+	assert.NoError(t, VerifyCentralAndSensorPeerCertificates(centralTLSState))
+	assert.NoError(t, VerifyCentralAndSensorPeerCertificates(sensorTLSState))
+}
+
+func TestVerifyCentralPeerCertificate(t *testing.T) {
+	assert.NoError(t, VerifyCentralPeerCertificate(centralTLSState))
+	assert.Error(t, VerifyCentralPeerCertificate(sensorTLSState))
+}
+
+func TestVerifySensorPeerCertificate(t *testing.T) {
+	assert.NoError(t, VerifySensorPeerCertificate(sensorTLSState))
+	assert.Error(t, VerifySensorPeerCertificate(centralTLSState))
 }
