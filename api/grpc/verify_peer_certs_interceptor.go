@@ -1,3 +1,6 @@
+// Any changes to this file should be considered for its counterpart:
+// pkg/clairify/server/middleware/verify_peer_certs.go
+
 package grpc
 
 import (
@@ -24,7 +27,9 @@ func verifyPeerCertsUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	skipPeerValidation := env.SkipPeerValidation.Enabled()
 
 	verifyPeerCertificate := mtls.VerifyCentralPeerCertificate
-	if env.SlimMode.Enabled() {
+	if env.LocalScanning.Enabled() {
+		verifyPeerCertificate = mtls.VerifyCentralAndSensorPeerCertificates
+	} else if env.SlimMode.Enabled() {
 		verifyPeerCertificate = mtls.VerifySensorPeerCertificate
 	}
 

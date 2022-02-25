@@ -1,3 +1,6 @@
+// Any changes to this file should be considered for its counterpart:
+// api/grpc/verify_peer_certs_interceptor.go
+
 package middleware
 
 import (
@@ -18,12 +21,14 @@ var (
 	)
 )
 
-// VerifyPeerCerts returns http middleware to verify peer certs for certain endpoints
+// VerifyPeerCerts returns http middleware to verify peer certs for certain endpoints.
 func VerifyPeerCerts() mux.MiddlewareFunc {
 	skipPeerValidation := env.SkipPeerValidation.Enabled()
 
 	verifyPeerCertificate := mtls.VerifyCentralPeerCertificate
-	if env.SlimMode.Enabled() {
+	if env.LocalScanning.Enabled() {
+		verifyPeerCertificate = mtls.VerifyCentralAndSensorPeerCertificates
+	} else if env.SlimMode.Enabled() {
 		verifyPeerCertificate = mtls.VerifySensorPeerCertificate
 	}
 

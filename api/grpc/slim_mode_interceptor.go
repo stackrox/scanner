@@ -1,3 +1,6 @@
+// Any changes to this file should be considered for its counterpart:
+// pkg/clairify/server/middleware/slim_mode.go
+
 package grpc
 
 import (

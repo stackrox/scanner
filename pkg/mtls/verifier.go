@@ -12,6 +12,13 @@ const (
 	sensorCN  = "SENSOR_SERVICE: "
 )
 
+// VerifyCentralAndSensorPeerCertificates verifies that the peer certificate has
+// either the Central Common Name or the Sensor Common Name.
+// The CA should have already been verified via tls.VerifyClientCertIfGiven.
+func VerifyCentralAndSensorPeerCertificates(tls *tls.ConnectionState) error {
+	return verifyPeerCertificate(tls, centralCN, sensorCN)
+}
+
 // VerifyCentralPeerCertificate verifies that the peer certificate has the Central Common Name.
 // The CA should have already been verified via tls.VerifyClientCertIfGiven.
 func VerifyCentralPeerCertificate(tls *tls.ConnectionState) error {
@@ -24,7 +31,7 @@ func VerifySensorPeerCertificate(tls *tls.ConnectionState) error {
 	return verifyPeerCertificate(tls, sensorCN)
 }
 
-func verifyPeerCertificate(tls *tls.ConnectionState, expectedCN string) error {
+func verifyPeerCertificate(tls *tls.ConnectionState, expectedCNs ...string) error {
 	if tls == nil {
 		return errors.New("no tls connection state")
 	}
@@ -34,9 +41,13 @@ func verifyPeerCertificate(tls *tls.ConnectionState, expectedCN string) error {
 		return errors.New("no peer certificates found")
 	}
 
-	if peerCN := peerCerts[0].Subject.CommonName; !strings.HasPrefix(peerCN, expectedCN) {
-		return errors.Errorf("peer certificate common name %q does not match expected common name prefix: %s", peerCN, expectedCN)
+	peerCN := peerCerts[0].Subject.CommonName
+
+	for _, expectedCN := range expectedCNs {
+		if strings.HasPrefix(peerCN, expectedCN) {
+			return nil
+		}
 	}
 
-	return nil
+	return errors.Errorf("peer certificate common name %q does not match any expected common name prefix", peerCN)
 }
