@@ -6,15 +6,17 @@ var (
 
 	// SkipPeerValidation skips peer certificate validation (typically used for testing).
 	// When disabled, only Central ingress is allowed, by default. See SlimMode and
-	// LocalScanning for other ingress controls.
+	// OpenshiftAPI for other ingress controls.
 	SkipPeerValidation = RegisterBooleanSetting("ROX_SKIP_PEER_VALIDATION", false)
 
-	// SlimMode enables slim-mode. If SkipPeerValidation is disabled,
-	// only Sensor ingress is allowed.
-	// If LocalScanning is enabled, this is ignored.
+	// SlimMode enables slim-mode. When enabled, Scanner only supports a subset of APIs,
+	// and only Sensor ingress is allowed.
+	// If SkipPeerValidation or OpenshiftAPI is enabled, the ingress implications are ignored.
 	SlimMode = RegisterBooleanSetting("ROX_SLIM_MODE", false)
 
-	// LocalScanning enables both Central and Sensor ingress instead of just Central.
-	// If SkipPeerValidation is enabled, this is ignored.
-	LocalScanning = RegisterBooleanSetting("ROX_LOCAL_SCANNING", false)
+	// OpenshiftAPI indicates Scanner is running in an OpenShift environment.
+	// When set to "true", ingress is allowed from both Central and Sensor.
+	// This is ignored if SkipPeerValidation is enabled.
+	// This variable was copied over from the stackrox repo.
+	OpenshiftAPI = RegisterBooleanSetting("ROX_OPENSHIFT_API", false)
 )

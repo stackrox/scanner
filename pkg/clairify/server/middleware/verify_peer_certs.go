@@ -26,7 +26,7 @@ func VerifyPeerCerts() mux.MiddlewareFunc {
 	skipPeerValidation := env.SkipPeerValidation.Enabled()
 
 	verifyPeerCertificate := mtls.VerifyCentralPeerCertificate
-	if env.LocalScanning.Enabled() {
+	if env.OpenshiftAPI.Enabled() {
 		verifyPeerCertificate = mtls.VerifyCentralAndSensorPeerCertificates
 	} else if env.SlimMode.Enabled() {
 		verifyPeerCertificate = mtls.VerifySensorPeerCertificate
