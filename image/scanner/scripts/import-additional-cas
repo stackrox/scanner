@@ -4,8 +4,13 @@ set -euo pipefail
 
 lines=$(for d in /usr/local/share/ca-certificates /etc/pki/injected-ca-trust
 do
-    [ -d "$d" ] && find "$d" -maxdepth 1 -name '*.crt' -o -name '*.pem' \
+    if [ -d "$d" ]; then
+        find "$d" -maxdepth 1 -type f \
          -print -exec cp -L {} /etc/pki/ca-trust/source/anchors \;
+    fi
 done | wc -l)
 
-[ "$lines" -gt 0 ] && update-ca-trust
+if (( lines )); then
+    update-ca-trust extract
+fi
+
