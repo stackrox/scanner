@@ -25,17 +25,10 @@ var (
 func VerifyPeerCerts() mux.MiddlewareFunc {
 	skipPeerValidation := env.SkipPeerValidation.Enabled()
 
-	verifyPeerCertificate := mtls.VerifyCentralPeerCertificate
-	if env.OpenshiftAPI.Enabled() {
-		verifyPeerCertificate = mtls.VerifyCentralAndSensorPeerCertificates
-	} else if env.SlimMode.Enabled() {
-		verifyPeerCertificate = mtls.VerifySensorPeerCertificate
-	}
-
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if !skipPeerValidation && !verifyPeerCertsAllowList.Contains(r.RequestURI) {
-				if err := verifyPeerCertificate(r.TLS); err != nil {
+				if err := mtls.VerifyPeerCertificate(r.TLS); err != nil {
 					httputil.WriteGRPCStyleError(w, codes.InvalidArgument, err)
 					return
 				}
