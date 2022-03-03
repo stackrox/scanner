@@ -2804,7 +2804,7 @@ var testCases = []testCase{
 								},
 							},
 						},
-						FixedBy: "2.13.2",
+						FixedBy: "2.12.3",
 					},
 					{
 						Name:          "CVE-2021-44228",
@@ -2901,7 +2901,7 @@ var testCases = []testCase{
 				},
 				AddedBy:  "sha256:c46de89b745ad8ba4400323d4ebc230a4b88cbbdbc92a862c92a743478abd617",
 				Location: "usr/share/logstash/vendor/bundle/jruby/2.5.0/gems/logstash-input-tcp-6.0.10-java/vendor/jar-dependencies/org/logstash/inputs/logstash-input-tcp/6.0.10/logstash-input-tcp-6.0.10.jar:log4j-core",
-				FixedBy:  "2.13.2",
+				FixedBy:  "2.12.4",
 			},
 			{
 				Name:          "log4j",
@@ -3041,7 +3041,7 @@ var testCases = []testCase{
 								},
 							},
 						},
-						FixedBy: "2.13.2",
+						FixedBy: "2.12.3",
 					},
 					{
 						Name:          "CVE-2021-44832",
@@ -3092,7 +3092,7 @@ var testCases = []testCase{
 				},
 				AddedBy:  "sha256:d84ba7ea7803fa43fca06730523d264b31c562968cfd7020f0584f5ec1b26225",
 				Location: "log4j-core-2.12.2.jar",
-				FixedBy:  "2.13.2",
+				FixedBy:  "2.12.4",
 			},
 		},
 	},
