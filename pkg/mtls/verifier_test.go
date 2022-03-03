@@ -6,11 +6,13 @@ import (
 	"crypto/x509/pkix"
 	"testing"
 
+	"github.com/stackrox/rox/pkg/testutils/envisolator"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestVerifyCentralPeerCertificate(t *testing.T) {
-	tlsState := &tls.ConnectionState{
+var (
+	centralTLSState = &tls.ConnectionState{
 		PeerCertificates: []*x509.Certificate{
 			{
 				Subject: pkix.Name{
@@ -20,11 +22,7 @@ func TestVerifyCentralPeerCertificate(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, VerifyCentralPeerCertificate(tlsState))
-}
-
-func TestVerifySensorPeerCertificate(t *testing.T) {
-	tlsState := &tls.ConnectionState{
+	sensorTLSState = &tls.ConnectionState{
 		PeerCertificates: []*x509.Certificate{
 			{
 				Subject: pkix.Name{
@@ -34,5 +32,71 @@ func TestVerifySensorPeerCertificate(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, VerifySensorPeerCertificate(tlsState))
+	fooTLSState = &tls.ConnectionState{
+		PeerCertificates: []*x509.Certificate{
+			{
+				Subject: pkix.Name{
+					CommonName: "FOO: RANDOM-STRING-HERE",
+				},
+			},
+		},
+	}
+)
+
+func TestVerifyPeerCertificate_Default(t *testing.T) {
+	assert.NoError(t, VerifyPeerCertificate(centralTLSState))
+	assert.Error(t, VerifyPeerCertificate(sensorTLSState))
+	assert.Error(t, VerifyPeerCertificate(fooTLSState))
+}
+
+func TestVerifyPeerCertificate_ROX_OPENSHIFT_API(t *testing.T) {
+	envIsolator := envisolator.NewEnvIsolator(t)
+	defer envIsolator.RestoreAll()
+
+	envIsolator.Setenv(env.OpenshiftAPI.EnvVar(), "true")
+
+	assert.NoError(t, VerifyPeerCertificate(centralTLSState))
+	assert.NoError(t, VerifyPeerCertificate(sensorTLSState))
+	assert.Error(t, VerifyPeerCertificate(fooTLSState))
+}
+
+func TestVerifyPeerCertificate_ROX_OPENSHIFT_API_AND_ROX_SLIM_MODE(t *testing.T) {
+	envIsolator := envisolator.NewEnvIsolator(t)
+	defer envIsolator.RestoreAll()
+
+	envIsolator.Setenv(env.OpenshiftAPI.EnvVar(), "true")
+	envIsolator.Setenv(env.SlimMode.EnvVar(), "true")
+
+	assert.NoError(t, VerifyPeerCertificate(centralTLSState))
+	assert.NoError(t, VerifyPeerCertificate(sensorTLSState))
+	assert.Error(t, VerifyPeerCertificate(fooTLSState))
+}
+
+func TestVerifyPeerCertificate_ROX_SLIM_MODE(t *testing.T) {
+	envIsolator := envisolator.NewEnvIsolator(t)
+	defer envIsolator.RestoreAll()
+
+	envIsolator.Setenv(env.SlimMode.EnvVar(), "true")
+
+	assert.Error(t, VerifyPeerCertificate(centralTLSState))
+	assert.NoError(t, VerifyPeerCertificate(sensorTLSState))
+	assert.Error(t, VerifyPeerCertificate(fooTLSState))
+}
+
+func TestVerifyCentralOrSensorPeerCertificate(t *testing.T) {
+	assert.NoError(t, verifyCentralOrSensorPeerCertificate(centralTLSState))
+	assert.NoError(t, verifyCentralOrSensorPeerCertificate(sensorTLSState))
+	assert.Error(t, verifyCentralOrSensorPeerCertificate(fooTLSState))
+}
+
+func TestVerifyCentralPeerCertificate(t *testing.T) {
+	assert.NoError(t, verifyCentralPeerCertificate(centralTLSState))
+	assert.Error(t, verifyCentralPeerCertificate(sensorTLSState))
+	assert.Error(t, verifyCentralPeerCertificate(fooTLSState))
+}
+
+func TestVerifySensorPeerCertificate(t *testing.T) {
+	assert.Error(t, verifySensorPeerCertificate(centralTLSState))
+	assert.NoError(t, verifySensorPeerCertificate(sensorTLSState))
+	assert.Error(t, verifySensorPeerCertificate(fooTLSState))
 }

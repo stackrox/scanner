@@ -1,3 +1,6 @@
+// Any changes to this file should be considered for its counterpart:
+// api/grpc/slim_mode_interceptor.go
+
 package middleware
 
 import (
