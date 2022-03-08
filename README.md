@@ -29,6 +29,23 @@ Only major, breaking changes will merit a bump to the major version, but this is
 
 Note: There is no genesis-dump update for patch releases (unless the patch, itself, requires it)
 
+### Update the scanner genesis dump
+
+Look at the running workflows for scanner, and pick the ID of the most recently completed run of the update-dumps-hourly workflow. Then call:
+
+
+```sh
+make genesis-dump-release GENESIS_DUMP_WORKFLOW_ID=<workflow-id>
+```
+
+This will download the latest dump, upload the artifacts to the proper gcloud buckets, and checkout a branch on your local git repo with the required changes to submit a PR to update the latest manifest files.
+
+Make sure you have permissions to the buckets, and you have `gsutils` working locally.
+
+The make targets are setup to dedup, so it's safe to re-try in an intermediate step, or if something fails.
+
+More details on the steps being carried out here: https://stack-rox.atlassian.net/wiki/spaces/ENGKB/pages/991363095/How+to+update+the+scanner+genesis+dump
+
 ## Building
 
 ### Prerequisites

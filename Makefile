@@ -55,6 +55,11 @@ $(GOLANGCILINT_BIN): deps
 	@echo "+ $@"
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint
 
+OSSLS_BIN := $(GOBIN)/ossls
+$(OSSLS_BIN): deps
+	@echo "+ $@"
+	go install github.com/stackrox/ossls@0.10.1
+
 #############
 ##  Tag  ##
 #############
@@ -302,3 +307,60 @@ clean-pprof:
 	@echo "+ $@"
 	rm /tmp/pprof.zip || true
 	rm -rf /tmp/pprof
+
+
+##########################
+## Genesis Dump Release ##
+##########################
+
+# Generate and update the scanner genesis dump. It assumes ``gsutil`` is setup
+# properly.  Example:
+#
+#     make genesis-dump-release GENESIS_DUMP_WORKFLOW_ID=<update-dumps-hourly-workflow-id>
+#
+
+GENESIS_DUMP_WORKFLOW_ID :=
+GENESIS_DUMP_BASE_DIR := genesis-dump-release
+GENESIS_DUMP_DIR := $(GENESIS_DUMP_BASE_DIR)/$(GENESIS_DUMP_WORKFLOW_ID)
+
+ifndef GENESIS_DUMP_WORKFLOW_ID
+GENESIS_DUMP_DIR := workflow-id-not-set
+endif
+
+GENESIS_DUMP_MANIFEST := image/scanner/dump/genesis_manifests.json
+
+.PHONY: genesis-dump-release
+genesis-dump-release: $(GENESIS_DUMP_DIR)/manifest.json
+	cp $< $(GENESIS_DUMP_MANIFEST)
+	! git status --porcelain | grep '^[^? ]' && git add $(GENESIS_DUMP_MANIFEST)
+	git checkout -b genesis-dump/$$(date -u -d "$$(cat $(GENESIS_DUMP_DIR)/until)" +%Y-%m-%d)
+	git commit -v -m "New Genesis Dump $$(date -u -d "$$(cat $(GENESIS_DUMP_DIR)/until)" +%Y-%m-%d)"
+
+$(GENESIS_DUMP_DIR)/manifest.json: $(GENESIS_DUMP_DIR)/uuid $(GENESIS_DUMP_DIR)/dest $(GENESIS_DUMP_DIR)/until
+	gsutil cp $(GENESIS_DUMP_DIR)/uuid gs://definitions.stackrox.io/$$(cat $(GENESIS_DUMP_DIR)/uuid)/uuid
+	git show HEAD:$(GENESIS_DUMP_MANIFEST) | jq '.knownGenesisDumps += [{"dumpLocationInGS": "'$$(cat $(GENESIS_DUMP_DIR)/dest)'", "timestamp": "'$$(cat $(GENESIS_DUMP_DIR)/until)'", "uuid": "'$$(cat $(GENESIS_DUMP_DIR)/uuid)'"}]' >$@;
+
+$(GENESIS_DUMP_DIR)/dest: $(GENESIS_DUMP_DIR)/until $(GENESIS_DUMP_DIR)/dump.zip
+	( dest=gs://stackrox-scanner-ci-vuln-dump/genesis-$$(date -u -d "$$(cat $<)" +%Y%m%d%H%M%S).zip; \
+	  gsutil cp $(GENESIS_DUMP_DIR)/dump.zip $${dest}; \
+	  gsutil retention event set $${dest}; \
+	  echo $${dest} >$@; \
+	)
+
+$(GENESIS_DUMP_DIR)/until: $(GENESIS_DUMP_DIR)/dump.zip
+	unzip -p $< manifest.json | jq -r .until > $@
+
+$(GENESIS_DUMP_DIR)/dump.zip: $(GENESIS_DUMP_DIR)/uuid
+	gsutil cp $$(gsutil ls "gs://roxci-artifacts/scanner/$$(basename $(dir $<))" | grep generate-genesis-dump)genesis-dump.zip $@
+
+$(GENESIS_DUMP_DIR)/uuid: $(GENESIS_DUMP_DIR)/.dir
+	uuidgen >$@
+
+$(GENESIS_DUMP_DIR)/.dir:
+	@if [ "$@" = "workflow-id-not-set/.dir" ]; \
+	then \
+	    echo "ERROR: Please specifiy the variable GENESIS_DUMP_WORKFLOW_ID"; \
+	    exit 1; \
+	fi
+	mkdir -p $(dir $@)
+	touch $@
