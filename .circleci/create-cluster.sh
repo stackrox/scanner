@@ -45,7 +45,7 @@ create-cluster() {
             echo >&2 "Create cluster did not create the cluster in Google. Trying a different zone..."
           else
             for i in {1..120}; do
-                if [[ "$(gcloud container clusters describe ${CLUSTER_NAME} --format json | jq -r .status)" == "RUNNING" ]]; then
+                if [[ "$(gcloud container clusters describe "${CLUSTER_NAME}" --format json | jq -r .status)" == "RUNNING" ]]; then
                   success=1
                   break
                 fi
@@ -71,7 +71,7 @@ create-cluster() {
 }
 
 wait-for-cluster() {
-  while [[ $(kubectl -n kube-system get pod | tail +2 | wc -l) -lt 2 ]]; do
+  while [[ $(kubectl -n kube-system get pod | tail -n +2 | wc -l) -lt 2 ]]; do
   	echo "Still waiting for kubernetes to create initial kube-system pods"
   	sleep 1
   done

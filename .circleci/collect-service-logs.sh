@@ -31,9 +31,9 @@ main() {
     mkdir -p "$log_dir"
 
 	  set +e
-    for pod in $(kubectl -n "${namespace}" get po | tail +2 | awk '{print $1}'); do
+    for pod in $(kubectl -n "${namespace}" get po | tail -n +2 | awk '{print $1}'); do
         kubectl describe po "${pod}" -n "${namespace}" > "${log_dir}/${pod}_describe.log"
-        for ctr in $(kubectl -n "${namespace}" get po $pod -o jsonpath='{.status.containerStatuses[*].name}'); do
+        for ctr in $(kubectl -n "${namespace}" get po "$pod" -o jsonpath='{.status.containerStatuses[*].name}'); do
             kubectl -n "${namespace}" logs "po/${pod}" -c "$ctr" > "${log_dir}/${pod}-${ctr}.log"
             kubectl -n "${namespace}" logs "po/${pod}" -p -c "$ctr" > "${log_dir}/${pod}-${ctr}-previous.log"
         done
