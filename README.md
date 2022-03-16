@@ -41,11 +41,11 @@ Finally:
 
 - Review the changes in `genesis-dump/YEAR-MONTH-DAY`.
 - Push `genesis-dump/YEAR-MONTH-DAY` to origin and create a PR ([example](https://github.com/stackrox/scanner/pull/191)).
-- Add the `generate-dumps-on-pr` label to th ePR.
+- Add the `generate-dumps-on-pr` label to the PR.
 
-Then, the CircleCI jobs on the PR should generate a `diff.zip` inside a definitions.stackrox.io bucket with the UUID used in the entry appended to `genesis-manifest.json` file. Scanners will use it for updates once the PR is merged.
+Then, the CircleCI jobs on the PR should generate a `diff.zip` inside a definitions.stackrox.io bucket named with the UUID used in the entry appended to `genesis-manifest.json` file. Scanners will use it for updates once the PR is merged.
 
-Full details at [Red Hat's How To article](https://docs.engineering.redhat.com/display/ENGKB/How+to+update+the+scanner+genesis+dump).
+Full details at [Red Hat's engineering wiki](https://docs.engineering.redhat.com/display/ENGKB/How+to+update+the+scanner+genesis+dump).
 
 ### Creating a new Patch Release
 
