@@ -22,12 +22,7 @@ Only major, breaking changes will merit a bump to the major version, but this is
 
 #### Creating Genesis Dump
 
-https://stack-rox.atlassian.net/wiki/spaces/ENGKB/pages/991363095/How+to+update+the+scanner+genesis+dump
-
-The purpose of the gensis dump is to embedded the new release of Scanner with
-the most up-to-date vulnerability data, and reduce its startup time since only
-diffs will be fetched from the network, rather than the whole vulnerability
-content.
+The purpose of the gensis dump is to embedded the new release of Scanner with the most up-to-date vulnerability data, and reduce its startup time since only diffs will be fetched from the network, rather than the whole vulnerability content.
 
 To run this:
 
