@@ -2,7 +2,7 @@
 version: 2.1
 
 defaultImage: &defaultImage
-  image: "quay.io/rhacs-eng/apollo-ci:0.3.26"
+  image: "quay.io/rhacs-eng/apollo-ci:stackrox-test-cci-0.3.34"
   auth:
     username: $QUAY_RHACS_ENG_RO_USERNAME
     password: $QUAY_RHACS_ENG_RO_PASSWORD
@@ -344,8 +344,6 @@ commands:
             unzip -d image/scanner/dump /tmp/k8s-definitions.zip
             unzip -d image/scanner/dump /tmp/repo2cpe.zip
 
-      - install-ossls
-
       - run:
           name: Build images
           command: make << parameters.make-image-target >>
@@ -418,12 +416,18 @@ commands:
 
                 stackrox_io_scanner_image="stackrox.io/${scanner_image_name}:${tag}"
                 stackrox_io_scanner_db_image="stackrox.io/${db_image_name}:${tag}"
+                stackrox_io_scanner_slim_image="stackrox.io/${scanner_slim_image_name}:${tag}"
+                stackrox_io_scanner_db_slim_image="stackrox.io/${db_slim_image_name}:${tag}"
 
                 docker tag "${gcr_scanner_image}" "${stackrox_io_scanner_image}"
                 docker tag "${gcr_db_image}" "${stackrox_io_scanner_db_image}"
+                docker tag "${gcr_scanner_slim_image}" "${stackrox_io_scanner_slim_image}"
+                docker tag "${gcr_db_slim_image}" "${stackrox_io_scanner_db_slim_image}"
 
                 ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_image}"
                 ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_db_image}"
+                ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_slim_image}"
+                ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_db_slim_image}"
             fi
   run-e2e-tests:
     parameters:
@@ -631,19 +635,6 @@ commands:
       - ci-artifacts/store:
           path: /tmp/metrics
           destination: metrics
-
-  install-ossls:
-    steps:
-    - run:
-        name: Install ossls
-        working_directory: /tmp
-        command: |
-          wget --quiet https://github.com/gruntwork-io/fetch/releases/download/v0.3.5/fetch_linux_amd64
-          sudo install fetch_linux_amd64 /usr/bin/fetch
-          export GITHUB_OAUTH_TOKEN="$GITHUB_TOKEN"
-          fetch --repo="https://github.com/stackrox/ossls" --tag="0.10.1" --release-asset="ossls_linux_amd64" .
-          sudo install ossls_linux_amd64 /usr/bin/ossls
-          ossls version
 
 jobs:
   unit-tests:

@@ -39,6 +39,10 @@ RUN dnf upgrade -y && \
     chown -R 65534:65534 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl && \
     chmod +rx /scanner
 
+ENV REPO_TO_CPE_DIR="/repo2cpe"
+
+COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
+
 ENTRYPOINT ["/entrypoint.sh"]
 
 FROM base AS scanner-slim
@@ -53,11 +57,9 @@ ENV ROX_SLIM_MODE="false"
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
-ENV REPO_TO_CPE_DIR="/repo2cpe"
 
 COPY --from=extracted_bundle /bundle/genesis_manifests.json ./
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 
 USER 65534:65534

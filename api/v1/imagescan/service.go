@@ -142,6 +142,9 @@ func (s *serviceImpl) getLayerNameFromImageReq(req imageRequest) (string, string
 }
 
 func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest) (*v1.GetImageComponentsResponse, error) {
+	image := req.GetImage()
+	logrus.Infof("Analyzing image components for %s", image)
+
 	// Attempt to get image results assuming the image is within RHEL Certification scope (or is a non-RHEL image).
 	imgComponents, err := s.getImageComponents(ctx, req, false)
 	if err != nil {
@@ -149,6 +152,8 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 	}
 	for _, note := range imgComponents.Notes {
 		if note == apiV1.CertifiedRHELScanUnavailable {
+			logrus.Infof("%s is a RHEL-based image not within certification scope. Trying again...", image)
+
 			// Image is RHEL, but not within Certification scope. Try again...
 			imgComponents, err = s.getImageComponents(ctx, req, true)
 			if err != nil {
@@ -158,6 +163,8 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 			break
 		}
 	}
+
+	logrus.Infof("Done analyzing components for %s", image)
 
 	return &v1.GetImageComponentsResponse{
 		ScannerVersion: s.version,
