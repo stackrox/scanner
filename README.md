@@ -14,13 +14,13 @@ Only major, breaking changes will merit a bump to the major version, but this is
 
 ### Creating a new Minor Release
 
-1. Please follow the steps outlined [here](https://stack-rox.atlassian.net/wiki/spaces/ENGKB/pages/991363095/How+to+update+the+scanner+genesis+dump) to update the genesis dump
+1. Please follow the steps outlined [here](https://docs.engineering.redhat.com/display/ENGKB/How+to+update+the+scanner+genesis+dump) to update the genesis dump
     * The purpose of this is to preload the latest version of Scanner with the most up-to-date vulnerability data
     * This severely decreases the startup time
 1. Create a new branch `release/2.<new version>.x` based on the latest master once the genesis dump is updated
 1. Create a new tag/release based on the new branch
 1. Add release notes based on the changes between the previous release and this one
-1. Once the latest image is built in CI, update the [SCANNER_VERSION](https://github.com/stackrox/rox/blob/master/SCANNER_VERSION) file in the rox repo
+1. Once the latest image is built in CI, update the [SCANNER_VERSION](https://github.com/stackrox/stackrox/blob/master/SCANNER_VERSION) file in the rox repo
 
 ### Creating a new Patch Release
 
