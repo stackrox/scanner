@@ -101,8 +101,8 @@ ifdef CI
 	@echo "Running with no tags..."
 	golangci-lint run
 	@echo "Running with release tags..."
-	@# We use --tests=false because some unit tests don't compile with release tags,
-	@# since they use functions that we don't define in the release build. That's okay.
+	@# We use --tests=false because some unit tests don\'t compile with release tags,
+	@# since they use functions that we don\'t define in the release build. That\'s okay.
 	golangci-lint run --build-tags "$(subst $(comma),$(space),$(RELEASE_GOTAGS))" --tests=false
 else
 	golangci-lint run --fix
@@ -309,58 +309,69 @@ clean-pprof:
 	rm -rf /tmp/pprof
 
 
-##########################
-## Genesis Dump Release ##
-##########################
+##################
+## Genesis Dump ##
+##################
 
-# Generate and update the scanner genesis dump. It assumes ``gsutil`` is setup
+# Generate and update the scanner genesis dump.  It assumes ``gsutil`` is setup
 # properly.  Example:
 #
-#     make genesis-dump-release GENESIS_DUMP_WORKFLOW_ID=<update-dumps-hourly-workflow-id>
+#     make genesis-dump WORKFLOW=<update-dumps-hourly-workflow-id>
 #
 
-GENESIS_DUMP_WORKFLOW_ID :=
-GENESIS_DUMP_BASE_DIR := genesis-dump-release
-GENESIS_DUMP_DIR := $(GENESIS_DUMP_BASE_DIR)/$(GENESIS_DUMP_WORKFLOW_ID)
+gd-param-workflow := WORKFLOW
 
-ifndef GENESIS_DUMP_WORKFLOW_ID
-GENESIS_DUMP_DIR := workflow-id-not-set
-endif
+gd-target := genesis-dump
+gd-base := genesis-dump
+gd-dir := $(gd-base)/$($(gd-param-workflow))
 
-GENESIS_DUMP_MANIFEST := image/scanner/dump/genesis_manifests.json
+gd-manifest-file := image/scanner/dump/genesis_manifests.json
+gd-bucket-dump := gs://stackrox-scanner-ci-vuln-dump
 
-.PHONY: genesis-dump-release
-genesis-dump-release: $(GENESIS_DUMP_DIR)/manifest.json
-	cp $< $(GENESIS_DUMP_MANIFEST)
-	! git status --porcelain | grep '^[^? ]' && git add $(GENESIS_DUMP_MANIFEST)
-	git checkout -b genesis-dump/$$(date -u -d "$$(cat $(GENESIS_DUMP_DIR)/until)" +%Y-%m-%d)
-	git commit -v -m "New Genesis Dump $$(date -u -d "$$(cat $(GENESIS_DUMP_DIR)/until)" +%Y-%m-%d)"
 
-$(GENESIS_DUMP_DIR)/manifest.json: $(GENESIS_DUMP_DIR)/uuid $(GENESIS_DUMP_DIR)/dest $(GENESIS_DUMP_DIR)/until
-	gsutil cp $(GENESIS_DUMP_DIR)/uuid gs://definitions.stackrox.io/$$(cat $(GENESIS_DUMP_DIR)/uuid)/uuid
-	git show HEAD:$(GENESIS_DUMP_MANIFEST) | jq '.knownGenesisDumps += [{"dumpLocationInGS": "'$$(cat $(GENESIS_DUMP_DIR)/dest)'", "timestamp": "'$$(cat $(GENESIS_DUMP_DIR)/until)'", "uuid": "'$$(cat $(GENESIS_DUMP_DIR)/uuid)'"}]' >$@;
+.PHONY: $(gd-target) $(gd-target)-commit $(gd-target)-all
 
-$(GENESIS_DUMP_DIR)/dest: $(GENESIS_DUMP_DIR)/until $(GENESIS_DUMP_DIR)/dump.zip
-	( dest=gs://stackrox-scanner-ci-vuln-dump/genesis-$$(date -u -d "$$(cat $<)" +%Y%m%d%H%M%S).zip; \
-	  gsutil cp $(GENESIS_DUMP_DIR)/dump.zip $${dest}; \
-	  gsutil retention event set $${dest}; \
-	  echo $${dest} >$@; \
-	)
+$(gd-target)-all:  $(gd-target)-commit $(gd-target)
 
-$(GENESIS_DUMP_DIR)/until: $(GENESIS_DUMP_DIR)/dump.zip
+$(gd-target): $(gd-dir)/manifest.json $(gd-dir)/until
+	@echo "MANIFEST:"
+	@diff -u $< $(gd-manifest-file) | sed 's/^/    /'
+	@echo "Run \`make $(gd-target)-commit [...]\` to submit to gcloud and commit."
+
+$(gd-target)-commit: $(gd-dir)/gcloud
+	! git status --porcelain | grep '^[^? ]'
+	cp $< $(gd-manifest-file)
+	git add $(gd-manifest-file)
+	git checkout -b genesis-dump/$$(cat $(gd-dir)/until) | sed 's/T.*//')
+	git commit -v -m "New Genesis Dump $$(cat $(gd-dir)/until) | sed 's/T.*//')"
+
+$(gd-dir)/gcloud: $(gd-dir)/dest $(gd-dir)/dump.zip
+	gsutil cp $(gd-dir)/dump.zip $$(cat $<)
+	gsutil retention event set $$(cat $<)
+	touch $@
+
+$(gd-dir)/manifest.json: $(gd-dir)/dest $(gd-dir)/uuid $(gd-dir)/until
+	git show HEAD:$(gd-manifest-file) \
+	    | jq '.knownGenesisDumps += [{"dumpLocationInGS": "'$$(cat $(gd-dir)/dest)'", "timestamp": "'$$(cat $(gd-dir)/until)'", "uuid": "'$$(cat $(gd-dir)/uuid)'"}]' \
+	      > $@
+
+$(gd-dir)/dest: $(gd-dir)/until $(gd-dir)/dump.zip
+	echo $(gd-bucket-dump)/genesis-$$(cat $< | sed 's/\..*//; s/[:T-]//g').zip > $@
+
+$(gd-dir)/until: $(gd-dir)/dump.zip
 	unzip -p $< manifest.json | jq -r .until > $@
 
-$(GENESIS_DUMP_DIR)/dump.zip: $(GENESIS_DUMP_DIR)/uuid
-	gsutil cp $$(gsutil ls "gs://roxci-artifacts/scanner/$$(basename $(dir $<))" | grep generate-genesis-dump)genesis-dump.zip $@
-
-$(GENESIS_DUMP_DIR)/uuid: $(GENESIS_DUMP_DIR)/.dir
-	uuidgen >$@
-
-$(GENESIS_DUMP_DIR)/.dir:
-	@if [ "$@" = "workflow-id-not-set/.dir" ]; \
-	then \
-	    echo "ERROR: Please specifiy the variable GENESIS_DUMP_WORKFLOW_ID"; \
-	    exit 1; \
-	fi
+$(gd-dir)/dump.zip:
 	mkdir -p $(dir $@)
-	touch $@
+	orig=$$(gsutil ls "gs://roxci-artifacts/scanner/$$(basename $(dir $@))" \
+	            | grep generate-genesis-dump) && \
+	    gsutil cp $${orig%/}/genesis-dump.zip $@
+
+$(gd-dir)/uuid:
+ifndef $(gd-param-workflow)
+	@echo "$(gd-param-workflow) was not specified, use \`make $@ $(gd-param-workflow)=<workflow-id>\`"
+	@exit 1
+else
+	mkdir -p $(dir $@)
+	uuidgen > $@
+endif
