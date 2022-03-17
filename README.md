@@ -22,7 +22,7 @@ Only major, breaking changes will merit a bump to the major version, but this is
 
 #### Creating Genesis Dump
 
-The purpose of the gensis dump is to embedded the new release of Scanner with the most up-to-date vulnerability data, and reduce its startup time since only diffs will be fetched from the network, rather than the whole vulnerability content.
+The purpose of the gensis dump is to embed the new release of Scanner with the most up-to-date vulnerability data, and reduce its startup time since only diffs will be fetched from the network, rather than the whole vulnerability content.
 
 To run this:
 
@@ -32,10 +32,10 @@ To run this:
 Steps:
 
 1. Look into the most recently completed run of the update-dumps-hourly workflow, and pick its ID.
-2. Run `make genesis-dump GENESIS_DUMP_WORKFLOW_ID=<workflow-id>`. This will download the latest vulnerability data from the build, generate all the artifacts and diffs.
-3. Run `make genesis-dump-commit GENESIS_DUMP_WORKFLOW_ID=<workflow-id>`. This will upload the artifacts to gcloud and add a new entry to `image/scanner/dump/genesis-manifests.json` in a branch called `genesis-dump/YEAR-MONTH-DAY`.
+1. Run `make genesis-dump GENESIS_DUMP_WORKFLOW_ID=<workflow-id>`. This will download the latest vulnerability data from the build, generate all the artifacts and diffs.
+1. Run `make genesis-dump-commit GENESIS_DUMP_WORKFLOW_ID=<workflow-id>`. This will upload the artifacts to gcloud and add a new entry to `image/scanner/dump/genesis-manifests.json` in a branch called `genesis-dump/YEAR-MONTH-DAY`.
 
-You can also run `make genesis-dump-all GENESIS_DUMP_WORKFLOW_ID=<workflow-id>` to run (1.) and (2.)
+You can also run `make genesis-dump-all GENESIS_DUMP_WORKFLOW_ID=<workflow-id>` to run the last two steps at once.
 
 Finally:
 
