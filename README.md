@@ -32,10 +32,10 @@ To run this:
 Steps:
 
 1. Look into the most recently completed run of the update-dumps-hourly workflow, and pick its ID.
-1. Run `make genesis-dump GENESIS_DUMP_WORKFLOW_ID=<workflow-id>`. This will download the latest vulnerability data from the build, generate all the artifacts and diffs.
-1. Run `make genesis-dump-commit GENESIS_DUMP_WORKFLOW_ID=<workflow-id>`. This will upload the artifacts to gcloud and add a new entry to `image/scanner/dump/genesis-manifests.json` in a branch called `genesis-dump/YEAR-MONTH-DAY`.
+1. Run `make genesis-dump WORKFLOW=<workflow-id>`. This will download the latest vulnerability data from the build, generate all the artifacts and diffs.
+1. Run `make genesis-dump-commit WORKFLOW=<workflow-id>`. This will upload the artifacts to gcloud and add a new entry to `image/scanner/dump/genesis-manifests.json` in a branch called `genesis-dump/YEAR-MONTH-DAY`.
 
-You can also run `make genesis-dump-all GENESIS_DUMP_WORKFLOW_ID=<workflow-id>` to run the last two steps at once.
+You can also run `make genesis-dump-all WORKFLOW=<workflow-id>` to run the last two steps at once.
 
 Finally:
 
