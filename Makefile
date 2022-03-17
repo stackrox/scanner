@@ -55,6 +55,11 @@ $(GOLANGCILINT_BIN): deps
 	@echo "+ $@"
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint
 
+OSSLS_BIN := $(GOBIN)/ossls
+$(OSSLS_BIN): deps
+	@echo "+ $@"
+	go install github.com/stackrox/ossls@0.10.1
+
 #############
 ##  Tag  ##
 #############
@@ -96,8 +101,8 @@ ifdef CI
 	@echo "Running with no tags..."
 	golangci-lint run
 	@echo "Running with release tags..."
-	@# We use --tests=false because some unit tests don't compile with release tags,
-	@# since they use functions that we don't define in the release build. That's okay.
+	@# We use --tests=false because some unit tests don\'t compile with release tags,
+	@# since they use functions that we don\'t define in the release build. That\'s okay.
 	golangci-lint run --build-tags "$(subst $(comma),$(space),$(RELEASE_GOTAGS))" --tests=false
 else
 	golangci-lint run --fix
@@ -302,3 +307,71 @@ clean-pprof:
 	@echo "+ $@"
 	rm /tmp/pprof.zip || true
 	rm -rf /tmp/pprof
+
+
+##################
+## Genesis Dump ##
+##################
+
+# Generate and update the scanner genesis dump.  It assumes ``gsutil`` is setup
+# properly.  Example:
+#
+#     make genesis-dump WORKFLOW=<update-dumps-hourly-workflow-id>
+#
+
+gd-param-workflow := WORKFLOW
+
+gd-target := genesis-dump
+gd-base := genesis-dump
+gd-dir := $(gd-base)/$($(gd-param-workflow))
+
+gd-manifest-file := image/scanner/dump/genesis_manifests.json
+gd-bucket-dump := gs://stackrox-scanner-ci-vuln-dump
+
+
+.PHONY: $(gd-target) $(gd-target)-commit $(gd-target)-all
+
+$(gd-target)-all:  $(gd-target)-commit $(gd-target)
+
+$(gd-target): $(gd-dir)/manifest.json $(gd-dir)/until
+	@echo "MANIFEST:"
+	@diff -u $< $(gd-manifest-file) | sed 's/^/    /'
+	@echo "Run \`make $(gd-target)-commit [...]\` to submit to gcloud and commit."
+
+$(gd-target)-commit: $(gd-dir)/gcloud
+	! git status --porcelain | grep '^[^? ]'
+	cp $< $(gd-manifest-file)
+	git add $(gd-manifest-file)
+	git checkout -b genesis-dump/$$(cat $(gd-dir)/until) | sed 's/T.*//')
+	git commit -v -m "New Genesis Dump $$(cat $(gd-dir)/until) | sed 's/T.*//')"
+
+$(gd-dir)/gcloud: $(gd-dir)/dest $(gd-dir)/dump.zip
+	gsutil cp $(gd-dir)/dump.zip $$(cat $<)
+	gsutil retention event set $$(cat $<)
+	touch $@
+
+$(gd-dir)/manifest.json: $(gd-dir)/dest $(gd-dir)/uuid $(gd-dir)/until
+	git show HEAD:$(gd-manifest-file) \
+	    | jq '.knownGenesisDumps += [{"dumpLocationInGS": "'$$(cat $(gd-dir)/dest)'", "timestamp": "'$$(cat $(gd-dir)/until)'", "uuid": "'$$(cat $(gd-dir)/uuid)'"}]' \
+	      > $@
+
+$(gd-dir)/dest: $(gd-dir)/until $(gd-dir)/dump.zip
+	echo $(gd-bucket-dump)/genesis-$$(cat $< | sed 's/\..*//; s/[:T-]//g').zip > $@
+
+$(gd-dir)/until: $(gd-dir)/dump.zip
+	unzip -p $< manifest.json | jq -r .until > $@
+
+$(gd-dir)/dump.zip:
+	mkdir -p $(dir $@)
+	orig=$$(gsutil ls "gs://roxci-artifacts/scanner/$$(basename $(dir $@))" \
+	            | grep generate-genesis-dump) && \
+	    gsutil cp $${orig%/}/genesis-dump.zip $@
+
+$(gd-dir)/uuid:
+ifndef $(gd-param-workflow)
+	@echo "$(gd-param-workflow) was not specified, use \`make $@ $(gd-param-workflow)=<workflow-id>\`"
+	@exit 1
+else
+	mkdir -p $(dir $@)
+	uuidgen > $@
+endif
