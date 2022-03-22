@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConvertVersion(t *testing.T) {
+func TestTruncateVersion(t *testing.T) {
 	for _, testCase := range []struct {
 		version  string
 		expected string
@@ -70,6 +70,10 @@ func TestConvertVersion(t *testing.T) {
 		{
 			version:  "0:4.7.0-202104030128.p0-2513fdb",
 			expected: "4.7.0",
+		},
+		{
+			version:  "1.20.6-7.rhaos4.7.gitd7f3909.el8",
+			expected: "1.20.6",
 		},
 	} {
 		actual, err := TruncateVersion(testCase.version)

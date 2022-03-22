@@ -246,27 +246,27 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 				{
 					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
 						{
-							Cpe23Uri:              "cpe:2.3:a:kubernetes:cri-o:*:*:*:*:*:*:*:*",
+							Cpe23Uri:              `cpe:2.3:a:kubernetes:cri\-o:*:*:*:*:*:*:*:*`,
 							VersionEndExcluding:   "1.19.6",
 							VersionStartIncluding: "1.19.0",
 						},
 						{
-							Cpe23Uri:              "cpe:2.3:a:kubernetes:cri-o:*:*:*:*:*:*:*:*",
+							Cpe23Uri:              `cpe:2.3:a:kubernetes:cri\-o:*:*:*:*:*:*:*:*`,
 							VersionEndExcluding:   "1.20.7",
 							VersionStartIncluding: "1.20.0",
 						},
 						{
-							Cpe23Uri:              "cpe:2.3:a:kubernetes:cri-o:*:*:*:*:*:*:*:*",
+							Cpe23Uri:              `cpe:2.3:a:kubernetes:cri\-o:*:*:*:*:*:*:*:*`,
 							VersionEndExcluding:   "1.21.6",
 							VersionStartIncluding: "1.21.0",
 						},
 						{
-							Cpe23Uri:              "cpe:2.3:a:kubernetes:cri-o:*:*:*:*:*:*:*:*",
+							Cpe23Uri:              `cpe:2.3:a:kubernetes:cri\-o:*:*:*:*:*:*:*:*`,
 							VersionEndExcluding:   "1.22.3",
 							VersionStartIncluding: "1.22.0",
 						},
 						{
-							Cpe23Uri:              "cpe:2.3:a:kubernetes:cri-o:*:*:*:*:*:*:*:*",
+							Cpe23Uri:              `cpe:2.3:a:kubernetes:cri\-o:*:*:*:*:*:*:*:*`,
 							VersionEndExcluding:   "1.23.2",
 							VersionStartIncluding: "1.23.0",
 						},
