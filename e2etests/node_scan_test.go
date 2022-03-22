@@ -213,12 +213,6 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 						MetadataV2: &v1.Metadata{
 							PublishedDateTime:    "2022-03-16T00:00Z",
 							LastModifiedDateTime: "2022-03-16T00:00Z",
-							CvssV2: &v1.CVSSMetadata{
-								Score:               0.0,
-								Vector:              "",
-								ExploitabilityScore: 0.0,
-								ImpactScore:         0.0,
-							},
 							CvssV3: &v1.CVSSMetadata{
 								Score:               8.8,
 								Vector:              "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
