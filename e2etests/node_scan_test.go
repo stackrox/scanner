@@ -241,7 +241,10 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 		if expectedContains != nil {
 			for _, contains := range expectedContains {
 				contains.MetadataV2.LastModifiedDateTime = ""
-				assert.Contains(t, foundVulns, contains)
+				if !assert.Contains(t, foundVulns, contains) {
+					fmt.Printf("Found vulns: %v\n", foundVulns)
+					fmt.Printf("Expected vuln: %v\n", contains)
+				}
 			}
 		}
 	}
