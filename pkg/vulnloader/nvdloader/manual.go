@@ -295,6 +295,6 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 			},
 		},
 		LastModifiedDate: "2022-03-16T00:00Z",
-		PublishedDate:    "2021-13-16T00:00Z",
+		PublishedDate:    "2021-03-16T00:00Z",
 	},
 }
