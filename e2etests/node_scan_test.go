@@ -190,6 +190,41 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 				},
 			},
 		},
+		{
+			request: &v1.GetNodeVulnerabilitiesRequest{
+				OsImage:          "Red Hat Enterprise Linux CoreOS 47.84.202202070903-0 (Ootpa)",
+				KernelVersion:    "4.18.0-305.34.2.el8_4.x86_64",
+				KubeletVersion:   "v1.20.11+e880017",
+				KubeproxyVersion: "v1.20.11+e880017",
+				Runtime: &v1.GetNodeVulnerabilitiesRequest_ContainerRuntime{
+					Name:    "cri-o",
+					Version: "1.20.6-7.rhaos4.7.gitd7f3909.el8",
+				},
+			},
+			responseContains: &v1.GetNodeVulnerabilitiesResponse{
+				KernelVulnerabilities:    nil,
+				KubeletVulnerabilities:   nil,
+				KubeproxyVulnerabilities: nil,
+				RuntimeVulnerabilities: []*v1.Vulnerability{
+					{
+						Name:        "CVE-2022-0811",
+						Description: "A flaw introduced in CRI-O version 1.19 which an attacker can use to bypass the safeguards and set arbitrary kernel parameters on the host. As a result, anyone with rights to deploy a pod on a Kubernetes cluster that uses the CRI-O runtime can abuse the “kernel.core_pattern” kernel parameter to achieve container escape and arbitrary code execution as root on any node in the cluster.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2022-0811",
+						MetadataV2: &v1.Metadata{
+							PublishedDateTime:    "2022-03-16T00:00Z",
+							LastModifiedDateTime: "2022-03-16T00:00Z",
+							CvssV3: &v1.CVSSMetadata{
+								Score:               8.8,
+								Vector:              "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+								ExploitabilityScore: 2.8,
+								ImpactScore:         5.9,
+							},
+						},
+						FixedBy: "1.20.7",
+					},
+				},
+			},
+		},
 	}
 
 	contains := func(t *testing.T, foundVulns, expectedContains []*v1.Vulnerability) {
@@ -200,7 +235,10 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 		if expectedContains != nil {
 			for _, contains := range expectedContains {
 				contains.MetadataV2.LastModifiedDateTime = ""
-				assert.Contains(t, foundVulns, contains)
+				if !assert.Contains(t, foundVulns, contains) {
+					fmt.Printf("Found vulns: %v\n", foundVulns)
+					fmt.Printf("Expected vuln: %v\n", contains)
+				}
 			}
 		}
 	}
