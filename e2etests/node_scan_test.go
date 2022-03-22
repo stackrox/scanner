@@ -209,7 +209,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 					{
 						Name:        "CVE-2022-0811",
 						Description: "A flaw introduced in CRI-O version 1.19 which an attacker can use to bypass the safeguards and set arbitrary kernel parameters on the host. As a result, anyone with rights to deploy a pod on a Kubernetes cluster that uses the CRI-O runtime can abuse the “kernel.core_pattern” kernel parameter to achieve container escape and arbitrary code execution as root on any node in the cluster.",
-						Link:        "https://access.redhat.com/security/cve/CVE-2022-0811",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2022-0811",
 						MetadataV2: &v1.Metadata{
 							PublishedDateTime:    "2022-03-16T00:00Z",
 							LastModifiedDateTime: "2022-03-16T00:00Z",
