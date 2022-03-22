@@ -216,4 +216,85 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 		LastModifiedDate: "2022-01-13T00:00Z",
 		PublishedDate:    "2021-12-19T00:00Z",
 	},
+	"CVE-2022-0811": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ID: "CVE-2022-0811",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: `A flaw introduced in CRI-O version 1.19 which an attacker can use to bypass the safeguards and set arbitrary kernel parameters on the host. As a result, anyone with rights to deploy a pod on a Kubernetes cluster that uses the CRI-O runtime can abuse the “kernel.core_pattern” kernel parameter to achieve container escape and arbitrary code execution as root on any node in the cluster.`,
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name: "https://access.redhat.com/security/cve/CVE-2022-0811",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:              "cpe:2.3:a:kubernetes:cri-o:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "1.19.6",
+							VersionStartIncluding: "1.19.0",
+						},
+						{
+							Cpe23Uri:              "cpe:2.3:a:kubernetes:cri-o:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "1.20.7",
+							VersionStartIncluding: "1.20.0",
+						},
+						{
+							Cpe23Uri:              "cpe:2.3:a:kubernetes:cri-o:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "1.21.6",
+							VersionStartIncluding: "1.21.0",
+						},
+						{
+							Cpe23Uri:              "cpe:2.3:a:kubernetes:cri-o:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "1.22.3",
+							VersionStartIncluding: "1.22.0",
+						},
+						{
+							Cpe23Uri:              "cpe:2.3:a:kubernetes:cri-o:*:*:*:*:*:*:*:*",
+							VersionEndExcluding:   "1.23.2",
+							VersionStartIncluding: "1.23.0",
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             8.8,
+					ConfidentialityImpact: "HIGH",
+					IntegrityImpact:       "HIGH",
+					PrivilegesRequired:    "LOW",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 2.8,
+				ImpactScore:         5.9,
+			},
+		},
+		LastModifiedDate: "2022-03-16T00:00Z",
+		PublishedDate:    "2021-13-16T00:00Z",
+	},
 }
