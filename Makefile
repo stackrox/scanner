@@ -316,7 +316,7 @@ clean-pprof:
 # Generate and update the scanner genesis dump.  It assumes ``gsutil`` is setup
 # properly.  Example:
 #
-#     make genesis-dump WORKFLOW=<update-dumps-hourly-workflow-id>
+#     make genesis-dump-all WORKFLOW=<update-dumps-hourly-workflow-id>
 #
 
 gd-param-workflow := WORKFLOW
@@ -342,8 +342,8 @@ $(gd-target)-commit: $(gd-dir)/gcloud
 	! git status --porcelain | grep '^[^? ]'
 	cp $< $(gd-manifest-file)
 	git add $(gd-manifest-file)
-	git checkout -b genesis-dump/$$(cat $(gd-dir)/until) | sed 's/T.*//')
-	git commit -v -m "New Genesis Dump $$(cat $(gd-dir)/until) | sed 's/T.*//')"
+	git checkout -b genesis-dump/$$((cat $(gd-dir)/until) | sed 's/T.*//')
+	git commit -v -m "New Genesis Dump $$((cat $(gd-dir)/until) | sed 's/T.*//')"
 
 $(gd-dir)/gcloud: $(gd-dir)/dest $(gd-dir)/dump.zip
 	gsutil cp $(gd-dir)/dump.zip $$(cat $<)
