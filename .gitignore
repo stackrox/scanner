@@ -10,6 +10,7 @@ proto-generated-srcs
 protoc-*
 /.proto/
 /.gobin/
+/genesis-dump/
 
 # nohup output when running port-forwards
 nohup.out

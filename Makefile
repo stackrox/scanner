@@ -316,7 +316,7 @@ clean-pprof:
 # Generate and update the scanner genesis dump.  It assumes ``gsutil`` is setup
 # properly.  Example:
 #
-#     make genesis-dump WORKFLOW=<update-dumps-hourly-workflow-id>
+#     make genesis-dump-all WORKFLOW=<update-dumps-hourly-workflow-id>
 #
 
 gd-param-workflow := WORKFLOW
@@ -331,19 +331,19 @@ gd-bucket-dump := gs://stackrox-scanner-ci-vuln-dump
 
 .PHONY: $(gd-target) $(gd-target)-commit $(gd-target)-all
 
-$(gd-target)-all:  $(gd-target)-commit $(gd-target)
+$(gd-target)-all: $(gd-target) $(gd-target)-commit
 
 $(gd-target): $(gd-dir)/manifest.json $(gd-dir)/until
 	@echo "MANIFEST:"
-	@diff -u $< $(gd-manifest-file) | sed 's/^/    /'
+	@diff -u $(gd-manifest-file) $< | sed 's/^/    /'
 	@echo "Run \`make $(gd-target)-commit [...]\` to submit to gcloud and commit."
 
-$(gd-target)-commit: $(gd-dir)/gcloud
+$(gd-target)-commit: $(gd-dir)/manifest.json $(gd-dir)/gcloud
 	! git status --porcelain | grep '^[^? ]'
 	cp $< $(gd-manifest-file)
 	git add $(gd-manifest-file)
-	git checkout -b genesis-dump/$$(cat $(gd-dir)/until) | sed 's/T.*//')
-	git commit -v -m "New Genesis Dump $$(cat $(gd-dir)/until) | sed 's/T.*//')"
+	git checkout -b genesis-dump/$$(cat $(gd-dir)/until | sed 's/T.*//')
+	git commit -v -m "New Genesis Dump $$(cat $(gd-dir)/until | sed 's/T.*//')"
 
 $(gd-dir)/gcloud: $(gd-dir)/dest $(gd-dir)/dump.zip
 	gsutil cp $(gd-dir)/dump.zip $$(cat $<)
@@ -373,5 +373,5 @@ ifndef $(gd-param-workflow)
 	@exit 1
 else
 	mkdir -p $(dir $@)
-	uuidgen > $@
+	uuidgen | tr '[:upper:]' '[:lower:]' > $@
 endif
