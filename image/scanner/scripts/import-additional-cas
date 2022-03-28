@@ -2,15 +2,5 @@
 
 set -euo pipefail
 
-lines=$(for d in /usr/local/share/ca-certificates /etc/pki/injected-ca-trust
-do
-    if [ -d "$d" ]; then
-        find "$d" -maxdepth 1 -type f -print0 | \
-            xargs --no-run-if-empty -0 cp -t /etc/pki/ca-trust/source/anchors
-    fi
-done | wc -l)
-
-if (( lines )); then
-    update-ca-trust extract
-fi
-
+cp -L /usr/local/share/ca-certificates/* /etc/pki/injected-ca-trust \
+    /etc/pki/ca-trust/source/anchors && update-ca-trust || echo "No custom certificates"
