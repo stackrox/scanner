@@ -12,7 +12,7 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 3
     reviewers:
-      - "RTann" # TODO: Update to a group...
+      - 'stackrox/scanner-dep-updates'
 
   - package-ecosystem: 'gomod'
     directory: '/tools/linters/'
@@ -21,4 +21,4 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 3
     reviewers:
-      - "RTann" # TODO: Update to a group...
+      - 'stackrox/scanner-dep-updates'
