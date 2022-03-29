@@ -52,7 +52,7 @@ require (
 	google.golang.org/api v0.63.0
 	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v2 v2.4.0
-	honnef.co/go/tools v0.2.2
+	honnef.co/go/tools v0.3.0-0.dev.0.20220306074811-23e1086441d2
 )
 
 replace (
