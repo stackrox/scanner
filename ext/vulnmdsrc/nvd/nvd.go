@@ -97,7 +97,9 @@ func (a *appender) parseDataFeed(r io.Reader) error {
 		return commonerr.ErrCouldNotParse
 	}
 
-	for _, nvdEntry := range nvd.Entries {
+	for i := range nvd.Entries {
+		// This removes the possibility of memory aliasing.
+		nvdEntry := nvd.Entries[i]
 		// Create metadata entry.
 		enricher := newMetadataEnricher(&nvdEntry)
 		if enricher.metadata != nil {
