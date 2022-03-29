@@ -6,19 +6,19 @@
 version: 2
 updates:
   - package-ecosystem: 'gomod'
-      directory: '/'
-      schedule:
-        interval: 'weekly'
-        day: 'wednesday'
-      open-pull-requests-limit: 3
-      reviewers:
-        - "RTann" # TODO: Update to a group...
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    open-pull-requests-limit: 3
+    reviewers:
+      - "RTann" # TODO: Update to a group...
 
   - package-ecosystem: 'gomod'
-      directory: '/tools/linters/'
-      schedule:
-        interval: 'weekly'
-        day: 'wednesday'
-      open-pull-requests-limit: 3
-      reviewers:
-        - "RTann" # TODO: Update to a group...
+    directory: '/tools/linters/'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    open-pull-requests-limit: 3
+    reviewers:
+      - "RTann" # TODO: Update to a group...
