@@ -113,5 +113,5 @@ linters:
     # - unused
     # - varcheck
     # - whitespace
-    # - wrapcheck
+    # - wrapcheck TODO: add in follow-up
     # - wsl
