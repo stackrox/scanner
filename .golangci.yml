@@ -1,4 +1,4 @@
-# Originally copied from stackrox repo.
+# Originally copied from github.com/stackrox/stackrox, and regularly kept in-sync manually.
 
 run:
   timeout: 5m
@@ -29,7 +29,7 @@ issues:
 linters-settings:
   gosec:
     includes:
-      - G601
+      - G601 # Implicit memory aliasing of items from a range statement
   revive:
     min-confidence: 0
   govet:
