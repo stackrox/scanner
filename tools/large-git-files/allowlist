@@ -4,7 +4,6 @@ generated/scanner/api/v1/component.pb.go
 generated/scanner/api/v1/image_scan_service.pb.go
 generated/scanner/api/v1/vulnerability.pb.go
 go.sum
-**/go.sum
 image/dump/cves_10222019.tar.gz
 pkg/rhelv2/rpm/testdata/Packages
 pkg/vulnloader/nvdloader/nvdloader_easyjson.go

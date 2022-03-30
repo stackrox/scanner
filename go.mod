@@ -17,6 +17,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2
+	github.com/golangci/golangci-lint v1.45.2
 	github.com/google/go-cmp v0.5.7
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
@@ -51,6 +52,7 @@ require (
 	google.golang.org/api v0.63.0
 	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v2 v2.4.0
+	honnef.co/go/tools v0.3.0-0.dev.0.20220306074811-23e1086441d2
 )
 
 replace (
