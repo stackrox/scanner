@@ -17,19 +17,19 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2
-	github.com/golangci/golangci-lint v1.33.0
-	github.com/google/go-cmp v0.5.6
+	github.com/golangci/golangci-lint v1.45.2
+	github.com/google/go-cmp v0.5.7
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible
-	github.com/hashicorp/go-version v1.3.0
+	github.com/hashicorp/go-version v1.4.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
 	github.com/knqyf263/go-rpm-version v0.0.0-20170716094938-74609b86c936
-	github.com/lib/pq v1.9.0
+	github.com/lib/pq v1.10.4
 	github.com/mailru/easyjson v0.7.7
 	github.com/mholt/archiver/v3 v3.5.0
 	github.com/mitchellh/hashstructure v1.1.0
@@ -41,18 +41,18 @@ require (
 	github.com/quay/goval-parser v0.8.6
 	github.com/remind101/migrate v0.0.0-20170729031349-52c1edff7319
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.3.0
+	github.com/spf13/cobra v1.4.0
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
 	github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab
 	github.com/stackrox/rox v0.0.0-20210914215712-9ac265932e28
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9
-	google.golang.org/api v0.62.0
-	google.golang.org/grpc v1.42.0
+	golang.org/x/sys v0.0.0-20220209214540-3681064d5158
+	google.golang.org/api v0.63.0
+	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v2 v2.4.0
-	honnef.co/go/tools v0.0.1-2020.1.6
+	honnef.co/go/tools v0.3.0-0.dev.0.20220306074811-23e1086441d2
 )
 
 replace (

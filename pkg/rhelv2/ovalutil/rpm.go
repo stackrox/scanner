@@ -176,8 +176,8 @@ func walkCriterion(module string, node *oval.Criteria, cris *[]*criterionWithMod
 	}
 
 	// recursive to leaves
-	for _, criteria := range node.Criterias {
-		walkCriterion(module, &criteria, cris)
+	for i := range node.Criterias {
+		walkCriterion(module, &node.Criterias[i], cris)
 	}
 }
 
