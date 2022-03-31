@@ -43,7 +43,7 @@ BUILD_CMD := go build -ldflags="-linkmode=external -X github.com/stackrox/scanne
 STATICCHECK_BIN := $(GOPATH)/bin/staticcheck
 $(STATICCHECK_BIN): deps
 	@echo "+ $@"
-	@go install honnef.co/go/tools/cmd/staticcheck
+	@cd tools/linters/ && go install honnef.co/go/tools/cmd/staticcheck
 
 EASYJSON_BIN := $(GOPATH)/bin/easyjson
 $(EASYJSON_BIN): deps
@@ -53,7 +53,7 @@ $(EASYJSON_BIN): deps
 GOLANGCILINT_BIN := $(GOBIN)/golangci-lint
 $(GOLANGCILINT_BIN): deps
 	@echo "+ $@"
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint
+	@cd tools/linters/ && go install github.com/golangci/golangci-lint/cmd/golangci-lint
 
 OSSLS_BIN := $(GOBIN)/ossls
 $(OSSLS_BIN): deps
