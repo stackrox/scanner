@@ -297,4 +297,134 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 		LastModifiedDate: "2022-03-16T00:00Z",
 		PublishedDate:    "2022-03-16T00:00Z",
 	},
+	"CVE-2022-22963": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ID: "CVE-2022-22963",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: `In Spring Cloud Function versions 3.1.6, 3.2.2 and older unsupported versions, when using routing functionality it is possible for a user to provide a specially crafted SpEL as a routing-expression that may result in remote code execution and access to local resources.`,
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name: "https://tanzu.vmware.com/security/cve-2022-22963",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:              `cpe:2.3:a:vmware:spring_cloud_function:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "3.1.7",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:vmware:spring_cloud_function:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "3.2.3",
+							VersionStartIncluding: "3.2.0",
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             9.8,
+					ConfidentialityImpact: "HIGH",
+					IntegrityImpact:       "HIGH",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+					Version:               "3.0",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         5.9,
+			},
+		},
+		LastModifiedDate: "2022-03-29T00:00Z",
+		PublishedDate:    "2022-03-31T00:00Z",
+	},
+	"CVE-2022-22965": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ID: "CVE-2022-22965",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: `A Spring MVC or Spring WebFlux application running on JDK 9+ may be vulnerable to remote code execution (RCE) via data binding. The specific exploit requires the application to run on Tomcat as a WAR deployment. If the application is deployed as a Spring Boot executable jar, i.e. the default, it is not vulnerable to the exploit. However, the nature of the vulnerability is more general, and there may be other ways to exploit it.`,
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name: "https://tanzu.vmware.com/security/cve-2022-22965",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:              `cpe:2.3:a:vmware:spring_framework:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:vmware:spring_framework:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.0",
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             9.8,
+					ConfidentialityImpact: "HIGH",
+					IntegrityImpact:       "HIGH",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+					Version:               "3.0",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         5.9,
+			},
+		},
+		LastModifiedDate: "2022-03-31T00:00Z",
+		PublishedDate:    "2022-03-31T00:00Z",
+	},
 }
