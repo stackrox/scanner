@@ -80,7 +80,9 @@ func (a *appender) parseDataFeed(r io.Reader) error {
 		return err
 	}
 
-	for _, redhatEntry := range redhat {
+	for i := range redhat {
+		// This removes the possibility of memory aliasing.
+		redhatEntry := redhat[i]
 		// Create metadata entry.
 		enricher := newMetadataEnricher(&redhatEntry)
 		if enricher.metadata != nil {

@@ -254,7 +254,9 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 	}
 
 	baseVulnsMap := make(map[clairVulnUniqueKey]database.Vulnerability, len(baseVulns))
-	for _, vuln := range baseVulns {
+	for i := range baseVulns {
+		// This removes the possibility of memory aliasing.
+		vuln := baseVulns[i]
 		key := keyFromVuln(&vuln)
 		if _, ok := baseVulnsMap[key]; ok {
 			// Should really never happen, but being defensive.
@@ -265,7 +267,9 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 
 	var filtered []database.Vulnerability
 	var linuxKernelVulnsFiltered int
-	for _, headVuln := range headVulns {
+	for i := range headVulns {
+		// This removes the possibility of memory aliasing.
+		headVuln := headVulns[i]
 		if cfg.SkipUbuntuLinuxKernelVulns {
 			filterUbuntuLinuxKernelFeatures(&headVuln)
 			if len(headVuln.FixedIn) == 0 {
