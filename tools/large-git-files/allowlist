@@ -1,4 +1,3 @@
-**/go.sum
 e2etests/testcase_test.go
 ext/featurefmt/rpm/testdata/Packages
 generated/scanner/api/v1/component.pb.go
@@ -9,3 +8,4 @@ image/dump/cves_10222019.tar.gz
 pkg/rhelv2/rpm/testdata/Packages
 pkg/vulnloader/nvdloader/nvdloader_easyjson.go
 pkg/ziputil/testdata/test.zip
+tools/linters/go.sum
