@@ -1,6 +1,7 @@
 package pgsql
 
 import (
+	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 )
 
@@ -10,13 +11,13 @@ func (pgSQL *pgSQL) GetLayerBySHA(sha string, opts *database.DatastoreOptions) (
 	if err != nil {
 		return "", "", false, err
 	}
-	defer rows.Close()
+	defer utils.IgnoreError(rows.Close)
 	for rows.Next() {
 		var layer, lineage string
 		err = rows.Scan(&layer, &lineage)
 		return layer, lineage, true, err
 	}
-	return "", "", false, nil
+	return "", "", false, rows.Err()
 }
 
 // GetLayerByName fetches the latest layer for an image by the image name.
@@ -25,13 +26,13 @@ func (pgSQL *pgSQL) GetLayerByName(name string, opts *database.DatastoreOptions)
 	if err != nil {
 		return "", "", false, err
 	}
-	defer rows.Close()
+	defer utils.IgnoreError(rows.Close)
 	for rows.Next() {
 		var layer, lineage string
 		err = rows.Scan(&layer, &lineage)
 		return layer, lineage, true, err
 	}
-	return "", "", false, nil
+	return "", "", false, rows.Err()
 }
 
 // AddImage inserts an image and its latest layer into the database.
