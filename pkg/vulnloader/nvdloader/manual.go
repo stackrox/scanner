@@ -297,4 +297,465 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 		LastModifiedDate: "2022-03-16T00:00Z",
 		PublishedDate:    "2022-03-16T00:00Z",
 	},
+	"CVE-2022-22965": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ID: "CVE-2022-22965",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: `A Spring MVC or Spring WebFlux application running on JDK 9+ may be vulnerable to remote code execution (RCE) via data binding. The specific exploit requires the application to run on Tomcat as a WAR deployment. If the application is deployed as a Spring Boot executable jar, i.e. the default, it is not vulnerable to the exploit. However, the nature of the vulnerability is more general, and there may be other ways to exploit it.`,
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name: "https://tanzu.vmware.com/security/cve-2022-22965",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						// Spring Web MVC 5.3.x
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.0",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.17:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.17",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.16:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.16",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.15:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.15",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.14:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.14",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.13:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.13",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.12:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.12",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.11:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.11",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.10:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.10",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.9:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.9",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.8:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.8",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.7:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.7",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.6:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.6",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.5:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.5",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.4:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.4",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.3:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.3",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.2:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.2",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.1:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.1",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.3\.0:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.0",
+						},
+
+						// Spring Web MVC 5.2.x
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.19:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.19",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.18:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.18",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.17:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.17",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.16:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.16",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.15:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.15",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.14:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.14",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.13:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.13",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.12:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.12",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.11:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.11",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.10:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.10",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.9:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.9",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.8:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.8",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.7:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.7",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.6:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.6",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.5:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.5",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.4:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.4",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.3:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.3",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.2:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.2",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.1:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.1",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.0:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.0",
+						},
+
+						// Spring Web Flux 5.3.x
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.0",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.17:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.17",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.16:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.16",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.15:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.15",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.14:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.14",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.13:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.13",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.12:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.12",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.11:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.11",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.10:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.10",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.9:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.9",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.8:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.8",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.7:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.7",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.6:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.6",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.5:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.5",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.4:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.4",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.3:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.3",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.2:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.2",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.1:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.1",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.3\.0:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.3.18",
+							VersionStartIncluding: "5.3.0",
+						},
+
+						// Spring Web Flux 5.2.x
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.19:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.19",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.18:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.18",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.17:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.17",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.16:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.16",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.15:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.15",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.14:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.14",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.13:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.13",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.12:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.12",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.11:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.11",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.10:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.10",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.9:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.9",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.8:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.8",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.7:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.7",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.6:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.6",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.5:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.5",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.4:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.4",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.3:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.3",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.2:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.2",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.1:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.1",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.0:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.2.20",
+							VersionStartIncluding: "5.2.0",
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             9.8,
+					ConfidentialityImpact: "HIGH",
+					IntegrityImpact:       "HIGH",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+					Version:               "3.0",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         5.9,
+			},
+		},
+		LastModifiedDate: "2022-03-31T00:00Z",
+		PublishedDate:    "2022-03-31T00:00Z",
+	},
 }
