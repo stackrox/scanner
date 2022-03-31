@@ -177,9 +177,9 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 	// we will get a foreign key constraint violation.
 	// This is because the DB is cleared, but the cache logic assumes the DB
 	// has the entry for the foreign key.
-	//if pg.config.CacheSize > 0 {
-	//	pg.cache, _ = lru.New(pg.config.CacheSize)
-	//}
+	// if pg.config.CacheSize > 0 {
+	//   pg.cache, _ = lru.New(pg.config.CacheSize)
+	// }
 
 	return &pg, nil
 }
