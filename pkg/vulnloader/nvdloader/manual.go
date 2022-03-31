@@ -425,8 +425,8 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 
 						// Spring Web MVC 5.2.x
 						{
-							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc:*:*:*:*:*:*:*:*`,
-							VersionEndExcluding:   "5.2.20",
+							Cpe23Uri:            `cpe:2.3:a:apache:spring\-webmvc:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "5.2.20",
 						},
 						{
 							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webmvc\-5\.2\.19:*:*:*:*:*:*:*:*`,
@@ -628,8 +628,8 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 
 						// Spring Web Flux 5.2.x
 						{
-							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux:*:*:*:*:*:*:*:*`,
-							VersionEndExcluding:   "5.2.20",
+							Cpe23Uri:            `cpe:2.3:a:apache:spring\-webflux:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "5.2.20",
 						},
 						{
 							Cpe23Uri:              `cpe:2.3:a:apache:spring\-webflux\-5\.2\.19:*:*:*:*:*:*:*:*`,
