@@ -3132,10 +3132,10 @@ var testCases = []testCase{
 		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
 		source:                  "NVD",
-		namespace:               "alpine:3.15",
+		namespace:               "alpine:v3.15",
 		expectedFeatures: []apiV1.Feature{
 			{
-				Name:          "spring-webmvc-5.3.17",
+				Name:          "spring-webmvc",
 				VersionFormat: "JavaSourceType",
 				Version:       "5.3.17",
 				Vulnerabilities: []apiV1.Vulnerability{
@@ -3176,10 +3176,10 @@ var testCases = []testCase{
 		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
 		source:                  "NVD",
-		namespace:               "alpine:3.15",
+		namespace:               "alpine:v3.15",
 		expectedFeatures: []apiV1.Feature{
 			{
-				Name:          "spring-webmvc-5.3.18",
+				Name:          "spring-webmvc",
 				VersionFormat: "JavaSourceType",
 				Version:       "5.3.18",
 				AddedBy:       "sha256:d84ba7ea7803fa43fca06730523d264b31c562968cfd7020f0584f5ec1b26225",
@@ -3195,10 +3195,10 @@ var testCases = []testCase{
 		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
 		source:                  "NVD",
-		namespace:               "alpine:3.15",
+		namespace:               "alpine:v3.15",
 		expectedFeatures: []apiV1.Feature{
 			{
-				Name:          "spring-webflux-5.3.17",
+				Name:          "spring-webflux",
 				VersionFormat: "JavaSourceType",
 				Version:       "5.3.17",
 				Vulnerabilities: []apiV1.Vulnerability{
@@ -3239,10 +3239,10 @@ var testCases = []testCase{
 		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
 		source:                  "NVD",
-		namespace:               "alpine:3.15",
+		namespace:               "alpine:v3.15",
 		expectedFeatures: []apiV1.Feature{
 			{
-				Name:          "spring-webflux-5.3.18",
+				Name:          "spring-webflux",
 				VersionFormat: "JavaSourceType",
 				Version:       "5.3.18",
 				AddedBy:       "sha256:d84ba7ea7803fa43fca06730523d264b31c562968cfd7020f0584f5ec1b26225",
