@@ -332,8 +332,8 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 							VersionStartIncluding: "5.3.0",
 						},
 						{
-							Cpe23Uri:              `cpe:2.3:a:apache:spring_webmvc:*:*:*:*:*:*:*:*`,
-							VersionEndExcluding:   "5.2.20",
+							Cpe23Uri:            `cpe:2.3:a:apache:spring_webmvc:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "5.2.20",
 						},
 						{
 							Cpe23Uri:              `cpe:2.3:a:apache:spring_webflux:*:*:*:*:*:*:*:*`,
@@ -341,8 +341,8 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 							VersionStartIncluding: "5.3.0",
 						},
 						{
-							Cpe23Uri:              `cpe:2.3:a:apache:spring_webflux:*:*:*:*:*:*:*:*`,
-							VersionEndExcluding:   "5.2.20",
+							Cpe23Uri:            `cpe:2.3:a:apache:spring_webflux:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "5.2.20",
 						},
 					},
 					Operator: "OR",
