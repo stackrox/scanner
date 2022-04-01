@@ -357,7 +357,7 @@ commands:
           name: Push images
           command: |
             source scripts/ci/lib.sh
-            push_images "$CIRCLE_TAG"
+            push_images "${CIRCLE_TAG:-}"
 
   run-e2e-tests:
     parameters:
