@@ -23,6 +23,31 @@ var (
 	}
 )
 
+///////////////////////////////////////////////////
+// BEGIN
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
+// nameRegexp is used to attempt to pull a name and version out of a jar's
+// filename.
+var nameRegexp = regexp.MustCompile(`([[:graph:]]+)-([[:digit:]][\-.[:alnum:]]*(?:-SNAPSHOT)?)`)
+
+// checkName returns the extracted package name from the above regexp.
+func checkName(name string) string {
+	m := nameRegexp.FindStringSubmatch(name)
+	if m == nil || len(m) < 2 {
+		return name
+	}
+	return m[1]
+}
+
+///////////////////////////////////////////////////
+// END
+// Influenced by ClairCore under Apache 2.0 License
+// https://github.com/quay/claircore
+///////////////////////////////////////////////////
+
 // Filter some substrings: e.g. annotations and specs can be ignored for example
 func filterComponent(component string) bool {
 	for _, filteredSubstring := range filteredJavaComponents {
@@ -78,7 +103,7 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) [
 	fileName := strings.TrimSuffix(filepath.Base(locationSoFar), filepath.Ext(locationSoFar))
 
 	topLevelComponent := newJavaComponent(locationSoFar)
-	topLevelComponent.Name = fileName
+	topLevelComponent.Name = checkName(fileName)
 	topLevelComponent.JavaPkgMetadata = &component.JavaPkgMetadata{
 		ImplementationVersion: manifest.implementationVersion,
 		SpecificationVersion:  manifest.specificationVersion,
