@@ -3251,7 +3251,7 @@ var testCases = []testCase{
 						FixedBy: "3.2.3",
 					},
 				},
-				AddedBy:  "sha256:52c471c8fdbfbedce8e2557b6b3ae9e53bfaac9ea9d606f870a0ea1a07a1b6e0",
+				AddedBy:  "sha256:f26cc7bc44e4f9b8969a0a95040d484ab301b3e56d1fb1eda8a79bf7e089f24e",
 				Location: "app/demo-0.0.1-SNAPSHOT.war:WEB-INF/lib/spring-cloud-function-core-3.2.2.jar",
 				FixedBy:  "3.2.3",
 			},
