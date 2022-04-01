@@ -356,80 +356,9 @@ commands:
       - run:
           name: Push images
           command: |
-            tag="$(make --quiet --no-print-directory tag)"
-            scanner_image_name="scanner"
-            db_image_name="scanner-db"
-            scanner_slim_image_name="scanner-slim"
-            db_slim_image_name="scanner-db-slim"
+            source scripts/ci/lib.sh
+            push_images "$CIRCLE_TAG"
 
-            gcr_scanner_image="us.gcr.io/stackrox-ci/${scanner_image_name}:${tag}"
-            gcr_db_image="us.gcr.io/stackrox-ci/${db_image_name}:${tag}"
-            gcr_scanner_slim_image="us.gcr.io/stackrox-ci/${scanner_slim_image_name}:${tag}"
-            gcr_db_slim_image="us.gcr.io/stackrox-ci/${db_slim_image_name}:${tag}"
-
-            ./scripts/push-as-manifest-list.sh "${gcr_scanner_image}"
-            ./scripts/push-as-manifest-list.sh "${gcr_db_image}"
-            ./scripts/push-as-manifest-list.sh "${gcr_scanner_slim_image}"
-            ./scripts/push-as-manifest-list.sh "${gcr_db_slim_image}"
-
-            # Retag for docker.io
-            docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
-
-            dockerhub_scanner_image="stackrox/${scanner_image_name}:${tag}"
-            docker tag "${gcr_scanner_image}" "${dockerhub_scanner_image}"
-            ./scripts/push-as-manifest-list.sh "${dockerhub_scanner_image}"
-
-            dockerhub_db_image="stackrox/${db_image_name}:${tag}"
-            docker tag "${gcr_db_image}" "${dockerhub_db_image}"
-            ./scripts/push-as-manifest-list.sh "${dockerhub_db_image}"
-
-            dockerhub_scanner_slim_image="stackrox/${scanner_slim_image_name}:${tag}"
-            docker tag "${gcr_scanner_slim_image}" "${dockerhub_scanner_slim_image}"
-            ./scripts/push-as-manifest-list.sh "${dockerhub_scanner_slim_image}"
-
-            dockerhub_db_slim_image="stackrox/${db_slim_image_name}:${tag}"
-            docker tag "${gcr_db_slim_image}" "${dockerhub_db_slim_image}"
-            ./scripts/push-as-manifest-list.sh "${dockerhub_db_slim_image}"
-
-            # Retag for quay.io
-
-            docker login -u "$QUAY_RHACS_ENG_RW_USERNAME" -p "$QUAY_RHACS_ENG_RW_PASSWORD" quay.io
-
-            QUAY_REPO="rhacs-eng"
-            quay_scanner_image="quay.io/$QUAY_REPO/${scanner_image_name}:${tag}"
-            docker tag "${gcr_scanner_image}" "${quay_scanner_image}"
-            ./scripts/push-as-manifest-list.sh "${quay_scanner_image}"
-
-            quay_db_image="quay.io/$QUAY_REPO/${db_image_name}:${tag}"
-            docker tag "${gcr_db_image}" "${quay_db_image}"
-            ./scripts/push-as-manifest-list.sh "${quay_db_image}"
-
-            quay_scanner_slim_image="quay.io/$QUAY_REPO/${scanner_slim_image_name}:${tag}"
-            docker tag "${gcr_scanner_slim_image}" "${quay_scanner_slim_image}"
-            ./scripts/push-as-manifest-list.sh "${quay_scanner_slim_image}"
-
-            quay_db_slim_image="quay.io/$QUAY_REPO/${db_slim_image_name}:${tag}"
-            docker tag "${gcr_db_slim_image}" "${quay_db_slim_image}"
-            ./scripts/push-as-manifest-list.sh "${quay_db_slim_image}"
-
-            if [[ -n "$CIRCLE_TAG" ]]; then
-                docker login -u "$STACKROX_IO_PUSH_USERNAME" -p "$STACKROX_IO_PUSH_PASSWORD" stackrox.io
-
-                stackrox_io_scanner_image="stackrox.io/${scanner_image_name}:${tag}"
-                stackrox_io_scanner_db_image="stackrox.io/${db_image_name}:${tag}"
-                stackrox_io_scanner_slim_image="stackrox.io/${scanner_slim_image_name}:${tag}"
-                stackrox_io_scanner_db_slim_image="stackrox.io/${db_slim_image_name}:${tag}"
-
-                docker tag "${gcr_scanner_image}" "${stackrox_io_scanner_image}"
-                docker tag "${gcr_db_image}" "${stackrox_io_scanner_db_image}"
-                docker tag "${gcr_scanner_slim_image}" "${stackrox_io_scanner_slim_image}"
-                docker tag "${gcr_db_slim_image}" "${stackrox_io_scanner_db_slim_image}"
-
-                ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_image}"
-                ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_db_image}"
-                ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_slim_image}"
-                ./scripts/push-as-manifest-list.sh "${stackrox_io_scanner_db_slim_image}"
-            fi
   run-e2e-tests:
     parameters:
       cluster-id:
@@ -1165,6 +1094,7 @@ workflows:
           - docker-io-and-stackrox-io-push
           - quay-rhacs-eng-readonly
           - quay-rhacs-eng-readwrite
+          - quay-stackrox-io-readwrite
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
