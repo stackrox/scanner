@@ -297,6 +297,71 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 		LastModifiedDate: "2022-03-16T00:00Z",
 		PublishedDate:    "2022-03-16T00:00Z",
 	},
+	"CVE-2022-22963": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ID: "CVE-2022-22963",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: `In Spring Cloud Function versions 3.1.6, 3.2.2 and older unsupported versions, when using routing functionality it is possible for a user to provide a specially crafted SpEL as a routing-expression that may result in remote code execution and access to local resources.`,
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name: "https://tanzu.vmware.com/security/cve-2022-22963",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-cloud\-function\-core:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "3.2.3",
+							VersionEndIncluding:   "3.2.0",
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:apache:spring\-cloud\-function\-core:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "3.1.7",
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             9.8,
+					ConfidentialityImpact: "HIGH",
+					IntegrityImpact:       "HIGH",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+					Version:               "3.0",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         5.9,
+			},
+		},
+		LastModifiedDate: "2022-03-31T00:00Z",
+		PublishedDate:    "2022-03-29T00:00Z",
+	},
 	"CVE-2022-22965": {
 		CVE: &schema.CVEJSON40{
 			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{

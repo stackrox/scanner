@@ -3213,4 +3213,48 @@ var testCases = []testCase{
 			},
 		},
 	},
+	{
+		image:                   "docker.io/stackrox/sandbox:springboot-web-cloud-function-2.6.6",
+		registry:                "https://registry-1.docker.io",
+		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
+		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		source:                  "NVD",
+		namespace:               "alpine:v3.15",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "spring-cloud-function-core",
+				VersionFormat: "JavaSourceType",
+				Version:       "3.2.2",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2022-22963",
+						Description:   "In Spring Cloud Function versions 3.1.6, 3.2.2 and older unsupported versions, when using routing functionality it is possible for a user to provide a specially crafted SpEL as a routing-expression that may result in remote code execution and access to local resources.",
+						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2022-22963",
+						Severity:      "Critical",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         5.9,
+									"Score":               9.8,
+									"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "3.2.3",
+					},
+				},
+				AddedBy:  "sha256:f7edbdbbb0752d6ec06c7098cc966e7b36edf216a72c4d8c074ecf0d3a363b85",
+				Location: "app/demo-0.0.1-SNAPSHOT.war:WEB-INF/lib/spring-cloud-function-core-3.2.2.jar",
+				FixedBy:  "3.2.3",
+			},
+		},
+	},
 }
