@@ -1191,7 +1191,7 @@ workflows:
   nightly:
     triggers:
       - schedule:
-          cron: "* 18 * * *"
+          cron: "18 11 * * *"
           filters:
             branches:
               only: master
