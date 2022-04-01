@@ -3125,4 +3125,92 @@ var testCases = []testCase{
 		source:    "NVD",
 		namespace: "busybox:1.35.0",
 	},
+	{
+		image:                   "docker.io/stackrox/sandbox:springboot-2.6.5",
+		registry:                "https://registry-1.docker.io",
+		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
+		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		source:                  "NVD",
+		namespace:               "alpine:v3.15",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "spring-webmvc",
+				VersionFormat: "JavaSourceType",
+				Version:       "5.3.17",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2022-22965",
+						Description:   "A Spring MVC or Spring WebFlux application running on JDK 9+ may be vulnerable to remote code execution (RCE) via data binding. The specific exploit requires the application to run on Tomcat as a WAR deployment. If the application is deployed as a Spring Boot executable jar, i.e. the default, it is not vulnerable to the exploit. However, the nature of the vulnerability is more general, and there may be other ways to exploit it.",
+						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2022-22965",
+						Severity:      "Critical",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         5.9,
+									"Score":               9.8,
+									"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "5.3.18",
+					},
+				},
+				AddedBy:  "sha256:bb57a75650ced8dd9ff54ca55ab34a150a7cb7b68258064056e65e0b2a9c3320",
+				Location: "app/demo-0.0.1-SNAPSHOT.war:WEB-INF/lib/spring-webmvc-5.3.17.jar",
+				FixedBy:  "5.3.18",
+			},
+		},
+	},
+	{
+		image:                   "docker.io/stackrox/sandbox:springboot-2.6.5-flux",
+		registry:                "https://registry-1.docker.io",
+		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
+		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		source:                  "NVD",
+		namespace:               "alpine:v3.15",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "spring-webflux",
+				VersionFormat: "JavaSourceType",
+				Version:       "5.3.17",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2022-22965",
+						Description:   "A Spring MVC or Spring WebFlux application running on JDK 9+ may be vulnerable to remote code execution (RCE) via data binding. The specific exploit requires the application to run on Tomcat as a WAR deployment. If the application is deployed as a Spring Boot executable jar, i.e. the default, it is not vulnerable to the exploit. However, the nature of the vulnerability is more general, and there may be other ways to exploit it.",
+						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2022-22965",
+						Severity:      "Critical",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         5.9,
+									"Score":               9.8,
+									"Vectors":             "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "5.3.18",
+					},
+				},
+				AddedBy:  "sha256:f7edbdbbb0752d6ec06c7098cc966e7b36edf216a72c4d8c074ecf0d3a363b85",
+				Location: "app/demo-0.0.1-SNAPSHOT.war:WEB-INF/lib/spring-webflux-5.3.17.jar",
+				FixedBy:  "5.3.18",
+			},
+		},
+	},
 }
