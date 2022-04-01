@@ -329,11 +329,11 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 						{
 							Cpe23Uri:              `cpe:2.3:a:apache:spring\-cloud\-function\-core:*:*:*:*:*:*:*:*`,
 							VersionEndExcluding:   "3.2.3",
-							VersionEndIncluding:   "3.2.0",
+							VersionStartIncluding: "3.2.0",
 						},
 						{
-							Cpe23Uri:              `cpe:2.3:a:apache:spring\-cloud\-function\-core:*:*:*:*:*:*:*:*`,
-							VersionEndExcluding:   "3.1.7",
+							Cpe23Uri:            `cpe:2.3:a:apache:spring\-cloud\-function\-core:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "3.1.7",
 						},
 					},
 					Operator: "OR",
