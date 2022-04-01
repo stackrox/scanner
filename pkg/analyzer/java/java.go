@@ -31,7 +31,7 @@ var (
 
 // nameRegexp is used to attempt to pull a name and version out of a jar's
 // filename.
-var nameRegexp = regexp.MustCompile(`([[:graph:]]+)-([[:digit:]][\-.[:alnum:]]*(?:-SNAPSHOT)?)\.jar`)
+var nameRegexp = regexp.MustCompile(`([[:graph:]]+)-([[:digit:]][\-.[:alnum:]]*(?:-SNAPSHOT)?)`)
 
 // checkName returns the extracted package name from the above regexp.
 func checkName(name string) string {
@@ -100,11 +100,10 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) [
 		return nil
 	}
 
-	fileNameWithExt := filepath.Base(locationSoFar)
-	fileName := strings.TrimSuffix(fileNameWithExt, filepath.Ext(locationSoFar))
+	fileName := strings.TrimSuffix(filepath.Base(locationSoFar), filepath.Ext(locationSoFar))
 
 	topLevelComponent := newJavaComponent(locationSoFar)
-	topLevelComponent.Name = checkName(fileNameWithExt)
+	topLevelComponent.Name = checkName(fileName)
 	topLevelComponent.JavaPkgMetadata = &component.JavaPkgMetadata{
 		ImplementationVersion: manifest.implementationVersion,
 		SpecificationVersion:  manifest.specificationVersion,
