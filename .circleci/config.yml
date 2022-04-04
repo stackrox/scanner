@@ -1029,6 +1029,7 @@ workflows:
             - docker-io-and-stackrox-io-push
             - quay-rhacs-eng-readwrite
             - quay-rhacs-eng-readonly
+            - quay-stackrox-io-readwrite
           requires:
             - create-postgres-dump-from-genesis-dump
             - upload-dumps-for-embedding-into-image
