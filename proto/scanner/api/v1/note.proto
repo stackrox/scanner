@@ -12,3 +12,7 @@ enum Note {
   LANGUAGE_CVES_UNAVAILABLE       = 2;
   CERTIFIED_RHEL_SCAN_UNAVAILABLE = 3;
 }
+
+enum NodeNote {
+  NODE_OS_UNSUPPORTED = 0;
+}

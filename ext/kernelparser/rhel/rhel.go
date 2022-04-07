@@ -15,7 +15,11 @@ const (
 )
 
 var (
-	regex = regexp.MustCompile(`el[0-9]+`)
+	// rhcosOSImagePattern is the pattern by which versions of Red Hat CoreOS follow.
+	// Example: Red Hat Enterprise Linux CoreOS 47.84.202203141332-0 (Ootpa)
+	// The parser expects osImage to be lowercase, so the pattern is lowercase.
+	rhcosOSImagePattern = regexp.MustCompile(`^red hat enterprise linux coreos `)
+	rhelKernelPattern   = regexp.MustCompile(`el[0-9]+`)
 )
 
 func init() {
@@ -27,7 +31,12 @@ func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.
 		return nil, false, nil
 	}
 
-	matches := regex.FindStringSubmatch(kernelVersion)
+	if rhcosOSImagePattern.MatchString(osImage) {
+		// Explicitly ignore RHEL CoreOS.
+		return nil, true, nil
+	}
+
+	matches := rhelKernelPattern.FindStringSubmatch(kernelVersion)
 	if len(matches) == 0 {
 		return nil, false, fmt.Errorf("could not find RHEL version in kernel version string: %q", osImage)
 	}

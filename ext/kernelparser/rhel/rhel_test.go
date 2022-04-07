@@ -20,11 +20,8 @@ func TestParser(t *testing.T) {
 			kernelVersion: "4.18.0-193.14.3.el8_2.x86_64",
 			osImage:       "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 
-			expected: &kernelparser.ParseMatch{
-				Namespace: "centos:8",
-				Version:   "4.18.0-193.14.3.el8_2.x86_64",
-			},
-			valid: true,
+			expected: nil,
+			valid:    true,
 		},
 		{
 			kernelVersion: "3.10.0-957.el7.x86_64",
