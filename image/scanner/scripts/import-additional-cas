@@ -3,7 +3,7 @@
 set -euo pipefail
 
 copy_existing () {
-    src=$1
+    src="$1"
     if [ -d "$src" ] && [ "$(ls -A -I "..*" "$src")" ]; then
         cp -v -L "$src"/* /etc/pki/ca-trust/source/anchors
     else
@@ -14,4 +14,4 @@ copy_existing () {
 copy_existing /usr/local/share/ca-certificates
 copy_existing /etc/pki/injected-ca-trust
 
-update-ca-trust
+update-ca-trust extract
