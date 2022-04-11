@@ -226,12 +226,13 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 
 	os, kernelVulns, kernelComponent, err := s.evaluateLinuxKernelVulns(req)
 	if err != nil {
+		// If the node is unsupported, exit early.
+		if err == kernelparser.ErrNodeUnsupported {
+			resp.Notes = append(resp.Notes, v1.NodeNote_NODE_OS_UNSUPPORTED)
+			return resp, nil
+		}
+
 		return nil, status.Error(codes.Internal, err.Error())
-	}
-	if os == "" && kernelVulns == nil && kernelComponent == nil {
-		// Node's OS is unsupported, so exit early.
-		resp.Notes = append(resp.Notes, v1.NodeNote_NODE_OS_UNSUPPORTED)
-		return resp, nil
 	}
 
 	resp.OperatingSystem, resp.KernelVulnerabilities, resp.KernelComponent = os, kernelVulns, kernelComponent

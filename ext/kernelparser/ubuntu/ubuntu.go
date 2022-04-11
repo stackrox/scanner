@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
@@ -30,10 +31,10 @@ func parser(db database.Datastore, kernelVersion, osImage string) (*kernelparser
 
 	matches := regex.FindStringSubmatch(osImage)
 	if len(matches) == 0 {
-		return nil, false, fmt.Errorf("could not find Ubuntu version in OS string: %q", osImage)
+		return nil, false, errors.Errorf("could not find Ubuntu version in OS string: %q", osImage)
 	}
 	if len(matches) > 1 {
-		return nil, false, fmt.Errorf("found multiple Ubuntu versions in OS string: %q", osImage)
+		return nil, false, errors.Errorf("found multiple Ubuntu versions in OS string: %q", osImage)
 	}
 
 	featureName := "linux"
@@ -55,7 +56,7 @@ func parser(db database.Datastore, kernelVersion, osImage string) (*kernelparser
 	backportedFeature := fmt.Sprintf("%s-%s.%s", featureName, kernelSplit[0], kernelSplit[1])
 	exists, err := db.FeatureExists(namespace, backportedFeature)
 	if err != nil {
-		return nil, false, fmt.Errorf("error checking if feature exists: %v", err)
+		return nil, false, errors.Errorf("error checking if feature exists: %v", err)
 	}
 	if exists {
 		featureName = backportedFeature

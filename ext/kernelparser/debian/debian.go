@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
 )
@@ -40,10 +41,10 @@ func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.
 
 	matches := regex.FindStringSubmatch(osImage)
 	if len(matches) == 0 {
-		return nil, false, fmt.Errorf("could not find Debian version in OS string: %q", osImage)
+		return nil, false, errors.Errorf("could not find Debian version in OS string: %q", osImage)
 	}
 	if len(matches) > 1 {
-		return nil, true, fmt.Errorf("found multiple Debian versions in OS string: %q", osImage)
+		return nil, true, errors.Errorf("found multiple Debian versions in OS string: %q", osImage)
 	}
 
 	return &kernelparser.ParseMatch{

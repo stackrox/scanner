@@ -32,8 +32,8 @@ func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.
 	}
 
 	if rhcosOSImagePattern.MatchString(osImage) {
-		// Explicitly ignore RHEL CoreOS.
-		return nil, true, nil
+		// Explicitly ignore RHEL CoreOS nodes completely.
+		return nil, true, kernelparser.ErrNodeUnsupported
 	}
 
 	matches := rhelKernelPattern.FindStringSubmatch(kernelVersion)
