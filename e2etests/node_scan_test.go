@@ -206,6 +206,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 				KubeletVulnerabilities:   nil,
 				KubeproxyVulnerabilities: nil,
 				RuntimeVulnerabilities:   nil,
+				Notes:                    []v1.NodeNote{v1.NodeNote_NODE_OS_UNSUPPORTED},
 			},
 		},
 	}
@@ -234,6 +235,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 			contains(t, resp.RuntimeVulnerabilities, c.responseContains.RuntimeVulnerabilities)
 			contains(t, resp.KubeletVulnerabilities, c.responseContains.KubeletVulnerabilities)
 			contains(t, resp.KubeproxyVulnerabilities, c.responseContains.KubeproxyVulnerabilities)
+			assert.Equal(t, c.responseContains.Notes, resp.Notes)
 		})
 	}
 }
@@ -255,6 +257,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		expectedKernelComponent *v1.GetNodeVulnerabilitiesResponse_KernelComponent
 		expectedCVEs            []expectedCVE
 		unexpectedCVEs          []string
+		expectedNotes           []v1.NodeNote
 	}{
 		// Ubuntu
 		{
@@ -424,18 +427,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 			kernelVersion: "4.18.0-193.14.3.el8_2.x86_64",
 
-			expectedOS: "centos:8",
-			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
-				Name:    "kernel",
-				Version: "4.18.0-193.14.3.el8_2.x86_64",
-			},
-			expectedCVEs: []expectedCVE{
-				{
-					id:      "CVE-2020-14381",
-					fixedBy: "0:4.18.0-240.el8",
-				},
-			},
-			unexpectedCVEs: []string{"CVE-2020-27675", "CVE-2019-2182"},
+			expectedOS:              nil,
+			expectedKernelComponent: nil,
+			expectedCVEs:            nil,
+			expectedNotes:           []v1.NodeNote{v1.NodeNote_NODE_OS_UNSUPPORTED},
 		},
 		// Amzn
 		{
@@ -505,6 +500,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			})
 			require.NoError(t, err)
 
+			assert.Equal(t, c.expectedNotes, resp.Notes)
 			assert.Equal(t, c.expectedOS, resp.GetOperatingSystem())
 			assert.Equal(t, c.expectedKernelComponent, resp.KernelComponent)
 

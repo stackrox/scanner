@@ -220,11 +220,12 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 		return nil, status.Error(codes.InvalidArgument, "both os image and kernel version are required")
 	}
 
+	var err error
 	resp := &v1.GetNodeVulnerabilitiesResponse{
 		ScannerVersion: s.version,
 	}
 
-	os, kernelVulns, kernelComponent, err := s.evaluateLinuxKernelVulns(req)
+	resp.OperatingSystem, resp.KernelVulnerabilities, resp.KernelComponent, err = s.evaluateLinuxKernelVulns(req)
 	if err != nil {
 		// If the node is unsupported, exit early.
 		if err == kernelparser.ErrNodeUnsupported {
@@ -234,8 +235,6 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	resp.OperatingSystem, resp.KernelVulnerabilities, resp.KernelComponent = os, kernelVulns, kernelComponent
 
 	resp.KubeproxyVulnerabilities, err = s.getKubernetesVuln(k8scache.KubeProxy, req.GetKubeproxyVersion())
 	if err != nil {

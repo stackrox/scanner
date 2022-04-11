@@ -15,6 +15,7 @@ func TestParser(t *testing.T) {
 		osImage       string
 		expected      *kernelparser.ParseMatch
 		valid         bool
+		err           error
 	}{
 		{
 			kernelVersion: "4.18.0-193.14.3.el8_2.x86_64",
@@ -22,6 +23,7 @@ func TestParser(t *testing.T) {
 
 			expected: nil,
 			valid:    true,
+			err:      kernelparser.ErrNodeUnsupported,
 		},
 		{
 			kernelVersion: "3.10.0-957.el7.x86_64",
@@ -74,7 +76,7 @@ func TestParser(t *testing.T) {
 			}
 
 			match, valid, err := parser(nil, c.kernelVersion, osImage)
-			assert.NoError(t, err)
+			assert.Equal(t, c.err, err)
 			assert.Equal(t, c.valid, valid)
 			assert.Equal(t, c.expected, match)
 		})
