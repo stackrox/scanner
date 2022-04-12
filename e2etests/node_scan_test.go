@@ -427,7 +427,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 			kernelVersion: "4.18.0-193.14.3.el8_2.x86_64",
 
-			expectedOS:              nil,
+			expectedOS:              "",
 			expectedKernelComponent: nil,
 			expectedCVEs:            nil,
 			expectedNotes:           []v1.NodeNote{v1.NodeNote_NODE_OS_UNSUPPORTED},
