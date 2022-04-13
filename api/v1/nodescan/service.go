@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/rox/pkg/utils"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/convert"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
@@ -95,32 +96,38 @@ func featureVersionToKernelComponent(fv database.FeatureVersion) *v1.GetNodeVuln
 
 func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesRequest) (string, []*v1.Vulnerability, *v1.GetNodeVulnerabilitiesResponse_KernelComponent, error) {
 	osImage := strings.ToLower(req.GetOsImage())
+	kernelVersion := req.GetKernelVersion()
 
 	var match *kernelparser.ParseMatch
+Parsers:
 	for name, parser := range kernelparser.Parsers {
-		var ok bool
 		var err error
-		match, ok, err = parser(s.db, req.GetKernelVersion(), osImage)
-		if err != nil {
-			return "", nil, nil, err
+		match, err = parser(s.db, kernelVersion, osImage)
+		switch err {
+		case nil:
+			// Found a match.
+			break Parsers
+		case kernelparser.ErrKernelUnrecognized:
+			// This parser did not recognize the kernel. Try another one.
+			continue Parsers
+		case kernelparser.ErrKernelUnsupported:
+			log.Debugf("%s parser found unsupported kernel: %s %s", name, req.GetOsImage(), kernelVersion)
+		case kernelparser.ErrNodeUnsupported:
+			log.Debugf("%s parser found unsupported node: %s %s", name, req.GetOsImage(), kernelVersion)
+		default:
+			// Should never happen.
+			utils.Must(errors.Errorf("Found unexpected error in kernel parser: %v", err))
 		}
-		if !ok {
-			continue
-		}
-		if match == nil {
-			log.Debugf("%s %s matched %s, but no match found", osImage, req.GetKernelVersion(), name)
-			return "", nil, nil, nil
-		}
-		break
+
+		return "", nil, nil, err
 	}
 
 	if match == nil {
-		// Did not find relevant OS-specific kernel parser.
-		// Defaulting to general kernel vulns from NVD.
-		vulns, err := s.getNVDVulns("linux", "linux_kernel", req.GetKernelVersion())
+		log.Debugf("Did not find relevant OS-specific kernel parser for %s %s; defaulting to generic kernel vulns from NVD", req.GetOsImage(), kernelVersion)
+		vulns, err := s.getNVDVulns("linux", "linux_kernel", kernelVersion)
 		return "", vulns, &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
 			Name:    "kernel",
-			Version: req.GetKernelVersion(),
+			Version: kernelVersion,
 		}, err
 	}
 
@@ -226,13 +233,15 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	}
 
 	resp.OperatingSystem, resp.KernelVulnerabilities, resp.KernelComponent, err = s.evaluateLinuxKernelVulns(req)
-	if err != nil {
-		// If the node is unsupported, exit early.
-		if err == kernelparser.ErrNodeUnsupported {
-			resp.Notes = append(resp.Notes, v1.NodeNote_NODE_OS_UNSUPPORTED)
-			return resp, nil
-		}
-
+	switch err {
+	case nil: // Normal
+	case kernelparser.ErrNodeUnsupported:
+		// The node is unsupported, exit early.
+		resp.Notes = append(resp.Notes, v1.NodeNote_NODE_OS_UNSUPPORTED)
+		return resp, nil
+	case kernelparser.ErrKernelUnsupported:
+		resp.Notes = append(resp.Notes, v1.NodeNote_NODE_KERNEL_UNSUPPORTED)
+	default:
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

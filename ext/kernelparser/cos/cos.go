@@ -11,9 +11,10 @@ func init() {
 	kernelparser.RegisterParser("cos", parser)
 }
 
-func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.ParseMatch, bool, error) {
+func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.ParseMatch, error) {
 	if strings.HasSuffix(kernelVersion, "+") && strings.Contains(osImage, "container-optimized") {
-		return nil, true, nil
+		// Google COS kernel is unsupported at this time.
+		return nil, kernelparser.ErrKernelUnsupported
 	}
-	return nil, false, nil
+	return nil, kernelparser.ErrKernelUnrecognized
 }

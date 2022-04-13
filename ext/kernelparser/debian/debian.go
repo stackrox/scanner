@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
 )
@@ -25,26 +24,26 @@ func init() {
 	kernelparser.RegisterParser("debian", parser)
 }
 
-func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.ParseMatch, bool, error) {
+func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.ParseMatch, error) {
 	if strings.Contains(osImage, "garden") {
 		return &kernelparser.ParseMatch{
 			Namespace:   gardenLinux,
 			Format:      format,
 			FeatureName: featureName,
 			Version:     kernelVersion,
-		}, true, nil
+		}, nil
 	}
 
 	if !strings.Contains(osImage, "debian") {
-		return nil, false, nil
+		return nil, kernelparser.ErrKernelUnrecognized
 	}
 
 	matches := regex.FindStringSubmatch(osImage)
 	if len(matches) == 0 {
-		return nil, false, errors.Errorf("could not find Debian version in OS string: %q", osImage)
+		return nil, fmt.Errorf("could not find Debian version in OS string: %q", osImage)
 	}
 	if len(matches) > 1 {
-		return nil, true, errors.Errorf("found multiple Debian versions in OS string: %q", osImage)
+		return nil, fmt.Errorf("found multiple Debian versions in OS string: %q", osImage)
 	}
 
 	return &kernelparser.ParseMatch{
@@ -52,5 +51,5 @@ func parser(_ database.Datastore, kernelVersion, osImage string) (*kernelparser.
 		Format:      format,
 		FeatureName: featureName,
 		Version:     kernelVersion,
-	}, true, nil
+	}, nil
 }

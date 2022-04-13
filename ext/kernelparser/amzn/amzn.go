@@ -17,14 +17,14 @@ func init() {
 	kernelparser.RegisterParser("amzn", parser)
 }
 
-func parser(_ database.Datastore, kernelVersion, _ string) (*kernelparser.ParseMatch, bool, error) {
+func parser(_ database.Datastore, kernelVersion, _ string) (*kernelparser.ParseMatch, error) {
 	if !strings.Contains(kernelVersion, "amzn2") {
-		return nil, false, nil
+		return nil, kernelparser.ErrKernelUnrecognized
 	}
 	return &kernelparser.ParseMatch{
 		Namespace:   namespace,
 		Format:      format,
 		FeatureName: featureName,
 		Version:     kernelVersion,
-	}, true, nil
+	}, nil
 }
