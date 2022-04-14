@@ -1,5 +1,5 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8-minimal
+ARG BASE_IMAGE=ubi8/ubi
 # Be sure to keep the pg_rhel_version in create-bundle.sh up-to-date.
 ARG BASE_TAG=8.5
 
@@ -7,7 +7,7 @@ FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 COPY bundle.tar.gz /
 
 WORKDIR /bundle
-RUN microdnf install tar gzip && tar -zxf /bundle.tar.gz
+RUN tar -xzf /bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
@@ -27,22 +27,19 @@ COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/postgres.rpm /bundle/postgres-libs.rpm /bundle/postgres-server.rpm /tmp/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 
-RUN microdnf upgrade && \
-    microdnf install shadow-utils libicu systemd-sysv glibc-locale-source glibc-langpack-en && \
-    microdnf clean all && \
-    # TODO: Eventually, ubi-minimal will be based on a version of Fedora which will have a version of microdnf
-    # which can install local RPMs: https://fedoraproject.org/wiki/Changes/MajorUpgradeOfMicrodnf#User_Experience
-    rpm -i /tmp/postgres-libs.rpm && \
-    rpm -i /tmp/postgres-server.rpm && \
-    rpm -i /tmp/postgres.rpm && \
-    groupadd -g 70 postgres && \
+RUN RUN groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
     rpm --import RPM-GPG-KEY-PGDG-12 && \
+    dnf upgrade -y && \
+    dnf install -y \
+        ca-certificates libicu systemd-sysv /tmp/postgres-libs.rpm \
+        /tmp/postgres-server.rpm /tmp/postgres.rpm glibc-locale-source glibc-langpack-en && \
+    dnf clean all && \
     rm /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm && \
     rm RPM-GPG-KEY-PGDG-12 && \
     # (Optional) Remove line below to keep package management utilities
     rpm -e --nodeps $(rpm -qa curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/yum && \
+    rm -rf /var/cache/dnf && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
