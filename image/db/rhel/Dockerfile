@@ -28,10 +28,13 @@ COPY --from=extracted_bundle /bundle/postgres.rpm /bundle/postgres-libs.rpm /bun
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 
 RUN microdnf upgrade && \
-    microdnf install \
-        shadow-utils libicu systemd-sysv /tmp/postgres-libs.rpm \
-        /tmp/postgres-server.rpm /tmp/postgres.rpm glibc-locale-source glibc-langpack-en && \
+    microdnf install shadow-utils libicu systemd-sysv glibc-locale-source glibc-langpack-en && \
     microdnf clean all && \
+    # TODO: Eventually, ubi-minimal will be based on a version of Fedora which will have a version of microdnf
+    # which can install local RPMs: https://fedoraproject.org/wiki/Changes/MajorUpgradeOfMicrodnf#User_Experience
+    rpm -i /tmp/postgres-libs.rpm && \
+    rpm -i /tmp/postgres-server.rpm && \
+    rpm -i /tmp/postgres.rpm && \
     groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
     rpm --import RPM-GPG-KEY-PGDG-12 && \
