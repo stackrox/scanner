@@ -14,6 +14,6 @@ enum Note {
 }
 
 enum NodeNote {
-  NODE_OS_UNSUPPORTED     = 0;
+  NODE_UNSUPPORTED        = 0;
   NODE_KERNEL_UNSUPPORTED = 1;
 }

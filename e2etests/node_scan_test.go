@@ -206,7 +206,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 				KubeletVulnerabilities:   nil,
 				KubeproxyVulnerabilities: nil,
 				RuntimeVulnerabilities:   nil,
-				Notes:                    []v1.NodeNote{v1.NodeNote_NODE_OS_UNSUPPORTED},
+				Notes:                    []v1.NodeNote{v1.NodeNote_NODE_UNSUPPORTED},
 			},
 		},
 	}
@@ -430,7 +430,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			expectedOS:              "",
 			expectedKernelComponent: nil,
 			expectedCVEs:            nil,
-			expectedNotes:           []v1.NodeNote{v1.NodeNote_NODE_OS_UNSUPPORTED},
+			expectedNotes:           []v1.NodeNote{v1.NodeNote_NODE_UNSUPPORTED},
 		},
 		// Amzn
 		{

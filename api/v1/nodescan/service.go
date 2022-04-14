@@ -237,7 +237,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	case nil: // Normal
 	case kernelparser.ErrNodeUnsupported:
 		// The node is unsupported, exit early.
-		resp.Notes = append(resp.Notes, v1.NodeNote_NODE_OS_UNSUPPORTED)
+		resp.Notes = append(resp.Notes, v1.NodeNote_NODE_UNSUPPORTED)
 		return resp, nil
 	case kernelparser.ErrKernelUnsupported:
 		resp.Notes = append(resp.Notes, v1.NodeNote_NODE_KERNEL_UNSUPPORTED)
