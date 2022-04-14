@@ -1,5 +1,5 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8/ubi
+ARG BASE_IMAGE=ubi8-minimal
 # Be sure to keep the pg_rhel_version in create-bundle.sh up-to-date.
 ARG BASE_TAG=8.5
 
@@ -27,19 +27,19 @@ COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/postgres.rpm /bundle/postgres-libs.rpm /bundle/postgres-server.rpm /tmp/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 
-RUN groupadd -g 70 postgres && \
+RUN microdnf upgrade && \
+    microdnf install \
+        shadow-utils libicu systemd-sysv /tmp/postgres-libs.rpm \
+        /tmp/postgres-server.rpm /tmp/postgres.rpm glibc-locale-source glibc-langpack-en && \
+    microdnf clean all && \
+    groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
     rpm --import RPM-GPG-KEY-PGDG-12 && \
-    dnf upgrade -y && \
-    dnf install -y \
-        ca-certificates libicu systemd-sysv /tmp/postgres-libs.rpm \
-        /tmp/postgres-server.rpm /tmp/postgres.rpm glibc-locale-source glibc-langpack-en && \
-    dnf clean all && \
     rm /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm && \
     rm RPM-GPG-KEY-PGDG-12 && \
     # (Optional) Remove line below to keep package management utilities
     rpm -e --nodeps $(rpm -qa curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/dnf && \
+    rm -rf /var/cache/yum && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
