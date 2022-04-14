@@ -7,7 +7,7 @@ FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 COPY bundle.tar.gz /
 
 WORKDIR /bundle
-RUN tar -xzf /bundle.tar.gz
+RUN microdnf install tar gzip && tar -zxf /bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
