@@ -27,7 +27,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible
+	github.com/guregu/null v4.0.0+incompatible
 	github.com/hashicorp/go-version v1.4.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/heroku/docker-registry-client v0.0.0
