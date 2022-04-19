@@ -22,7 +22,6 @@ import (
 	"compress/bzip2"
 	"compress/gzip"
 	"io"
-	"os/exec"
 	"path"
 	"strings"
 
@@ -33,6 +32,7 @@ import (
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
+	"github.com/ulikunitz/xz"
 )
 
 const (
@@ -217,46 +217,6 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 	return files, nil
 }
 
-// XzReader implements io.ReadCloser for data compressed via `xz`.
-type XzReader struct {
-	io.ReadCloser
-	cmd     *exec.Cmd
-	closech chan error
-}
-
-// NewXzReader returns an io.ReadCloser by executing a command line `xz`
-// executable to decompress the provided io.Reader.
-//
-// It is the caller's responsibility to call Close on the XzReader when done.
-func NewXzReader(r io.Reader) (*XzReader, error) {
-	rpipe, wpipe := io.Pipe()
-	ex, err := exec.LookPath("xz")
-	if err != nil {
-		return nil, err
-	}
-	cmd := exec.Command(ex, "--decompress", "--stdout")
-
-	closech := make(chan error)
-
-	cmd.Stdin = r
-	cmd.Stdout = wpipe
-
-	go func() {
-		err := cmd.Run()
-		wpipe.CloseWithError(err)
-		closech <- err
-	}()
-
-	return &XzReader{rpipe, cmd, closech}, nil
-}
-
-// Close cleans up the resources used by an XzReader.
-func (r *XzReader) Close() error {
-	r.ReadCloser.Close()
-	r.cmd.Process.Kill()
-	return <-r.closech
-}
-
 // TarReadCloser embeds a *tar.Reader and the related io.Closer
 // It is the caller's responsibility to call Close on TarReadCloser when
 // done.
@@ -277,7 +237,7 @@ func (r *TarReadCloser) Close() error {
 // Gzip/Bzip2/XZ detection is done by using the magic numbers:
 // Gzip: the first two bytes should be 0x1f and 0x8b. Defined in the RFC1952.
 // Bzip2: the first three bytes should be 0x42, 0x5a and 0x68. No RFC.
-// XZ: the first three bytes should be 0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00. No RFC.
+// XZ: the first six bytes should be 0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00. No RFC.
 func NewTarReadCloser(r io.Reader) (*TarReadCloser, error) {
 	br := bufio.NewReader(r)
 	header, err := br.Peek(readLen)
@@ -293,11 +253,11 @@ func NewTarReadCloser(r io.Reader) (*TarReadCloser, error) {
 			bzip2r := io.NopCloser(bzip2.NewReader(br))
 			return &TarReadCloser{tar.NewReader(bzip2r), bzip2r}, nil
 		case bytes.HasPrefix(header, xzHeader):
-			xzr, err := NewXzReader(br)
+			xzr, err := xz.NewReader(br)
 			if err != nil {
 				return nil, err
 			}
-			return &TarReadCloser{tar.NewReader(xzr), xzr}, nil
+			return &TarReadCloser{tar.NewReader(xzr), io.NopCloser(xzr)}, nil
 		}
 	}
 

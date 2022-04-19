@@ -25,7 +25,6 @@ COPY --from=extracted_bundle /bundle/scanner ./
 COPY ./THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
 RUN microdnf upgrade && \
-    microdnf install xz && \
     microdnf clean all && \
     # (Optional) Remove line below to keep package management utilities
     # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.

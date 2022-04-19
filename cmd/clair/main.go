@@ -193,7 +193,7 @@ func main() {
 	proxy.WatchProxyConfig(context.Background(), proxyConfigPath, proxyConfigFile, true)
 
 	// Check for dependencies.
-	for _, bin := range []string{"rpm", "xz"} {
+	for _, bin := range []string{"rpm"} {
 		_, err := exec.LookPath(bin)
 		if err != nil {
 			log.WithError(err).WithField("dependency", bin).Fatal("failed to find dependency")
