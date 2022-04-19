@@ -1,12 +1,12 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8/ubi
+ARG BASE_IMAGE=ubi8-minimal
 ARG BASE_TAG=8.5
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 
 COPY bundle.tar.gz /
 WORKDIR /bundle
-RUN tar -xzf /bundle.tar.gz
+RUN microdnf install tar gzip && tar -zxf /bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
@@ -24,13 +24,13 @@ COPY --from=extracted_bundle /bundle/scanner ./
 
 COPY ./THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
-RUN dnf upgrade -y && \
-    dnf install -y ca-certificates xz && \
-    dnf clean all && \
+RUN microdnf upgrade && \
+    microdnf install xz && \
+    microdnf clean all && \
     # (Optional) Remove line below to keep package management utilities
     # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
     rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/dnf && \
+    rm -rf /var/cache/yum && \
     chown -R 65534:65534 /tmp && \
     # The contents of paths mounted as emptyDir volumes in Kubernetes are saved
     # by the script `save-dir-contents` during the image build. The directory
