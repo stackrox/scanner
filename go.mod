@@ -35,7 +35,7 @@ require (
 	github.com/knqyf263/go-rpm-version v0.0.0-20170716094938-74609b86c936
 	github.com/lib/pq v1.10.5
 	github.com/mailru/easyjson v0.7.7
-	github.com/mholt/archiver/v3 v3.5.0
+	github.com/mholt/archiver/v3 v3.5.1
 	github.com/mitchellh/hashstructure v1.1.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.0.3-0.20211202193544-a5463b7f9c84
