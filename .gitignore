@@ -17,3 +17,6 @@ nohup.out
 
 # Vim swap files
 *.swp
+
+# Go mod
+vendor
