@@ -12,7 +12,7 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 3
     reviewers:
-      - 'stackrox/scanner-dep-updates'
+      - 'stackrox/scanner-dep-updaters'
 
   - package-ecosystem: 'gomod'
     directory: '/tools/linters/'
@@ -21,4 +21,4 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 3
     reviewers:
-      - 'stackrox/scanner-dep-updates'
+      - 'stackrox/scanner-dep-updaters'
