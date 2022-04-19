@@ -3,17 +3,17 @@ module github.com/stackrox/scanner
 go 1.16
 
 require (
-	cloud.google.com/go/storage v1.12.0
+	cloud.google.com/go/storage v1.22.0
 	github.com/NYTimes/gziphandler v1.1.1
-	github.com/PuerkitoBio/goquery v1.5.1
+	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/blevesearch/blevex v1.0.0 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
 	github.com/blevesearch/segment v0.9.0 // indirect
 	github.com/ckaznocha/protoc-gen-lint v0.2.4
-	github.com/containers/image/v5 v5.19.1
+	github.com/containers/image/v5 v5.21.0
 	github.com/couchbase/vellum v1.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1
-	github.com/docker/distribution v2.7.1+incompatible
+	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker-credential-helpers v0.6.4
 	github.com/facebookincubator/flog v0.0.0-20190930132826-d2511d0ce33c // indirect
 	github.com/facebookincubator/nvdtools v0.1.4
@@ -27,21 +27,21 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/guregu/null v3.0.2-0.20160228005316-41961cea0328+incompatible
+	github.com/guregu/null v4.0.0+incompatible
 	github.com/hashicorp/go-version v1.4.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
 	github.com/knqyf263/go-rpm-version v0.0.0-20170716094938-74609b86c936
-	github.com/lib/pq v1.10.4
+	github.com/lib/pq v1.10.5
 	github.com/mailru/easyjson v0.7.7
-	github.com/mholt/archiver/v3 v3.5.0
+	github.com/mholt/archiver/v3 v3.5.1
 	github.com/mitchellh/hashstructure v1.1.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.0.3-0.20211202193544-a5463b7f9c84
-	github.com/pborman/uuid v1.2.0
+	github.com/pborman/uuid v1.2.1
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/client_golang v1.12.1
 	github.com/quay/goval-parser v0.8.6
 	github.com/remind101/migrate v0.0.0-20170729031349-52c1edff7319
 	github.com/sirupsen/logrus v1.8.1
@@ -54,9 +54,9 @@ require (
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/sys v0.0.0-20220209214540-3681064d5158
-	google.golang.org/api v0.63.0
-	google.golang.org/grpc v1.43.0
+	golang.org/x/sys v0.0.0-20220328115105-d36c6a25d886
+	google.golang.org/api v0.74.0
+	google.golang.org/grpc v1.45.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
