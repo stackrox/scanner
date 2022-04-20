@@ -2617,7 +2617,7 @@ var testCases = []testCase{
 					},
 				},
 				AddedBy: "sha256:596ba82af5aaa3e2fd9d6f955b8b94f0744a2b60710e3c243ba3e4a467f051d1",
-				FixedBy: "1.32.1-r7",
+				FixedBy: "1.32.1-r8",
 				Executables: []*v1.Executable{
 					{
 						Path: "/etc/network/if-up.d/dad",
@@ -2689,7 +2689,7 @@ var testCases = []testCase{
 				VersionFormat: "apk",
 				Version:       "1.33.1-r2",
 				AddedBy:       "sha256:5843afab387455b37944e709ee8c78d7520df80f8d01cf7f861aae63beeddb6b",
-				FixedBy:       "1.33.1-r6",
+				FixedBy:       "1.33.1-r7",
 			},
 		},
 	},
@@ -2713,6 +2713,7 @@ var testCases = []testCase{
 				VersionFormat: "apk",
 				Version:       "1.34.1-r3",
 				AddedBy:       "sha256:59bf1c3509f33515622619af21ed55bbe26d24913cedbca106468a5fb37a50c3",
+				FixedBy:       "1.34.1-r5",
 			},
 		},
 	},
