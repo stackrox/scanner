@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
-	"github.com/stackrox/rox/pkg/utils"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/convert"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
@@ -94,31 +93,39 @@ func featureVersionToKernelComponent(fv database.FeatureVersion) *v1.GetNodeVuln
 	}
 }
 
-func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesRequest) (string, []*v1.Vulnerability, *v1.GetNodeVulnerabilitiesResponse_KernelComponent, error) {
-	osImage := strings.ToLower(req.GetOsImage())
-	kernelVersion := req.GetKernelVersion()
+// parseLinuxKernel parses the linux kernel based on the given osImage and kernelVersion.
+// The returned kernel may be nil even without error if it could not be determined.
+func (s *serviceImpl) parseLinuxKernel(osImage, kernelVersion string) (*kernelparser.ParseMatch, error) {
+	osImageLower := strings.ToLower(osImage)
 
-	var match *kernelparser.ParseMatch
-Parsers:
 	for name, parser := range kernelparser.Parsers {
-		var err error
-		match, err = parser(s.db, kernelVersion, osImage)
+		match, err := parser(s.db, kernelVersion, osImageLower)
 		switch err {
 		case nil:
 			// Found a match.
-			break Parsers
+			return match, nil
 		case kernelparser.ErrKernelUnrecognized:
 			// This parser did not recognize the kernel. Try another one.
-			continue Parsers
+			continue
 		case kernelparser.ErrKernelUnsupported:
-			log.Debugf("%s parser found unsupported kernel: %s %s", name, req.GetOsImage(), kernelVersion)
+			log.Debugf("%s parser found unsupported kernel: %s %s", name, osImage, kernelVersion)
 		case kernelparser.ErrNodeUnsupported:
-			log.Debugf("%s parser found unsupported node: %s %s", name, req.GetOsImage(), kernelVersion)
+			log.Debugf("%s parser found unsupported node: %s %s", name, osImage, kernelVersion)
 		default:
-			// Should never happen.
-			utils.Must(errors.Errorf("Found unexpected error in kernel parser: %v", err))
+			log.Warnf("Unable to parse kernel: %v", err)
 		}
 
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesRequest) (string, []*v1.Vulnerability, *v1.GetNodeVulnerabilitiesResponse_KernelComponent, error) {
+	kernelVersion := req.GetKernelVersion()
+
+	match, err := s.parseLinuxKernel(req.GetOsImage(), kernelVersion)
+	if err != nil {
 		return "", nil, nil, err
 	}
 
