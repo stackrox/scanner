@@ -23,7 +23,6 @@ ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
     POSTGRES_PASSWORD_FILE="/run/secrets/stackrox.io/secrets/password"
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
-COPY --from=extracted_bundle /bundle/postgres.rpm /bundle/postgres-libs.rpm /bundle/postgres-server.rpm /tmp/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 
 RUN groupadd -g 70 postgres && \
