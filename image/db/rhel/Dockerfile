@@ -1,6 +1,5 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8/ubi
-# Be sure to keep the pg_rhel_version in create-bundle.sh up-to-date.
 ARG BASE_TAG=8.5
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
