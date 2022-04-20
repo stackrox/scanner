@@ -30,7 +30,7 @@ RUN microdnf upgrade && \
     # (Optional) Remove line below to keep package management utilities
     # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
     rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/yum && \
+    rm -rf /var/cache/dnf /var/cache/yum && \
     chown -R 65534:65534 /tmp && \
     # The contents of paths mounted as emptyDir volumes in Kubernetes are saved
     # by the script `save-dir-contents` during the image build. The directory
