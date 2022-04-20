@@ -17,6 +17,7 @@ LABEL name="scanner-db" \
       summary="Image scanner database for the StackRox Kubernetes Security Platform" \
       description="This image supports image scanning in the StackRox Kubernetes Security Platform."
 
+# Be sure to keep the postgres_major in create-bundle.sh up-to-date.
 ENV PG_MAJOR=12
 ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
     PGDATA="/var/lib/postgresql/data" \
