@@ -16,7 +16,7 @@ func TestParser(t *testing.T) {
 		osImage        string
 		backportExists bool
 		expected       *kernelparser.ParseMatch
-		valid          bool
+		err            error
 	}{
 		{
 			kernelVersion: "5.9.1-1050",
@@ -28,7 +28,6 @@ func TestParser(t *testing.T) {
 				Version:     "5.9.1-1050.10000",
 				FeatureName: "linux",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "5.4.0-1032-azure",
@@ -40,7 +39,6 @@ func TestParser(t *testing.T) {
 				Version:     "5.4.0-1032.10000",
 				FeatureName: "linux-azure",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "5.4.0-1032-azure",
@@ -52,7 +50,6 @@ func TestParser(t *testing.T) {
 				Version:     "5.4.0-1032.10000",
 				FeatureName: "linux-azure-5.4",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "5.4.0-1030-aws",
@@ -64,7 +61,6 @@ func TestParser(t *testing.T) {
 				Version:     "5.4.0-1030.10000",
 				FeatureName: "linux-aws",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "5.4.0-1030-aws",
@@ -76,7 +72,6 @@ func TestParser(t *testing.T) {
 				Version:     "5.4.0-1030.10000",
 				FeatureName: "linux-aws-5.4",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "5.3.0-1036-gke",
@@ -88,7 +83,6 @@ func TestParser(t *testing.T) {
 				Version:     "5.3.0-1036.10000",
 				FeatureName: "linux-gke-5.3",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "5.3.0-1036-gke",
@@ -100,7 +94,13 @@ func TestParser(t *testing.T) {
 				Version:     "5.3.0-1036.10000",
 				FeatureName: "linux-gke",
 			},
-			valid: true,
+		},
+		{
+			kernelVersion: "5.4.0-5-cloud-amd64",
+			osImage:       "Garden Linux 184.0",
+
+			expected: nil,
+			err:      kernelparser.ErrKernelUnrecognized,
 		},
 	}
 
@@ -115,10 +115,9 @@ func TestParser(t *testing.T) {
 			mockDatastore.FctFeatureExists = func(_, _ string) (bool, error) {
 				return c.backportExists, nil
 			}
-			match, valid, err := parser(&mockDatastore, c.kernelVersion, osImage)
-			assert.NoError(t, err)
-			assert.Equal(t, c.valid, valid)
+			match, err := parser(&mockDatastore, c.kernelVersion, osImage)
 			assert.Equal(t, c.expected, match)
+			assert.Equal(t, c.err, err)
 		})
 	}
 }

@@ -205,24 +205,8 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 				KernelVulnerabilities:    nil,
 				KubeletVulnerabilities:   nil,
 				KubeproxyVulnerabilities: nil,
-				RuntimeVulnerabilities: []*v1.Vulnerability{
-					{
-						Name:        "CVE-2022-0811",
-						Description: "A flaw introduced in CRI-O version 1.19 which an attacker can use to bypass the safeguards and set arbitrary kernel parameters on the host. As a result, anyone with rights to deploy a pod on a Kubernetes cluster that uses the CRI-O runtime can abuse the “kernel.core_pattern” kernel parameter to achieve container escape and arbitrary code execution as root on any node in the cluster.",
-						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2022-0811",
-						MetadataV2: &v1.Metadata{
-							PublishedDateTime:    "2022-03-16T00:00Z",
-							LastModifiedDateTime: "2022-03-16T00:00Z",
-							CvssV3: &v1.CVSSMetadata{
-								Score:               8.8,
-								Vector:              "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
-								ExploitabilityScore: 2.8,
-								ImpactScore:         5.9,
-							},
-						},
-						FixedBy: "1.20.7",
-					},
-				},
+				RuntimeVulnerabilities:   nil,
+				Notes:                    []v1.NodeNote{v1.NodeNote_NODE_UNSUPPORTED},
 			},
 		},
 	}
@@ -251,6 +235,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 			contains(t, resp.RuntimeVulnerabilities, c.responseContains.RuntimeVulnerabilities)
 			contains(t, resp.KubeletVulnerabilities, c.responseContains.KubeletVulnerabilities)
 			contains(t, resp.KubeproxyVulnerabilities, c.responseContains.KubeproxyVulnerabilities)
+			assert.Equal(t, c.responseContains.Notes, resp.Notes)
 		})
 	}
 }
@@ -272,6 +257,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 		expectedKernelComponent *v1.GetNodeVulnerabilitiesResponse_KernelComponent
 		expectedCVEs            []expectedCVE
 		unexpectedCVEs          []string
+		expectedNotes           []v1.NodeNote
 	}{
 		// Ubuntu
 		{
@@ -441,18 +427,10 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			osImage:       "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 			kernelVersion: "4.18.0-193.14.3.el8_2.x86_64",
 
-			expectedOS: "centos:8",
-			expectedKernelComponent: &v1.GetNodeVulnerabilitiesResponse_KernelComponent{
-				Name:    "kernel",
-				Version: "4.18.0-193.14.3.el8_2.x86_64",
-			},
-			expectedCVEs: []expectedCVE{
-				{
-					id:      "CVE-2020-14381",
-					fixedBy: "0:4.18.0-240.el8",
-				},
-			},
-			unexpectedCVEs: []string{"CVE-2020-27675", "CVE-2019-2182"},
+			expectedOS:              "",
+			expectedKernelComponent: nil,
+			expectedCVEs:            nil,
+			expectedNotes:           []v1.NodeNote{v1.NodeNote_NODE_UNSUPPORTED},
 		},
 		// Amzn
 		{
@@ -522,6 +500,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			})
 			require.NoError(t, err)
 
+			assert.Equal(t, c.expectedNotes, resp.Notes)
 			assert.Equal(t, c.expectedOS, resp.GetOperatingSystem())
 			assert.Equal(t, c.expectedKernelComponent, resp.KernelComponent)
 

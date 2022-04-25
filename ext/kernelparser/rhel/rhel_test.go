@@ -14,18 +14,8 @@ func TestParser(t *testing.T) {
 		kernelVersion string
 		osImage       string
 		expected      *kernelparser.ParseMatch
-		valid         bool
+		err           error
 	}{
-		{
-			kernelVersion: "4.18.0-193.14.3.el8_2.x86_64",
-			osImage:       "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
-
-			expected: &kernelparser.ParseMatch{
-				Namespace: "centos:8",
-				Version:   "4.18.0-193.14.3.el8_2.x86_64",
-			},
-			valid: true,
-		},
 		{
 			kernelVersion: "3.10.0-957.el7.x86_64",
 			osImage:       "OpenShift",
@@ -34,7 +24,6 @@ func TestParser(t *testing.T) {
 				Namespace: "centos:7",
 				Version:   "3.10.0-957.el7.x86_64",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "3.10.0-1127.13.1.el7.x86_64",
@@ -44,7 +33,6 @@ func TestParser(t *testing.T) {
 				Namespace: "centos:7",
 				Version:   "3.10.0-1127.13.1.el7.x86_64",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "3.10.0-1127.13.1.el7.x86_64",
@@ -54,7 +42,6 @@ func TestParser(t *testing.T) {
 				Namespace: "centos:7",
 				Version:   "3.10.0-1127.13.1.el7.x86_64",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "3.10.0-1062.12.1.el7.x86_64",
@@ -64,7 +51,20 @@ func TestParser(t *testing.T) {
 				Namespace: "centos:7",
 				Version:   "3.10.0-1062.12.1.el7.x86_64",
 			},
-			valid: true,
+		},
+		{
+			kernelVersion: "4.18.0-193.14.3.el8_2.x86_64",
+			osImage:       "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
+
+			expected: nil,
+			err:      kernelparser.ErrNodeUnsupported,
+		},
+		{
+			kernelVersion: "5.4.0-5-cloud-amd64",
+			osImage:       "Garden Linux 184.0",
+
+			expected: nil,
+			err:      kernelparser.ErrKernelUnrecognized,
 		},
 	}
 
@@ -76,10 +76,9 @@ func TestParser(t *testing.T) {
 				c.expected.FeatureName = featureName
 			}
 
-			match, valid, err := parser(nil, c.kernelVersion, osImage)
-			assert.NoError(t, err)
-			assert.Equal(t, c.valid, valid)
+			match, err := parser(nil, c.kernelVersion, osImage)
 			assert.Equal(t, c.expected, match)
+			assert.Equal(t, c.err, err)
 		})
 	}
 }

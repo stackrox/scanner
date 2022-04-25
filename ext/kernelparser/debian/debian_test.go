@@ -14,7 +14,7 @@ func TestParser(t *testing.T) {
 		kernelVersion string
 		osImage       string
 		expected      *kernelparser.ParseMatch
-		valid         bool
+		err           error
 	}{
 		{
 			kernelVersion: "4.9.0-3-amd64",
@@ -24,7 +24,6 @@ func TestParser(t *testing.T) {
 				Namespace: "debian:9",
 				Version:   "4.9.0-3-amd64",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "4.9.0-13-amd64",
@@ -34,7 +33,6 @@ func TestParser(t *testing.T) {
 				Namespace: "debian:11",
 				Version:   "4.9.0-13-amd64",
 			},
-			valid: true,
 		},
 		{
 			kernelVersion: "5.4.0-5-cloud-amd64",
@@ -44,7 +42,13 @@ func TestParser(t *testing.T) {
 				Namespace: "debian:11",
 				Version:   "5.4.0-5-cloud-amd64",
 			},
-			valid: true,
+		},
+		{
+			kernelVersion: "3.10.0-1127.13.1.el7.x86_64",
+			osImage:       "Red Hat Enterprise Linux",
+
+			expected: nil,
+			err:      kernelparser.ErrKernelUnrecognized,
 		},
 	}
 
@@ -56,10 +60,9 @@ func TestParser(t *testing.T) {
 				c.expected.FeatureName = featureName
 			}
 
-			match, valid, err := parser(nil, c.kernelVersion, osImage)
-			assert.NoError(t, err)
-			assert.Equal(t, c.valid, valid)
+			match, err := parser(nil, c.kernelVersion, osImage)
 			assert.Equal(t, c.expected, match)
+			assert.Equal(t, c.err, err)
 		})
 	}
 }
