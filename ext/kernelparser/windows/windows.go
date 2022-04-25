@@ -11,9 +11,9 @@ func init() {
 	kernelparser.RegisterParser("windows", parser)
 }
 
-func parser(_ database.Datastore, _, osImage string) (*kernelparser.ParseMatch, bool, error) {
+func parser(_ database.Datastore, _, osImage string) (*kernelparser.ParseMatch, error) {
 	if strings.Contains(osImage, "windows") {
-		return nil, true, nil
+		return nil, kernelparser.ErrKernelUnsupported
 	}
-	return nil, false, nil
+	return nil, kernelparser.ErrKernelUnrecognized
 }

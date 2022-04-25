@@ -20,7 +20,9 @@ type ParseMatch struct {
 }
 
 // Parser is a kernel parser.
-type Parser func(db database.Datastore, kernelVersion, osImage string) (*ParseMatch, bool, error)
+// osImage is expected to be lowercase (for example by calling `strings.ToLower(osImage)`).
+// Returns a non-nil *ParseMatch if the kernel is supported.
+type Parser func(db database.Datastore, kernelVersion, osImage string) (*ParseMatch, error)
 
 // RegisterParser registers the given kernel parser.
 func RegisterParser(name string, parser Parser) {

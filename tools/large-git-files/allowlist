@@ -2,6 +2,7 @@ e2etests/testcase_test.go
 ext/featurefmt/rpm/testdata/Packages
 generated/scanner/api/v1/component.pb.go
 generated/scanner/api/v1/image_scan_service.pb.go
+generated/scanner/api/v1/node_scan_service.pb.go
 generated/scanner/api/v1/vulnerability.pb.go
 go.sum
 image/dump/cves_10222019.tar.gz

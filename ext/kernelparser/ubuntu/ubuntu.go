@@ -23,17 +23,17 @@ func init() {
 	kernelparser.RegisterParser("ubuntu", parser)
 }
 
-func parser(db database.Datastore, kernelVersion, osImage string) (*kernelparser.ParseMatch, bool, error) {
+func parser(db database.Datastore, kernelVersion, osImage string) (*kernelparser.ParseMatch, error) {
 	if !strings.Contains(osImage, "ubuntu") {
-		return nil, false, nil
+		return nil, kernelparser.ErrKernelUnrecognized
 	}
 
 	matches := regex.FindStringSubmatch(osImage)
 	if len(matches) == 0 {
-		return nil, false, fmt.Errorf("could not find Ubuntu version in OS string: %q", osImage)
+		return nil, fmt.Errorf("could not find Ubuntu version in OS string: %q", osImage)
 	}
 	if len(matches) > 1 {
-		return nil, false, fmt.Errorf("found multiple Ubuntu versions in OS string: %q", osImage)
+		return nil, fmt.Errorf("found multiple Ubuntu versions in OS string: %q", osImage)
 	}
 
 	featureName := "linux"
@@ -55,7 +55,7 @@ func parser(db database.Datastore, kernelVersion, osImage string) (*kernelparser
 	backportedFeature := fmt.Sprintf("%s-%s.%s", featureName, kernelSplit[0], kernelSplit[1])
 	exists, err := db.FeatureExists(namespace, backportedFeature)
 	if err != nil {
-		return nil, false, fmt.Errorf("error checking if feature exists: %v", err)
+		return nil, fmt.Errorf("error checking if feature exists: %v", err)
 	}
 	if exists {
 		featureName = backportedFeature
@@ -70,7 +70,7 @@ func parser(db database.Datastore, kernelVersion, osImage string) (*kernelparser
 		Format:      format,
 		FeatureName: featureName,
 		Version:     kernelVersion,
-	}, true, nil
+	}, nil
 }
 
 // StripVersionPadding removes the version padding appended to the end of an Ubuntu version.
