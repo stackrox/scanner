@@ -10,7 +10,7 @@ require (
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
 	github.com/blevesearch/segment v0.9.0 // indirect
 	github.com/ckaznocha/protoc-gen-lint v0.2.4
-	github.com/containers/image/v5 v5.21.0
+	github.com/containers/image/v5 v5.20.0
 	github.com/couchbase/vellum v1.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.8.1+incompatible
