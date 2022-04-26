@@ -78,6 +78,11 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 	baseFiles := make(map[string]*zip.File)
 	for _, baseF := range baseZipR.File {
 		name := baseF.Name
+
+		if strings.Contains(name, "..") {
+			continue
+		}
+
 		if filepath.Dir(name) == vulndump.K8sDirName && filepath.Ext(name) == ".yaml" {
 			baseFiles[name] = baseF
 		}
@@ -85,6 +90,12 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 
 	for _, headF := range headZipR.File {
 		name := headF.Name
+
+		// Protect from "zip slip".
+		if strings.Contains(name, "..") {
+			continue
+		}
+
 		// Only look at YAML files in the k8s/ folder.
 		if filepath.Dir(name) != vulndump.K8sDirName || filepath.Ext(name) != ".yaml" {
 			continue
@@ -141,6 +152,12 @@ func generateNVDDiffs(outputDir string, baseLastModifiedTime time.Time, headZipR
 
 	for _, headF := range headZipR.File {
 		name := headF.Name
+
+		// Protect from "zip slip".
+		if strings.Contains(name, "..") {
+			continue
+		}
+
 		// Only look at JSON files in the nvd/ folder.
 		if filepath.Dir(name) != vulndump.NVDDirName || filepath.Ext(name) != ".json" {
 			continue
