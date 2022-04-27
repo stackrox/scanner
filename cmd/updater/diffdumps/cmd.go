@@ -80,6 +80,7 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 		name := baseF.Name
 
 		if strings.Contains(name, "../") {
+			log.Warnf("Illegal file name in ZIP: %s", name)
 			continue
 		}
 
@@ -155,6 +156,7 @@ func generateNVDDiffs(outputDir string, baseLastModifiedTime time.Time, headZipR
 
 		// Protect from "zip slip".
 		if strings.Contains(name, "../") {
+			log.Warnf("Illegal file name in ZIP: %s", name)
 			continue
 		}
 

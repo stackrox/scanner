@@ -161,6 +161,7 @@ func generateRHELv2VulnsDiff(cfg config, outputDir string, baseLastModifiedTime 
 
 		// Protect from "zip slip".
 		if strings.Contains(name, "../") {
+			log.Warnf("Illegal file name in ZIP: %s", name)
 			continue
 		}
 
