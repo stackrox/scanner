@@ -79,7 +79,7 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 	for _, baseF := range baseZipR.File {
 		name := baseF.Name
 
-		if strings.Contains(name, "..") {
+		if strings.Contains(name, "../") {
 			continue
 		}
 
@@ -92,7 +92,7 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 		name := headF.Name
 
 		// Protect from "zip slip".
-		if strings.Contains(name, "..") {
+		if strings.Contains(name, "../") {
 			continue
 		}
 
@@ -154,7 +154,7 @@ func generateNVDDiffs(outputDir string, baseLastModifiedTime time.Time, headZipR
 		name := headF.Name
 
 		// Protect from "zip slip".
-		if strings.Contains(name, "..") {
+		if strings.Contains(name, "../") {
 			continue
 		}
 

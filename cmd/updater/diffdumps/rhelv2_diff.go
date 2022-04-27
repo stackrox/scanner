@@ -160,7 +160,7 @@ func generateRHELv2VulnsDiff(cfg config, outputDir string, baseLastModifiedTime 
 		name := headF.Name
 
 		// Protect from "zip slip".
-		if strings.Contains(name, "..") {
+		if strings.Contains(name, "../") {
 			continue
 		}
 
