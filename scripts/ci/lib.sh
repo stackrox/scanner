@@ -19,7 +19,7 @@ get_pr_details() {
         [ -n "${CIRCLE_PULL_REQUEST}" ] || { echo "Not on a PR, ignoring label overrides"; exit 3; }
         [ -n "${CIRCLE_PROJECT_USERNAME}" ] || { echo "CIRCLE_PROJECT_USERNAME not found" ; exit 2; }
         [ -n "${CIRCLE_PROJECT_REPONAME}" ] || { echo "CIRCLE_PROJECT_REPONAME not found" ; exit 2; }
-        pull_request="${CIRCLE_PULL_REQUEST}"
+        pull_request="${CIRCLE_PULL_REQUEST##*/}"
         org="${CIRCLE_PROJECT_USERNAME}"
         repo="${CIRCLE_PROJECT_REPONAME}"
     else

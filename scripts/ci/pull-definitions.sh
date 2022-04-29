@@ -14,17 +14,18 @@ source "$SCRIPTS_ROOT/scripts/ci/lib.sh"
 
 require_executable "gsutil"
 
-if pr_has_label "generate-dumps-on-pr"; then
-    cp /tmp/postgres/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
-    zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/nvd-definitions.zip
-    zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/k8s-definitions.zip
-    zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/repo2cpe.zip
-else
+# Only error code 1 indicates this is a PR which does not have the required label.
+if pr_has_label "generate-dumps-on-pr"; [[ $? -eq 1 ]]; then
     echo "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
     gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
     gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
     gsutil cp gs://stackrox-scanner-ci-vuln-dump/k8s-definitions.zip /tmp/k8s-definitions.zip
     gsutil cp gs://stackrox-scanner-ci-vuln-dump/repo2cpe.zip /tmp/repo2cpe.zip
+else
+    cp /tmp/postgres/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
+    zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/nvd-definitions.zip
+    zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/k8s-definitions.zip
+    zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/repo2cpe.zip
 fi
 
 unzip -d image/scanner/dump /tmp/nvd-definitions.zip
