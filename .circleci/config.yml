@@ -328,7 +328,7 @@ commands:
       - run:
           name: Pull definitions dumps
           command: |
-            ./scripts/ci/pull-defs.sh
+            ./scripts/ci/pull-definitions.sh
       - run:
           name: Build images
           command: make << parameters.make-image-target >>

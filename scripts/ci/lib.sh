@@ -26,12 +26,12 @@ get_pr_details() {
         die "not supported"
     fi
 
-    headers=()
+    local headers=()
     if [[ -n "${GITHUB_TOKEN:-}" ]]; then
         headers+=(-H "Authorization: token ${GITHUB_TOKEN}")
     fi
 
-    url="https://api.github.com/repos/${org}/${repo}/pulls/${pull_request}"
+    local url="https://api.github.com/repos/${org}/${repo}/pulls/${pull_request}"
     curl -sS "${headers[@]}" "${url}"
 }
 
