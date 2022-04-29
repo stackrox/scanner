@@ -1,11 +1,48 @@
 #!/usr/bin/env bash
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
-source "$ROOT/scripts/lib.sh"
+set -euo pipefail
 
 # A library of CI related reusable bash functions
 
-set -euo pipefail
+set +u
+SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+set -u
+
+source "$SCRIPTS_ROOT/scripts/lib.sh"
+
+get_pr_details() {
+    local pull_request
+    local org
+    local repo
+
+    if is_CIRCLECI; then
+        [ -n "${CIRCLE_PULL_REQUEST}" ] || { echo "Not on a PR, ignoring label overrides"; exit 3; }
+        [ -n "${CIRCLE_PROJECT_USERNAME}" ] || { echo "CIRCLE_PROJECT_USERNAME not found" ; exit 2; }
+        [ -n "${CIRCLE_PROJECT_REPONAME}" ] || { echo "CIRCLE_PROJECT_REPONAME not found" ; exit 2; }
+        pull_request="${CIRCLE_PULL_REQUEST}"
+        org="${CIRCLE_PROJECT_USERNAME}"
+        repo="${CIRCLE_PROJECT_REPONAME}"
+    else
+        die "not supported"
+    fi
+
+    headers=()
+    if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+        headers+=(-H "Authorization: token ${GITHUB_TOKEN}")
+    fi
+
+    url="https://api.github.com/repos/${org}/${repo}/pulls/${pull_request}"
+    curl -sS "${headers[@]}" "${url}"
+}
+
+pr_has_label() {
+    if [[ -z "${1:-}" ]]; then
+        die "usage: pr_has_label <expected label>"
+    fi
+
+    local expected_label="$1"
+    get_pr_details | jq '([.labels | .[].name]  // []) | .[]' -r | grep -qx "${expected_label}"
+}
 
 push_images() {
     info "Pushing images"
