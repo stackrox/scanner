@@ -1,0 +1,11 @@
+version: v1
+name: buf.build/stackrox/scanner
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - DEFAULT
+deps:
+  - buf.build/gogo/protobuf
+  - buf.build/googleapis/googleapis
