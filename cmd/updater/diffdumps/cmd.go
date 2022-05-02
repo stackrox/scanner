@@ -94,6 +94,7 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 
 		// Protect from "zip slip".
 		if strings.Contains(name, "../") {
+			log.Warnf("Illegal file name in ZIP: %s", name)
 			continue
 		}
 
