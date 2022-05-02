@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/mitchellh/hashstructure"
@@ -150,13 +151,19 @@ func generateRHELv2VulnsDiff(cfg config, outputDir string, baseLastModifiedTime 
 		}
 	}
 
-	// Let's us know if the base dump had RHELv2 data.
+	// Lets us know if the base dump had RHELv2 data.
 	rhelExists := len(baseFiles) > 0
 
 	// Get RHEL Repo to CPE file
 	repoToCPEFile := filepath.Join(vulndump.RHELv2DirName, repo2cpe.RHELv2CPERepoName)
 	for _, headF := range headZipR.File {
 		name := headF.Name
+
+		// Protect from "zip slip".
+		if strings.Contains(name, "../") {
+			log.Warnf("Illegal file name in ZIP: %s", name)
+			continue
+		}
 
 		// repo to cpe JSON
 		if name == repoToCPEFile {
