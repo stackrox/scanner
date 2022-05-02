@@ -25,13 +25,14 @@ var DebianReleasesMapping = map[string]string{
 	"stretch":  "9",
 	"buster":   "10",
 	"bullseye": "11",
+	"bookworm": "12",
 	"sid":      "unstable",
 
 	// Class names
-	"oldoldstable": "8",
-	"oldstable":    "9",
-	"stable":       "10",
-	"testing":      "11",
+	"oldoldstable": "9",
+	"oldstable":    "10",
+	"stable":       "11",
+	"testing":      "12",
 	"unstable":     "unstable",
 }
 
