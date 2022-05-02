@@ -42,6 +42,7 @@ var UbuntuReleasesMapping = map[string]string{
 	"precise": "12.04",
 	"quantal": "12.10",
 	"raring":  "13.04",
+	"saucy":   "13.10",
 	"trusty":  "14.04",
 	"utopic":  "14.10",
 	"vivid":   "15.04",
@@ -58,4 +59,5 @@ var UbuntuReleasesMapping = map[string]string{
 	"groovy":  "20.10",
 	"hirsute": "21.04",
 	"impish":  "21.10",
+	"jammy":   "22.04",
 }
