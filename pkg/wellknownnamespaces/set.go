@@ -9,7 +9,7 @@ var (
 		"ubuntu:12.04",
 		"ubuntu:12.10",
 		"ubuntu:13.04",
-		"ubuntu:13.10",
+		// Note: Ubuntu 13.10 is unsupported.
 		"ubuntu:14.10",
 		"ubuntu:15.04",
 		"ubuntu::15.10",
