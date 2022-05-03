@@ -3258,4 +3258,27 @@ var testCases = []testCase{
 			},
 		},
 	},
+	{
+		image:                   "ubuntu:22.04",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:22.04",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "adduser",
+				NamespaceName: "ubuntu:22.04",
+				VersionFormat: "dpkg",
+				Version:       "3.118ubuntu5",
+				AddedBy:       "sha256:125a6e411906fe6b0aaa50fc9d600bf6ff9bb11a8651727ce1ed482dc271c24c",
+			},
+			{
+				Name:          "apt",
+				NamespaceName: "ubuntu:22.04",
+				VersionFormat: "dpkg",
+				Version:       "2.4.5",
+				AddedBy:       "sha256:125a6e411906fe6b0aaa50fc9d600bf6ff9bb11a8651727ce1ed482dc271c24c",
+			},
+		},
+	},
 }

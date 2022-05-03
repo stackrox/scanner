@@ -6,8 +6,10 @@ var (
 	// KnownStaleNamespaces is the set of base namespaces we know have stale vulnerabilities.
 	KnownStaleNamespaces = set.NewFrozenStringSet(
 		"debian:8",
+		"ubuntu:12.04",
 		"ubuntu:12.10",
 		"ubuntu:13.04",
+		// Note: Ubuntu 13.10 is unsupported.
 		"ubuntu:14.10",
 		"ubuntu:15.04",
 		"ubuntu::15.10",
@@ -17,6 +19,8 @@ var (
 		"ubuntu:18.10",
 		"ubuntu:19.04",
 		"ubuntu:19.10",
+		"ubuntu:20.10",
+		"ubuntu:21.04",
 	)
 
 	// KnownSupportedNamespaces is the set of base namespaces we support.
@@ -51,13 +55,11 @@ var (
 		"rhel:6",
 		"rhel:7",
 		"rhel:8",
-		"ubuntu:12.04",
 		"ubuntu:14.04",
 		"ubuntu:16.04",
 		"ubuntu:18.04",
 		"ubuntu:20.04",
-		"ubuntu:20.10",
-		"ubuntu:21.04",
 		"ubuntu:21.10",
+		"ubuntu:22.04",
 	)
 )
