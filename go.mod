@@ -54,8 +54,8 @@ require (
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
-	google.golang.org/api v0.76.0
+	golang.org/x/sys v0.0.0-20220502124256-b6088ccd6cba
+	google.golang.org/api v0.78.0
 	google.golang.org/grpc v1.46.0
 	gopkg.in/yaml.v2 v2.4.0
 )
