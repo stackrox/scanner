@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Creates a tgz bundle of all binary artifacts needed for scanner-rhel
+# Creates a tgz bundle of all binary artifacts needed for scanner
 
 NVD_DEFINITIONS_DIR="/nvd_definitions"
 K8S_DEFINITIONS_DIR="/k8s_definitions"
