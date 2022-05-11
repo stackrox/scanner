@@ -52,7 +52,7 @@ ENV ROX_SLIM_MODE="true"
 # The entrypoint script requires the init directory to exist, so we create it
 # here even though scanner slim does not ship any definitions.
 
-RUN mkdir /docker-entrypoint-initdb.d
+#RUN mkdir /docker-entrypoint-initdb.d
 
 USER 70:70
 
