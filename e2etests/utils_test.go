@@ -2,7 +2,12 @@
 
 package e2etests
 
-import "github.com/stretchr/testify/require"
+import (
+	"testing"
+
+	v1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stretchr/testify/require"
+)
 
 func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1.Feature, allowNotFound bool) *v1.Feature {
 	candidateIdx := -1
