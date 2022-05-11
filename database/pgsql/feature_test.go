@@ -1,4 +1,5 @@
 // +build db_integration
+// +build slim_db_integration
 
 // Copyright 2016 clair authors
 //

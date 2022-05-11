@@ -1,4 +1,5 @@
 // +build e2e
+// +build slim_e2e
 
 package e2etests
 

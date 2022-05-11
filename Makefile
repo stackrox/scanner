@@ -245,10 +245,20 @@ e2e-tests: deps
 	@echo "+ $@"
 	go test -tags e2e -count=1 -timeout=20m ./e2etests/...
 
+.PHONY: slim-e2e-tests
+slim-e2e-tests: deps
+	@echo "+ $@"
+	go test -tags slim_e2e -count=1 -timeout=20m ./e2etests/...
+
 .PHONY: db-integration-tests
 db-integration-tests: deps
 	@echo "+ $@"
 	go test -tags db_integration -count=1 ./database/pgsql
+
+.PHONY: slim-db-integration-tests
+slim-db-integration-tests: deps
+	@echo "+ $@"
+	go test -tags slim_db_integration -count=1 ./database/pgsql
 
 .PHONY: scale-tests
 scale-tests: deps
