@@ -2484,19 +2484,20 @@ var testCases = []testCase{
 			},
 		},
 	},
-	{
-		image:     "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
-		registry:  "https://quay.io",
-		source:    "NVD",
-		namespace: "", // Fedora 28
-		unexpectedFeatures: []apiV1.Feature{
-			{
-				Name:          "p11-kit",
-				VersionFormat: "rpm",
-				Version:       "0.23.5-3.el7",
-			},
-		},
-	},
+	// TODO: The image below no longer exists. Replace this image as well as the one above with other images which accomplish the same task.
+	//{
+	//	image:     "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
+	//	registry:  "https://quay.io",
+	//	source:    "NVD",
+	//	namespace: "", // Fedora 28
+	//	unexpectedFeatures: []apiV1.Feature{
+	//		{
+	//			Name:          "p11-kit",
+	//			VersionFormat: "rpm",
+	//			Version:       "0.23.5-3.el7",
+	//		},
+	//	},
+	//},
 	{
 		image:                    "alpine:3.13.0",
 		registry:                 "https://registry-1.docker.io",
