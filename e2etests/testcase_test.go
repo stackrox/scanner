@@ -2484,7 +2484,7 @@ var testCases = []testCase{
 			},
 		},
 	},
-	// TODO: The image below no longer exists. Replace this image as well as the one above with other images which accomplish the same task.
+	// TODO(ROX-10926): The image below no longer exists. Replace this image as well as the one above with other images which accomplish the same task.
 	//{
 	//	image:     "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
 	//	registry:  "https://quay.io",
