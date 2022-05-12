@@ -219,8 +219,8 @@ deploy: clean-helm-rendered
 	helm template scanner chart/ --set tag=$(TAG),logLevel=$(LOGLEVEL),updateInterval=2m --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
-.PHONY: deploy-slim
-deploy-slim: clean-helm-rendered
+.PHONY: slim-deploy
+slim-deploy: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
 	helm template scanner chart/ --set scannerImage=us.gcr.io/stackrox-ci/scanner-slim,scannerDBImage=us.gcr.io/stackrox-ci/scanner-db-slim,tag=$(TAG),logLevel=$(LOGLEVEL),updateInterval=2m --output-dir rendered-chart

@@ -361,9 +361,8 @@ commands:
 
   run-e2e-tests:
     parameters:
-      slim:
+      is-slim:
         type: boolean
-        default: false
       cluster-id:
         type: string
 
@@ -381,8 +380,8 @@ commands:
       - run:
           name: Deploy into the cluster
           command: |
-            if [[ "<< parameters.slim >>" == "true" ]]; then
-              make deploy-slim
+            if [[ "<< parameters.is-slim >>" == "true" ]]; then
+              make slim-deploy
             else
               make deploy
             fi
@@ -394,7 +393,7 @@ commands:
           name: Run sanity tests
           no_output_timeout: 20m
           command: |
-            if [[ "<< parameters.slim >>" == "true" ]]; then
+            if [[ "<< parameters.is-slim >>" == "true" ]]; then
               make slim-e2e-tests
             else
               make e2e-tests
@@ -420,7 +419,7 @@ commands:
       - fetch-and-upload-scanner-metrics
 
       - run-db-integration-tests:
-          slim: << parameters.slim >>
+          is-slim: << parameters.is-slim >>
 
       - run:
           name: Collect k8s logs
@@ -464,15 +463,14 @@ commands:
 
   run-db-integration-tests:
     parameters:
-      slim:
+      is-slim:
         type: boolean
-        default: false
     steps:
       - scanner-db-pf
       - run:
           name: Run db integration tests
           command: |
-            if [[ "<< parameters.slim >>" == "true" ]]; then
+            if [[ "<< parameters.is-slim >>" == "true" ]]; then
               make slim-db-integration-tests
             else
               make db-integration-tests
@@ -940,13 +938,14 @@ jobs:
     <<: *defaults
     steps:
       - run-e2e-tests:
+          is-slim: false
           cluster-id: rhel
 
   slim-e2e-tests:
     <<: *defaults
     steps:
       - run-e2e-tests:
-          slim: true
+          is-slim: true
           cluster-id: rhel-slim
 
   scale-tests:
