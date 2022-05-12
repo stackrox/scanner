@@ -2465,9 +2465,6 @@ var testCases = []testCase{
 			},
 		},
 	},
-	// The next two images have the same layer and thus verify lineage checks between different images
-	// The first is a centos:7 image that has the package p11-kit. The second image is from fedora, and we
-	// can't identify the OS, so it should not have p11-kit.
 	{
 		image:                   "quay.io/dougtidwell/open-adventure@sha256:564c8dde1931f337a7bc8925f94cb594d9c81a5ee9eacc5ec5590f1e60e94b6a",
 		registry:                "https://quay.io",
@@ -2481,19 +2478,6 @@ var testCases = []testCase{
 				VersionFormat: "rpm",
 				Version:       "0.23.5-3.el7",
 				AddedBy:       "sha256:f9ce27a295e879233c8fbbf9ab67944a10e1ce80da69e46f87c583082a1ff3bb",
-			},
-		},
-	},
-	{
-		image:     "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
-		registry:  "https://quay.io",
-		source:    "NVD",
-		namespace: "", // Fedora 28
-		unexpectedFeatures: []apiV1.Feature{
-			{
-				Name:          "p11-kit",
-				VersionFormat: "rpm",
-				Version:       "0.23.5-3.el7",
 			},
 		},
 	},
