@@ -26,7 +26,7 @@ if [[ "$?" -eq 0 ]]; then
   echo "Image exists. Exiting..."
   exit 0
 fi
-if [[ ! "${docker_pull_output}" =~ ^.*manifest\ for.*not\ found.*$ ]]; then
+if [[ ! "${docker_pull_output}" =~ ^.*manifest\ for.*not\ found.*$ ]] && [[ ! "$docker_pull_output" =~ ^.*pull\ access\ denied.*$ ]]; then
   die "Unexpected docker pull error: ${docker_pull_output}"
 fi
 
