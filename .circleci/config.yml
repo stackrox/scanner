@@ -361,6 +361,8 @@ commands:
 
   run-e2e-tests:
     parameters:
+      is-slim:
+        type: boolean
       cluster-id:
         type: string
 
@@ -378,7 +380,11 @@ commands:
       - run:
           name: Deploy into the cluster
           command: |
-            make deploy
+            if [[ "<< parameters.is-slim >>" == "true" ]]; then
+              make slim-deploy
+            else
+              make deploy
+            fi
 
       - wait-for-scanner-and-pf:
           condition: Ready
@@ -387,7 +393,11 @@ commands:
           name: Run sanity tests
           no_output_timeout: 20m
           command: |
-            make e2e-tests
+            if [[ "<< parameters.is-slim >>" == "true" ]]; then
+              make slim-e2e-tests
+            else
+              make e2e-tests
+            fi
 
       - run:
           name: Collect k8s logs
@@ -408,7 +418,8 @@ commands:
 
       - fetch-and-upload-scanner-metrics
 
-      - run-db-integration-tests
+      - run-db-integration-tests:
+          is-slim: << parameters.is-slim >>
 
       - run:
           name: Collect k8s logs
@@ -451,11 +462,19 @@ commands:
       - teardown-gke
 
   run-db-integration-tests:
+    parameters:
+      is-slim:
+        type: boolean
     steps:
       - scanner-db-pf
       - run:
           name: Run db integration tests
-          command: make db-integration-tests
+          command: |
+            if [[ "<< parameters.is-slim >>" == "true" ]]; then
+              make slim-db-integration-tests
+            else
+              make db-integration-tests
+            fi
 
   run-scale-tests:
     parameters:
@@ -895,6 +914,14 @@ jobs:
       - provision-gke-cluster:
           cluster-id: rhel
 
+  provision-slim-cluster:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker
+      - provision-gke-cluster:
+          cluster-id: rhel-slim
+
   provision-scale-cluster:
     <<: *defaults
     steps:
@@ -911,7 +938,15 @@ jobs:
     <<: *defaults
     steps:
       - run-e2e-tests:
+          is-slim: false
           cluster-id: rhel
+
+  slim-e2e-tests:
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          is-slim: true
+          cluster-id: rhel-slim
 
   scale-tests:
     <<: *defaults
@@ -1042,6 +1077,15 @@ workflows:
           requires:
             - build
             - provision-cluster
+      - provision-slim-cluster:
+          <<: *runOnAllTagsWithQuayPullCtx
+          requires:
+            - create-postgres-dump-from-genesis-dump
+      - slim-e2e-tests:
+          <<: *runOnAllTagsWithRedHatCtx
+          requires:
+            - build
+            - provision-slim-cluster
 
   sanity-check-vuln-updates-scheduled:
     triggers:
@@ -1108,6 +1152,15 @@ workflows:
         requires:
           - build
           - provision-cluster
+    - provision-slim-cluster:
+        <<: *runOnAllTagsWithQuayPullCtx
+        requires:
+          - create-postgres-dump-from-genesis-dump
+    - slim-e2e-tests:
+        <<: *runOnAllTagsWithRedHatCtx
+        requires:
+          - build
+          - provision-slim-cluster
     - provision-scale-cluster:
         <<: *runOnAllTagsWithQuayPullCtx
         requires:

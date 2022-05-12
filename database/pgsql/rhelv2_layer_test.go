@@ -1,4 +1,4 @@
-// +build db_integration
+// +build db_integration slim_db_integration
 
 package pgsql
 

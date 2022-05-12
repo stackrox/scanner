@@ -17,21 +17,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func getMatchingFeature(t *testing.T, featureList []v1.Feature, featureToFind v1.Feature, allowNotFound bool) *v1.Feature {
-	candidateIdx := -1
-	for i, f := range featureList {
-		if f.Name == featureToFind.Name && f.Version == featureToFind.Version {
-			require.Equal(t, -1, candidateIdx, "Found multiple features for %s/%s", f.Name, f.Version)
-			candidateIdx = i
-		}
-	}
-	if allowNotFound && candidateIdx == -1 {
-		return nil
-	}
-	require.NotEqual(t, -1, candidateIdx, "Feature %+v not in list: %v", featureToFind, featureList)
-	return &featureList[candidateIdx]
-}
-
 func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulnerability) {
 	if expectedVuln.Metadata == nil {
 		assert.Nil(t, matchingVuln.Metadata, "Expected no metadata for %s but got some", expectedVuln.Name)
