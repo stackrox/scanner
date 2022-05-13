@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -68,8 +67,8 @@ func NewSlimUpdater(updaterConfig Config, sensorEndpoint string, repoToCPE *repo
 	}
 
 	// Set up the repo2cpe local filename and its directory.
-	repoToCPELocalFilename := path.Join(slimUpdaterDir, repoToCPEFilename)
-	if err := os.MkdirAll(path.Dir(repoToCPELocalFilename), 0700); err != nil {
+	repoToCPELocalFilename := filepath.Join(slimUpdaterDir, filepath.FromSlash(repoToCPEFilename))
+	if err := os.MkdirAll(filepath.Dir(repoToCPELocalFilename), 0700); err != nil {
 		return nil, errors.Wrap(err, "creating slim updater output dir")
 	}
 
