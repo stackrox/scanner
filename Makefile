@@ -161,13 +161,8 @@ image: scanner-image db-image
 .PHONY: image-slim
 image-slim: scanner-image-slim db-image-slim
 
-.PHONY: scanner-image-builder
-scanner-image-builder:
-	@echo "+ $@"
-	scripts/ensure_image.sh $(BUILD_IMAGE) build/Dockerfile build/
-
 .PHONY: scanner-build-dockerized
-scanner-build-dockerized: scanner-image-builder deps
+scanner-build-dockerized: deps
 	@echo "+ $@"
 ifdef CI
 	docker container create --name builder $(BUILD_IMAGE) $(BUILD_CMD)
@@ -179,7 +174,7 @@ else
 endif
 
 .PHONY: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
-$(CURDIR)/image/scanner/rhel/bundle.tar.gz: build
+$(CURDIR)/image/scanner/rhel/bundle.tar.gz:
 	$(CURDIR)/image/scanner/rhel/create-bundle.sh $(CURDIR)/image/scanner $(CURDIR)/image/scanner/rhel
 
 .PHONY: $(CURDIR)/image/db/rhel/bundle.tar.gz
