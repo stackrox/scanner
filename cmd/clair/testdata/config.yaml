@@ -1,6 +1,7 @@
 # Configuration file for scanner.
 scanner:
   centralEndpoint: https://central.stackrox.svc
+  sensorEndpoint: https://sensor.stackrox.svc
   database:
     # Database driver
     type: pgsql

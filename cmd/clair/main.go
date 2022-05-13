@@ -119,7 +119,7 @@ func Boot(config *Config, slimMode bool) {
 
 	var nvdVulnCache nvdtoolscache.Cache
 	var k8sVulnCache k8scache.Cache
-	var repoToCPE *repo2cpe.Mapping
+
 	if !slimMode {
 		wg.Add(1)
 		go func() {
@@ -132,19 +132,28 @@ func Boot(config *Config, slimMode bool) {
 			defer wg.Add(-1)
 			k8sVulnCache = k8scache.Singleton()
 		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Add(-1)
-			repoToCPE = repo2cpe.Singleton()
-		}()
 	}
+
+	var repoToCPE *repo2cpe.Mapping
+
+	wg.Add(1)
+	go func() {
+		defer wg.Add(-1)
+		repoToCPE = repo2cpe.Singleton()
+	}()
 
 	// Initialize the datastores prior to making the API available
 	wg.Wait()
 	defer db.Close()
 
-	if !slimMode {
+	if slimMode {
+		u, err := updater.NewSlimUpdater(config.Updater, config.SensorEndpoint, repoToCPE)
+		if err != nil {
+			log.WithError(err).Fatal("Failed to initialize slim updater")
+		}
+		go u.RunForever()
+		defer u.Stop()
+	} else {
 		u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdVulnCache, k8sVulnCache)
 		if err != nil {
 			log.WithError(err).Fatal("Failed to initialize updater")
