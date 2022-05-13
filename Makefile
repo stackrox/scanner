@@ -165,7 +165,7 @@ image-slim: scanner-image-slim db-image-slim
 scanner-build-dockerized: deps
 	@echo "+ $@"
 ifdef CI
-	docker container create --name builder $(BUILD_IMAGE) $(BUILD_CMD)
+	docker container create -w /go/src/github.com/stackrox/scanner --name builder $(BUILD_IMAGE) $(BUILD_CMD)
 	docker cp $(GOPATH) builder:/
 	docker start -i builder
 	docker cp builder:/go/src/github.com/stackrox/scanner/image/scanner/bin/scanner image/scanner/bin/scanner
