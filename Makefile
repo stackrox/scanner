@@ -30,7 +30,7 @@ BUILD_IMAGE := $(DEFAULT_IMAGE_REGISTRY)/apollo-ci:$(BUILD_IMAGE_VERSION)
 LOCAL_VOLUME_ARGS := -v$(CURDIR):/src:delegated -v $(GOPATH):/go:delegated
 GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
 BUILD_FLAGS := -e CGO_ENABLED=1,GOOS=linux,GOARCH=amd64
-BUILD_CMD := go build -ldflags="-linkmode=external -X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
+BUILD_CMD := go build -trimpath -ldflags="-linkmode=external -X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
 
 #####################################################################
 ###### Binaries we depend on (need to be defined on top) ############
@@ -70,7 +70,7 @@ tag:
 .PHONY: build-updater
 build-updater: deps
 	@echo "+ $@"
-	go build -o ./bin/updater ./cmd/updater
+	go build -trimpath -o ./bin/updater ./cmd/updater
 
 ###########
 ## Style ##
