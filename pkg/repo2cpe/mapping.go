@@ -50,7 +50,11 @@ func NewMapping() *Mapping {
 
 // Load loads the contents of the RHELv2CPERepoName file in the given directory into the Mapping.
 func (m *Mapping) Load(dir string) error {
-	path := filepath.Join(dir, RHELv2CPERepoName)
+	return m.LoadFile(filepath.Join(dir, RHELv2CPERepoName))
+}
+
+// LoadFile loads the contents of the specified file into the Mapping.
+func (m *Mapping) LoadFile(path string) error {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return errors.Wrapf(err, "reading mapping file at %s", path)

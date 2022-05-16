@@ -2,7 +2,6 @@ package updater
 
 import (
 	"bytes"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -11,9 +10,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/concurrency"
-	"github.com/stackrox/rox/pkg/httputil"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
-	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/cache"
 	"github.com/stackrox/scanner/pkg/mtls"
@@ -25,12 +22,6 @@ import (
 
 var (
 	diffDumpOutputPath = filepath.Join(wellknowndirnames.WriteableDir, "diff-dump.zip")
-)
-
-const (
-	ifModifiedSinceHeader = "If-Modified-Since"
-
-	defaultTimeout = 5 * time.Minute
 )
 
 var (
@@ -52,41 +43,6 @@ type Updater struct {
 	repoToCPE *repo2cpe.Mapping
 
 	stopSig *concurrency.Signal
-}
-
-func fetchDumpFromURL(ctx concurrency.Waitable, client *http.Client, url string, lastUpdatedTime time.Time, outputPath string) (bool, error) {
-	// First, head the URL to see when it was last modified.
-	req, err := http.NewRequestWithContext(concurrency.AsContext(ctx), http.MethodGet, url, nil)
-	if err != nil {
-		return false, errors.Wrap(err, "constructing req")
-	}
-	req.Header.Set(ifModifiedSinceHeader, lastUpdatedTime.UTC().Format(http.TimeFormat))
-	resp, err := client.Do(req)
-	if err != nil {
-		return false, errors.Wrap(err, "executing request")
-	}
-	defer utils.IgnoreError(resp.Body.Close)
-	if resp.StatusCode == http.StatusNotModified {
-		// Not modified
-		return false, nil
-	}
-	if resp.StatusCode == http.StatusNotFound {
-		log.Warn("Central does not have any vuln dumps")
-		return false, nil
-	}
-	if err := httputil.ResponseToError(resp); err != nil {
-		return false, err
-	}
-	outFile, err := os.Create(outputPath)
-	if err != nil {
-		return false, errors.Wrap(err, "creating output file")
-	}
-	defer utils.IgnoreError(outFile.Close)
-	_, err = io.Copy(outFile, resp.Body)
-	if err != nil {
-		return false, errors.Wrap(err, "streaming response to file")
-	}
-	return true, nil
 }
 
 type updateMode int
@@ -175,16 +131,15 @@ func New(config Config, centralEndpoint string, db database.Datastore, repoToCPE
 		return nil, errors.Wrap(err, "getting relevant download URL")
 	}
 
-	client := &http.Client{
-		Timeout:   defaultTimeout,
-		Transport: proxy.RoundTripper(),
-	}
+	client := newHTTPClient(proxy.RoundTripper())
 	clientConfig, err := mtls.TLSClientConfigForCentral()
 	if err != nil {
 		return nil, errors.Wrap(err, "generating TLS client config for Central")
 	}
 	client.Transport = &http.Transport{
 		TLSClientConfig: clientConfig,
+		// We are pulling the definitions bundle, which is already compressed.
+		DisableCompression: true,
 		// Values are taken from http.DefaultTransport, Go 1.17.3
 		MaxIdleConns:          100,
 		IdleConnTimeout:       90 * time.Second,
