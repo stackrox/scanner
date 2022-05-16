@@ -6,16 +6,11 @@ require (
 	cloud.google.com/go/storage v1.22.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.8.0
-	github.com/blevesearch/blevex v1.0.0 // indirect
-	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
-	github.com/blevesearch/segment v0.9.0 // indirect
 	github.com/ckaznocha/protoc-gen-lint v0.2.4
 	github.com/containers/image/v5 v5.20.0
-	github.com/couchbase/vellum v1.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker-credential-helpers v0.6.4
-	github.com/facebookincubator/flog v0.0.0-20190930132826-d2511d0ce33c // indirect
 	github.com/facebookincubator/nvdtools v0.1.4
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.3.1
@@ -49,9 +44,7 @@ require (
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
 	github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab
 	github.com/stackrox/rox v0.0.0-20210914215712-9ac265932e28
-	github.com/steveyen/gtreap v0.1.0 // indirect
 	github.com/stretchr/testify v1.7.1
-	github.com/syndtr/goleveldb v1.0.0 // indirect
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6
@@ -75,7 +68,10 @@ replace (
 	github.com/heroku/docker-registry-client => github.com/stackrox/docker-registry-client v0.0.0-20220204234128-07f109db0819
 	github.com/mattn/goveralls => github.com/viswajithiii/goveralls v0.0.3-0.20190917224517-4dd02c532775
 	github.com/nilslice/protolock => github.com/viswajithiii/protolock v0.10.1-0.20190117180626-43bb8a9ba4e8
-	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20210914215712-04ef1c1cfc62
+
+	github.com/operator-framework/helm-operator-plugins => github.com/stackrox/helm-operator v0.0.8-0.20220506091602-3764c49abfb3
+	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20220512161225-64d3c8bd40a8
+
 	go.uber.org/zap => github.com/stackrox/zap v1.15.1-0.20200720133746-810fd602fd0f
 	k8s.io/client-go => k8s.io/client-go v0.20.4
 )
