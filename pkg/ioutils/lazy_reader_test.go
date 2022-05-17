@@ -6,10 +6,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDiskLazyReader(t *testing.T) {
+func TestDiskLazyReader_basic(t *testing.T) {
 	testString := "This is to create a reader to test lazy reader with disk backed buffer."
 	bytes := []byte(testString)
 	reader := strings.NewReader(testString)
@@ -49,11 +51,32 @@ func TestDiskLazyReader(t *testing.T) {
 			assert.Equal(t, fetched[:10], bytes[dataSize-20:dataSize-10])
 			assert.EqualValues(t, 10, n)
 
-			lazyReader.Close()
+			require.NoError(t, lazyReader.Close())
 			n, err = lazyReader.ReadAt(fetched[:10], dataSize-10)
 			assert.Equal(t, err, errBufferStolen)
 			assert.Zero(t, 0, n)
-			lazyReader.Close()
+			require.NoError(t, lazyReader.Close())
 		})
 	}
+}
+
+func TestDiskLazyReader_full(t *testing.T) {
+	overflowBlockSize = 64
+	maxBufferSize := int64(100)
+
+	// Random 201 byte string. This string plus a block size of 64 and maxBufferSize of 100 is meant
+	// to mimic the actual used values scaled down by a factor of MB.
+	testString := `r6stSDxPmOtVZEugG9BWPZ9ftFgFhlIwSj8hVgDVuo0euxQjIerfmH0NnbDVHcnTQbVsvY9dBYAwT4u258UVeEsdrQMujhOgfCX8KLFn6QY4Qmp1gac4Oeh2r6RAmqKmgoExGLAtOngW7Qi5wSzvZeEhC8awmxpzD5Lp5xs1rO6XdDevS0pdnV2yAki7tVrfNFjJYhrNK`
+	reader := strings.NewReader(testString)
+	lazyReaderAt := NewLazyReaderAtWithDiskBackedBuffer(reader, reader.Size(), []byte{}, maxBufferSize)
+	defer func() {
+		require.NoError(t, lazyReaderAt.Close())
+	}()
+
+	// Read entire contents.
+	p := make([]byte, reader.Size())
+	n, err := lazyReaderAt.ReadAt(p, 0)
+	assert.NoError(t, err)
+	assert.Equal(t, int(reader.Size()), n)
+	assert.Equal(t, []byte(testString), p)
 }
