@@ -22,3 +22,21 @@ updates:
     open-pull-requests-limit: 3
     reviewers:
       - 'stackrox/scanner-dep-updaters'
+      
+  - package-ecosystem: 'docker'
+    directory: 'image/scanner/rhel'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    open-pull-requests-limit: 1
+    reviewers:
+      - 'stackrox/scanner-dep-updaters'
+    
+  - package-ecosystem: 'docker'
+    directory: 'image/db/rhel'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    open-pull-requests-limit: 1
+    reviewers:
+      - 'stackrox/scanner-dep-updaters'
