@@ -188,7 +188,7 @@ func (r *diskBackedLazyReaderAt) ensureOverflowToDisk(till int64) {
 		}
 	}
 
-	// Copy until next block align with size r.maxBufferSize or the size of file.
+	// Copy until next block align with size overflowBlockSize or the size of file.
 	// Request to copy an extra byte to ensure EOF is recorded.
 	to := mathutil.MinInt64(((till-1)/overflowBlockSize+1)*overflowBlockSize, r.size)
 	if to == r.size {
