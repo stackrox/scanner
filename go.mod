@@ -28,7 +28,7 @@ require (
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
 	github.com/knqyf263/go-rpm-version v0.0.0-20170716094938-74609b86c936
-	github.com/lib/pq v1.10.5
+	github.com/lib/pq v1.10.6
 	github.com/mailru/easyjson v0.7.7
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/mitchellh/hashstructure v1.1.0
@@ -49,7 +49,7 @@ require (
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6
 	google.golang.org/api v0.80.0
-	google.golang.org/grpc v1.46.0
+	google.golang.org/grpc v1.46.2
 	gopkg.in/yaml.v2 v2.4.0
 )
 
