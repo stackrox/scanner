@@ -45,6 +45,21 @@ func TestIsELFExecutable(t *testing.T) {
 	}
 }
 
+type badReader struct{}
+
+func (br *badReader) ReadAt(p []byte, _ int64) (n int, err error) {
+	if len(p) == 0 {
+		return 0, nil
+	}
+	return len(p) - 1, io.ErrNoProgress
+}
+
+func TestErrorHandling(t *testing.T) {
+	metadata, err := GetExecutableMetadata(&badReader{})
+	require.Nil(t, metadata)
+	require.ErrorIs(t, err, io.ErrNoProgress)
+}
+
 func TestGetImportedLibraries(t *testing.T) {
 	elfFile := "testdata/elf_exec"
 	stat, err := os.Stat(elfFile)
