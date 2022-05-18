@@ -179,7 +179,7 @@ func (r *diskBackedLazyReaderAt) ensureOverflowToDisk(till int64) {
 			}
 		}()
 
-		// Prepare overFlowFile
+		// Prepare overflowFile
 		filePath := filepath.Join(r.dirPath, tmpFileName)
 		r.overflowFile, err = os.Create(filePath)
 		if err != nil {
@@ -188,13 +188,13 @@ func (r *diskBackedLazyReaderAt) ensureOverflowToDisk(till int64) {
 		}
 	}
 
-	// Copy until next block align with size overflowBlockSize or the size of file.
-	// Request to copy an extra byte to ensure EOF is recorded.
+	// Copy up to the next block, aligned with size overflowBlockSize.
+	// This is maxed to the size of the reader.
 	to := mathutil.MinInt64(((till-1)/overflowBlockSize+1)*overflowBlockSize, r.size)
+	// If the entire reader size is required, then copy an extra byte to ensure EOF is recorded.
 	if to == r.size {
 		to++
 	}
-
 	var n int64
 	n, r.err = io.CopyN(r.overflowFile, r.reader, to-r.pos)
 	r.pos += n
