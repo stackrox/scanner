@@ -2,7 +2,6 @@ package ioutils
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,10 +14,12 @@ import (
 
 const (
 	// The temp overFlowFile is like "/tmp/<tmpDirName>111111/<tmpFileName>"
-	tmpFileName       = "buffer-overflow"
-	tmpDirName        = "disk-lazy-reader-"
-	overflowBlockSize = 64 * 1024 * 1024
+	tmpFileName = "buffer-overflow"
+	tmpDirName  = "disk-lazy-reader-"
 )
+
+// overflowBlockSize defines the block size used when writing to the overflow file on disk.
+var overflowBlockSize int64 = 64 * 1024 * 1024
 
 // LazyReaderAtWithDiskBackedBuffer is a LazyReaderAt which uses a temporary file on disk
 // to store extra data beyond the maximum buffer size requested.
@@ -37,7 +38,7 @@ type diskBackedLazyReaderAt struct {
 
 	mutex        sync.RWMutex
 	pos          int64
-	overFlowFile *os.File
+	overflowFile *os.File
 	dirPath      string
 	err          error
 }
@@ -45,7 +46,7 @@ type diskBackedLazyReaderAt struct {
 // CleanUpTempFiles removes the temporary overflow files.
 func CleanUpTempFiles() {
 	// Clean up the directory created with os.MkdirTemp
-	dir, err := ioutil.ReadDir(os.TempDir())
+	dir, err := os.ReadDir(os.TempDir())
 	utils.Should(err)
 	for _, d := range dir {
 		if d.IsDir() && strings.HasPrefix(d.Name(), tmpDirName) {
@@ -79,9 +80,9 @@ func (r *diskBackedLazyReaderAt) StealBuffer() []byte {
 	defer r.mutex.Unlock()
 
 	// Clean up
-	if r.overFlowFile != nil {
-		_ = r.overFlowFile.Close()
-		r.overFlowFile = nil
+	if r.overflowFile != nil {
+		_ = r.overflowFile.Close()
+		r.overflowFile = nil
 	}
 	if r.dirPath != "" {
 		_ = os.RemoveAll(r.dirPath)
@@ -119,10 +120,10 @@ func (r *diskBackedLazyReaderAt) readAt(p []byte, off int64) (n int, err error) 
 			return n, err
 		}
 	}
-	if r.overFlowFile != nil {
+	if r.overflowFile != nil {
 		// Fill the rest from disk. Offset is relative to r.maxBufferSize.
 		var nFromDisk int
-		nFromDisk, err = r.overFlowFile.ReadAt(p[n:], off+int64(n)-r.maxBufferSize)
+		nFromDisk, err = r.overflowFile.ReadAt(p[n:], off+int64(n)-r.maxBufferSize)
 		n += nFromDisk
 	}
 
@@ -163,36 +164,38 @@ func (r *diskBackedLazyReaderAt) ensureOverflowToDisk(till int64) {
 		r.pos = r.maxBufferSize
 	}
 
-	if r.overFlowFile == nil {
+	if r.overflowFile == nil {
 		var err error
+		// "" indicates we want to use os.TempDir().
 		r.dirPath, err = os.MkdirTemp("", tmpDirName)
 		if err != nil {
 			r.err = errors.Wrap(err, "failed to create temp dir for overflow")
 			return
 		}
 		defer func() {
-			if r.overFlowFile == nil {
+			if r.overflowFile == nil {
 				_ = os.RemoveAll(r.dirPath)
 				r.dirPath = ""
 			}
 		}()
 
-		// Prepare overFlowFile
+		// Prepare overflowFile
 		filePath := filepath.Join(r.dirPath, tmpFileName)
-		r.overFlowFile, err = os.Create(filePath)
+		r.overflowFile, err = os.Create(filePath)
 		if err != nil {
 			r.err = errors.Wrapf(err, "create overFlowFile %s", filePath)
 			return
 		}
 	}
 
-	// Copy until next block align with size r.maxBufferSize or the size of file.
-	// Request to copy an extra byte to ensure EOF is recorded.
-	to := mathutil.MinInt64(((till-1)/r.maxBufferSize+1)*overflowBlockSize, r.size)
+	// Copy up to the next block, aligned with size overflowBlockSize.
+	// This is maxed to the size of the reader.
+	to := mathutil.MinInt64(((till-1)/overflowBlockSize+1)*overflowBlockSize, r.size)
+	// If the entire reader size is required, then copy an extra byte to ensure EOF is recorded.
 	if to == r.size {
 		to++
 	}
 	var n int64
-	n, r.err = io.CopyN(r.overFlowFile, r.reader, to-r.pos)
+	n, r.err = io.CopyN(r.overflowFile, r.reader, to-r.pos)
 	r.pos += n
 }
