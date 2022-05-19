@@ -25,8 +25,8 @@ type Metadata struct {
 func GetExecutableMetadata(r io.ReaderAt) (*Metadata, error) {
 	elfFile, err := elf.NewFile(r)
 	if err != nil {
-		// Do not return error if it is not in ELF format
-		if _, ok := err.(*elf.FormatError); ok {
+		// Do not return error if it is not in ELF format.
+		if _, isFormatError := err.(*elf.FormatError); isFormatError {
 			err = nil
 		}
 		return nil, err
