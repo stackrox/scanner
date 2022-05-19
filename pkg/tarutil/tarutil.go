@@ -161,14 +161,13 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 		case tar.TypeReg, tar.TypeLink:
 			var fileData FileData
 
-			// ELF file size limit
-			if hdr.Size <= maxELFExecutableFileSize {
+			if hdr.Size > maxELFExecutableFileSize {
+				log.Warnf("Skipping ELF executable check for file %q (%d bytes) because it is larger than the configured maxELFExecutableFileSizeMB of %d", filename, hdr.Size, maxELFExecutableFileSize/1024/1024)
+			} else if hdr.Size > 0 { // Do not bother attempting to get ELF metadata if the file is empty.
 				fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
 				if err != nil {
 					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 				}
-			} else {
-				log.Errorf("Skipping ELF executable check for file %q (%d bytes) because it was greater than the configured maxELFExecutableFileSizeMB of %d", filename, hdr.Size, maxELFExecutableFileSize/1024/1024)
 			}
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
