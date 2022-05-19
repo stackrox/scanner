@@ -625,7 +625,7 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
 					Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/",
 					AddedBy:       "sha256:b48f8e1b0b06887c382543e23275911a388c1010e3436dc9b708ef29885bb594",
-					FixedBy:       "3.1.18",
+					FixedBy:       "3.1.23",
 					Vulnerabilities: []v1.Vulnerability{
 						{
 							Name:        "CVE-2020-1108",
@@ -1205,7 +1205,7 @@ func TestImageSanity(t *testing.T) {
 					},
 					AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
 					Location: "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.0/",
-					FixedBy:  "3.1.18",
+					FixedBy:  "3.1.23",
 				},
 			},
 		},
@@ -1451,7 +1451,7 @@ func TestImageSanity(t *testing.T) {
 					},
 					AddedBy:  "sha256:36e8e9714b9a509fae9e515ff16237928c3d809f5ae228b14d2f7d7605c02623",
 					Location: "jars/jackson-databind-2.9.10.4.jar",
-					FixedBy:  "2.9.10.8",
+					FixedBy:  "2.12.6.1",
 				},
 			},
 			unexpectedFeatures: []v1.Feature{
@@ -1917,9 +1917,6 @@ func TestImageSanity(t *testing.T) {
 				},
 			},
 		},
-		// The next two images have the same layer and thus verify lineage checks between different images
-		// The first is a centos:7 image that has the package p11-kit. The second image is from fedora and we
-		// can't identify the OS so it should not have p11-kit
 		{
 			image:                   "quay.io/dougtidwell/open-adventure@sha256:564c8dde1931f337a7bc8925f94cb594d9c81a5ee9eacc5ec5590f1e60e94b6a",
 			registry:                "https://quay.io",
@@ -1932,18 +1929,6 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: "rpm",
 					Version:       "0.23.5-3.el7",
 					AddedBy:       "sha256:f9ce27a295e879233c8fbbf9ab67944a10e1ce80da69e46f87c583082a1ff3bb",
-				},
-			},
-		},
-		{
-			image:    "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
-			registry: "https://quay.io",
-			source:   "NVD",
-			unexpectedFeatures: []v1.Feature{
-				{
-					Name:          "p11-kit",
-					VersionFormat: "rpm",
-					Version:       "0.23.5-3.el7",
 				},
 			},
 		},
@@ -2043,7 +2028,7 @@ func TestImageSanity(t *testing.T) {
 						},
 					},
 					AddedBy: "sha256:596ba82af5aaa3e2fd9d6f955b8b94f0744a2b60710e3c243ba3e4a467f051d1",
-					FixedBy: "1.32.1-r7",
+					FixedBy: "1.32.1-r8",
 				},
 			},
 		},
@@ -2093,7 +2078,7 @@ func TestImageSanity(t *testing.T) {
 					VersionFormat: "apk",
 					Version:       "1.33.1-r2",
 					AddedBy:       "sha256:5843afab387455b37944e709ee8c78d7520df80f8d01cf7f861aae63beeddb6b",
-					FixedBy:       "1.33.1-r6",
+					FixedBy:       "1.33.1-r7",
 				},
 			},
 		},
