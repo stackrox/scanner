@@ -1451,7 +1451,7 @@ func TestImageSanity(t *testing.T) {
 					},
 					AddedBy:  "sha256:36e8e9714b9a509fae9e515ff16237928c3d809f5ae228b14d2f7d7605c02623",
 					Location: "jars/jackson-databind-2.9.10.4.jar",
-					FixedBy:  "2.9.10.8",
+					FixedBy:  "2.12.6.1",
 				},
 			},
 			unexpectedFeatures: []v1.Feature{
