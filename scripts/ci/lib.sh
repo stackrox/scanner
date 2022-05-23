@@ -48,7 +48,7 @@ push_images() {
         local tag="$2"
 
         for image in "${image_set[@]}"; do
-            "$ROOT/scripts/push-as-manifest-list.sh" "${registry}/${image}:${tag}" | cat
+            "$SCRIPTS_ROOT/scripts/push-as-manifest-list.sh" "${registry}/${image}:${tag}" | cat
         done
     }
 
