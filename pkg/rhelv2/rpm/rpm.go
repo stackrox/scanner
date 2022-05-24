@@ -13,6 +13,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -57,7 +59,6 @@ const (
 		`[%{FILENAMES}\n]` +
 		`.\n`
 
-	dbPath           = `var/lib/rpm/Packages`
 	contentManifests = `root/buildinfo/content_manifests`
 
 	pkgFmt = `rpmv2`
@@ -65,18 +66,84 @@ const (
 
 var contentManifestPattern = regexp.MustCompile(`^root/buildinfo/content_manifests/.*\.json$`)
 
+// rpmDatabaseDir is the directory where the RPM database is expected to be in
+// the container filesystem.
+var rpmDatabaseDir = "var/lib/rpm"
+
+// rpmDatabaseFiles is a slice of all RPM database files for all known backends.
+var rpmDatabaseFiles = []string{
+	// bdb (rpm < 4.16)
+	"Packages",
+	// sqlite (rpm >= 4.16)
+	"rpmdb.sqlite",
+	"rpmdb.sqlite-shm",
+	"rpmdb.sqlite-wal",
+}
+
 // AllRHELRequiredFiles lists all the names of the files required to identify RHEL-based releases.
 var AllRHELRequiredFiles set.StringSet
 
 func init() {
-	AllRHELRequiredFiles.Add(dbPath)
 	AllRHELRequiredFiles.AddAll(RequiredFilenames()...)
 	AllRHELRequiredFiles.AddAll(redhatrelease.RequiredFilenames...)
 	AllRHELRequiredFiles.AddAll(osrelease.RequiredFilenames...)
 }
 
+// rpmDatabase represents an RPM database in the filesystem.
+type rpmDatabase struct {
+	// The path to the rpm database, can be used as --dbpath <dbPath> in rpm commands.
+	dbPath string
+}
+
+// createRPMDatabaseFromImage creates an RPM database in a temporary directory
+// from the RPM database found in the container image. All known RPM database
+// backend is supported (i.e. bdb, sqlite). If no database is found in the image,
+// returns nil.
+func createRPMDatabaseFromImage(imageFiles tarutil.LayerFiles) (*rpmDatabase, error) {
+	// Find all known RPM database files in the image archive.
+	dbFiles := make(map[string]tarutil.FileData)
+	for _, name := range rpmDatabaseFiles {
+		data, exists := imageFiles.Get(path.Join(rpmDatabaseDir, name))
+		if exists {
+			dbFiles[name] = data
+		}
+	}
+	if len(dbFiles) == 0 {
+		// Not rpm database was found.
+		return nil, nil
+	}
+	// Write the database files to the filesystem.
+	dbDir, err := os.MkdirTemp("", "rpm")
+	if err != nil {
+		log.WithError(err).Error("could not create temporary folder for the rpm database")
+		return nil, commonerr.ErrFilesystem
+	}
+	defer func() {
+		// Remove temporary directory if returning on errors.
+		if err != nil {
+			_ = os.RemoveAll(dbDir)
+		}
+	}()
+	for name, data := range dbFiles {
+		path := filepath.Join(dbDir, name)
+		err = os.WriteFile(path, data.Contents, 0700)
+		if err != nil {
+			log.WithError(err).Error("failed to create rpm database file")
+			return nil, commonerr.ErrFilesystem
+		}
+	}
+	return &rpmDatabase{
+		dbPath: dbDir,
+	}, nil
+}
+
+// delete removes all the RPM database files.
+func (d *rpmDatabase) delete() error {
+	return os.RemoveAll(d.dbPath)
+}
+
 // ListFeatures returns the features found from the given files.
-// returns a slice of packages found via rpm and a slice of CPEs found in
+// returns a slice of packages found via rpm          and a slice of CPEs found in
 // /root/buildinfo/content_manifests.
 func ListFeatures(files tarutil.LayerFiles) ([]*database.RHELv2Package, []string, error) {
 	if features.ActiveVulnMgmt.Enabled() {
@@ -91,33 +158,21 @@ func listFeatures(files tarutil.LayerFiles, queryFmt string) ([]*database.RHELv2
 		return nil, nil, err
 	}
 
-	f, hasFile := files.Get(dbPath)
-	if !hasFile {
-		return nil, cpes, nil
-	}
-
 	defer metrics.ObserveListFeaturesTime(pkgFmt, "all", time.Now())
 
-	// Write the required "Packages" file to disk
-	tmpDir, err := os.MkdirTemp("", "rpm")
+	rpmDB, err := createRPMDatabaseFromImage(files)
 	if err != nil {
-		log.WithError(err).Error("could not create temporary folder for RPM detection")
-		return nil, nil, commonerr.ErrFilesystem
+		return nil, nil, err
 	}
-	defer func() {
-		_ = os.RemoveAll(tmpDir)
-	}()
-
-	err = os.WriteFile(tmpDir+"/Packages", f.Contents, 0700)
-	if err != nil {
-		log.WithError(err).Error("could not create temporary file for RPM detection")
-		return nil, nil, commonerr.ErrFilesystem
+	if rpmDB == nil {
+		return nil, cpes, nil
 	}
+	defer rpmDB.delete()
 
 	defer metrics.ObserveListFeaturesTime(pkgFmt, "cli+parse", time.Now())
 
 	cmd := exec.Command("rpm",
-		`--dbpath`, tmpDir,
+		`--dbpath`, rpmDB.dbPath,
 		`--query`, `--all`, `--queryformat`, queryFmt)
 	r, err := cmd.StdoutPipe()
 	if err != nil {
@@ -273,5 +328,9 @@ func getContentManifestFileContents(files tarutil.LayerFiles) []byte {
 
 // RequiredFilenames lists the files required to be present for analysis to be run.
 func RequiredFilenames() []string {
-	return []string{dbPath, contentManifests}
+	names := []string{contentManifests}
+	for _, fn := range rpmDatabaseFiles {
+		names = append(names, path.Join(rpmDatabaseDir, fn))
+	}
+	return names
 }
