@@ -137,13 +137,41 @@ func createRPMDatabaseFromImage(imageFiles tarutil.LayerFiles) (*rpmDatabase, er
 	}, nil
 }
 
+// rpmProvidesFile return true if a package provide the specified path in the RPM
+// database. If the path is relative, we assume its relative to the root
+// directory.
+func (d *rpmDatabase) rpmProvidesFile(path string) bool {
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+	cmd := exec.Command(
+		"rpm",
+		`--dbpath`, d.dbPath,
+		`-q`,
+		`--whatprovides`, path,
+	)
+	if err := cmd.Run(); err != nil {
+		// When an RPM package does not provide a file, the expected output has
+		// status code 1.
+		if exitError, ok := err.(*exec.ExitError); ok && exitError.ExitCode() == 1 {
+			// RPM does NOT provide this package.
+			return false
+		}
+		log.WithError(err).Errorf("unexpected error when determining if %s belongs to an RPM package", path)
+		// Upon error, say no RPM package provides this file.
+		return false
+	}
+	// The command exited properly, which implies the file IS provided by an RPM package.
+	return true
+}
+
 // delete removes all the RPM database files.
 func (d *rpmDatabase) delete() error {
 	return os.RemoveAll(d.dbPath)
 }
 
 // ListFeatures returns the features found from the given files.
-// returns a slice of packages found via rpm          and a slice of CPEs found in
+// returns a slice of packages found via rpm and a slice of CPEs found in
 // /root/buildinfo/content_manifests.
 func ListFeatures(files tarutil.LayerFiles) ([]*database.RHELv2Package, []string, error) {
 	if features.ActiveVulnMgmt.Enabled() {
@@ -167,13 +195,17 @@ func listFeatures(files tarutil.LayerFiles, queryFmt string) ([]*database.RHELv2
 	if rpmDB == nil {
 		return nil, cpes, nil
 	}
-	defer rpmDB.delete()
 
+	defer rpmDB.delete()
 	defer metrics.ObserveListFeaturesTime(pkgFmt, "cli+parse", time.Now())
 
-	cmd := exec.Command("rpm",
+	cmd := exec.Command(
+		"rpm",
 		`--dbpath`, rpmDB.dbPath,
-		`--query`, `--all`, `--queryformat`, queryFmt)
+		`--query`,
+		`--all`,
+		`--queryformat`, queryFmt,
+	)
 	r, err := cmd.StdoutPipe()
 	if err != nil {
 		return nil, nil, err
