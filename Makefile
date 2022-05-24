@@ -32,6 +32,10 @@ GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
 BUILD_FLAGS := -e CGO_ENABLED=1,GOOS=linux,GOARCH=amd64
 BUILD_CMD := go build -trimpath -ldflags="-linkmode=external -X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
 
+DOCKER_BIN := docker
+DOCKER_BUILD_FLAGS := --security-opt seccomp=unconfined
+DOCKER_BUILD := $(DOCKER_BIN) build $(DOCKER_BUILD_FLAGS)
+
 #####################################################################
 ###### Binaries we depend on (need to be defined on top) ############
 #####################################################################
@@ -184,24 +188,24 @@ $(CURDIR)/image/db/rhel/bundle.tar.gz:
 .PHONY: scanner-image
 scanner-image: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build --target scanner -t scanner:$(TAG) -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
+	@$(DOCKER_BUILD) --target scanner -t scanner:$(TAG) -t us.gcr.io/stackrox-ci/scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: scanner-image-slim
 scanner-image-slim: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build --target scanner-slim -t scanner-slim:$(TAG) -t us.gcr.io/stackrox-ci/scanner-slim:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
+	@$(DOCKER_BUILD) --target scanner-slim -t scanner-slim:$(TAG) -t us.gcr.io/stackrox-ci/scanner-slim:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: db-image
 db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build --target scanner-db -t scanner-db:$(TAG) -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
+	@$(DOCKER_BUILD) --target scanner-db -t scanner-db:$(TAG) -t us.gcr.io/stackrox-ci/scanner-db:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: db-image-slim
 db-image-slim: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build --target scanner-db-slim -t scanner-db-slim:$(TAG) -t us.gcr.io/stackrox-ci/scanner-db-slim:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
+	@$(DOCKER_BUILD) --target scanner-db-slim -t scanner-db-slim:$(TAG) -t us.gcr.io/stackrox-ci/scanner-db-slim:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered

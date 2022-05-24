@@ -1,7 +1,6 @@
 package rpm
 
 import (
-	"os"
 	"os/exec"
 
 	log "github.com/sirupsen/logrus"
@@ -16,66 +15,24 @@ func AnnotateComponentsWithPackageManagerInfo(files tarutil.LayerFiles, componen
 	if len(components) == 0 {
 		return nil
 	}
-	f, hasFile := files.Get(dbPath)
-	if !hasFile {
-		return nil
-	}
-	matcher, finish, err := isProvidedByRPMPackageMatcher(f.Contents)
+	rpmDB, err := createRPMDatabaseFromImage(files)
 	if err != nil {
 		return err
 	}
-	defer finish()
-
-	locationAlreadyChecked := make(map[string]bool)
-	for _, c := range components {
-		// This handles jar-in-jar cases as the location is manually created so we only want
-		// the initial path
-		normalizedLocation := stringutils.GetUpTo(c.Location, ":")
-		fromPackageManager, ok := locationAlreadyChecked[normalizedLocation]
-		if ok {
-			c.FromPackageManager = fromPackageManager
-			continue
-		}
-		c.FromPackageManager = matcher(normalizedLocation)
-		locationAlreadyChecked[normalizedLocation] = c.FromPackageManager
+	if rpmDB == nil {
+		return nil
 	}
-	return nil
-}
+	defer rpmDB.delete()
 
-// isProvidedByRPMPackageMatcher uses the given package contents (expected to be an RPM Berkeley DB)
-// to return:
-// * a function which returns if the given file path is provided by an RPM package.
-// * a function to be called once the package contents are no longer needed which cleans up any used resources.
-// * an error.
-func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, func(), error) {
-	if packagesContents == nil {
-		// Default return always says the given path is not provided by an RPM package.
-		return func(string) bool { return false }, func() {}, nil
-	}
-
-	// Write the required "Packages" file to disk
-	tmpDir, err := os.MkdirTemp("", "rpm")
-	if err != nil {
-		log.WithError(err).Error("could not create temporary folder for RPM detection")
-		return nil, nil, err
-	}
-
-	err = os.WriteFile(tmpDir+"/Packages", packagesContents, 0700)
-	if err != nil {
-		log.WithError(err).Error("could not create temporary file for RPM detection")
-		return nil, nil, err
-	}
-
-	finishFn := func() { _ = os.RemoveAll(tmpDir) }
-
-	return func(path string) bool {
+	// A function which returns if the given file path is provided by an RPM package.
+	matcher := func(path string) bool {
 		// We need the full path of the file.
 		// When we originally extract the file, the `/` prefix is removed.
 		// Add it back here.
 		fullPath := "/" + path
 
 		cmd := exec.Command("rpm",
-			`--dbpath`, tmpDir,
+			`--dbpath`, rpmDB.dbPath,
 			`-q`, `--whatprovides`, fullPath)
 
 		if err := cmd.Run(); err != nil {
@@ -94,5 +51,20 @@ func isProvidedByRPMPackageMatcher(packagesContents []byte) (func(string) bool, 
 		// The command exited properly, which implies the file IS provided by an RPM package.
 		return true
 
-	}, finishFn, nil
+	}
+
+	locationAlreadyChecked := make(map[string]bool)
+	for _, c := range components {
+		// This handles jar-in-jar cases as the location is manually created so we only want
+		// the initial path
+		normalizedLocation := stringutils.GetUpTo(c.Location, ":")
+		fromPackageManager, ok := locationAlreadyChecked[normalizedLocation]
+		if ok {
+			c.FromPackageManager = fromPackageManager
+			continue
+		}
+		c.FromPackageManager = matcher(normalizedLocation)
+		locationAlreadyChecked[normalizedLocation] = c.FromPackageManager
+	}
+	return nil
 }
