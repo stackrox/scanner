@@ -2702,6 +2702,29 @@ var testCases = []testCase{
 		},
 	},
 	{
+		image:                   "alpine:3.16.0",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "alpine:v3.16",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "apk-tools",
+				NamespaceName: "alpine:v3.16",
+				VersionFormat: "apk",
+				Version:       "2.12.9-r3",
+				AddedBy:       "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
+			},
+			{
+				Name:          "busybox",
+				NamespaceName: "alpine:v3.16",
+				VersionFormat: "apk",
+				Version:       "1.35.0-r13",
+				AddedBy:       "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
+			},
+		},
+	},
+	{
 		image:    "quay.io/rhacs-eng/qa:debian-package-removal",
 		registry: "https://quay.io",
 		username: os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
