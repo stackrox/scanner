@@ -35,7 +35,7 @@ case "$ci_job" in
         make style
         ;;
     unit-tests)
-        make style
+        make unit-tests
         ;;
     *)
         # For ease of initial integration this function does not fail when the
