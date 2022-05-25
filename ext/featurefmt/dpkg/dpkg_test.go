@@ -17,66 +17,13 @@ package dpkg
 import (
 	"testing"
 
-	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/pkg/elf"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 func TestDpkgFeatureDetection(t *testing.T) {
-	env := envisolator.NewEnvIsolator(t)
-	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
-	defer env.RestoreAll()
-
-	testData := []featurefmt.TestData{
-		// Test an Ubuntu dpkg status file
-		{
-			FeatureVersions: []database.FeatureVersion{
-				// Two packages from this source are installed, it should only appear one time
-				{
-					Feature: database.Feature{Name: "pam"},
-					Version: "1.1.8-3.1ubuntu3",
-				},
-				{
-					Feature: database.Feature{Name: "makedev"},
-					Version: "2.3.1-93ubuntu1",
-				},
-				{
-					Feature: database.Feature{Name: "gcc-5"},
-					Version: "5.1.1-12ubuntu1", // The version comes from the "Source:" line
-				},
-				{
-					Feature: database.Feature{Name: "base-files"},
-					Version: "10.3+deb10u6",
-				},
-				{
-					Feature: database.Feature{Name: "netbase"},
-					Version: "5.6",
-				},
-				{
-					Feature: database.Feature{Name: "pkg-source"},
-					Version: "1.1.8-3.1ubuntu3",
-				},
-			},
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
-				"var/lib/dpkg/status":           {Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
-				"var/lib/dpkg/status.d":         {},
-				"var/lib/dpkg/status.d/base":    {Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},
-				"var/lib/dpkg/status.d/netbase": {Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-netbase")},
-			}),
-		},
-	}
-
-	featurefmt.TestLister(t, &lister{}, testData)
-}
-
-func TestDpkgFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
-	env := envisolator.NewEnvIsolator(t)
-	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
-	defer env.RestoreAll()
-
 	testData := []featurefmt.TestData{
 		// Test an Ubuntu dpkg status file
 		{

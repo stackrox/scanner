@@ -6,9 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
@@ -17,79 +15,10 @@ import (
 
 // ListFeaturesTest does the same as ListFeatures but should only be used for testing.
 func ListFeaturesTest(files tarutil.LayerFiles) ([]*database.RHELv2Package, []string, error) {
-	if features.ActiveVulnMgmt.Enabled() {
-		return listFeatures(files, queryFmtActiveVulnMgmtTest)
-	}
 	return listFeatures(files, queryFmtTest)
 }
 
 func TestRPMFeatureDetection(t *testing.T) {
-	env := envisolator.NewEnvIsolator(t)
-	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
-	defer env.RestoreAll()
-
-	sampleExpectedPkgs := []*database.RHELv2Package{
-		{
-			Name:    "zlib",
-			Version: "1.2.11-16.el8_2",
-			Arch:    "x86_64",
-		},
-		{
-			Name:    "dbus-common",
-			Version: "1:1.12.8-12.el8_3",
-			Arch:    "noarch",
-		},
-		{
-			Name:    "ncurses-libs",
-			Version: "6.1-7.20180224.el8",
-			Arch:    "x86_64",
-		},
-		{
-			Name:    "redhat-release",
-			Version: "8.3-1.0.el8",
-			Arch:    "x86_64",
-		},
-	}
-
-	unexpectedPkgs := []*database.RHELv2Package{
-		{
-			Name:    "gpg-pubkey",
-			Version: "d4082792-5b32db75",
-		},
-	}
-
-	expectedCPEs := []string{
-		"cpe:/o:redhat:enterprise_linux:8::baseos",
-		"cpe:/a:redhat:enterprise_linux:8::appstream",
-	}
-
-	_, filename, _, _ := runtime.Caller(0)
-	d, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/Packages"))
-	require.NoError(t, err)
-
-	manifest, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/test.json"))
-	require.NoError(t, err)
-
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
-
-	pkgs, cpes, err := ListFeaturesTest(tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
-		"var/lib/rpm/Packages":                       {Contents: d},
-		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
-	}))
-	assert.NoError(t, err)
-	assert.ElementsMatch(t, cpes, expectedCPEs)
-	assert.Subset(t, pkgs, sampleExpectedPkgs)
-	assert.NotSubset(t, pkgs, unexpectedPkgs)
-}
-
-func TestRPMFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
-	env := envisolator.NewEnvIsolator(t)
-	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
-	defer env.RestoreAll()
-
 	sampleExpectedPkgs := []*database.RHELv2Package{
 		{
 			Name:    "zlib",

@@ -30,7 +30,6 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/pkg/commonerr"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -40,9 +39,6 @@ const (
 	dbPath = "var/lib/rpm/Packages"
 
 	queryFmt = `%{name}\n` +
-		`%{evr}\n` +
-		`.\n`
-	queryFmtActiveVulnMgmt = `%{name}\n` +
 		`%{evr}\n` +
 		`[%{FILENAMES}\n]` +
 		`.\n`
@@ -80,12 +76,8 @@ func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersio
 	}
 
 	// Extract binary package names because RHSA refers to binary package names.
-	qf := queryFmt
-	if features.ActiveVulnMgmt.Enabled() {
-		qf = queryFmtActiveVulnMgmt
-	}
 	defer metrics.ObserveListFeaturesTime(pkgFmt, "cli+parse", time.Now())
-	cmd := exec.Command("rpm", "--dbpath", tmpDir, "-qa", "--qf", qf)
+	cmd := exec.Command("rpm", "--dbpath", tmpDir, "-qa", "--qf", queryFmt)
 	r, err := cmd.StdoutPipe()
 	if err != nil {
 		return []database.FeatureVersion{}, errors.Wrap(err, "Unable to get pipe for RPM command")

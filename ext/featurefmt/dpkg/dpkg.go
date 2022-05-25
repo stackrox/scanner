@@ -31,7 +31,6 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -161,7 +160,7 @@ func handleComponent(files tarutil.LayerFiles, pkgMetadata *componentMetadata, p
 	execToDeps := make(database.StringToStringsMap)
 	libToDeps := make(database.StringToStringsMap)
 	// Distroless containers do not provide executable files the same way distro containers do.
-	if !distroless && features.ActiveVulnMgmt.Enabled() {
+	if !distroless {
 		// for example: var/lib/dpkg/info/vim.list
 		filenamesList := dpkgInfoPrefix + pkgMetadata.name + dpkgFilenamesSuffix
 		// for example: /var/lib/dpkg/info/zlib1g:amd64.list
