@@ -34,6 +34,9 @@ case "$ci_job" in
     style-checks)
         make style
         ;;
+    unit-tests)
+        make unit-tests
+        ;;
     *)
         # For ease of initial integration this function does not fail when the
         # job is unknown.
