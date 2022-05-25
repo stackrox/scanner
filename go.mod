@@ -3,7 +3,7 @@ module github.com/stackrox/scanner
 go 1.16
 
 require (
-	cloud.google.com/go/storage v1.22.0
+	cloud.google.com/go/storage v1.22.1
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/ckaznocha/protoc-gen-lint v0.2.4
@@ -23,7 +23,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/guregu/null v4.0.0+incompatible
-	github.com/hashicorp/go-version v1.4.0
+	github.com/hashicorp/go-version v1.5.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
@@ -47,8 +47,8 @@ require (
 	github.com/stretchr/testify v1.7.1
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6
-	google.golang.org/api v0.80.0
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
+	google.golang.org/api v0.81.0
 	google.golang.org/grpc v1.46.2
 	gopkg.in/yaml.v2 v2.4.0
 )
