@@ -25,7 +25,6 @@ import (
 	"github.com/stackrox/scanner/ext/featurens/osrelease"
 	"github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	"github.com/stackrox/scanner/pkg/commonerr"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/tarutil"
@@ -37,21 +36,12 @@ const (
 		`%{evr}\n` +
 		`%{ARCH}\n` +
 		`%{RPMTAG_MODULARITYLABEL}\n` +
-		`.\n`
-	queryFmtActiveVulnMgmt = `%{name}\n` +
-		`%{evr}\n` +
-		`%{ARCH}\n` +
-		`%{RPMTAG_MODULARITYLABEL}\n` +
 		`[%{FILENAMES}\n]` +
 		`.\n`
 
 	// Older versions of rpm do not have the `RPMTAG_MODULARITYLABEL` tag.
 	// Ignore it for testing.
 	queryFmtTest = `%{name}\n` +
-		`%{evr}\n` +
-		`%{ARCH}\n` +
-		`.\n`
-	queryFmtActiveVulnMgmtTest = `%{name}\n` +
 		`%{evr}\n` +
 		`%{ARCH}\n` +
 		`[%{FILENAMES}\n]` +
@@ -79,9 +69,6 @@ func init() {
 // returns a slice of packages found via rpm and a slice of CPEs found in
 // /root/buildinfo/content_manifests.
 func ListFeatures(files tarutil.LayerFiles) ([]*database.RHELv2Package, []string, error) {
-	if features.ActiveVulnMgmt.Enabled() {
-		return listFeatures(files, queryFmtActiveVulnMgmt)
-	}
 	return listFeatures(files, queryFmt)
 }
 

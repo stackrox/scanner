@@ -26,7 +26,6 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/apk"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -102,9 +101,9 @@ func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersio
 			}
 
 			pkg.Version = version
-		case line[:2] == "F:" && features.ActiveVulnMgmt.Enabled():
+		case line[:2] == "F:":
 			dir = line[2:]
-		case line[:2] == "R:" && features.ActiveVulnMgmt.Enabled():
+		case line[:2] == "R:":
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the layer files.
 			fileData, hasFile := files.Get(filename[1:])

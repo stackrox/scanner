@@ -7,7 +7,6 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/featurefmt/dpkg"
 	"github.com/stackrox/scanner/ext/featurens"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/matcher"
 )
 
@@ -32,23 +31,20 @@ func SingletonMatcher() matcher.Matcher {
 		clairMatcher := matcher.NewPrefixAllowlistMatcher(allFileNames...)
 		whiteoutMatcher := matcher.NewWhiteoutMatcher()
 
-		// Allocate extra spaces for the feature-flagged matchers.
 		allMatchers := make([]matcher.Matcher, 0, 6)
 		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
 
-		if features.ActiveVulnMgmt.Enabled() {
-			dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp, true)
-			dynamicLibMatcher := matcher.NewRegexpMatcher(dynamicLibRegexp, false)
-			libDirSymlinkMatcher := matcher.NewAndMatcher(matcher.NewRegexpMatcher(libraryDirRegexp, false), matcher.NewSymbolicLinkMatcher())
-			// All other matchers take precedence over this matcher.
-			// For example, an executable python file should be matched by
-			// the Python matcher. This matcher should be used for any
-			// remaining executable files which went unmatched otherwise.
-			// Therefore, this matcher MUST be the last matcher.
-			executableMatcher := matcher.NewExecutableMatcher()
-
-			allMatchers = append(allMatchers, dpkgFilenamesMatcher, dynamicLibMatcher, libDirSymlinkMatcher, executableMatcher)
-		}
+		// Active Vuln Mgmt related matchers.
+		dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp, true)
+		dynamicLibMatcher := matcher.NewRegexpMatcher(dynamicLibRegexp, false)
+		libDirSymlinkMatcher := matcher.NewAndMatcher(matcher.NewRegexpMatcher(libraryDirRegexp, false), matcher.NewSymbolicLinkMatcher())
+		// All other matchers take precedence over this matcher.
+		// For example, an executable python file should be matched by
+		// the Python matcher. This matcher should be used for any
+		// remaining executable files which went unmatched otherwise.
+		// Therefore, this matcher MUST be the last matcher.
+		executableMatcher := matcher.NewExecutableMatcher()
+		allMatchers = append(allMatchers, dpkgFilenamesMatcher, dynamicLibMatcher, libDirSymlinkMatcher, executableMatcher)
 
 		instance = matcher.NewOrMatcher(allMatchers...)
 	})

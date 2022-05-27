@@ -17,80 +17,13 @@ package apk
 import (
 	"testing"
 
-	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/pkg/elf"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 func TestAPKFeatureDetection(t *testing.T) {
-	env := envisolator.NewEnvIsolator(t)
-	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "false")
-	defer env.RestoreAll()
-
-	testData := []featurefmt.TestData{
-		{
-			FeatureVersions: []database.FeatureVersion{
-				{
-					Feature: database.Feature{Name: "musl"},
-					Version: "1.1.14-r10",
-				},
-				{
-					Feature: database.Feature{Name: "busybox"},
-					Version: "1.24.2-r9",
-				},
-				{
-					Feature: database.Feature{Name: "alpine-baselayout"},
-					Version: "3.0.3-r0",
-				},
-				{
-					Feature: database.Feature{Name: "alpine-keys"},
-					Version: "1.1-r0",
-				},
-				{
-					Feature: database.Feature{Name: "zlib"},
-					Version: "1.2.8-r2",
-				},
-				{
-					Feature: database.Feature{Name: "libcrypto1.0"},
-					Version: "1.0.2h-r1",
-				},
-				{
-					Feature: database.Feature{Name: "libssl1.0"},
-					Version: "1.0.2h-r1",
-				},
-				{
-					Feature: database.Feature{Name: "apk-tools"},
-					Version: "2.6.7-r0",
-				},
-				{
-					Feature: database.Feature{Name: "scanelf"},
-					Version: "1.1.6-r0",
-				},
-				{
-					Feature: database.Feature{Name: "musl-utils"},
-					Version: "1.1.14-r10",
-				},
-				{
-					Feature: database.Feature{Name: "libc-utils"},
-					Version: "0.7-r0",
-				},
-			},
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
-				"lib/apk/db/installed": {Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
-			}),
-		},
-	}
-	featurefmt.TestLister(t, &lister{}, testData)
-}
-
-func TestAPKFeatureDetectionWithActiveVulnMgmt(t *testing.T) {
-	env := envisolator.NewEnvIsolator(t)
-	env.Setenv(features.ActiveVulnMgmt.EnvVar(), "true")
-	defer env.RestoreAll()
-
 	testData := []featurefmt.TestData{
 		{
 			FeatureVersions: []database.FeatureVersion{
