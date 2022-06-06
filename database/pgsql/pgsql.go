@@ -18,7 +18,6 @@ package pgsql
 import (
 	"database/sql"
 	"fmt"
-	"github.com/stackrox/scanner/pkg/env"
 	"net/url"
 	"os"
 	"strings"
@@ -33,6 +32,7 @@ import (
 	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/database/pgsql/migrations"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/env"
 	"gopkg.in/yaml.v2"
 )
 
