@@ -202,15 +202,17 @@ commands:
             sleep 10
 
   copy-db-secret:
-    description: Copy the scanner db secret into /run/secrets/stackrox.io/secrets/password
+    description: Copy the scanner db secret into local file and set ROX_SCANNER_DB_SECRET_PATH
     steps:
-      - run:
-          name: mkdir /run/secrets/stackrox.io/secrets/
-          command: mkdir -p /run/secrets/stackrox.io/secrets/
       - run:
           name: Copy secret
           command: |
-            kubectl -n stackrox get secret/scanner-db-password -o jsonpath='{.data.password}' | base64 -d > /run/secrets/stackrox.io/secrets/password
+            kubectl -n stackrox get secret/scanner-db-password -o jsonpath='{.data.password}' | base64 -d > password
+      - run:
+          name: Set ROX_SCANNER_DB_SECRET_PATH
+          command: |
+            path="$(pwd)/password"
+            cci-export ROX_SCANNER_DB_SECRET_PATH path
 
   setup-gcp:
     description: Set up GCP service account and configure gcloud

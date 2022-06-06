@@ -2,6 +2,7 @@ package env
 
 var (
 	// LanguageVulns enables language vulnerabilities.
+	// Users may also use `LANGUAGE_VULNS` for legacy purposes.
 	LanguageVulns = RegisterBooleanSetting("ROX_LANGUAGE_VULNS", true, AllowWithoutRox())
 
 	// SkipPeerValidation skips peer certificate validation (typically used for testing).
@@ -19,4 +20,7 @@ var (
 	// This is ignored if SkipPeerValidation is enabled.
 	// This variable was copied over from the stackrox repo.
 	OpenshiftAPI = RegisterBooleanSetting("ROX_OPENSHIFT_API", false)
+
+	// DBSecretPath indicates the filepath where Scanner DB's secret is mounted.
+	DBSecretPath = registerSetting("ROX_SCANNER_DB_SECRET_PATH", WithDefault("/run/secrets/stackrox.io/secrets/password"))
 )
