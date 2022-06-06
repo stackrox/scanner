@@ -114,7 +114,9 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		}
 		src = fmt.Sprintf("%s password=%s", pg.config.Source, password)
 	} else if !os.IsNotExist(err) {
-		log.Errorf("error stating password file %q: %v", passwordFile, err)
+		log.Errorf("pgsql: error stating password file %q; continuing without one: %v", passwordFile, err)
+	} else {
+		log.Warnf("pgsql: no password file at expected location %q; continuing without one...", passwordFile)
 	}
 
 	dbName, pgSourceURL, err := parseConnectionString(pg.config.Source)

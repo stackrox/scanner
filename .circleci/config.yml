@@ -201,6 +201,17 @@ commands:
             nohup kubectl port-forward -n stackrox "${POD}" "5432:5432" & # PostgreSQL endpoint.
             sleep 10
 
+  copy-db-secret:
+    description: Copy the scanner db secret into /run/secrets/stackrox.io/secrets/password
+    steps:
+      - run:
+          name: mkdir /run/secrets/stackrox.io/secrets/
+          command: mkdir -p /run/secrets/stackrox.io/secrets/
+      - run:
+          name: Copy secret
+          command: |
+            kubectl -n stackrox get secret/scanner-db-password -o jsonpath='{.data.password}' | base64 -d > /run/secrets/stackrox.io/secrets/password
+
   setup-gcp:
     description: Set up GCP service account and configure gcloud
     parameters:
@@ -467,6 +478,7 @@ commands:
         type: boolean
     steps:
       - scanner-db-pf
+      - copy-db-secret
       - run:
           name: Run db integration tests
           command: |
