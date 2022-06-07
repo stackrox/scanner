@@ -3288,4 +3288,50 @@ var testCases = []testCase{
 			},
 		},
 	},
+	{
+		image:    "quay.io/rhacs-eng/qa:ansibleplaybookbundle--gluster-s3object-apb--481960439934084fb041431f27cb98b89666e1a0daaeb2078bcbe1209790368c",
+		registry: "https://quay.io",
+		username: os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password: os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:   "Red Hat",
+		// Ensure we find the executable files for packages added in a layer lower than the latest
+		// package DB version. The relevant *.list file will only exist in the layer the package is added
+		// so the layer with the latest packages DB will not have the *.list file for these packages.
+		checkProvidedExecutables: true,
+		namespace:                "centos:7",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "ncurses-base",
+				NamespaceName: "centos:7",
+				VersionFormat: "rpm",
+				Version:       "5.9-14.20130511.el7_4",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2017-10685",
+						NamespaceName: "centos:7",
+						Description:   "STATEMENT: Red Hat considers this issue as a duplicate of CVE-2017-10684.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2017-10685",
+						Severity:      "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 1.0,
+									"ImpactScore":         5.9,
+									"Score":               7.0,
+									"Vectors":             "CVSS:3.0/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H",
+								},
+							},
+						},
+					},
+				},
+				AddedBy: "sha256:4c25b3090c2685271afcffc2a4db73f15ab11a0124bfcde6085c934a4e6f4a51",
+			},
+		},
+	},
 }
