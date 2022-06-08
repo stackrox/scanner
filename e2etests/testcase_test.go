@@ -3304,6 +3304,29 @@ var testCases = []testCase{
 				Version:       "5.9-14.20130511.el7_4",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
+						Name:          "CVE-2017-10684",
+						NamespaceName: "centos:7",
+						Description:   "In ncurses 6.0, there is a stack-based buffer overflow in the fmt_entry function. A crafted input will lead to a remote arbitrary code execution attack.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2017-10684",
+						Severity:      "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 5.3,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "CVSS:3.0/AV:L/AC:H/PR:N/UI:R/S:U/C:N/I:L/A:H",
+								},
+							},
+						},
+					},
+					{
 						Name:          "CVE-2017-10685",
 						NamespaceName: "centos:7",
 						Description:   "STATEMENT: Red Hat considers this issue as a duplicate of CVE-2017-10684.",
