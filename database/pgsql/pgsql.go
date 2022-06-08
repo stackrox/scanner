@@ -104,7 +104,7 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 	}
 
 	src := pg.config.Source
-	passwordFile := env.DBSecretPath.Value()
+	passwordFile := env.DBPasswordPath.Value()
 	if _, err := os.Stat(passwordFile); err == nil {
 		password, err := os.ReadFile(passwordFile)
 		if err != nil {

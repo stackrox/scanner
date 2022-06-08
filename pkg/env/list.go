@@ -21,6 +21,8 @@ var (
 	// This variable was copied over from the stackrox repo.
 	OpenshiftAPI = RegisterBooleanSetting("ROX_OPENSHIFT_API", false)
 
-	// DBSecretPath indicates the filepath where Scanner DB's secret is mounted.
-	DBSecretPath = registerSetting("ROX_SCANNER_DB_SECRET_PATH", WithDefault("/run/secrets/stackrox.io/secrets/password"))
+	// DBPasswordPath indicates the filepath where Scanner DB's password is stored.
+	// Typically, this is a file under the Scanner DB Kubernetes Secret mounted volume path.
+	// This is useful when storing the password in some other local path for testing purposes.
+	DBPasswordPath = registerSetting("ROX_SCANNER_DB_PASSWORD_PATH", WithDefault("/run/secrets/stackrox.io/secrets/password"))
 )
