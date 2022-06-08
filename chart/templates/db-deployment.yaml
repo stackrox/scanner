@@ -32,9 +32,9 @@ spec:
             docker-entrypoint.sh initdb --pwfile /run/secrets/stackrox.io/secrets/password
           fi
         volumeMounts:
-        - name: db-data
+        - name: scanner-db-data
           mountPath: /var/lib/postgresql/data
-        - name: db-password
+        - name: scanner-db-password
           mountPath: /run/secrets/stackrox.io/secrets
           readOnly: true
         securityContext:
@@ -58,7 +58,7 @@ spec:
             cpu: 200m
             memory: 200Mi
         volumeMounts:
-          - name: db-data
+          - name: scanner-db-data
             mountPath: /var/lib/postgresql/data
           - name: scanner-db-tls-volume
             mountPath: /run/secrets/stackrox.io/certs
@@ -71,7 +71,7 @@ spec:
       - name: config
         configMap:
           name: {{ .Values.appName }}-config
-      - name: db-data
+      - name: scanner-db-data
         emptyDir: {}
       - name: scanner-db-tls-volume
         secret:
