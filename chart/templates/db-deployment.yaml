@@ -17,64 +17,73 @@ spec:
       labels:
         app: {{ .Values.appName }}-db
     spec:
+      initContainers:
+      - name: init-db
+        image: {{.Values.scannerDBImage}}:{{.Values.tag}}
+        env:
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Initialize DB if it does not exist
+          if [ ! -s "$PGDATA/PG_VERSION" ]; then
+            docker-entrypoint.sh initdb --pwfile /run/secrets/stackrox.io/secrets/password
+          fi
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+        - name: db-password
+          mountPath: /run/secrets/stackrox.io/secrets
+          readOnly: true
+        securityContext:
+          runAsUser: 70
+          runAsGroup: 70
+      containers:
+      - name: db
+        image: {{.Values.scannerDBImage}}:{{.Values.tag}}
+        env:
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        ports:
+        - name: postgresql
+          protocol: TCP
+          containerPort: 5432
+        resources:
+          limits:
+            cpu: 2
+            memory: 4Gi
+          requests:
+            cpu: 200m
+            memory: 200Mi
+        volumeMounts:
+          - name: db-data
+            mountPath: /var/lib/postgresql/data
+          - name: scanner-db-tls-volume
+            mountPath: /run/secrets/stackrox.io/certs
+        securityContext:
+          runAsUser: 70
+          runAsGroup: 70
       securityContext:
         fsGroup: 70
-      initContainers:
-        - name: init-db
-          image: {{.Values.scannerDBImage}}:{{.Values.tag}}
-          command:
-          - /bin/sh
-          - -c
-          - |
-            mkdir -p /var/lib/postgresql/data
-            chmod 700 /var/lib/postgresql/data
-            chown -R postgres:postgres /var/lib/postgresql
-          volumeMounts:
-            - name: db-data
-              mountPath: /var/lib/postgresql/data
-          securityContext:
-            runAsUser: 0
-      containers:
-        - name: db
-          command: ["/usr/local/bin/docker-entrypoint.sh", "postgres", "-c", "config_file=/etc/postgresql.conf"]
-          ports:
-          - name: postgresql
-            containerPort: 5432
-          image: {{.Values.scannerDBImage}}:{{.Values.tag}}
-          resources:
-            limits:
-              cpu: 2
-              memory: 4Gi
-            requests:
-              cpu: 200m
-              memory: 200Mi
-          volumeMounts:
-            - name: db-data
-              mountPath: /var/lib/postgresql/data
-            - name: scanner-db-tls-volume
-              mountPath: /run/secrets/stackrox.io/certs
-            - name: scanner-db-password
-              mountPath: /run/secrets/stackrox.io/secrets
-          securityContext:
-            runAsUser: 70
-            runAsGroup: 70
       volumes:
-        - name: config
-          configMap:
-            name: {{ .Values.appName }}-config
-        - name: db-data
-          emptyDir: {}
-        - name: scanner-db-tls-volume
-          secret:
-            secretName: scanner-db-tls
-            defaultMode: 0640
-            items:
-            - key: cert.pem
-              path: server.crt
-            - key: key.pem
-              path: server.key
-            - key: ca.pem
-              path: root.crt
-        - name: scanner-db-password
-          secret:
-            secretName: scanner-db-password
+      - name: config
+        configMap:
+          name: {{ .Values.appName }}-config
+      - name: db-data
+        emptyDir: {}
+      - name: scanner-db-tls-volume
+        secret:
+          secretName: scanner-db-tls
+          defaultMode: 0640
+          items:
+          - key: cert.pem
+            path: server.crt
+          - key: key.pem
+            path: server.key
+          - key: ca.pem
+            path: root.crt
+      - name: scanner-db-password
+        secret:
+          secretName: scanner-db-password

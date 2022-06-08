@@ -43,7 +43,7 @@ RUN groupadd -g 70 postgres && \
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
-CMD ["postgres"]
+CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
 
 FROM base AS scanner-db-slim
 
