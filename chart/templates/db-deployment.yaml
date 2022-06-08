@@ -36,6 +36,7 @@ spec:
           mountPath: /var/lib/postgresql/data
         - name: scanner-db-password
           mountPath: /run/secrets/stackrox.io/secrets
+          readOnly: true
         securityContext:
           runAsUser: 70
           runAsGroup: 70
@@ -61,6 +62,7 @@ spec:
             mountPath: /var/lib/postgresql/data
           - name: scanner-db-tls-volume
             mountPath: /run/secrets/stackrox.io/certs
+            readOnly: true
         securityContext:
           runAsUser: 70
           runAsGroup: 70
