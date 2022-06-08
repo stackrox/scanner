@@ -8,35 +8,35 @@ import (
 
 func TestConvertCVSSv3(t *testing.T) {
 	type testcase struct {
-		vector string
-		baseScore float64
-		impactScore float64
+		vector              string
+		baseScore           float64
+		impactScore         float64
 		exploitabilityScore float64
 	}
 
 	for _, c := range []testcase{
 		{
-			vector: "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H",
-			baseScore: 8.3,
-			impactScore: 6.0,
+			vector:              "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H",
+			baseScore:           8.3,
+			impactScore:         6.0,
 			exploitabilityScore: 1.6,
 		},
 		{
-			vector: "CVSS:3.1/AV:L/AC:H/PR:H/UI:N/S:C/C:H/I:H/A:H",
-			baseScore: 7.5,
-			impactScore: 6.0,
+			vector:              "CVSS:3.1/AV:L/AC:H/PR:H/UI:N/S:C/C:H/I:H/A:H",
+			baseScore:           7.5,
+			impactScore:         6.0,
 			exploitabilityScore: 0.8,
 		},
 		{
-			vector: "CVSS:3.0/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H",
-			baseScore: 7.0,
-			impactScore: 5.9,
+			vector:              "CVSS:3.0/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H",
+			baseScore:           7.0,
+			impactScore:         5.9,
 			exploitabilityScore: 1.0,
 		},
 		{
-			vector: "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
-			baseScore: 0.0,
-			impactScore: 0.0,
+			vector:              "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+			baseScore:           0.0,
+			impactScore:         0.0,
 			exploitabilityScore: 2.5,
 		},
 	} {
