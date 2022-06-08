@@ -3294,11 +3294,8 @@ var testCases = []testCase{
 		username: os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password: os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:   "Red Hat",
-		// Ensure we find the executable files for packages added in a layer lower than the latest
-		// package DB version. The relevant *.list file will only exist in the layer the package is added
-		// so the layer with the latest packages DB will not have the *.list file for these packages.
-		checkProvidedExecutables: true,
-		namespace:                "centos:7",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "centos:7",
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "ncurses-base",
