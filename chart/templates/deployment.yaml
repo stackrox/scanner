@@ -56,7 +56,6 @@ spec:
           mountPath: /var/lib/stackrox
         - name: scanner-db-password
           mountPath: /run/secrets/stackrox.io/secrets
-          readOnly: true
       volumes:
       - name: config
         configMap:

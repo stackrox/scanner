@@ -36,7 +36,6 @@ spec:
           mountPath: /var/lib/postgresql/data
         - name: scanner-db-password
           mountPath: /run/secrets/stackrox.io/secrets
-          readOnly: true
         securityContext:
           runAsUser: 70
           runAsGroup: 70
