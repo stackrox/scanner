@@ -23,8 +23,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackrox/scanner/pkg/env"
-
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -34,6 +32,7 @@ import (
 	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/database/pgsql/migrations"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"github.com/stackrox/scanner/pkg/env"
 	"gopkg.in/yaml.v2"
 )
 
