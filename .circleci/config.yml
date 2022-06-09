@@ -653,6 +653,8 @@ jobs:
     docker:
       - *defaultImage
       - image: postgres:12-alpine
+        environment:
+          POSTGRES_PASSWORD: password
     working_directory: *defaultWorkingDirectory
     steps:
       - checkout
