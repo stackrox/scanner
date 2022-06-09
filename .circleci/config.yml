@@ -652,7 +652,7 @@ jobs:
   create-postgres-dump-from-genesis-dump:
     docker:
       - *defaultImage
-      - image: postgres:12.0-alpine
+      - image: postgres:12-alpine
     working_directory: *defaultWorkingDirectory
     steps:
       - checkout
