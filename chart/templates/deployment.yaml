@@ -62,7 +62,7 @@ spec:
         configMap:
           name: {{ .Values.appName }}-config
       - name: vuln-temp-db
-      emptyDir: {}
+        emptyDir: {}
       - name: scanner-tls-volume
         secret:
           secretName: scanner-tls
