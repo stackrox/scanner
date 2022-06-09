@@ -73,7 +73,7 @@ spec:
         configMap:
           name: {{ .Values.appName }}-config
       - name: scanner-db-data
-      emptyDir: {}
+        emptyDir: {}
       - name: scanner-db-tls-volume
         secret:
           secretName: scanner-db-tls
