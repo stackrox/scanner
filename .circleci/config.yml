@@ -650,7 +650,10 @@ jobs:
             - updater-bin
 
   create-postgres-dump-from-genesis-dump:
-    <<: *defaults
+    docker:
+      - *defaultImage
+      - image: postgres:12-alpine
+    working_directory: *defaultWorkingDirectory
     steps:
       - checkout
       - check-label-to-run:
