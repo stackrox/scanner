@@ -38,28 +38,22 @@ RUN groupadd -g 70 postgres && \
     rm -rf /var/cache/dnf /var/cache/yum && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
-    chmod +x /usr/local/bin/docker-entrypoint.sh
+    chmod +x /usr/local/bin/docker-entrypoint.sh && \
+    mkdir /docker-entrypoint-initdb.d
+
+USER postgres:postgres
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
-CMD ["postgres"]
+CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
 
 FROM base AS scanner-db-slim
 
 ENV ROX_SLIM_MODE="true"
-
-# The entrypoint script requires the init directory to exist, so we create it
-# here even though scanner slim does not ship any definitions.
-
-RUN mkdir /docker-entrypoint-initdb.d
-
-USER 70:70
 
 FROM base AS scanner-db
 
 ENV ROX_SLIM_MODE="false"
 
 COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
-
-USER 70:70
