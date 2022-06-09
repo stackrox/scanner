@@ -1,3 +1,4 @@
+//go:build e2e || slim_e2e
 // +build e2e slim_e2e
 
 package e2etests
@@ -2499,7 +2500,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-30139",
 						NamespaceName: "alpine:v3.13",
 						Description:   "In Alpine Linux apk-tools before 2.12.5, the tarball parser allows a buffer overflow and crash.",
-						Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-30139",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2021-30139",
 						Severity:      "Important",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -2523,7 +2524,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-36159",
 						NamespaceName: "alpine:v3.13",
 						Description:   "libfetch before 2021-07-26, as used in apk-tools, xbps, and other products, mishandles numeric strings for the FTP and HTTP protocols. The FTP passive mode implementation allows an out-of-bounds read because strtol is used to parse the relevant numbers into address bytes. It does not check if the line ends prematurely. If it does, the for-loop condition checks for the '\\0' terminator one byte too late.",
-						Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-36159",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2021-36159",
 						Severity:      "Critical",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -2579,7 +2580,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-28831",
 						NamespaceName: "alpine:v3.13",
 						Description:   "decompress_gunzip.c in BusyBox through 1.32.1 mishandles the error bit on the huft_build result pointer, with a resultant invalid free or segmentation fault, via malformed gzip data.",
-						Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-28831",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2021-28831",
 						Severity:      "Important",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -2643,7 +2644,7 @@ var testCases = []testCase{
 						Name:          "CVE-2021-36159",
 						NamespaceName: "alpine:v3.14",
 						Description:   "libfetch before 2021-07-26, as used in apk-tools, xbps, and other products, mishandles numeric strings for the FTP and HTTP protocols. The FTP passive mode implementation allows an out-of-bounds read because strtol is used to parse the relevant numbers into address bytes. It does not check if the line ends prematurely. If it does, the for-loop condition checks for the '\\0' terminator one byte too late.",
-						Link:          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-36159",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2021-36159",
 						Severity:      "Critical",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
