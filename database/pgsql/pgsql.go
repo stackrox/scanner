@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackrox/scanner/pkg/env"
+
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -33,10 +35,6 @@ import (
 	"github.com/stackrox/scanner/database/pgsql/migrations"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"gopkg.in/yaml.v2"
-)
-
-const (
-	passwordFile = "/run/secrets/stackrox.io/secrets/password"
 )
 
 func init() {
@@ -107,6 +105,7 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 	}
 
 	src := pg.config.Source
+	passwordFile := env.DBPasswordPath.Value()
 	if _, err := os.Stat(passwordFile); err == nil {
 		password, err := os.ReadFile(passwordFile)
 		if err != nil {
@@ -114,7 +113,9 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		}
 		src = fmt.Sprintf("%s password=%s", pg.config.Source, password)
 	} else if !os.IsNotExist(err) {
-		log.Errorf("error stating password file %q: %v", passwordFile, err)
+		log.Errorf("pgsql: error stating password file %q; continuing without one: %v", passwordFile, err)
+	} else {
+		log.Warnf("pgsql: no password file at expected location %q; continuing without one...", passwordFile)
 	}
 
 	dbName, pgSourceURL, err := parseConnectionString(pg.config.Source)
