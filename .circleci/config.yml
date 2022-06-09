@@ -2,7 +2,7 @@
 version: 2.1
 
 defaultImage: &defaultImage
-  image: "quay.io/rhacs-eng/apollo-ci:stackrox-test-cci-0.3.38"
+  image: "quay.io/rhacs-eng/apollo-ci:scanner-test-cci-0.3.41"
   auth:
     username: $QUAY_RHACS_ENG_RO_USERNAME
     password: $QUAY_RHACS_ENG_RO_PASSWORD
