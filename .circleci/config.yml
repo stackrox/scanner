@@ -211,8 +211,8 @@ commands:
       - run:
           name: Set ROX_SCANNER_DB_PASSWORD_PATH
           command: |
-            path="$(pwd)/password"
-            cci-export ROX_SCANNER_DB_PASSWORD_PATH path
+            PASSWORD_PATH="$(pwd)/password"
+            cci-export ROX_SCANNER_DB_PASSWORD_PATH "$PASSWORD_PATH"
 
   setup-gcp:
     description: Set up GCP service account and configure gcloud
