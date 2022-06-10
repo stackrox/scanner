@@ -347,6 +347,7 @@ _main() {
 			echo 'PostgreSQL Database directory appears to contain a database; Skipping initialization'
 			echo
 		fi
+		### STACKROX MODIFIED - Exit once DB is initialized.
 		exit 0
 	fi
 
