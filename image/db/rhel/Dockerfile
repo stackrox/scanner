@@ -17,9 +17,7 @@ LABEL name="scanner-db" \
       description="This image supports image scanning in the StackRox Kubernetes Security Platform."
 
 ENV PG_MAJOR=12
-ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
-    PGDATA="/var/lib/postgresql/data" \
-    POSTGRES_PASSWORD_FILE="/run/secrets/stackrox.io/secrets/password"
+ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/"
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
