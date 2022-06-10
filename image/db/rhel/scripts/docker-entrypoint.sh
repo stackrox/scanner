@@ -299,6 +299,41 @@ _pg_want_help() {
 	return 1
 }
 
+### STACKROX MODIFIED - This allows us to initialize the database
+### with vulnerability data from within the initContainer.
+### This just copy/pasted and moved from the original source.
+postgres_initialize() {
+  # only run initialization on an empty data directory
+  if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
+    docker_verify_minimum_env
+
+    # check dir permissions to reduce likelihood of half-initialized database
+    ls /docker-entrypoint-initdb.d/ > /dev/null
+
+    docker_init_database_dir
+    pg_setup_hba_conf "$@"
+
+    # PGPASSWORD is required for psql when authentication is required for 'local' connections via pg_hba.conf and is otherwise harmless
+    # e.g. when '--auth=md5' or '--auth-local=md5' is used in POSTGRES_INITDB_ARGS
+    export PGPASSWORD="${PGPASSWORD:-$POSTGRES_PASSWORD}"
+    docker_temp_server_start "$@"
+
+    docker_setup_db
+    docker_process_init_files /docker-entrypoint-initdb.d/*
+
+    docker_temp_server_stop
+    unset PGPASSWORD
+
+    echo
+    echo 'PostgreSQL init process complete; ready for start up.'
+    echo
+  else
+    echo
+    echo 'PostgreSQL Database directory appears to contain a database; Skipping initialization'
+    echo
+  fi
+}
+
 _main() {
 	# if first arg looks like a flag, assume we want to run postgres server
 	if [ "${1:0:1}" = '-' ]; then
@@ -317,34 +352,12 @@ _main() {
 			exec gosu postgres "$BASH_SOURCE" "$@"
 		fi
 
-		# only run initialization on an empty data directory
-		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
-			docker_verify_minimum_env
-
-			# check dir permissions to reduce likelihood of half-initialized database
-			ls /docker-entrypoint-initdb.d/ > /dev/null
-
-			docker_init_database_dir
-			pg_setup_hba_conf "$@"
-
-			# PGPASSWORD is required for psql when authentication is required for 'local' connections via pg_hba.conf and is otherwise harmless
-			# e.g. when '--auth=md5' or '--auth-local=md5' is used in POSTGRES_INITDB_ARGS
-			export PGPASSWORD="${PGPASSWORD:-$POSTGRES_PASSWORD}"
-			docker_temp_server_start "$@"
-
-			docker_setup_db
-			docker_process_init_files /docker-entrypoint-initdb.d/*
-
-			docker_temp_server_stop
-			unset PGPASSWORD
-
-			echo
-			echo 'PostgreSQL init process complete; ready for start up.'
-			echo
-		else
-			echo
-			echo 'PostgreSQL Database directory appears to contain a database; Skipping initialization'
-			echo
+    ### STACKROX MODIFIED - This allows us to initialize the database
+    ### with vulnerability data from within the initContainer.
+    ### The original code was moved to postgres_initialize.
+    if [ "$2" = 'init' ]; then
+		  postgres_initialize "$@"
+		  exit $?
 		fi
 	fi
 

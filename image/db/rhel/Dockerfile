@@ -18,6 +18,8 @@ LABEL name="scanner-db" \
 
 ENV PG_MAJOR=12
 ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/"
+    PGDATA="/var/lib/postgresql/data/pgdata" \
+    POSTGRES_PASSWORD_FILE="/run/secrets/stackrox.io/secrets/password"
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
