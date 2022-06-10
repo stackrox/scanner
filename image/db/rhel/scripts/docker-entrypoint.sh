@@ -303,7 +303,7 @@ _pg_want_help() {
 ### with vulnerability data from within the initContainer.
 ### This just copy/pasted and moved from the original source.
 postgres_initialize() {
-	echo "here: $DATABASE_ALREADY_EXISTS"
+	ls /var/lib/postgresql/data/pgdata
 	# only run initialization on an empty data directory
 	if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 		docker_verify_minimum_env
