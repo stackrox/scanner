@@ -23,11 +23,6 @@ spec:
         env:
         - name: POSTGRES_PASSWORD_FILE
           value: "/run/secrets/stackrox.io/secrets/password"
-        command:
-        - /bin/sh
-        - -c
-        - sleep 300000
-        #- docker-entrypoint.sh postgres init
         volumeMounts:
         - name: scanner-db-data
           mountPath: /var/lib/postgresql/data
