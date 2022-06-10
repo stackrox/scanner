@@ -20,6 +20,9 @@ spec:
       initContainers:
       - name: init-db
         image: {{.Values.scannerDBImage}}:{{.Values.tag}}
+        env:
+        - name: POSTGRES_PASSWORD_FILE
+          value: "/run/secrets/stackrox.io/secrets/password"
         command:
         - /bin/sh
         - -c
