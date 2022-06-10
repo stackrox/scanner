@@ -26,7 +26,8 @@ spec:
         command:
         - /bin/sh
         - -c
-        - docker-entrypoint.sh postgres init
+        - sleep 300000
+        #- docker-entrypoint.sh postgres init
         volumeMounts:
         - name: scanner-db-data
           mountPath: /var/lib/postgresql/data
