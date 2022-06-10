@@ -23,9 +23,13 @@ spec:
         env:
         - name: POSTGRES_PASSWORD_FILE
           value: "/run/secrets/stackrox.io/secrets/password"
+        command: ["sleep", "20000"]
         volumeMounts:
         - name: scanner-db-data
           mountPath: /var/lib/postgresql/data
+        - name: scanner-db-tls-volume
+          mountPath: /run/secrets/stackrox.io/certs
+          readOnly: true
         - name: scanner-db-password
           mountPath: /run/secrets/stackrox.io/secrets
           readOnly: true
