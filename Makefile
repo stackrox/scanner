@@ -251,7 +251,7 @@ slim-e2e-tests: deps
 .PHONY: db-integration-tests
 db-integration-tests: deps
 	@echo "+ $@"
-	go test -tags db_integration -count=1 ./database/pgsql
+	go test -v -tags db_integration -count=1 ./database/pgsql
 
 .PHONY: slim-db-integration-tests
 slim-db-integration-tests: deps
