@@ -119,14 +119,10 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		log.Warnf("pgsql: no password file at expected location %q; continuing without one...", passwordFile)
 	}
 
-	log.Info(src)
-
 	dbName, pgSourceURL, err := parseConnectionString(pg.config.Source)
 	if err != nil {
 		return nil, err
 	}
-
-	log.Info(dbName, pgSourceURL)
 
 	// Create database.
 	if pg.config.ManageDatabaseLifecycle {
