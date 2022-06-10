@@ -17,7 +17,7 @@ LABEL name="scanner-db" \
       description="This image supports image scanning in the StackRox Kubernetes Security Platform."
 
 ENV PG_MAJOR=12
-ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/"
+ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
     PGDATA="/var/lib/postgresql/data/pgdata" \
     POSTGRES_PASSWORD_FILE="/run/secrets/stackrox.io/secrets/password"
 
