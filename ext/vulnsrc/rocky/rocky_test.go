@@ -1,5 +1,5 @@
 // Package rocky implements a vulnerability source updater using
-// ALAS (Amazon Linux Security Advisories).
+// RLSA (Rocky Linux Security Advisories).
 
 package rocky
 
