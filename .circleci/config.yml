@@ -582,7 +582,7 @@ jobs:
     docker:
       - *defaultImage
       - image: postgres:12-bullseye
-      working_directory: *defaultWorkingDirectory
+    working_directory: *defaultWorkingDirectory
     steps:
       - checkout
       - run:
