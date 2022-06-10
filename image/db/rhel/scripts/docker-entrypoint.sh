@@ -342,13 +342,14 @@ _main() {
 			echo
 			echo 'PostgreSQL init process complete; ready for start up.'
 			echo
+
+			### STACKROX MODIFIED - Exit once DB is initialized.
+			exit 0
 		else
 			echo
 			echo 'PostgreSQL Database directory appears to contain a database; Skipping initialization'
 			echo
 		fi
-		### STACKROX MODIFIED - Exit once DB is initialized.
-		exit 0
 	fi
 
 	exec "$@"
