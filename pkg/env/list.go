@@ -2,7 +2,6 @@ package env
 
 var (
 	// LanguageVulns enables language vulnerabilities.
-	// Users may also use `LANGUAGE_VULNS` for legacy purposes.
 	LanguageVulns = RegisterBooleanSetting("ROX_LANGUAGE_VULNS", true, AllowWithoutRox())
 
 	// SkipPeerValidation skips peer certificate validation (typically used for testing).
@@ -20,9 +19,4 @@ var (
 	// This is ignored if SkipPeerValidation is enabled.
 	// This variable was copied over from the stackrox repo.
 	OpenshiftAPI = RegisterBooleanSetting("ROX_OPENSHIFT_API", false)
-
-	// DBPasswordPath indicates the filepath where Scanner DB's password is stored.
-	// Typically, this is a file under the Scanner DB Kubernetes Secret mounted volume path.
-	// This is useful when storing the password in some other local path for testing purposes.
-	DBPasswordPath = registerSetting("ROX_SCANNER_DB_PASSWORD_PATH", WithDefault("/run/secrets/stackrox.io/secrets/password"))
 )

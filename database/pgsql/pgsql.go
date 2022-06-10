@@ -32,8 +32,11 @@ import (
 	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/database/pgsql/migrations"
 	"github.com/stackrox/scanner/pkg/commonerr"
-	"github.com/stackrox/scanner/pkg/env"
 	"gopkg.in/yaml.v2"
+)
+
+const (
+	passwordFile = "/run/secrets/stackrox.io/secrets/password"
 )
 
 func init() {
@@ -104,7 +107,6 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 	}
 
 	src := pg.config.Source
-	passwordFile := env.DBPasswordPath.Value()
 	if _, err := os.Stat(passwordFile); err == nil {
 		password, err := os.ReadFile(passwordFile)
 		if err != nil {

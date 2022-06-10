@@ -201,19 +201,6 @@ commands:
             nohup kubectl port-forward -n stackrox "${POD}" "5432:5432" & # PostgreSQL endpoint.
             sleep 10
 
-  copy-db-secret:
-    description: Copy the scanner db secret into local file and set ROX_SCANNER_DB_PASSWORD_PATH
-    steps:
-      - run:
-          name: Copy secret
-          command: |
-            kubectl -n stackrox get secret/scanner-db-password -o jsonpath='{.data.password}' | base64 -d > password
-      - run:
-          name: Set ROX_SCANNER_DB_PASSWORD_PATH
-          command: |
-            PASSWORD_PATH="$(pwd)/password"
-            cci-export ROX_SCANNER_DB_PASSWORD_PATH "$PASSWORD_PATH"
-
   setup-gcp:
     description: Set up GCP service account and configure gcloud
     parameters:
