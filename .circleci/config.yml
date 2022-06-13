@@ -635,7 +635,9 @@ jobs:
       - *defaultImage
       - image: postgres:12-bullseye
         environment:
+          POSTGRES_HOST_AUTH_METHOD: scram-sha-256
           POSTGRES_PASSWORD: password
+          POSTGRES_INITDB_ARGS: --auth=scram-sha-256
     working_directory: *defaultWorkingDirectory
     steps:
       - checkout
