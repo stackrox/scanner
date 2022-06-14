@@ -58,3 +58,22 @@ func TestUpdateUbuntuLink(t *testing.T) {
 	updateUbuntuLink(cfg, &vuln)
 	assert.Equal(t, "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2021-1234", vuln.Link)
 }
+
+func TestUpdateAlpineLink(t *testing.T) {
+	vuln := database.Vulnerability{
+		Name: "CVE-2021-1234",
+		Namespace: database.Namespace{
+			Name:          "alpine:v3.13",
+			VersionFormat: "apk",
+		},
+		Link: "https://www.cve.org/CVERecord?id=CVE-2021-1234",
+	}
+
+	cfg := config{UseLegacyAlpineCVEURLPrefix: false}
+	updateAlpineLink(cfg, &vuln)
+	assert.Equal(t, "https://www.cve.org/CVERecord?id=CVE-2021-1234", vuln.Link)
+
+	cfg.UseLegacyAlpineCVEURLPrefix = true
+	updateAlpineLink(cfg, &vuln)
+	assert.Equal(t, "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-1234", vuln.Link)
+}
