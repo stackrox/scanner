@@ -22,7 +22,7 @@ Only major, breaking changes will merit a bump to the major version, but this is
 
 #### Creating Genesis Dump
 
-The purpose of the gensis dump is to embed the new release of Scanner with the most up-to-date vulnerability data, and reduce its startup time since only diffs will be fetched from the network, rather than the whole vulnerability content.
+The purpose of the genesis dump is to embed the new release of Scanner with the most up-to-date vulnerability data, and reduce its startup time since only diffs will be fetched from the network, rather than the whole vulnerability content.
 
 To run this:
 
