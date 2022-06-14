@@ -2465,9 +2465,6 @@ var testCases = []testCase{
 			},
 		},
 	},
-	// The next two images have the same layer and thus verify lineage checks between different images
-	// The first is a centos:7 image that has the package p11-kit. The second image is from fedora, and we
-	// can't identify the OS, so it should not have p11-kit.
 	{
 		image:                   "quay.io/dougtidwell/open-adventure@sha256:564c8dde1931f337a7bc8925f94cb594d9c81a5ee9eacc5ec5590f1e60e94b6a",
 		registry:                "https://quay.io",
@@ -2481,19 +2478,6 @@ var testCases = []testCase{
 				VersionFormat: "rpm",
 				Version:       "0.23.5-3.el7",
 				AddedBy:       "sha256:f9ce27a295e879233c8fbbf9ab67944a10e1ce80da69e46f87c583082a1ff3bb",
-			},
-		},
-	},
-	{
-		image:     "quay.io/cgwalters/coreos-assembler@sha256:6ed6cd0006b6331d8cfd4a794afe7d2a87dc9019b80658a21b28d9941a97356d",
-		registry:  "https://quay.io",
-		source:    "NVD",
-		namespace: "", // Fedora 28
-		unexpectedFeatures: []apiV1.Feature{
-			{
-				Name:          "p11-kit",
-				VersionFormat: "rpm",
-				Version:       "0.23.5-3.el7",
 			},
 		},
 	},
@@ -3259,7 +3243,7 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:                   "ubuntu:22.04",
+		image:                   "ubuntu:22.04@sha256:cd3d86f1fb368c6a53659d467560010ab9e0695528127ea336fe32f68f7ba09f",
 		registry:                "https://registry-1.docker.io",
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
@@ -3270,14 +3254,14 @@ var testCases = []testCase{
 				NamespaceName: "ubuntu:22.04",
 				VersionFormat: "dpkg",
 				Version:       "3.118ubuntu5",
-				AddedBy:       "sha256:125a6e411906fe6b0aaa50fc9d600bf6ff9bb11a8651727ce1ed482dc271c24c",
+				AddedBy:       "sha256:6fa1296f44090f6150dfb96d6ae217a58b9d66c56d7a986c35657df6bd1a89f0",
 			},
 			{
 				Name:          "apt",
 				NamespaceName: "ubuntu:22.04",
 				VersionFormat: "dpkg",
 				Version:       "2.4.5",
-				AddedBy:       "sha256:125a6e411906fe6b0aaa50fc9d600bf6ff9bb11a8651727ce1ed482dc271c24c",
+				AddedBy:       "sha256:6fa1296f44090f6150dfb96d6ae217a58b9d66c56d7a986c35657df6bd1a89f0",
 			},
 		},
 	},
