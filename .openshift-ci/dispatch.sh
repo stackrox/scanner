@@ -31,6 +31,9 @@ ci_export CI_JOB_NAME "$ci_job"
 gate_job "$ci_job"
 
 case "$ci_job" in
+    db-integration-tests)
+        make db-integration-tests
+        ;;
     style-checks)
         make style
         ;;
