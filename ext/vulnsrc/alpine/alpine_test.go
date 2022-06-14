@@ -35,5 +35,5 @@ func TestYAMLParsing(t *testing.T) {
 	assert.Equal(t, "alpine:v3.4", vulns[0].Namespace.Name)
 	assert.Equal(t, "alpine:v3.4", vulns[0].FixedIn[0].Feature.Namespace.Name)
 	assert.Equal(t, "apache2", vulns[0].FixedIn[0].Feature.Name)
-	assert.Equal(t, "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-5387", vulns[0].Link)
+	assert.Equal(t, "https://www.cve.org/CVERecord?id=CVE-2016-5387", vulns[0].Link)
 }

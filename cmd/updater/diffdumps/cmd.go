@@ -20,6 +20,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/ext/vulnsrc/alpine"
 	"github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
@@ -263,6 +264,12 @@ func updateUbuntuLink(cfg config, vuln *database.Vulnerability) {
 	}
 }
 
+func updateAlpineLink(cfg config, vuln *database.Vulnerability) {
+	if cfg.UseLegacyAlpineCVEURLPrefix && namespaces.IsAlpineNamespace(vuln.Namespace.Name) {
+		vuln.Link = alpine.LegacyMitreURLPrefix + vuln.Link[len(alpine.MitreURLPrefix):]
+	}
+}
+
 func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, cfg config) error {
 	baseVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
 	if err != nil {
@@ -308,6 +315,8 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 
 		updateUbuntuLink(cfg, &headVuln)
 
+		updateAlpineLink(cfg, &headVuln)
+
 		key := keyFromVuln(&headVuln)
 		matchingBaseVuln, found := baseVulnsMap[key]
 		// If the vuln was in the base, and equal to what was in the base,
@@ -343,6 +352,7 @@ type config struct {
 	SkipRHELv2TitleComparison   bool `json:"skipRHELv2TitleComparison"`
 	KeepUnusedRHELv2CPEs        bool `json:"keepUnusedRHELv2CPEs"`
 	UseLegacyUbuntuCVEURLPrefix bool `json:"useLegacyUbuntuCVEURLPrefix"`
+	UseLegacyAlpineCVEURLPrefix bool `json:"useLegacyAlpineCVEURLPrefix"`
 }
 
 // Command defines the diff-dumps command.

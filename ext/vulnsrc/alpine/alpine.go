@@ -34,9 +34,12 @@ import (
 )
 
 const (
-	baseURL        = "https://secdb.alpinelinux.org/" // Web source for alpine vuln data
-	updaterFlag    = "alpine-secdbUpdater"
-	mitreURLPrefix = "https://cve.mitre.org/cgi-bin/cvename.cgi?name="
+	baseURL     = "https://secdb.alpinelinux.org/" // Web source for alpine vuln data
+	updaterFlag = "alpine-secdbUpdater"
+	// LegacyMitreURLPrefix is for legacy CVE link
+	LegacyMitreURLPrefix = "https://cve.mitre.org/cgi-bin/cvename.cgi?name="
+	// MitreURLPrefix is the most updated CVE Link
+	MitreURLPrefix = "https://www.cve.org/CVERecord?id="
 )
 
 func init() {
@@ -247,7 +250,7 @@ func (file *secDB) Vulnerabilities() (vulns []database.Vulnerability) {
 			for _, cve := range cveNames {
 				vuln := database.Vulnerability{
 					Name:      cve,
-					Link:      mitreURLPrefix + cve,
+					Link:      MitreURLPrefix + cve,
 					Severity:  database.UnknownSeverity,
 					Namespace: namespace,
 				}
