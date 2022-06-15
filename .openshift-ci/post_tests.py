@@ -145,69 +145,6 @@ class PostClusterTest(StoreArtifacts):
         )
 
 
-class CheckStackroxLogs(StoreArtifacts):
-    """When only stackrox logs and checks are required"""
-
-    def __init__(
-            self,
-            check_for_stackrox_restarts=False,
-            check_for_errors_in_stackrox_logs=False,
-            artifact_destination_prefix=None,
-    ):
-        super().__init__(artifact_destination_prefix=artifact_destination_prefix)
-        self._check_for_stackrox_restarts = check_for_stackrox_restarts
-        self._check_for_errors_in_stackrox_logs = check_for_errors_in_stackrox_logs
-        self.central_is_responsive = False
-
-    def run(self, test_output_dirs=None):
-        self.central_is_responsive = self.wait_for_central_api()
-        if self.central_is_responsive:
-            self.collect_stackrox_logs()
-            if self._check_for_stackrox_restarts:
-                self.check_for_stackrox_restarts()
-            if self._check_for_errors_in_stackrox_logs:
-                self.check_for_errors_in_stackrox_logs()
-        self.store_artifacts(test_output_dirs)
-        self.handle_run_failure()
-
-    def wait_for_central_api(self):
-        return self.run_with_best_effort(
-            ["tests/e2e/lib.sh", "wait_for_api"],
-            timeout=PostTestsConstants.API_TIMEOUT,
-        )
-
-    def collect_stackrox_logs(self):
-        self.run_with_best_effort(
-            [
-                "scripts/ci/collect-service-logs.sh",
-                "stackrox",
-                PostTestsConstants.STACKROX_LOG_DIR,
-            ],
-            timeout=PostTestsConstants.COLLECT_TIMEOUT,
-        )
-        self.data_to_store.append(PostTestsConstants.STACKROX_LOG_DIR)
-
-    def check_for_stackrox_restarts(self):
-        self.run_with_best_effort(
-            [
-                "tests/e2e/lib.sh",
-                "check_for_stackrox_restarts",
-                PostTestsConstants.STACKROX_LOG_DIR,
-            ],
-            timeout=PostTestsConstants.CHECK_TIMEOUT,
-        )
-
-    def check_for_errors_in_stackrox_logs(self):
-        self.run_with_best_effort(
-            [
-                "tests/e2e/lib.sh",
-                "check_for_errors_in_stackrox_logs",
-                PostTestsConstants.STACKROX_LOG_DIR,
-            ],
-            timeout=PostTestsConstants.CHECK_TIMEOUT,
-        )
-
-
 class FinalPost(StoreArtifacts):
     """Collect logs that accumulate over multiple tests and other final steps"""
 

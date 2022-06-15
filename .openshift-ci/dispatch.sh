@@ -34,12 +34,6 @@ case "$ci_job" in
     e2e-tests)
         "$ROOT/.openshift-ci/e2e_tests.py"
         ;;
-    scale-tests)
-        "$ROOT/.openshift-ci/scale_tests.py"
-        ;;
-    slim-e2e-tests)
-        "$ROOT/.openshift-ci/slim_e2e_tests.py"
-        ;;
     style-checks)
         make style
         ;;

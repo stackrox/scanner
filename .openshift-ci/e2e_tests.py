@@ -6,7 +6,7 @@ Run E2E tests in a GKE cluster
 import os
 from pre_tests import PreE2ETests
 from ci_tests import E2ETest
-from post_tests import PostClusterTest, CheckStackroxLogs, FinalPost
+from post_tests import PostClusterTest, FinalPost
 from clusters import GKECluster
 from runners import ClusterTestRunner
 
