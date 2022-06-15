@@ -20,7 +20,10 @@ class Deployer:
         if self.slim:
             cmd = "slim-deploy"
         subprocess.run(
-            [f"scripts/ci/jobs/deploy.sh {cmd}"],
+            [
+                "scripts/ci/jobs/deploy.sh",
+                cmd
+            ],
             check=True,
             timeout=Deployer.DEPLOY_TIMEOUT
         )
