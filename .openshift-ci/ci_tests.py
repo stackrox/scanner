@@ -40,25 +40,3 @@ class E2ETest(BaseTest):
         self.run_with_graceful_kill(
             ["make e2e-tests"], E2ETest.TEST_TIMEOUT
         )
-
-
-class ScaleTest(BaseTest):
-    TEST_TIMEOUT = 240 * 60
-
-    def run(self):
-        print("Executing Scale tests")
-
-        self.run_with_graceful_kill(
-            ["make scale-tests"], ScaleTest.TEST_TIMEOUT
-        )
-
-
-class SlimE2ETest(BaseTest):
-    TEST_TIMEOUT = 240 * 60
-
-    def run(self):
-        print("Executing Slim E2E tests")
-
-        self.run_with_graceful_kill(
-            ["make slim-e2e-tests"], SlimE2ETest.TEST_TIMEOUT
-        )

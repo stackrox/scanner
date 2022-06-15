@@ -19,9 +19,7 @@ class PostTestsConstants:
     FIXUP_TIMEOUT = 5 * 60
 
     K8S_LOG_DIR = "/tmp/k8s-service-logs"
-    DEBUG_OUTPUT = "debug-dump"
-    DIAGNOSTIC_OUTPUT = "diagnostic-bundle"
-    CENTRAL_DATA_OUTPUT = "central-data"
+    METRICS_DIR = "/tmp/metrics"
     STACKROX_LOG_DIR = "/tmp/stackrox-logs"
 
 
@@ -103,37 +101,18 @@ class PostClusterTest(StoreArtifacts):
     ):
         super().__init__(artifact_destination_prefix=artifact_destination_prefix)
         self._check_stackrox_logs = check_stackrox_logs
-        self.k8s_namespaces = ["stackrox"]
-        self.openshift_namespaces = [
-            "openshift-dns",
-            "openshift-apiserver",
-            "openshift-authentication",
-            "openshift-etcd",
-            "openshift-controller-manager",
-        ]
-        self.central_is_responsive = False
+        self.k8s_namespaces = ["kube-system", "stackrox"]
 
     def run(self, test_output_dirs=None):
-        self.central_is_responsive = self.wait_for_central_api()
         self.collect_service_logs()
-        self.collect_collector_metrics()
-        if self.central_is_responsive:
-            self.get_central_debug_dump()
-            self.get_central_diagnostics()
-            self.grab_central_data()
+        self.collect_scanner_metrics()
         if self._check_stackrox_logs:
             self.check_stackrox_logs()
         self.store_artifacts(test_output_dirs)
         self.handle_run_failure()
 
-    def wait_for_central_api(self):
-        return self.run_with_best_effort(
-            ["tests/e2e/lib.sh", "wait_for_api"],
-            timeout=PostTestsConstants.API_TIMEOUT,
-        )
-
     def collect_service_logs(self):
-        for namespace in self.k8s_namespaces + self.openshift_namespaces:
+        for namespace in self.k8s_namespaces:
             self.run_with_best_effort(
                 [
                     "scripts/ci/collect-service-logs.sh",
@@ -142,61 +121,26 @@ class PostClusterTest(StoreArtifacts):
                 ],
                 timeout=PostTestsConstants.COLLECT_TIMEOUT,
             )
-        self.run_with_best_effort(
-            [
-                "scripts/ci/collect-infrastructure-logs.sh",
-                PostTestsConstants.K8S_LOG_DIR,
-            ],
-            timeout=PostTestsConstants.COLLECT_TIMEOUT,
-        )
         self.data_to_store.append(PostTestsConstants.K8S_LOG_DIR)
 
-    def collect_collector_metrics(self):
+    def collect_scanner_metrics(self):
         self.run_with_best_effort(
             [
-                "scripts/ci/collect-collector-metrics.sh",
+                "scripts/ci/collect-scanner-metrics.sh",
                 "stackrox",
-                PostTestsConstants.COLLECTOR_METRICS_DIR,
+                PostTestsConstants.METRICS_DIR,
             ],
             timeout=PostTestsConstants.COLLECT_TIMEOUT,
         )
-        self.data_to_store.append(PostTestsConstants.COLLECTOR_METRICS_DIR)
-
-    def get_central_debug_dump(self):
-        self.run_with_best_effort(
-            [
-                "scripts/ci/lib.sh",
-                "get_central_debug_dump",
-                PostTestsConstants.DEBUG_OUTPUT,
-            ],
-            timeout=PostTestsConstants.COLLECT_TIMEOUT,
-        )
-        self.data_to_store.append(PostTestsConstants.DEBUG_OUTPUT)
-
-    def get_central_diagnostics(self):
-        self.run_with_best_effort(
-            [
-                "scripts/ci/lib.sh",
-                "get_central_diagnostics",
-                PostTestsConstants.DIAGNOSTIC_OUTPUT,
-            ],
-            timeout=PostTestsConstants.COLLECT_TIMEOUT,
-        )
-        self.data_to_store.append(PostTestsConstants.DIAGNOSTIC_OUTPUT)
-
-    def grab_central_data(self):
-        self.run_with_best_effort(
-            [
-                "scripts/grab-data-from-central.sh",
-                PostTestsConstants.CENTRAL_DATA_OUTPUT,
-            ],
-            timeout=PostTestsConstants.COLLECT_TIMEOUT,
-        )
-        self.data_to_store.append(PostTestsConstants.CENTRAL_DATA_OUTPUT)
+        self.data_to_store.append(PostTestsConstants.METRICS_DIR)
 
     def check_stackrox_logs(self):
         self.run_with_best_effort(
-            ["tests/e2e/lib.sh", "check_stackrox_logs", PostTestsConstants.K8S_LOG_DIR],
+            [
+                "scripts/ci/logcheck/check-logs.sh",
+                "check_stackrox_logs",
+                PostTestsConstants.K8S_LOG_DIR
+            ],
             timeout=PostTestsConstants.CHECK_TIMEOUT,
         )
 
@@ -269,15 +213,11 @@ class FinalPost(StoreArtifacts):
 
     def __init__(
             self,
-            store_test_debug_logs=False,
             artifact_destination_prefix="final",
     ):
         super().__init__(artifact_destination_prefix=artifact_destination_prefix)
-        self._store_test_debug_logs = store_test_debug_logs
-        if self._store_test_debug_logs:
-            self.data_to_store.append(PostTestsConstants.TEST_DEBUG_LOGS)
 
-    def run(self):
+    def run(self, test_output_dirs=None):
         self.store_artifacts()
         self.fixup_artifacts_content_type()
         self.make_artifacts_help()
