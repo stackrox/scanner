@@ -9,6 +9,12 @@ source "$SCRIPTS_ROOT/scripts/lib.sh"
 
 set -euo pipefail
 
+ensure_CI() {
+    if ! is_CI; then
+        die "A CI environment is required."
+    fi
+}
+
 ci_export() {
     if [[ "$#" -ne 2 ]]; then
         die "missing args. usage: ci_export <env-name> <env-value>"
