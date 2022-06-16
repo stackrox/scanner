@@ -3,6 +3,8 @@
 """
 Common steps to run when e2e tests are complete. All post steps are run in spite
 of prior failures. This models existing CI behavior from Circle CI.
+
+Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/post_tests.py
 """
 
 import os

@@ -1,5 +1,8 @@
 import subprocess
 
+'''
+Copied from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/common.py
+'''
 
 def popen_graceful_kill(cmd):
     cmd.terminate()

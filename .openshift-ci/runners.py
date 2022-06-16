@@ -2,6 +2,8 @@
 
 """
 Common test run patterns
+
+Copied from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/runners.py
 """
 
 from datetime import datetime
@@ -18,10 +20,10 @@ class ClusterTestSetsRunner:
     prior sets. This can be overridden on a set by set basis with 'always_run'"""
 
     def __init__(
-            self,
-            cluster=NullCluster(),
-            final_post=NullPostTest(),
-            sets=None,
+        self,
+        cluster=NullCluster(),
+        final_post=NullPostTest(),
+        sets=None,
     ):
         self.cluster = cluster
         self.final_post = final_post
@@ -134,12 +136,12 @@ class ClusterTestRunner(ClusterTestSetsRunner):
     . tears down the cluster"""
 
     def __init__(
-            self,
-            cluster=NullCluster(),
-            pre_test=NullPreTest(),
-            test=NullTest(),
-            post_test=NullPostTest(),
-            final_post=NullPostTest(),
+        self,
+        cluster=NullCluster(),
+        pre_test=NullPreTest(),
+        test=NullTest(),
+        post_test=NullPostTest(),
+        final_post=NullPostTest(),
     ):
         super().__init__(
             cluster=cluster,

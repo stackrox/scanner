@@ -2,6 +2,8 @@
 
 """
 Available tests
+
+Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/ci_tests.py
 """
 
 import subprocess
@@ -32,7 +34,7 @@ class NullTest(BaseTest):
 
 
 class E2ETest(BaseTest):
-    TEST_TIMEOUT = 240 * 60
+    TEST_TIMEOUT = 45 * 60
 
     def run(self):
         print("Executing E2E tests")

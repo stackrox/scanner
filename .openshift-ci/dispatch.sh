@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/dispatch.sh
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 source "$ROOT/scripts/ci/lib.sh"
 

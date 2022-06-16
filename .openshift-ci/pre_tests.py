@@ -1,5 +1,7 @@
 """
 PreTests - something to run before test but after resource provisioning.
+
+Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/pre_tests.py
 """
 
 import subprocess

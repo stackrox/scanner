@@ -125,9 +125,6 @@ create_cluster() {
     zones=$(gcloud compute zones list --filter="region=$REGION" | grep UP | cut -f1 -d' ' | shuf)
     success=0
     for zone in $zones; do
-        if is_CIRCLECI; then
-            "$SCRIPTS_ROOT/.circleci/check-workflow-live.sh" || return 1
-        fi
         echo "Trying zone $zone"
         ci_export ZONE "$zone"
         gcloud config set compute/zone "${zone}"
