@@ -3288,4 +3288,70 @@ var testCases = []testCase{
 			},
 		},
 	},
+	{
+		image:    "quay.io/rhacs-eng/qa:ansibleplaybookbundle--gluster-s3object-apb--481960439934084fb041431f27cb98b89666e1a0daaeb2078bcbe1209790368c",
+		registry: "https://quay.io",
+		username: os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password: os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:   "Red Hat",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "centos:7",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "ncurses-base",
+				NamespaceName: "centos:7",
+				VersionFormat: "rpm",
+				Version:       "5.9-14.20130511.el7_4",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2017-10684",
+						NamespaceName: "centos:7",
+						Description:   "STATEMENT: Red Hat Product Security has rated this issue as having Moderate security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2017-10684",
+						Severity:      "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 1.0,
+									"ImpactScore":         4.2,
+									"Score":               5.3,
+									"Vectors":             "CVSS:3.0/AV:L/AC:H/PR:N/UI:R/S:U/C:N/I:L/A:H",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2017-10685",
+						NamespaceName: "centos:7",
+						Description:   "STATEMENT: Red Hat considers this issue as a duplicate of CVE-2017-10684.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2017-10685",
+						Severity:      "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.5,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+								},
+							},
+						},
+					},
+				},
+				AddedBy: "sha256:7dc0dca2b1516961d6b3200564049db0a6e0410b370bb2189e2efae0d368616f",
+			},
+		},
+	},
 }
