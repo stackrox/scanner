@@ -32,7 +32,7 @@ func Command() *cobra.Command {
 			Options: map[string]interface{}{
 				"source": fmt.Sprintf("host=%s port=%d user=postgres sslmode=disable statement_timeout=60000", postgresHost, postgresPort),
 			},
-		}, 5, 10*time.Second)
+		}, false, 5, 10*time.Second)
 		if err != nil {
 			return errors.Wrap(err, "opening DB")
 		}
