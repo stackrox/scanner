@@ -5,7 +5,8 @@ set -euo pipefail
 
 # Check StackRox service logs.
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../../.. && pwd)"
+source "$ROOT/lib.sh"
 
 check_stackrox_logs() {
     if [[ "$#" -ne 1 ]]; then
@@ -14,7 +15,7 @@ check_stackrox_logs() {
 
     local dir="$1"
 
-    if [[ ! -d "$dir/stackrox/pods" ]]; then
+    if [[ ! -d "$dir/stackrox" ]]; then
         die "StackRox logs were not collected. (Use ./scripts/ci/collect-service-logs.sh stackrox)"
     fi
 
@@ -29,12 +30,12 @@ check_for_stackrox_restarts() {
 
     local dir="$1"
 
-    if [[ ! -d "$dir/stackrox/pods" ]]; then
+    if [[ ! -d "$dir/stackrox" ]]; then
         die "StackRox logs were not collected. (Use ./scripts/ci/collect-service-logs.sh stackrox)"
     fi
 
     local previous_logs
-    previous_logs=$(ls "$dir"/stackrox/pods/*-previous.log || true)
+    previous_logs=$(ls "$dir"/stackrox/*-previous.log || true)
     if [[ -n "$previous_logs" ]]; then
         echo >&2 "Previous logs found"
         # shellcheck disable=SC2086
@@ -51,12 +52,12 @@ check_for_errors_in_stackrox_logs() {
 
     local dir="$1"
 
-    if [[ ! -d "$dir/stackrox/pods" ]]; then
+    if [[ ! -d "$dir/stackrox" ]]; then
         die "StackRox logs were not collected. (Use ./scripts/ci/collect-service-logs.sh stackrox)"
     fi
 
     local logs
-    logs=$(ls "$dir"/stackrox/pods/*.log)
+    logs=$(ls "$dir"/stackrox/*.log)
     local filtered
     # shellcheck disable=SC2010,SC2086
     filtered=$(ls $logs | grep -v "previous.log" || true)

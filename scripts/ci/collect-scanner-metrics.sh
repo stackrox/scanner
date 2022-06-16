@@ -74,7 +74,8 @@ main() {
         curl --silent --fail -k "${local}/${metrics_path}" > "${metrics_dir}/${metrics_file}"
         echo "finished download ${metrics_file}"
         kill ${PID}
-        echo "finished tear down of port-forwarding from $remote to $local"
+        echo "finished teardown of port-forwarding from $remote to $local"
+        echo
     done
 }
 
