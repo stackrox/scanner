@@ -2,7 +2,7 @@
 version: 2.1
 
 defaultImage: &defaultImage
-  image: "quay.io/rhacs-eng/apollo-ci:stackrox-test-cci-0.3.38"
+  image: "quay.io/rhacs-eng/apollo-ci:scanner-test-cci-0.3.42"
   auth:
     username: $QUAY_RHACS_ENG_RO_USERNAME
     password: $QUAY_RHACS_ENG_RO_PASSWORD
@@ -406,27 +406,7 @@ commands:
             .circleci/collect-service-logs.sh kube-system
           when: always
 
-      - run:
-          name: Verify the scanner did not restart
-          command: |
-            if [[ "$(ls /tmp/k8s-service-logs/stackrox/*-previous.log | wc -l)" != 0 ]]; then
-                ls /tmp/k8s-service-logs/stackrox/*-previous.log
-                exit 1
-            fi
-            cat nohup.out || true
-          when: always
-
       - fetch-and-upload-scanner-metrics
-
-      - run-db-integration-tests:
-          is-slim: << parameters.is-slim >>
-
-      - run:
-          name: Collect k8s logs
-          command: |
-            .circleci/collect-service-logs.sh stackrox
-            .circleci/collect-service-logs.sh kube-system
-          when: always
 
       - ci-artifacts/store:
           path: /tmp/k8s-service-logs
@@ -460,21 +440,6 @@ commands:
           when: always
 
       - teardown-gke
-
-  run-db-integration-tests:
-    parameters:
-      is-slim:
-        type: boolean
-    steps:
-      - scanner-db-pf
-      - run:
-          name: Run db integration tests
-          command: |
-            if [[ "<< parameters.is-slim >>" == "true" ]]; then
-              make slim-db-integration-tests
-            else
-              make db-integration-tests
-            fi
 
   run-scale-tests:
     parameters:
@@ -613,6 +578,22 @@ jobs:
           name: Run style checks
           command: make style
 
+  db-integration-tests:
+    docker:
+      - *defaultImage
+      - image: postgres:12-bullseye
+        environment:
+          POSTGRES_PASSWORD: password
+    working_directory: *defaultWorkingDirectory
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: make deps
+      - run:
+          name: Run db integration tests (slim tests are a subset of the full tests)
+          command: make db-integration-tests
+
   generate-genesis-dump:
     <<: *defaults
     steps:
@@ -652,7 +633,9 @@ jobs:
   create-postgres-dump-from-genesis-dump:
     docker:
       - *defaultImage
-      - image: postgres:12-alpine
+      - image: postgres:12-bullseye
+        environment:
+          POSTGRES_PASSWORD: password
     working_directory: *defaultWorkingDirectory
     steps:
       - checkout
@@ -1058,6 +1041,8 @@ workflows:
           <<: *runOnAllTagsWithQuayPullCtx
       - style-checks:
           <<: *runOnAllTagsWithQuayPullCtx
+      - db-integration-tests:
+          <<: *runOnAllTagsWithQuayPullCtx
       - build:
           <<: *runOnAllTags
           context:
@@ -1132,6 +1117,8 @@ workflows:
     - unit-tests:
         <<: *runOnAllTagsWithQuayPullCtx
     - style-checks:
+        <<: *runOnAllTagsWithQuayPullCtx
+    - db-integration-tests:
         <<: *runOnAllTagsWithQuayPullCtx
     - build:
         <<: *runOnAllTags

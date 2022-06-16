@@ -2,7 +2,7 @@
 # Finds large files that have been checked in to Git.
 set -euo pipefail
 
-SCRIPT="$(python -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "${BASH_SOURCE[0]}")"
+SCRIPT="$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "${BASH_SOURCE[0]}")"
 
 allowlist_file="$(dirname "${SCRIPT}")/allowlist"
 [[ -f "${allowlist_file}" ]] || { echo >&2 "Couldn't find allowlist file. Exiting..."; exit 1; }
