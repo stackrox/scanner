@@ -32,7 +32,7 @@ class NullPostTest:
 
 class RunWithBestEffortMixin:
     def __init__(
-            self,
+        self,
     ):
         self.exitstatus = 0
         self.failed_commands: List[List[str]] = []
@@ -64,8 +64,8 @@ class StoreArtifacts(RunWithBestEffortMixin):
     """For tests that only need to store artifacts"""
 
     def __init__(
-            self,
-            artifact_destination_prefix=None,
+        self,
+        artifact_destination_prefix=None,
     ):
         super().__init__()
         self.artifact_destination_prefix = artifact_destination_prefix
@@ -97,9 +97,9 @@ class PostClusterTest(StoreArtifacts):
     """The standard cluster test suite of debug gathering and analysis"""
 
     def __init__(
-            self,
-            check_stackrox_logs=False,
-            artifact_destination_prefix=None,
+        self,
+        check_stackrox_logs=False,
+        artifact_destination_prefix=None,
     ):
         super().__init__(artifact_destination_prefix=artifact_destination_prefix)
         self._check_stackrox_logs = check_stackrox_logs
@@ -151,8 +151,8 @@ class FinalPost(StoreArtifacts):
     """Collect logs that accumulate over multiple tests and other final steps"""
 
     def __init__(
-            self,
-            artifact_destination_prefix="final",
+        self,
+        artifact_destination_prefix="final",
     ):
         super().__init__(artifact_destination_prefix=artifact_destination_prefix)
 

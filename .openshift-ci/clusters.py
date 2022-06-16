@@ -36,7 +36,7 @@ class GKECluster:
 
     def provision(self):
         with subprocess.Popen(
-                [GKECluster.PROVISION_PATH, "provision_gke_cluster", self.cluster_id]
+            [GKECluster.PROVISION_PATH, "provision_gke_cluster", self.cluster_id]
         ) as cmd:
 
             try:
