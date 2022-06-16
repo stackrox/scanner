@@ -5,8 +5,8 @@ set -euo pipefail
 
 # Check StackRox service logs.
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../../.. && pwd)"
-source "$ROOT/lib.sh"
+SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+source "$SCRIPTS_ROOT/lib.sh"
 
 check_stackrox_logs() {
     if [[ "$#" -ne 1 ]]; then
@@ -39,7 +39,7 @@ check_for_stackrox_restarts() {
     if [[ -n "$previous_logs" ]]; then
         echo >&2 "Previous logs found"
         # shellcheck disable=SC2086
-        if ! "$ROOT/scripts/ci/logcheck/check-restart-logs.sh" "${CI_JOB_NAME:-${CIRCLE_JOB}}" $previous_logs; then
+        if ! "$SCRIPTS_ROOT/ci/logcheck/check-restart-logs.sh" "${CI_JOB_NAME:-${CIRCLE_JOB}}" $previous_logs; then
             exit 1
         fi
     fi
@@ -63,7 +63,7 @@ check_for_errors_in_stackrox_logs() {
     filtered=$(ls $logs | grep -v "previous.log" || true)
     if [[ -n "$filtered" ]]; then
         # shellcheck disable=SC2086
-        if ! "$ROOT/scripts/ci/logcheck/check.sh" $filtered; then
+        if ! "$SCRIPTS_ROOT/ci/logcheck/check.sh" $filtered; then
             die "Found at least one suspicious log file entry."
         fi
     fi
@@ -78,7 +78,7 @@ collect_and_check_stackrox_logs() {
 
     info "Will collect stackrox logs to $dir and check them"
 
-    "$ROOT/scripts/ci/collect-service-logs.sh" stackrox "$dir"
+    "$SCRIPTS_ROOT/ci/collect-service-logs.sh" stackrox "$dir"
 
     check_stackrox_logs "$dir"
 }
