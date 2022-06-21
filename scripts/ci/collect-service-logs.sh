@@ -14,6 +14,8 @@ set -eu
 #
 # Assumptions:
 # - Logs are saved under /tmp/k8s-service-logs/ or DIR if passed
+#
+# Adapted from https://github.com/stackrox/stackrox/blob/master/scripts/ci/collect-service-logs.sh
 
 usage() {
     echo "./scripts/ci/collect-service-logs.sh <namespace>"

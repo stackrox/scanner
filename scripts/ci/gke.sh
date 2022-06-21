@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # A collection of GKE related reusable bash functions for CI
+# Copied from https://github.com/stackrox/stackrox/blob/master/scripts/ci/gke.sh
 
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 source "$SCRIPTS_ROOT/scripts/ci/lib.sh"
@@ -41,6 +42,7 @@ assign_env_variables() {
     fi
 
     local cluster_name="rox-ci-${cluster_id}-${build_num}"
+    cluster_name="${cluster_name:0:40}" # (for GKE name limit)
     ci_export CLUSTER_NAME "$cluster_name"
     echo "Assigned cluster name is $cluster_name"
 

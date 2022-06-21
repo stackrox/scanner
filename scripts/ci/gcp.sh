@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # A collection of GCP related reusable bash functions for CI
+# Copied from https://github.com/stackrox/stackrox/blob/master/scripts/ci/gcp.sh
 
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 source "$SCRIPTS_ROOT/scripts/ci/lib.sh"

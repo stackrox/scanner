@@ -2,6 +2,7 @@
 set -eu
 
 # Gather Scanner metrics script
+# Adapted from https://github.com/stackrox/stackrox/blob/master/scripts/ci/collect-collector-metrics.sh
 
 usage() {
     echo "$0 <namespace> <output-dir> <pod-port> <path>"

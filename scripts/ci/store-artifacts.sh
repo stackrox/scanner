@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # A secure store for CI artifacts
+# Copied from https://github.com/stackrox/stackrox/blob/master/scripts/ci/store-artifacts.sh
 
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 source "$SCRIPTS_ROOT/scripts/ci/gcp.sh"

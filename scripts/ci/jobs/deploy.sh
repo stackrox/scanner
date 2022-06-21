@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
 
-SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
-source "$SCRIPTS_ROOT/lib.sh"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../../.. && pwd)"
+source "$ROOT/scripts/lib.sh"
 
 set -euo pipefail
 
 # Deploys Scanner and port-forwards the HTTP and gRPC endpoints.
+# Adapted from https://github.com/stackrox/stackrox/blob/master/tests/e2e/lib.sh
 
 _deploy_scanner() {
     if [[ "$#" -ne 1 ]]; then
