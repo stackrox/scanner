@@ -4,6 +4,7 @@
 set -euo pipefail
 
 # Check StackRox service logs.
+# Adapted from https://github.com/stackrox/stackrox/blob/master/tests/e2e/lib.sh
 
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 source "$SCRIPTS_ROOT/lib.sh"

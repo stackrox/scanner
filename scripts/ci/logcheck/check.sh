@@ -4,6 +4,8 @@
 # Checks if a file contains any pattern from a configurable blocklist.
 # Usage: check.sh <files...>
 # It returns a non-zero exit status if any offending patterns have been found.
+#
+# Copied from https://github.com/stackrox/stackrox/blob/master/scripts/ci/logcheck/check.sh
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 

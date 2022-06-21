@@ -2,6 +2,8 @@
 
 # Checks if log files from pod restarts have patterns that indicate the restart is ok.
 # It returns a zero exit status if all log files have an ok indicating pattern.
+#
+# Copied from https://github.com/stackrox/stackrox/blob/master/scripts/ci/logcheck/check-restart-logs.sh
 
 set -e
 
