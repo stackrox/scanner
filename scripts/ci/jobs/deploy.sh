@@ -50,7 +50,9 @@ _start_port_forwards_for_test() {
         nohup kubectl port-forward -n stackrox "${POD}" "8080:8080" & # Legacy clairify endpoint
         nohup kubectl port-forward -n stackrox "${POD}" "8443:8443" & # gRPC endpoint
         curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -sk 'https://localhost:8080/clairify/ping' || touch FAIL
+        echo
         curl --retry 12 --retry-connrefused -4 --retry-delay 5 --retry-max-time 60 -skf 'https://localhost:8443/v1/ping' || touch FAIL
+        echo
         if [[ ! -f FAIL ]]; then
             success=1
             break
