@@ -93,7 +93,6 @@ func TestRemovedComponents(t *testing.T) {
 	}
 	conn := connectToScanner(t)
 	client := v1.NewImageScanServiceClient(conn)
-	_, inCIRun := os.LookupEnv("CI")
 	for _, c := range cases {
 		t.Run(c.distro, func(t *testing.T) {
 			scanResp := scanQuayStackRoxImage(client, fmt.Sprintf("quay.io/rhacs-eng/qa:%s-package-removal", c.distro), true, t)
