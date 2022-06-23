@@ -1,3 +1,4 @@
+//go:build e2e
 // +build e2e
 
 package e2etests
@@ -5,7 +6,6 @@ package e2etests
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -35,14 +35,8 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewImageScanServiceClient(conn)
 	var scanResp *v1.ScanImageResponse
-	if strings.HasPrefix(testCase.image, "docker.io") {
-		_, inCIRun := os.LookupEnv("CI")
-		if inCIRun {
-			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/vuln-images", "quay.io/rhacs-eng/qa", -1)
-			scanResp = scanQuayStackRoxImage(client, testCase.image, false, t)
-		} else {
-			scanResp = scanDockerIOStackRoxImage(client, testCase.image, false, t)
-		}
+	if strings.HasPrefix(testCase.image, "quay.io") {
+		scanResp = scanQuayStackRoxImage(client, testCase.image, false, t)
 	} else if strings.HasPrefix(testCase.image, "gcr.io") {
 		scanResp = scanGCRImage(client, testCase.image, t)
 	} else {
@@ -113,12 +107,12 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	}
 }
 
-// This test tests vulnerable images pushed up to docker.io/stackrox/vuln-images.
+// This test tests vulnerable images pushed up to quay.io/rhacs-eng/qa.
 // Images are pushed from https://github.com/stackrox/vuln-images.
 func TestStackroxVulnImages(t *testing.T) {
 	for _, testCase := range []singleTestCase{
 		{
-			image: "docker.io/stackrox/vuln-images:django-cve-2019-14235",
+			image: "quay.io/rhacs-eng/qa:django-cve-2019-14235",
 			expectedFeatures: []feature{
 				{"django", "2.1", []expectedVuln{
 					{name: "CVE-2018-16984", fixedBy: "2.1.2"},
@@ -134,7 +128,7 @@ func TestStackroxVulnImages(t *testing.T) {
 			},
 		},
 		{
-			image: "docker.io/stackrox/vuln-images:lodash-cve-2019-1010266",
+			image: "quay.io/rhacs-eng/qa:lodash-cve-2019-1010266",
 			expectedFeatures: []feature{
 				{"lodash", "4.17.10", []expectedVuln{
 					{name: "CVE-2019-10744", fixedBy: "4.17.12"},
@@ -145,7 +139,7 @@ func TestStackroxVulnImages(t *testing.T) {
 			},
 		},
 		{
-			image: "docker.io/stackrox/vuln-images:rails-cve-2016-2098",
+			image: "quay.io/rhacs-eng/qa:rails-cve-2016-2098",
 			expectedFeatures: []feature{
 				{"rails", "4.2.5.1", []expectedVuln{
 					{name: "CVE-2016-2098"},
@@ -161,7 +155,7 @@ func TestStackroxVulnImages(t *testing.T) {
 		},
 		{
 			// docker.io/1and1internet/ubuntu-16-customerssh:latest
-			image: "docker.io/stackrox/vuln-images:customerssh",
+			image: "quay.io/rhacs-eng/qa:customerssh",
 			expectedFeatures: []feature{
 				{"debug", "2.2.0", []expectedVuln{
 					{name: "CVE-2017-16137", fixedBy: "2.6.9"},
@@ -177,7 +171,7 @@ func TestStackroxVulnImages(t *testing.T) {
 		},
 		{
 			// appddemo/appdynamics-monitor@sha256:145ecc6c8b3a846b2c078806dbfae74b1c7dfdcde6f7931321e3763a5f898109
-			image: "docker.io/stackrox/vuln-images:appdynamics",
+			image: "quay.io/rhacs-eng/qa:appdynamics",
 			expectedFeatures: []feature{
 				{"commons_beanutils", "1.9.2", []expectedVuln{
 					{name: "CVE-2019-10086", fixedBy: ""},
@@ -204,7 +198,7 @@ func TestStackroxVulnImages(t *testing.T) {
 		},
 		{
 			// docker.io/31z4/zookeeper:latest@sha256:b8b94423656f32d19a2a6ee29ceae409c82cca106ee89469c4498ceaaf3007f5
-			image: "docker.io/stackrox/vuln-images:zookeeper",
+			image: "quay.io/rhacs-eng/qa:zookeeper",
 			expectedFeatures: []feature{
 				{"zookeeper", "3.4.13", []expectedVuln{
 					{name: "CVE-2019-0201", fixedBy: ""},
@@ -214,7 +208,7 @@ func TestStackroxVulnImages(t *testing.T) {
 		},
 		{
 			// docker.io/library/cassandra:latest
-			image: "docker.io/stackrox/vuln-images:cassandra",
+			image: "quay.io/rhacs-eng/qa:cassandra",
 			expectedFeatures: []feature{
 				{"logback", "1.1.3", []expectedVuln{
 					{name: "CVE-2017-5929", fixedBy: ""},
@@ -230,7 +224,7 @@ func TestStackroxVulnImages(t *testing.T) {
 		},
 		{
 			// docker.io/apacheignite/ignite:latest
-			image: "docker.io/stackrox/vuln-images:ignite",
+			image: "quay.io/rhacs-eng/qa:ignite",
 			expectedFeatures: []feature{
 				{"camel", "2.22.0", []expectedVuln{
 					{name: "CVE-2019-0194", fixedBy: ""},
