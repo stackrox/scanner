@@ -241,7 +241,7 @@ ossls-notice: deps
 .PHONY: unit-tests
 unit-tests: deps
 	@echo "+ $@"
-	go test -race ./...
+	go test -race ./... | tee test-output/test.log
 
 .PHONY: e2e-tests
 e2e-tests: deps
