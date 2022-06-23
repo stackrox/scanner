@@ -10,9 +10,10 @@ proto-generated-srcs
 protoc-*
 report.xml
 test.log
-/.proto/
 /.gobin/
+/.proto/
 /genesis-dump/
+/test-output/
 
 # nohup output when running port-forwards
 nohup.out
