@@ -246,7 +246,7 @@ unit-tests: deps
 .PHONY: e2e-tests
 e2e-tests: deps
 	@echo "+ $@"
-	go test -tags e2e -count=1 -timeout=20m ./e2etests/... | tee test-output/test.log
+	go test -tags e2e -count=1 -timeout=20m ./e2etests/... | tee test.log
 	make report JUNIT_OUT=e2e-tests
 
 .PHONY: slim-e2e-tests
