@@ -56,6 +56,11 @@ $(OSSLS_BIN): deps
 	@echo "+ $@"
 	go install github.com/stackrox/ossls@0.10.1
 
+GO_JUNIT_REPORT_BIN := $(GOBIN)/go-junit-report
+$(GO_JUNIT_REPORT_BIN):
+	@echo "+ $@"
+	go install github.com/jstemmer/go-junit-report
+
 #############
 ##  Tag  ##
 #############
@@ -241,7 +246,8 @@ unit-tests: deps
 .PHONY: e2e-tests
 e2e-tests: deps
 	@echo "+ $@"
-	go test -tags e2e -count=1 -timeout=20m ./e2etests/...
+	go test -tags e2e -count=1 -timeout=20m ./e2etests/... | tee test.log
+	make report JUNIT_OUT=e2e-tests
 
 .PHONY: slim-e2e-tests
 slim-e2e-tests: deps
@@ -264,6 +270,24 @@ scale-tests: deps
 	mkdir /tmp/pprof
 	go run ./scale/... /tmp/pprof || true
 	zip -r /tmp/pprof.zip /tmp/pprof
+
+.PHONY: report
+report: $(GO_JUNIT_REPORT_BIN)
+	@echo "+ $@"
+	@cat test.log | go-junit-report > report.xml
+	@mkdir -p $(JUNIT_OUT)
+	@cp test.log report.xml $(JUNIT_OUT)
+	@echo
+	@echo "Test coverage summary:"
+	@grep "^coverage: " -A1 test.log | grep -v -e '--' | paste -d " "  - -
+	@echo
+	@echo "Test pass/fail summary:"
+	@grep failures report.xml
+	@echo
+	@echo "`grep 'FAIL	github.com/stackrox/scanner' test.log | wc -l` package(s) detected with compilation or test failures."
+	@-grep 'FAIL	github.com/stackrox/scanner' test.log || true
+	@echo
+	@testerror="$$(grep -e 'can.t load package' -e '^# github.com/stackrox/scanner/' -e 'FAIL	github.com/stackrox/scanner' test.log | wc -l)" && test $$testerror -eq 0
 
 ####################
 ## Generated Srcs ##
