@@ -1,3 +1,4 @@
+//go:build e2e
 // +build e2e
 
 // This file has tests which are only used to test the full-Scanner (ie not Scanner-slim).
@@ -9,7 +10,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 	"testing"
 
 	"github.com/stackrox/scanner/api/v1/imagescan"
@@ -152,13 +152,6 @@ func TestGRPCGetImageVulnerabilities(t *testing.T) {
 	_, inCIRun := os.LookupEnv("CI")
 
 	for _, testCase := range testCases {
-		if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
-			testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
-			testCase.registry = "https://quay.io"
-			testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
-			testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
-		}
-
 		imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
 			Image: testCase.image,
 			Registry: &v1.RegistryData{

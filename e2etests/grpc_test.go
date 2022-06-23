@@ -1,12 +1,11 @@
+//go:build e2e || slim_e2e
 // +build e2e slim_e2e
 
 package e2etests
 
 import (
 	"context"
-	"os"
 	"sort"
-	"strings"
 	"testing"
 
 	apiV1 "github.com/stackrox/scanner/api/v1"
@@ -20,17 +19,8 @@ func TestGRPCGetImageComponents(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewImageScanServiceClient(conn)
 
-	_, inCIRun := os.LookupEnv("CI")
-
 	for _, testCase := range testCases {
 		t.Run(testCase.image, func(t *testing.T) {
-			if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
-				testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
-				testCase.registry = "https://quay.io"
-				testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
-				testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
-			}
-
 			imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
 				Image: testCase.image,
 				Registry: &v1.RegistryData{

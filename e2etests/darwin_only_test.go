@@ -1,5 +1,5 @@
-// +build darwin
-// +build e2e
+//go:build darwin && e2e
+// +build darwin,e2e
 
 package e2etests
 
@@ -16,7 +16,7 @@ import (
 func init() {
 	maybeGetFromKeyChain = func() (string, string) {
 		var buffer bytes.Buffer
-		err := dockerCredentialHelpers.Get(osxkeychain.Osxkeychain{}, strings.NewReader("docker.io"), &buffer)
+		err := dockerCredentialHelpers.Get(osxkeychain.Osxkeychain{}, strings.NewReader("quay.io"), &buffer)
 		if err != nil {
 			fmt.Printf("Error getting credentials: %v\n", err)
 			return "", ""
