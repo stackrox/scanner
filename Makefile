@@ -329,7 +329,7 @@ clean-proto-generated-srcs:
 ## Clean ##
 ###########
 .PHONY: clean
-clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof
+clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof clean-test
 	@echo "+ $@"
 
 .PHONY: clean-image
@@ -348,6 +348,11 @@ clean-pprof:
 	rm /tmp/pprof.zip || true
 	rm -rf /tmp/pprof
 
+.PHONY: clean-test
+clean-test:
+	@echo "+ $@"
+	rm -rf test-output/
+	rm -rf junit-reports/
 
 ##################
 ## Genesis Dump ##
