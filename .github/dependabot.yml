@@ -22,6 +22,15 @@ updates:
     open-pull-requests-limit: 3
     reviewers:
       - 'stackrox/scanner-dep-updaters'
+
+  - package-ecosystem: 'gomod'
+    directory: '/tools/test/'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    open-pull-requests-limit: 3
+    reviewers:
+      - 'stackrox/scanner-dep-updaters'
       
   - package-ecosystem: 'docker'
     directory: 'image/scanner/rhel'
