@@ -8,6 +8,8 @@
 deps
 proto-generated-srcs
 protoc-*
+report.xml
+test.log
 /.proto/
 /.gobin/
 /genesis-dump/
