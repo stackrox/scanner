@@ -8,7 +8,6 @@ package e2etests
 import (
 	"context"
 	"fmt"
-	"os"
 	"sort"
 	"testing"
 
@@ -148,8 +147,6 @@ func checkGRPCMatch(t *testing.T, expectedVuln, matchingVuln *v1.Vulnerability) 
 func TestGRPCGetImageVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewImageScanServiceClient(conn)
-
-	_, inCIRun := os.LookupEnv("CI")
 
 	for _, testCase := range testCases {
 		imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
