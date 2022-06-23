@@ -447,9 +447,6 @@ openshift_ci_mods() {
     export CIRCLE_JOB="${JOB_NAME:-${OPENSHIFT_BUILD_NAME}}"
     CIRCLE_TAG="$(git tag --contains | head -1)"
     export CIRCLE_TAG
-
-    # For gradle
-    export GRADLE_USER_HOME="${HOME}"
 }
 
 store_test_results() {
