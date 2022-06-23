@@ -289,6 +289,9 @@ report: $(GO_JUNIT_REPORT_BIN)
 	@echo
 	@testerror="$$(grep -e 'can.t load package' -e '^# github.com/stackrox/scanner/' -e 'FAIL	github.com/stackrox/scanner' test.log | wc -l)" && test $$testerror -eq 0
 
+generate-junit-reports: $(GO_JUNIT_REPORT_BIN)
+	$(BASE_DIR)/scripts/generate-junit-reports.sh
+
 ####################
 ## Generated Srcs ##
 ####################

@@ -4,6 +4,9 @@
 # Mac OS hidden file
 .DS_Store
 
+# Test output
+/junit-reports/
+
 # Makefile cruft
 deps
 proto-generated-srcs
