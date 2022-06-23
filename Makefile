@@ -246,7 +246,7 @@ test-prep:
 .PHONY: unit-tests
 unit-tests: deps test-prep
 	@echo "+ $@"
-	go test -race ./... | tee test-output/test.log
+	go test -race -v ./... | tee test-output/test.log
 
 .PHONY: e2e-tests
 e2e-tests: deps
