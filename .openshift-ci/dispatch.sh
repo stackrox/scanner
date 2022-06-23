@@ -40,7 +40,7 @@ case "$ci_job" in
         make style
         ;;
     unit-tests)
-        make unit-tests
+        "$ROOT/scripts/ci/jobs/unit-tests.sh"
         ;;
     *)
         # For ease of initial integration this function does not fail when the
