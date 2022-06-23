@@ -1710,7 +1710,7 @@ var testCases = []testCase{
 		// Deletes directory containing jackson-databind:2.6.6.
 		image:                   "quay.io/rhacs-eng/qa:sandbox-scannerremovejar",
 		registry:                "https://quay.io",
-		username:                os.Getenv("quay.io/rhacs-eng/qa:sandbox-ULL_USERNAME"),
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
