@@ -1,3 +1,4 @@
+//go:build e2e
 // +build e2e
 
 // This file has tests which are only used to test the full-Scanner (ie not Scanner-slim).

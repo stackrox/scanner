@@ -1,3 +1,4 @@
+//go:build e2e || slim_e2e
 // +build e2e slim_e2e
 
 package e2etests
@@ -3289,11 +3290,11 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:    "quay.io/rhacs-eng/qa:ansibleplaybookbundle--gluster-s3object-apb--481960439934084fb041431f27cb98b89666e1a0daaeb2078bcbe1209790368c",
-		registry: "https://quay.io",
-		username: os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
-		password: os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
-		source:   "Red Hat",
+		image:                   "quay.io/rhacs-eng/qa:ansibleplaybookbundle--gluster-s3object-apb--481960439934084fb041431f27cb98b89666e1a0daaeb2078bcbe1209790368c",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "Red Hat",
 		onlyCheckSpecifiedVulns: true,
 		namespace:               "centos:7",
 		expectedFeatures: []apiV1.Feature{
