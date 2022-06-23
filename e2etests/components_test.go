@@ -1,3 +1,4 @@
+//go:build e2e
 // +build e2e
 
 package e2etests
@@ -95,12 +96,7 @@ func TestRemovedComponents(t *testing.T) {
 	_, inCIRun := os.LookupEnv("CI")
 	for _, c := range cases {
 		t.Run(c.distro, func(t *testing.T) {
-			var scanResp *v1.ScanImageResponse
-			if inCIRun {
-				scanResp = scanQuayStackRoxImage(client, fmt.Sprintf("quay.io/rhacs-eng/qa:%s-package-removal", c.distro), true, t)
-			} else {
-				scanResp = scanDockerIOStackRoxImage(client, fmt.Sprintf("stackrox/vuln-images:%s-package-removal", c.distro), true, t)
-			}
+			scanResp := scanQuayStackRoxImage(client, fmt.Sprintf("quay.io/rhacs-eng/qa:%s-package-removal", c.distro), true, t)
 			scan, err := client.GetImageScan(context.Background(), &v1.GetImageScanRequest{
 				ImageSpec:       scanResp.GetImage(),
 				UncertifiedRHEL: true,

@@ -1,3 +1,4 @@
+//go:build e2e || slim_e2e
 // +build e2e slim_e2e
 
 package e2etests
@@ -1708,7 +1709,7 @@ var testCases = []testCase{
 	{
 		// Deletes directory containing jackson-databind:2.6.6.
 		image:                   "quay.io/rhacs-eng/qa:sandbox-scannerremovejar",
-		registry:                "https://registry-1.docker.io",
+		registry:                "https://quay.io",
 		username:                os.Getenv("quay.io/rhacs-eng/qa:sandbox-ULL_USERNAME"),
 		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:                  "NVD",
@@ -1985,7 +1986,7 @@ var testCases = []testCase{
 	{
 		// Deletes fatjar containing zookeeper and guava, and deletes standalone jar containing netty.
 		image:     "quay.io/rhacs-eng/qa:sandbox-zookeeper-fatjar-remove",
-		registry:  "https://registry-1.docker.io",
+		registry:  "https://quay.io",
 		username:  os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:  os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:    "NVD",
@@ -2011,7 +2012,7 @@ var testCases = []testCase{
 	{
 		// OCI media type manifest.
 		image:     "quay.io/rhacs-eng/qa:sandbox-oci-manifest",
-		registry:  "https://registry-1.docker.io",
+		registry:  "https://quay.io",
 		username:  os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:  os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:    "NVD",
@@ -2020,7 +2021,7 @@ var testCases = []testCase{
 	{
 		// One of the images used for Red Hat Scanner Certification.
 		image:                    "quay.io/rhacs-eng/qa:sandbox-jenkins-agent-maven-35-rhel7",
-		registry:                 "https://registry-1.docker.io",
+		registry:                 "https://quay.io",
 		username:                 os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:                 os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:                   "Red Hat",
@@ -2134,7 +2135,7 @@ var testCases = []testCase{
 	{
 		// One of the images used for Red Hat Scanner Certification with a chown on jackson-databind that should not show up in the results.
 		image:                   "quay.io/rhacs-eng/qa:sandbox-jenkins-agent-maven-35-rhel7-chown",
-		registry:                "https://registry-1.docker.io",
+		registry:                "https://quay.io",
 		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:                  "Red Hat",
@@ -2225,7 +2226,7 @@ var testCases = []testCase{
 	{
 		// One of the images used for Red Hat Scanner Certification.
 		image:                   "quay.io/rhacs-eng/qa:sandbox-nodejs-10",
-		registry:                "https://registry-1.docker.io",
+		registry:                "https://quay.io",
 		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:                  "Red Hat",
@@ -2432,7 +2433,7 @@ var testCases = []testCase{
 		// a CVE fixed in 1.6_rc1-r0. We do NOT expect this version of
 		// jq to be vulnerable to this CVE (CVE-2016-4074).
 		image:     "quay.io/rhacs-eng/qa:sandbox-alpine-jq-1.6-r1",
-		registry:  "https://registry-1.docker.io",
+		registry:  "https://quay.io",
 		username:  os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:  os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:    "NVD",
@@ -3040,7 +3041,7 @@ var testCases = []testCase{
 	},
 	{
 		image:     "quay.io/rhacs-eng/qa:sandbox-log4j-2-12-2",
-		registry:  "https://registry-1.docker.io",
+		registry:  "https://quay.io",
 		username:  os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:  os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:    "NVD",
@@ -3135,7 +3136,7 @@ var testCases = []testCase{
 	},
 	{
 		image:                   "quay.io/rhacs-eng/qa:sandbox-springboot-2.6.5",
-		registry:                "https://registry-1.docker.io",
+		registry:                "https://quay.io",
 		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
@@ -3179,7 +3180,7 @@ var testCases = []testCase{
 	},
 	{
 		image:                   "quay.io/rhacs-eng/qa:sandbox-springboot-2.6.5-flux",
-		registry:                "https://registry-1.docker.io",
+		registry:                "https://quay.io",
 		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
@@ -3223,7 +3224,7 @@ var testCases = []testCase{
 	},
 	{
 		image:                   "quay.io/rhacs-eng/qa:sandbox-springboot-web-cloud-function-2.6.6",
-		registry:                "https://registry-1.docker.io",
+		registry:                "https://quay.io",
 		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
