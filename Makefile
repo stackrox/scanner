@@ -238,8 +238,13 @@ ossls-notice: deps
 ## Tests ##
 ###########
 
+.PHONY: test-prep
+test-prep:
+	@echo "+ $@"
+	@mkdir -p test-output
+
 .PHONY: unit-tests
-unit-tests: deps
+unit-tests: deps test-prep
 	@echo "+ $@"
 	go test -race ./... | tee test-output/test.log
 
