@@ -59,7 +59,7 @@ $(OSSLS_BIN): deps
 GO_JUNIT_REPORT_BIN := $(GOBIN)/go-junit-report
 $(GO_JUNIT_REPORT_BIN):
 	@echo "+ $@"
-	go install github.com/jstemmer/go-junit-report
+	@cd tools/test/ && go install github.com/jstemmer/go-junit-report
 
 #############
 ##  Tag  ##
