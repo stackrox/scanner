@@ -6,6 +6,7 @@ package e2etests
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"sort"
 	"testing"
 
