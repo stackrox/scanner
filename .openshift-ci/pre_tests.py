@@ -23,7 +23,7 @@ class Deployer:
             cmd = "slim-deploy"
         subprocess.run(
             [
-                "scripts/ci/jobs/deploy.sh",
+                "scripts/ci/deploy.sh",
                 cmd
             ],
             check=True,
