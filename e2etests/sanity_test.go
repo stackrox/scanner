@@ -130,12 +130,12 @@ func TestImageSanity(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.image, func(t *testing.T) {
-			rUsername := os.Getenv("REDHAT_USERNAME") != ""
-			rPass := os.Getenv("REDHAT_PASSWORD") != ""
-			assert.True(t, rUsername)
-			assert.True(t, rPass)
-			gPass := os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER") != ""
-			assert.True(t, gPass)
+			rUsername := os.Getenv("REDHAT_USERNAME") == ""
+			rPass := os.Getenv("REDHAT_PASSWORD") == ""
+			assert.True(t, rUsername, "Red Hat Username is actually set")
+			assert.True(t, rPass, "Red Hat Password is actually set")
+			gPass := os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER") == ""
+			assert.True(t, gPass, "Google Password is actually set")
 			verifyImageHasExpectedFeatures(t, cli, testCase, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL})
 		})
 	}
