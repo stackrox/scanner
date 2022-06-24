@@ -18,8 +18,7 @@ LABEL name="scanner-db" \
 
 ENV PG_MAJOR=12
 ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
-    PGDATA="/var/lib/postgresql/data" \
-    POSTGRES_PASSWORD_FILE="/run/secrets/stackrox.io/secrets/password"
+    PGDATA="/var/lib/postgresql/data/pgdata"
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
@@ -38,28 +37,22 @@ RUN groupadd -g 70 postgres && \
     rm -rf /var/cache/dnf /var/cache/yum && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
-    chmod +x /usr/local/bin/docker-entrypoint.sh
+    chmod +x /usr/local/bin/docker-entrypoint.sh && \
+    mkdir /docker-entrypoint-initdb.d
+
+USER postgres:postgres
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
-CMD ["postgres"]
+CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
 
 FROM base AS scanner-db-slim
 
 ENV ROX_SLIM_MODE="true"
-
-# The entrypoint script requires the init directory to exist, so we create it
-# here even though scanner slim does not ship any definitions.
-
-RUN mkdir /docker-entrypoint-initdb.d
-
-USER 70:70
 
 FROM base AS scanner-db
 
 ENV ROX_SLIM_MODE="false"
 
 COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
-
-USER 70:70
