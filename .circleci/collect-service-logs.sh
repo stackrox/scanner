@@ -37,6 +37,10 @@ main() {
             kubectl -n "${namespace}" logs "po/${pod}" -c "$ctr" > "${log_dir}/${pod}-${ctr}.log"
             kubectl -n "${namespace}" logs "po/${pod}" -p -c "$ctr" > "${log_dir}/${pod}-${ctr}-previous.log"
         done
+        for ctr in $(kubectl -n "${namespace}" get po "$pod" -o jsonpath='{.status.initContainerStatuses[*].name}'); do
+            kubectl -n "${namespace}" logs "po/${pod}" -c "$ctr" > "${log_dir}/${pod}-${ctr}.log"
+            kubectl -n "${namespace}" logs "po/${pod}" -p -c "$ctr" > "${log_dir}/${pod}-${ctr}-previous.log"
+        done
     done
     find "${log_dir}" -type f -size 0 -delete
 }

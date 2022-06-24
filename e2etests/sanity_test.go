@@ -1,3 +1,4 @@
+//go:build e2e
 // +build e2e
 
 package e2etests
@@ -5,9 +6,7 @@ package e2etests
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"sort"
-	"strings"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/api/v1"
@@ -128,16 +127,8 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 func TestImageSanity(t *testing.T) {
 	cli := client.New(getScannerHTTPEndpoint(), true)
 
-	_, inCIRun := os.LookupEnv("CI")
-
 	for _, testCase := range testCases {
 		t.Run(testCase.image, func(t *testing.T) {
-			if inCIRun && strings.HasPrefix(testCase.image, "docker.io/stackrox/sandbox") {
-				testCase.image = strings.Replace(testCase.image, "docker.io/stackrox/sandbox:", "quay.io/rhacs-eng/qa:sandbox-", -1)
-				testCase.registry = "https://quay.io"
-				testCase.username = os.Getenv("QUAY_RHACS_ENG_RO_USERNAME")
-				testCase.password = os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD")
-			}
 			verifyImageHasExpectedFeatures(t, cli, testCase, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL})
 		})
 	}
