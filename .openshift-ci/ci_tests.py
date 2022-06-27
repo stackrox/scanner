@@ -40,6 +40,6 @@ class E2ETest(BaseTest):
         print("Executing E2E tests")
 
         self.run_with_graceful_kill(
-            ["scripts/ci/jobs/e2e-tests.sh"],
+            ["scripts/ci/e2e-tests.sh"],
             E2ETest.TEST_TIMEOUT,
         )
