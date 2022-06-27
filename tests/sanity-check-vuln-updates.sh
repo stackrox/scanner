@@ -8,7 +8,7 @@
 #   ./sanity-check-vuln-updates.sh [diff_id]
 #
 # Note:
-#   This work was tracked in https://stack-rox.atlassian.net/browse/ROX-7271.
+#   This work was tracked in https://issues.redhat.com/browse/ROX-7271.
 #   This test downloads ~500 MiB of vulnerability diffs with each run.
 #   gsutil stat "gs://definitions.stackrox.io/*/diff.zip"
 set -eu

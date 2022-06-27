@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 
 # A library of CI related reusable bash functions
-# This is copied from stackrox/stackrox, and any modifications
-# are labeled with ### MODIFIED.
+# Adapted from https://github.com/stackrox/stackrox/blob/master/scripts/ci/lib.sh
 
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 source "$SCRIPTS_ROOT/scripts/lib.sh"
 
 set -euo pipefail
+
+ensure_CI() {
+    if ! is_CI; then
+        die "A CI environment is required."
+    fi
+}
 
 ci_export() {
     if [[ "$#" -ne 2 ]]; then
@@ -83,6 +88,45 @@ push_images() {
     fi
 }
 
+poll_for_system_test_images() {
+    info "Polling for images required for system tests"
+
+    if [[ "$#" -ne 1 ]]; then
+        die "missing arg. usage: poll_for_system_test_images <seconds to wait>"
+    fi
+
+    local time_limit="$1"
+
+    require_environment "QUAY_RHACS_ENG_BEARER_TOKEN"
+
+    local tag
+    tag="$(make --quiet tag)"
+    local start_time
+    start_time="$(date '+%s')"
+
+    _image_exists() {
+        local name="$1"
+        local url="https://quay.io/api/v1/repository/rhacs-eng/$name/tag?specificTag=$tag"
+        info "Checking for $name using $url"
+        local check
+        check=$(curl --location -sS -H "Authorization: Bearer ${QUAY_RHACS_ENG_BEARER_TOKEN}" "$url")
+        echo "$check"
+        [[ "$(jq -r '.tags | first | .name' <<<"$check")" == "$tag" ]]
+    }
+
+    while true; do
+        ### MODIFIED - Replaced with Scanner-related images
+        if _image_exists "scanner" && _image_exists "scanner-db" && _image_exists "scanner-slim" && _image_exists "scanner-db-slim"; then
+            info "All images exist"
+            break
+        fi
+        if (( $(date '+%s') - start_time > time_limit )); then
+           die "Timed out waiting for images after ${time_limit} seconds"
+        fi
+        sleep 60
+    done
+}
+
 is_tagged() {
     local tags
     tags="$(git tag --contains)"
@@ -97,7 +141,22 @@ get_base_ref() {
     if is_CIRCLECI; then
         echo "${CIRCLE_BRANCH}"
     elif is_OPENSHIFT_CI; then
-        jq -r '.refs[0].base_ref' <<<"$CLONEREFS_OPTIONS"
+        if [[ -n "${PULL_BASE_REF:-}" ]]; then
+            # presubmit, postsubmit and batch runs
+            # (ref: https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables)
+            echo "${PULL_BASE_REF}"
+        elif [[ -n "${JOB_SPEC:-}" ]]; then
+            # periodics
+            # OpenShift CI adds 'extra_refs'
+            local base_ref
+            base_ref="$(jq -r <<<"${JOB_SPEC}" '.extra_refs[0].base_ref')" || die "invalid JOB_SPEC yaml"
+            if [[ "$base_ref" == "null" ]]; then
+                die "expect: base_ref in JOB_SEC.extra_refs[0]"
+            fi
+            echo "${base_ref}"
+        else
+            die "Expect PULL_BASE_REF or JOB_SPEC"
+        fi
     else
         die "unsupported"
     fi
@@ -109,7 +168,25 @@ get_repo_full_name() {
         # CIRCLE_REPOSITORY_URL=git@github.com:stackrox/scanner.git
         echo "${CIRCLE_REPOSITORY_URL:15:-4}"
     elif is_OPENSHIFT_CI; then
-        jq -r .base.repo.full_name <<<"$(get_pr_details)"
+        if [[ -n "${REPO_OWNER:-}" ]]; then
+            # presubmit, postsubmit and batch runs
+            # (ref: https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables)
+            [[ -n "${REPO_NAME:-}" ]] || die "expect: REPO_NAME"
+            echo "${REPO_OWNER}/${REPO_NAME}"
+        elif [[ -n "${JOB_SPEC:-}" ]]; then
+            # periodics
+            # OpenShift CI adds 'extra_refs'
+            local org
+            local repo
+            org="$(jq -r <<<"${JOB_SPEC}" '.extra_refs[0].org')" || die "invalid JOB_SPEC yaml"
+            repo="$(jq -r <<<"${JOB_SPEC}" '.extra_refs[0].repo')" || die "invalid JOB_SPEC yaml"
+            if [[ "$org" == "null" ]] || [[ "$repo" == "null" ]]; then
+                die "expect: org and repo in JOB_SEC.extra_refs[0]"
+            fi
+            echo "${org}/${repo}"
+        else
+            die "Expect REPO_OWNER/NAME or JOB_SPEC"
+        fi
     else
         die "unsupported"
     fi
@@ -245,11 +322,15 @@ gate_pr_job() {
     local job_config="$1"
     local pr_details="$2"
 
-    local run_with_labels
+    local run_with_labels=()
     local skip_with_label
     local run_with_changed_path
     local changed_path_to_ignore
-    mapfile -t run_with_labels < <(get_var_from_job_config run_with_labels "$job_config")
+    local run_with_labels_from_json
+    run_with_labels_from_json="$(get_var_from_job_config run_with_labels "$job_config")"
+    if [[ -n "${run_with_labels_from_json}" ]]; then
+        mapfile -t run_with_labels <<<"${run_with_labels_from_json}"
+    fi
     skip_with_label="$(get_var_from_job_config skip_with_label "$job_config")"
     run_with_changed_path="$(get_var_from_job_config run_with_changed_path "$job_config")"
     changed_path_to_ignore="$(get_var_from_job_config changed_path_to_ignore "$job_config")"
@@ -307,7 +388,11 @@ gate_merge_job() {
     run_on_tags="$(get_var_from_job_config run_on_tags "$job_config")"
 
     local base_ref
-    base_ref="$(get_base_ref)"
+    base_ref="$(get_base_ref)" || {
+        info "Warning: error running get_base_ref():"
+        echo "${base_ref}"
+        info "will continue with tests."
+    }
 
     if [[ "${base_ref}" == "master" && "${run_on_master}" == "true" ]]; then
         info "$job will run because this is master and run_on_master==true"
@@ -352,42 +437,37 @@ openshift_ci_mods() {
     export OPENSHIFT_CI=true
 
     # Provide Circle CI vars that are commonly used
-    export CIRCLE_JOB="${JOB_NAME}"
+    export CIRCLE_JOB="${JOB_NAME:-${OPENSHIFT_BUILD_NAME}}"
     CIRCLE_TAG="$(git tag --contains | head -1)"
     export CIRCLE_TAG
+}
 
-    # For gradle
-    export GRADLE_USER_HOME="${HOME}"
-
-    ### MODIFIED: stackrox -> scanner
-    # NAMESPACE is injected by OpenShift CI for the cluster running tests but
-    # can have side effects for scanner tests e.g. with helm.
-    if [[ -n "$NAMESPACE" ]]; then
+openshift_ci_e2e_mods() {
+    # NAMESPACE is injected by OpenShift CI for the cluster that is running the
+    # tests but this can have side effects for scanner tests due to its use as
+    # the default namespace e.g. with helm.
+    if [[ -n "${NAMESPACE:-}" ]]; then
         export OPENSHIFT_CI_NAMESPACE="$NAMESPACE"
         unset NAMESPACE
     fi
 
-    # Prow tests PRs rebased against master. This is a pain during migration
-    # because Circle CI does not and so images built in Circle CI have different
-    # tags.
-    local pr_details
-    local exitstatus=0
-    pr_details="${2:-$(get_pr_details)}" || exitstatus="$?"
-    ### MODIFIED: stackrox/stackrox -> stackrox/scanner
-    if [[ "$exitstatus" == "0" && "$(jq -r .base.repo.full_name <<<"$pr_details")" == "stackrox/scanner" ]]; then
-        info "Switching to the PR branch"
+    # Similarly the incoming KUBECONFIG is best avoided.
+    if [[ -n "${KUBECONFIG:-}" ]]; then
+        info "There is an incoming KUBECONFIG in ${KUBECONFIG}"
+        export OPENSHIFT_CI_KUBECONFIG="$KUBECONFIG"
+    fi
+    KUBECONFIG="$(mktemp)"
+    info "KUBECONFIG set: ${KUBECONFIG}"
+    export KUBECONFIG
 
-        # Clone the target repo
-        ### MODIFIED: stackrox -> scanner
-        cd ..
-        mv scanner scanner-osci
-        git clone https://github.com/stackrox/scanner.git
-        cd scanner
-
-        # Checkout the PR branch
-        head_ref="$(jq -r '.head.ref' <<<"$pr_details")"
-        info "Checking out a matching PR branch using: $head_ref"
-        git checkout "$head_ref"
+    # KUBERNETES_{PORT,SERVICE} env values also interact with commandline kubectl tests
+    if env | grep -e ^KUBERNETES_; then
+        local envfile
+        envfile="$(mktemp)"
+        info "Will clear ^KUBERNETES_ env"
+        env | grep -e ^KUBERNETES_ | cut -d= -f1 | awk '{ print "unset", $1 }' > "$envfile"
+        # shellcheck disable=SC1090
+        source "$envfile"
     fi
 }
 

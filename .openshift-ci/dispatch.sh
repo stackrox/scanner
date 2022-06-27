@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/dispatch.sh
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 source "$ROOT/scripts/ci/lib.sh"
 
@@ -29,6 +31,12 @@ shift
 ci_export CI_JOB_NAME "$ci_job"
 
 gate_job "$ci_job"
+
+case "$ci_job" in
+    e2e-tests)
+        openshift_ci_e2e_mods
+        ;;
+esac
 
 export PYTHONPATH="${PYTHONPATH:-}:.openshift-ci"
 
