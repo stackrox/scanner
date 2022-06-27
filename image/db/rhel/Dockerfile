@@ -40,7 +40,8 @@ RUN groupadd -g 70 postgres && \
     chmod +x /usr/local/bin/docker-entrypoint.sh && \
     mkdir /docker-entrypoint-initdb.d
 
-# This cannot be postgres:postgres, as the pod's security context sets `runAsNonRoot: true`,
+# This is equivalent to postgres:postgres. This remains unnamed, \
+# as the pod's security context sets `runAsNonRoot: true`,
 # and the Kubelet does not recognize named users.
 USER 70:70
 
