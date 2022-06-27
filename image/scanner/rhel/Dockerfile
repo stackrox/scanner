@@ -44,13 +44,13 @@ ENV REPO_TO_CPE_DIR="/repo2cpe"
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 COPY --from=extracted_bundle /bundle/genesis_manifests.json ./
 
+USER 65534:65534
+
 ENTRYPOINT ["/entrypoint.sh"]
 
 FROM base AS scanner-slim
 
 ENV ROX_SLIM_MODE="true"
-
-USER 65534:65534
 
 FROM base AS scanner
 
@@ -61,5 +61,3 @@ ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
-
-USER 65534:65534
