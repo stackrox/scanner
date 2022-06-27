@@ -32,19 +32,22 @@ ci_export CI_JOB_NAME "$ci_job"
 
 gate_job "$ci_job"
 
-case "$ci_job" in
-    e2e-tests)
-        "$ROOT/.openshift-ci/e2e_tests.py"
-        ;;
-    style-checks)
-        make style
-        ;;
-    unit-tests)
-        "$ROOT/scripts/ci/jobs/unit-tests.sh"
-        ;;
-    *)
-        # For ease of initial integration this function does not fail when the
-        # job is unknown.
-        info "nothing to see here: ${ci_job}"
-        exit 0
-esac
+export PYTHONPATH="${PYTHONPATH:-}:.openshift-ci"
+
+if ! [[ "$ci_job" =~ [a-z-]+ ]]; then
+    # don't exec possibly untrusted scripts
+    die "untrusted job: $ci_job"
+fi
+
+if [[ -f "$ROOT/scripts/ci/jobs/${ci_job}.sh" ]]; then
+    job_script="$ROOT/scripts/ci/jobs/${ci_job}.sh"
+elif [[ -f "$ROOT/scripts/ci/jobs/${ci_job//-/_}.py" ]]; then
+    job_script="$ROOT/scripts/ci/jobs/${ci_job//-/_}.py"
+else
+    # For ease of initial integration this function does not fail when the
+    # job is unknown.
+    info "nothing to see here: ${ci_job}"
+    exit 0
+fi
+
+"${job_script}" "$@"
