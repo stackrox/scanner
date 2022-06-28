@@ -121,8 +121,9 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 			src = fmt.Sprintf("%s password=%s", pg.config.Source, password)
 		} else if !os.IsNotExist(err) {
 			return nil, errors.Wrapf(err, "pgsql: could not stat password file %q", passwordFile)
+		} else {
+			return nil, errors.Errorf("pgsql: no password file at expected location %q", passwordFile)
 		}
-		return nil, errors.Errorf("pgsql: no password file at expected location %q", passwordFile)
 	}
 
 	// Create database.
