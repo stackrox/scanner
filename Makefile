@@ -254,9 +254,9 @@ e2e-tests: deps test-prep
 	go test -tags e2e -count=1 -timeout=20m -v ./e2etests/... | tee test-output/test.log
 
 .PHONY: slim-e2e-tests
-slim-e2e-tests: deps
+slim-e2e-tests: deps test-prep
 	@echo "+ $@"
-	go test -tags slim_e2e -count=1 -timeout=20m ./e2etests/...
+	go test -tags slim_e2e -count=1 -timeout=20m -v ./e2etests/... | tee test-output/test.log
 
 .PHONY: db-integration-tests
 db-integration-tests: deps

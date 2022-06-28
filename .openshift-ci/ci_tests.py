@@ -43,3 +43,27 @@ class E2ETest(BaseTest):
             ["scripts/ci/jobs/e2etests/e2e-tests.sh"],
             E2ETest.TEST_TIMEOUT,
         )
+
+
+class ScaleTest(BaseTest):
+    TEST_TIMEOUT = 60 * 60
+
+    def run(self):
+        print("Executing Scale tests")
+
+        self.run_with_graceful_kill(
+            ["scripts/ci/jobs/e2etests/scale-tests.sh"],
+            ScaleTest.TEST_TIMEOUT,
+        )
+
+
+class SlimE2ETest(BaseTest):
+    TEST_TIMEOUT = 60 * 60
+
+    def run(self):
+        print("Executing Slim E2E tests")
+
+        self.run_with_graceful_kill(
+            ["scripts/ci/jobs/e2etests/slim-e2e-tests.sh"],
+            SlimE2ETest.TEST_TIMEOUT,
+        )
