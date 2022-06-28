@@ -56,6 +56,11 @@ $(OSSLS_BIN): deps
 	@echo "+ $@"
 	go install github.com/stackrox/ossls@0.10.1
 
+GO_JUNIT_REPORT_BIN := $(GOBIN)/go-junit-report
+$(GO_JUNIT_REPORT_BIN):
+	@echo "+ $@"
+	@cd tools/test/ && go install github.com/jstemmer/go-junit-report
+
 #############
 ##  Tag  ##
 #############
@@ -233,15 +238,20 @@ ossls-notice: deps
 ## Tests ##
 ###########
 
-.PHONY: unit-tests
-unit-tests: deps
+.PHONY: test-prep
+test-prep:
 	@echo "+ $@"
-	go test -race ./...
+	@mkdir -p test-output
+
+.PHONY: unit-tests
+unit-tests: deps test-prep
+	@echo "+ $@"
+	go test -race -v ./... | tee test-output/test.log
 
 .PHONY: e2e-tests
-e2e-tests: deps
+e2e-tests: deps test-prep
 	@echo "+ $@"
-	go test -tags e2e -count=1 -timeout=20m ./e2etests/...
+	go test -tags e2e -count=1 -timeout=20m -v ./e2etests/... | tee test-output/test.log
 
 .PHONY: slim-e2e-tests
 slim-e2e-tests: deps
@@ -264,6 +274,27 @@ scale-tests: deps
 	mkdir /tmp/pprof
 	go run ./scale/... /tmp/pprof || true
 	zip -r /tmp/pprof.zip /tmp/pprof
+
+.PHONY: report
+report: $(GO_JUNIT_REPORT_BIN)
+	@echo "+ $@"
+	@cat test.log | go-junit-report > report.xml
+	@mkdir -p $(JUNIT_OUT)
+	@cp test.log report.xml $(JUNIT_OUT)
+	@echo
+	@echo "Test coverage summary:"
+	@grep "^coverage: " -A1 test.log | grep -v -e '--' | paste -d " "  - -
+	@echo
+	@echo "Test pass/fail summary:"
+	@grep failures report.xml
+	@echo
+	@echo "`grep 'FAIL	github.com/stackrox/scanner' test.log | wc -l` package(s) detected with compilation or test failures."
+	@-grep 'FAIL	github.com/stackrox/scanner' test.log || true
+	@echo
+	@testerror="$$(grep -e 'can.t load package' -e '^# github.com/stackrox/scanner/' -e 'FAIL	github.com/stackrox/scanner' test.log | wc -l)" && test $$testerror -eq 0
+
+generate-junit-reports: $(GO_JUNIT_REPORT_BIN)
+	$(BASE_DIR)/scripts/generate-junit-reports.sh
 
 ####################
 ## Generated Srcs ##
@@ -297,7 +328,7 @@ clean-proto-generated-srcs:
 ## Clean ##
 ###########
 .PHONY: clean
-clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof
+clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof clean-test
 	@echo "+ $@"
 
 .PHONY: clean-image
@@ -316,6 +347,11 @@ clean-pprof:
 	rm /tmp/pprof.zip || true
 	rm -rf /tmp/pprof
 
+.PHONY: clean-test
+clean-test:
+	@echo "+ $@"
+	rm -rf test-output/
+	rm -rf junit-reports/
 
 ##################
 ## Genesis Dump ##

@@ -1,3 +1,4 @@
+//go:build e2e || slim_e2e
 // +build e2e slim_e2e
 
 package e2etests
@@ -1707,10 +1708,10 @@ var testCases = []testCase{
 	},
 	{
 		// Deletes directory containing jackson-databind:2.6.6.
-		image:                   "docker.io/stackrox/sandbox:scannerremovejar",
-		registry:                "https://registry-1.docker.io",
-		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:                   "quay.io/rhacs-eng/qa:sandbox-scannerremovejar",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
 		namespace:               "ubuntu:14.04",
@@ -1984,10 +1985,10 @@ var testCases = []testCase{
 	},
 	{
 		// Deletes fatjar containing zookeeper and guava, and deletes standalone jar containing netty.
-		image:     "docker.io/stackrox/sandbox:zookeeper-fatjar-remove",
-		registry:  "https://registry-1.docker.io",
-		username:  os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:  os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:     "quay.io/rhacs-eng/qa:sandbox-zookeeper-fatjar-remove",
+		registry:  "https://quay.io",
+		username:  os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:  os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:    "NVD",
 		namespace: "alpine:v3.8",
 		unexpectedFeatures: []apiV1.Feature{
@@ -2010,19 +2011,19 @@ var testCases = []testCase{
 	},
 	{
 		// OCI media type manifest.
-		image:     "docker.io/stackrox/sandbox:oci-manifest",
-		registry:  "https://registry-1.docker.io",
-		username:  os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:  os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:     "quay.io/rhacs-eng/qa:sandbox-oci-manifest",
+		registry:  "https://quay.io",
+		username:  os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:  os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:    "NVD",
 		namespace: "ubuntu:16.04",
 	},
 	{
 		// One of the images used for Red Hat Scanner Certification.
-		image:                    "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7",
-		registry:                 "https://registry-1.docker.io",
-		username:                 os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:                 os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:                    "quay.io/rhacs-eng/qa:sandbox-jenkins-agent-maven-35-rhel7",
+		registry:                 "https://quay.io",
+		username:                 os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                 os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:                   "Red Hat",
 		onlyCheckSpecifiedVulns:  true,
 		checkProvidedExecutables: true,
@@ -2133,10 +2134,10 @@ var testCases = []testCase{
 	},
 	{
 		// One of the images used for Red Hat Scanner Certification with a chown on jackson-databind that should not show up in the results.
-		image:                   "docker.io/stackrox/sandbox:jenkins-agent-maven-35-rhel7-chown",
-		registry:                "https://registry-1.docker.io",
-		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:                   "quay.io/rhacs-eng/qa:sandbox-jenkins-agent-maven-35-rhel7-chown",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:                  "Red Hat",
 		onlyCheckSpecifiedVulns: true,
 		namespace:               "rhel:7",
@@ -2224,10 +2225,10 @@ var testCases = []testCase{
 	},
 	{
 		// One of the images used for Red Hat Scanner Certification.
-		image:                   "docker.io/stackrox/sandbox:nodejs-10",
-		registry:                "https://registry-1.docker.io",
-		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:                   "quay.io/rhacs-eng/qa:sandbox-nodejs-10",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:                  "Red Hat",
 		onlyCheckSpecifiedVulns: true,
 		namespace:               "rhel:8",
@@ -2431,10 +2432,10 @@ var testCases = []testCase{
 		// Had an issue where Scanner claimed jq 6.1-r1 was vulnerable to
 		// a CVE fixed in 1.6_rc1-r0. We do NOT expect this version of
 		// jq to be vulnerable to this CVE (CVE-2016-4074).
-		image:     "docker.io/stackrox/sandbox:alpine-jq-1.6-r1",
-		registry:  "https://registry-1.docker.io",
-		username:  os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:  os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:     "quay.io/rhacs-eng/qa:sandbox-alpine-jq-1.6-r1",
+		registry:  "https://quay.io",
+		username:  os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:  os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:    "NVD",
 		namespace: "alpine:v3.13",
 		expectedFeatures: []apiV1.Feature{
@@ -3039,10 +3040,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:     "docker.io/stackrox/sandbox:log4j-2-12-2",
-		registry:  "https://registry-1.docker.io",
-		username:  os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:  os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:     "quay.io/rhacs-eng/qa:sandbox-log4j-2-12-2",
+		registry:  "https://quay.io",
+		username:  os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:  os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:    "NVD",
 		namespace: "ubuntu:20.04",
 		expectedFeatures: []apiV1.Feature{
@@ -3134,10 +3135,10 @@ var testCases = []testCase{
 		namespace: "busybox:1.35.0",
 	},
 	{
-		image:                   "docker.io/stackrox/sandbox:springboot-2.6.5",
-		registry:                "https://registry-1.docker.io",
-		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:                   "quay.io/rhacs-eng/qa:sandbox-springboot-2.6.5",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
 		source:                  "NVD",
 		namespace:               "alpine:v3.15",
@@ -3178,10 +3179,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:                   "docker.io/stackrox/sandbox:springboot-2.6.5-flux",
-		registry:                "https://registry-1.docker.io",
-		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:                   "quay.io/rhacs-eng/qa:sandbox-springboot-2.6.5-flux",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
 		source:                  "NVD",
 		namespace:               "alpine:v3.15",
@@ -3222,10 +3223,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:                   "docker.io/stackrox/sandbox:springboot-web-cloud-function-2.6.6",
-		registry:                "https://registry-1.docker.io",
-		username:                os.Getenv("DOCKER_IO_PULL_USERNAME"),
-		password:                os.Getenv("DOCKER_IO_PULL_PASSWORD"),
+		image:                   "quay.io/rhacs-eng/qa:sandbox-springboot-web-cloud-function-2.6.6",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
 		source:                  "NVD",
 		namespace:               "alpine:v3.15",
@@ -3285,6 +3286,72 @@ var testCases = []testCase{
 				VersionFormat: "dpkg",
 				Version:       "2.4.5",
 				AddedBy:       "sha256:6fa1296f44090f6150dfb96d6ae217a58b9d66c56d7a986c35657df6bd1a89f0",
+			},
+		},
+	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:ansibleplaybookbundle--gluster-s3object-apb--481960439934084fb041431f27cb98b89666e1a0daaeb2078bcbe1209790368c",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "Red Hat",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "centos:7",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "ncurses-base",
+				NamespaceName: "centos:7",
+				VersionFormat: "rpm",
+				Version:       "5.9-14.20130511.el7_4",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2017-10684",
+						NamespaceName: "centos:7",
+						Description:   "STATEMENT: Red Hat Product Security has rated this issue as having Moderate security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2017-10684",
+						Severity:      "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 1.0,
+									"ImpactScore":         4.2,
+									"Score":               5.3,
+									"Vectors":             "CVSS:3.0/AV:L/AC:H/PR:N/UI:R/S:U/C:N/I:L/A:H",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2017-10685",
+						NamespaceName: "centos:7",
+						Description:   "STATEMENT: Red Hat considers this issue as a duplicate of CVE-2017-10684.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2017-10685",
+						Severity:      "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.5,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+								},
+							},
+						},
+					},
+				},
+				AddedBy: "sha256:7dc0dca2b1516961d6b3200564049db0a6e0410b370bb2189e2efae0d368616f",
 			},
 		},
 	},

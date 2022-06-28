@@ -20,25 +20,7 @@ import (
 const (
 	scannerHTTPEndpointEnv = "SCANNER_ENDPOINT"
 	scannerGRPCEndpointEnv = "SCANNER_GRPC_ENDPOINT"
-	dockerIOUsernameEnv    = "DOCKER_IO_PULL_USERNAME"
-	dockerIOPasswordEnv    = "DOCKER_IO_PULL_PASSWORD"
 )
-
-var (
-	maybeGetFromKeyChain func() (string, string)
-)
-
-func mustGetDockerCredentials(t *testing.T) (string, string) {
-	// This is only injected on Darwin, to simplify running tests locally without exporting the
-	// env variables.
-	if maybeGetFromKeyChain != nil {
-		user, pass := maybeGetFromKeyChain()
-		if stringutils.AllNotEmpty(user, pass) {
-			return user, pass
-		}
-	}
-	return mustGetEnv(t, dockerIOUsernameEnv), mustGetEnv(t, dockerIOPasswordEnv)
-}
 
 func mustGetEnv(t *testing.T, key string) string {
 	val := os.Getenv(key)
@@ -74,19 +56,6 @@ func scanPublicDockerHubImage(client v1.ImageScanServiceClient, imageName string
 		Image: imageName,
 		Registry: &v1.RegistryData{
 			Url: "https://registry-1.docker.io",
-		},
-		UncertifiedRHEL: uncertifiedRHEL,
-	}, t)
-}
-
-func scanDockerIOStackRoxImage(client v1.ImageScanServiceClient, imageName string, uncertifiedRHEL bool, t *testing.T) *v1.ScanImageResponse {
-	user, pass := mustGetDockerCredentials(t)
-	return scanImage(client, &v1.ScanImageRequest{
-		Image: imageName,
-		Registry: &v1.RegistryData{
-			Url:      "https://registry-1.docker.io",
-			Username: user,
-			Password: pass,
 		},
 		UncertifiedRHEL: uncertifiedRHEL,
 	}, t)

@@ -7,13 +7,15 @@ set -eu
 # future examination.
 #
 # Usage:
-#   collect-service-logs.sh NAMESPACE
+#   collect-service-logs.sh NAMESPACE [DIR]
 #
 # Example:
 # $ ./scripts/ci/collect-service-logs.sh stackrox
 #
 # Assumptions:
-# - Logs are saved under /tmp/k8s-service-logs/
+# - Logs are saved under /tmp/k8s-service-logs/ or DIR if passed
+#
+# Adapted from https://github.com/stackrox/stackrox/blob/master/scripts/ci/collect-service-logs.sh
 
 usage() {
     echo "./scripts/ci/collect-service-logs.sh <namespace>"
@@ -27,10 +29,19 @@ main() {
         exit 1
     fi
 
-    log_dir="/tmp/k8s-service-logs/${namespace}"
-    mkdir -p "$log_dir"
+    if [ $# -gt 1 ]; then
+        log_dir="$2"
+    else
+        log_dir="/tmp/k8s-service-logs"
+    fi
+    log_dir="${log_dir}/${namespace}"
+    mkdir -p "${log_dir}"
 
+    echo
+    echo ">>> Collecting from namespace ${namespace} <<<"
+    echo
 	  set +e
+
     for pod in $(kubectl -n "${namespace}" get po | tail -n +2 | awk '{print $1}'); do
         kubectl describe po "${pod}" -n "${namespace}" > "${log_dir}/${pod}_describe.log"
         for ctr in $(kubectl -n "${namespace}" get po "$pod" -o jsonpath='{.status.containerStatuses[*].name}'); do

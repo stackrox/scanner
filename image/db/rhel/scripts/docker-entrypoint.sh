@@ -317,6 +317,7 @@ _main() {
 			exec gosu postgres "$BASH_SOURCE" "$@"
 		fi
 
+		### STACKROX MODIFIED - If there is no data, initialize and exit.
 		# only run initialization on an empty data directory
 		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 			docker_verify_minimum_env
@@ -341,6 +342,9 @@ _main() {
 			echo
 			echo 'PostgreSQL init process complete; ready for start up.'
 			echo
+
+			### STACKROX MODIFIED - Exit once DB is initialized.
+			exit 0
 		else
 			echo
 			echo 'PostgreSQL Database directory appears to contain a database; Skipping initialization'
