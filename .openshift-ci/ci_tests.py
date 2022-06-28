@@ -48,6 +48,8 @@ class E2ETest(BaseTest):
 class ScaleTest(BaseTest):
     TEST_TIMEOUT = 60 * 60
 
+    OUTPUT_DIR = "/tmp/pprof-out"
+
     def run(self):
         print("Executing Scale tests")
 
@@ -55,6 +57,8 @@ class ScaleTest(BaseTest):
             ["scripts/ci/jobs/e2etests/scale-tests.sh"],
             ScaleTest.TEST_TIMEOUT,
         )
+
+        self.test_output_dirs = ScaleTest.OUTPUT_DIR
 
 
 class SlimE2ETest(BaseTest):

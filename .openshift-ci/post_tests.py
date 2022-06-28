@@ -147,22 +147,6 @@ class PostClusterTest(StoreArtifacts):
         )
 
 
-# pylint: disable=too-many-instance-attributes
-class StoreExtraArtifacts(PostClusterTest):
-    """PostClusterTest with additional artifact storage"""
-
-    def __init__(
-        self,
-        artifact_directories=None,
-    ):
-        super().__init__()
-        self.extra_artifact_dirs=artifact_directories
-
-    def run(self, test_output_dirs=None):
-        super().run(test_output_dirs)
-
-
-
 class FinalPost(StoreArtifacts):
     """Collect logs that accumulate over multiple tests and other final steps"""
 
