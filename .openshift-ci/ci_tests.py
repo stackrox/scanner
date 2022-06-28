@@ -58,7 +58,7 @@ class ScaleTest(BaseTest):
             ScaleTest.TEST_TIMEOUT,
         )
 
-        self.test_output_dirs = ScaleTest.OUTPUT_DIR
+        self.test_output_dirs.append(ScaleTest.OUTPUT_DIR)
 
 
 class SlimE2ETest(BaseTest):
