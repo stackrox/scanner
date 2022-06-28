@@ -89,7 +89,7 @@ type Config struct {
 // It immediately runs all necessary migrations. If ManageDatabaseLifecycle is
 // specified, the database will be created first. If FixturePath is specified,
 // every SQL queries that are present insides will be executed.
-func openDatabase(registrableComponentConfig database.RegistrableComponentConfig) (database.Datastore, error) {
+func openDatabase(registrableComponentConfig database.RegistrableComponentConfig, passwordRequired bool) (database.Datastore, error) {
 	var pg pgSQL
 	var err error
 
@@ -106,20 +106,24 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		return nil, fmt.Errorf("pgsql: could not load configuration: %v", err)
 	}
 
-	src := pg.config.Source
-	if _, err := os.Stat(passwordFile); err == nil {
-		password, err := os.ReadFile(passwordFile)
-		if err != nil {
-			return nil, errors.Wrapf(err, "pgsql: could not load password file %q", passwordFile)
-		}
-		src = fmt.Sprintf("%s password=%s", pg.config.Source, password)
-	} else if !os.IsNotExist(err) {
-		log.Errorf("error stating password file %q: %v", passwordFile, err)
-	}
-
 	dbName, pgSourceURL, err := parseConnectionString(pg.config.Source)
 	if err != nil {
 		return nil, err
+	}
+
+	src := pg.config.Source
+	if passwordRequired {
+		if _, err := os.Stat(passwordFile); err == nil {
+			password, err := os.ReadFile(passwordFile)
+			if err != nil {
+				return nil, errors.Wrapf(err, "pgsql: could not load password file %q", passwordFile)
+			}
+			src = fmt.Sprintf("%s password=%s", pg.config.Source, password)
+		} else if !os.IsNotExist(err) {
+			return nil, errors.Wrapf(err, "pgsql: could not stat password file %q", passwordFile)
+		} else {
+			return nil, errors.Errorf("pgsql: no password file at expected location %q", passwordFile)
+		}
 	}
 
 	// Create database.
