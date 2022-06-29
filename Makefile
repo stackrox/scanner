@@ -249,10 +249,9 @@ unit-tests: deps test-prep
 	go test -race -v ./... | tee test-output/test.log
 
 .PHONY: e2e-tests
-e2e-tests: deps
+e2e-tests: deps test-prep
 	@echo "+ $@"
-	go test -tags e2e -count=1 -timeout=20m ./e2etests/... | tee test.log
-	make report JUNIT_OUT=e2e-tests
+	go test -tags e2e -count=1 -timeout=20m -v ./e2etests/... | tee test-output/test.log
 
 .PHONY: slim-e2e-tests
 slim-e2e-tests: deps

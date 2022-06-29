@@ -28,7 +28,7 @@ import (
 )
 
 func openDatabaseForTest(testName string, loadFixture bool) (*pgSQL, error) {
-	ds, err := openDatabase(generateTestConfig(testName, loadFixture))
+	ds, err := openDatabase(generateTestConfig(testName, loadFixture), false)
 	if err != nil {
 		return nil, err
 	}

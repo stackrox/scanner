@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/dispatch.sh
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 source "$ROOT/scripts/ci/lib.sh"
 
@@ -31,15 +33,27 @@ ci_export CI_JOB_NAME "$ci_job"
 gate_job "$ci_job"
 
 case "$ci_job" in
-    style-checks)
-        make style
+    e2e-tests)
+        openshift_ci_e2e_mods
         ;;
-    unit-tests)
-        "$ROOT/scripts/ci/jobs/unit-tests.sh"
-        ;;
-    *)
-        # For ease of initial integration this function does not fail when the
-        # job is unknown.
-        info "nothing to see here: ${ci_job}"
-        exit 0
 esac
+
+export PYTHONPATH="${PYTHONPATH:-}:.openshift-ci"
+
+if ! [[ "$ci_job" =~ [a-z-]+ ]]; then
+    # don't exec possibly untrusted scripts
+    die "untrusted job: $ci_job"
+fi
+
+if [[ -f "$ROOT/scripts/ci/jobs/${ci_job}.sh" ]]; then
+    job_script="$ROOT/scripts/ci/jobs/${ci_job}.sh"
+elif [[ -f "$ROOT/scripts/ci/jobs/${ci_job//-/_}.py" ]]; then
+    job_script="$ROOT/scripts/ci/jobs/${ci_job//-/_}.py"
+else
+    # For ease of initial integration this function does not fail when the
+    # job is unknown.
+    info "nothing to see here: ${ci_job}"
+    exit 0
+fi
+
+"${job_script}" "$@"

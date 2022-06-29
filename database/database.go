@@ -50,7 +50,7 @@ var drivers = make(map[string]Driver)
 
 // Driver is a function that opens a Datastore specified by its database driver type and specific
 // configuration.
-type Driver func(RegistrableComponentConfig) (Datastore, error)
+type Driver func(cfg RegistrableComponentConfig, passwordRequired bool) (Datastore, error)
 
 // Register makes a Constructor available by the provided name.
 //
@@ -67,7 +67,7 @@ func Register(name string, driver Driver) {
 }
 
 // OpenWithRetries opens the database with the given number of retries.
-func OpenWithRetries(cfg RegistrableComponentConfig, maxTries int, sleepBetweenTries time.Duration) (Datastore, error) {
+func OpenWithRetries(cfg RegistrableComponentConfig, passwordRequired bool, maxTries int, sleepBetweenTries time.Duration) (Datastore, error) {
 	driver, ok := drivers[cfg.Type]
 	if !ok {
 		return nil, fmt.Errorf("database: unknown Driver %q (forgotten configuration or import?)", cfg.Type)
@@ -75,7 +75,7 @@ func OpenWithRetries(cfg RegistrableComponentConfig, maxTries int, sleepBetweenT
 	var db Datastore
 	err := retry.WithRetry(func() error {
 		var err error
-		db, err = driver(cfg)
+		db, err = driver(cfg, passwordRequired)
 		return err
 	}, retry.Tries(maxTries), retry.OnFailedAttempts(func(err error) {
 		log.WithError(err).Error("Failed to open database.")
@@ -91,8 +91,8 @@ func OpenWithRetries(cfg RegistrableComponentConfig, maxTries int, sleepBetweenT
 }
 
 // Open opens a Datastore specified by a configuration.
-func Open(cfg RegistrableComponentConfig) (Datastore, error) {
-	return OpenWithRetries(cfg, 1, 0)
+func Open(cfg RegistrableComponentConfig, passwordRequired bool) (Datastore, error) {
+	return OpenWithRetries(cfg, passwordRequired, 1, 0)
 }
 
 // Datastore represents the required operations on a persistent data store for
