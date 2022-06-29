@@ -46,7 +46,7 @@ class E2ETest(BaseTest):
 
 
 class ScaleTest(BaseTest):
-    TEST_TIMEOUT = 90 * 60
+    TEST_TIMEOUT = 120 * 60
 
     OUTPUT_DIR = "/tmp/pprof-out"
 
