@@ -476,7 +476,7 @@ commands:
           command: make scale-tests
 
       - ci-artifacts/store:
-          path: /tmp/pprof.zip
+          path: /tmp/pprof-out/pprof.zip
           destination: pprof.zip
 
       - run:

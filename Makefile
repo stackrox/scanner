@@ -254,9 +254,9 @@ e2e-tests: deps test-prep
 	go test -tags e2e -count=1 -timeout=20m -v ./e2etests/... | tee test-output/test.log
 
 .PHONY: slim-e2e-tests
-slim-e2e-tests: deps
+slim-e2e-tests: deps test-prep
 	@echo "+ $@"
-	go test -tags slim_e2e -count=1 -timeout=20m ./e2etests/...
+	go test -tags slim_e2e -count=1 -timeout=20m -v ./e2etests/... | tee test-output/test.log
 
 .PHONY: db-integration-tests
 db-integration-tests: deps
@@ -272,8 +272,9 @@ slim-db-integration-tests: deps
 scale-tests: deps
 	@echo "+ $@"
 	mkdir /tmp/pprof
+	mkdir /tmp/pprof-out
 	go run ./scale/... /tmp/pprof || true
-	zip -r /tmp/pprof.zip /tmp/pprof
+	zip -r /tmp/pprof-out/pprof.zip /tmp/pprof
 
 .PHONY: report
 report: $(GO_JUNIT_REPORT_BIN)
