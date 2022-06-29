@@ -32,9 +32,6 @@ spec:
         - name: scanner-db-password
           mountPath: /run/secrets/stackrox.io/secrets
           readOnly: true
-        securityContext:
-          runAsUser: 70
-          runAsGroup: 70
       containers:
       - name: db
         image: {{.Values.scannerDBImage}}:{{.Values.tag}}
@@ -55,11 +52,11 @@ spec:
         - name: scanner-db-tls-volume
           mountPath: /run/secrets/stackrox.io/certs
           readOnly: true
-        securityContext:
-          runAsUser: 70
-          runAsGroup: 70
       securityContext:
         fsGroup: 70
+        runAsGroup: 70
+        runAsNonRoot: true
+        runAsUser: 70
       volumes:
       - name: config
         configMap:

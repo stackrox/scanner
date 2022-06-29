@@ -40,7 +40,8 @@ RUN groupadd -g 70 postgres && \
     chmod +x /usr/local/bin/docker-entrypoint.sh && \
     mkdir /docker-entrypoint-initdb.d
 
-USER postgres:postgres
+# This is equivalent to postgres:postgres.
+USER 70:70
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
