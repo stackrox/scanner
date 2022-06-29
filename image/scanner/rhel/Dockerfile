@@ -44,9 +44,7 @@ ENV REPO_TO_CPE_DIR="/repo2cpe"
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 COPY --from=extracted_bundle /bundle/genesis_manifests.json ./
 
-# This is equivalent to nobody:nobody. This remains unnamed,
-# as the pod's security context sets `runAsNonRoot: true`,
-# and the Kubelet does not recognize named users.
+# This is equivalent to nobody:nobody.
 USER 65534:65534
 
 ENTRYPOINT ["/entrypoint.sh"]
