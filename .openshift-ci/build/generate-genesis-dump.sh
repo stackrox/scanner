@@ -7,6 +7,8 @@ source "$ROOT/scripts/ci/lib.sh"
 
 set -euo pipefail
 
+openshift_ci_mods
+
 gate_job generate-genesis-dump
 
 generate_genesis_dump() {
