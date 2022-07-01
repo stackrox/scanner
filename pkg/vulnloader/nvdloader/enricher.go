@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	nvdEnricherRepo = "https://github.com:stackrox/dotnet-scraper.git"
+	nvdEnricherRepo = "https://github.com/stackrox/dotnet-scraper.git"
 )
 
 // FileFormatWrapper is a wrapper around .NET vulnerability file.

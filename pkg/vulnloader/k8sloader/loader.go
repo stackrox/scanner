@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	k8sCVEsRepository = "https://github.com:stackrox/k8s-cves.git"
+	k8sCVEsRepository = "https://github.com/stackrox/k8s-cves.git"
 	k8sCVEsRefName    = "refs/heads/main"
 )
 
