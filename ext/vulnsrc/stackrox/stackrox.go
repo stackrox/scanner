@@ -62,9 +62,9 @@ func (u *updater) downloadFeed(objectHandle *googleStorage.ObjectHandle) ([]data
 }
 
 func (u *updater) Update(_ vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
-	log.WithField("package", "Stackrox").Info("Start fetching vulnerabilities")
+	log.WithField("package", "StackRox").Info("Start fetching vulnerabilities")
 
-	client, err := googleStorage.NewClient(context.Background(), option.WithoutAuthentication())
+	client, err := googleStorage.NewClient(context.Background(), option.WithoutAuthentication(), option.WithScopes(googleStorage.ScopeReadOnly))
 	if err != nil {
 		return resp, errors.Wrap(err, "could not create GCS client")
 	}
