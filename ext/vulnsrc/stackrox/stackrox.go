@@ -12,6 +12,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 )
 
 const (
@@ -63,7 +64,7 @@ func (u *updater) downloadFeed(objectHandle *googleStorage.ObjectHandle) ([]data
 func (u *updater) Update(_ vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
 	log.WithField("package", "Stackrox").Info("Start fetching vulnerabilities")
 
-	client, err := googleStorage.NewClient(context.Background())
+	client, err := googleStorage.NewClient(context.Background(), option.WithoutAuthentication())
 	if err != nil {
 		return resp, errors.Wrap(err, "could not create GCS client")
 	}
