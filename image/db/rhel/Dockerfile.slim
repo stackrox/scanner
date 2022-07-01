@@ -43,7 +43,7 @@ RUN groupadd -g 70 postgres && \
 # This is equivalent to postgres:postgres.
 USER 70:70
 
-COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
+ENV ROX_SLIM_MODE="true"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
