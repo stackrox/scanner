@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # A collection of GCP related reusable bash functions for CI
-# Copied from https://github.com/stackrox/stackrox/blob/master/scripts/ci/gcp.sh
+# Adapted from https://github.com/stackrox/stackrox/blob/master/scripts/ci/gcp.sh
 
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 source "$SCRIPTS_ROOT/scripts/ci/lib.sh"
@@ -14,7 +14,9 @@ setup_gcp() {
     ensure_CI
 
     local service_account
-    if is_OPENSHIFT_CI; then
+    if [ $# -gt 0 ]; then
+        service_account="$1"
+    elif is_OPENSHIFT_CI; then
         require_environment "GCLOUD_SERVICE_ACCOUNT_OPENSHIFT_CI_ROX"
         service_account="${GCLOUD_SERVICE_ACCOUNT_OPENSHIFT_CI_ROX}"
     elif is_CIRCLECI; then

@@ -137,7 +137,7 @@ EOF
   fi
 
   if [[ "$cache_control_cloudflare" != "cache-control: public, max-age=3600" ]]; then
-    # known issue -- https://stack-rox.atlassian.net/browse/RS-307
+    # known issue -- https://issues.redhat.com/browse/RS-307
     testfail "Incorrect cloudflare cache control setting, expected max-age=3600"
   fi
 
@@ -151,7 +151,7 @@ EOF
   # updated hourly so I might need to track hashes across runs to test this properly.
   if [[ "$gcs_object_age_seconds" -gt 3600 ]]; then
     if [[ "$md5sum_cloudflare" != "$md5sum_gcs_https" ]]; then
-      testfail "Cloudflare CDN content mistmatch against reference after cache should have been invalidated"
+      testfail "Cloudflare CDN content mismatch against reference after cache should have been invalidated"
     fi
   fi
 }
