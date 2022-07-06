@@ -22,6 +22,12 @@ generate_genesis_dump() {
 
     info "Printing some stats"
     "$ROOT/bin/updater" print-stats /tmp/genesis-dump/dump.zip
+
+    touch /tmp/hold
+    while [[ -e /tmp/hold ]]; do
+        info "Holding this job for debug"
+        sleep 60
+    done
 }
 
 generate_genesis_dump
