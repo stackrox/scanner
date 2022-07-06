@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	bucketName = "scanner-stackrox-feed-test-debian9"
+	bucketName = "stackrox-scanner-feed"
 
 	requestTimeout = 1 * time.Minute
 )
