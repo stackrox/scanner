@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	bucketName = "stackrox-scanner-feed"
+	bucketName = "scanner-stackrox-feed-test-debian9"
 
 	requestTimeout = 1 * time.Minute
 )
@@ -68,24 +68,22 @@ func (u *updater) Update(_ vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err 
 	if err != nil {
 		return resp, errors.Wrap(err, "could not create GCS client")
 	}
-	for _, bucket := range []string{bucketName, "scanner-stackrox-feed-test-debian9"} {
-		bucketHandle := client.Bucket(bucket)
-		feeds, err := u.listAllFeeds(bucketHandle)
+	bucketHandle := client.Bucket(bucketName)
+	feeds, err := u.listAllFeeds(bucketHandle)
+	if err != nil {
+		return resp, err
+	}
+
+	var vulnerabilities []database.Vulnerability
+	for _, feed := range feeds {
+		feedVulns, err := u.downloadFeed(bucketHandle.Object(feed))
 		if err != nil {
 			return resp, err
 		}
-
-		var vulnerabilities []database.Vulnerability
-		for _, feed := range feeds {
-			feedVulns, err := u.downloadFeed(bucketHandle.Object(feed))
-			if err != nil {
-				return resp, err
-			}
-			vulnerabilities = append(vulnerabilities, feedVulns...)
-		}
-
-		resp.Vulnerabilities = vulnerabilities
+		vulnerabilities = append(vulnerabilities, feedVulns...)
 	}
+
+	resp.Vulnerabilities = vulnerabilities
 	return
 }
 
