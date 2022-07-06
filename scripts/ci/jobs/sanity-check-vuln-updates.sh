@@ -8,4 +8,8 @@ source "$ROOT/scripts/lib.sh"
 require_environment "GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER"
 setup_gcp "${GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER}"
 
-"$ROOT/scripts/ci/sanity-check-vuln-updates.sh"
+"$ROOT/scripts/ci/sanity-check-vuln-updates.sh" /tmp/check-vuln-updates
+
+"$ROOT/scripts/ci/store-artifacts.sh" store_artifacts /tmp/check-vuln-updates
+
+

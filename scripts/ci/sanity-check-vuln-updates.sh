@@ -179,7 +179,7 @@ function bash_exit_failure { error "$@"; bash_false; exit $?; }
 
 # __MAIN__
 DIGIT="[[:digit:]]"
-WORKING_DIR="/tmp/ROX-7271"
+WORKING_DIR=$1
 FPATH_DIFF_LIST="$WORKING_DIR/diff.txt"
 FPATH_DIFF_ID_LIST="$WORKING_DIR/ids.txt"
 FPATH_DIFF_GSUTIL_STAT="$WORKING_DIR/metadata.txt"

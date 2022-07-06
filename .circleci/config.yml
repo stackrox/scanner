@@ -945,7 +945,7 @@ jobs:
           service-account-env: GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER
       - run:
           name: Check scanner vulnerability updates
-          command: ./scripts/ci/sanity-check-vuln-updates.sh
+          command: ./scripts/ci/sanity-check-vuln-updates.sh /tmp/ROX-7271
       - ci-artifacts/store:
           path: /tmp/ROX-7271
       - slack/notify:
