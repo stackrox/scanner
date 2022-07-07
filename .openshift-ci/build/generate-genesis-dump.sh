@@ -9,7 +9,7 @@ set -euo pipefail
 
 openshift_ci_mods
 
-#gate_job generate-genesis-dump
+gate_job generate-genesis-dump
 
 generate_genesis_dump() {
     info "Building updater"
