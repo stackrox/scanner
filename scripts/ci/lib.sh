@@ -41,7 +41,6 @@ push_images() {
     require_environment "QUAY_STACKROX_IO_RW_USERNAME"
     require_environment "QUAY_STACKROX_IO_RW_PASSWORD"
 
-    local ci_tag="$1"
     local tag
     tag="$(make --quiet --no-print-directory tag)"
     local image_set=("scanner" "scanner-db" "scanner-slim" "scanner-db-slim")
@@ -77,15 +76,6 @@ push_images() {
     docker login -u "$QUAY_STACKROX_IO_RW_USERNAME" --password-stdin <<<"$QUAY_STACKROX_IO_RW_PASSWORD" quay.io
     _tag_image_set "quay.io/stackrox-io" "$tag"
     _push_image_set "quay.io/stackrox-io" "$tag"
-
-    if [[ -n "$ci_tag" ]]; then
-        require_environment "STACKROX_IO_PUSH_USERNAME"
-        require_environment "STACKROX_IO_PUSH_PASSWORD"
-        docker login -u "$STACKROX_IO_PUSH_USERNAME" --password-stdin <<<"$STACKROX_IO_PUSH_PASSWORD" stackrox.io
-
-        _tag_image_set "stackrox.io" "$tag"
-        _push_image_set "stackrox.io" "$tag"
-    fi
 }
 
 poll_for_system_test_images() {
