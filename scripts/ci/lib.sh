@@ -32,10 +32,6 @@ ci_export() {
 push_images() {
     info "Pushing images"
 
-    if [[ "$#" -ne 1 ]]; then
-        die "missing arg. usage: push_images <ci_tag>"
-    fi
-
     require_environment "QUAY_RHACS_ENG_RW_USERNAME"
     require_environment "QUAY_RHACS_ENG_RW_PASSWORD"
     require_environment "QUAY_STACKROX_IO_RW_USERNAME"
