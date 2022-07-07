@@ -357,7 +357,7 @@ commands:
           name: Push images
           command: |
             source scripts/ci/lib.sh
-            push_images "${CIRCLE_TAG:-}"
+            push_images
 
   run-e2e-tests:
     parameters:
@@ -1046,7 +1046,6 @@ workflows:
       - build:
           <<: *runOnAllTags
           context:
-            - docker-io-and-stackrox-io-push
             - quay-rhacs-eng-readwrite
             - quay-rhacs-eng-readonly
             - quay-stackrox-io-readwrite
@@ -1123,7 +1122,6 @@ workflows:
     - build:
         <<: *runOnAllTags
         context:
-          - docker-io-and-stackrox-io-push
           - quay-rhacs-eng-readonly
           - quay-rhacs-eng-readwrite
           - quay-stackrox-io-readwrite

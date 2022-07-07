@@ -34,7 +34,7 @@ class NullTest(BaseTest):
 
 
 class E2ETest(BaseTest):
-    TEST_TIMEOUT = 60 * 60
+    TEST_TIMEOUT = 90 * 60
 
     def run(self):
         print("Executing E2E tests")
@@ -62,7 +62,7 @@ class ScaleTest(BaseTest):
 
 
 class SlimE2ETest(BaseTest):
-    TEST_TIMEOUT = 60 * 60
+    TEST_TIMEOUT = 90 * 60
 
     def run(self):
         print("Executing Slim E2E tests")
