@@ -1046,7 +1046,7 @@ workflows:
       - build:
           <<: *runOnAllTags
           context:
-            - docker-io-and-stackrox-io-push
+            - stackrox-io-push
             - quay-rhacs-eng-readwrite
             - quay-rhacs-eng-readonly
             - quay-stackrox-io-readwrite
@@ -1123,7 +1123,7 @@ workflows:
     - build:
         <<: *runOnAllTags
         context:
-          - docker-io-and-stackrox-io-push
+          - stackrox-io-push
           - quay-rhacs-eng-readonly
           - quay-rhacs-eng-readwrite
           - quay-stackrox-io-readwrite
