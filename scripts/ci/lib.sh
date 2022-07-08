@@ -205,8 +205,18 @@ get_repo_full_name() {
                 die "expect: org and repo in JOB_SEC.extra_refs[0]"
             fi
             echo "${org}/${repo}"
+        elif [[ -n "${CLONEREFS_OPTIONS:-}" ]]; then
+            # image builds
+            local org
+            local repo
+            org=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].org') || die "invalid CLONEREFS_OPTIONS json"
+            repo=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].repo') || die "invalid CLONEREFS_OPTIONS json"
+            if [[ "$org" == "null" ]] || [[ "$repo" == "null" ]]; then
+                die "expect: org and repo in CLONEREFS_OPTIONS.refs[0]"
+            fi
+            echo "${org}/${repo}"
         else
-            die "Expect REPO_OWNER/NAME or JOB_SPEC"
+            die "Expect REPO_OWNER/NAME, JOB_SPEC, or CLONEREFS_OPTIONS"
         fi
     else
         die "unsupported"
