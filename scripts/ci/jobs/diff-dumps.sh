@@ -51,7 +51,8 @@ upload_diff_dumps() {
         if [[ "$branch" != "master" && -z "${CIRCLE_TAG}" ]]; then
             cmd+=(echo "Would do")
         fi
-        "${cmd[@]}" gsutil cp "${expected_zip_file_loc}" gs://definitions.stackrox.io/"${diffUUID}"/diff.zip
+        echo "Branch: $branch, Tag: ${CIRCLE_TAG}"
+        #"${cmd[@]}" gsutil cp "${expected_zip_file_loc}" gs://definitions.stackrox.io/"${diffUUID}"/diff.zip
     done < <(jq -r '.knownGenesisDumps | .[]| [.uuid] | @tsv' < image/scanner/dump/genesis_manifests.json)
 }
 
@@ -101,7 +102,8 @@ upload_offline_dump() {
     if [[ "$branch" != "master" && -z "${CIRCLE_TAG}" ]]; then
       cmd+=(echo "Would do")
     fi
-    "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
+    echo "Branch: $branch, Tag: ${CIRCLE_TAG}"
+    # "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
 }
 
 diff_dumps() {
