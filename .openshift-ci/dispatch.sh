@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# The entrypoint for CI defined in https://github.com/openshift/release/tree/master/ci-operator/config/stackrox/scanner
+# Imports secrets to env vars, gates the job based on context, changed files and PR labels and ultimately
+# hands off to the test/build script in *scripts/ci/jobs*.
+#
 # Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/dispatch.sh
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
@@ -7,20 +11,9 @@ source "$ROOT/scripts/ci/lib.sh"
 
 set -euo pipefail
 
-shopt -s nullglob
-for cred in /tmp/secret/**/[A-Z]*; do
-    export "$(basename "$cred")"="$(cat "$cred")"
-done
-
 openshift_ci_mods
-
-function hold() {
-    while [[ -e /tmp/hold ]]; do
-        info "Holding this job for debug"
-        sleep 60
-    done
-}
-trap hold EXIT
+openshift_ci_import_creds
+create_exit_trap
 
 if [[ "$#" -lt 1 ]]; then
     die "usage: dispatch <ci-job> [<...other parameters...>]"
@@ -56,4 +49,13 @@ else
     exit 0
 fi
 
-"${job_script}" "$@"
+"${job_script}" "$@" &
+job_pid="$!"
+
+forward_sigint() {
+    echo "Dispatch is forwarding SIGINT to job"
+    kill -SIGINT "${job_pid}"
+}
+trap forward_sigint SIGINT
+
+wait "${job_pid}"
