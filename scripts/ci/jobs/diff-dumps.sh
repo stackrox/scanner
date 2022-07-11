@@ -104,7 +104,7 @@ upload_offline_dump() {
       cmd+=(echo "Would do")
     fi
     echo "Branch: $branch, Tag: ${CIRCLE_TAG}"
-    # "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
+    #"${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
 }
 
 diff_dumps() {
