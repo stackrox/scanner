@@ -75,10 +75,6 @@ push_images() {
         done
     }
 
-    # Push to us.gcr.io/stackrox-ci
-    _tag_image_set "us.gcr.io/stackrox-ci" "$tag"
-    _push_image_set "us.gcr.io/stackrox-ci" "$tag"
-
     # Push to quay.io/rhacs-eng
     docker login -u "$QUAY_RHACS_ENG_RW_USERNAME" --password-stdin <<<"$QUAY_RHACS_ENG_RW_PASSWORD" quay.io
     _tag_image_set "quay.io/rhacs-eng" "$tag"
