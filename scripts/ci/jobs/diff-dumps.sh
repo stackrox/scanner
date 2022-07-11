@@ -87,7 +87,8 @@ create_offline_dump() {
     if [[ "$branch" != "master" && -z "${CIRCLE_TAG}" ]]; then
         cmd+=(echo "Would do")
     fi
-    "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
+    echo "Branch: $branch, Tag: ${CIRCLE_TAG}"
+    #"${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 }
 
 upload_offline_dump() {
