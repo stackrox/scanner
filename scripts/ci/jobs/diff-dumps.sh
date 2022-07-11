@@ -108,7 +108,6 @@ upload_offline_dump() {
 
 diff_dumps() {
     info "Starting diff dumps"
-    touch /tmp/hold
 
     # These are not needed until later, but no reason to continue if these do not exist.
     require_environment "GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER"
