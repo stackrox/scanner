@@ -7,6 +7,11 @@ source "$ROOT/scripts/ci/lib.sh"
 set -euo pipefail
 
 upload_dumps_for_downstream() {
+    if is_in_PR_context; then
+        info "In PR context. Skipping..."
+        return 0
+    fi
+
     info "Starting dumps upload"
 
     require_environment "GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER"
@@ -19,21 +24,21 @@ upload_dumps_for_downstream() {
     zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/vuln-dump/repo2cpe.zip
 
     local scanner_version
-    if [[ -n "${CIRCLE_TAG}" || "${CIRCLE_BRANCH}" != "master" ]]; then
-        # Tagged builds are the main ones for which we push artifacts and we use the tag as label. Makefile will
-        # return tag in the `2.20.0` format for them.
 
-        # Also, for PRs with the expected label, we will use the tag that the makefile returns. However that tag
-        # would look like `2.20.0-3-g74ff9abf69` and should not overwrite the production tagged dumps. This is
-        # enabled for ability to dry-run this upload job.
-
-        scanner_version="$(make --quiet --no-print-directory tag)"
-    else
+    local base_ref
+    base_ref="$(get_base_ref)"
+    if [[ "${base_ref}" == "master" ]]; then
         # For the master branch we store artifacts in "unversioned" way to make sure this upload job works and
         # does not break on more rare tagged builds. Note that we should not consume these latest builds
-        # downstream, we should use tagged ones instead becase otherwise the master branch can introduce format
+        # downstream, we should use tagged ones instead because otherwise the master branch can introduce format
         # changes that the downstream release can be unprepared to deal with.
         scanner_version="latest"
+    elif is_tagged; then
+        # Tagged builds are the main ones for which we push artifacts and we use the tag as label. Makefile will
+        # return tag in the `x.y.z` format for them.
+        scanner_version="$(make --quiet --no-print-directory tag)"
+    else
+        die "Unsupported "
     fi
 
     destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}/"

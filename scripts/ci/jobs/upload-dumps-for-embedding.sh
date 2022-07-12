@@ -18,6 +18,7 @@ upload_dumps_for_embedding() {
     zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/vuln-dump/repo2cpe.zip
 
     info "Uploading dumps"
+    # TODO: Fake for now...
     cmd=(echo "Would do")
     "${cmd[@]}" gsutil cp /tmp/vuln-dump/nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
     "${cmd[@]}" gsutil cp /tmp/vuln-dump/k8s-definitions.zip gs://stackrox-scanner-ci-vuln-dump
