@@ -30,10 +30,11 @@ ci_export() {
 }
 
 ci_exit_trap() {
+    local exit_code="$?"
     info "Executing a general purpose exit trap for CI"
-    echo "Exit code is: $?"
+    echo "Exit code is: ${exit_code}"
 
-    (send_slack_notice_for_failures_on_merge "$?") || { echo "ERROR: Could not slack a test failure message"; }
+    (send_slack_notice_for_failures_on_merge "${exit_code}") || { echo "ERROR: Could not slack a test failure message"; }
 
     while [[ -e /tmp/hold ]]; do
         info "Holding this job for debug"
@@ -467,6 +468,9 @@ openshift_ci_mods() {
     info "Git log:"
     git log --oneline --decorate -n 20 || true
 
+    info "Recent git refs:"
+    git for-each-ref --format='%(creatordate) %(refname)' --sort=creatordate | tail -20
+
     info "Current Status:"
     "$ROOT/status.sh" || true
 
@@ -480,7 +484,7 @@ openshift_ci_mods() {
 
     # Provide Circle CI vars that are commonly used
     export CIRCLE_JOB="${JOB_NAME:-${OPENSHIFT_BUILD_NAME}}"
-    CIRCLE_TAG="$(git tag --contains | head -1)"
+    CIRCLE_TAG="$(git tag --contains --sort=creatordate | tail -1)" || echo "Warning: Cannot get tag"
     export CIRCLE_TAG
 
     handle_nightly_runs
@@ -577,14 +581,14 @@ send_slack_notice_for_failures_on_merge() {
     local exitstatus="${1:-}"
 
     if ! is_OPENSHIFT_CI || [[ "$exitstatus" == "0" ]] || is_in_PR_context || is_nightly_run; then
-        return
+        return 0
     fi
 
     local tag
     tag="$(make --quiet tag)"
-    [[ "$tag" =~ $RELEASE_RC_TAG_BASH_REGEX ]] || {
-        return
-    }
+    if [[ "$tag" =~ $RELEASE_RC_TAG_BASH_REGEX ]]; then
+        return 0
+    fi
 
     local webhook_url="${TEST_FAILURES_NOTIFY_WEBHOOK}"
 
