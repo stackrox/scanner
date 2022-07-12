@@ -563,7 +563,6 @@ handle_nightly_runs() {
 run_postgres() {
     info "Starting up Postgres"
 
-    ci_export POSTGRES_PASSWORD "password"
     /docker-entrypoint.sh &
     pid="$!"
 
