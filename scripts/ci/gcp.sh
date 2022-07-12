@@ -15,7 +15,7 @@ setup_gcp() {
     ensure_CI
 
     local service_account
-    if [ $# -gt 0 ]; then
+    if [[ "$#" -gt 0 ]]; then
         service_account="$1"
     else
         require_environment "GOOGLE_SA_CIRCLECI_SCANNER"
