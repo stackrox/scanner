@@ -558,6 +558,20 @@ handle_nightly_runs() {
     fi
 }
 
+# run_postgres startups Postgres and returns the PID of the running process.
+# run_postgres can only run inside a container which has /docker-entrypoint.sh.
+run_postgres() {
+    info "Starting up Postgres"
+
+    /docker-entrypoint.sh &
+    pid="$!"
+
+    # Allow Postgres time to start.
+    sleep 30
+
+    echo "$pid"
+}
+
 store_test_results() {
     if [[ "$#" -ne 2 ]]; then
         die "missing args. usage: store_test_results <from> <to>"
