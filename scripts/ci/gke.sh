@@ -94,6 +94,9 @@ create_cluster() {
     else
         die "Support is missing for this CI environment"
     fi
+    # . from branch names
+    tags="${tags//./-}"
+    labels="${labels//./-}"
     # lowercase
     tags="${tags,,}"
     labels="${labels,,}"

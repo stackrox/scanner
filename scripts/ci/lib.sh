@@ -29,19 +29,30 @@ ci_export() {
     fi
 }
 
+ci_exit_trap() {
+    info "Executing a general purpose exit trap for CI"
+    echo "Exit code is: $?"
+
+    (send_slack_notice_for_failures_on_merge "$?") || { echo "ERROR: Could not slack a test failure message"; }
+
+    while [[ -e /tmp/hold ]]; do
+        info "Holding this job for debug"
+        sleep 60
+    done
+}
+
+create_exit_trap() {
+    trap ci_exit_trap EXIT
+}
+
 push_images() {
     info "Pushing images"
-
-    if [[ "$#" -ne 1 ]]; then
-        die "missing arg. usage: push_images <ci_tag>"
-    fi
 
     require_environment "QUAY_RHACS_ENG_RW_USERNAME"
     require_environment "QUAY_RHACS_ENG_RW_PASSWORD"
     require_environment "QUAY_STACKROX_IO_RW_USERNAME"
     require_environment "QUAY_STACKROX_IO_RW_PASSWORD"
 
-    local ci_tag="$1"
     local tag
     tag="$(make --quiet --no-print-directory tag)"
     local image_set=("scanner" "scanner-db" "scanner-slim" "scanner-db-slim")
@@ -77,15 +88,6 @@ push_images() {
     docker login -u "$QUAY_STACKROX_IO_RW_USERNAME" --password-stdin <<<"$QUAY_STACKROX_IO_RW_PASSWORD" quay.io
     _tag_image_set "quay.io/stackrox-io" "$tag"
     _push_image_set "quay.io/stackrox-io" "$tag"
-
-    if [[ -n "$ci_tag" ]]; then
-        require_environment "STACKROX_IO_PUSH_USERNAME"
-        require_environment "STACKROX_IO_PUSH_PASSWORD"
-        docker login -u "$STACKROX_IO_PUSH_USERNAME" --password-stdin <<<"$STACKROX_IO_PUSH_PASSWORD" stackrox.io
-
-        _tag_image_set "stackrox.io" "$tag"
-        _push_image_set "stackrox.io" "$tag"
-    fi
 }
 
 poll_for_system_test_images() {
@@ -131,6 +133,25 @@ is_tagged() {
     local tags
     tags="$(git tag --contains)"
     [[ -n "$tags" ]]
+}
+
+is_nightly_run() {
+    [[ "${CIRCLE_TAG:-}" =~ -nightly- ]]
+}
+
+is_in_PR_context() {
+    if is_CIRCLECI && [[ -n "${CIRCLE_PULL_REQUEST:-}" ]]; then
+        return 0
+    elif is_OPENSHIFT_CI && [[ -n "${PULL_NUMBER:-}" ]]; then
+        return 0
+    elif is_OPENSHIFT_CI && [[ -n "${CLONEREFS_OPTIONS:-}" ]]; then
+        # bin, test-bin, images
+        local pull_request
+        pull_request=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].pulls[0].number' 2>&1) || return 1
+        [[ "$pull_request" =~ ^[0-9]+$ ]] && return 0
+    fi
+
+    return 1
 }
 
 is_openshift_CI_rehearse_PR() {
@@ -184,8 +205,18 @@ get_repo_full_name() {
                 die "expect: org and repo in JOB_SEC.extra_refs[0]"
             fi
             echo "${org}/${repo}"
+        elif [[ -n "${CLONEREFS_OPTIONS:-}" ]]; then
+            # image builds
+            local org
+            local repo
+            org=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].org') || die "invalid CLONEREFS_OPTIONS json"
+            repo=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].repo') || die "invalid CLONEREFS_OPTIONS json"
+            if [[ "$org" == "null" ]] || [[ "$repo" == "null" ]]; then
+                die "expect: org and repo in CLONEREFS_OPTIONS.refs[0]"
+            fi
+            echo "${org}/${repo}"
         else
-            die "Expect REPO_OWNER/NAME or JOB_SPEC"
+            die "Expect REPO_OWNER/NAME, JOB_SPEC, or CLONEREFS_OPTIONS"
         fi
     else
         die "unsupported"
@@ -404,7 +435,7 @@ gate_merge_job() {
         return
     fi
 
-    info "$job will be skipped"
+    info "$job will be skipped - neither master/run_on_master or tagged/run_on_tags"
     exit 0
 }
 
@@ -428,6 +459,17 @@ _EOH_
 }
 
 openshift_ci_mods() {
+    info "BEGIN OpenShift CI mods"
+
+    info "Env A-Z dump:"
+    env | sort | grep -E '^[A-Z]' || true
+
+    info "Git log:"
+    git log --oneline --decorate -n 20 || true
+
+    info "Current Status:"
+    "$ROOT/status.sh" || true
+
     # For ci_export(), override BASH_ENV from stackrox-test with something that is writable.
     BASH_ENV=$(mktemp)
     export BASH_ENV
@@ -440,6 +482,20 @@ openshift_ci_mods() {
     export CIRCLE_JOB="${JOB_NAME:-${OPENSHIFT_BUILD_NAME}}"
     CIRCLE_TAG="$(git tag --contains | head -1)"
     export CIRCLE_TAG
+
+    handle_nightly_runs
+
+    info "Status after mods:"
+    "$ROOT/status.sh" || true
+
+    info "END OpenShift CI mods"
+}
+
+openshift_ci_import_creds() {
+    shopt -s nullglob
+    for cred in /tmp/secret/**/[A-Z]*; do
+        export "$(basename "$cred")"="$(cat "$cred")"
+    done
 }
 
 openshift_ci_e2e_mods() {
@@ -471,6 +527,33 @@ openshift_ci_e2e_mods() {
     fi
 }
 
+handle_nightly_runs() {
+    if ! is_OPENSHIFT_CI; then
+        die "Only for OpenShift CI"
+    fi
+
+    if ! is_in_PR_context; then
+        info "Debug:"
+        echo "JOB_NAME: ${JOB_NAME:-}"
+        echo "JOB_NAME_SAFE: ${JOB_NAME_SAFE:-}"
+    fi
+
+    local nightly_tag_prefix
+    nightly_tag_prefix="$(git describe --tags --abbrev=0 --exclude '*-nightly-*')-nightly-"
+    if ! is_in_PR_context && [[ "${JOB_NAME_SAFE:-}" =~ ^nightly- ]]; then
+        ci_export CIRCLE_TAG "${nightly_tag_prefix}$(date '+%Y%m%d')"
+    elif is_in_PR_context && pr_has_label "simulate-nightly-run"; then
+        local sha
+        if [[ -n "${PULL_PULL_SHA:-}" ]]; then
+            sha="${PULL_PULL_SHA}"
+        else
+            sha=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].pulls[0].sha') || die "Cannot find pull sha"
+            [[ "$sha" != "null" ]] || die "Cannot find pull sha"
+        fi
+        ci_export CIRCLE_TAG "${nightly_tag_prefix}${sha:0:8}"
+    fi
+}
+
 store_test_results() {
     if [[ "$#" -ne 2 ]]; then
         die "missing args. usage: store_test_results <from> <to>"
@@ -488,6 +571,70 @@ store_test_results() {
     local dest="${ARTIFACT_DIR}/junit-$to"
 
     cp -a "$from" "$dest" || true # (best effort)
+}
+
+send_slack_notice_for_failures_on_merge() {
+    local exitstatus="${1:-}"
+
+    if ! is_OPENSHIFT_CI || [[ "$exitstatus" == "0" ]] || is_in_PR_context || is_nightly_run; then
+        return
+    fi
+
+    local tag
+    tag="$(make --quiet tag)"
+    [[ "$tag" =~ $RELEASE_RC_TAG_BASH_REGEX ]] || {
+        return
+    }
+
+    local webhook_url="${TEST_FAILURES_NOTIFY_WEBHOOK}"
+
+    local commit_details
+    org=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].org') || return 1
+    repo=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].repo') || return 1
+    [[ "$org" != "null" ]] && [[ "$repo" != "null" ]] || return 1
+    local commit_details_url="https://api.github.com/repos/${org}/${repo}/commits/${OPENSHIFT_BUILD_COMMIT}"
+    commit_details=$(curl --retry 5 -sS "${commit_details_url}") || return 1
+
+    local job_name="${JOB_NAME_SAFE#merge-}"
+
+    local commit_msg
+    commit_msg=$(jq -r <<<"$commit_details" '.commit.message') || return 1
+    local commit_url
+    commit_url=$(jq -r <<<"$commit_details" '.html_url') || return 1
+    local author
+    author=$(jq -r <<<"$commit_details" '.commit.author.name') || return 1
+    [[ "$commit_msg" != "null" ]] && [[ "$commit_url" != "null" ]] && [[ "$author" != "null" ]] || return 1
+
+    local log_url="https://prow.ci.openshift.org/view/gs/origin-ci-test/logs/${JOB_NAME}/${BUILD_ID}"
+
+    local body
+    body=$(cat <<_EOB_
+{
+    "text": "*Job Name:* $job_name",
+    "blocks": [
+		{
+			"type": "header",
+			"text": {
+				"type": "plain_text",
+				"text": "Prow job failure: $job_name"
+			}
+		},
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*Commit:* <$commit_url|$commit_msg>\n*Author:* $author\n*Log:* $log_url"
+            }
+        },
+		{
+			"type": "divider"
+		}
+    ]
+}
+_EOB_
+    )
+
+    echo "$body" | jq | curl -XPOST -d @- -H 'Content-Type: application/json' "$webhook_url"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then

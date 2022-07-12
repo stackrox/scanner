@@ -4,7 +4,6 @@ package stackrox
 import (
 	"context"
 	"encoding/json"
-	"os"
 	"time"
 
 	googleStorage "cloud.google.com/go/storage"
@@ -62,15 +61,10 @@ func (u *updater) downloadFeed(objectHandle *googleStorage.ObjectHandle) ([]data
 	return vulnerabilities, nil
 }
 
-func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
-	log.WithField("package", "Stackrox").Info("Start fetching vulnerabilities")
+func (u *updater) Update(_ vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
+	log.WithField("package", "StackRox").Info("Start fetching vulnerabilities")
 
-	serviceAccount := os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER")
-	if serviceAccount == "" {
-		return resp, errors.New("StackRox updater cannot be run without a service account")
-	}
-
-	client, err := googleStorage.NewClient(context.Background(), option.WithCredentialsJSON([]byte(serviceAccount)))
+	client, err := googleStorage.NewClient(context.Background(), option.WithoutAuthentication(), option.WithScopes(googleStorage.ScopeReadOnly))
 	if err != nil {
 		return resp, errors.Wrap(err, "could not create GCS client")
 	}
