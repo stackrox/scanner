@@ -1093,21 +1093,10 @@ workflows:
         <<: *runOnAllTagsWithQuayPullCtx
         requires:
           - generate-genesis-dump
-    - create-diff-dumps:
-        <<: *runOnAllTagsWithQuayPullCtx
-        requires:
-          - generate-genesis-dump
     - upload-dumps-for-embedding-into-image:
         <<: *runOnAllTagsWithQuayPullCtx
         requires:
           - generate-genesis-dump
-    - upload-diff-dumps-and-offline-dumps:
-        <<: *runOnAllTags
-        context:
-          - quay-rhacs-eng-readonly
-          - scanner-support
-        requires:
-          - create-diff-dumps
     - upload-dumps-for-downstream-builds:
         <<: *runOnAllTagsWithQuayPullCtx
         requires:
