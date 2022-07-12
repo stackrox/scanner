@@ -468,6 +468,9 @@ openshift_ci_mods() {
     info "Git log:"
     git log --oneline --decorate -n 20 || true
 
+    info "Recent git refs:"
+    git for-each-ref --format='%(creatordate) %(refname)' --sort=creatordate | tail -20
+
     info "Current Status:"
     "$ROOT/status.sh" || true
 
@@ -481,7 +484,7 @@ openshift_ci_mods() {
 
     # Provide Circle CI vars that are commonly used
     export CIRCLE_JOB="${JOB_NAME:-${OPENSHIFT_BUILD_NAME}}"
-    CIRCLE_TAG="$(git tag --contains | head -1)"
+    CIRCLE_TAG="$(git tag --contains --sort=creatordate | tail -1)" || echo "Warning: Cannot get tag"
     export CIRCLE_TAG
 
     handle_nightly_runs
@@ -583,9 +586,9 @@ send_slack_notice_for_failures_on_merge() {
 
     local tag
     tag="$(make --quiet tag)"
-    [[ "$tag" =~ $RELEASE_RC_TAG_BASH_REGEX ]] || {
+    if [[ "$tag" =~ $RELEASE_RC_TAG_BASH_REGEX ]]; then
         return 0
-    }
+    fi
 
     local webhook_url="${TEST_FAILURES_NOTIFY_WEBHOOK}"
 
