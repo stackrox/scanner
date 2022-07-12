@@ -47,9 +47,8 @@ upload_diff_dumps() {
         cmd=()
         if is_in_PR_context; then
             cmd+=(echo "Would do")
-            info "MADE IT HERE!!!"
         fi
-        #"${cmd[@]}" gsutil cp "${expected_zip_file_loc}" gs://definitions.stackrox.io/"${diffUUID}"/diff.zip
+        "${cmd[@]}" gsutil cp "${expected_zip_file_loc}" gs://definitions.stackrox.io/"${diffUUID}"/diff.zip
     done < <(jq -r '.knownGenesisDumps | .[]| [.uuid] | @tsv' < image/scanner/dump/genesis_manifests.json)
 }
 
@@ -79,9 +78,8 @@ create_offline_dump() {
     cmd=()
     if is_in_PR_context; then
         cmd+=(echo "Would do")
-        info "MADE IT HERE!!!"
     fi
-    #"${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
+    "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 }
 
 upload_offline_dump() {
@@ -91,9 +89,8 @@ upload_offline_dump() {
     cmd=()
     if is_in_PR_context; then
         cmd+=(echo "Would do")
-        echo "MADE IT HERE!!!"
     fi
-    #"${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
+    "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
 }
 
 diff_dumps() {
