@@ -32,10 +32,8 @@ create_diff_dumps() {
 upload_diff_dumps() {
     info "Uploading diff dumps"
 
-    local branch
     local idx
 
-    branch=$(get_base_ref)
     idx=-1
     while IFS=$'\t' read -r diffUUID; do
         idx=$((idx+1))
@@ -47,19 +45,16 @@ upload_diff_dumps() {
         echo "Found file at ${expected_zip_file_loc}"
         du -skh "${expected_zip_file_loc}"
         cmd=()
-        # Note: CIRCLE_TAG is defined via openshift_ci_mods in scripts/ci/lib.sh.
-        if [[ "$branch" != "master" && -z "${CIRCLE_TAG}" ]]; then
+        if is_in_PR_context; then
             cmd+=(echo "Would do")
+            info "MADE IT HERE!!!"
         fi
-        echo "Branch: $branch, Tag: ${CIRCLE_TAG}"
         #"${cmd[@]}" gsutil cp "${expected_zip_file_loc}" gs://definitions.stackrox.io/"${diffUUID}"/diff.zip
     done < <(jq -r '.knownGenesisDumps | .[]| [.uuid] | @tsv' < image/scanner/dump/genesis_manifests.json)
 }
 
 create_offline_dump() {
     info "Creating offline dump"
-
-    local branch
 
     mkdir -p /tmp/offline-dump
 
@@ -82,28 +77,22 @@ create_offline_dump() {
     zip scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
     du -skh scanner-vuln-updates.zip
     cmd=()
-    branch=$(get_base_ref)
-    # Note: CIRCLE_TAG is defined via openshift_ci_mods in scripts/ci/lib.sh.
-    if [[ "$branch" != "master" && -z "${CIRCLE_TAG}" ]]; then
+    if is_in_PR_context; then
         cmd+=(echo "Would do")
+        info "MADE IT HERE!!!"
     fi
-    echo "Branch: $branch, Tag: ${CIRCLE_TAG}"
     #"${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 }
 
 upload_offline_dump() {
     info "Uploading offline dump"
 
-    local branch
-
     cd /tmp/offline-dump
     cmd=()
-    branch=$(get_base_ref)
-    # Note: CIRCLE_TAG is defined via openshift_ci_mods in scripts/ci/lib.sh.
-    if [[ "$branch" != "master" && -z "${CIRCLE_TAG}" ]]; then
-      cmd+=(echo "Would do")
+    if is_in_PR_context; then
+        cmd+=(echo "Would do")
+        echo "MADE IT HERE!!!"
     fi
-    echo "Branch: $branch, Tag: ${CIRCLE_TAG}"
     #"${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
 }
 
