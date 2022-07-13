@@ -176,8 +176,16 @@ get_base_ref() {
                 die "expect: base_ref in JOB_SEC.extra_refs[0]"
             fi
             echo "${base_ref}"
+        elif [[ -n "${CLONEREFS_OPTIONS:-}" ]]; then
+            # image build
+            local base_ref
+            base_ref="$(jq -r <<<"${CLONEREFS_OPTIONS}" '.refs[0].base_ref')" || die "invalid CLONEREFS_OPTIONS yaml"
+            if [[ "$base_ref" == "null" ]]; then
+                die "expect: base_ref in CLONEREFS_OPTIONS.refs[0]"
+            fi
+            echo "${base_ref}"
         else
-            die "Expect PULL_BASE_REF or JOB_SPEC"
+            die "Expect PULL_BASE_REF, JOB_SPEC, or CLONEREFS_OPTIONS"
         fi
     else
         die "unsupported"
