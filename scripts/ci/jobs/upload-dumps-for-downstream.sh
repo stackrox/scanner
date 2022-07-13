@@ -7,10 +7,10 @@ source "$ROOT/scripts/ci/lib.sh"
 set -euo pipefail
 
 upload_dumps_for_downstream() {
-    if is_in_PR_context; then
-        info "In PR context. Skipping..."
-        return 0
-    fi
+#    if is_in_PR_context; then
+#        info "In PR context. Skipping..."
+#        return 0
+#    fi
 
     info "Starting dumps upload"
 
@@ -38,7 +38,7 @@ upload_dumps_for_downstream() {
         # return tag in the `x.y.z` format for them.
         scanner_version="$(make --quiet --no-print-directory tag)"
     else
-        die "Unsupported "
+        die "Unsupported"
     fi
 
     destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}/"

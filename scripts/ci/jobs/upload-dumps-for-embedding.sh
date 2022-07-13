@@ -7,6 +7,11 @@ source "$ROOT/scripts/lib.sh"
 set -euo pipefail
 
 upload_dumps_for_embedding() {
+#    if is_in_PR_context; then
+#        info "In PR context. Skipping..."
+#        return 0
+#    fi
+
     info "Starting dumps upload"
 
     setup_gcp
