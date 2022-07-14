@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../../.. && pwd)"
-source "$ROOT/scripts/ci/lib.sh"
+source "$ROOT/scripts/ci/deploy-postgres.sh"
 
 set -euo pipefail
 
 db_integration_tests() {
     info "Starting DB integration tests"
 
-    pid=$(run_postgres)
+    deploy_postgres
 
     make db-integration-tests || touch FAIL
 
@@ -16,10 +16,9 @@ db_integration_tests() {
     make generate-junit-reports || touch FAIL
     store_test_results junit-reports reports
 
-    [[ ! -f FAIL ]] || die "DB integration tests failed"
+    undeploy_postgres
 
-    # Terminate Postgres.
-    kill -SIGINT "$pid"
+    [[ ! -f FAIL ]] || die "DB integration tests failed"
 }
 
 db_integration_tests "$*"

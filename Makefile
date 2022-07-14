@@ -261,12 +261,12 @@ slim-e2e-tests: deps test-prep
 .PHONY: db-integration-tests
 db-integration-tests: deps test-prep
 	@echo "+ $@"
-	go test -tags db_integration -count=1 ./database/pgsql | tee test-output/test.log
+	go test -tags db_integration -count=1 -v ./database/pgsql | tee test-output/test.log
 
 .PHONY: slim-db-integration-tests
 slim-db-integration-tests: deps test-prep
 	@echo "+ $@"
-	go test -tags slim_db_integration -count=1 ./database/pgsql | tee test-output/test.log
+	go test -tags slim_db_integration -count=1 -v ./database/pgsql | tee test-output/test.log
 
 .PHONY: scale-tests
 scale-tests: deps
@@ -296,6 +296,19 @@ report: $(GO_JUNIT_REPORT_BIN)
 
 generate-junit-reports: $(GO_JUNIT_REPORT_BIN)
 	$(BASE_DIR)/scripts/generate-junit-reports.sh
+
+##################
+## OpenShift CI ##
+##################
+
+.PHONY: deploy-postgres-osci
+deploy-postgres-osci:
+	kubectl create namespace stackrox 2> /dev/null || true
+	kubectl -n stackrox apply -f  $(BASE_DIR)/.openshift-ci/postgres/postgres.yaml
+
+.PHONY: undeploy-postgres-osci
+undeploy-postgres-osci:
+	kubectl delete -n stackrox -f $(BASE_DIR)/.openshift-ci/postgres/postgres.yaml
 
 ####################
 ## Generated Srcs ##
