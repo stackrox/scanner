@@ -6,8 +6,7 @@ source "$ROOT/scripts/lib.sh"
 
 set -euo pipefail
 
-# Deploys Scanner and port-forwards the HTTP and gRPC endpoints.
-# Adapted from https://github.com/stackrox/stackrox/blob/master/tests/e2e/lib.sh
+# Deploys PostgreSQL and port-forwards the TCP endpoint.
 
 deploy_postgres() {
     info "Deploying Postgres"
