@@ -8,6 +8,8 @@ set -euo pipefail
 db_integration_tests() {
     info "Starting DB integration tests"
 
+    touch /tmp/hold
+
     pid=$(run_postgres)
 
     make db-integration-tests || touch FAIL
