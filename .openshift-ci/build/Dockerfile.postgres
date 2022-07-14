@@ -1,0 +1,8 @@
+FROM quay.io/stackrox-io/apollo-ci:scanner-test-0.3.42
+
+RUN set -x && pwd && ls -la
+
+COPY . /go/src/github.com/stackrox/scanner
+WORKDIR /go/src/github.com/stackrox/scanner
+
+RUN set -x && pwd && ls -la
