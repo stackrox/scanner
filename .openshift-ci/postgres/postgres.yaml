@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: stackrox
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  minReadySeconds: 15
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      namespace: stackrox
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: db
+        env:
+        - name: POSTGRES_PASSWORD
+          value: password
+        image: quay.io/stackrox-io/ci:postgres-12-bullseye
+        ports:
+        - name: postgresql
+          protocol: TCP
+          containerPort: 5432
+        resources:
+          limits:
+            cpu: 2
+            memory: 4Gi
+          requests:
+            cpu: 200m
+            memory: 200Mi
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+      securityContext:
+        fsGroup: 70
+      volumes:
+      - name: db-data
+        emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: stackrox
+spec:
+  ports:
+    - name: tcp-postgres
+      port: 5432
+      targetPort: postgresql
+  selector:
+    app: postgres
+  type: ClusterIP
