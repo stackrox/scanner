@@ -13,7 +13,7 @@ deploy_postgres() {
 
     make deploy-postgres-osci
 
-    _start_port_forwards_for_test
+    _start_port_forward_for_postgres
 }
 
 _start_port_forward_for_postgres() {
