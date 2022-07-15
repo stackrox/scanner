@@ -11,6 +11,8 @@ set -euo pipefail
 deploy_postgres() {
     info "Deploying Postgres"
 
+    touch /tmp/hold
+
     make deploy-postgres-osci
 
     _start_port_forward_for_postgres
