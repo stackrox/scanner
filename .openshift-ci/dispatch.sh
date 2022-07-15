@@ -24,10 +24,10 @@ case "$ci_job" in
         ;;
     *)
         openshift_ci_mods
+        openshift_ci_import_creds
         ;;
 esac
 
-openshift_ci_import_creds
 create_exit_trap
 
 gate_job "$ci_job"
