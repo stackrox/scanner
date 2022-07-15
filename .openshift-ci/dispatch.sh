@@ -11,10 +11,6 @@ source "$ROOT/scripts/ci/lib.sh"
 
 set -euo pipefail
 
-openshift_ci_mods
-openshift_ci_import_creds
-create_exit_trap
-
 if [[ "$#" -lt 1 ]]; then
     die "usage: dispatch <ci-job> [<...other parameters...>]"
 fi
@@ -22,6 +18,17 @@ fi
 ci_job="$1"
 shift
 ci_export CI_JOB_NAME "$ci_job"
+
+case "$ci_job" in
+    db-integration-tests)
+        ;;
+    *)
+        openshift_ci_mods
+        ;;
+esac
+
+openshift_ci_import_creds
+create_exit_trap
 
 gate_job "$ci_job"
 
