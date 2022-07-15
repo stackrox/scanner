@@ -26,7 +26,7 @@ _start_port_forward_for_postgres() {
     ulimit -n 65535 || true
 
     # Give it some time to start.
-    sleep 5
+    sleep 30
     kubectl -n stackrox get pod
     POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="postgres")].metadata.name}')"
     [[ -n "${POD}" ]]
