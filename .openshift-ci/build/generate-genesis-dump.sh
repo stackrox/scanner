@@ -16,12 +16,12 @@ generate_genesis_dump() {
     make build-updater
 
     info "Generating genesis dump"
-    mkdir -p /tmp/genesis-dump
-    "$ROOT/bin/updater" generate-dump --out-file /tmp/genesis-dump/dump.zip
-    ls -lrt /tmp/genesis-dump
+    mkdir /genesis-dump
+    "$ROOT/bin/updater" generate-dump --out-file /genesis-dump/dump.zip
+    ls -lrt /genesis-dump
 
     info "Printing some stats"
-    "$ROOT/bin/updater" print-stats /tmp/genesis-dump/dump.zip
+    "$ROOT/bin/updater" print-stats /genesis-dump/dump.zip
 }
 
 generate_genesis_dump
