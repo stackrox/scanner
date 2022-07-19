@@ -7,6 +7,7 @@ source "$ROOT/scripts/ci/lib.sh"
 set -euo pipefail
 
 upload_dumps_for_downstream() {
+    touch /tmp/hold
 #    if is_in_PR_context; then
 #        info "In PR context. Skipping..."
 #        return 0
