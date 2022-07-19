@@ -24,7 +24,7 @@ create_diff_dumps() {
         echo "Got timestamps -- from zip: ${timestamp_in_zip}; from manifest: ${timestamp}"
         [[ "${timestamp_in_zip}" == "${timestamp}" ]] # Assertion on the manifest contents
         # $ROOT/bin/updater is from the generate-genesis image in OpenShift CI.
-        "$ROOT/bin/updater" diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/dump.zip --config "${config}" --out-file "/tmp/diff-dumps/dump${idx}/diff.zip"
+        "$ROOT/bin/updater" diff-dumps --base-dump "${dump_file_name}" --head-dump /tmp/genesis-dump/genesis-dump.zip --config "${config}" --out-file "/tmp/diff-dumps/dump${idx}/diff.zip"
     done < <(jq -r '.knownGenesisDumps | .[]| [.dumpLocationInGS, .timestamp, (.config // empty | tostring)] | @tsv' < image/scanner/dump/genesis_manifests.json)
     du -d 2 -kh "/tmp/diff-dumps"
 }
