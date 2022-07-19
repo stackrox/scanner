@@ -7,6 +7,8 @@ source "$ROOT/scripts/ci/postgres.sh"
 set -euo pipefail
 
 generate_db_dump() {
+    touch /tmp/hold
+
     info "Generating DB dump"
 
     start_postgres
