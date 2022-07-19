@@ -22,6 +22,8 @@ generate_genesis_dump() {
 
     info "Printing some stats"
     "$ROOT/bin/updater" print-stats /tmp/genesis-dump/dump.zip
+
+    store_test_results /tmp/genesis-dump genesis-dump
 }
 
 generate_genesis_dump
