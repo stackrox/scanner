@@ -259,14 +259,14 @@ slim-e2e-tests: deps test-prep
 	go test -tags slim_e2e -count=1 -timeout=20m -v ./e2etests/... | tee test-output/test.log
 
 .PHONY: db-integration-tests
-db-integration-tests: deps
+db-integration-tests: deps test-prep
 	@echo "+ $@"
-	go test -tags db_integration -count=1 ./database/pgsql
+	go test -tags db_integration -count=1 -v ./database/pgsql | tee test-output/test.log
 
 .PHONY: slim-db-integration-tests
 slim-db-integration-tests: deps
 	@echo "+ $@"
-	go test -tags slim_db_integration -count=1 ./database/pgsql
+	go test -tags slim_db_integration -count=1 -v ./database/pgsql | tee test-output/test.log
 
 .PHONY: scale-tests
 scale-tests: deps
