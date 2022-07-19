@@ -264,7 +264,7 @@ db-integration-tests: deps test-prep
 	go test -tags db_integration -count=1 -v ./database/pgsql | tee test-output/test.log
 
 .PHONY: slim-db-integration-tests
-slim-db-integration-tests: deps
+slim-db-integration-tests: deps test-prep
 	@echo "+ $@"
 	go test -tags slim_db_integration -count=1 -v ./database/pgsql | tee test-output/test.log
 
