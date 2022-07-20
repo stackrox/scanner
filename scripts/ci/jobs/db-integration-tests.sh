@@ -8,7 +8,6 @@ source "$ROOT/scripts/ci/postgres.sh"
 set -euo pipefail
 
 db_integration_tests() {
-    touch /tmp/hold
     info "Starting DB integration tests"
 
     start_postgres
