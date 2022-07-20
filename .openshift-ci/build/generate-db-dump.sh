@@ -2,7 +2,6 @@
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 source "$ROOT/scripts/ci/lib.sh"
-source "$ROOT/scripts/ci/postgres.sh"
 
 set -euo pipefail
 
@@ -16,7 +15,7 @@ generate_db_dump() {
     groupadd -g 71 pg
     adduser pg -u 71 -g 71 -d /var/lib/postgresql -s /bin/sh
 
-    runuser -l pg -c start_postgres
+    runuser -l pg -c "$ROOT/scripts/ci/postgres.sh start_postgres"
 
     "$ROOT/bin/updater" load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file /tmp/genesis-dump/genesis-dump.zip
 
