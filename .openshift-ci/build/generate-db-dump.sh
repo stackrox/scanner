@@ -20,7 +20,7 @@ generate_db_dump() {
     "$ROOT/bin/updater" load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file /tmp/genesis-dump/genesis-dump.zip
 
     mkdir /tmp/postgres
-    runuser -l pg -c 'pg_dump -U postgres postgres://127.0.0.1:5432 > /tmp/postgres/pg-definitions.sql'
+    pg_dump -U postgres postgres://127.0.0.1:5432 > /tmp/postgres/pg-definitions.sql
     gzip --best /tmp/postgres/pg-definitions.sql
 }
 
