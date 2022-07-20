@@ -11,8 +11,6 @@ openshift_ci_mods
 gate_job generate-db-dump
 
 generate_db_dump() {
-    touch /tmp/hold
-
     info "Generating DB dump"
 
     groupadd -g 71 pg
