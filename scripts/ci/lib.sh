@@ -54,9 +54,11 @@ push_images() {
     require_environment "QUAY_STACKROX_IO_RW_USERNAME"
     require_environment "QUAY_STACKROX_IO_RW_PASSWORD"
 
-    local tag
-    tag="$(make --quiet --no-print-directory tag)"
     local image_set=("scanner" "scanner-db" "scanner-slim" "scanner-db-slim")
+    if is_OPENSHIFT_CI; then
+        local image_srcs=("$SCANNER_IMAGE" "$SCANNER_DB_IMAGE" "$SCANNER_SLIM_IMAGE" "$SCANNER_DB_SLIM_IMAGE")
+        oc registry login
+    fi
 
     _push_image_set() {
         local registry="$1"
@@ -76,19 +78,52 @@ push_images() {
         done
     }
 
-    # Push to us.gcr.io/stackrox-ci
-    _tag_image_set "us.gcr.io/stackrox-ci" "$tag"
-    _push_image_set "us.gcr.io/stackrox-ci" "$tag"
+    _mirror_image_set() {
+        local registry="$1"
+        local tag="$2"
 
-    # Push to quay.io/rhacs-eng
-    docker login -u "$QUAY_RHACS_ENG_RW_USERNAME" --password-stdin <<<"$QUAY_RHACS_ENG_RW_PASSWORD" quay.io
-    _tag_image_set "quay.io/rhacs-eng" "$tag"
-    _push_image_set "quay.io/rhacs-eng" "$tag"
+        local idx=0
+        for image in "${image_set[@]}"; do
+            oc image mirror "${image_srcs[$idx]}" "${registry}/${image}:${tag}"
+            (( idx++ )) || true
+        done
+    }
 
-    # Push to quay.io/stackrox-io
-    docker login -u "$QUAY_STACKROX_IO_RW_USERNAME" --password-stdin <<<"$QUAY_STACKROX_IO_RW_PASSWORD" quay.io
-    _tag_image_set "quay.io/stackrox-io" "$tag"
-    _push_image_set "quay.io/stackrox-io" "$tag"
+    local destination_registries=("us.gcr.io/stackrox-ci" "quay.io/rhacs-eng" "quay.io/stackrox-io")
+
+    local tag
+    tag="$(make --quiet --no-print-directory tag)"
+    for registry in "${destination_registries[@]}"; do
+        registry_rw_login "$registry"
+
+        if is_OPENSHIFT_CI; then
+            _mirror_image_set "$registry" "$tag"
+        else
+            _tag_image_set "$registry" "$tag"
+            _push_main_image_set "$registry" "$tag"
+        fi
+    done
+}
+
+registry_rw_login() {
+    if [[ "$#" -ne 1 ]]; then
+        die "missing arg. usage: registry_rw_login <registry>"
+    fi
+
+    local registry="$1"
+
+    case "$registry" in
+        us.gcr.io/stackrox-ci)
+            ;;
+        quay.io/rhacs-eng)
+            docker login -u "$QUAY_RHACS_ENG_RW_USERNAME" --password-stdin <<<"$QUAY_RHACS_ENG_RW_PASSWORD" quay.io
+            ;;
+        quay.io/stackrox-io)
+            docker login -u "$QUAY_STACKROX_IO_RW_USERNAME" --password-stdin <<<"$QUAY_STACKROX_IO_RW_PASSWORD" quay.io
+            ;;
+        *)
+            die "Unsupported registry login: $registry"
+    esac
 }
 
 poll_for_system_test_images() {

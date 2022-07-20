@@ -1,50 +1,15 @@
 #!/usr/bin/env bash
 
-# Execute all build steps required to create the main image bundle.tar.gz and
-# scripts used in image/rhel/Dockerfile
+# Execute the build steps required to create the scanner image's bundle.tar.gz.
+#
+# Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/build/build-main-and-bundle.sh
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 source "$ROOT/scripts/ci/lib.sh"
 
 set -euo pipefail
 
-build_go_binaries() {
-    info "Building Go binaries & swagger docs"
-
-    if pr_has_label "ci-release-build"; then
-        ci_export GOTAGS release
-    fi
-
-    local main_build_args="${MAIN_BUILD_ARGS:-}"
-
-    if pr_has_label "ci-race-tests" || [[ "${RACE_CONDITION_DEBUG:-}" == "true" ]]; then
-        main_build_args="${main_build_args} RACE=true"
-    fi
-
-    if [[ -n "${main_build_args}" ]]; then
-        info "Building main with args: ${main_build_args}"
-    fi
-
-    # shellcheck disable=SC2086
-    make ${main_build_args} main-build-nodeps
-
-    make swagger-docs
-}
-
-create_main_bundle_and_scripts() {
-    info "Creating main bundle.tar.gz"
-
-    if [[ -z "${DEBUG_BUILD:-}" ]]; then
-        if [[ "$(git rev-parse --abbrev-ref HEAD)" =~ "-debug" ]]; then
-            DEBUG_BUILD="yes"
-        else
-            DEBUG_BUILD="no"
-        fi
-    fi
-
-    DEBUG_BUILD="${DEBUG_BUILD}" \
-       "$ROOT/image/rhel/create-bundle.sh" image "local" "local" image/rhel
-}
+openshift_ci_mods
 
 cleanup_image() {
     if [[ -z "${OPENSHIFT_BUILD_NAME:-}" ]]; then
@@ -59,40 +24,45 @@ cleanup_image() {
     rm -rf /root/{.cache,.npm}
     rm -rf /usr/local/share/.cache
     rm -rf .git
-    rm -rf bin
-    rm -rf docs
-    rm -rf image/{THIRD_PARTY_NOTICES,bin,ui}
-    rm -rf ui/build ui/node_modules ui/**/node_modules
+    rm -rf image/scanner/bin
+    rm -rf image/scanner/rhel/THIRD_PARTY_NOTICES
     set -e
 }
 
-build_main_and_bundles() {
-    # avoid a -dirty tag
-    info "Reset to remove Dockerfile modification by OpenShift CI"
-    git restore .
-    git status
+get_genesis_dump() {
+    info "Retrieving Genesis dump"
 
-    openshift_ci_mods
+    if is_in_PR_context && ! pr_has_label "generate-dumps-on-pr"; then
+        setup_gcp
 
-    info "Make the main image Dockerfile"
-    make "$ROOT/image/rhel/Dockerfile.gen"
+        echo "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
+        gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
+        gsutil cp gs://stackrox-scanner-ci-vuln-dump/k8s-definitions.zip /tmp/k8s-definitions.zip
+        gsutil cp gs://stackrox-scanner-ci-vuln-dump/repo2cpe.zip /tmp/repo2cpe.zip
+    else
+        zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/nvd-definitions.zip
+        zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/k8s-definitions.zip
+        zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/repo2cpe.zip
+    fi
 
-    background_build_ui
-    build_cli
-    build_go_binaries
-    wait_for_ui_build
+    unzip -d image/scanner/dump /tmp/nvd-definitions.zip
+    unzip -d image/scanner/dump /tmp/k8s-definitions.zip
+    unzip -d image/scanner/dump /tmp/repo2cpe.zip
+}
+
+build_bundle() {
+    info "Building Scanner binary"
+    make scanner-build-nodeps
 
     info "Making THIRD_PARTY_NOTICES"
     make ossls-notice
 
-    info "Copying binaries for image/"
-    mkdir -p image/bin
-    make copy-binaries-to-image-dir
-    cp bin/linux/roxctl image/roxctl/roxctl-linux
+    get_genesis_dump
 
-    create_main_bundle_and_scripts
+    info "Creating Scanner bundle"
+    "$ROOT/image/scanner/rhel/create-bundle.sh" "$ROOT/image/scanner" "$ROOT/image/scanner/rhel"
 
     cleanup_image
 }
 
-build_main_and_bundles
+build_bundle
