@@ -19,7 +19,7 @@ generate_genesis_dump() {
     mkdir -p /tmp/genesis-dump
     "$ROOT/bin/updater" generate-dump --out-file /tmp/genesis-dump/dump.zip
     # Images are built as the root user, so ensure any user may access this file.
-    chmod 777 /tmp/genesis-dump/genesis-dump.zip
+    chmod 777 /tmp/genesis-dump/dump.zip
     ls -lrt /tmp/genesis-dump
 
     info "Printing some stats"
