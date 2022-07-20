@@ -620,7 +620,7 @@ send_slack_notice_for_failures_on_merge() {
 			"type": "header",
 			"text": {
 				"type": "plain_text",
-				"text": "Prow job failure: $job_name"
+				"text": "Prow job failure: \($job_name)"
 			}
 		},
         {
