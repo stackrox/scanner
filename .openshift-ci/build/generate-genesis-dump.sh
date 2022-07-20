@@ -18,6 +18,7 @@ generate_genesis_dump() {
     info "Generating genesis dump"
     mkdir -p /tmp/genesis-dump
     "$ROOT/bin/updater" generate-dump --out-file /tmp/genesis-dump/genesis-dump.zip
+    chmod 777 /tmp/genesis-dump/genesis-dump.zip
     ls -lrt /tmp/genesis-dump
 
     info "Printing some stats"
