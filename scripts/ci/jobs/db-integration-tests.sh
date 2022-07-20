@@ -4,21 +4,19 @@
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../../.. && pwd)"
 source "$ROOT/scripts/ci/lib.sh"
+source "$ROOT/scripts/ci/postgres.sh"
 set -euo pipefail
 
 db_integration_tests() {
     info "Starting DB integration tests"
 
-    initdb "${HOME}/data"
-    pg_ctl -D "${HOME}/data" -l logfile -o "-k /tmp" start
-    export PGHOST=/tmp
-    createuser -s postgres
+    start_postgres
 
     make db-integration-tests || touch FAIL
 
     info "Saving junit XML report"
     make generate-junit-reports || touch FAIL
-    store_test_results junit-reports reports
+    store_test_results junit-reports junit-reports
 
     [[ ! -f FAIL ]] || die "DB integration tests failed"
 }

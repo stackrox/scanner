@@ -12,7 +12,7 @@ slim_e2e_tests() {
 
     info "Saving junit XML report"
     make generate-junit-reports || touch FAIL
-    store_test_results junit-reports reports
+    store_test_results junit-reports junit-reports
 
     [[ ! -f FAIL ]] || die "Slim E2E tests failed"
 }

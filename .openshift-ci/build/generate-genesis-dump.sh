@@ -17,11 +17,11 @@ generate_genesis_dump() {
 
     info "Generating genesis dump"
     mkdir -p /tmp/genesis-dump
-    "$ROOT/bin/updater" generate-dump --out-file /tmp/genesis-dump/dump.zip
+    "$ROOT/bin/updater" generate-dump --out-file /tmp/genesis-dump/genesis-dump.zip
     ls -lrt /tmp/genesis-dump
 
     info "Printing some stats"
-    "$ROOT/bin/updater" print-stats /tmp/genesis-dump/dump.zip
+    "$ROOT/bin/updater" print-stats /tmp/genesis-dump/genesis-dump.zip
 }
 
 generate_genesis_dump
