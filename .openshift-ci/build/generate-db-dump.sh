@@ -21,7 +21,9 @@ generate_db_dump() {
 
     mkdir /tmp/postgres
     pg_dump -U postgres postgres://127.0.0.1:5432 > /tmp/postgres/pg-definitions.sql
+    ls -lrt /tmp/postgres
     gzip --best /tmp/postgres/pg-definitions.sql
+    ls -lrt /tmp/postgres
 }
 
 generate_db_dump "$*"
