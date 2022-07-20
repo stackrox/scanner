@@ -7,7 +7,6 @@ source "$ROOT/scripts/lib.sh"
 set -euo pipefail
 
 upload_dumps_for_embedding() {
-    touch /tmp/hold
 #    if is_in_PR_context; then
 #        info "In PR context. Skipping..."
 #        return 0
