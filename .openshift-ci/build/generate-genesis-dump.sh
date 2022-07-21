@@ -25,9 +25,9 @@ generate_genesis_dump() {
 
     info "Extracting dumps"
     mkdir -p /tmp/vuln-dump
-    zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/vuln-dump/nvd-definitions.zip
-    zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/vuln-dump/k8s-definitions.zip
-    zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/vuln-dump/repo2cpe.zip
+    zip /tmp/genesis-dump/genesis-dump.zip 'nvd/*' --copy --out /tmp/vuln-dump/nvd-definitions.zip
+    zip /tmp/genesis-dump/genesis-dump.zip 'k8s/*' --copy --out /tmp/vuln-dump/k8s-definitions.zip
+    zip /tmp/genesis-dump/genesis-dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/vuln-dump/repo2cpe.zip
 }
 
 generate_genesis_dump
