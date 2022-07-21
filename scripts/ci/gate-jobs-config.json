@@ -7,6 +7,14 @@
     "run_on_master": "true",
     "run_on_tags": "false"
   },
+  "generate-db-dump": {
+    "run_with_labels": ["generate-dumps-on-pr"],
+    "skip_with_label": "",
+    "run_with_changed_path": "",
+    "changed_path_to_ignore": "",
+    "run_on_master": "true",
+    "run_on_tags": "true"
+  },
   "generate-genesis-dump": {
     "run_with_labels": ["generate-dumps-on-pr"],
     "skip_with_label": "",
@@ -21,6 +29,30 @@
     "run_with_changed_path": "",
     "changed_path_to_ignore": "",
     "run_on_master": "false",
+    "run_on_tags": "true"
+  },
+  "store-db-dump": {
+    "run_with_labels": ["generate-dumps-on-pr"],
+    "skip_with_label": "",
+    "run_with_changed_path": "",
+    "changed_path_to_ignore": "",
+    "run_on_master": "true",
+    "run_on_tags": "true"
+  },
+  "store-genesis-dump": {
+    "run_with_labels": ["generate-dumps-on-pr"],
+    "skip_with_label": "",
+    "run_with_changed_path": "",
+    "changed_path_to_ignore": "",
+    "run_on_master": "true",
+    "run_on_tags": "true"
+  },
+  "upload-db-dump": {
+    "run_with_labels": [],
+    "skip_with_label": "",
+    "run_with_changed_path": "",
+    "changed_path_to_ignore": "",
+    "run_on_master": "true",
     "run_on_tags": "true"
   },
   "upload-dumps-for-downstream": {

@@ -1113,12 +1113,6 @@ workflows:
         requires:
           - create-postgres-dump-from-genesis-dump
           - upload-dumps-for-embedding-into-image
-    - unit-tests:
-        <<: *runOnAllTagsWithQuayPullCtx
-    - style-checks:
-        <<: *runOnAllTagsWithQuayPullCtx
-    - db-integration-tests:
-        <<: *runOnAllTagsWithQuayPullCtx
     - build:
         <<: *runOnAllTags
         context:

@@ -14,7 +14,7 @@ unit_tests() {
 
     info "Saving junit XML report"
     make generate-junit-reports || touch FAIL
-    store_test_results junit-reports reports
+    store_test_results junit-reports junit-reports
 
     [[ ! -f FAIL ]] || die "Unit tests failed"
 }

@@ -38,7 +38,7 @@ require (
 	github.com/prometheus/client_golang v1.12.2
 	github.com/quay/goval-parser v0.8.6
 	github.com/remind101/migrate v0.0.0-20170729031349-52c1edff7319
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
 	github.com/stackrox/k8s-cves v0.0.0-20201110001126-cc333981eaab
@@ -46,8 +46,8 @@ require (
 	github.com/stretchr/testify v1.8.0
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/sys v0.0.0-20220624220833-87e55d714810
-	google.golang.org/api v0.87.0
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8
+	google.golang.org/api v0.88.0
 	google.golang.org/grpc v1.48.0
 	gopkg.in/yaml.v2 v2.4.0
 )
