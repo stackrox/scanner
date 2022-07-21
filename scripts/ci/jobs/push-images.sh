@@ -25,19 +25,6 @@ push_images() {
 comment_on_pr() {
     info "Adding a comment with the build tag to the PR"
 
-    # TODO(RS-509) - remove this when hub-comment is added to rox-ci-image
-    if ! command -v "hub-comment" >/dev/null 2>&1; then
-        wget --quiet https://github.com/joshdk/hub-comment/releases/download/0.1.0-rc6/hub-comment_linux_amd64
-        chmod +x ./hub-comment_linux_amd64
-        hub_comment() {
-            ./hub-comment_linux_amd64 "$@"
-        }
-    else
-        hub_comment() {
-            hub-comment "$@"
-        }
-    fi
-
     # hub-comment is tied to Circle CI env
     local url
     url=$(get_pr_details | jq -r '.html_url')
