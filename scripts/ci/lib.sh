@@ -100,7 +100,7 @@ push_images() {
             _mirror_image_set "$registry" "$tag"
         else
             _tag_image_set "$registry" "$tag"
-            _push_main_image_set "$registry" "$tag"
+            _push_image_set "$registry" "$tag"
         fi
     done
 }
