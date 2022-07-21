@@ -41,9 +41,9 @@ get_genesis_dump() {
         gsutil cp gs://stackrox-scanner-ci-vuln-dump/k8s-definitions.zip /tmp/k8s-definitions.zip
         gsutil cp gs://stackrox-scanner-ci-vuln-dump/repo2cpe.zip /tmp/repo2cpe.zip
     else
-        zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/nvd-definitions.zip
-        zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/k8s-definitions.zip
-        zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/repo2cpe.zip
+        zip /tmp/genesis-dump/genesis-dump.zip 'nvd/*' --copy --out /tmp/nvd-definitions.zip
+        zip /tmp/genesis-dump/genesis-dump.zip 'k8s/*' --copy --out /tmp/k8s-definitions.zip
+        zip /tmp/genesis-dump/genesis-dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/repo2cpe.zip
     fi
 
     unzip -d "$ROOT/image/scanner/dump" /tmp/nvd-definitions.zip
