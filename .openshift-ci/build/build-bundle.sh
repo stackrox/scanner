@@ -33,7 +33,7 @@ cleanup_image() {
 get_genesis_dump() {
     info "Retrieving Genesis dump"
 
-    ls -lrt /tmp/genesis-dump || info "No local genesis dump"
+    ls -lrt /tmp/vuln-dump || info "No local genesis dump"
 
     if is_in_PR_context && ! pr_has_label "generate-dumps-on-pr"; then
         info "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
