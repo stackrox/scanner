@@ -15,7 +15,7 @@ openshift_ci_mods
 get_db_dump() {
     info "Retrieving DB dump"
 
-    ls -lrt /tmp/postgres
+    ls -lrt /tmp/postgres || info "No local DB dump"
 
     if is_in_PR_context && ! pr_has_label "generate-dumps-on-pr"; then
         setup_gcp
