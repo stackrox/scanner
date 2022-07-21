@@ -25,8 +25,8 @@ cleanup_image() {
     rm -rf /root/{.cache,.npm}
     rm -rf /usr/local/share/.cache
     rm -rf .git
-    rm -rf image/scanner/bin
-    rm -rf image/scanner/rhel/THIRD_PARTY_NOTICES
+    rm -rf "$ROOT/image/scanner/bin"
+    rm -rf "$ROOT/image/scanner/rhel/THIRD_PARTY_NOTICES"
     set -e
 }
 
@@ -46,9 +46,9 @@ get_genesis_dump() {
         zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/repo2cpe.zip
     fi
 
-    unzip -d image/scanner/dump /tmp/nvd-definitions.zip
-    unzip -d image/scanner/dump /tmp/k8s-definitions.zip
-    unzip -d image/scanner/dump /tmp/repo2cpe.zip
+    unzip -d "$ROOT/image/scanner/dump /tmp/nvd-definitions.zip"
+    unzip -d "$ROOT/image/scanner/dump /tmp/k8s-definitions.zip"
+    unzip -d "$ROOT/image/scanner/dump /tmp/repo2cpe.zip"
 }
 
 build_bundle() {

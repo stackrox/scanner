@@ -19,22 +19,17 @@ get_db_dump() {
 
     if is_in_PR_context && ! pr_has_label "generate-dumps-on-pr"; then
         info "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
-        gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
+        gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz "$ROOT/image/db/dump/definitions.sql.gz"
     else
-        cp /tmp/postgres/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
+        cp /tmp/postgres/pg-definitions.sql.gz "$ROOT/image/db/dump/definitions.sql.gz"
     fi
 }
 
-create_db_bundle() {
-    info "Creating scanner-db bundle.tar.gz"
+build_db_bundle() {
+    get_db_dump
 
+    info "Creating scanner-db bundle.tar.gz"
     "$ROOT/image/db/rhel/create-bundle.sh" "$ROOT/image/scanner" "$ROOT/image/scanner/rhel"
 }
 
-db_bundle() {
-    get_db_dump
-
-    create_db_bundle
-}
-
-db_bundle
+build_db_bundle
