@@ -17,12 +17,6 @@ upload_dumps_for_downstream() {
     require_environment "GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER"
     setup_gcp "${GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER}"
 
-    info "Extracting dumps"
-    mkdir -p /tmp/vuln-dump
-    zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/vuln-dump/nvd-definitions.zip
-    zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/vuln-dump/k8s-definitions.zip
-    zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/vuln-dump/repo2cpe.zip
-
     local scanner_version
 
     local base_ref
@@ -51,7 +45,7 @@ upload_dumps_for_downstream() {
     "${cmd[@]}" gsutil cp /tmp/postgres/pg-definitions.sql.gz "$destination"
     # Note that we include genesis manifests for the downstream to avoid the situation when dumps taken from
     # GCloud are older than manifests taken from the source code repo.
-    "${cmd[@]}" gsutil cp image/scanner/dump/genesis_manifests.json "$destination"
+    "${cmd[@]}" gsutil cp "$ROOT/image/scanner/dump/genesis_manifests.json" "$destination"
 }
 
 upload_dumps_for_downstream "$*"

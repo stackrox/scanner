@@ -16,12 +16,6 @@ upload_dumps_for_embedding() {
 
     setup_gcp
 
-    info "Extracting dumps"
-    mkdir -p /tmp/vuln-dump
-    zip /tmp/genesis-dump/dump.zip 'nvd/*' --copy --out /tmp/vuln-dump/nvd-definitions.zip
-    zip /tmp/genesis-dump/dump.zip 'k8s/*' --copy --out /tmp/vuln-dump/k8s-definitions.zip
-    zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/vuln-dump/repo2cpe.zip
-
     info "Uploading dumps"
     # TODO: Fake for now...
     cmd=(echo "Would do")
