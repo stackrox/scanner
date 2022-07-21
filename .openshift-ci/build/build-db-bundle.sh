@@ -18,9 +18,7 @@ get_db_dump() {
     ls -lrt /tmp/postgres || info "No local DB dump"
 
     if is_in_PR_context && ! pr_has_label "generate-dumps-on-pr"; then
-        setup_gcp
-
-        echo "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
+        info "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
         gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
     else
         cp /tmp/postgres/pg-definitions.sql.gz image/db/dump/definitions.sql.gz

@@ -36,8 +36,6 @@ get_genesis_dump() {
     ls -lrt /tmp/genesis-dump || info "No local genesis dump"
 
     if is_in_PR_context && ! pr_has_label "generate-dumps-on-pr"; then
-        setup_gcp
-
         info "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
         gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/nvd-definitions.zip
         gsutil cp gs://stackrox-scanner-ci-vuln-dump/k8s-definitions.zip /tmp/k8s-definitions.zip
