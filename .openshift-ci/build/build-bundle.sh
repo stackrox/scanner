@@ -46,9 +46,9 @@ get_genesis_dump() {
         zip /tmp/genesis-dump/dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/repo2cpe.zip
     fi
 
-    unzip -d "$ROOT/image/scanner/dump /tmp/nvd-definitions.zip"
-    unzip -d "$ROOT/image/scanner/dump /tmp/k8s-definitions.zip"
-    unzip -d "$ROOT/image/scanner/dump /tmp/repo2cpe.zip"
+    unzip -d "$ROOT/image/scanner/dump" /tmp/nvd-definitions.zip
+    unzip -d "$ROOT/image/scanner/dump" /tmp/k8s-definitions.zip
+    unzip -d "$ROOT/image/scanner/dump" /tmp/repo2cpe.zip
 }
 
 build_bundle() {
