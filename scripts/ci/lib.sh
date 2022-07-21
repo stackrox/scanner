@@ -46,7 +46,7 @@ create_exit_trap() {
     trap ci_exit_trap EXIT
 }
 
-push_images() {
+push_image_set() {
     info "Pushing images"
 
     require_environment "QUAY_RHACS_ENG_RW_USERNAME"

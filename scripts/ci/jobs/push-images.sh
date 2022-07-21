@@ -15,7 +15,7 @@ push_images() {
 
     [[ "${OPENSHIFT_CI:-false}" == "true" ]] || { die "Only supported in OpenShift CI"; }
 
-    push_main_image_set
+    push_image_set
 
     if is_in_PR_context; then
         comment_on_pr
