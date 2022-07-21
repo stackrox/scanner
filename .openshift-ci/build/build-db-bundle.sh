@@ -29,7 +29,7 @@ build_db_bundle() {
     get_db_dump
 
     info "Creating scanner-db bundle.tar.gz"
-    "$ROOT/image/db/rhel/create-bundle.sh" "$ROOT/image/scanner" "$ROOT/image/scanner/rhel"
+    "$ROOT/image/db/rhel/create-bundle.sh" "$ROOT/image/db" "$ROOT/image/db/rhel"
 }
 
 build_db_bundle
