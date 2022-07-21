@@ -84,7 +84,7 @@ push_images() {
 
         local idx=0
         for image in "${image_set[@]}"; do
-            oc image mirror "${image_srcs[$idx]}" "${registry}/${image}:${tag}"
+            oc_image_mirror "${image_srcs[$idx]}" "${registry}/${image}:${tag}"
             (( idx++ )) || true
         done
     }
@@ -124,6 +124,10 @@ registry_rw_login() {
         *)
             die "Unsupported registry login: $registry"
     esac
+}
+
+oc_image_mirror() {
+    retry 5 true oc image mirror "$1" "$2"
 }
 
 poll_for_system_test_images() {
