@@ -22,7 +22,7 @@ COPY scripts /
 
 COPY --from=extracted_bundle /bundle/scanner ./
 
-COPY ./THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
+COPY --from=extracted_bundle /bundle/THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
 RUN microdnf upgrade && \
     microdnf install xz && \

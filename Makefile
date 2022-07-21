@@ -29,7 +29,8 @@ BUILD_IMAGE := $(DEFAULT_IMAGE_REGISTRY)/apollo-ci:$(BUILD_IMAGE_VERSION)
 
 LOCAL_VOLUME_ARGS := -v$(CURDIR):/src:delegated -v $(GOPATH):/go:delegated
 GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
-BUILD_FLAGS := -e CGO_ENABLED=1,GOOS=linux,GOARCH=amd64
+IMAGE_BUILD_FLAGS := -e CGO_ENABLED=1,GOOS=linux,GOARCH=amd64
+BUILD_FLAGS := CGO_ENABLED=1 GOOS=linux GOARCH=amd64
 BUILD_CMD := go build -trimpath -ldflags="-linkmode=external -X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
 
 #####################################################################
@@ -175,8 +176,12 @@ ifdef CI
 	docker start -i builder
 	docker cp builder:/go/src/github.com/stackrox/scanner/image/scanner/bin/scanner image/scanner/bin/scanner
 else
-	docker run $(BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(BUILD_IMAGE) $(BUILD_CMD)
+	docker run $(IMAGE_BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(BUILD_IMAGE) $(BUILD_CMD)
 endif
+
+.PHONY: scanner-build-nodeps
+scanner-build-nodeps:
+	$(BUILD_FLAGS) $(BUILD_CMD)
 
 .PHONY: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 $(CURDIR)/image/scanner/rhel/bundle.tar.gz:

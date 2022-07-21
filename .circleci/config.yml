@@ -357,7 +357,7 @@ commands:
           name: Push images
           command: |
             source scripts/ci/lib.sh
-            push_images
+            push_image_set
 
   run-e2e-tests:
     parameters:
