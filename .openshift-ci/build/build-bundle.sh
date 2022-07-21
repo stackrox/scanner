@@ -5,6 +5,7 @@
 # Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/build/build-main-and-bundle.sh
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+source "$ROOT/scripts/ci/gcp.sh"
 source "$ROOT/scripts/ci/lib.sh"
 
 set -euo pipefail
@@ -31,6 +32,8 @@ cleanup_image() {
 
 get_genesis_dump() {
     info "Retrieving Genesis dump"
+
+    ls -lrt /tmp/genesis-dump
 
     if is_in_PR_context && ! pr_has_label "generate-dumps-on-pr"; then
         setup_gcp
