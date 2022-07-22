@@ -1,7 +1,7 @@
 appName: scanner
 namespace: stackrox
-scannerImage: us.gcr.io/stackrox-ci/scanner
-scannerDBImage: us.gcr.io/stackrox-ci/scanner-db
+scannerImage: quay.io/stackrox-io/scanner
+scannerDBImage: quay.io/stackrox-io/scanner-db
 tag: latest
 
 logLevel: info

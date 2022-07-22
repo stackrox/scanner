@@ -89,7 +89,7 @@ push_image_set() {
         done
     }
 
-    local destination_registries=("us.gcr.io/stackrox-ci" "quay.io/rhacs-eng" "quay.io/stackrox-io")
+    local destination_registries=("quay.io/rhacs-eng" "quay.io/stackrox-io")
 
     local tag
     tag="$(make --quiet --no-print-directory tag)"
@@ -113,8 +113,6 @@ registry_rw_login() {
     local registry="$1"
 
     case "$registry" in
-        us.gcr.io/stackrox-ci)
-            ;;
         quay.io/rhacs-eng)
             docker login -u "$QUAY_RHACS_ENG_RW_USERNAME" --password-stdin <<<"$QUAY_RHACS_ENG_RW_PASSWORD" quay.io
             ;;
