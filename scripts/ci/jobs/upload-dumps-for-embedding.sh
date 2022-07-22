@@ -7,21 +7,19 @@ source "$ROOT/scripts/lib.sh"
 set -euo pipefail
 
 upload_dumps_for_embedding() {
-#    if is_in_PR_context; then
-#        info "In PR context. Skipping..."
-#        return 0
-#    fi
+    if is_in_PR_context; then
+        info "In PR context. Skipping..."
+        return 0
+    fi
 
     info "Starting dumps upload"
 
     setup_gcp
 
     info "Uploading dumps"
-    # TODO: Fake for now...
-    cmd=(echo "Would do")
-    "${cmd[@]}" gsutil cp /tmp/vuln-dump/nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
-    "${cmd[@]}" gsutil cp /tmp/vuln-dump/k8s-definitions.zip gs://stackrox-scanner-ci-vuln-dump
-    "${cmd[@]}" gsutil cp /tmp/vuln-dump/repo2cpe.zip gs://stackrox-scanner-ci-vuln-dump
+    gsutil cp /tmp/vuln-dump/nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+    gsutil cp /tmp/vuln-dump/k8s-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+    gsutil cp /tmp/vuln-dump/repo2cpe.zip gs://stackrox-scanner-ci-vuln-dump
 }
 
 upload_dumps_for_embedding "$*"

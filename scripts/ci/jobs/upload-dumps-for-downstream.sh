@@ -7,10 +7,10 @@ source "$ROOT/scripts/ci/lib.sh"
 set -euo pipefail
 
 upload_dumps_for_downstream() {
-#    if is_in_PR_context; then
-#        info "In PR context. Skipping..."
-#        return 0
-#    fi
+    if is_in_PR_context; then
+        info "In PR context. Skipping..."
+        return 0
+    fi
 
     info "Starting dumps upload"
 
@@ -38,14 +38,13 @@ upload_dumps_for_downstream() {
     destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}/"
 
     info "Uploading dumps"
-    cmd=(echo "Would do")
-    "${cmd[@]}" gsutil cp /tmp/vuln-dump/nvd-definitions.zip "$destination"
-    "${cmd[@]}" gsutil cp /tmp/vuln-dump/k8s-definitions.zip "$destination"
-    "${cmd[@]}" gsutil cp /tmp/vuln-dump/repo2cpe.zip "$destination"
-    "${cmd[@]}" gsutil cp /tmp/postgres/pg-definitions.sql.gz "$destination"
+    gsutil cp /tmp/vuln-dump/nvd-definitions.zip "$destination"
+    gsutil cp /tmp/vuln-dump/k8s-definitions.zip "$destination"
+    gsutil cp /tmp/vuln-dump/repo2cpe.zip "$destination"
+    gsutil cp /tmp/postgres/pg-definitions.sql.gz "$destination"
     # Note that we include genesis manifests for the downstream to avoid the situation when dumps taken from
     # GCloud are older than manifests taken from the source code repo.
-    "${cmd[@]}" gsutil cp "$ROOT/image/scanner/dump/genesis_manifests.json" "$destination"
+    gsutil cp "$ROOT/image/scanner/dump/genesis_manifests.json" "$destination"
 }
 
 upload_dumps_for_downstream "$*"
