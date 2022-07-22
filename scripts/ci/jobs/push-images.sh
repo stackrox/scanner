@@ -44,7 +44,7 @@ comment_on_pr() {
     cat > "$tmpfile" <<- EOT
 Images are ready for the commit at {{.Env._SHA}}.
 
-To use with deploy scripts, first \`export MAIN_IMAGE_TAG={{.Env._TAG}}\`.
+To use the images, use the tag \`{{.Env._TAG}}\`.
 EOT
 
     hub-comment -type build -template-file "$tmpfile"
