@@ -47,7 +47,7 @@ Images are ready for the commit at {{.Env._SHA}}.
 To use with deploy scripts, first \`export MAIN_IMAGE_TAG={{.Env._TAG}}\`.
 EOT
 
-    hub_comment -type build -template-file "$tmpfile"
+    hub-comment -type build -template-file "$tmpfile"
 }
 
 push_images "$@"
