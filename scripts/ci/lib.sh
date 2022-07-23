@@ -178,18 +178,18 @@ is_nightly_run() {
 }
 
 is_in_PR_context() {
-    if is_CIRCLECI && [[ -n "${CIRCLE_PULL_REQUEST:-}" ]]; then
+    if ! is_OPENSHIFT_CI; then
+        return 1
+    elif [[ -n "${PULL_NUMBER:-}" ]]; then
         return 0
-    elif is_OPENSHIFT_CI && [[ -n "${PULL_NUMBER:-}" ]]; then
-        return 0
-    elif is_OPENSHIFT_CI && [[ -n "${CLONEREFS_OPTIONS:-}" ]]; then
+    elif [[ -n "${CLONEREFS_OPTIONS:-}" ]]; then
         # bin, test-bin, images
         local pull_request
         pull_request=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].pulls[0].number' 2>&1) || return 1
         [[ "$pull_request" =~ ^[0-9]+$ ]] && return 0
+    else
+        return 1
     fi
-
-    return 1
 }
 
 is_openshift_CI_rehearse_PR() {
@@ -197,9 +197,7 @@ is_openshift_CI_rehearse_PR() {
 }
 
 get_base_ref() {
-    if is_CIRCLECI; then
-        echo "${CIRCLE_BRANCH}"
-    elif is_OPENSHIFT_CI; then
+    if is_OPENSHIFT_CI; then
         if [[ -n "${PULL_BASE_REF:-}" ]]; then
             # presubmit, postsubmit and batch runs
             # (ref: https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables)
@@ -221,11 +219,7 @@ get_base_ref() {
 }
 
 get_repo_full_name() {
-    if is_CIRCLECI; then
-        ### MODIFIED: stackrox/stackrox -> stackrox/scanner
-        # CIRCLE_REPOSITORY_URL=git@github.com:stackrox/scanner.git
-        echo "${CIRCLE_REPOSITORY_URL:15:-4}"
-    elif is_OPENSHIFT_CI; then
+    if is_OPENSHIFT_CI; then
         if [[ -n "${REPO_OWNER:-}" ]]; then
             # presubmit, postsubmit and batch runs
             # (ref: https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables)
@@ -282,14 +276,7 @@ get_pr_details() {
         exit 1
     }
 
-    if is_CIRCLECI; then
-        [ -n "${CIRCLE_PULL_REQUEST:-}" ] || _not_a_PR
-        [ -n "${CIRCLE_PROJECT_USERNAME}" ] || { echo "CIRCLE_PROJECT_USERNAME not found" ; exit 2; }
-        [ -n "${CIRCLE_PROJECT_REPONAME}" ] || { echo "CIRCLE_PROJECT_REPONAME not found" ; exit 2; }
-        pull_request="${CIRCLE_PULL_REQUEST##*/}"
-        org="${CIRCLE_PROJECT_USERNAME}"
-        repo="${CIRCLE_PROJECT_REPONAME}"
-    elif is_OPENSHIFT_CI; then
+    if is_OPENSHIFT_CI; then
         if [[ -n "${JOB_SPEC:-}" ]]; then
             pull_request=$(jq -r <<<"$JOB_SPEC" '.refs.pulls[0].number')
             org=$(jq -r <<<"$JOB_SPEC" '.refs.org')
@@ -304,7 +291,7 @@ get_pr_details() {
         fi
         [[ "${pull_request}" == "null" ]] && _not_a_PR
     else
-        echo "Expect Circle or OpenShift CI"
+        echo "Expect OpenShift CI"
         exit 2
     fi
 
@@ -408,11 +395,7 @@ gate_pr_job() {
 
     if [[ -n "${run_with_changed_path}" || -n "${changed_path_to_ignore}" ]]; then
         local diff_base
-        if is_CIRCLECI; then
-            diff_base="$(git merge-base HEAD origin/master)"
-            echo "Determined diff-base as ${diff_base}"
-            echo "Master SHA: $(git rev-parse origin/master)"
-        elif is_OPENSHIFT_CI; then
+        if is_OPENSHIFT_CI; then
             diff_base="$(jq -r '.refs[0].base_sha' <<<"$CLONEREFS_OPTIONS")"
             echo "Determined diff-base as ${diff_base}"
             [[ "${diff_base}" != "null" ]] || die "Could not find base_sha in CLONEREFS_OPTIONS: $CLONEREFS_OPTIONS"
