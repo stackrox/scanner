@@ -26,7 +26,7 @@ ci_export CI_JOB_NAME "$ci_job"
 gate_job "$ci_job"
 
 case "$ci_job" in
-    e2e-tests)
+    e2e-tests|slim-e2e-tests)
         openshift_ci_e2e_mods
         ;;
 esac
