@@ -22,6 +22,7 @@ var (
 		"ubuntu:19.10",
 		"ubuntu:20.10",
 		"ubuntu:21.04",
+		"ubuntu:21.10",
 	)
 
 	// KnownSupportedNamespaces is the set of base namespaces we support.
@@ -60,7 +61,6 @@ var (
 		"ubuntu:16.04",
 		"ubuntu:18.04",
 		"ubuntu:20.04",
-		"ubuntu:21.10",
 		"ubuntu:22.04",
 	)
 )
