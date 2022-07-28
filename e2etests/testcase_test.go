@@ -2602,7 +2602,7 @@ var testCases = []testCase{
 					},
 				},
 				AddedBy: "sha256:596ba82af5aaa3e2fd9d6f955b8b94f0744a2b60710e3c243ba3e4a467f051d1",
-				FixedBy: "1.32.1-r8",
+				FixedBy: "1.32.1-r9",
 				Executables: []*v1.Executable{
 					{
 						Path: "/etc/network/if-up.d/dad",
@@ -2721,7 +2721,34 @@ var testCases = []testCase{
 				NamespaceName: "alpine:v3.16",
 				VersionFormat: "apk",
 				Version:       "1.35.0-r13",
-				AddedBy:       "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2022-30065",
+						NamespaceName: "alpine:v3.16",
+						Description:   "A use-after-free in Busybox 1.35-x's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the copyvar function.",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2022-30065",
+						Severity:      "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 1.8,
+									"ImpactScore":         5.9,
+									"Score":               7.8,
+									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 8.6,
+									"ImpactScore":         6.4,
+									"Score":               6.8,
+									"Vectors":             "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+								},
+							},
+						},
+						FixedBy: "1.35.0-r15",
+					},
+				},
+				AddedBy: "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
+				FixedBy: "1.35.0-r15",
 			},
 		},
 	},
@@ -2876,9 +2903,9 @@ var testCases = []testCase{
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 6.8,
-									"ImpactScore":         6.4,
-									"Score":               6.0,
-									"Vectors":             "AV:N/AC:M/Au:S/C:P/I:P/A:P",
+									"ImpactScore":         10.0,
+									"Score":               8.5,
+									"Vectors":             "AV:N/AC:M/Au:S/C:C/I:C/A:C",
 								},
 							},
 						},
@@ -2978,9 +3005,9 @@ var testCases = []testCase{
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 6.8,
-									"ImpactScore":         6.4,
-									"Score":               6.0,
-									"Vectors":             "AV:N/AC:M/Au:S/C:P/I:P/A:P",
+									"ImpactScore":         10.0,
+									"Score":               8.5,
+									"Vectors":             "AV:N/AC:M/Au:S/C:C/I:C/A:C",
 								},
 							},
 						},
@@ -3090,9 +3117,9 @@ var testCases = []testCase{
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 6.8,
-									"ImpactScore":         6.4,
-									"Score":               6.0,
-									"Vectors":             "AV:N/AC:M/Au:S/C:P/I:P/A:P",
+									"ImpactScore":         10.0,
+									"Score":               8.5,
+									"Vectors":             "AV:N/AC:M/Au:S/C:C/I:C/A:C",
 								},
 							},
 						},

@@ -246,6 +246,7 @@ teardown_gke_cluster() {
     # (prefix output to avoid triggering prow log focus)
     "$SCRIPTS_ROOT/scripts/ci/cleanup-deployment.sh" 2>&1 | sed -e 's/^/out: /' || true
 
+    gcloud config set compute/zone "${ZONE}"
     gcloud container clusters delete "$CLUSTER_NAME" --async
 
     info "Cluster deleting asynchronously"

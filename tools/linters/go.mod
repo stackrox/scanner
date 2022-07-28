@@ -3,7 +3,7 @@ module github.com/stackrox/scanner/tools/linters
 go 1.17
 
 require (
-	github.com/golangci/golangci-lint v1.47.1
+	github.com/golangci/golangci-lint v1.47.2
 	honnef.co/go/tools v0.3.2
 )
 

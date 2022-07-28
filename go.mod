@@ -3,7 +3,7 @@ module github.com/stackrox/scanner
 go 1.16
 
 require (
-	cloud.google.com/go/storage v1.23.0
+	cloud.google.com/go/storage v1.24.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/ckaznocha/protoc-gen-lint v0.2.4
@@ -47,7 +47,7 @@ require (
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8
-	google.golang.org/api v0.88.0
+	google.golang.org/api v0.89.0
 	google.golang.org/grpc v1.48.0
 	gopkg.in/yaml.v2 v2.4.0
 )
