@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 #
 # Setup:
 #   pip install --upgrade cryptography google-cloud-storage
@@ -11,7 +12,12 @@
 #   This work was tracked in https://issues.redhat.com/browse/ROX-7271.
 #   This test downloads ~500 MiB of vulnerability diffs with each run.
 #   gsutil stat "gs://definitions.stackrox.io/*/diff.zip"
-set -eu
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../../.. && pwd)"
+source "$ROOT/scripts/ci/gcp.sh"
+source "$ROOT/scripts/ci/lib.sh"
+
+set -euo pipefail
 
 function is_mac   { uname | grep -qi 'darwin'; }
 function is_linux { uname | grep -qi 'linux'; }
@@ -167,9 +173,6 @@ function get_gcs_object_age_seconds {
   echo "$obj_age_seconds"
 }
 
-function info { >&2 echo "INFO: $*"; }
-function warn { >&2 echo "WARN: $*"; }
-function error { >&2 echo "ERROR: $*"; }
 function testfail { >&2 echo "FAIL: $*"; (( FAILURE_COUNT += 1 )); }
 function bash_true { ((0 == 0)); }
 function bash_false { ((0 == 1)); }
@@ -179,13 +182,18 @@ function bash_exit_failure { error "$@"; bash_false; exit $?; }
 
 # __MAIN__
 DIGIT="[[:digit:]]"
-WORKING_DIR="/tmp/ROX-7271"
+NAME="sanity-check-vuln-updates"
+WORKING_DIR="/tmp/$NAME"
 FPATH_DIFF_LIST="$WORKING_DIR/diff.txt"
 FPATH_DIFF_ID_LIST="$WORKING_DIR/ids.txt"
 FPATH_DIFF_GSUTIL_STAT="$WORKING_DIR/metadata.txt"
 FPATH_TRANSCRIPT="$WORKING_DIR/transcript.txt"
 MAX_GCS_OBJECT_AGE_SECONDS=$((4 * 3600))
 FAILURE_COUNT=0
+
+# Setup GCP
+require_environment "GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER"
+setup_gcp "${GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER}"
 
 # Initialize working dir
 rm -rf "$WORKING_DIR"
@@ -216,7 +224,9 @@ done < "$FPATH_DIFF_ID_LIST"
 rm -f diff{1,2}.zip
 info "--------"
 info "ran to completion -- see $FPATH_TRANSCRIPT"
+store_test_results "$WORKING_DIR" "$NAME"
 if [[ $FAILURE_COUNT -gt 0 ]]; then
+  send_slack_notice_for_vuln_check_failure
   bash_exit_failure "$FAILURE_COUNT test failures"
 fi
 bash_exit_success "$FAILURE_COUNT test failures"
