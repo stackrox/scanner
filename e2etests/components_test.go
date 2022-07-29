@@ -6,21 +6,21 @@ package e2etests
 import (
 	"context"
 	"fmt"
-	"os"
+	"google.golang.org/protobuf/encoding/protojson"
+	"io/ioutil"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/golang/protobuf/jsonpb"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func loadExpectedComponentResponse(filePath string, t *testing.T) map[string]*v1.LanguageLevelComponents {
-	f, err := os.Open(filePath)
+	contents, err := ioutil.ReadFile(filePath)
 	require.NoError(t, err)
 	var resp v1.GetLanguageLevelComponentsResponse
-	require.NoError(t, jsonpb.Unmarshal(f, &resp))
+	require.NoError(t, protojson.Unmarshal(contents, &resp))
 	return resp.GetLayerToComponents()
 }
 
