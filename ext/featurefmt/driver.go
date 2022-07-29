@@ -139,10 +139,14 @@ func TestLister(t *testing.T, l Lister, testData []TestData) {
 func AddToDependencyMap(filename string, fileData tarutil.FileData, execToDeps, libToDeps database.StringToStringsMap) {
 	if fileData.Executable {
 		deps := set.NewStringSet()
-		if fileData.ELFMetadata != nil {
-			deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+		if elfMeta := fileData.ELFMetadata; elfMeta != nil {
+			deps.AddAll(fileData.elfMeta.ImportedLibraries...)
+			if !elfMeta.SharedObject {
+				execToDeps[filename] = deps
+			}
+		} else {
+			execToDeps[filename] = deps
 		}
-		execToDeps[filename] = deps
 	}
 	if fileData.ELFMetadata != nil {
 		for _, soname := range fileData.ELFMetadata.Sonames {

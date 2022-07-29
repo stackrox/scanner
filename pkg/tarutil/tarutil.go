@@ -166,27 +166,27 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			var fileData FileData
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
-			if hdr.Size > maxELFExecutableFileSize {
-				log.Warnf("Skipping ELF executable check for file %q (%d bytes) because it is larger than the configured maxELFExecutableFileSizeMB of %d", filename, hdr.Size, maxELFExecutableFileSize/1024/1024)
-			} else if executable {
-				if hdr.Size >= elfHeaderSize { // Only bother attempting to get ELF metadata if the file is large enough for the ELF header.
-					fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
-					if err != nil {
-						log.Errorf("Failed to get dependencies for %s: %v", filename, err)
-					} else {
-						executable = true
-					}
-				}
-				if fileData.ELFMetadata != nil {
-					shebangBytes := make([]byte, 2)
-					if hdr.Size > 2 {
-						_, err := contents.ReadAt(shebangBytes, 0)
+			if executable {
+				if hdr.Size > maxELFExecutableFileSize {
+					log.Warnf("Skipping ELF executable check for file %q (%d bytes) because it is larger than the configured maxELFExecutableFileSizeMB of %d", filename, hdr.Size, maxELFExecutableFileSize/1024/1024)
+				} else {
+					if hdr.Size >= elfHeaderSize { // Only bother attempting to get ELF metadata if the file is large enough for the ELF header.
+						fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
 						if err != nil {
-							log.Errorf("unable to read first two bytes of file %s: %v", filename, err)
-							continue
+							log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 						}
 					}
-					executable = bytes.Equal(shebangBytes, shebangHeader)
+					if fileData.ELFMetadata != nil {
+						shebangBytes := make([]byte, 2)
+						if hdr.Size > 2 {
+							_, err := contents.ReadAt(shebangBytes, 0)
+							if err != nil {
+								log.Errorf("unable to read first two bytes of file %s: %v", filename, err)
+								continue
+							}
+						}
+						executable = bytes.Equal(shebangBytes, shebangHeader)
+					}
 				}
 			}
 

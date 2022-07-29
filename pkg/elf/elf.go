@@ -18,6 +18,7 @@ type Metadata struct {
 	// Sonames contains provided sonames for shared objects
 	Sonames           []string
 	ImportedLibraries []string
+	SharedObject      bool
 }
 
 // GetExecutableMetadata extracts and returns Metadata if the input is an executable ELF binary.
@@ -34,7 +35,7 @@ func GetExecutableMetadata(r io.ReaderAt) (*Metadata, error) {
 	defer utils.IgnoreError(elfFile.Close)
 
 	// Exclude core and other unknown ELF file.
-	if !allowedELFTypeList.Contains(int(elfFile.Type)) {
+	if !allowedELFTypeList.Contains(elfFile.Type) {
 		return nil, nil
 	}
 
@@ -49,5 +50,6 @@ func GetExecutableMetadata(r io.ReaderAt) (*Metadata, error) {
 	return &Metadata{
 		Sonames:           sonames,
 		ImportedLibraries: libraries,
+		SharedObject:      elfFile.Type == elf.ET_DYN,
 	}, nil
 }
