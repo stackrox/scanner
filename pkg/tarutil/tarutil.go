@@ -60,10 +60,11 @@ var (
 	// limit is backed by temporary files on disk.
 	maxLazyReaderBufferSize int64 = DefaultMaxLazyReaderBufferSizeMB * 1024 * 1024
 
-	readLen     = 6 // max bytes to sniff
-	gzipHeader  = []byte{0x1f, 0x8b}
-	bzip2Header = []byte{0x42, 0x5a, 0x68}
-	xzHeader    = []byte{0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00}
+	readLen       = 6 // max bytes to sniff
+	gzipHeader    = []byte{0x1f, 0x8b}
+	bzip2Header   = []byte{0x42, 0x5a, 0x68}
+	xzHeader      = []byte{0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00}
+	shebangHeader = []byte{0x23, 0x21}
 )
 
 // SetMaxExtractableFileSize sets the max extractable file size.
@@ -167,10 +168,25 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
 			if hdr.Size > maxELFExecutableFileSize {
 				log.Warnf("Skipping ELF executable check for file %q (%d bytes) because it is larger than the configured maxELFExecutableFileSizeMB of %d", filename, hdr.Size, maxELFExecutableFileSize/1024/1024)
-			} else if executable && hdr.Size >= elfHeaderSize { // Only bother attempting to get ELF metadata if the file is large enough for the ELF header.
-				fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
-				if err != nil {
-					log.Errorf("Failed to get dependencies for %s: %v", filename, err)
+			} else if executable {
+				if hdr.Size >= elfHeaderSize { // Only bother attempting to get ELF metadata if the file is large enough for the ELF header.
+					fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
+					if err != nil {
+						log.Errorf("Failed to get dependencies for %s: %v", filename, err)
+					} else {
+						executable = true
+					}
+				}
+				if fileData.ELFMetadata != nil {
+					shebangBytes := make([]byte, 2)
+					if hdr.Size > 2 {
+						_, err := contents.ReadAt(shebangBytes, 0)
+						if err != nil {
+							log.Errorf("unable to read first two bytes of file %s: %v", filename, err)
+							continue
+						}
+					}
+					executable = bytes.Equal(shebangBytes, shebangHeader)
 				}
 			}
 
@@ -194,7 +210,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 					numExtractedContentBytes += len(d)
 				}
 			}
-			fileData.Executable = fileData.ELFMetadata != nil
+			fileData.Executable = executable
 			files.data[filename] = fileData
 		case tar.TypeSymlink:
 			if path.IsAbs(hdr.Linkname) {
