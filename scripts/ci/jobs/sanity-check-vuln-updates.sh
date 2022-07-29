@@ -228,4 +228,5 @@ if [[ $FAILURE_COUNT -gt 0 ]]; then
   send_slack_notice_for_vuln_check_failure
   bash_exit_failure "$FAILURE_COUNT test failures"
 fi
+send_slack_notice_for_vuln_check_failure
 bash_exit_success "$FAILURE_COUNT test failures"
