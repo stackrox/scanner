@@ -696,7 +696,7 @@ send_slack_notice_for_vuln_check_failure() {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "*Repo:* \($repo)\n*Log:* \($log_url)\n*Mentions: \($mentions)"
+                "text": "*Repo:* \($repo)\n*Log:* \($log_url)\n*Mentions:* \($mentions)"
             }
         },
         {
