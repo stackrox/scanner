@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-#
 # Setup:
 #   pip install --upgrade cryptography google-cloud-storage
 #   gcloud components update
