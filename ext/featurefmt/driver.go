@@ -140,7 +140,7 @@ func AddToDependencyMap(filename string, fileData tarutil.FileData, execToDeps, 
 	if fileData.Executable {
 		deps := set.NewStringSet()
 		if elfMeta := fileData.ELFMetadata; elfMeta != nil {
-			deps.AddAll(fileData.elfMeta.ImportedLibraries...)
+			deps.AddAll(elfMeta.ImportedLibraries...)
 			if !elfMeta.SharedObject {
 				execToDeps[filename] = deps
 			}
