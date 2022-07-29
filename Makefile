@@ -312,7 +312,7 @@ generate-junit-reports: $(GO_JUNIT_REPORT_BIN)
 ## Generated Srcs ##
 ####################
 
-PROTO_GENERATED_SRCS = $(GENERATED_PB_SRCS) $(GENERATED_API_GW_SRCS)
+PROTO_GENERATED_SRCS = $(GENERATED_PB_SRCS) $(GENERATED_GRPC_PB_SRCS) $(GENERATED_PB_VT_SRCS) $(GENERATED_API_GW_SRCS)
 
 include make/protogen.mk
 
