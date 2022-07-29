@@ -137,8 +137,6 @@ poll_for_system_test_images() {
 
     local time_limit="$1"
 
-    require_environment "QUAY_RHACS_ENG_BEARER_TOKEN"
-
     local tag
     tag="$(make --quiet tag)"
     local start_time
@@ -146,10 +144,10 @@ poll_for_system_test_images() {
 
     _image_exists() {
         local name="$1"
-        local url="https://quay.io/api/v1/repository/rhacs-eng/$name/tag?specificTag=$tag"
+        local url="https://quay.io/api/v1/repository/stackrox-io/$name/tag?specificTag=$tag"
         info "Checking for $name using $url"
         local check
-        check=$(curl --location -sS -H "Authorization: Bearer ${QUAY_RHACS_ENG_BEARER_TOKEN}" "$url")
+        check=$(curl --location -sS "$url")
         echo "$check"
         [[ "$(jq -r '.tags | first | .name' <<<"$check")" == "$tag" ]]
     }
