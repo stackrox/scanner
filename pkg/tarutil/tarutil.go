@@ -166,10 +166,6 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			var fileData FileData
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
-			if executable {
-
-			}
-
 			if hdr.Size > maxELFExecutableFileSize {
 				log.Warnf("Skipping ELF executable check for file %q (%d bytes) because it is larger than the configured maxELFExecutableFileSizeMB of %d", filename, hdr.Size, maxELFExecutableFileSize/1024/1024)
 			} else {
