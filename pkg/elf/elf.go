@@ -35,7 +35,7 @@ func GetExecutableMetadata(r io.ReaderAt) (*Metadata, error) {
 	defer utils.IgnoreError(elfFile.Close)
 
 	// Exclude core and other unknown ELF file.
-	if !allowedELFTypeList.Contains(elfFile.Type) {
+	if !allowedELFTypeList.Contains(int(elfFile.Type)) {
 		return nil, nil
 	}
 
