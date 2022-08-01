@@ -60,11 +60,12 @@ var (
 	// limit is backed by temporary files on disk.
 	maxLazyReaderBufferSize int64 = DefaultMaxLazyReaderBufferSizeMB * 1024 * 1024
 
-	readLen       = 6 // max bytes to sniff
-	gzipHeader    = []byte{0x1f, 0x8b}
-	bzip2Header   = []byte{0x42, 0x5a, 0x68}
-	xzHeader      = []byte{0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00}
-	shebangHeader = []byte{0x23, 0x21}
+	readLen           = 6 // max bytes to sniff
+	gzipHeader        = []byte{0x1f, 0x8b}
+	bzip2Header       = []byte{0x42, 0x5a, 0x68}
+	xzHeader          = []byte{0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00}
+	shebangHeader     = []byte{0x23, 0x21}
+	shebangHeaderSize = len(shebangHeader)
 )
 
 // SetMaxExtractableFileSize sets the max extractable file size.
@@ -176,8 +177,8 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 					}
 				}
 				if executable && fileData.ELFMetadata == nil {
-					shebangBytes := make([]byte, 2)
-					if hdr.Size > 2 {
+					shebangBytes := make([]byte, shebangHeaderSize)
+					if hdr.Size > int64(shebangHeaderSize) {
 						_, err := contents.ReadAt(shebangBytes, 0)
 						if err != nil {
 							log.Errorf("unable to read first two bytes of file %s: %v", filename, err)
