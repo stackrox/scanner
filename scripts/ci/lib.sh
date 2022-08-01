@@ -637,13 +637,13 @@ send_slack_notice_for_failures_on_merge() {
 {
     "text": "*Job Name:* \($job_name)",
     "blocks": [
-		{
-			"type": "header",
-			"text": {
-				"type": "plain_text",
-				"text": "Prow job failure: \($job_name)"
-			}
-		},
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": "Prow job failure: \($job_name)"
+            }
+        },
         {
             "type": "section",
             "text": {
@@ -651,9 +651,9 @@ send_slack_notice_for_failures_on_merge() {
                 "text": "*Commit:* <\($commit_url)|\($commit_msg)>\n*Repo:* \($repo)\n*Author:* \($author)\n*Log:* \($log_url)"
             }
         },
-		{
-			"type": "divider"
-		}
+        {
+          "type": "divider"
+        }
     ]
 }
 '
@@ -664,6 +664,54 @@ send_slack_notice_for_failures_on_merge() {
 
     jq --null-input --arg job_name "$job_name" --arg commit_url "$commit_url" --arg commit_msg "$commit_msg" \
        --arg repo "$repo" --arg author "$author" --arg log_url "$log_url" "$body" | \
+    curl -XPOST -d @- -H 'Content-Type: application/json' "$webhook_url"
+}
+
+send_slack_notice_for_vuln_check_failure() {
+    if ! is_OPENSHIFT_CI; then
+        return 0
+    fi
+
+    require_environment "SLACK_WEBHOOK_ONCALL"
+    local webhook_url="${SLACK_WEBHOOK_ONCALL}"
+
+    local repo="scanner"
+    local job_name="sanity-check-vuln-updates"
+    local mentions="@scanner-defs-oncall @shane"
+    local log_url="https://prow.ci.openshift.org/view/gs/origin-ci-test/logs/${JOB_NAME}/${BUILD_ID}"
+
+    # shellcheck disable=SC2016
+    local body='
+{
+    "text": "*Job Name:* \($job_name)",
+    "blocks": [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": "Prow job failure: \($job_name)"
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*Repo:* \($repo)\n*Log:* \($log_url)\n*Mentions:* \($mentions)"
+            }
+        },
+        {
+            "type": "divider"
+        }
+    ]
+}
+'
+
+    echo "About to post:"
+    jq --null-input --arg job_name "$job_name" --arg repo "$repo" \
+       --arg log_url "$log_url" --arg mentions "$mentions" "$body"
+
+    jq --null-input --arg job_name "$job_name" --arg repo "$repo" \
+       --arg log_url "$log_url" --arg mentions "$mentions" "$body" | \
     curl -XPOST -d @- -H 'Content-Type: application/json' "$webhook_url"
 }
 
