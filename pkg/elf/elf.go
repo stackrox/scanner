@@ -49,7 +49,7 @@ func isSharedObject(elfFile *elf.File) (bool, error) {
 			d = d[16:]
 		}
 		if t == elf.DT_FLAGS_1 {
-			return v != df1PIE, nil
+			return v&df1PIE == 0, nil
 		}
 	}
 	return true, nil
