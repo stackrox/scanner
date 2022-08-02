@@ -139,8 +139,8 @@ func TestLister(t *testing.T, l Lister, testData []TestData) {
 func AddToDependencyMap(filename string, fileData tarutil.FileData, execToDeps, libToDeps database.StringToStringsMap) {
 	if fileData.Executable {
 		deps := set.NewStringSet()
-		if fileData.ELFMetadata != nil {
-			deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
+		if elfMeta := fileData.ELFMetadata; elfMeta != nil {
+			deps.AddAll(elfMeta.ImportedLibraries...)
 		}
 		execToDeps[filename] = deps
 	}
