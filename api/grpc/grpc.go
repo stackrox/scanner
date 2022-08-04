@@ -16,6 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/mtls"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -51,7 +52,7 @@ func (a *apiImpl) listenOnLocalEndpoint(server *grpc.Server) error {
 }
 
 func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
-	return grpc.Dial(localEndpoint, grpc.WithInsecure())
+	return grpc.Dial(localEndpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 }
 
 func (a *apiImpl) Start() {
