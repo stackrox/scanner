@@ -3,8 +3,7 @@ package vulndefs
 import (
 	"context"
 
-	"github.com/gogo/protobuf/types"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
@@ -12,6 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Service defines a vulnerability definitions service.
@@ -50,8 +50,8 @@ func (s *serviceImpl) GetVulnDefsMetadata(context.Context, *v1.Empty) (*v1.VulnD
 		return nil, status.Errorf(codes.Internal, "failed to obtain vulnerability definitions update timestamp: %v", err)
 	}
 
-	ts, err := types.TimestampProto(t)
-	if err != nil {
+	ts := timestamppb.New(t)
+	if err := ts.CheckValid(); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to obtain vulnerability definitions update timestamp: %v", err)
 	}
 

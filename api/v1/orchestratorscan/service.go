@@ -3,7 +3,7 @@ package orchestratorscan
 import (
 	"context"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	rpmVersion "github.com/knqyf263/go-rpm-version"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"

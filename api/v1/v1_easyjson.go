@@ -92,7 +92,7 @@ func easyjson102f8a2fDecodeGithubComStackroxScannerApiV1(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson102f8a2fEncodeGithubComStackroxScannerApiV1(out *jwriter.Writer, in LayerEnvelope) {
+func easyjson102f8a2fEncodeGithubComStackroxScannerApiV1(out *jwriter.Writer, in *LayerEnvelope) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -110,7 +110,7 @@ func easyjson102f8a2fEncodeGithubComStackroxScannerApiV1(out *jwriter.Writer, in
 		} else {
 			out.RawString(prefix)
 		}
-		easyjson102f8a2fEncodeGithubComStackroxScannerApiV11(out, *in.Layer)
+		easyjson102f8a2fEncodeGithubComStackroxScannerApiV11(out, &*in.Layer)
 	}
 	if len(in.Notes) != 0 {
 		const prefix string = ",\"Notes\":"
@@ -139,7 +139,7 @@ func easyjson102f8a2fEncodeGithubComStackroxScannerApiV1(out *jwriter.Writer, in
 		} else {
 			out.RawString(prefix)
 		}
-		easyjson102f8a2fEncodeGithubComStackroxScannerApiV12(out, *in.Error)
+		easyjson102f8a2fEncodeGithubComStackroxScannerApiV12(out, &*in.Error)
 	}
 	out.RawByte('}')
 }
@@ -147,13 +147,13 @@ func easyjson102f8a2fEncodeGithubComStackroxScannerApiV1(out *jwriter.Writer, in
 // MarshalJSON supports json.Marshaler interface
 func (v LayerEnvelope) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson102f8a2fEncodeGithubComStackroxScannerApiV1(&w, v)
+	easyjson102f8a2fEncodeGithubComStackroxScannerApiV1(&w, &v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v LayerEnvelope) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson102f8a2fEncodeGithubComStackroxScannerApiV1(w, v)
+	easyjson102f8a2fEncodeGithubComStackroxScannerApiV1(w, &v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
@@ -198,7 +198,7 @@ func easyjson102f8a2fDecodeGithubComStackroxScannerApiV12(in *jlexer.Lexer, out 
 		in.Consumed()
 	}
 }
-func easyjson102f8a2fEncodeGithubComStackroxScannerApiV12(out *jwriter.Writer, in Error) {
+func easyjson102f8a2fEncodeGithubComStackroxScannerApiV12(out *jwriter.Writer, in *Error) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -294,7 +294,7 @@ func easyjson102f8a2fDecodeGithubComStackroxScannerApiV11(in *jlexer.Lexer, out 
 		in.Consumed()
 	}
 }
-func easyjson102f8a2fEncodeGithubComStackroxScannerApiV11(out *jwriter.Writer, in Layer) {
+func easyjson102f8a2fEncodeGithubComStackroxScannerApiV11(out *jwriter.Writer, in *Layer) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -392,7 +392,7 @@ func easyjson102f8a2fEncodeGithubComStackroxScannerApiV11(out *jwriter.Writer, i
 				if v7 > 0 {
 					out.RawByte(',')
 				}
-				easyjson102f8a2fEncodeGithubComStackroxScannerApiV13(out, v8)
+				easyjson102f8a2fEncodeGithubComStackroxScannerApiV13(out, &v8)
 			}
 			out.RawByte(']')
 		}
@@ -496,7 +496,7 @@ func easyjson102f8a2fDecodeGithubComStackroxScannerApiV13(in *jlexer.Lexer, out 
 		in.Consumed()
 	}
 }
-func easyjson102f8a2fEncodeGithubComStackroxScannerApiV13(out *jwriter.Writer, in Feature) {
+func easyjson102f8a2fEncodeGithubComStackroxScannerApiV13(out *jwriter.Writer, in *Feature) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -550,7 +550,7 @@ func easyjson102f8a2fEncodeGithubComStackroxScannerApiV13(out *jwriter.Writer, i
 				if v11 > 0 {
 					out.RawByte(',')
 				}
-				easyjson102f8a2fEncodeGithubComStackroxScannerApiV14(out, v12)
+				easyjson102f8a2fEncodeGithubComStackroxScannerApiV14(out, &v12)
 			}
 			out.RawByte(']')
 		}
@@ -602,7 +602,7 @@ func easyjson102f8a2fEncodeGithubComStackroxScannerApiV13(out *jwriter.Writer, i
 				if v14 == nil {
 					out.RawString("null")
 				} else {
-					easyjson102f8a2fEncodeGithubComStackroxScannerGeneratedScannerApiV1(out, *v14)
+					easyjson102f8a2fEncodeGithubComStackroxScannerGeneratedScannerApiV1(out, &*v14)
 				}
 			}
 			out.RawByte(']')
@@ -672,7 +672,7 @@ func easyjson102f8a2fDecodeGithubComStackroxScannerGeneratedScannerApiV1(in *jle
 		in.Consumed()
 	}
 }
-func easyjson102f8a2fEncodeGithubComStackroxScannerGeneratedScannerApiV1(out *jwriter.Writer, in _v1.Executable) {
+func easyjson102f8a2fEncodeGithubComStackroxScannerGeneratedScannerApiV1(out *jwriter.Writer, in *_v1.Executable) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -699,7 +699,7 @@ func easyjson102f8a2fEncodeGithubComStackroxScannerGeneratedScannerApiV1(out *jw
 				if v17 == nil {
 					out.RawString("null")
 				} else {
-					easyjson102f8a2fEncodeGithubComStackroxScannerGeneratedScannerApiV11(out, *v17)
+					easyjson102f8a2fEncodeGithubComStackroxScannerGeneratedScannerApiV11(out, &*v17)
 				}
 			}
 			out.RawByte(']')
@@ -740,7 +740,7 @@ func easyjson102f8a2fDecodeGithubComStackroxScannerGeneratedScannerApiV11(in *jl
 		in.Consumed()
 	}
 }
-func easyjson102f8a2fEncodeGithubComStackroxScannerGeneratedScannerApiV11(out *jwriter.Writer, in _v1.FeatureNameVersion) {
+func easyjson102f8a2fEncodeGithubComStackroxScannerGeneratedScannerApiV11(out *jwriter.Writer, in *_v1.FeatureNameVersion) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -829,7 +829,7 @@ func easyjson102f8a2fDecodeGithubComStackroxScannerApiV14(in *jlexer.Lexer, out 
 		in.Consumed()
 	}
 }
-func easyjson102f8a2fEncodeGithubComStackroxScannerApiV14(out *jwriter.Writer, in Vulnerability) {
+func easyjson102f8a2fEncodeGithubComStackroxScannerApiV14(out *jwriter.Writer, in *Vulnerability) {
 	out.RawByte('{')
 	first := true
 	_ = first

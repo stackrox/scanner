@@ -81,7 +81,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgVulnloaderNvdloader(in *jl
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(out *jwriter.Writer, in itemWrapper) {
+func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(out *jwriter.Writer, in *itemWrapper) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -91,18 +91,18 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(out *j
 		if in.CVE == nil {
 			out.RawString("null")
 		} else {
-			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(out, *in.CVE)
+			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(out, &*in.CVE)
 		}
 	}
 	if in.Configurations != nil {
 		const prefix string = ",\"configurations\":"
 		out.RawString(prefix)
-		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(out, *in.Configurations)
+		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(out, &*in.Configurations)
 	}
 	if in.Impact != nil {
 		const prefix string = ",\"impact\":"
 		out.RawString(prefix)
-		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(out, *in.Impact)
+		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(out, &*in.Impact)
 	}
 	if in.LastModifiedDate != "" {
 		const prefix string = ",\"lastModifiedDate\":"
@@ -120,13 +120,13 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(out *j
 // MarshalJSON supports json.Marshaler interface
 func (v itemWrapper) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(&w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(&w, &v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v itemWrapper) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader(w, &v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
@@ -189,7 +189,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(i
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(out *jwriter.Writer, in schema.NVDCVEFeedJSON10DefImpact) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(out *jwriter.Writer, in *schema.NVDCVEFeedJSON10DefImpact) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -197,7 +197,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(o
 		const prefix string = ",\"baseMetricV2\":"
 		first = false
 		out.RawString(prefix[1:])
-		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(out, *in.BaseMetricV2)
+		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(out, &*in.BaseMetricV2)
 	}
 	if in.BaseMetricV3 != nil {
 		const prefix string = ",\"baseMetricV3\":"
@@ -207,7 +207,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(o
 		} else {
 			out.RawString(prefix)
 		}
-		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(out, *in.BaseMetricV3)
+		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(out, &*in.BaseMetricV3)
 	}
 	out.RawByte('}')
 }
@@ -254,7 +254,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(i
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(out *jwriter.Writer, in schema.NVDCVEFeedJSON10DefImpactBaseMetricV3) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(out *jwriter.Writer, in *schema.NVDCVEFeedJSON10DefImpactBaseMetricV3) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -262,7 +262,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema4(o
 		const prefix string = ",\"cvssV3\":"
 		first = false
 		out.RawString(prefix[1:])
-		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(out, *in.CVSSV3)
+		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(out, &*in.CVSSV3)
 	}
 	if in.ExploitabilityScore != 0 {
 		const prefix string = ",\"exploitabilityScore\":"
@@ -375,7 +375,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(i
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(out *jwriter.Writer, in schema.CVSSV30) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema5(out *jwriter.Writer, in *schema.CVSSV30) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -607,7 +607,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(i
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(out *jwriter.Writer, in schema.NVDCVEFeedJSON10DefImpactBaseMetricV2) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(out *jwriter.Writer, in *schema.NVDCVEFeedJSON10DefImpactBaseMetricV2) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -625,7 +625,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema3(o
 		} else {
 			out.RawString(prefix)
 		}
-		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema6(out, *in.CVSSV2)
+		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema6(out, &*in.CVSSV2)
 	}
 	if in.ExploitabilityScore != 0 {
 		const prefix string = ",\"exploitabilityScore\":"
@@ -766,7 +766,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema6(i
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema6(out *jwriter.Writer, in schema.CVSSV20) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema6(out *jwriter.Writer, in *schema.CVSSV20) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -955,7 +955,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(i
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(out *jwriter.Writer, in schema.NVDCVEFeedJSON10DefConfigurations) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(out *jwriter.Writer, in *schema.NVDCVEFeedJSON10DefConfigurations) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -976,7 +976,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(o
 				if v3 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(out, *v3)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(out, &*v3)
 				}
 			}
 			out.RawByte(']')
@@ -1079,7 +1079,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(i
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(out *jwriter.Writer, in schema.NVDCVEFeedJSON10DefNode) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(out *jwriter.Writer, in *schema.NVDCVEFeedJSON10DefNode) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1096,7 +1096,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(o
 				if v7 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(out, *v7)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(out, &*v7)
 				}
 			}
 			out.RawByte(']')
@@ -1119,7 +1119,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(o
 				if v9 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(out, *v9)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema7(out, &*v9)
 				}
 			}
 			out.RawByte(']')
@@ -1221,7 +1221,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(i
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(out *jwriter.Writer, in schema.NVDCVEFeedJSON10DefCPEMatch) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(out *jwriter.Writer, in *schema.NVDCVEFeedJSON10DefCPEMatch) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1238,7 +1238,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema8(o
 				if v12 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(out, *v12)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(out, &*v12)
 				}
 			}
 			out.RawByte(']')
@@ -1324,7 +1324,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(i
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(out *jwriter.Writer, in schema.NVDCVEFeedJSON10DefCPEName) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema9(out *jwriter.Writer, in *schema.NVDCVEFeedJSON10DefCPEName) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1431,7 +1431,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(in
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(out *jwriter.Writer, in schema.CVEJSON40) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(out *jwriter.Writer, in *schema.CVEJSON40) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1441,7 +1441,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(ou
 		if in.Affects == nil {
 			out.RawString("null")
 		} else {
-			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(out, *in.Affects)
+			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(out, &*in.Affects)
 		}
 	}
 	{
@@ -1450,7 +1450,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(ou
 		if in.CVEDataMeta == nil {
 			out.RawString("null")
 		} else {
-			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema11(out, *in.CVEDataMeta)
+			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema11(out, &*in.CVEDataMeta)
 		}
 	}
 	{
@@ -1474,7 +1474,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(ou
 		if in.Description == nil {
 			out.RawString("null")
 		} else {
-			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(out, *in.Description)
+			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(out, &*in.Description)
 		}
 	}
 	{
@@ -1483,7 +1483,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(ou
 		if in.Problemtype == nil {
 			out.RawString("null")
 		} else {
-			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(out, *in.Problemtype)
+			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(out, &*in.Problemtype)
 		}
 	}
 	{
@@ -1492,7 +1492,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(ou
 		if in.References == nil {
 			out.RawString("null")
 		} else {
-			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(out, *in.References)
+			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(out, &*in.References)
 		}
 	}
 	out.RawByte('}')
@@ -1557,7 +1557,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(out *jwriter.Writer, in schema.CVEJSON40References) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(out *jwriter.Writer, in *schema.CVEJSON40References) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1575,7 +1575,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema14(
 				if v15 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(out, *v15)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(out, &*v15)
 				}
 			}
 			out.RawByte(']')
@@ -1641,7 +1641,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(out *jwriter.Writer, in schema.CVEJSON40Reference) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema15(out *jwriter.Writer, in *schema.CVEJSON40Reference) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1752,7 +1752,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(out *jwriter.Writer, in schema.CVEJSON40Problemtype) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(out *jwriter.Writer, in *schema.CVEJSON40Problemtype) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1770,7 +1770,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema13(
 				if v21 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(out, *v21)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(out, &*v21)
 				}
 			}
 			out.RawByte(']')
@@ -1838,7 +1838,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(out *jwriter.Writer, in schema.CVEJSON40ProblemtypeProblemtypeData) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(out *jwriter.Writer, in *schema.CVEJSON40ProblemtypeProblemtypeData) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1856,7 +1856,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema16(
 				if v24 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(out, *v24)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(out, &*v24)
 				}
 			}
 			out.RawByte(']')
@@ -1897,7 +1897,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(out *jwriter.Writer, in schema.CVEJSON40LangString) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(out *jwriter.Writer, in *schema.CVEJSON40LangString) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1973,7 +1973,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(out *jwriter.Writer, in schema.CVEJSON40Description) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(out *jwriter.Writer, in *schema.CVEJSON40Description) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1991,7 +1991,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema12(
 				if v27 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(out, *v27)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema17(out, &*v27)
 				}
 			}
 			out.RawByte(']')
@@ -2034,7 +2034,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema11(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema11(out *jwriter.Writer, in schema.CVEJSON40CVEDataMeta) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema11(out *jwriter.Writer, in *schema.CVEJSON40CVEDataMeta) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -2094,7 +2094,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(out *jwriter.Writer, in schema.CVEJSON40Affects) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(out *jwriter.Writer, in *schema.CVEJSON40Affects) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -2104,7 +2104,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema10(
 		if in.Vendor == nil {
 			out.RawString("null")
 		} else {
-			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(out, *in.Vendor)
+			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(out, &*in.Vendor)
 		}
 	}
 	out.RawByte('}')
@@ -2169,7 +2169,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(out *jwriter.Writer, in schema.CVEJSON40AffectsVendor) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(out *jwriter.Writer, in *schema.CVEJSON40AffectsVendor) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -2187,7 +2187,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema18(
 				if v30 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(out, *v30)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(out, &*v30)
 				}
 			}
 			out.RawByte(']')
@@ -2236,7 +2236,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(out *jwriter.Writer, in schema.CVEJSON40AffectsVendorVendorData) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(out *jwriter.Writer, in *schema.CVEJSON40AffectsVendorVendorData) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -2246,7 +2246,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema19(
 		if in.Product == nil {
 			out.RawString("null")
 		} else {
-			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(out, *in.Product)
+			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(out, &*in.Product)
 		}
 	}
 	{
@@ -2316,7 +2316,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(out *jwriter.Writer, in schema.CVEJSON40AffectsVendorVendorDataProduct) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(out *jwriter.Writer, in *schema.CVEJSON40AffectsVendorVendorDataProduct) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -2334,7 +2334,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema20(
 				if v33 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(out, *v33)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(out, &*v33)
 				}
 			}
 			out.RawByte(']')
@@ -2383,7 +2383,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(out *jwriter.Writer, in schema.CVEJSON40Product) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(out *jwriter.Writer, in *schema.CVEJSON40Product) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -2398,7 +2398,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema21(
 		if in.Version == nil {
 			out.RawString("null")
 		} else {
-			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(out, *in.Version)
+			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(out, &*in.Version)
 		}
 	}
 	out.RawByte('}')
@@ -2463,7 +2463,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(out *jwriter.Writer, in schema.CVEJSON40ProductVersion) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(out *jwriter.Writer, in *schema.CVEJSON40ProductVersion) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -2481,7 +2481,7 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema22(
 				if v36 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(out, *v36)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(out, &*v36)
 				}
 			}
 			out.RawByte(']')
@@ -2522,7 +2522,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(out *jwriter.Writer, in schema.CVEJSON40ProductVersionVersionData) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema23(out *jwriter.Writer, in *schema.CVEJSON40ProductVersionVersionData) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -2614,7 +2614,7 @@ func easyjson77cee5bfDecodeGithubComStackroxScannerPkgVulnloaderNvdloader1(in *j
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(out *jwriter.Writer, in feedWrapper) {
+func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(out *jwriter.Writer, in *feedWrapper) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -2657,7 +2657,7 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(out *
 				if v39 == nil {
 					out.RawString("null")
 				} else {
-					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(out, *v39)
+					easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(out, &*v39)
 				}
 			}
 			out.RawByte(']')
@@ -2669,13 +2669,13 @@ func easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(out *
 // MarshalJSON supports json.Marshaler interface
 func (v feedWrapper) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(&w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(&w, &v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v feedWrapper) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(w, v)
+	easyjson77cee5bfEncodeGithubComStackroxScannerPkgVulnloaderNvdloader1(w, &v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
@@ -2752,7 +2752,7 @@ func easyjson77cee5bfDecodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(
 		in.Consumed()
 	}
 }
-func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(out *jwriter.Writer, in schema.NVDCVEFeedJSON10DefCVEItem) {
+func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(out *jwriter.Writer, in *schema.NVDCVEFeedJSON10DefCVEItem) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -2762,18 +2762,18 @@ func easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema24(
 		if in.CVE == nil {
 			out.RawString("null")
 		} else {
-			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(out, *in.CVE)
+			easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema(out, &*in.CVE)
 		}
 	}
 	if in.Configurations != nil {
 		const prefix string = ",\"configurations\":"
 		out.RawString(prefix)
-		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(out, *in.Configurations)
+		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema1(out, &*in.Configurations)
 	}
 	if in.Impact != nil {
 		const prefix string = ",\"impact\":"
 		out.RawString(prefix)
-		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(out, *in.Impact)
+		easyjson77cee5bfEncodeGithubComFacebookincubatorNvdtoolsCvefeedNvdSchema2(out, &*in.Impact)
 	}
 	if in.LastModifiedDate != "" {
 		const prefix string = ",\"lastModifiedDate\":"
