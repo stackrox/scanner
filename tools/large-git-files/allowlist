@@ -2,6 +2,7 @@ e2etests/testcase_test.go
 ext/featurefmt/rpm/testdata/Packages
 generated/scanner/api/v1/component.pb.go
 generated/scanner/api/v1/image_scan_service.pb.go
+generated/scanner/api/v1/image_scan_service_vtproto.pb.go
 generated/scanner/api/v1/node_scan_service.pb.go
 generated/scanner/api/v1/vulnerability.pb.go
 go.sum
@@ -11,3 +12,4 @@ pkg/rhelv2/rpm/testdata/rpmdb.sqlite
 pkg/vulnloader/nvdloader/nvdloader_easyjson.go
 pkg/ziputil/testdata/test.zip
 tools/linters/go.sum
+scale/fixtures.go
