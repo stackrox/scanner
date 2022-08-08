@@ -14,6 +14,11 @@ set -euo pipefail
 
 main() {
 
+    if is_openshift_CI_rehearse_PR; then
+        echo "Skipping on openshift/release rehearsal PRs"
+        exit 0
+    fi
+
     openshift_ci_import_creds
 
     gitbot(){
@@ -63,6 +68,10 @@ main() {
     }
 
     # Push
+
+    gitbot push origin "$nightly_tag" || {
+        die "Could not push"
+    }
 
     gitbot push --force || {
         die "Could not push"

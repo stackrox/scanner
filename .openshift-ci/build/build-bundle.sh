@@ -49,6 +49,11 @@ get_genesis_dump() {
 }
 
 build_bundle() {
+    # avoid a -dirty tag
+    info "Reset to remove Dockerfile modification by OpenShift CI"
+    git restore .
+    git status
+
     info "Building Scanner binary"
     make scanner-build-nodeps
 
