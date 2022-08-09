@@ -23,7 +23,7 @@ ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 
-ARG POSTGRESQL_ARCH=aarch64
+ARG POSTGRESQL_ARCH=x86_64
 
 RUN groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
