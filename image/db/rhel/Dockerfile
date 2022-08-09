@@ -23,12 +23,14 @@ ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 
+ARG POSTGRESQL_ARCH=aarch64
+
 RUN groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
     dnf upgrade -y && \
     dnf install -y \
         ca-certificates libicu systemd-sysv glibc-locale-source glibc-langpack-en \
-        https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm && \
+        https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-${POSTGRESQL_ARCH}/pgdg-redhat-repo-latest.noarch.rpm && \
     dnf install -y postgresql12-server && \
     dnf clean all && \
     rpm -e --nodeps $(rpm -qa 'pgdg-redhat-repo*') && \

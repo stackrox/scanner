@@ -27,10 +27,20 @@ DEFAULT_IMAGE_REGISTRY := quay.io/stackrox-io
 BUILD_IMAGE_VERSION=$(shell sed 's/\s*\#.*//' BUILD_IMAGE_VERSION)
 BUILD_IMAGE := $(DEFAULT_IMAGE_REGISTRY)/apollo-ci:$(BUILD_IMAGE_VERSION)
 
+ifeq ($(shell uname -ms),Darwin arm64)
+	# TODO(ROX-12064) build these images in the CI pipeline
+	BUILD_IMAGE = quay.io/rhacs-eng/sandbox:apollo-ci-scanner-build-0.3.44-arm64
+	ARCH := aarch64
+	GOARCH := arm64
+else
+	ARCH := x86_64
+	GOARCH := amd64
+endif
+
 LOCAL_VOLUME_ARGS := -v$(CURDIR):/src:delegated -v $(GOPATH):/go:delegated
 GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
-IMAGE_BUILD_FLAGS := -e CGO_ENABLED=1,GOOS=linux,GOARCH=amd64
-BUILD_FLAGS := CGO_ENABLED=1 GOOS=linux GOARCH=amd64
+IMAGE_BUILD_FLAGS := -e CGO_ENABLED=1,GOOS=linux,GOARCH=${GOARCH}
+BUILD_FLAGS := CGO_ENABLED=1 GOOS=linux GOARCH=${GOARCH}
 BUILD_CMD := go build -trimpath -ldflags="-linkmode=external -X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
 
 #####################################################################
@@ -205,7 +215,7 @@ scanner-image-slim: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanne
 db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t scanner-db:$(TAG) -f image/db/rhel/Dockerfile image/db/rhel
+	@docker build -t scanner-db:$(TAG) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: db-image-slim
 db-image-slim: $(CURDIR)/image/db/rhel/bundle.tar.gz
