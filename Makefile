@@ -221,7 +221,7 @@ db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
 db-image-slim: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t scanner-db-slim:$(TAG) -f image/db/rhel/Dockerfile.slim image/db/rhel
+	@docker build -t scanner-db-slim:$(TAG) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile.slim image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered
