@@ -93,6 +93,7 @@ push_image_set() {
 
     local tag
     tag="$(make --quiet --no-print-directory tag)"
+    info "PUSHING IMAGES WITH TAG: ${tag}"
     for registry in "${destination_registries[@]}"; do
         registry_rw_login "$registry"
 
