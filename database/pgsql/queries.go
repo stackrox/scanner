@@ -223,16 +223,16 @@ const (
 	insertRHELv2VulnPackage = `
 		INSERT INTO vuln_package (
 			hash,
-			name,
+			vuln_hash, name,
 			package_name, package_module, package_arch,
 			cpe,
 			fixed_in_version, arch_operation
 		) VALUES (
 			$1,
-			$2,
-			$3, $4, $5,
-			$6,
-			$7, $8
+			$2, $3,
+			$4, $5, $6,
+			$7,
+			$8, $9
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
@@ -255,7 +255,7 @@ const (
 		FROM
 			vuln_package
 			LEFT JOIN vuln ON
-				vuln_package.name = vuln.name
+				vuln_package.vuln_hash = vuln.hash
 		WHERE
 			vuln_package.package_name = $1
 				AND vuln_package.package_module = $2

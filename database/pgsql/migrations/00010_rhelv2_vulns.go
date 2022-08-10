@@ -35,6 +35,7 @@ func init() {
 		CREATE TABLE IF NOT EXISTS vuln_package (
 			id               BIGSERIAL PRIMARY KEY,
 			hash             BYTEA NOT NULL,
+			vuln_hash        BYTEA NOT NULL,
 			name             TEXT,
 			package_name     TEXT,
 			package_module   TEXT,
