@@ -3421,7 +3421,7 @@ var testCases = []testCase{
 						},
 					},
 				},
-				AddedBy: "",
+				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 			{
 				Name:          "dotnet-runtime-6.0",
@@ -3453,7 +3453,7 @@ var testCases = []testCase{
 						},
 					},
 				},
-				AddedBy: "",
+				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 		},
 	},
