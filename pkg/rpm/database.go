@@ -143,6 +143,19 @@ func CreateDatabaseFromLayer(imageFiles tarutil.LayerFiles) (*rpmDatabase, error
 			return nil, commonerr.ErrFilesystem
 		}
 	}
+	// Rebuild the rpm database, it will recreate indexes and convert old formats
+	// to the latest supported by the current rpm version.
+	dbCmd := exec.Command(
+		"rpmdb",
+		"--dbpath", dbDir,
+		"--rebuilddb",
+	)
+	var errBuffer bytes.Buffer
+	dbCmd.Stderr = &errBuffer
+	if err := dbCmd.Run(); err != nil {
+		logrus.Warnf("failed to rebuild the rpm database: %s", errBuffer.String())
+		return nil, errors.Wrap(err, "failed to rebuild rpm database")
+	}
 	return &rpmDatabase{
 		dbPath: dbDir,
 	}, nil
