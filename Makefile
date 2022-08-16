@@ -246,7 +246,7 @@ deploy-local: clean-helm-rendered
 	kubectl apply -R -f rendered-chart
 
 .PHONY: ossls-notice
-ossls-notice: deps
+ossls-notice: deps $(OSSLS_BIN)
 	ossls version
 	ossls audit --export image/scanner/rhel/THIRD_PARTY_NOTICES
 
