@@ -13,6 +13,7 @@ import (
 )
 
 // TimeFormat is the format used for vulnerability published and/or modified time.
+// This format is expected in StackRox Central.
 const TimeFormat = "2006-01-02T15:04Z"
 
 // Metadata is the vulnerability metadata.
