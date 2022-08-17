@@ -3,7 +3,7 @@ module github.com/stackrox/scanner
 go 1.16
 
 require (
-	cloud.google.com/go/storage v1.24.0
+	cloud.google.com/go/storage v1.25.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/ckaznocha/protoc-gen-lint v0.2.4
