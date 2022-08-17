@@ -2,6 +2,9 @@
 
 # Adapted from https://github.com/stackrox/stackrox/blob/master/scripts/ci/jobs/go-postgres-tests.sh
 
+SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+source "$SCRIPTS_ROOT/scripts/lib.sh"
+
 set -euo pipefail
 
 start_postgres() {
