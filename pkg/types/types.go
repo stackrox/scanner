@@ -12,6 +12,9 @@ import (
 	"github.com/stackrox/scanner/database"
 )
 
+// TimeFormat is the format used for vulnerability published and/or modified time.
+const TimeFormat = "2006-01-02T15:04Z"
+
 // Metadata is the vulnerability metadata.
 type Metadata struct {
 	PublishedDateTime    string
@@ -153,6 +156,8 @@ func ConvertMetadataFromK8s(cve *validation.CVESchema) (*Metadata, error) {
 			m.CVSSv3 = *cvssv3
 		}
 	}
+
+	m.PublishedDateTime = cve.Published.Format(TimeFormat)
 
 	return &m, nil
 }
