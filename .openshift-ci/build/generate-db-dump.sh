@@ -16,7 +16,7 @@ generate_db_dump() {
     adduser pg -u 1001 -g 1001 -d /var/lib/postgresql -s /bin/sh
 
     # The PATH is not completely preserved, so set the PATH here to ensure postgres-related commands can be found.
-    runuser -l pg -c "PATH=$PATH:/usr/pgsql-$PG_MAJOR/bin/ $ROOT/scripts/ci/postgres.sh start_postgres"
+    runuser -l pg -c "PATH=$PATH $ROOT/scripts/ci/postgres.sh start_postgres"
 
     "$ROOT/bin/updater" load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file /tmp/genesis-dump/genesis-dump.zip
 
