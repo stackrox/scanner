@@ -79,6 +79,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 								ExploitabilityScore: 1.4,
 								ImpactScore:         3.4,
 							},
+							PublishedDateTime: "2019-05-24T00:00Z",
 						},
 						FixedBy: "1.14.3",
 					},
