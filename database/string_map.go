@@ -63,8 +63,9 @@ func (m *StringToStringsMap) Scan(value interface{}) error {
 }
 
 // Merge merges map b to map a.
-// If a contains str_a -> ["a", "b"]
+// If:
 //
+//	a contains str_a -> ["a", "b"]
 //	b contains str_a -> ["b", "c"]
 //
 // Then after merging:
