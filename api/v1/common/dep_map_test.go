@@ -54,9 +54,10 @@ func TestCreateDepMap(t *testing.T) {
 }
 
 // Test Topology:  x -> y means x is used by y.
-//         x -> y -> z
-//         ^         |
-//         |_________|
+//
+//	x -> y -> z
+//	^         |
+//	|_________|
 func TestLoopDepMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		"x": {
@@ -89,11 +90,12 @@ func TestLoopDepMap(t *testing.T) {
 }
 
 // Test Topology: x -> y means x is used by y.
-//                   |------------
-//                   v           |
-//   x1 -> x -> y -> z -> z1 -> z2 -> z3
-//         ^         |
-//         |_________|
+//
+//	                |------------
+//	                v           |
+//	x1 -> x -> y -> z -> z1 -> z2 -> z3
+//	      ^         |
+//	      |_________|
 func TestDoubleLoopDepMap(t *testing.T) {
 	featureMap := map[string]database.FeatureVersion{
 		"x1": {
