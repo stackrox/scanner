@@ -41,7 +41,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
-	github.com/stackrox/k8s-cves v0.0.0-20220817213406-b74247cbb247
+	github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d
 	github.com/stackrox/rox v0.0.0-20210914215712-9ac265932e28
 	github.com/stretchr/testify v1.8.0
 	go.etcd.io/bbolt v1.3.6
