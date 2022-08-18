@@ -12,11 +12,11 @@ import (
 )
 
 func TestConvertK8sVulnerabilities(t *testing.T) {
-	pieDay, err := time.Parse(validation.TimeFormat, "2020-03-14")
+	pieDay, err := time.Parse(validation.TimeLayout, "2020-03-14T00:00Z")
 	require.NoError(t, err)
-	taxDay, err := time.Parse(validation.TimeFormat, "2015-04-15")
+	taxDay, err := time.Parse(validation.TimeLayout, "2015-04-15T00:00Z")
 	require.NoError(t, err)
-	newYearsDay, err := time.Parse(validation.TimeFormat, "2022-01-01")
+	newYearsDay, err := time.Parse(validation.TimeLayout, "2022-01-01T00:00Z")
 	require.NoError(t, err)
 
 	testCases := []struct {
@@ -70,7 +70,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ExploitabilityScore: 1.8,
 							ImpactScore:         4.0,
 						},
-						PublishedDateTime: pieDay.Format(types.TimeFormat),
+						PublishedDateTime: pieDay.Format(types.NVDTimeLayout),
 					},
 					FixedBy: "1.0.1",
 				},
@@ -167,7 +167,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ExploitabilityScore: 3.1,
 							ImpactScore:         4.0,
 						},
-						PublishedDateTime: taxDay.Format(types.TimeFormat),
+						PublishedDateTime: taxDay.Format(types.NVDTimeLayout),
 					},
 					FixedBy: "1.1.1",
 				},
@@ -182,7 +182,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ExploitabilityScore: 3.1,
 							ImpactScore:         4.0,
 						},
-						PublishedDateTime: pieDay.Format(types.TimeFormat),
+						PublishedDateTime: pieDay.Format(types.NVDTimeLayout),
 					},
 				},
 				{
@@ -196,7 +196,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ExploitabilityScore: 3.1,
 							ImpactScore:         4.0,
 						},
-						PublishedDateTime: newYearsDay.Format(types.TimeFormat),
+						PublishedDateTime: newYearsDay.Format(types.NVDTimeLayout),
 					},
 					FixedBy: "1.1.3",
 				},
@@ -249,7 +249,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ExploitabilityScore: 1.8,
 							ImpactScore:         4.0,
 						},
-						PublishedDateTime: newYearsDay.Format(types.TimeFormat),
+						PublishedDateTime: newYearsDay.Format(types.NVDTimeLayout),
 					},
 					FixedBy: "v1.12.1+d4cacc0",
 				},

@@ -12,9 +12,8 @@ import (
 	"github.com/stackrox/scanner/database"
 )
 
-// TimeFormat is the format used for vulnerability published and/or modified time.
-// This format is expected in StackRox Central.
-const TimeFormat = "2006-01-02T15:04Z"
+// NVDTimeLayout is the time layout used by NVD.
+const NVDTimeLayout = schema.TimeLayout
 
 // Metadata is the vulnerability metadata.
 type Metadata struct {
@@ -158,7 +157,7 @@ func ConvertMetadataFromK8s(cve *validation.CVESchema) (*Metadata, error) {
 		}
 	}
 
-	m.PublishedDateTime = cve.Published.Format(TimeFormat)
+	m.PublishedDateTime = cve.Published.Format(NVDTimeLayout)
 
 	return &m, nil
 }
