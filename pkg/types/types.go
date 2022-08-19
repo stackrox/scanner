@@ -12,6 +12,9 @@ import (
 	"github.com/stackrox/scanner/database"
 )
 
+// NVDTimeLayout is the time layout used by NVD.
+const NVDTimeLayout = schema.TimeLayout
+
 // Metadata is the vulnerability metadata.
 type Metadata struct {
 	PublishedDateTime    string
@@ -153,6 +156,8 @@ func ConvertMetadataFromK8s(cve *validation.CVESchema) (*Metadata, error) {
 			m.CVSSv3 = *cvssv3
 		}
 	}
+
+	m.PublishedDateTime = cve.Published.Format(NVDTimeLayout)
 
 	return &m, nil
 }
