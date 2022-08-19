@@ -2,13 +2,23 @@ package convert
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
+	"github.com/stackrox/scanner/pkg/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConvertK8sVulnerabilities(t *testing.T) {
+	pieDay, err := time.Parse(validation.TimeLayout, "2020-03-14T00:00Z")
+	require.NoError(t, err)
+	taxDay, err := time.Parse(validation.TimeLayout, "2015-04-15T00:00Z")
+	require.NoError(t, err)
+	newYearsDay, err := time.Parse(validation.TimeLayout, "2022-01-01T00:00Z")
+	require.NoError(t, err)
+
 	testCases := []struct {
 		version  string
 		cves     []*validation.CVESchema
@@ -21,6 +31,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					CVE:         "CVE-2020-1234",
 					Description: "test1",
 					IssueURL:    "issueUrl",
+					Published:   validation.Time{Time: pieDay},
 					CVSS: &validation.CVSSSchema{
 						NVD: &validation.NVDSchema{
 							ScoreV2:  3.5,
@@ -59,6 +70,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ExploitabilityScore: 1.8,
 							ImpactScore:         4.0,
 						},
+						PublishedDateTime: pieDay.Format(types.NVDTimeLayout),
 					},
 					FixedBy:  "1.0.1",
 					Severity: "Moderate",
@@ -73,6 +85,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					Description: "test2",
 					IssueURL:    "issueUrl",
 					URL:         "url",
+					Published:   validation.Time{Time: taxDay},
 					CVSS: &validation.CVSSSchema{
 						NVD: &validation.NVDSchema{
 							ScoreV3:  7.7,
@@ -98,6 +111,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					CVE:         "CVE-2020-1235",
 					Description: "test2",
 					URL:         "url",
+					Published:   validation.Time{Time: pieDay},
 					CVSS: &validation.CVSSSchema{
 						NVD: &validation.NVDSchema{
 							ScoreV3:  7.7,
@@ -115,6 +129,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					CVE:         "CVE-2020-1236",
 					Description: "test3",
 					URL:         "url",
+					Published:   validation.Time{Time: newYearsDay},
 					CVSS: &validation.CVSSSchema{
 						NVD: &validation.NVDSchema{
 							ScoreV3:  7.7,
@@ -153,6 +168,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ExploitabilityScore: 3.1,
 							ImpactScore:         4.0,
 						},
+						PublishedDateTime: taxDay.Format(types.NVDTimeLayout),
 					},
 					FixedBy:  "1.1.1",
 					Severity: "Important",
@@ -168,6 +184,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ExploitabilityScore: 3.1,
 							ImpactScore:         4.0,
 						},
+						PublishedDateTime: pieDay.Format(types.NVDTimeLayout),
 					},
 					Severity: "Important",
 				},
@@ -182,6 +199,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ExploitabilityScore: 3.1,
 							ImpactScore:         4.0,
 						},
+						PublishedDateTime: newYearsDay.Format(types.NVDTimeLayout),
 					},
 					FixedBy:  "1.1.3",
 					Severity: "Important",
@@ -196,6 +214,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 					CVE:         "CVE-2020-1234",
 					Description: "test1",
 					IssueURL:    "issueUrl",
+					Published:   validation.Time{Time: newYearsDay},
 					CVSS: &validation.CVSSSchema{
 						NVD: &validation.NVDSchema{
 							ScoreV2:  3.5,
@@ -234,6 +253,7 @@ func TestConvertK8sVulnerabilities(t *testing.T) {
 							ExploitabilityScore: 1.8,
 							ImpactScore:         4.0,
 						},
+						PublishedDateTime: newYearsDay.Format(types.NVDTimeLayout),
 					},
 					FixedBy:  "v1.12.1+d4cacc0",
 					Severity: "Moderate",
