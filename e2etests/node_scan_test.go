@@ -549,7 +549,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				for _, vuln := range resp.GetKernelVulnerabilities() {
 					if vuln.GetName() == expectedCVE.id {
 						assert.Equal(t, expectedCVE.fixedBy, vuln.GetFixedBy())
-						assert.Equal(t, expectedCVE.Severity, vuln.GetSeverity())
+						assert.Equal(t, expectedCVE.severity, vuln.GetSeverity())
 						continue OUTER
 					}
 				}
