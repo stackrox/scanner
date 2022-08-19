@@ -281,7 +281,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				{
 					id:       "CVE-2020-27675",
 					fixedBy:  "5.4.0-59.65",
-					severity: "Moderate",
+					severity: "Low",
 				},
 			},
 		},
@@ -298,7 +298,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				{
 					id:       "CVE-2020-27675",
 					fixedBy:  "4.15.0-1091.104~16.04.1",
-					severity: "Moderate",
+					severity: "Low",
 				},
 				{
 					id:       "CVE-2019-2182",
@@ -320,7 +320,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				{
 					id:       "CVE-2020-27675",
 					fixedBy:  "4.4.0-1119.133",
-					severity: "Moderate",
+					severity: "Low",
 				},
 			},
 			unexpectedCVEs: []string{
@@ -346,7 +346,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 					// AWS Flavor on 18.04 is vulnerable and should have a different fixed by
 					id:       "CVE-2019-2182",
 					fixedBy:  "4.15.0-1063.67",
-					severity: "Important",
+					severity: "Moderate",
 				},
 			},
 		},
