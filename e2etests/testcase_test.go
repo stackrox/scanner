@@ -3382,4 +3382,71 @@ var testCases = []testCase{
 			},
 		},
 	},
+	{
+		image:                   "ubi9/ubi:9.0.0-1576@sha256:f22a438f4967419bd477c648d25ed0627f54b81931d0143dc45801c8356bd379",
+		namespace:               "rhel:9",
+		onlyCheckSpecifiedVulns: true,
+		registry:                "https://registry.access.redhat.com",
+		source:                  "Red Hat",
+		unexpectedFeatures: []apiV1.Feature{
+			{
+				Name:     "urllib3",
+				Version:  "9.0-2.17",
+				Location: "usr/lib/python3.9/site-packages/urllib3-1.26.5-py3.9.egg-info/PKG-INFO",
+			},
+		},
+		expectedFeatures: []apiV1.Feature{
+			{
+				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
+				Name:          "python3-urllib3",
+				NamespaceName: "rhel:9",
+				Version:       "1.26.5-3.el9.noarch",
+				VersionFormat: "rpm",
+			},
+			{
+				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
+				FixedBy:       "2:8.2.2637-16.el9_0.3",
+				Name:          "vim-minimal",
+				NamespaceName: "rhel:9",
+				Version:       "2:8.2.2637-16.el9_0.2.x86_64",
+				VersionFormat: "rpm",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "RHSA-2022:5942",
+						NamespaceName: "rhel:9",
+						Description: `Vim (Vi IMproved) is an updated and improved version of the vi editor.
+
+Security Fix(es):
+
+* vim: Out-of-bounds Write (CVE-2022-1785)
+
+* vim: out-of-bounds write in vim_regsub_both() in regexp.c (CVE-2022-1897)
+
+* vim: buffer over-read in utf_ptr2char() in mbyte.c (CVE-2022-1927)
+
+For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.`,
+						Link:     "https://access.redhat.com/errata/RHSA-2022:5942",
+						Severity: "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 1.8,
+									"ImpactScore":         5.9,
+									"Score":               7.8,
+									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+								},
+							},
+						},
+						FixedBy: "2:8.2.2637-16.el9_0.3",
+					},
+				},
+			},
+		},
+	},
 }
