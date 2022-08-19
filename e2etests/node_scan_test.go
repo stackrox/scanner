@@ -303,7 +303,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				{
 					id:       "CVE-2019-2182",
 					fixedBy:  "4.15.0-1058.62",
-					severity: "Important",
+					severity: "Moderate",
 				},
 			},
 		},
@@ -340,7 +340,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				{
 					id:       "CVE-2020-27675",
 					fixedBy:  "4.15.0-1091.96",
-					severity: "Moderate",
+					severity: "Low",
 				},
 				{
 					// AWS Flavor on 18.04 is vulnerable and should have a different fixed by
@@ -363,7 +363,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				{
 					id:       "CVE-2020-14381",
 					fixedBy:  "5.3.0-1020.22~18.04.1",
-					severity: "Important",
+					severity: "Moderate",
 				},
 			},
 			unexpectedCVEs: []string{"CVE-2019-2182"},
@@ -404,7 +404,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			expectedCVEs: []expectedCVE{
 				{
 					id:       "CVE-2020-14381",
-					severity: "Important",
+					severity: "Moderate",
 				},
 			},
 			unexpectedCVEs: []string{"CVE-2020-27675", "CVE-2019-2182"},
@@ -421,7 +421,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			expectedCVEs: []expectedCVE{
 				{
 					id:       "CVE-2020-14381",
-					severity: "Important",
+					severity: "Moderate",
 				},
 			},
 			unexpectedCVEs: []string{"CVE-2020-27675", "CVE-2019-2182"},
@@ -438,7 +438,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			expectedCVEs: []expectedCVE{
 				{
 					id:       "CVE-2020-14381",
-					severity: "Important",
+					severity: "Moderate",
 				},
 			},
 			unexpectedCVEs: []string{"CVE-2020-27675", "CVE-2019-2182"},
