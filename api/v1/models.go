@@ -394,6 +394,7 @@ type LayerEnvelope struct {
 }
 
 // Note defines scanning notes.
+//
 //go:generate stringer -type=Note
 type Note int
 

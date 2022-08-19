@@ -18,8 +18,7 @@ type libDepNode struct {
 
 // cycle is discovered while traversing a graph of dependency.
 // head: the first element that was traversed within the cycle.
-// members: all the elements that may appear in the cycle regardless
-//          of the order.
+// members: all the elements that may appear in the cycle regardless of the order.
 type cycle struct {
 	head    string
 	members set.StringSet

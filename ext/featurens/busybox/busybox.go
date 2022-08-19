@@ -1,8 +1,6 @@
 // Package busybox implements a featurens.Detector for container images
 // layers based on busybox[1].
 //
-// [1]: https://www.busybox.net/FAQ.html
-//
 // The detector assumes a Busybox image has the following attributes:
 //
 // 1. Does not contain any freedesktop standard release file (os-release, lsb-release).
@@ -11,6 +9,7 @@
 //
 // 3. The busybox binary contains a version string on the form "BusyBox vX.Y.Z"
 //
+// [1]: https://www.busybox.net/FAQ.html
 package busybox
 
 import (
