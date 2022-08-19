@@ -63,7 +63,7 @@ func TestConvertNVDVulns(t *testing.T) {
 						},
 					},
 					FixedBy:  "1.3.4",
-					Severity: "Moderate",
+					Severity: "Important",
 				},
 			},
 		},
