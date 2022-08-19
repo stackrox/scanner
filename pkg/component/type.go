@@ -1,6 +1,7 @@
 package component
 
 // SourceType represents the specific type of a language-level component.
+//
 //go:generate stringer -type=SourceType
 type SourceType int
 
