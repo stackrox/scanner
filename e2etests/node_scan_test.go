@@ -58,7 +58,8 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 								ImpactScore:         3.6,
 							},
 						},
-						FixedBy: "5.4.0-59.65",
+						FixedBy:  "5.4.0-59.65",
+						Severity: "Moderate",
 					},
 				},
 				KubeletVulnerabilities: []*v1.Vulnerability{
@@ -80,7 +81,8 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 								ImpactScore:         3.4,
 							},
 						},
-						FixedBy: "1.14.3",
+						FixedBy:  "1.14.3",
+						Severity: "Moderate",
 					},
 				},
 				KubeproxyVulnerabilities: nil,
@@ -105,6 +107,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 								ImpactScore:         3.6,
 							},
 						},
+						Severity: "Important",
 					},
 				},
 			},
@@ -145,7 +148,8 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 								ImpactScore:         3.4,
 							},
 						},
-						FixedBy: "1.16.1",
+						FixedBy:  "1.16.1",
+						Severity: "Moderate",
 					},
 				},
 			},
@@ -186,7 +190,8 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 								ImpactScore:         4.0,
 							},
 						},
-						FixedBy: "1.2.14",
+						FixedBy:  "1.2.14",
+						Severity: "Moderate",
 					},
 				},
 			},
@@ -246,8 +251,9 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 	client := v1.NewNodeScanServiceClient(conn)
 
 	type expectedCVE struct {
-		id      string
-		fixedBy string
+		id       string
+		fixedBy  string
+		severity string
 	}
 
 	cases := []struct {
@@ -272,8 +278,9 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id:      "CVE-2020-27675",
-					fixedBy: "5.4.0-59.65",
+					id:       "CVE-2020-27675",
+					fixedBy:  "5.4.0-59.65",
+					severity: "Moderate",
 				},
 			},
 		},
@@ -288,12 +295,14 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id:      "CVE-2020-27675",
-					fixedBy: "4.15.0-1091.104~16.04.1",
+					id:       "CVE-2020-27675",
+					fixedBy:  "4.15.0-1091.104~16.04.1",
+					severity: "Moderate",
 				},
 				{
-					id:      "CVE-2019-2182",
-					fixedBy: "4.15.0-1058.62",
+					id:       "CVE-2019-2182",
+					fixedBy:  "4.15.0-1058.62",
+					severity: "Important",
 				},
 			},
 		},
@@ -308,8 +317,9 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id:      "CVE-2020-27675",
-					fixedBy: "4.4.0-1119.133",
+					id:       "CVE-2020-27675",
+					fixedBy:  "4.4.0-1119.133",
+					severity: "Moderate",
 				},
 			},
 			unexpectedCVEs: []string{
@@ -327,13 +337,15 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id:      "CVE-2020-27675",
-					fixedBy: "4.15.0-1091.96",
+					id:       "CVE-2020-27675",
+					fixedBy:  "4.15.0-1091.96",
+					severity: "Moderate",
 				},
 				{
 					// AWS Flavor on 18.04 is vulnerable and should have a different fixed by
-					id:      "CVE-2019-2182",
-					fixedBy: "4.15.0-1063.67",
+					id:       "CVE-2019-2182",
+					fixedBy:  "4.15.0-1063.67",
+					severity: "Important",
 				},
 			},
 		},
@@ -348,8 +360,9 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id:      "CVE-2020-14381",
-					fixedBy: "5.3.0-1020.22~18.04.1",
+					id:       "CVE-2020-14381",
+					fixedBy:  "5.3.0-1020.22~18.04.1",
+					severity: "Important",
 				},
 			},
 			unexpectedCVEs: []string{"CVE-2019-2182"},
@@ -366,12 +379,14 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id:      "CVE-2020-27675",
-					fixedBy: "4.9.246-1",
+					id:       "CVE-2020-27675",
+					fixedBy:  "4.9.246-1",
+					severity: "Moderate",
 				},
 				{
-					id:      "CVE-2020-14381",
-					fixedBy: "4.9.228-1",
+					id:       "CVE-2020-14381",
+					fixedBy:  "4.9.228-1",
+					severity: "Important",
 				},
 			},
 		},
@@ -387,7 +402,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id: "CVE-2020-14381",
+					id:       "CVE-2020-14381",
+					severity: "Important",
 				},
 			},
 			unexpectedCVEs: []string{"CVE-2020-27675", "CVE-2019-2182"},
@@ -403,7 +419,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id: "CVE-2020-14381",
+					id:       "CVE-2020-14381",
+					severity: "Important",
 				},
 			},
 			unexpectedCVEs: []string{"CVE-2020-27675", "CVE-2019-2182"},
@@ -419,7 +436,8 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id: "CVE-2020-14381",
+					id:       "CVE-2020-14381",
+					severity: "Important",
 				},
 			},
 			unexpectedCVEs: []string{"CVE-2020-27675", "CVE-2019-2182"},
@@ -445,12 +463,14 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id:      "ALAS2-2020-1488",
-					fixedBy: "4.14.193-149.317.amzn2",
+					id:       "ALAS2-2020-1488",
+					fixedBy:  "4.14.193-149.317.amzn2",
+					severity: "Important",
 				},
 				{
-					id:      "CVE-2020-14386",
-					fixedBy: "4.14.193-149.317.amzn2",
+					id:       "CVE-2020-14386",
+					fixedBy:  "4.14.193-149.317.amzn2",
+					severity: "Important",
 				},
 			},
 		},
@@ -465,8 +485,9 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id:      "CVE-2020-14381",
-					fixedBy: "5.6",
+					id:       "CVE-2020-14381",
+					fixedBy:  "5.6",
+					severity: "Important",
 				},
 			},
 		},
@@ -482,12 +503,14 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			},
 			expectedCVEs: []expectedCVE{
 				{
-					id:      "CVE-2020-27675",
-					fixedBy: "5.9.6-1",
+					id:       "CVE-2020-27675",
+					fixedBy:  "5.9.6-1",
+					severity: "Moderate",
 				},
 				{
-					id:      "CVE-2020-14381",
-					fixedBy: "5.5.13-1",
+					id:       "CVE-2020-14381",
+					fixedBy:  "5.5.13-1",
+					severity: "Important",
 				},
 			},
 		},
@@ -526,6 +549,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 				for _, vuln := range resp.GetKernelVulnerabilities() {
 					if vuln.GetName() == expectedCVE.id {
 						assert.Equal(t, expectedCVE.fixedBy, vuln.GetFixedBy())
+						assert.Equal(t, expectedCVE.Severity, vuln.GetSeverity())
 						continue OUTER
 					}
 				}

@@ -36,7 +36,10 @@ type MetadataCVSSv3 struct {
 	ImpactScore         float64
 }
 
-func cvssToSeverity(metadata *Metadata) database.Severity {
+// MetadataToDatabaseSeverity determines the database.Severity based on the given *Metadata.
+// The database.Severity is determined based on the CVSS score(s) and using the proper
+// qualitative severity rating scale https://nvd.nist.gov/vuln-metrics/cvss.
+func MetadataToDatabaseSeverity(metadata *Metadata) database.Severity {
 	if metadata == nil {
 		return database.UnknownSeverity
 	}
@@ -77,7 +80,7 @@ func NewVulnerability(cveitem *schema.NVDCVEFeedJSON10DefCVEItem) *database.Vuln
 		Metadata: map[string]interface{}{
 			"NVD": metadata,
 		},
-		Severity: cvssToSeverity(metadata),
+		Severity: MetadataToDatabaseSeverity(metadata),
 	}
 }
 

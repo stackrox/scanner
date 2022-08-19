@@ -171,6 +171,7 @@ func (s *serviceImpl) evaluateLinuxKernelVulns(req *v1.GetNodeVulnerabilitiesReq
 			Description: affected.Description,
 			Link:        affected.Link,
 			MetadataV2:  metadata,
+			Severity:    string(convert.DatabaseSeverityToSeverity(affected.Severity)),
 		}
 		if affected.FixedBy != versionfmt.MaxVersion {
 			vuln.FixedBy = affected.FixedBy
