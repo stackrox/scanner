@@ -59,7 +59,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 							},
 						},
 						FixedBy:  "5.4.0-59.65",
-						Severity: "Moderate",
+						Severity: "Low",
 					},
 				},
 				KubeletVulnerabilities: []*v1.Vulnerability{
