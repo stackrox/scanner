@@ -107,7 +107,7 @@ func NVDVulns(nvdVulns []*nvdtoolscache.NVDCVEItemWithFixedIn) ([]*v1.Vulnerabil
 			Link:        nvd.Link(vuln.CVE.CVEDataMeta.ID),
 			MetadataV2:  Metadata(m),
 			FixedBy:     vuln.FixedIn,
-			Severity:    string(DatabaseSeverityToSeverity(types.MetadataToDatabaseSeverity(m))),
+			Severity:    string(DatabaseSeverityToSeverity(m.GetDatabaseSeverity())),
 		})
 	}
 

@@ -34,7 +34,7 @@ func K8sVulnerabilities(version string, k8sVulns []*validation.CVESchema) ([]*v1
 			Link:        link,
 			MetadataV2:  Metadata(m),
 			FixedBy:     fixedBy,
-			Severity:    string(DatabaseSeverityToSeverity(types.MetadataToDatabaseSeverity(m))),
+			Severity:    string(DatabaseSeverityToSeverity(m.GetDatabaseSeverity())),
 		})
 	}
 	return vulns, nil
