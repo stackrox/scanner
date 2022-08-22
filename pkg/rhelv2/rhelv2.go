@@ -126,7 +126,7 @@ func UpdateV2(outputDir string) (int, error) {
 		}
 		p := uri.Path
 		switch {
-		case strings.Contains(p, "RHEL6") || strings.Contains(p, "RHEL8"):
+		case strings.Contains(p, "RHEL6") || strings.Contains(p, "RHEL8") || strings.Contains(p, "RHEL9"):
 		case strings.Contains(p, "RHEL7"):
 			// We need to disregard this OVAL stream because some advisories therein have
 			// been released with the CPEs identical to those used in classic RHEL stream.
