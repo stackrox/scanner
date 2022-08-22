@@ -1,11 +1,8 @@
 // Package rocky implements a vulnerability source updater using
 // RLSA (Rocky Linux Security Advisories).
-
 package rocky
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -23,7 +20,6 @@ import (
 const (
 	url        = "https://errata.rockylinux.org/api/advisories"
 	linkFormat = "https://errata.rockylinux.org/%s"
-	updateFlag = "rockyUpdater"
 )
 
 var (
@@ -32,7 +28,7 @@ var (
 )
 
 type jsonData struct {
-	Advisories []jsonAdvisory `json"advisories"`
+	Advisories []jsonAdvisory `json:"advisories"`
 }
 
 type jsonAdvisory struct {
@@ -57,7 +53,7 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 	// Download JSON
 	r, err := httputil.GetWithUserAgent(url)
 	if err != nil {
-		log.WithError(err).Error("could now download Rocky's update")
+		log.WithError(err).Error("could not download Rocky's update")
 		return resp, commonerr.ErrCouldNotDownload
 	}
 	defer r.Body.Close()
@@ -67,14 +63,8 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 		return resp, commonerr.ErrCouldNotDownload
 	}
 
-	// Get the SHA-1 of the latest JSON data
-	latestHash, err := datastore.GetKeyValue(updateFlag)
-	if err != nil {
-		return resp, err
-	}
-
 	// Parse JSON
-	resp, err = buildResponse(r.Body, latestHash)
+	resp, err = buildResponse(r.Body)
 	if err != nil {
 		return resp, err
 	}
@@ -84,25 +74,13 @@ func (u *updater) Update(datastore vulnsrc.DataStore) (resp vulnsrc.UpdateRespon
 
 func (u *updater) Clean() {}
 
-func buildResponse(jsonReader io.Reader, latestKnownHash string) (resp vulnsrc.UpdateResponse, err error) {
-	hash := latestKnownHash
-
-	jsonSHA := sha1.New()
-	teedJSONReader := io.TeeReader(jsonReader, jsonSHA)
-
+func buildResponse(jsonReader io.Reader) (resp vulnsrc.UpdateResponse, err error) {
 	// Unmarshal JSON
 	var data jsonData
-	err = json.NewDecoder(teedJSONReader).Decode(&data)
+	err = json.NewDecoder(jsonReader).Decode(&data)
 	if err != nil {
 		log.WithError(err).Error("could not unmarshal Rocky's JSON")
 		return resp, commonerr.ErrCouldNotParse
-	}
-
-	// Calculate the hash and skip updating if the hash has been seen before.
-	hash = hex.EncodeToString(jsonSHA.Sum(nil))
-	if latestKnownHash == hash {
-		log.WithField("package", "Rocky").Debug("no update")
-		return resp, nil
 	}
 
 	// Extract vulnerability data from Rocky's JSON schema.
@@ -111,33 +89,30 @@ func buildResponse(jsonReader io.Reader, latestKnownHash string) (resp vulnsrc.U
 	return resp, nil
 }
 
-func parseRockyJSON(data *jsonData) (vulnerabilities []database.Vulnerability) {
-	mvulnerabilities := make(map[string]*database.Vulnerability)
+func parseRockyJSON(data *jsonData) []database.Vulnerability {
+	var vulnerabilities []database.Vulnerability
 
 	for _, advisory := range data.Advisories {
-		if strings.ToLower(advisory.Type) != "security" {
+		if !strings.EqualFold(advisory.Type, "security") {
 			continue
 		}
 
 		vulnName := advisory.Name
-		vulnerability, vulnerabilityAlreadyExists := mvulnerabilities[vulnName]
 
-		if !vulnerabilityAlreadyExists {
-			var subCVEs []string
-			for _, cve := range advisory.CVEs {
-				cveID := cve[strings.LastIndex(cve, ":::")+3:]
-				if strings.HasPrefix(cveID, "CVE-") {
-					subCVEs = append(subCVEs, cveID)
-				}
+		subCVEs := make([]string, 0, len(advisory.CVEs))
+		for _, cve := range advisory.CVEs {
+			cveID := cve[strings.LastIndex(cve, ":::")+3:]
+			if strings.HasPrefix(cveID, "CVE-") {
+				subCVEs = append(subCVEs, cveID)
 			}
+		}
 
-			vulnerability = &database.Vulnerability{
-				Name:        vulnName,
-				Link:        fmt.Sprintf(linkFormat, vulnName),
-				Severity:    normalizeSeverity(advisory.Severity),
-				Description: advisory.Description,
-				SubCVEs:     subCVEs,
-			}
+		vuln := database.Vulnerability{
+			Name:        vulnName,
+			Link:        fmt.Sprintf(linkFormat, vulnName),
+			Severity:    normalizeSeverity(advisory.Severity),
+			Description: advisory.Description,
+			SubCVEs:     subCVEs,
 		}
 
 		for _, rpmName := range advisory.RPMs {
@@ -170,18 +145,15 @@ func parseRockyJSON(data *jsonData) (vulnerabilities []database.Vulnerability) {
 				},
 				Version: pkgVersion,
 			}
-			vulnerability.FixedIn = append(vulnerability.FixedIn, pkg)
+			vuln.FixedIn = append(vuln.FixedIn, pkg)
 		}
 
 		// Store the vulnerability
-		mvulnerabilities[vulnName] = vulnerability
+		vulnerabilities = append(vulnerabilities, vuln)
+
 	}
 
-	for _, v := range mvulnerabilities {
-		vulnerabilities = append(vulnerabilities, *v)
-	}
-
-	return
+	return vulnerabilities
 }
 
 func normalizeSeverity(severity string) database.Severity {

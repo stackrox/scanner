@@ -345,6 +345,10 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg c
 			}
 		}
 
+		if cfg.SkipRockyLinuxVulns {
+			continue
+		}
+
 		if cfg.UseDPKGParserForAlpine && namespaces.IsAlpineNamespace(headVuln.Namespace.Name) {
 			headVuln.Namespace.VersionFormat = dpkg.ParserName
 
@@ -395,6 +399,7 @@ type config struct {
 	KeepUnusedRHELv2CPEs        bool `json:"keepUnusedRHELv2CPEs"`
 	UseLegacyUbuntuCVEURLPrefix bool `json:"useLegacyUbuntuCVEURLPrefix"`
 	UseLegacyAlpineCVEURLPrefix bool `json:"useLegacyAlpineCVEURLPrefix"`
+	SkipRockyLinuxVulns         bool `json:"skipRockyLinuxVulns"`
 }
 
 // Command defines the diff-dumps command.

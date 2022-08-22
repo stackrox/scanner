@@ -3444,7 +3444,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy: "1:3.0.1-43.el9_0",
+				FixedBy:       "1:3.0.1-43.el9_0",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3486,7 +3486,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy: "1:3.0.1-43.el9_0",
+				FixedBy:       "1:3.0.1-43.el9_0",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3777,6 +3777,49 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				FixedBy: "3.0.2-0ubuntu1.7",
 				// TODO: Why is it this layer?
 				AddedBy: "sha256:301a8b74f71f85f3a31e9c7e7fedd5b001ead5bcf895bc2911c1d260e06bd987",
+			},
+		},
+	},
+	{
+		image:                   "rockylinux/rockylinux:8.5@sha256:1d2b2d2433bec7eeff0c4fd904ab866e074c58ecadd1798aff3ab52476f792cf",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "rocky:8",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "rpm",
+				NamespaceName: "rocky:8",
+				VersionFormat: "rpm",
+				Version:       "4.14.3",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2021-20266",
+						NamespaceName: "rocky:8",
+						Description:   "A flaw was found in RPM's hdrblobInit() in lib/header.c. This flaw allows an attacker who can modify the rpmdb to cause an out-of-bounds read. The highest threat from this vulnerability is to system availability.",
+						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2021-20266",
+						Severity:      "Medium",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"Vectors":             "AV:N/AC:L/Au:S/C:N/I:N/A:P",
+									"Score":               4.0,
+									"ExploitabilityScore": 8.0,
+									"ImpactScore":         2.9,
+								},
+								"CVSSv3": map[string]interface{}{
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:N/I:N/A:H",
+									"Score":               4.9,
+									"ExploitabilityScore": 1.2,
+									"ImpactScore":         3.6,
+								},
+							},
+						},
+						FixedBy: "4.16.1.3",
+					},
+				},
+				FixedBy: "4.16.1.3",
+				AddedBy: "sha256:72a2451028f11c6927678e5f1bb8f35b4e723d3b342ec1a6980d7b5591cf81d6",
 			},
 		},
 	},
