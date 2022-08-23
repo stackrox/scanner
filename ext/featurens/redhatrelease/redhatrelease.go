@@ -30,6 +30,7 @@ import (
 )
 
 var (
+	almaReleaseRegexp   = regexp.MustCompile(`(?P<os>AlmaLinux) (release) (?P<version>[\d]+)`)
 	amazonReleaseRegexp = regexp.MustCompile(`(?P<os>Amazon) (Linux release|Linux AMI release) (?P<version>[\d]+\.[\d]+|[\d]+)`)
 	oracleReleaseRegexp = regexp.MustCompile(`(?P<os>Oracle) (Linux Server release) (?P<version>[\d]+)`)
 	centosReleaseRegexp = regexp.MustCompile(`(?P<os>[^\s]*) (Linux release|release) (?P<version>[\d]+)`)
@@ -37,7 +38,7 @@ var (
 	rockyReleaseRegexp  = regexp.MustCompile(`(?P<os>Rocky) (Linux release) (?P<version>[\d]+)`)
 
 	// RequiredFilenames defines the names of the files required to identify the RHEL-based release.
-	RequiredFilenames = []string{"etc/oracle-release", "etc/centos-release", "etc/redhat-release", "etc/rocky-release", "etc/system-release"}
+	RequiredFilenames = []string{"etc/almalinux-release", "etc/oracle-release", "etc/centos-release", "etc/redhat-release", "etc/rocky-release", "etc/system-release"}
 )
 
 type detector struct{}
@@ -54,6 +55,15 @@ func (d detector) Detect(files analyzer.Files, opts *featurens.DetectorOptions) 
 		}
 
 		var r []string
+
+		// Attempt to match Alma Linux.
+		r = almaReleaseRegexp.FindStringSubmatch(string(f.Contents))
+		if len(r) == 4 {
+			return &database.Namespace{
+				Name:          "alma:" + r[3],
+				VersionFormat: rpm.ParserName,
+			}
+		}
 
 		// Attempt to match Amazon Linux.
 		r = amazonReleaseRegexp.FindStringSubmatch(string(f.Contents))

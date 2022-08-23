@@ -30,6 +30,7 @@ import (
 var (
 	// blocklistFilenames are files that should exclude this detector.
 	blocklistFilenames = []string{
+		"etc/almalinux-release",
 		"etc/alpine-release",
 		"etc/centos-release",
 		"etc/fedora-release",

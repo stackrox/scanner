@@ -100,6 +100,18 @@ func TestDetector(t *testing.T) {
 			}),
 		},
 		{
+			ExpectedNamespace: &database.Namespace{Name: "alma:8", VersionFormat: rpm.ParserName},
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"etc/almalinux-release": {Contents: []byte(`AlmaLinux release 8.6 (Sky Tiger)`)},
+			}),
+		},
+		{
+			ExpectedNamespace: &database.Namespace{Name: "alma:9", VersionFormat: rpm.ParserName},
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"etc/almalinux-release": {Contents: []byte(`AlmaLinux release 9.0 (Emerald Puma)`)},
+			}),
+		},
+		{
 			ExpectedNamespace: nil,
 			Files:             tarutil.CreateNewLayerFiles(nil),
 		},
