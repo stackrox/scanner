@@ -220,6 +220,8 @@ replace (
 	github.com/nilslice/protolock => github.com/viswajithiii/protolock v0.10.1-0.20190117180626-43bb8a9ba4e8
 
 	github.com/operator-framework/helm-operator-plugins => github.com/stackrox/helm-operator v0.0.8-0.20220506091602-3764c49abfb3
+
+	github.com/quay/goval-parser => github.com/stackrox/goval-parser v0.0.0-20220824013435-c27a99415c28
 	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20220512161225-64d3c8bd40a8
 
 	go.uber.org/zap => github.com/stackrox/zap v1.15.1-0.20200720133746-810fd602fd0f
