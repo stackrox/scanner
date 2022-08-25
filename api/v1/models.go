@@ -21,6 +21,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/api/v1/common"
+	"github.com/stackrox/scanner/api/v1/convert"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
@@ -61,7 +62,7 @@ func vulnerabilityFromDatabaseModel(dbVuln database.Vulnerability) Vulnerability
 		NamespaceName: dbVuln.Namespace.Name,
 		Description:   dbVuln.Description,
 		Link:          dbVuln.Link,
-		Severity:      string(databaseVulnToSeverity(dbVuln)),
+		Severity:      string(convert.DatabaseSeverityToSeverity(dbVuln.Severity)),
 		Metadata:      dbVuln.Metadata,
 	}
 	if dbVuln.FixedBy != versionfmt.MaxVersion {

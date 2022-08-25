@@ -1,4 +1,4 @@
-package v1
+package convert
 
 import "github.com/stackrox/scanner/database"
 
@@ -14,8 +14,9 @@ const (
 	CriticalSeverity  Severity = "Critical"
 )
 
-func databaseVulnToSeverity(dbVuln database.Vulnerability) Severity {
-	switch dbVuln.Severity {
+// DatabaseSeverityToSeverity converts a database.Severity into a Severity.
+func DatabaseSeverityToSeverity(severity database.Severity) Severity {
+	switch severity {
 	case database.UnknownSeverity:
 		return UnknownSeverity
 	case database.NegligibleSeverity, database.LowSeverity:
