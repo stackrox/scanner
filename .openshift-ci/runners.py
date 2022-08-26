@@ -101,16 +101,16 @@ class ClusterTestSetsRunner:
             except Exception as err:
                 self.log_event("ERROR: test failed", test_set)
                 hold = err
-            try:
-                self.log_event("About to run post test", test_set)
-                test_set["post_test"].run(
-                    test_output_dirs=test_set["test"].test_output_dirs
-                )
-                self.log_event("post test completed", test_set)
-            except Exception as err:
-                self.log_event("ERROR: post test failed", test_set)
-                if hold is None:
-                    hold = err
+        try:
+            self.log_event("About to run post test", test_set)
+            test_set["post_test"].run(
+                test_output_dirs=test_set["test"].test_output_dirs
+            )
+            self.log_event("post test completed", test_set)
+        except Exception as err:
+            self.log_event("ERROR: post test failed", test_set)
+            if hold is None:
+                hold = err
 
         if hold is not None:
             raise hold
