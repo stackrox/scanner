@@ -26,44 +26,6 @@ func isValidCPE(cpeSet set.StringSet, cpe string) bool {
 	return cpeutils.IsOpenShiftCPE(cpe) || cpeSet.Contains(cpe)
 }
 
-func parseCVEComponents(def oval.Definition, uri string) (map[string][]string, error) {
-	defType, err := ovalutil.GetDefinitionType(def)
-	if err != nil {
-		return nil, err
-	}
-
-	// Red Hat OVAL v2 data include information about vulnerabilities,
-	// that actually don't affect the package in any way. Storing them
-	// would increase number of records in DB without adding any value.
-	if defType == ovalutil.UnaffectedDefinition {
-		return nil, nil
-	}
-
-	name := name(def)
-	if name == "" {
-		return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
-	}
-
-	if len(def.Advisory.Affected.Resolution) < 1 {
-		return nil, nil
-	}
-
-	var result map[string][]string
-	resolutions := def.Advisory.Affected.Resolution
-
-	for i := 0; i < len(resolutions); i++ {
-		state := resolutions[i].State
-		components := resolutions[i].Components
-
-		for j := 0; j < len(components); j++ {
-			component := components[j]
-			result[state] = append(result[state], component)
-		}
-	}
-
-	return result, nil
-}
-
 func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	var root oval.Root
 	if err := xml.NewDecoder(r).Decode(&root); err != nil {

@@ -36,7 +36,7 @@ require (
 	github.com/pborman/uuid v1.2.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.13.0
-	github.com/quay/goval-parser v0.8.6
+	github.com/quay/goval-parser v0.8.7
 	github.com/remind101/migrate v0.0.0-20170729031349-52c1edff7319
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
@@ -221,7 +221,6 @@ replace (
 
 	github.com/operator-framework/helm-operator-plugins => github.com/stackrox/helm-operator v0.0.8-0.20220506091602-3764c49abfb3
 
-	github.com/quay/goval-parser => github.com/stackrox/goval-parser v0.0.0-20220824013435-c27a99415c28
 	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20220512161225-64d3c8bd40a8
 
 	go.uber.org/zap => github.com/stackrox/zap v1.15.1-0.20200720133746-810fd602fd0f
