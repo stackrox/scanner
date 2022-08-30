@@ -19,6 +19,7 @@ import (
 
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -87,7 +88,7 @@ func TestAPKFeatureDetection(t *testing.T) {
 					Version: "0.7-r0",
 				},
 			},
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"lib/apk/db/installed":      {Contents: featurefmt.LoadFileForTest("apk/testdata/installed")},
 				"lib/libc.musl-x86_64.so.1": {Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{"c.so.1"}, ImportedLibraries: []string{"ld.so.1"}}},
 				"lib/ld-musl-x86_64.so.1":   {Executable: true, ELFMetadata: &elf.Metadata{Sonames: []string{"ld.so.1"}}},

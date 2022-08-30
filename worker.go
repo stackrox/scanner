@@ -166,10 +166,9 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 	return files, datastore.InsertLayerComponents(layer.Name, lineage, languageComponents, files.GetRemovedFiles(), opts)
 }
 
-func detectFromFiles(files tarutil.LayerFiles, name string, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
+func detectFromFiles(files analyzer.Files, name string, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace,
+	[]database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
 	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
-
-	distroless := isDistroless(files) || (parent != nil && parent.Distroless)
 
 	var featureVersions []database.FeatureVersion
 	var rhelfeatures *database.RHELv2Components
@@ -179,7 +178,7 @@ func detectFromFiles(files tarutil.LayerFiles, name string, parent *database.Lay
 		// Use the RHELv2 scanner instead.
 		packages, cpes, err := rhelv2.ListFeatures(files)
 		if err != nil {
-			return nil, distroless, nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		rhelfeatures = &database.RHELv2Components{
 			Dist:     namespace.Name,
@@ -195,18 +194,13 @@ func detectFromFiles(files tarutil.LayerFiles, name string, parent *database.Lay
 		// Detect features.
 		featureVersions, err = detectFeatureVersions(name, files, namespace, parent)
 		if err != nil {
-			return nil, distroless, nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		if len(featureVersions) > 0 {
 			log.WithFields(log.Fields{logLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
 		}
 	}
-
-	if !env.LanguageVulns.Enabled() {
-		return namespace, distroless, featureVersions, rhelfeatures, nil, nil
-	}
-
-	return namespace, distroless, featureVersions, rhelfeatures, languageComponents, nil
+	return namespace, featureVersions, rhelfeatures, languageComponents, nil
 }
 
 // analyzingMatcher is a Matcher implementation that calls ProcessFile on each analyzer,
@@ -247,7 +241,11 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 		log.WithFields(log.Fields{logLayerName: name, "component count": len(m.components)}).Debug("detected components")
 	}
 
-	namespace, distroless, features, rhelv2Components, languageComponents, err := detectFromFiles(*files, name, parent, m.components, uncertifiedRHEL)
+	namespace, features, rhelv2Components, languageComponents, err := detectFromFiles(*files, name, parent, m.components, uncertifiedRHEL)
+	distroless := isDistroless(*files) || (parent != nil && parent.Distroless)
+	if !env.LanguageVulns.Enabled() {
+		languageComponents = nil
+	}
 	return namespace, distroless, features, rhelv2Components, languageComponents, files, err
 }
 
@@ -257,7 +255,7 @@ func isDistroless(filesMap tarutil.LayerFiles) bool {
 }
 
 // DetectNamespace detects the layer's namespace.
-func DetectNamespace(name string, files tarutil.LayerFiles, parent *database.Layer, uncertifiedRHEL bool) *database.Namespace {
+func DetectNamespace(name string, files analyzer.Files, parent *database.Layer, uncertifiedRHEL bool) *database.Namespace {
 	namespace := featurens.Detect(files, &featurens.DetectorOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
@@ -278,7 +276,7 @@ func DetectNamespace(name string, files tarutil.LayerFiles, parent *database.Lay
 	return nil
 }
 
-func detectFeatureVersions(name string, files tarutil.LayerFiles, namespace *database.Namespace, parent *database.Layer) (features []database.FeatureVersion, err error) {
+func detectFeatureVersions(name string, files analyzer.Files, namespace *database.Namespace, parent *database.Layer) (features []database.FeatureVersion, err error) {
 	// TODO(Quentin-M): We need to pass the parent image to DetectFeatures because it's possible that
 	// some detectors would need it in order to produce the entire feature list (if they can only
 	// detect a diff). Also, we should probably pass the detected namespace so detectors could

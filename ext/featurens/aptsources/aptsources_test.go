@@ -20,6 +20,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -27,7 +28,7 @@ func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
 			ExpectedNamespace: &database.Namespace{Name: "debian:unstable", VersionFormat: dpkg.ParserName},
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"etc/os-release": {Contents: []byte(
 					`PRETTY_NAME="Debian GNU/Linux stretch/sid"
 NAME="Debian GNU/Linux"

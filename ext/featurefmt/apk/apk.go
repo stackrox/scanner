@@ -26,8 +26,8 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/apk"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/metrics"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 const (
@@ -40,7 +40,7 @@ func init() {
 
 type lister struct{}
 
-func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
+func (l lister) ListFeatures(files analyzer.Files) ([]database.FeatureVersion, error) {
 	file, exists := files.Get(dbPath)
 	if !exists {
 		return []database.FeatureVersion{}, nil

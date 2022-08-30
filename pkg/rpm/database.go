@@ -15,9 +15,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/features"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 const (
@@ -104,16 +104,16 @@ func DatabaseFiles() []string {
 	return paths
 }
 
-// CreateDatabaseFromLayer creates an RPM database in a temporary directory
+// CreateDatabaseFromImage creates an RPM database in a temporary directory
 // from the RPM database found in the container image. All known RPM database
 // backend is supported (i.e. bdb, sqlite). If no database is found in the image,
 // returns nil.
-func CreateDatabaseFromLayer(imageFiles tarutil.LayerFiles) (*rpmDatabase, error) {
+func CreateDatabaseFromImage(imageFiles analyzer.Files) (*rpmDatabase, error) {
 	// Find all known RPM database models and their files. It is unlikely that the
 	// image will contain more than one model, but in that scenario we copy all files
 	// and rely on the fact that `rpm` will select the most up-to-date database
 	// model, instead of replicating that knowledge in the code.
-	dbFiles := make(map[string]tarutil.FileData)
+	dbFiles := make(map[string]analyzer.FileData)
 	for name := range databaseFiles {
 		if data, exists := imageFiles.Get(path.Join(databaseDir, name)); exists {
 			dbFiles[name] = data

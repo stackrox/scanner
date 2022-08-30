@@ -20,6 +20,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/apk"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -27,25 +28,25 @@ func TestDetector(t *testing.T) {
 	testData := []featurens.TestData{
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v3.3", VersionFormat: apk.ParserName},
-			Files:             tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`3.3.4`)}}),
+			Files:             tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{"etc/alpine-release": {Contents: []byte(`3.3.4`)}}),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v3.4", VersionFormat: apk.ParserName},
-			Files:             tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`3.4.0`)}}),
+			Files:             tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{"etc/alpine-release": {Contents: []byte(`3.4.0`)}}),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v0.3", VersionFormat: apk.ParserName},
-			Files:             tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`0.3.4`)}}),
+			Files:             tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{"etc/alpine-release": {Contents: []byte(`0.3.4`)}}),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:v0.3", VersionFormat: apk.ParserName},
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{"etc/alpine-release": {Contents: []byte(`
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{"etc/alpine-release": {Contents: []byte(`
 0.3.4
 `)}}),
 		},
 		{
 			ExpectedNamespace: &database.Namespace{Name: "alpine:edge", VersionFormat: apk.ParserName},
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"etc/alpine-release": {Contents: []byte(`3.14.0_alpha20210212`)},
 				"etc/os-release": {Contents: []byte(
 					`NAME="Alpine Linux"

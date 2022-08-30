@@ -31,8 +31,8 @@ import (
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/metrics"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 const (
@@ -66,7 +66,7 @@ type componentMetadata struct {
 	arch          string
 }
 
-func (l lister) parseComponents(files tarutil.LayerFiles, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) error {
+func (l lister) parseComponents(files analyzer.Files, file []byte, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) error {
 	pkgFmt := `dpkg`
 	if distroless {
 		pkgFmt = `distroless`
@@ -146,7 +146,7 @@ func (l lister) parseComponents(files tarutil.LayerFiles, file []byte, packagesM
 	return scanner.Err()
 }
 
-func handleComponent(files tarutil.LayerFiles, pkgMetadata *componentMetadata, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) {
+func handleComponent(files analyzer.Files, pkgMetadata *componentMetadata, packagesMap map[featurefmt.PackageKey]*database.FeatureVersion, removedPackages set.StringSet, distroless bool) {
 	// Debian and Ubuntu vulnerability feeds only have entries for source packages,
 	// and not the package binaries, though usually only the binaries are installed.
 	pkgName := stringutils.FirstNonEmpty(pkgMetadata.sourceName, pkgMetadata.name)
@@ -221,7 +221,7 @@ func handleComponent(files tarutil.LayerFiles, pkgMetadata *componentMetadata, p
 	}
 }
 
-func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
+func (l lister) ListFeatures(files analyzer.Files) ([]database.FeatureVersion, error) {
 	// Create a map to store packages and ensure their uniqueness
 	packagesMap := make(map[featurefmt.PackageKey]*database.FeatureVersion)
 	// Create a set to store removed packages to ensure it holds between files.
@@ -234,14 +234,12 @@ func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersio
 		}
 	}
 
-	for filename, file := range files.GetFilesMap() {
+	for filename, file := range files.GetFilesPrefix(statusDir) {
 		// For distroless images, which are based on Debian, but also useful for
 		// all images using dpkg.
 		// The var/lib/dpkg/status.d directory holds the files which define packages.
-		if strings.HasPrefix(filename, statusDir) && filename != statusDir {
-			if err := l.parseComponents(files, append(file.Contents, '\n'), packagesMap, removedPackages, true); err != nil {
-				return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", filename)
-			}
+		if err := l.parseComponents(files, append(file.Contents, '\n'), packagesMap, removedPackages, true); err != nil {
+			return []database.FeatureVersion{}, errors.Wrapf(err, "parsing %s", filename)
 		}
 	}
 

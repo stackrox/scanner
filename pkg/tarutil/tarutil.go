@@ -29,6 +29,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
@@ -164,7 +165,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 		// Extract the element
 		switch hdr.Typeflag {
 		case tar.TypeReg, tar.TypeLink:
-			var fileData FileData
+			var fileData analyzer.FileData
 
 			executable, _ := executableMatcher.Match(filename, hdr.FileInfo(), contents)
 			if hdr.Size > maxELFExecutableFileSize {
@@ -223,7 +224,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 			// Do not bother saving the contents,
 			// and directories are NOT considered executable.
 			// However, add to the map, so the entry will exist.
-			files.data[filename] = FileData{}
+			files.data[filename] = analyzer.FileData{}
 		}
 	}
 	files.detectRemovedFiles()

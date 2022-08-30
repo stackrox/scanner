@@ -23,8 +23,8 @@ import (
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/osrelease"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 var (
@@ -48,7 +48,7 @@ func init() {
 	featurens.RegisterDetector("os-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.LayerFiles, _ *featurens.DetectorOptions) *database.Namespace {
+func (d detector) Detect(files analyzer.Files, _ *featurens.DetectorOptions) *database.Namespace {
 	var OS, version string
 
 	for _, filePath := range blocklistFilenames {

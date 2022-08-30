@@ -29,10 +29,10 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/commonerr"
 	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/rhelv2/rpm"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 const (
@@ -50,7 +50,7 @@ func init() {
 	featurefmt.RegisterLister("rpm", &lister{})
 }
 
-func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
+func (l lister) ListFeatures(files analyzer.Files) ([]database.FeatureVersion, error) {
 	f, hasFile := files.Get(dbPath)
 	if !hasFile {
 		return []database.FeatureVersion{}, nil
@@ -106,7 +106,7 @@ func (l lister) ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersio
 	return featureVersions, nil
 }
 
-func parseFeatures(r io.Reader, files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
+func parseFeatures(r io.Reader, files analyzer.Files) ([]database.FeatureVersion, error) {
 	var featureVersions []database.FeatureVersion
 
 	var fv database.FeatureVersion

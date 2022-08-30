@@ -22,6 +22,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,7 +37,7 @@ var (
 type Detector interface {
 	// Detect attempts to determine a Namespace from a LayerFiles of an image
 	// layer.
-	Detect(tarutil.LayerFiles, *DetectorOptions) *database.Namespace
+	Detect(analyzer.Files, *DetectorOptions) *database.Namespace
 
 	// RequiredFilenames returns the list of files required to be in the LayerFiles
 	// provided to the Detect method.
@@ -69,7 +70,7 @@ func RegisterDetector(name string, d Detector) {
 
 // Detect iterators through all registered Detectors and returns the first
 // non-nil detected namespace.
-func Detect(files tarutil.LayerFiles, opts *DetectorOptions) *database.Namespace {
+func Detect(files analyzer.Files, opts *DetectorOptions) *database.Namespace {
 	detectorsM.RLock()
 	defer detectorsM.RUnlock()
 

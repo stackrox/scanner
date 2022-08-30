@@ -20,7 +20,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/language"
-	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/analyzer"
 )
 
 type detector struct{}
@@ -54,7 +54,7 @@ func parseBusyBoxVersion(contents []byte) string {
 	return ""
 }
 
-func (detector) Detect(files tarutil.LayerFiles, options *featurens.DetectorOptions) *database.Namespace {
+func (detector) Detect(files analyzer.Files, options *featurens.DetectorOptions) *database.Namespace {
 	for _, filePath := range blockedFiles {
 		if _, hasFile := files.Get(filePath); hasFile {
 			return nil

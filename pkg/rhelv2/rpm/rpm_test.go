@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/testutils"
@@ -37,7 +38,7 @@ func Test_listFeatures(t *testing.T) {
 		args args
 
 		// Add test layer files from a map of file data.
-		files map[string]tarutil.FileData
+		files map[string]analyzer.FileData
 		// Add test layer files from a map of files stored in the testdata/
 		// directory.
 		filesFromTestData map[string]string
@@ -94,7 +95,7 @@ func Test_listFeatures(t *testing.T) {
 		},
 		{
 			name: "TestRPMFeatureDetectionWithActiveVulnMgmt with BerkleyDB",
-			files: map[string]tarutil.FileData{
+			files: map[string]analyzer.FileData{
 				"usr/lib64/libz.so.1":          {Executable: true},
 				"usr/lib64/libz.so.1.2.11":     {Executable: true},
 				"usr/lib64/libform.so.6":       {Executable: true},
@@ -196,7 +197,7 @@ func Test_listFeatures(t *testing.T) {
 		},
 		{
 			name: "TestRPMFeatureDetectionWithActiveVulnMgmt with SQLite",
-			files: map[string]tarutil.FileData{
+			files: map[string]analyzer.FileData{
 				"usr/lib64/libz.so.1":          {Executable: true},
 				"usr/lib64/libz.so.1.2.11":     {Executable: true},
 				"usr/lib64/libform.so.6":       {Executable: true},
@@ -264,12 +265,12 @@ func Test_listFeatures(t *testing.T) {
 		// Initialize test arguments.
 		if tt.filesFromTestData != nil {
 			if tt.files == nil {
-				tt.files = make(map[string]tarutil.FileData)
+				tt.files = make(map[string]analyzer.FileData)
 			}
 			for n, f := range tt.filesFromTestData {
 				c, err := os.ReadFile(filepath.Join(testDirectory, "testdata", f))
 				require.NoError(t, err)
-				tt.files[n] = tarutil.FileData{Contents: c}
+				tt.files[n] = analyzer.FileData{Contents: c}
 			}
 		}
 		tt.args.layerFiles = tarutil.CreateNewLayerFiles(tt.files)
