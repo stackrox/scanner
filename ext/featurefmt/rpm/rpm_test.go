@@ -19,6 +19,7 @@ import (
 
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -57,7 +58,7 @@ func TestRpmFeatureDetection(t *testing.T) {
 					},
 				},
 			},
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"var/lib/rpm/Packages":   {Contents: featurefmt.LoadFileForTest("rpm/testdata/Packages")},
 				"etc/centos-release":     {Executable: true},
 				"usr/games":              {Executable: true, ELFMetadata: &elf.Metadata{ImportedLibraries: []string{"base.so.1", "mock.so.1.0"}}},

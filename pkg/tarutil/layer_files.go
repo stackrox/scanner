@@ -6,44 +6,47 @@ import (
 	"strings"
 
 	"github.com/stackrox/rox/pkg/set"
-	"github.com/stackrox/scanner/pkg/elf"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/whiteout"
 )
-
-// FileData is the contents of a file and relevant metadata.
-type FileData struct {
-	// Contents is the contents of the file.
-	Contents []byte
-	// Executable indicates if the file is executable.
-	Executable bool
-	// ELFMetadata contains the dynamic library dependency metadata if the file is in ELF format.
-	ELFMetadata *elf.Metadata
-}
 
 // LayerFiles represent the files in an image layer.
 // It contains a map of the files' paths to their data and the information to resolve them.
 type LayerFiles struct {
-	data map[string]FileData
+	data map[string]analyzer.FileData
 	// links maps a symbolic link to link target.
 	links   map[string]string
 	removed set.StringSet
 }
 
 // CreateNewLayerFiles creates a LayerFiles
-func CreateNewLayerFiles(data map[string]FileData) LayerFiles {
+func CreateNewLayerFiles(data map[string]analyzer.FileData) LayerFiles {
 	if data == nil {
-		data = make(map[string]FileData)
+		data = make(map[string]analyzer.FileData)
 	}
 	return LayerFiles{data: data, links: make(map[string]string), removed: set.NewStringSet()}
 }
 
-// GetFilesMap returns the map of files to their data
-func (f LayerFiles) GetFilesMap() map[string]FileData {
-	return f.data
+func (f LayerFiles) filterMap(filterFunc func(string, analyzer.FileData) bool) (filesMap map[string]analyzer.FileData) {
+	filesMap = make(map[string]analyzer.FileData)
+	for filename, file := range f.data {
+		if filterFunc(filename, file) {
+			filesMap[filename] = file
+		}
+	}
+	return filesMap
+}
+
+// GetFilesPrefix returns a map of file paths that have the same prefix to their
+// associate FileData, excluding the prefix itself.
+func (f LayerFiles) GetFilesPrefix(prefix string) map[string]analyzer.FileData {
+	return f.filterMap(func(name string, _ analyzer.FileData) bool {
+		return strings.HasPrefix(name, prefix) && name != prefix
+	})
 }
 
 // Get resolves and gets FileData for the path
-func (f LayerFiles) Get(path string) (FileData, bool) {
+func (f LayerFiles) Get(path string) (analyzer.FileData, bool) {
 	resolved := f.resolve(path)
 	if !strings.HasSuffix(resolved, "/") && strings.HasSuffix(path, "/") {
 		resolved += "/"

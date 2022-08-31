@@ -19,6 +19,7 @@ import (
 
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/elf"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
@@ -60,7 +61,7 @@ func TestDpkgFeatureDetection(t *testing.T) {
 				},
 			},
 			Files: tarutil.CreateNewLayerFiles(
-				map[string]tarutil.FileData{
+				map[string]analyzer.FileData{
 					"var/lib/dpkg/status":                       {Contents: featurefmt.LoadFileForTest("dpkg/testdata/status")},
 					"var/lib/dpkg/status.d":                     {},
 					"var/lib/dpkg/status.d/base":                {Contents: featurefmt.LoadFileForTest("dpkg/testdata/statusd-base")},

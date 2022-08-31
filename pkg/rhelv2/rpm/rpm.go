@@ -7,7 +7,7 @@ package rpm
 
 import (
 	"encoding/json"
-	"regexp"
+	"strings"
 	"time"
 
 	"github.com/stackrox/rox/pkg/set"
@@ -15,10 +15,10 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens/osrelease"
 	"github.com/stackrox/scanner/ext/featurens/redhatrelease"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/rpm"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 const (
@@ -26,8 +26,6 @@ const (
 
 	pkgFmt = `rpmv2`
 )
-
-var contentManifestPattern = regexp.MustCompile(`^root/buildinfo/content_manifests/.*\.json$`)
 
 // AllRHELRequiredFiles lists all the names of the files required to identify RHEL-based releases.
 var AllRHELRequiredFiles set.StringSet
@@ -41,11 +39,11 @@ func init() {
 // ListFeatures returns the features found from the given files.
 // returns a slice of packages found via rpm and a slice of CPEs found in
 // /root/buildinfo/content_manifests.
-func ListFeatures(files tarutil.LayerFiles) ([]*database.RHELv2Package, []string, error) {
+func ListFeatures(files analyzer.Files) ([]*database.RHELv2Package, []string, error) {
 	return listFeatures(files, false)
 }
 
-func listFeatures(files tarutil.LayerFiles, testing bool) ([]*database.RHELv2Package, []string, error) {
+func listFeatures(files analyzer.Files, testing bool) ([]*database.RHELv2Package, []string, error) {
 	cpes, err := getCPEsUsingEmbeddedContentSets(files)
 	if err != nil {
 		return nil, nil, err
@@ -58,7 +56,7 @@ func listFeatures(files tarutil.LayerFiles, testing bool) ([]*database.RHELv2Pac
 }
 
 // AddToDependencyMap checks and adds files to executable and library dependency for RHEL package
-func AddToDependencyMap(filename string, fileData tarutil.FileData, execToDeps, libToDeps database.StringToStringsMap) {
+func AddToDependencyMap(filename string, fileData analyzer.FileData, execToDeps, libToDeps database.StringToStringsMap) {
 	// The first character is always "/", which is removed when inserted into the layer files.
 	if fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
 		deps := set.NewStringSet()
@@ -79,7 +77,7 @@ func AddToDependencyMap(filename string, fileData tarutil.FileData, execToDeps, 
 	}
 }
 
-func getCPEsUsingEmbeddedContentSets(files tarutil.LayerFiles) ([]string, error) {
+func getCPEsUsingEmbeddedContentSets(files analyzer.Files) ([]string, error) {
 	defer metrics.ObserveListFeaturesTime(pkgFmt, "cpes", time.Now())
 
 	// Get CPEs using embedded content-set files.
@@ -98,23 +96,20 @@ func getCPEsUsingEmbeddedContentSets(files tarutil.LayerFiles) ([]string, error)
 	return repo2cpe.Singleton().Get(contentManifest.ContentSets)
 }
 
-func getContentManifestFileContents(files tarutil.LayerFiles) []byte {
-	for file, contents := range files.GetFilesMap() {
-		if !contentManifestPattern.MatchString(file) {
-			continue
+func getContentManifestFileContents(files analyzer.Files) []byte {
+	for name, file := range files.GetFilesPrefix(contentManifests) {
+		if strings.HasSuffix(name, ".json") {
+			// Return the first one found, as there should only be one per layer.
+			return file.Contents
 		}
-
-		// Return the first one found, as there should only be one per layer.
-		return contents.Contents
 	}
-
 	return nil
 }
 
-func getFeaturesFromRPMDatabase(files tarutil.LayerFiles, testing bool) ([]*database.RHELv2Package, error) {
+func getFeaturesFromRPMDatabase(files analyzer.Files, testing bool) ([]*database.RHELv2Package, error) {
 	defer metrics.ObserveListFeaturesTime(pkgFmt, "all", time.Now())
 
-	rpmDB, err := rpm.CreateDatabaseFromLayer(files)
+	rpmDB, err := rpm.CreateDatabaseFromImage(files)
 	if err != nil {
 		return nil, err
 	}

@@ -2,18 +2,18 @@ package rpm
 
 import (
 	"github.com/stackrox/rox/pkg/stringutils"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/rpm"
-	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
 // AnnotateComponentsWithPackageManagerInfo checks for each component if it was installed by the package manager,
 // and sets the `FromPackageManager` attribute accordingly.
-func AnnotateComponentsWithPackageManagerInfo(files tarutil.LayerFiles, components []*component.Component) error {
+func AnnotateComponentsWithPackageManagerInfo(files analyzer.Files, components []*component.Component) error {
 	if len(components) == 0 {
 		return nil
 	}
-	rpmDB, err := rpm.CreateDatabaseFromLayer(files)
+	rpmDB, err := rpm.CreateDatabaseFromImage(files)
 	if err != nil {
 		return err
 	}

@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stretchr/testify/assert"
 )
@@ -111,7 +112,7 @@ func TestExtractWithSymlink(t *testing.T) {
 	}
 
 	files, err := ExtractFiles(f, matcher.NewPrefixAllowlistMatcher(""))
-	base := LayerFiles{data: make(map[string]FileData), links: map[string]string{"lib64": "l1"}}
+	base := LayerFiles{data: make(map[string]analyzer.FileData), links: map[string]string{"lib64": "l1"}}
 	files.MergeBaseAndResolveSymlinks(&base)
 	assert.NoError(t, err)
 	assert.Len(t, files.data, 9)

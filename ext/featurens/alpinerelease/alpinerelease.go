@@ -24,7 +24,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/apk"
-	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/analyzer"
 )
 
 const (
@@ -43,7 +43,7 @@ func init() {
 
 type detector struct{}
 
-func (d detector) Detect(files tarutil.LayerFiles, _ *featurens.DetectorOptions) *database.Namespace {
+func (d detector) Detect(files analyzer.Files, _ *featurens.DetectorOptions) *database.Namespace {
 	file, exists := files.Get(alpineReleasePath)
 	if !exists {
 		return nil

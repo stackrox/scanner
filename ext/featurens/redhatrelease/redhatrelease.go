@@ -26,7 +26,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
-	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/analyzer"
 )
 
 var (
@@ -45,7 +45,7 @@ func init() {
 	featurens.RegisterDetector("redhat-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.LayerFiles, opts *featurens.DetectorOptions) *database.Namespace {
+func (d detector) Detect(files analyzer.Files, opts *featurens.DetectorOptions) *database.Namespace {
 	for _, filePath := range d.RequiredFilenames() {
 		f, hasFile := files.Get(filePath)
 		if !hasFile {

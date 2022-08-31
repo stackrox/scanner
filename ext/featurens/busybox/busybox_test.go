@@ -6,6 +6,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurens"
 	"github.com/stackrox/scanner/ext/versionfmt/language"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/tarutil"
 )
 
@@ -24,7 +25,7 @@ func Test_detector_Detect(t *testing.T) {
 				Name:          expectedName,
 				VersionFormat: language.ParserName,
 			},
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"bin/busybox": {Contents: []byte(bbContent)},
 				"bin/[":       {Contents: []byte(bbContent)},
 			}),
@@ -32,21 +33,21 @@ func Test_detector_Detect(t *testing.T) {
 		// Invalid busybox version strings.
 		{
 			ExpectedNamespace: nil,
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"bin/busybox": {Contents: []byte(bbContentNoVersion)},
 				"bin/[":       {Contents: []byte(bbContentNoVersion)},
 			}),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"bin/busybox": {Contents: []byte(bbContentBadVersion)},
 				"bin/[":       {Contents: []byte(bbContentBadVersion)},
 			}),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"bin/busybox": {Contents: []byte(bbContentPartialVersion)},
 				"bin/[":       {Contents: []byte(bbContentPartialVersion)},
 			}),
@@ -54,34 +55,34 @@ func Test_detector_Detect(t *testing.T) {
 		// Unexpected coreutils or unnexpected files.
 		{
 			ExpectedNamespace: nil,
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"bin/busybox": {Contents: []byte("something else")},
 				"bin/[":       {Contents: []byte(bbContent)},
 			}),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"bin/busybox": {Contents: []byte(bbContent)},
 				"bin/[":       {Contents: []byte("something else")},
 			}),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"bin/busybox": {Contents: []byte(bbContent)},
 			}),
 		},
 		{
 			ExpectedNamespace: nil,
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"bin/[": {Contents: []byte(bbContent)},
 			}),
 		},
 		// Blocked files.
 		{
 			ExpectedNamespace: nil,
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"etc/os-release": {},
 				"bin/busybox":    {Contents: []byte(bbContent)},
 				"bin/[":          {Contents: []byte(bbContent)},
@@ -89,7 +90,7 @@ func Test_detector_Detect(t *testing.T) {
 		},
 		{
 			ExpectedNamespace: nil,
-			Files: tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"etc/lsb-release": {},
 				"bin/busybox":     {Contents: []byte(bbContent)},
 				"bin/[":           {Contents: []byte(bbContent)},

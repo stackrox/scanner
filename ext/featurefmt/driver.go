@@ -25,6 +25,7 @@ import (
 
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	rhelv2 "github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stretchr/testify/assert"
@@ -44,7 +45,7 @@ type PackageKey struct {
 // Lister represents an ability to list the features present in an image layer.
 type Lister interface {
 	// ListFeatures produces a list of FeatureVersions present in an image layer.
-	ListFeatures(tarutil.LayerFiles) ([]database.FeatureVersion, error)
+	ListFeatures(analyzer.Files) ([]database.FeatureVersion, error)
 
 	// RequiredFilenames returns the list of files required to be in the LayerFiles
 	// provided to the ListFeatures method.
@@ -77,7 +78,7 @@ func RegisterLister(name string, l Lister) {
 
 // ListFeatures produces the list of FeatureVersions in an image layer using
 // every registered Lister.
-func ListFeatures(files tarutil.LayerFiles) ([]database.FeatureVersion, error) {
+func ListFeatures(files analyzer.Files) ([]database.FeatureVersion, error) {
 	listersM.RLock()
 	defer listersM.RUnlock()
 
@@ -136,7 +137,7 @@ func TestLister(t *testing.T, l Lister, testData []TestData) {
 }
 
 // AddToDependencyMap checks and adds files to executable and library dependency
-func AddToDependencyMap(filename string, fileData tarutil.FileData, execToDeps, libToDeps database.StringToStringsMap) {
+func AddToDependencyMap(filename string, fileData analyzer.FileData, execToDeps, libToDeps database.StringToStringsMap) {
 	if fileData.Executable {
 		deps := set.NewStringSet()
 		if elfMeta := fileData.ELFMetadata; elfMeta != nil {

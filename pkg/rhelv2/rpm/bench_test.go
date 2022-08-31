@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -24,7 +25,7 @@ func BenchmarkListFeatures(b *testing.B) {
 	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
 	defer envIsolator.RestoreAll()
 
-	filemap := tarutil.CreateNewLayerFiles(map[string]tarutil.FileData{
+	filemap := tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 		"var/lib/rpm/Packages":                       {Contents: d},
 		"root/buildinfo/content_manifests/test.json": {Contents: manifest},
 		"usr/lib64/libz.so.1":                        {Executable: true},

@@ -28,7 +28,7 @@ import (
 	"github.com/stackrox/scanner/ext/featurens/util"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/ext/versionfmt/rpm"
-	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/analyzer"
 )
 
 var (
@@ -42,7 +42,7 @@ func init() {
 	featurens.RegisterDetector("lsb-release", &detector{})
 }
 
-func (d detector) Detect(files tarutil.LayerFiles, _ *featurens.DetectorOptions) *database.Namespace {
+func (d detector) Detect(files analyzer.Files, _ *featurens.DetectorOptions) *database.Namespace {
 	f, hasFile := files.Get("etc/lsb-release")
 	if !hasFile {
 		return nil
