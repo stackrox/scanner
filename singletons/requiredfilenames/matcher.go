@@ -28,7 +28,7 @@ var (
 )
 
 // SingletonOSMatcher returns the singleton matcher instance for extracting files
-// for OS package analysis.
+// for O.S. package analysis.
 func SingletonOSMatcher() matcher.PrefixMatcher {
 	osMatcherOnce.Do(func() {
 		allFileNames := append(featurefmt.RequiredFilenames(), featurens.RequiredFilenames()...)
@@ -61,7 +61,7 @@ func SingletonActiveVulnMatcher() matcher.Matcher {
 }
 
 // SingletonMatcher returns the singleton matcher instance to use for extracting
-// files for analyzing image container. It includes matching for OS features
+// files for analyzing image container. It includes matching for O.S. features
 // and active vulnerability. Note: language-level analyzers implement a different
 // interface, and do not require extraction of files. Therefore, the respective
 // files do not need to be matched here.

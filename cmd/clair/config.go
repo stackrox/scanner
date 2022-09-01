@@ -22,7 +22,7 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/pkg/tarutil"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/updater"
 	"gopkg.in/yaml.v2"
 )
@@ -64,9 +64,9 @@ func DefaultConfig() Config {
 			GRPCPort:  8443,
 		},
 		LogLevel:                       "info",
-		MaxExtractableFileSizeMB:       tarutil.DefaultMaxExtractableFileSizeMB,
-		MaxELFExecutableFileSizeMB:     tarutil.DefaultMaxELFExecutableFileSizeMB,
-		MaxImageFileReaderBufferSizeMB: tarutil.DefaultMaxLazyReaderBufferSizeMB,
+		MaxExtractableFileSizeMB:       analyzer.DefaultMaxExtractableFileSizeMB,
+		MaxELFExecutableFileSizeMB:     analyzer.DefaultMaxELFExecutableFileSizeMB,
+		MaxImageFileReaderBufferSizeMB: analyzer.DefaultMaxLazyReaderBufferSizeMB,
 		CentralEndpoint:                "https://central.stackrox.svc",
 		SensorEndpoint:                 "https://sensor.stackrox.svc",
 	}

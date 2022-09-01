@@ -59,8 +59,8 @@ func NewPrefixAllowlistMatcher(allowlist ...string) PrefixMatcher {
 	return &allowlistMatcher{allowlist: allowlist}
 }
 
-func (m *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
-	for _, s := range m.allowlist {
+func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
+	for _, s := range w.allowlist {
 		if strings.HasPrefix(fullPath, s) {
 			return true, true
 		}
@@ -68,14 +68,10 @@ func (m *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) 
 	return false, false
 }
 
-func (m *allowlistMatcher) GetCommonPrefixDirs() []string {
-	return findCommonDirPrefixes(m.allowlist)
+func (w *allowlistMatcher) GetCommonPrefixDirs() []string {
+	return findCommonDirPrefixes(w.allowlist)
 }
 
-// findCommonDirPrefixes goes over all prefixes, steps one level down from the
-// root directory, and returns exactly one common prefix per first level dir
-// referenced. It does it by doing creating a trie-like structure with the
-// directory tree filtering paths with only single-children nodes.
 func findCommonDirPrefixes(prefixes []string) []string {
 	prefixToSubdirs := make(map[string]set.StringSet)
 	for _, d := range prefixes {
