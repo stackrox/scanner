@@ -9,6 +9,7 @@ import (
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/features"
 )
 
 type testCase struct {
@@ -23,6 +24,8 @@ type testCase struct {
 	onlyCheckSpecifiedVulns  bool
 	uncertifiedRHEL          bool
 	checkProvidedExecutables bool
+	// If assigned a features.FeatureFlag, only enable the test if it is enabled.
+	requiredFeatureFlag features.FeatureFlag
 }
 
 var testCases = []testCase{
@@ -3383,6 +3386,7 @@ var testCases = []testCase{
 		},
 	},
 	{
+		requiredFeatureFlag:     features.RHEL9Scanning,
 		image:                   "ubi9/ubi:9.0.0-1576@sha256:f22a438f4967419bd477c648d25ed0627f54b81931d0143dc45801c8356bd379",
 		namespace:               "rhel:9",
 		onlyCheckSpecifiedVulns: true,
@@ -3449,4 +3453,17 @@ For more details about the security issue(s), including the impact, a CVSS score
 			},
 		},
 	},
+}
+
+// getEnabledTestCases returns the enabled test cases from the list of defined test cases.
+func getEnabledTestCases() []testCase {
+	cases := testCases[:0]
+	for _, tc := range testCases {
+		// We filter out test cases that depend on feature flags that are disabled.
+		if tc.requiredFeatureFlag != nil && !tc.requiredFeatureFlag.Enabled() {
+			continue
+		}
+		cases = append(cases, tc)
+	}
+	return cases
 }
