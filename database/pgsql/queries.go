@@ -209,57 +209,107 @@ const (
 	///////////////////////////////////////////////////
 
 	insertRHELv2Vuln = `
-		INSERT INTO vuln (
+		INSERT INTO vuln_v2 (
 			hash,
-			name, title, description, issued, updated,
-			link, severity, cvss3, cvss2
-		) VALUES (
-			$1,
-			$2, $3, $4, $5, $6,
-			$7, $8, $9, $10
-		)
-		ON CONFLICT (hash) DO NOTHING;`
-
-	insertRHELv2VulnPackage = `
-		INSERT INTO vuln_package (
-			hash,
-			name,
-			package_name, package_module, package_arch,
-			cpe,
+		    name, title,
+		    issued, updated,
+		    link, severity, cvss3, cvss2,
+		    package_name, package_module, package_arch,
+		    cpe,
 			fixed_in_version, arch_operation
 		) VALUES (
 			$1,
-			$2,
-			$3, $4, $5,
-			$6,
-			$7, $8
+			$2, $3,
+		    $4, $5,
+		    $6, $7, $8, $9,
+		    $10, $11, $12,
+		    $13,
+		    $14, $15
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
+	insertRHELv2VulnDescription = `
+		INSERT INTO vuln_description (
+        	vuln_name, description
+        ) VALUES (
+            $1, $2
+        )
+        ON CONFLICT (vuln_name) DO NOTHING;`
+
+	//insertRHELv2Vuln = `
+	//	INSERT INTO vuln (
+	//		hash,
+	//		name, title, description, issued, updated,
+	//		link, severity, cvss3, cvss2
+	//	) VALUES (
+	//		$1,
+	//		$2, $3, $4, $5, $6,
+	//		$7, $8, $9, $10
+	//	)
+	//	ON CONFLICT (hash) DO NOTHING;`
+	//
+	//insertRHELv2VulnPackage = `
+	//	INSERT INTO vuln_package (
+	//		hash,
+	//		name,
+	//		package_name, package_module, package_arch,
+	//		cpe,
+	//		fixed_in_version, arch_operation
+	//	) VALUES (
+	//		$1,
+	//		$2,
+	//		$3, $4, $5,
+	//		$6,
+	//		$7, $8
+	//	)
+	//	ON CONFLICT (hash) DO NOTHING;`
+
 	searchRHELv2Vulnerabilities = `
 		SELECT
-			vuln_package.id,
-			vuln_package.name,
+			vuln.id,
+			vuln.name,
 			vuln.title,
-			vuln.description,
+			vuln_description.description,
 			vuln.link,
 			vuln.issued,
 			vuln.updated,
 			vuln.severity,
 			vuln.cvss3,
 			vuln.cvss2,
-			vuln_package.package_name,
-			vuln_package.package_arch,
-			vuln_package.fixed_in_version,
-			vuln_package.arch_operation
+			vuln.package_name,
+			vuln.package_arch,
+			vuln.fixed_in_version,
+			vuln.arch_operation
 		FROM
-			vuln_package
-			LEFT JOIN vuln ON
-				vuln_package.name = vuln.name
+			vuln
+			LEFT JOIN vuln_description ON vuln.name = vuln_description.name
 		WHERE
-			vuln_package.package_name = $1
-				AND vuln_package.package_module = $2
-				AND vuln_package.cpe = $3;`
+		    vuln.package_name = $1 AND vuln.package_module = $2 AND vuln.cpe = $3;`
+
+	//searchRHELv2Vulnerabilities = `
+	//	SELECT
+	//		vuln_package.id,
+	//		vuln_package.name,
+	//		vuln.title,
+	//		vuln.description,
+	//		vuln.link,
+	//		vuln.issued,
+	//		vuln.updated,
+	//		vuln.severity,
+	//		vuln.cvss3,
+	//		vuln.cvss2,
+	//		vuln_package.package_name,
+	//		vuln_package.package_arch,
+	//		vuln_package.fixed_in_version,
+	//		vuln_package.arch_operation
+	//	FROM
+	//		vuln_package
+	//		LEFT JOIN vuln ON
+	//			vuln_package.name = vuln.name
+	//	WHERE
+	//		vuln_package.package_name = $1
+	//			AND vuln_package.package_module = $2
+	//			AND vuln_package.cpe = $3;`
 
 	insertRHELv2Layer = `
 		INSERT INTO rhelv2_layer (hash, parent_hash, dist, cpes)
