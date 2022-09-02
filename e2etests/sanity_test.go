@@ -127,7 +127,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 func TestImageSanity(t *testing.T) {
 	cli := client.New(getScannerHTTPEndpoint(), true)
 
-	for _, testCase := range testCases {
+	for _, testCase := range getEnabledTestCases() {
 		t.Run(testCase.image, func(t *testing.T) {
 			verifyImageHasExpectedFeatures(t, cli, testCase, &types.ImageRequest{Image: testCase.image, Registry: testCase.registry, UncertifiedRHELScan: testCase.uncertifiedRHEL})
 		})

@@ -148,7 +148,7 @@ func TestGRPCGetImageVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewImageScanServiceClient(conn)
 
-	for _, testCase := range testCases {
+	for _, testCase := range getEnabledTestCases() {
 		imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
 			Image: testCase.image,
 			Registry: &v1.RegistryData{

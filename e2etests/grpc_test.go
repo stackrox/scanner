@@ -19,7 +19,11 @@ func TestGRPCGetImageComponents(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewImageScanServiceClient(conn)
 
-	for _, testCase := range testCases {
+	for _, testCase := range getEnabledTestCases() {
+		// Only run test cases for selected features if they are enabled.
+		if !testCase.requiredFeatureFlag.Enabled() {
+			continue
+		}
 		t.Run(testCase.image, func(t *testing.T) {
 			imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
 				Image: testCase.image,
