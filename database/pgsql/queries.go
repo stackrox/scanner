@@ -208,10 +208,20 @@ const (
 	// https://github.com/quay/claircore
 	///////////////////////////////////////////////////
 
+	insertVulnDesc = `
+		INSERT INTO vuln_desc (
+			hash,
+			description
+		) VALUES (
+			$1,
+			$2
+		)
+		ON CONFLICT (hash) DO NOTHING;`
+
 	insertRHELv2Vuln = `
 		INSERT INTO vuln (
 			hash,
-			name, title, description, issued, updated,
+			name, title, desc_hash, issued, updated,
 			link, severity, cvss3, cvss2
 		) VALUES (
 			$1,
@@ -241,7 +251,7 @@ const (
 			vuln_package.id,
 			vuln_package.name,
 			vuln.title,
-			vuln.description,
+            vuln_desc.description,
 			vuln.link,
 			vuln.issued,
 			vuln.updated,
@@ -256,6 +266,8 @@ const (
 			vuln_package
 			LEFT JOIN vuln ON
 				vuln_package.vuln_hash = vuln.hash
+			LEFT JOIN vuln_desc ON
+				vuln_desc.hash = vuln.desc_hash
 		WHERE
 			vuln_package.package_name = $1
 				AND vuln_package.package_module = $2

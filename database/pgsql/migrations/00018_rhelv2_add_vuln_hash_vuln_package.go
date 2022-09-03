@@ -18,7 +18,20 @@ func init() {
 	RegisterMigration(migrate.Migration{
 		ID: 18,
 		Up: migrate.Queries([]string{
-			`ALTER TABLE vuln_package ADD COLUMN vuln_hash BYTEA NOT NULL`,
+			`-- Vulnerability Description
+             -- This table holds the vulnerability descriptions with their hash.
+			CREATE TABLE IF NOT EXISTS vuln_desc (
+				id          BIGSERIAL PRIMARY KEY,
+				hash        BYTEA NOT NULL,
+				description TEXT,
+				UNIQUE (hash)
+			);
+            -- Move description from vuln to vuln_desc table.
+			ALTER TABLE vuln ADD COLUMN desc_hash BYTEA REFERENCES vuln_desc (hash);
+			ALTER TABLE vuln DROP COLUMN description;
+			CREATE INDEX IF NOT EXISTS vuln_by_desc_idx on vuln (desc_hash);
+			-- Add a vuln hash to vuln_package 
+			ALTER TABLE vuln_package ADD COLUMN vuln_hash BYTEA NOT NULL`,
 		}),
 	})
 }
