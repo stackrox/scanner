@@ -3464,7 +3464,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 // getEnabledTestCases returns the enabled test cases from the list of defined test cases.
 func getEnabledTestCases() []testCase {
 	once.Do(func() {
-		cases := testCases
+		cases := testCases[:0]
 		for _, tc := range testCases {
 			// We filter out test cases that depend on feature flags that are disabled.
 			if tc.requiredFeatureFlag != nil && !tc.requiredFeatureFlag.Enabled() {
