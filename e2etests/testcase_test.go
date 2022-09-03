@@ -5,6 +5,7 @@ package e2etests
 
 import (
 	"os"
+	"sync"
 
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
@@ -28,6 +29,11 @@ type testCase struct {
 	requiredFeatureFlag features.FeatureFlag
 }
 
+var once sync.Once
+
+// testCases defines all the E2E test cases.
+// testCases should not be used directly;
+// instead, users should call getEnabledTestCases().
 var testCases = []testCase{
 	{
 		image:                    "ubuntu:16.04",
@@ -3457,13 +3463,16 @@ For more details about the security issue(s), including the impact, a CVSS score
 
 // getEnabledTestCases returns the enabled test cases from the list of defined test cases.
 func getEnabledTestCases() []testCase {
-	cases := testCases[:0]
-	for _, tc := range testCases {
-		// We filter out test cases that depend on feature flags that are disabled.
-		if tc.requiredFeatureFlag != nil && !tc.requiredFeatureFlag.Enabled() {
-			continue
+	once.Do(func() {
+		cases := testCases
+		for _, tc := range testCases {
+			// We filter out test cases that depend on feature flags that are disabled.
+			if tc.requiredFeatureFlag != nil && !tc.requiredFeatureFlag.Enabled() {
+				continue
+			}
+			cases = append(cases, tc)
 		}
-		cases = append(cases, tc)
-	}
-	return cases
+		testCases = cases
+	})
+	return testCases
 }
