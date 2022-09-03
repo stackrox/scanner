@@ -19,7 +19,7 @@ func TestGRPCGetImageComponents(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewImageScanServiceClient(conn)
 
-	for _, testCase := range getEnabledTestCases() {
+	for _, testCase := range testCases {
 		t.Run(testCase.image, func(t *testing.T) {
 			imgComponentsResp, err := client.GetImageComponents(context.Background(), &v1.GetImageComponentsRequest{
 				Image: testCase.image,
