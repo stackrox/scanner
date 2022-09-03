@@ -3475,10 +3475,15 @@ For more details about the security issue(s), including the impact, a CVSS score
 				Version:       "6.0.6-1.el8_6.x86_64",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2022-1650",
+						Name:          "RHBA-2022:5747",
 						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: A flaw was found in the EventSource NPM Package. The description from the source states the following message: \"Exposure of Sensitive Information to an Unauthorized Actor.\" This flaw allows an attacker to steal the user's credentials and then use the credentials to access the legitimate website.",
-						Link:          "https://access.redhat.com/security/cve/CVE-2022-1650",
+						Description:   `.NET Core is a managed-software framework. It implements a subset of the .NET
+framework APIs and several new APIs, and it includes a CLR implementation.
+
+Bug Fix(es) and Enhancement(s):
+
+* Update .NET 6.0 to SDK 6.0.107 and Runtime 6.0.7 [rhel-8.6.0.z] (BZ#2105397)`,
+						Link:          "https://access.redhat.com/errata/RHBA-2022:5747",
 						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
@@ -3507,10 +3512,15 @@ For more details about the security issue(s), including the impact, a CVSS score
 				Version:       "6.0.6-1.el8_6.x86_64",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2022-1650",
+						Name:          "RHBA-2022:5747",
 						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: A flaw was found in the EventSource NPM Package. The description from the source states the following message: \"Exposure of Sensitive Information to an Unauthorized Actor.\" This flaw allows an attacker to steal the user's credentials and then use the credentials to access the legitimate website.",
-						Link:          "https://access.redhat.com/security/cve/CVE-2022-1650",
+						Description:   `.NET Core is a managed-software framework. It implements a subset of the .NET
+framework APIs and several new APIs, and it includes a CLR implementation.
+
+Bug Fix(es) and Enhancement(s):
+
+* Update .NET 6.0 to SDK 6.0.107 and Runtime 6.0.7 [rhel-8.6.0.z] (BZ#2105397)`,
+						Link:          "https://access.redhat.com/errata/RHBA-2022:5747",
 						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
