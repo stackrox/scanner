@@ -3459,6 +3459,81 @@ For more details about the security issue(s), including the impact, a CVSS score
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:sandbox-dotnet-60-runtime-6.0-15.20220620151726",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "Red Hat",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:8",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "aspnetcore-runtime-6.0",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "6.0.6-1.el8_6.x86_64",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2022-1650",
+						NamespaceName: "rhel:8",
+						Description:   "DOCUMENTATION: A flaw was found in the EventSource NPM Package. The description from the source states the following message: \"Exposure of Sensitive Information to an Unauthorized Actor.\" This flaw allows an attacker to steal the user's credentials and then use the credentials to access the legitimate website.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2022-1650",
+						Severity:      "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.8,
+									"ImpactScore":         5.2,
+									"Score":               8.1,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+								},
+							},
+						},
+					},
+				},
+				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
+			},
+			{
+				Name:          "dotnet-runtime-6.0",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "6.0.6-1.el8_6.x86_64",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2022-1650",
+						NamespaceName: "rhel:8",
+						Description:   "DOCUMENTATION: A flaw was found in the EventSource NPM Package. The description from the source states the following message: \"Exposure of Sensitive Information to an Unauthorized Actor.\" This flaw allows an attacker to steal the user's credentials and then use the credentials to access the legitimate website.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2022-1650",
+						Severity:      "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.8,
+									"ImpactScore":         5.2,
+									"Score":               8.1,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+								},
+							},
+						},
+					},
+				},
+				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
+			},
+		},
+	},
 }
 
 // getEnabledTestCases returns the enabled test cases from the list of defined test cases.
