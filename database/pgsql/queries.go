@@ -211,30 +211,30 @@ const (
 	insertRHELv2Vuln = `
 		INSERT INTO vuln_v2 (
 			hash,
-		    name, title,
-		    issued, updated,
-		    link, severity, cvss3, cvss2,
-		    package_name, package_module, package_arch,
-		    cpe,
+			name, title,
+			issued, updated,
+			link, severity, cvss3, cvss2,
+			package_name, package_module, package_arch,
+			cpe,
 			fixed_in_version, arch_operation
 		) VALUES (
 			$1,
 			$2, $3,
-		    $4, $5,
-		    $6, $7, $8, $9,
-		    $10, $11, $12,
-		    $13,
-		    $14, $15
+			$4, $5,
+			$6, $7, $8, $9,
+			$10, $11, $12,
+			$13,
+			$14, $15
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
 	insertRHELv2VulnDescription = `
 		INSERT INTO vuln_description (
-        	vuln_name, description
-        ) VALUES (
-            $1, $2
-        )
-        ON CONFLICT (vuln_name) DO NOTHING;`
+			vuln_name, description
+		) VALUES (
+			$1, $2
+		)
+		ON CONFLICT (vuln_name) DO NOTHING;`
 
 	searchRHELv2Vulns = `
 		SELECT
@@ -256,7 +256,7 @@ const (
 			vuln_v2 as vuln
 			LEFT JOIN vuln_description ON vuln.name = vuln_description.vuln_name
 		WHERE
-		    vuln.package_name = $1 AND vuln.package_module = $2 AND vuln.cpe = $3;`
+			vuln.package_name = $1 AND vuln.package_module = $2 AND vuln.cpe = $3;`
 
 	deleteStaleRHELv2Vulns = `DELETE FROM vuln_v2 WHERE name = ANY($1::text[]) and package_name = ANY($2::text[]) and cpe = ANY($3::text[]) and package_module = $4;`
 
