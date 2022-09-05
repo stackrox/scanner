@@ -114,7 +114,7 @@ func NewExecutableMatcher() Matcher {
 }
 
 func (e *executableMatcher) Match(_ string, fi os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
-	return fi.Mode().IsRegular() && fi.Mode()&0111 != 0, false
+	return IsFileExecutable(fi), false
 }
 
 type regexpMatcher struct {
@@ -190,4 +190,9 @@ func (a *andMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.Re
 		extract = extract && extractable
 	}
 	return true, extract
+}
+
+// IsFileExecutable returns if the file is an executable regular file.
+func IsFileExecutable(fileInfo fs.FileInfo) bool {
+	return fileInfo.Mode().IsRegular() && fileInfo.Mode()&0111 != 0
 }
