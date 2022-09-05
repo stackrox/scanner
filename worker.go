@@ -166,7 +166,13 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 	return files, datastore.InsertLayerComponents(layer.Name, lineage, languageComponents, files.GetRemovedFiles(), opts)
 }
 
-func detectFromFiles(files analyzer.Files, name string, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace,
+// DetectFromFiles detects the namespace and extracts the components present in
+// the files of a filesystem or image layer. For layers, the parent layer should
+// be specified. For filesystems, which don't have the concept of intermediate
+// layers, or the root layer, use `nil`. Notice that language components are not
+// extracted by DetectFromFiles, but if provided they are annotated with
+// certified RHEL dependencies, and returned.
+func DetectFromFiles(files analyzer.Files, name string, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace,
 	[]database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
 	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
 
@@ -241,7 +247,7 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 		log.WithFields(log.Fields{logLayerName: name, "component count": len(m.components)}).Debug("detected components")
 	}
 
-	namespace, features, rhelv2Components, languageComponents, err := detectFromFiles(*files, name, parent, m.components, uncertifiedRHEL)
+	namespace, features, rhelv2Components, languageComponents, err := DetectFromFiles(*files, name, parent, m.components, uncertifiedRHEL)
 	distroless := isDistroless(*files) || (parent != nil && parent.Distroless)
 	if !env.LanguageVulns.Enabled() {
 		languageComponents = nil

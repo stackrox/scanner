@@ -40,13 +40,13 @@ import (
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
+	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/clairify/metrics"
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/formatter"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
-	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/pkg/updater"
 	"github.com/stackrox/scanner/pkg/version"
 	"golang.org/x/sys/unix"
@@ -227,19 +227,19 @@ func main() {
 
 	// Set the max extractable file size from the config.
 	if config.MaxExtractableFileSizeMB > 0 {
-		tarutil.SetMaxExtractableFileSize(config.MaxExtractableFileSizeMB * 1024 * 1024)
+		analyzer.SetMaxExtractableFileSize(config.MaxExtractableFileSizeMB * 1024 * 1024)
 		log.Infof("Max extractable file size set to %d MB", config.MaxExtractableFileSizeMB)
 	}
 
 	// Set the max ELF executable file size from the config.
 	if config.MaxELFExecutableFileSizeMB > 0 {
-		tarutil.SetMaxELFExecutableFileSize(config.MaxELFExecutableFileSizeMB * 1024 * 1024)
+		analyzer.SetMaxELFExecutableFileSize(config.MaxELFExecutableFileSizeMB * 1024 * 1024)
 		log.Infof("Max ELF executable file size set to %d MB", config.MaxELFExecutableFileSizeMB)
 	}
 
 	// Set the max lazy reader buffer size from the config.
 	if config.MaxImageFileReaderBufferSizeMB > 0 {
-		tarutil.SetMaxLazyReaderBufferSize(config.MaxImageFileReaderBufferSizeMB * 1024 * 1024)
+		analyzer.SetMaxLazyReaderBufferSize(config.MaxImageFileReaderBufferSizeMB * 1024 * 1024)
 		log.Infof("Max image file reader buffer size set to %d MB", config.MaxImageFileReaderBufferSizeMB)
 	}
 
