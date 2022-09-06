@@ -23,6 +23,7 @@ func init() {
 			hash             BYTEA NOT NULL,
 			name             TEXT,
 			title            TEXT,
+			description_hash BYTEA NOT NULL,
 			issued           timestamptz,
 			updated          timestamptz,
 			link             TEXT,
@@ -43,14 +44,13 @@ func init() {
 
 		-- VulnDescription
 		-- This table contains the description for each vulnerability.
-		-- It is assumed that each unique CVE/RHSA/RHBA/RHEA ID has a single description.
 		CREATE TABLE IF NOT EXISTS vuln_description (
 			id          BIGSERIAL PRIMARY KEY,
-			vuln_name   TEXT,
+			hash        BYTEA NOT NULL,
 			description TEXT,
-			UNIQUE (vuln_name)
+			UNIQUE (hash)
 		);
-		CREATE INDEX IF NOT EXISTS vuln_description_lookup_idx on vuln_description (vuln_name);`,
+		CREATE INDEX IF NOT EXISTS vuln_description_lookup_idx on vuln_description (hash);`,
 			`DROP TABLE IF EXISTS vuln;`,
 			`DROP TABLE IF EXISTS vuln_package;`,
 		}),

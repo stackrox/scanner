@@ -211,7 +211,7 @@ const (
 	insertRHELv2Vuln = `
 		INSERT INTO vuln_v2 (
 			hash,
-			name, title,
+			name, title, description_hash,
 			issued, updated,
 			link, severity, cvss3, cvss2,
 			package_name, package_module, package_arch,
@@ -219,22 +219,22 @@ const (
 			fixed_in_version, arch_operation
 		) VALUES (
 			$1,
-			$2, $3,
-			$4, $5,
-			$6, $7, $8, $9,
-			$10, $11, $12,
-			$13,
-			$14, $15
+			$2, $3, $4,
+			$5, $6,
+			$7, $8, $9, $10,
+			$11, $12, $13,
+			$14,
+			$15, $16
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
 	insertRHELv2VulnDescription = `
 		INSERT INTO vuln_description (
-			vuln_name, description
+			hash, description
 		) VALUES (
 			$1, $2
 		)
-		ON CONFLICT (vuln_name) DO NOTHING;`
+		ON CONFLICT (hash) DO NOTHING;`
 
 	searchRHELv2Vulns = `
 		SELECT
@@ -254,7 +254,7 @@ const (
 			vuln.arch_operation
 		FROM
 			vuln_v2 as vuln
-			LEFT JOIN vuln_description ON vuln.name = vuln_description.vuln_name
+			LEFT JOIN vuln_description ON vuln.description_hash = vuln_description.hash
 		WHERE
 			vuln.package_name = $1 AND vuln.package_module = $2 AND vuln.cpe = $3;`
 
