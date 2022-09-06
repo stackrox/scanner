@@ -51,8 +51,8 @@ func init() {
 			UNIQUE (vuln_name)
 		);
 		CREATE INDEX IF NOT EXISTS vuln_description_lookup_idx on vuln_description (vuln_name);`,
-		`DROP TABLE IF EXISTS vuln;`,
-		`DROP TABLE IF EXISTS vuln_package;`,
+			`DROP TABLE IF EXISTS vuln;`,
+			`DROP TABLE IF EXISTS vuln_package;`,
 		}),
 	})
 }
