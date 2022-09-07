@@ -41,7 +41,8 @@ func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 		}
 		updated, err := c.handleYAMLFile(filepath.Join(definitionsDir, f.Name()))
 		if err != nil {
-			return errors.Wrapf(err, "handling file %s", f.Name())
+			log.Errorf("Skipping vuln update for %s due to error: %v", f.Name(), err)
+			continue
 		}
 		if updated {
 			totalVulns++

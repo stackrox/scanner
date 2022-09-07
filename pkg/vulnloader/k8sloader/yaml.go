@@ -21,17 +21,3 @@ func LoadYAMLFileFromReader(r io.Reader) (*validation.CVESchema, error) {
 	}
 	return &schema, nil
 }
-
-// WriteYAMLFileToWriter marshals the given Kubernetes CVE file as YAML and writes it to the given io.Writer.
-// The writer is NOT closed; that is the caller's responsibility.
-func WriteYAMLFileToWriter(contents *validation.CVESchema, w io.Writer) error {
-	contentBytes, err := yaml.Marshal(contents)
-	if err != nil {
-		return errors.Wrap(err, "marshaling YAML into bytes")
-	}
-	_, err = w.Write(contentBytes)
-	if err != nil {
-		return errors.Wrap(err, "writing YAML into writer")
-	}
-	return nil
-}
