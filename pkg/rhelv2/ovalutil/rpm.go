@@ -139,7 +139,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				Module: criterion.module,
 			}
 			if componentResolutions != nil && len(componentResolutions) > 0 && componentResolutions[object.Name] != "" {
-				//	pkg.ResolutionState = componentResolutions[object.Name]
+				pkg.ResolutionState = componentResolutions[object.Name]
 			}
 			if state != nil && state.Arch != nil {
 				pkg.Arch = state.Arch.Body
@@ -253,7 +253,7 @@ func parseUnpatchedCVEComponents(def oval.Definition) (map[string]string, error)
 	for i := 0; i < len(resolutions); i++ {
 		state := resolutions[i].State
 		components := resolutions[i].Components
-		
+
 		for j := 0; j < len(components); j++ {
 			component := components[j]
 			stringSlice := strings.Split(component, "/")
