@@ -59,8 +59,8 @@ func NewPrefixAllowlistMatcher(allowlist ...string) PrefixMatcher {
 	return &allowlistMatcher{allowlist: allowlist}
 }
 
-func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
-	for _, s := range w.allowlist {
+func (m *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
+	for _, s := range m.allowlist {
 		if strings.HasPrefix(fullPath, s) {
 			return true, true
 		}
@@ -68,10 +68,14 @@ func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) 
 	return false, false
 }
 
-func (w *allowlistMatcher) GetCommonPrefixDirs() []string {
-	return findCommonDirPrefixes(w.allowlist)
+func (m *allowlistMatcher) GetCommonPrefixDirs() []string {
+	return findCommonDirPrefixes(m.allowlist)
 }
 
+// findCommonDirPrefixes goes over all prefixes, steps one level down from the
+// root directory, and returns exactly one common prefix per first level dir
+// referenced. It does it by doing creating a trie-like structure with the
+// directory tree filtering paths with only single-children nodes.
 func findCommonDirPrefixes(prefixes []string) []string {
 	prefixToSubdirs := make(map[string]set.StringSet)
 	for _, d := range prefixes {
@@ -117,7 +121,7 @@ func NewExecutableMatcher() Matcher {
 }
 
 func (e *executableMatcher) Match(_ string, fi os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
-	return fi.Mode().IsRegular() && fi.Mode()&0111 != 0, false
+	return IsFileExecutable(fi), false
 }
 
 type regexpMatcher struct {
@@ -193,4 +197,9 @@ func (a *andMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.Re
 		extract = extract && extractable
 	}
 	return true, extract
+}
+
+// IsFileExecutable returns if the file is an executable regular file.
+func IsFileExecutable(fileInfo fs.FileInfo) bool {
+	return fileInfo.Mode().IsRegular() && fileInfo.Mode()&0111 != 0
 }

@@ -59,7 +59,7 @@ func Test_filesMap_extractFile(t *testing.T) {
 	type test struct {
 		name         string
 		args         args
-		wantFileData *fileData
+		wantFileData *fileMetadata
 		maxFileSize  int64
 		wantErr      assert.ErrorAssertionFunc
 	}
@@ -158,7 +158,7 @@ func Test_filesMap_extractFile(t *testing.T) {
 					return ff.FileInfo(), nil
 				}},
 			},
-			wantFileData: &fileData{
+			wantFileData: &fileMetadata{
 				isExecutable:  true,
 				isExtractable: true,
 			},
@@ -188,7 +188,7 @@ func Test_filesMap_Get(t *testing.T) {
 	testdata := filepath.Join(wd, "testdata")
 	type fields struct {
 		root      string
-		fileMap   map[string]*fileData
+		fileMap   map[string]*fileMetadata
 		readError error
 	}
 	tests := []struct {
@@ -207,7 +207,7 @@ func Test_filesMap_Get(t *testing.T) {
 			name: "when file is not extractable then returns without content",
 			fields: fields{
 				root: "",
-				fileMap: map[string]*fileData{
+				fileMap: map[string]*fileMetadata{
 					"foo/bar.txt": {
 						isExecutable:  true,
 						isExtractable: false,
@@ -225,7 +225,7 @@ func Test_filesMap_Get(t *testing.T) {
 			name: "when file is in map and is extractable, should return with contents",
 			fields: fields{
 				root: filepath.Join(testdata, "rootfs-foo"),
-				fileMap: map[string]*fileData{
+				fileMap: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
 						isExtractable: true,
@@ -243,7 +243,7 @@ func Test_filesMap_Get(t *testing.T) {
 			name: "when file is in map and is extractable but does not exist, then keep error",
 			fields: fields{
 				root: filepath.Join(testdata, "rootfs-foo"),
-				fileMap: map[string]*fileData{
+				fileMap: map[string]*fileMetadata{
 					"foo/does/not/exist": {
 						isExecutable:  false,
 						isExtractable: true,

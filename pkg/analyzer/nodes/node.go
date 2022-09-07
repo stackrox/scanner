@@ -18,10 +18,10 @@ import (
 )
 
 // Information about extracted files.
-type fileData struct {
+type fileMetadata struct {
 	// If true, the file has executable permissions.
 	isExecutable bool
-	// If true, contents should be extracted from the filesystem.
+	// If true, contents can be extracted from the filesystem.
 	isExtractable bool
 }
 
@@ -35,7 +35,7 @@ type filesMap struct {
 	// Root directory where all the files, and their relative paths, reside.
 	root string
 	// Map of extracted file information keyed by their relative file paths.
-	files map[string]*fileData
+	files map[string]*fileMetadata
 	// Last error found when reading files contents.
 	readError error
 }
@@ -64,8 +64,8 @@ func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (Components, erro
 	if err != nil {
 		return Components{}, nil
 	}
-	// File reading errors during analysis failed are not exposed to DetectFiles,
-	// hence we check it and if there were any we fail the analysis.
+	// File reading errors during analysis are not exposed to DetectFiles, hence we
+	// check it and if there were any we fail.
 	if err := files.readErr(); err != nil {
 		return Components{}, errors.Wrapf(err, "analysis of node %q failed", nodeName)
 	}
@@ -81,7 +81,7 @@ func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*fil
 	}
 	n := &filesMap{
 		root:  absRoot,
-		files: make(map[string]*fileData),
+		files: make(map[string]*fileMetadata),
 	}
 	m := metrics.FileExtractionMetrics{}
 	for _, dir := range matcher.GetCommonPrefixDirs() {
@@ -135,7 +135,7 @@ func filesIsNotAccessible(err error) bool {
 
 // extractFile extracts data from the given directory entry, if granted by the
 // path matcher, and if it passes safety checks. Otherwise, returns nil.
-func extractFile(path string, entry fs.DirEntry, pathMatcher matcher.Matcher, m *metrics.FileExtractionMetrics) (*fileData, error) {
+func extractFile(path string, entry fs.DirEntry, pathMatcher matcher.Matcher, m *metrics.FileExtractionMetrics) (*fileMetadata, error) {
 	// Ignore all directories.
 	if entry.IsDir() {
 		return nil, nil
@@ -165,7 +165,7 @@ func extractFile(path string, entry fs.DirEntry, pathMatcher matcher.Matcher, m 
 			path, fileInfo.Size(), analyzer.GetMaxExtractableFileSize()/1024/1024)
 		return nil, nil
 	}
-	return &fileData{
+	return &fileMetadata{
 		isExecutable:  matcher.IsFileExecutable(fileInfo),
 		isExtractable: isExtractable,
 	}, nil
