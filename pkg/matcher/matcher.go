@@ -4,10 +4,12 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
 
+	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/pkg/whiteout"
 )
 
@@ -20,23 +22,82 @@ type Matcher interface {
 	Match(fullPath string, fileInfo os.FileInfo, contents io.ReaderAt) (matches bool, extract bool)
 }
 
+// PrefixMatcher is a matcher that uses file prefixes.
+type PrefixMatcher interface {
+	Matcher
+
+	// GetCommonPrefixDirs list all directories from all the prefixes used in this
+	// matcher, and returns a list of common directories in all of them, up to one
+	// level below the root dir, e.g. prefixes are {"a/b/f", "a/c/f", "b/c/"} the
+	// common prefix list is {"a/", "b/c/"}. The returned directories will always be
+	// terminated with /. If a name is not terminated by a slash it is considered a
+	// file and ignored. Example:
+	//
+	// Prefixes:
+	//   - var/lib/rpm/
+	//   - var/lib/dpkg/
+	//   - root/buildinfo/
+	//   - usr/bin
+	//   - usr/bin/bash
+	//   - etc/apt.sources
+	//
+	// Output:
+	//   - var/lib/
+	//   - root/buildinfo/
+	//   - usr/
+	//   - etc/
+	GetCommonPrefixDirs() []string
+}
+
 type allowlistMatcher struct {
 	allowlist []string
 }
 
-// NewPrefixAllowlistMatcher returns a matcher that matches all filenames which have any
-// of the passed paths as a prefix.
-func NewPrefixAllowlistMatcher(allowlist ...string) Matcher {
+// NewPrefixAllowlistMatcher returns a prefix matcher that matches all filenames
+// which have any of the passed paths as a prefix.
+func NewPrefixAllowlistMatcher(allowlist ...string) PrefixMatcher {
 	return &allowlistMatcher{allowlist: allowlist}
 }
 
-func (w *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
-	for _, s := range w.allowlist {
+func (m *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
+	for _, s := range m.allowlist {
 		if strings.HasPrefix(fullPath, s) {
 			return true, true
 		}
 	}
 	return false, false
+}
+
+func (m *allowlistMatcher) GetCommonPrefixDirs() []string {
+	return findCommonDirPrefixes(m.allowlist)
+}
+
+// findCommonDirPrefixes goes over all prefixes, steps one level down from the
+// root directory, and returns exactly one common prefix per first level dir
+// referenced. It does it by doing creating a trie-like structure with the
+// directory tree filtering paths with only single-children nodes.
+func findCommonDirPrefixes(prefixes []string) []string {
+	pre := make(map[string]set.StringSet)
+	for _, d := range prefixes {
+		for d != "" {
+			p, _ := path.Split(strings.TrimSuffix(d, "/"))
+			s := pre[p]
+			s.Add(d)
+			pre[p] = s
+			d = p
+		}
+	}
+	// Work on one step below root.
+	firstLevelDirs := pre[""].AsSlice()
+	ret := firstLevelDirs[:0]
+	for _, d := range firstLevelDirs {
+		for len(pre[d]) == 1 {
+			d = pre[d].GetArbitraryElem()
+		}
+		d, _ := path.Split(d)
+		ret = append(ret, d)
+	}
+	return ret
 }
 
 type whiteoutMatcher struct{}
