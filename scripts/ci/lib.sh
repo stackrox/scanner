@@ -14,8 +14,6 @@ push_images() {
         die "missing arg. usage: push_images <ci_tag>"
     fi
 
-    require_environment "DOCKER_IO_PUSH_USERNAME"
-    require_environment "DOCKER_IO_PUSH_PASSWORD"
     require_environment "QUAY_RHACS_ENG_RW_USERNAME"
     require_environment "QUAY_RHACS_ENG_RW_PASSWORD"
     require_environment "QUAY_STACKROX_IO_RW_USERNAME"
@@ -47,11 +45,6 @@ push_images() {
     # Push to us.gcr.io/stackrox-ci
     _tag_image_set "us.gcr.io/stackrox-ci" "$tag"
     _push_image_set "us.gcr.io/stackrox-ci" "$tag"
-
-    # Push to docker.io/stackrox
-    docker login -u "$DOCKER_IO_PUSH_USERNAME" --password-stdin <<<"$DOCKER_IO_PUSH_PASSWORD" docker.io
-    _tag_image_set "stackrox" "$tag"
-    _push_image_set "stackrox" "$tag"
 
     # Push to quay.io/rhacs-eng
     docker login -u "$QUAY_RHACS_ENG_RW_USERNAME" --password-stdin <<<"$QUAY_RHACS_ENG_RW_PASSWORD" quay.io

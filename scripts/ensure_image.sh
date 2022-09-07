@@ -16,7 +16,6 @@ dir="$3"
 [[ -n "${image}" && -n "${dockerfile}" && -n "${dir}" ]] || die "Usage $0 <image> <dockerfile_path> <dir>"
 
 if [[ -n "${CI}" ]]; then
-  docker login -u "$DOCKER_IO_PUSH_USERNAME" -p "$DOCKER_IO_PUSH_PASSWORD" docker.io
   docker login -u  "${QUAY_RHACS_ENG_RW_USERNAME}" -p "${QUAY_RHACS_ENG_RW_PASSWORD}" quay.io
 fi
 
