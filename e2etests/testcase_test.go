@@ -2601,7 +2601,7 @@ var testCases = []testCase{
 					},
 				},
 				AddedBy: "sha256:596ba82af5aaa3e2fd9d6f955b8b94f0744a2b60710e3c243ba3e4a467f051d1",
-				FixedBy: "1.32.1-r8",
+				FixedBy: "1.32.1-r9",
 				Executables: []*v1.Executable{
 					{
 						Path: "/etc/network/if-up.d/dad",
@@ -2852,9 +2852,9 @@ var testCases = []testCase{
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 6.8,
-									"ImpactScore":         6.4,
-									"Score":               6.0,
-									"Vectors":             "AV:N/AC:M/Au:S/C:P/I:P/A:P",
+									"ImpactScore":         10.0,
+									"Score":               8.5,
+									"Vectors":             "AV:N/AC:M/Au:S/C:C/I:C/A:C",
 								},
 							},
 						},
@@ -2954,9 +2954,9 @@ var testCases = []testCase{
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 6.8,
-									"ImpactScore":         6.4,
-									"Score":               6.0,
-									"Vectors":             "AV:N/AC:M/Au:S/C:P/I:P/A:P",
+									"ImpactScore":         10.0,
+									"Score":               8.5,
+									"Vectors":             "AV:N/AC:M/Au:S/C:C/I:C/A:C",
 								},
 							},
 						},
@@ -3066,9 +3066,9 @@ var testCases = []testCase{
 								},
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 6.8,
-									"ImpactScore":         6.4,
-									"Score":               6.0,
-									"Vectors":             "AV:N/AC:M/Au:S/C:P/I:P/A:P",
+									"ImpactScore":         10.0,
+									"Score":               8.5,
+									"Vectors":             "AV:N/AC:M/Au:S/C:C/I:C/A:C",
 								},
 							},
 						},
