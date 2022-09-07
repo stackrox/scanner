@@ -3477,14 +3477,14 @@ For more details about the security issue(s), including the impact, a CVSS score
 					{
 						Name:          "RHBA-2022:5747",
 						NamespaceName: "rhel:8",
-						Description:   `.NET Core is a managed-software framework. It implements a subset of the .NET
+						Description: `.NET Core is a managed-software framework. It implements a subset of the .NET
 framework APIs and several new APIs, and it includes a CLR implementation.
 
 Bug Fix(es) and Enhancement(s):
 
 * Update .NET 6.0 to SDK 6.0.107 and Runtime 6.0.7 [rhel-8.6.0.z] (BZ#2105397)`,
-						Link:          "https://access.redhat.com/errata/RHBA-2022:5747",
-						Severity:      "Moderate",
+						Link:     "https://access.redhat.com/errata/RHBA-2022:5747",
+						Severity: "Moderate",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -3516,14 +3516,14 @@ Bug Fix(es) and Enhancement(s):
 					{
 						Name:          "RHBA-2022:5747",
 						NamespaceName: "rhel:8",
-						Description:   `.NET Core is a managed-software framework. It implements a subset of the .NET
+						Description: `.NET Core is a managed-software framework. It implements a subset of the .NET
 framework APIs and several new APIs, and it includes a CLR implementation.
 
 Bug Fix(es) and Enhancement(s):
 
 * Update .NET 6.0 to SDK 6.0.107 and Runtime 6.0.7 [rhel-8.6.0.z] (BZ#2105397)`,
-						Link:          "https://access.redhat.com/errata/RHBA-2022:5747",
-						Severity:      "Moderate",
+						Link:     "https://access.redhat.com/errata/RHBA-2022:5747",
+						Severity: "Moderate",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
