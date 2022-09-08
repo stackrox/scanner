@@ -6,7 +6,7 @@ func init() {
 	RegisterMigration(migrate.Migration{
 		ID: 18,
 		Up: migrate.Queries([]string{
-			`ALTER TABLE vuln_package ADD COLUMN IF NOT EXISTS resolution_state VARCHAR(64)`,
+			`ALTER TABLE vuln_package ADD COLUMN IF NOT EXISTS resolution_state VARCHAR(100)`,
 		}),
 	})
 }

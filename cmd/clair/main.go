@@ -158,7 +158,6 @@ func Boot(config *Config, slimMode bool) {
 		if err != nil {
 			log.WithError(err).Fatal("Failed to initialize updater")
 		}
-
 		// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up-to-date
 		u.UpdateApplicationCachesOnly()
 

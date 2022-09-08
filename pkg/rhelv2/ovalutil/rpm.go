@@ -69,9 +69,9 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 
 		//parse unpatched CVE component resolution for each def
 		componentResolutions, err := parseUnpatchedCVEComponents(def)
-		log.Infof(">>>> parseUnpatchedCVEComponents components size: %d", len(componentResolutions))
 		// recursively collect criterions for this definition
 		cris := cris[:0]
+		log.Infof(">>>> Unpatched CVE components size is: %d", len(componentResolutions))
 		walkCriterion("", &def.Criteria, &cris)
 		// unpack criterions into vulnerabilities
 		for _, criterion := range cris {
@@ -138,8 +138,10 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				Name:   object.Name,
 				Module: criterion.module,
 			}
-			if componentResolutions != nil && len(componentResolutions) > 0 && componentResolutions[object.Name] != "" {
-				pkg.ResolutionState = componentResolutions[object.Name]
+			if componentResolutions != nil && len(componentResolutions) > 0 {
+				if val, ok := componentResolutions[object.Name]; ok {
+					pkg.ResolutionState = val
+				}
 			}
 			if state != nil && state.Arch != nil {
 				pkg.Arch = state.Arch.Body

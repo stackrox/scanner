@@ -66,7 +66,7 @@ func (u *Updater) doUpdate(mode updateMode) error {
 		log.Info("No new update to fetch")
 		return nil
 	}
-
+	log.Info("TEST updater: UpdateFromVulnDump")
 	var db database.Datastore
 	if mode == updateApplicationCachesAndPostgres {
 		db = u.db
