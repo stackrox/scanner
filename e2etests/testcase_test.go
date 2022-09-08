@@ -41,6 +41,8 @@ func init() {
 }
 
 // testCases defines all the E2E test cases.
+// Not all defined test cases will be available for use.
+// Cases which rely on a disabled feature flag are filtered out.
 var testCases = []testCase{
 	{
 		image:                    "ubuntu:16.04",
