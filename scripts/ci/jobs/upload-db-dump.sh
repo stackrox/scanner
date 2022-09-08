@@ -10,6 +10,9 @@ upload_db_dump() {
     if is_in_PR_context; then
         info "Skipping upload, as this is a PR"
     fi
+    if is_tagged; then
+        info "SKipping upload, as this is a tag"
+    fi
 
     info "Starting DB dump upload"
 

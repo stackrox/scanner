@@ -11,6 +11,10 @@ upload_dumps_for_embedding() {
         info "In PR context. Skipping..."
         return 0
     fi
+    if is_tagged; then
+        info "In tag context. Skipping..."
+        return 0
+    fi
 
     info "Starting dumps upload"
 
