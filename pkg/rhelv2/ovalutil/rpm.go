@@ -67,9 +67,8 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			continue
 		}
 
-		//parse unpatched CVE component resolution for each def
+		// parse unpatched CVE component resolution for each def
 		componentResolutions := parseUnpatchedCVEComponents(def)
-		log.Infof(">>>> Unpatched CVE components size is: %d", len(componentResolutions))
 
 		// recursively collect criterions for this definition
 		cris := cris[:0]
@@ -140,6 +139,12 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			}
 			if state != nil && state.Arch != nil {
 				pkg.Arch = state.Arch.Body
+			}
+
+			if len(componentResolutions) > 0 {
+				if val, ok := componentResolutions[object.Name]; ok {
+					pkg.ResolutionState = val
+				}
 			}
 
 			pkgInfo.Packages = append(pkgInfo.Packages, pkg)
@@ -231,7 +236,7 @@ func GetDefinitionType(def oval.Definition) (string, error) {
 
 func parseUnpatchedCVEComponents(def oval.Definition) map[string]string {
 	resolutions := def.Advisory.Affected.Resolutions
-	if len(resolutions) < 1 {
+	if len(resolutions) == 0 {
 		return nil
 	}
 	result := make(map[string]string)
