@@ -77,22 +77,22 @@ func (m *allowlistMatcher) GetCommonPrefixDirs() []string {
 // referenced. It does it by doing creating a trie-like structure with the
 // directory tree filtering paths with only single-children nodes.
 func findCommonDirPrefixes(prefixes []string) []string {
-	pre := make(map[string]set.StringSet)
+	prefixToSubdirs := make(map[string]set.StringSet)
 	for _, d := range prefixes {
 		for d != "" {
 			p, _ := path.Split(strings.TrimSuffix(d, "/"))
-			s := pre[p]
+			s := prefixToSubdirs[p]
 			s.Add(d)
-			pre[p] = s
+			prefixToSubdirs[p] = s
 			d = p
 		}
 	}
 	// Work on one step below root.
-	firstLevelDirs := pre[""].AsSlice()
+	firstLevelDirs := prefixToSubdirs[""].AsSlice()
 	ret := firstLevelDirs[:0]
 	for _, d := range firstLevelDirs {
-		for len(pre[d]) == 1 {
-			d = pre[d].GetArbitraryElem()
+		for len(prefixToSubdirs[d]) == 1 {
+			d = prefixToSubdirs[d].GetArbitraryElem()
 		}
 		d, _ := path.Split(d)
 		ret = append(ret, d)
