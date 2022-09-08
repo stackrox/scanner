@@ -67,9 +67,8 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			continue
 		}
 
-		//parse unpatched CVE component resolution for each def
-		componentResolutions, err := parseUnpatchedCVEComponents(def)
-		log.Infof(">>>> Unpatched CVE components size is: %d", len(componentResolutions))
+		// parse unpatched CVE component resolution for each def
+		componentResolutions := ParseUnpatchedCVEComponents(def)
 
 		// recursively collect criterions for this definition
 		cris := cris[:0]
@@ -140,6 +139,10 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			}
 			if state != nil && state.Arch != nil {
 				pkg.Arch = state.Arch.Body
+			}
+
+			if val, ok := componentResolutions[object.Name]; ok {
+				pkg.ResolutionState = val
 			}
 
 			pkgInfo.Packages = append(pkgInfo.Packages, pkg)
@@ -229,27 +232,17 @@ func GetDefinitionType(def oval.Definition) (string, error) {
 	return match[1], nil
 }
 
-func parseUnpatchedCVEComponents(def oval.Definition) (map[string]string, error) {
-	defType, err := GetDefinitionType(def)
-	if err != nil {
-		return nil, err
-	}
-
-	// Red Hat OVAL v2 data include information about vulnerabilities,
-	// that actually don't affect the package in any way. Storing them
-	// would increase number of records in DB without adding any value.
-	if defType == UnaffectedDefinition {
-		return nil, nil
-	}
+// ParseUnpatchedCVEComponents parse components and resolution states of these components in an OVAL definition
+func ParseUnpatchedCVEComponents(def oval.Definition) map[string]string {
 	resolutions := def.Advisory.Affected.Resolutions
-	if len(resolutions) < 1 {
-		return nil, nil
+	if len(resolutions) == 0 {
+		return nil
 	}
 	result := make(map[string]string)
 
-	for i := 0; i < len(resolutions); i++ {
-		state := resolutions[i].State
-		components := resolutions[i].Components
+	for _, resolution := range resolutions {
+		state := resolution.State
+		components := resolution.Components
 
 		for j := 0; j < len(components); j++ {
 			component := components[j]
@@ -264,5 +257,5 @@ func parseUnpatchedCVEComponents(def oval.Definition) (map[string]string, error)
 		}
 	}
 
-	return result, nil
+	return result
 }
