@@ -3468,4 +3468,93 @@ For more details about the security issue(s), including the impact, a CVSS score
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:sandbox-dotnet-60-runtime-6.0-15.20220620151726",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "Red Hat",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:8",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "aspnetcore-runtime-6.0",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "6.0.6-1.el8_6.x86_64",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "RHBA-2022:5747",
+						NamespaceName: "rhel:8",
+						Description: `.NET Core is a managed-software framework. It implements a subset of the .NET
+framework APIs and several new APIs, and it includes a CLR implementation.
+
+Bug Fix(es) and Enhancement(s):
+
+* Update .NET 6.0 to SDK 6.0.107 and Runtime 6.0.7 [rhel-8.6.0.z] (BZ#2105397)`,
+						Link:     "https://access.redhat.com/errata/RHBA-2022:5747",
+						Severity: "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.8,
+									"ImpactScore":         5.2,
+									"Score":               8.1,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+								},
+							},
+						},
+						FixedBy: "0:6.0.7-1.el8_6",
+					},
+				},
+				FixedBy: "6.0.8-1.el8_6",
+				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
+			},
+			{
+				Name:          "dotnet-runtime-6.0",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "6.0.6-1.el8_6.x86_64",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "RHBA-2022:5747",
+						NamespaceName: "rhel:8",
+						Description: `.NET Core is a managed-software framework. It implements a subset of the .NET
+framework APIs and several new APIs, and it includes a CLR implementation.
+
+Bug Fix(es) and Enhancement(s):
+
+* Update .NET 6.0 to SDK 6.0.107 and Runtime 6.0.7 [rhel-8.6.0.z] (BZ#2105397)`,
+						Link:     "https://access.redhat.com/errata/RHBA-2022:5747",
+						Severity: "Moderate",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.8,
+									"ImpactScore":         5.2,
+									"Score":               8.1,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+								},
+							},
+						},
+						FixedBy: "0:6.0.7-1.el8_6",
+					},
+				},
+				FixedBy: "6.0.8-1.el8_6",
+				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
+			},
+		},
+	},
 }
