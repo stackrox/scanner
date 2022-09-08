@@ -7,6 +7,7 @@ package ovalutil
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/quay/goval-parser/oval"
@@ -65,8 +66,12 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 		if vuln == nil {
 			continue
 		}
-		// recursively collect criterions for this definition
 
+		//parse unpatched CVE component resolution for each def
+		componentResolutions, err := parseUnpatchedCVEComponents(def)
+		log.Infof(">>>> Unpatched CVE components size is: %d", len(componentResolutions))
+
+		// recursively collect criterions for this definition
 		cris := cris[:0]
 		walkCriterion("", &def.Criteria, &cris)
 		// unpack criterions into vulnerabilities
@@ -222,4 +227,42 @@ func GetDefinitionType(def oval.Definition) (string, error) {
 		return "", errors.New("cannot parse definition ID for its type")
 	}
 	return match[1], nil
+}
+
+func parseUnpatchedCVEComponents(def oval.Definition) (map[string]string, error) {
+	defType, err := GetDefinitionType(def)
+	if err != nil {
+		return nil, err
+	}
+
+	// Red Hat OVAL v2 data include information about vulnerabilities,
+	// that actually don't affect the package in any way. Storing them
+	// would increase number of records in DB without adding any value.
+	if defType == UnaffectedDefinition {
+		return nil, nil
+	}
+	resolutions := def.Advisory.Affected.Resolutions
+	if len(resolutions) < 1 {
+		return nil, nil
+	}
+	result := make(map[string]string)
+
+	for i := 0; i < len(resolutions); i++ {
+		state := resolutions[i].State
+		components := resolutions[i].Components
+
+		for j := 0; j < len(components); j++ {
+			component := components[j]
+			stringSlice := strings.Split(component, "/")
+			var componentName string
+			if len(stringSlice) > 1 {
+				componentName = stringSlice[len(stringSlice)-1]
+			} else {
+				componentName = stringSlice[0]
+			}
+			result[componentName] = state
+		}
+	}
+
+	return result, nil
 }
