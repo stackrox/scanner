@@ -19,6 +19,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
 	"github.com/stackrox/scanner/pkg/analyzer"
+	"github.com/stackrox/scanner/pkg/analyzer/detection"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
@@ -109,7 +110,7 @@ func analyzeLocalImage(path string) {
 		if err != nil {
 			panic(err)
 		}
-		namespace = clair.DetectNamespace(l, *files, nil, false)
+		namespace = detection.DetectNamespace(l, *files, nil, false)
 		if namespace != nil {
 			break
 		}
