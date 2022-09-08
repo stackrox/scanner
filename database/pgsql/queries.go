@@ -226,13 +226,13 @@ const (
 			name,
 			package_name, package_module, package_arch,
 			cpe,
-			fixed_in_version, arch_operation
+			fixed_in_version, arch_operation, resolution_state
 		) VALUES (
 			$1,
 			$2,
 			$3, $4, $5,
 			$6,
-			$7, $8
+			$7, $8, $9
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 

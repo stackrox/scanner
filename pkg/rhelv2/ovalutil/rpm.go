@@ -133,6 +133,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				// If FixedInVersion is not defined, we keep the title empty to reduce the scale of the database.
 				vuln.Title = ""
 			}
+
 			pkg := &database.RHELv2Package{
 				// object.Name will never be empty.
 				Name:   object.Name,
@@ -141,7 +142,11 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			if state != nil && state.Arch != nil {
 				pkg.Arch = state.Arch.Body
 			}
-
+			if len(componentResolutions) > 0 {
+				if val, ok := componentResolutions[object.Name]; ok {
+					pkg.ResolutionState = val
+				}
+			}
 			pkgInfo.Packages = append(pkgInfo.Packages, pkg)
 
 			vuln.PackageInfos = append(vuln.PackageInfos, pkgInfo)
