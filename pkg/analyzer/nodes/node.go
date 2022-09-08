@@ -50,24 +50,24 @@ type Components struct {
 }
 
 // Analyze performs analysis of node's hosts filesystem and return the detected components.
-func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (Components, error) {
+func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, error) {
 	// Currently, the node analyzer can only identify operating system components
 	// without active vulnerability, so we use the OS matcher.
 	matcher := requiredfilenames.SingletonOSMatcher()
 	files, err := extractFilesFromDirectory(rootFSdir, matcher)
 	if err != nil {
-		return Components{}, err
+		return nil, err
 	}
-	c := Components{}
+	c := &Components{}
 	c.OSNamespace, c.OSComponents, c.CertifiedRHELComponents, _, err =
 		clair.DetectFromFiles(files, nodeName, nil, nil, uncertifiedRHEL)
 	if err != nil {
-		return Components{}, nil
+		return nil, nil
 	}
 	// File reading errors during analysis are not exposed to DetectFiles, hence we
 	// check it and if there were any we fail.
 	if err := files.readErr(); err != nil {
-		return Components{}, errors.Wrapf(err, "analysis of node %q failed", nodeName)
+		return nil, errors.Wrapf(err, "analysis of node %q failed", nodeName)
 	}
 	return c, nil
 }
@@ -102,7 +102,7 @@ func (n *filesMap) addFiles(dir string, matcher matcher.Matcher, m *metrics.File
 	return filepath.WalkDir(filepath.Join(n.root, dir), func(fullPath string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			if filesIsNotAccessible(err) {
-				m.ErrorCount()
+				m.InaccessibleCount()
 				return nil
 			}
 			return errors.Wrapf(err, "failed to read %q", fullPath)
@@ -143,7 +143,7 @@ func extractFile(path string, entry fs.DirEntry, pathMatcher matcher.Matcher, m 
 	fileInfo, err := entry.Info()
 	if err != nil {
 		if filesIsNotAccessible(err) {
-			m.ErrorCount()
+			m.InaccessibleCount()
 			return nil, nil
 		}
 		// We assume that other errors reflect underlying problems with the filesystem

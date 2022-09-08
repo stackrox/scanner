@@ -15,9 +15,9 @@ var (
 		Buckets: []float64{50, 100, 500, 1000},
 	})
 
-	fileExtractionErrorCountMetric = prometheus.NewHistogram(prometheus.HistogramOpts{
-		Name:    "file_extraction_error_count",
-		Help:    "Number of files in an node filesystem scan that failed to read",
+	fileExtractionInaccessibleCountMetric = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name:    "file_extraction_inaccessible_count",
+		Help:    "Number of matched files in an node filesystem scan that were not accessible for reading",
 		Buckets: []float64{50, 100, 500, 1000},
 	})
 )
@@ -26,13 +26,13 @@ func init() {
 	prometheus.MustRegister(
 		fileExtractionCountMetric,
 		fileExtractionMatchCountMetric,
-		fileExtractionErrorCountMetric,
+		fileExtractionInaccessibleCountMetric,
 	)
 }
 
 // FileExtractionMetrics tracks and emit node extraction metrics.
 type FileExtractionMetrics struct {
-	fileCount, matchCount, errorCount float64
+	fileCount, matchCount, inaccessibleCount float64
 }
 
 // FileCount increments the file count.
@@ -49,11 +49,11 @@ func (m *FileExtractionMetrics) MatchCount() {
 	}
 }
 
-// ErrorCount increments the file error count that were ignored and treated as
+// InaccessibleCount increments the file error count that were ignored and treated as
 // non-existent files.
-func (m *FileExtractionMetrics) ErrorCount() {
+func (m *FileExtractionMetrics) InaccessibleCount() {
 	if m != nil {
-		m.errorCount++
+		m.inaccessibleCount++
 	}
 }
 
@@ -62,7 +62,7 @@ func (m *FileExtractionMetrics) Emit() {
 	if m != nil {
 		fileExtractionCountMetric.Observe(m.matchCount)
 		fileExtractionMatchCountMetric.Observe(m.fileCount)
-		fileExtractionErrorCountMetric.Observe(m.errorCount)
+		fileExtractionInaccessibleCountMetric.Observe(m.inaccessibleCount)
 	}
 	*m = FileExtractionMetrics{}
 }
