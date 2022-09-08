@@ -68,7 +68,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 		}
 
 		//parse unpatched CVE component resolution for each def
-		componentResolutions, err := parseUnpatchedCVEComponents(def)
+		componentResolutions := parseUnpatchedCVEComponents(def)
 		log.Infof(">>>> Unpatched CVE components size is: %d", len(componentResolutions))
 
 		// recursively collect criterions for this definition
@@ -229,21 +229,10 @@ func GetDefinitionType(def oval.Definition) (string, error) {
 	return match[1], nil
 }
 
-func parseUnpatchedCVEComponents(def oval.Definition) (map[string]string, error) {
-	defType, err := GetDefinitionType(def)
-	if err != nil {
-		return nil, err
-	}
-
-	// Red Hat OVAL v2 data include information about vulnerabilities,
-	// that actually don't affect the package in any way. Storing them
-	// would increase number of records in DB without adding any value.
-	if defType == UnaffectedDefinition {
-		return nil, nil
-	}
+func parseUnpatchedCVEComponents(def oval.Definition) map[string]string {
 	resolutions := def.Advisory.Affected.Resolutions
 	if len(resolutions) < 1 {
-		return nil, nil
+		return nil
 	}
 	result := make(map[string]string)
 
@@ -264,5 +253,5 @@ func parseUnpatchedCVEComponents(def oval.Definition) (map[string]string, error)
 		}
 	}
 
-	return result, nil
+	return result
 }
