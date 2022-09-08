@@ -3,6 +3,7 @@ package diffdumps
 import (
 	"archive/zip"
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -29,33 +30,27 @@ import (
 )
 
 func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
-	reader, err := headF.Open()
+	headReader, err := headF.Open()
 	if err != nil {
 		return errors.Wrap(err, "opening file")
 	}
-	defer utils.IgnoreError(reader.Close)
-	k8sDump, err := k8sloader.LoadYAMLFileFromReader(reader)
+	defer utils.IgnoreError(headReader.Close)
+	k8sDump, err := k8sloader.LoadYAMLFileFromReader(headReader)
 	if err != nil {
 		return errors.Wrap(err, "reading Kubernetes dump")
 	}
 
 	var baseK8sDump *validation.CVESchema
 	if baseF != nil {
-		reader, err := baseF.Open()
+		baseReader, err := baseF.Open()
 		if err != nil {
 			return errors.Wrap(err, "opening file")
 		}
-		defer utils.IgnoreError(reader.Close)
-		baseK8sDump, err = k8sloader.LoadYAMLFileFromReader(reader)
+		defer utils.IgnoreError(baseReader.Close)
+		baseK8sDump, err = k8sloader.LoadYAMLFileFromReader(baseReader)
 		if err != nil {
 			return errors.Wrap(err, "reading base Kubernetes dump")
 		}
-	}
-
-	var k8sDiff validation.CVESchema
-	if !reflect.DeepEqual(baseK8sDump, k8sDump) {
-		log.Infof("Kubernetes CVE file %q is in the diff", headF.Name)
-		k8sDiff = *k8sDump
 	}
 
 	outF, err := os.Create(filepath.Join(outputDir, filepath.Base(headF.Name)))
@@ -64,9 +59,13 @@ func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
 	}
 	defer utils.IgnoreError(outF.Close)
 
-	if err := k8sloader.WriteYAMLFileToWriter(&k8sDiff, outF); err != nil {
-		return errors.Wrap(err, "writing dump to writer")
+	if !reflect.DeepEqual(baseK8sDump, k8sDump) {
+		log.Infof("Kubernetes CVE file %q is in the diff", headF.Name)
+		if _, err := io.Copy(outF, headReader); err != nil {
+			return errors.Wrap(err, "copying Kubernetes CVE file")
+		}
 	}
+
 	return nil
 }
 

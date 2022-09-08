@@ -23,6 +23,13 @@ spec:
         env:
         - name: POSTGRES_PASSWORD_FILE
           value: "/run/secrets/stackrox.io/secrets/password"
+        resources:
+          limits:
+            cpu: 2
+            memory: 4Gi
+          requests:
+            cpu: 200m
+            memory: 200Mi
         volumeMounts:
         - name: scanner-db-data
           mountPath: /var/lib/postgresql/data
