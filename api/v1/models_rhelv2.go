@@ -121,30 +121,24 @@ func getRHELv2Vulns(vulns map[int][]*database.RHELv2Vulnerability, pkg *database
 	// 1. The package's version is less than the vuln's fixed-in version, if present.
 	// 2. The ArchOperation passes.
 	for _, vuln := range vulns[pkg.ID] {
-		if len(vuln.PackageInfos) != 1 {
-			log.Warnf("Unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
+		if len(vuln.Packages) != 1 {
+			log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.Packages), 1)
 			continue
 		}
-		vulnPkgInfo := vuln.PackageInfos[0]
-
-		if len(vulnPkgInfo.Packages) != 1 {
-			log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vulnPkgInfo.Packages), 1)
-			continue
-		}
-		vulnPkg := vulnPkgInfo.Packages[0]
+		vulnPkg := vuln.Packages[0]
 
 		// Assume the vulnerability is not fixed.
 		// In that case, all versions are affected.
 		affectedVersion := true
 		var vulnVersion *rpmVersion.Version
-		if vulnPkgInfo.FixedInVersion != "" {
+		if vulnPkg.FixedInVersion != "" {
 			// The vulnerability is fixed. Determine if this package is affected.
-			vulnVersion = rpmVersionPtr(rpmVersion.NewVersion(vulnPkgInfo.FixedInVersion))
+			vulnVersion = rpmVersionPtr(rpmVersion.NewVersion(vulnPkg.FixedInVersion))
 			affectedVersion = pkgVersion.LessThan(*vulnVersion)
 		}
 
 		// Compare the package's architecture to the affected architecture.
-		affectedArch := vulnPkgInfo.ArchOperation.Cmp(pkgArch, vulnPkg.Arch)
+		affectedArch := vulnPkg.ArchOperation.Cmp(pkgArch, vulnPkg.Arch)
 
 		if affectedVersion && affectedArch {
 			vulnerabilities = append(vulnerabilities, RHELv2ToVulnerability(vuln, namespaceName))
@@ -348,7 +342,7 @@ func RHELv2ToVulnerability(vuln *database.RHELv2Vulnerability, namespace string)
 		Link:          vuln.Link,
 		Severity:      vuln.Severity,
 		Metadata:      metadata,
-		// It is guaranteed there is 1 and only one element in `vuln.PackageInfos`.
-		FixedBy: vuln.PackageInfos[0].FixedInVersion, // Empty string if not fixed.
+		// It is guaranteed there is 1 and only one element in `vuln.Packages`.
+		FixedBy: vuln.Packages[0].FixedInVersion, // Empty string if not fixed.
 	}
 }

@@ -144,28 +144,22 @@ func (s *serviceImpl) GetOpenShiftVulnerabilities(_ context.Context, req *v1.Get
 		ScannerVersion: s.version,
 	}
 	for _, vuln := range vulns {
-		if len(vuln.PackageInfos) != 1 {
-			log.Warnf("unexpected number of package infos for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.PackageInfos), 1)
+		if len(vuln.Packages) != 1 {
+			log.Warnf("unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vuln.Packages), 1)
 			continue
 		}
-		vulnPkgInfo := vuln.PackageInfos[0]
+		vulnPkg := vuln.Packages[0]
 
-		if len(vulnPkgInfo.Packages) != 1 {
-			log.Warnf("Unexpected number of packages for vuln %q (%d != %d); Skipping...", vuln.Name, len(vulnPkgInfo.Packages), 1)
-			continue
-		}
-
-		vulnPkg := vulnPkgInfo.Packages[0]
-		affectedArch := vulnPkgInfo.ArchOperation.Cmp("x86_64", vulnPkg.Arch)
+		affectedArch := vulnPkg.ArchOperation.Cmp("x86_64", vulnPkg.Arch)
 		if !affectedArch {
-			log.Warnf("vuln %s is for arch %v %s, Skipping ...", vuln.Name, vulnPkgInfo.ArchOperation, vulnPkg.Arch)
+			log.Warnf("vuln %s is for arch %v %s, Skipping ...", vuln.Name, vulnPkg.ArchOperation, vulnPkg.Arch)
 			continue
 		}
 
 		// Skip fixed vulns.
-		fixedBy, err := version.GetFixedVersion(vulnPkgInfo.FixedInVersion, vuln.Title)
+		fixedBy, err := version.GetFixedVersion(vulnPkg.FixedInVersion, vuln.Title)
 		if err != nil {
-			// Skip it. The vuln has a fixedBy version but we cannot extract it.
+			// Skip it. The vuln has a fixedBy version, but we cannot extract it.
 			log.Errorf("cannot get fix version for vuln %s: %v, Skipping ...", vuln.Name, err)
 			continue
 		}
