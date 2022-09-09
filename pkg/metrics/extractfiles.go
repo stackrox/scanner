@@ -59,10 +59,11 @@ func (m *FileExtractionMetrics) InaccessibleCount() {
 
 // Emit emits the metrics and reset counters
 func (m *FileExtractionMetrics) Emit() {
-	if m != nil {
-		fileExtractionCountMetric.Observe(m.matchCount)
-		fileExtractionMatchCountMetric.Observe(m.fileCount)
-		fileExtractionInaccessibleCountMetric.Observe(m.inaccessibleCount)
+	if m == nil {
+		return
 	}
+	fileExtractionCountMetric.Observe(m.matchCount)
+	fileExtractionMatchCountMetric.Observe(m.fileCount)
+	fileExtractionInaccessibleCountMetric.Observe(m.inaccessibleCount)
 	*m = FileExtractionMetrics{}
 }

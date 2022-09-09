@@ -129,7 +129,7 @@ func Test_filesMap_extractFile(t *testing.T) {
 			wantErr:      assert.NoError,
 		},
 		{
-			name:        "when file is extractable and size is bigger then the limit then return nothing",
+			name:        "when file is extractable and size is bigger than the limit then return nothing",
 			maxFileSize: 1, // minimal size set to fail
 			args: args{
 				fileMatcherMock: matcherMock{

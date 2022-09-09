@@ -17,6 +17,11 @@ import (
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
 )
 
+// Verify interface compliance[1].
+//
+// [1]: https://github.com/uber-go/guide/blob/master/style.md#verify-interface-compliance
+var _ analyzer.Files = (*filesMap)(nil)
+
 // Information about extracted files.
 type fileMetadata struct {
 	// If true, the file has executable permissions.
@@ -64,7 +69,7 @@ func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, err
 	if err != nil {
 		return nil, nil
 	}
-	// File reading errors during analysis are not exposed to DetectFiles, hence we
+	// File reading errors during analysis are not exposed to DetectComponents, hence we
 	// check it and if there were any we fail.
 	if err := files.readErr(); err != nil {
 		return nil, errors.Wrapf(err, "analysis of node %q failed", nodeName)
