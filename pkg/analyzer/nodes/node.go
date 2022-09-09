@@ -8,9 +8,9 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/analyzer"
+	"github.com/stackrox/scanner/pkg/analyzer/detection"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
@@ -60,7 +60,7 @@ func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, err
 	}
 	c := &Components{}
 	c.OSNamespace, c.OSComponents, c.CertifiedRHELComponents, _, err =
-		clair.DetectFromFiles(files, nodeName, nil, nil, uncertifiedRHEL)
+		detection.DetectComponents(nodeName, files, nil, nil, uncertifiedRHEL)
 	if err != nil {
 		return nil, nil
 	}
