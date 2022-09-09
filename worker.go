@@ -227,13 +227,20 @@ func (m *analyzingMatcher) Match(filePath string, fi os.FileInfo, contents io.Re
 
 // DetectContentFromReader detects scanning content in the given reader.
 func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *database.Layer, base *tarutil.LayerFiles, uncertifiedRHEL bool) (*database.Namespace, bool, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, *tarutil.LayerFiles, error) {
-	// Create a "matcher" that actually calls `ProcessFile` on each analyzer, before delegating
-	// to the actual matcher for operating system-level feature extraction.
-	// TODO: this is ugly. A matcher should not have side-effects; but the `analyzingMatcher`s
-	// sole purpose is to have a side effect. The `ExtractFromReader` should be more explicit
-	// about the matcher not just being a matcher.
+	// Get the list of language analyzers if language vulnerability is enabled.
+	var langAnalyzers []analyzer.Analyzer
+	if env.LanguageVulns.Enabled() {
+		langAnalyzers = analyzers.Analyzers()
+	}
+	// Create a "matcher" that actually calls `ProcessFile` on each analyzer, before
+	// delegating to the actual matcher for operating system-level feature
+	// extraction.
+	//
+	// TODO: This is ugly. A matcher should not have side-effects; but the `analyzingMatcher`s
+	//       sole purpose is to have a side effect. The `ExtractFromReader` should be more
+	//       explicit about the matcher not just being a matcher.
 	m := &analyzingMatcher{
-		analyzers: analyzers.Analyzers(),
+		analyzers: langAnalyzers,
 		delegate:  requiredfilenames.SingletonMatcher(),
 	}
 
@@ -249,9 +256,7 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 
 	namespace, features, rhelv2Components, languageComponents, err := DetectFromFiles(*files, name, parent, m.components, uncertifiedRHEL)
 	distroless := isDistroless(*files) || (parent != nil && parent.Distroless)
-	if !env.LanguageVulns.Enabled() {
-		languageComponents = nil
-	}
+
 	return namespace, distroless, features, rhelv2Components, languageComponents, files, err
 }
 
