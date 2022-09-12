@@ -11,7 +11,7 @@ upload_db_dump() {
         info "Skipping upload, as this is a PR"
     fi
     if is_tagged; then
-        info "SKipping upload, as this is a tag"
+        info "Skipping upload, as this is a tag"
     fi
 
     info "Starting DB dump upload"
