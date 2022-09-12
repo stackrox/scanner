@@ -80,7 +80,7 @@ func TestMaxExtractableFileSize(t *testing.T) {
 	// test_big.txt is of size 57 bytes.
 	assert.Contains(t, files.data, "test_big.txt")
 
-	SetMaxExtractableFileSize(50)
+	analyzer.SetMaxExtractableFileSize(50)
 	files, err = ExtractFiles(f, matcher.NewPrefixAllowlistMatcher("test_big.txt"))
 	assert.NoError(t, err)
 	assert.Empty(t, files.data)

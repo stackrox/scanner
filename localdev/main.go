@@ -18,6 +18,8 @@ import (
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/imagefmt"
+	"github.com/stackrox/scanner/pkg/analyzer"
+	"github.com/stackrox/scanner/pkg/analyzer/detection"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
@@ -78,8 +80,8 @@ func analyzeLocalImage(path string) {
 
 	// Extract
 	var matcher manifestMatcher
-	tarutil.SetMaxExtractableFileSize(1024 * 1024 * 1024)
-	tarutil.SetMaxELFExecutableFileSize(1024 * 1024 * 1024)
+	analyzer.SetMaxExtractableFileSize(1024 * 1024 * 1024)
+	analyzer.SetMaxELFExecutableFileSize(1024 * 1024 * 1024)
 	filemap, err := tarutil.ExtractFiles(f, &matcher)
 	if err != nil {
 		panic(err)
@@ -108,7 +110,7 @@ func analyzeLocalImage(path string) {
 		if err != nil {
 			panic(err)
 		}
-		namespace = clair.DetectNamespace(l, *files, nil, false)
+		namespace = detection.DetectNamespace(l, *files, nil, false)
 		if namespace != nil {
 			break
 		}

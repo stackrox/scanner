@@ -11,8 +11,15 @@ import (
 )
 
 var (
+	osMatcher     matcher.PrefixMatcher
+	osMatcherOnce sync.Once
+
+	activeVulnMatcher     matcher.Matcher
+	activeVulnMatcherOnce sync.Once
+
 	instance matcher.Matcher
 	once     sync.Once
+
 	// dynamicLibRegexp matches all dynamic libraries.
 	dynamicLibRegexp = regexp.MustCompile(`(^|/)(lib|ld-)[^/.-][^/]*\.so(\.[^/.]+)*$`)
 	// libraryDirRegexp matches all files under directories where the dynamic libraries are commonly found.
@@ -20,21 +27,20 @@ var (
 	libraryDirRegexp = regexp.MustCompile(`^(usr/(local/)?)?lib(32|64)?(/.+|$)`)
 )
 
-// SingletonMatcher returns the singleton matcher instance to use for extracting
-// files to be analyzed for operating system features.
-// Note: language-level analyzers implement a different interface, and do not require
-// extraction of files into a `FileMap`. Therefore, the respective files do not need
-// to be matched here.
-func SingletonMatcher() matcher.Matcher {
-	once.Do(func() {
+// SingletonOSMatcher returns the singleton matcher instance for extracting files
+// for OS package analysis.
+func SingletonOSMatcher() matcher.PrefixMatcher {
+	osMatcherOnce.Do(func() {
 		allFileNames := append(featurefmt.RequiredFilenames(), featurens.RequiredFilenames()...)
-		clairMatcher := matcher.NewPrefixAllowlistMatcher(allFileNames...)
-		whiteoutMatcher := matcher.NewWhiteoutMatcher()
+		osMatcher = matcher.NewPrefixAllowlistMatcher(allFileNames...)
+	})
+	return osMatcher
+}
 
-		allMatchers := make([]matcher.Matcher, 0, 6)
-		allMatchers = append(allMatchers, clairMatcher, whiteoutMatcher)
-
-		// Active Vuln Mgmt related matchers.
+// SingletonActiveVulnMatcher returns the singleton matcher instance for
+// extracting files for active vulnerability analysis.
+func SingletonActiveVulnMatcher() matcher.Matcher {
+	activeVulnMatcherOnce.Do(func() {
 		dpkgFilenamesMatcher := matcher.NewRegexpMatcher(dpkg.FilenamesListRegexp, true)
 		dynamicLibMatcher := matcher.NewRegexpMatcher(dynamicLibRegexp, false)
 		libDirSymlinkMatcher := matcher.NewAndMatcher(matcher.NewRegexpMatcher(libraryDirRegexp, false), matcher.NewSymbolicLinkMatcher())
@@ -44,9 +50,27 @@ func SingletonMatcher() matcher.Matcher {
 		// remaining executable files which went unmatched otherwise.
 		// Therefore, this matcher MUST be the last matcher.
 		executableMatcher := matcher.NewExecutableMatcher()
-		allMatchers = append(allMatchers, dpkgFilenamesMatcher, dynamicLibMatcher, libDirSymlinkMatcher, executableMatcher)
+		activeVulnMatcher = matcher.NewOrMatcher(
+			dpkgFilenamesMatcher,
+			dynamicLibMatcher,
+			libDirSymlinkMatcher,
+			executableMatcher,
+		)
+	})
+	return activeVulnMatcher
+}
 
-		instance = matcher.NewOrMatcher(allMatchers...)
+// SingletonMatcher returns the singleton matcher instance to use for extracting
+// files for analyzing image container. It includes matching for OS features
+// and active vulnerability. Note: language-level analyzers implement a different
+// interface, and do not require extraction of files. Therefore, the respective
+// files do not need to be matched here.
+func SingletonMatcher() matcher.Matcher {
+	once.Do(func() {
+		instance = matcher.NewOrMatcher(
+			matcher.NewWhiteoutMatcher(),
+			SingletonOSMatcher(),
+			SingletonActiveVulnMatcher())
 	})
 	return instance
 }

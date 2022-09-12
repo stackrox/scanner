@@ -57,6 +57,7 @@ var (
 		"rhel:6",
 		"rhel:7",
 		"rhel:8",
+		"rhel:9",
 		"ubuntu:14.04",
 		"ubuntu:16.04",
 		"ubuntu:18.04",
