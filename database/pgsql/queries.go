@@ -251,7 +251,8 @@ const (
 			vuln.package_name,
 			vuln.package_arch,
 			vuln.fixed_in_version,
-			vuln.arch_operation
+			vuln.arch_operation,
+			vuln.package_resolution_state
 		FROM
 			vuln_v2 as vuln
 			LEFT JOIN vuln_description ON vuln.description_hash = vuln_description.hash
