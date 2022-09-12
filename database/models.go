@@ -155,6 +155,8 @@ type RHELv2Vulnerability struct {
 }
 
 // RHELv2PackageInfo defines all the data necessary for fully define a RHELv2 package.
+//
+// Deprecated: RHELv2Package should be used instead.
 type RHELv2PackageInfo struct {
 	Packages       []*RHELv2Package `json:"package" hash:"set"`
 	FixedInVersion string           `json:"fixed_in_version"`
