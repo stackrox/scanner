@@ -20,9 +20,9 @@ import (
 )
 
 func processRHELv2Vulnerability(v *database.RHELv2Vulnerability) {
-	for i, pkgInfo := range v.PackageInfos {
-		if i > 0 {
-			log.Infof("HERE. DIDN'T THINK THIS WAS POSSIBLE")
+	for _, pkgInfo := range v.PackageInfos {
+		if len(pkgInfo.Packages) > 1 {
+			log.Errorf("Unexpected number of packages in a RHELv2PackageInfo: %d > 1", len(pkgInfo.Packages))
 		}
 		for _, pkg := range pkgInfo.Packages {
 			pkg.FixedInVersion = pkgInfo.FixedInVersion
