@@ -16,16 +16,18 @@ type FakeFile interface {
 }
 
 // NewFakeFile creates a new fake file from the given path and contents.
-func NewFakeFile(fullPath string, contents []byte) FakeFile {
+func NewFakeFile(fullPath string, contents []byte, mode os.FileMode) FakeFile {
 	return fakeFile{
 		fullPath: fullPath,
 		contents: contents,
+		mode:     mode,
 	}
 }
 
 type fakeFile struct {
 	fullPath string
 	contents []byte
+	mode     os.FileMode
 }
 
 func (f fakeFile) FullPath() string {
@@ -45,7 +47,7 @@ func (f fakeFile) Name() string {
 }
 
 func (f fakeFile) Mode() os.FileMode {
-	return 0644
+	return f.mode
 }
 
 func (f fakeFile) IsDir() bool {
