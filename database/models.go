@@ -138,20 +138,20 @@ func (mm *MetadataMap) Value() (driver.Value, error) {
 type RHELv2Vulnerability struct {
 	Model
 
-	Name        string           `json:"name"`
-	Title       string           `json:"title"`
-	Description string           `json:"description"`
-	Issued      time.Time        `json:"issued"`
-	Updated     time.Time        `json:"updated"`
-	Link        string           `json:"link"`
-	Severity    string           `json:"severity"`
-	CVSSv3      string           `json:"cvssv3,omitempty"`
-	CVSSv2      string           `json:"cvssv2,omitempty"`
-	CPEs        []string         `json:"cpes" hash:"ignore"` // These are checked explicitly due to the removal of unused CPEs
+	Name        string    `json:"name"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Issued      time.Time `json:"issued"`
+	Updated     time.Time `json:"updated"`
+	Link        string    `json:"link"`
+	Severity    string    `json:"severity"`
+	CVSSv3      string    `json:"cvssv3,omitempty"`
+	CVSSv2      string    `json:"cvssv2,omitempty"`
+	CPEs        []string  `json:"cpes" hash:"ignore"` // These are checked explicitly due to the removal of unused CPEs
 	// Deprecated: Packages should be used instead.
 	PackageInfos []*RHELv2PackageInfo `json:"package_info" hash:"set"`
-	Packages    []*RHELv2Package `json:"packages" hash:"set"`
-	SubCVEs     []string         `json:"sub_cves,omitempty" hash:"set"`
+	Packages     []*RHELv2Package     `json:"packages" hash:"set"`
+	SubCVEs      []string             `json:"sub_cves,omitempty" hash:"set"`
 }
 
 // RHELv2PackageInfo defines all the data necessary for fully define a RHELv2 package.

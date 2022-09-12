@@ -19,6 +19,20 @@ import (
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
+func processRHELv2Vulnerability(v *database.RHELv2Vulnerability) {
+	for i, pkgInfo := range v.PackageInfos {
+		if i > 0 {
+			log.Infof("HERE. DIDN'T THINK THIS WAS POSSIBLE")
+		}
+		for _, pkg := range pkgInfo.Packages {
+			pkg.FixedInVersion = pkgInfo.FixedInVersion
+			pkg.ArchOperation = pkgInfo.ArchOperation
+			v.Packages = append(v.Packages, pkg)
+		}
+	}
+	v.PackageInfos = nil
+}
+
 func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.Time, baseF, headF *zip.File, rhelExists bool) error {
 	reader, err := headF.Open()
 	if err != nil {
@@ -62,6 +76,7 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 
 	baseVulnsMap := make(map[string]*database.RHELv2Vulnerability, len(baseRHEL.Vulns))
 	for _, vuln := range baseRHEL.Vulns {
+		processRHELv2Vulnerability(vuln)
 		if _, ok := baseVulnsMap[vuln.Name]; ok {
 			// Should really never happen, but being defensive.
 			return errors.Errorf("UNEXPECTED: got multiple vulns for key: %s", vuln.Name)
