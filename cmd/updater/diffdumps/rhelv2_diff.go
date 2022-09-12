@@ -20,6 +20,10 @@ import (
 )
 
 func processRHELv2Vulnerability(v *database.RHELv2Vulnerability) {
+	// PackageInfos is deprecated, so it is no longer populated.
+	// However, we need to ensure we diff correctly with older genesis dumps
+	// which populate this field. We simply convert each RHELv2PackageInfo
+	// into its respective RHELv2Package.
 	for _, pkgInfo := range v.PackageInfos {
 		for _, pkg := range pkgInfo.Packages {
 			pkg.FixedInVersion = pkgInfo.FixedInVersion
