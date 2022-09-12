@@ -148,8 +148,17 @@ type RHELv2Vulnerability struct {
 	CVSSv3      string           `json:"cvssv3,omitempty"`
 	CVSSv2      string           `json:"cvssv2,omitempty"`
 	CPEs        []string         `json:"cpes" hash:"ignore"` // These are checked explicitly due to the removal of unused CPEs
-	Packages    []*RHELv2Package `json:"package_info" hash:"set"`
+	// Deprecated: Packages should be used instead.
+	PackageInfos []*RHELv2PackageInfo `json:"package_info" hash:"set"`
+	Packages    []*RHELv2Package `json:"packages" hash:"set"`
 	SubCVEs     []string         `json:"sub_cves,omitempty" hash:"set"`
+}
+
+// RHELv2PackageInfo defines all the data necessary for fully define a RHELv2 package.
+type RHELv2PackageInfo struct {
+	Packages       []*RHELv2Package `json:"package" hash:"set"`
+	FixedInVersion string           `json:"fixed_in_version"`
+	ArchOperation  archop.ArchOp    `json:"arch_op,omitempty"`
 }
 
 // RHELv2Package defines the basic information of a RHELv2 package.
