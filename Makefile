@@ -95,12 +95,7 @@ build-updater: deps
 ## Style ##
 ###########
 .PHONY: style
-style: golangci-lint blanks newlines staticcheck check-service-protos no-large-files
-
-.PHONY: staticcheck
-staticcheck: $(STATICCHECK_BIN)
-	@echo "+ $@"
-	@$(BASE_DIR)/tools/staticcheck-wrap.sh ./...
+style: golangci-lint blanks newlines check-service-protos no-large-files
 
 .PHONY: check-service-protos
 check-service-protos:
