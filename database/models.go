@@ -165,11 +165,12 @@ type RHELv2PackageInfo struct {
 type RHELv2Package struct {
 	Model
 
-	Name           string        `json:"name"`
-	Version        string        `json:"version,omitempty"`
+	Name    string `json:"name"`
+	Version string `json:"version,omitempty"`
+	Module  string `json:"module,omitempty"`
+	Arch    string `json:"arch,omitempty"`
+
 	FixedInVersion string        `json:"fixed_in_version"`
-	Module         string        `json:"module,omitempty"`
-	Arch           string        `json:"arch,omitempty"`
 	ArchOperation  archop.ArchOp `json:"arch_op,omitempty"`
 
 	// ExecutableToDependencies maps a feature provided executable to its dependencies.

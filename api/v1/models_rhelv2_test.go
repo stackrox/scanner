@@ -109,9 +109,10 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Name: "v1",
 			Packages: []*database.RHELv2Package{
 				{
-					Name:           "pkg",
+					Name: "pkg",
+					Arch: "x86_64",
+
 					FixedInVersion: "4",
-					Arch:           "x86_64",
 					ArchOperation:  archop.OpEquals,
 				},
 			},
@@ -121,9 +122,10 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Name: "v2",
 			Packages: []*database.RHELv2Package{
 				{
-					Name:           "pkg",
+					Name: "pkg",
+					Arch: "i686|ppc64|s390x|x86_64",
+
 					FixedInVersion: "5",
-					Arch:           "i686|ppc64|s390x|x86_64",
 					ArchOperation:  archop.OpPatternMatch,
 				},
 			},
@@ -134,9 +136,10 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 			Name: "v3",
 			Packages: []*database.RHELv2Package{
 				{
-					Name:           "pkg",
+					Name: "pkg",
+					Arch: "x86_64",
+
 					FixedInVersion: "6",
-					Arch:           "x86_64",
 					ArchOperation:  archop.OpNotEquals,
 				},
 			},
