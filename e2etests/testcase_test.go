@@ -3557,4 +3557,49 @@ Bug Fix(es) and Enhancement(s):
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:spring-CVE-2022-22978",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "Red Hat",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:8",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "spring-security-web",
+				NamespaceName: "rhel:8",
+				VersionFormat: component.JavaSourceType.String(),
+				Version:       "5.5.5",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2022-22978",
+						NamespaceName: "rhel:8",
+						Description: "In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers. Applications using RegexRequestMatcher with `.` in the regular expression are possibly vulnerable to an authorization bypass",
+						Link:     "https://nvd.nist.gov/vuln/detail/CVE-2022-22978",
+						Severity: "Critical",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 10.0,
+									"ImpactScore":         6.4,
+									"Score":               7.5,
+									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         5.9,
+									"Score":               9.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								},
+							},
+						},
+						FixedBy: "5.5.7",
+					},
+				},
+				FixedBy: "5.5.7",
+				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
+			},
+		},
+	},
 }
