@@ -42,9 +42,9 @@ endif
 
 LOCAL_VOLUME_ARGS := -v$(CURDIR):/src:delegated -v $(GOPATH):/go:delegated
 GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
-IMAGE_BUILD_FLAGS := -e CGO_ENABLED=1,GOOS=linux,GOARCH=${GOARCH}
-BUILD_FLAGS := CGO_ENABLED=1 GOOS=linux GOARCH=${GOARCH}
-BUILD_CMD := go build -trimpath -ldflags="-linkmode=external -X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
+IMAGE_BUILD_FLAGS := -e CGO_ENABLED=0,GOOS=linux,GOARCH=${GOARCH}
+BUILD_FLAGS := CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH}
+BUILD_CMD := go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
 
 #####################################################################
 ###### Binaries we depend on (need to be defined on top) ############
