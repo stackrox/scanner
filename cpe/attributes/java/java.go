@@ -36,7 +36,7 @@ var (
 		"agent",
 	}
 
-	knownSpringVendors = []string{"pivotal", "pivotal_software", "vmware"}
+	knownSpringVendors    = []string{"pivotal", "pivotal_software", "vmware"}
 	knownSpringComponents = set.NewFrozenStringSet(
 		"spring_advanced_message_queuing_protocol",
 		"spring_aop",
