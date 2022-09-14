@@ -3568,29 +3568,29 @@ Bug Fix(es) and Enhancement(s):
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "spring-security-web",
-				NamespaceName: "rhel:8",
 				VersionFormat: component.JavaSourceType.String(),
 				Version:       "5.5.5",
+				Location:      "application/app.jar:BOOT-INF/lib/spring-security-web-5.5.5.jar",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2022-22978",
 						NamespaceName: "rhel:8",
-						Description: "In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers. Applications using RegexRequestMatcher with `.` in the regular expression are possibly vulnerable to an authorization bypass",
-						Link:     "https://nvd.nist.gov/vuln/detail/CVE-2022-22978",
-						Severity: "Critical",
+						Description:   "In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers.\\n\\nApplications using RegexRequestMatcher with `.` in the regular expression are possibly vulnerable to an authorization bypass.",
+						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2022-22978",
+						Severity:      "Important",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 10.0,
-									"ImpactScore":         6.4,
-									"Score":               7.5,
-									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
 								},
 								"CVSSv3": map[string]interface{}{
 									"ExploitabilityScore": 3.9,
-									"ImpactScore":         5.9,
-									"Score":               9.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									"ImpactScore":         4.2,
+									"Score":               8.2,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
 								},
 							},
 						},
@@ -3598,7 +3598,7 @@ Bug Fix(es) and Enhancement(s):
 					},
 				},
 				FixedBy: "5.5.7",
-				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
+				AddedBy: "sha256:5b6e3ce9721946e142ba43e488385ee4d323204a6052e0f20352d89ac00cafa2",
 			},
 		},
 	},
