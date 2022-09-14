@@ -19,7 +19,7 @@ push_images() {
 
     if is_in_PR_context; then
         comment_on_pr || {
-          warn "Could not add a comment to the PR"
+            warn "Could not add a comment to the PR"
         }
     fi
 }
