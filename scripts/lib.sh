@@ -25,6 +25,10 @@ error() {
     echo "ERROR: $(date): $*"
 }
 
+debug() {
+    echo "DEBUG: $(date): $*"
+}
+
 die() {
     echo >&2 "$@"
     exit 1
