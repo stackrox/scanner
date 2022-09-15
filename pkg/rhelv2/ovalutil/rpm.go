@@ -240,9 +240,9 @@ func ParseUnpatchedCVEComponents(def oval.Definition) map[string]string {
 	}
 	result := make(map[string]string)
 
-	for i := 0; i < len(resolutions); i++ {
-		state := resolutions[i].State
-		components := resolutions[i].Components
+	for _, resolution := range resolutions {
+		state := resolution.State
+		components := resolution.Components
 
 		for j := 0; j < len(components); j++ {
 			component := components[j]
