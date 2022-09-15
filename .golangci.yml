@@ -1,7 +1,10 @@
 # Originally copied from github.com/stackrox/stackrox, and regularly kept in-sync manually.
 
 run:
-  timeout: 5m
+  timeout: 16m
+
+output:
+  format: "junit-xml:report.xml,colored-line-number"
 
 issues:
   exclude-use-default: false
@@ -73,21 +76,22 @@ linters:
     # - dupl
     # - errcheck
     # - funlen
+    # - forbidigo
     # - gochecknoglobals
     # - gochecknoinits
     # - gocognit
     # - goconst
     - exportloopref
-    # - gocritic TODO: add in follow-up
+    - gocritic
     # - gocyclo
     # - godot
     # - godox
     # - goerr113
     - gofmt
     - goimports
+    - revive # replaces golint
     # - gomnd
     # - goprintffuncname
-    # - gosec
     - gosec
     - gosimple
     - govet
@@ -100,10 +104,9 @@ linters:
     # - nestif
     - nolintlint
     # - prealloc
-    - revive # replaces golint
     - rowserrcheck
     # - scopelint
-    # - staticcheck
+    - staticcheck
     # - structcheck
     # - stylecheck
     # - testpackage
