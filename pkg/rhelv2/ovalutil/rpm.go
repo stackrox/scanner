@@ -7,6 +7,7 @@ package ovalutil
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/quay/goval-parser/oval"
@@ -65,8 +66,11 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 		if vuln == nil {
 			continue
 		}
-		// recursively collect criterions for this definition
 
+		// parse unpatched CVE component resolution for each def
+		componentResolutions := ParseUnpatchedCVEComponents(def)
+
+		// recursively collect criterions for this definition
 		cris := cris[:0]
 		walkCriterion("", &def.Criteria, &cris)
 		// unpack criterions into vulnerabilities
@@ -135,6 +139,10 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			}
 			if state != nil && state.Arch != nil {
 				pkg.Arch = state.Arch.Body
+			}
+
+			if val, ok := componentResolutions[object.Name]; ok {
+				pkg.ResolutionState = val
 			}
 
 			pkgInfo.Packages = append(pkgInfo.Packages, pkg)
@@ -222,4 +230,31 @@ func GetDefinitionType(def oval.Definition) (string, error) {
 		return "", errors.New("cannot parse definition ID for its type")
 	}
 	return match[1], nil
+}
+
+// ParseUnpatchedCVEComponents parse components and resolution states of these components in an OVAL definition
+func ParseUnpatchedCVEComponents(def oval.Definition) map[string]string {
+	resolutions := def.Advisory.Affected.Resolutions
+	if len(resolutions) == 0 {
+		return nil
+	}
+	result := make(map[string]string)
+
+	for _, resolution := range resolutions {
+		state := resolution.State
+		components := resolution.Components
+
+		for _, component := range components {
+			stringSlice := strings.Split(component, "/")
+			var componentName string
+			if len(stringSlice) > 1 {
+				componentName = stringSlice[len(stringSlice)-1]
+			} else {
+				componentName = stringSlice[0]
+			}
+			result[componentName] = state
+		}
+	}
+
+	return result
 }
