@@ -244,8 +244,7 @@ func ParseUnpatchedCVEComponents(def oval.Definition) map[string]string {
 		state := resolution.State
 		components := resolution.Components
 
-		for j := 0; j < len(components); j++ {
-			component := components[j]
+		for _, component := range components {
 			stringSlice := strings.Split(component, "/")
 			var componentName string
 			if len(stringSlice) > 1 {
