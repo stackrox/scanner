@@ -8,10 +8,13 @@ package ovalutil
 import (
 	"encoding/xml"
 	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/quay/goval-parser/oval"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type definitionTypeTestCase struct {
@@ -80,31 +83,26 @@ func TestGetDefinitionType(t *testing.T) {
 	}
 }
 
-func TestParseUnpatchedCVEComponents(t *testing.T) {
-	f, err := os.Open("../../../testdata/cve/RHEL-8-including-unpatched-test.xml")
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestGetComponentResolutions(t *testing.T) {
+	_, filename, _, _ := runtime.Caller(0)
+	path := filepath.Dir(filename)
+
+	dataFilePath := filepath.Join(path, "/testdata/RHEL-8-including-unpatched-test.xml")
+	f, err := os.Open(dataFilePath)
+	require.NoError(t, err)
 	defer f.Close()
 
 	var root oval.Root
-	if err := xml.NewDecoder(f).Decode(&root); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, xml.NewDecoder(f).Decode(&root))
 
-	definitions := root.Definitions
+	definitions := root.Definitions.Definitions
+	nDefinitions := len(definitions)
+	assert.Lenf(t, definitions, 3, "Definition list length is incorrect, current definition list size is: %d", nDefinitions)
 
-	arr := definitions.Definitions
-	m := len(arr)
-	if !cmp.Equal(m, 3) {
-		t.Errorf("Definition list length is incorrect, current definition list size is: %d", m)
-	}
-	exampleSize := [3]int{1, 9, 1}
-	for i := 0; i < m; i++ {
-		componentMap := ParseUnpatchedCVEComponents(arr[i])
-		if !cmp.Equal(exampleSize[i], len(componentMap)) {
-			t.Errorf("Parsed CVE component map size is incorrect")
-		}
+	exampleSize := []int{1, 9, 1}
+	for i := 0; i < nDefinitions; i++ {
+		componentMap := getComponentResolutions(definitions[i])
+		assert.Equal(t, exampleSize[i], len(componentMap))
 	}
 
 }

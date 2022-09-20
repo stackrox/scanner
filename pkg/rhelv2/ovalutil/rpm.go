@@ -67,8 +67,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			continue
 		}
 
-		// parse unpatched CVE component resolution for each def
-		componentResolutions := ParseUnpatchedCVEComponents(def)
+		componentResolutions := getComponentResolutions(def)
 
 		// recursively collect criterions for this definition
 		cris := cris[:0]
@@ -232,8 +231,8 @@ func GetDefinitionType(def oval.Definition) (string, error) {
 	return match[1], nil
 }
 
-// ParseUnpatchedCVEComponents parse components and resolution states of these components in an OVAL definition
-func ParseUnpatchedCVEComponents(def oval.Definition) map[string]string {
+// getComponentResolutions parses the given oval.Definition to determine a mapping from component to its resolution state.
+func getComponentResolutions(def oval.Definition) map[string]string {
 	resolutions := def.Advisory.Affected.Resolutions
 	if len(resolutions) == 0 {
 		return nil
@@ -247,6 +246,8 @@ func ParseUnpatchedCVEComponents(def oval.Definition) map[string]string {
 		for _, component := range components {
 			stringSlice := strings.Split(component, "/")
 			var componentName string
+			// Some components are prefixed with superfluous information followed by a /.
+			// For example, TODO.
 			if len(stringSlice) > 1 {
 				componentName = stringSlice[len(stringSlice)-1]
 			} else {
