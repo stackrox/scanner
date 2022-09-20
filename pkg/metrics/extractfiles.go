@@ -63,6 +63,6 @@ func (m *FileExtractionMetrics) Emit() {
 		fileExtractionCountMetric.Observe(m.matchCount)
 		fileExtractionMatchCountMetric.Observe(m.fileCount)
 		fileExtractionInaccessibleCountMetric.Observe(m.inaccessibleCount)
+		*m = FileExtractionMetrics{}
 	}
-	*m = FileExtractionMetrics{}
 }
