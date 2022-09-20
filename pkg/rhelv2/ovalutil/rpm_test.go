@@ -6,8 +6,11 @@
 package ovalutil
 
 import (
+	"encoding/xml"
+	"os"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/quay/goval-parser/oval"
 )
 
@@ -75,4 +78,33 @@ func TestGetDefinitionType(t *testing.T) {
 			t.Errorf("%q failed: want %q, got %q", tc.name, tc.want, got)
 		}
 	}
+}
+
+func TestParseUnpatchedCVEComponents(t *testing.T) {
+	f, err := os.Open("../../../testdata/cve/RHEL-8-including-unpatched-test.xml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	var root oval.Root
+	if err := xml.NewDecoder(f).Decode(&root); err != nil {
+		t.Fatal(err)
+	}
+
+	definitions := root.Definitions
+
+	arr := definitions.Definitions
+	m := len(arr)
+	if !cmp.Equal(m, 3) {
+		t.Errorf("Definition list length is incorrect, current definition list size is: %d", m)
+	}
+	exampleSize := [3]int{1, 9, 1}
+	for i := 0; i < m; i++ {
+		componentMap := ParseUnpatchedCVEComponents(arr[i])
+		if !cmp.Equal(exampleSize[i], len(componentMap)) {
+			t.Errorf("Parsed CVE component map size is incorrect")
+		}
+	}
+
 }

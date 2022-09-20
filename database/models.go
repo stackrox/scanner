@@ -184,7 +184,8 @@ type RHELv2Package struct {
 	// Executables lists the executables determined from ExecutableToDependencies and
 	// LibraryToDependencies. This is only populated when both ExecutableToDependencies and
 	// LibraryToDependencies are empty.
-	Executables []*v1.Executable `json:"executables,omitempty"`
+	Executables     []*v1.Executable `json:"executables,omitempty"`
+	ResolutionState string           `json:"resolution_state"`
 }
 
 func (p *RHELv2Package) String() string {

@@ -19,6 +19,7 @@ import (
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
+//nolint:staticcheck
 func processRHELv2Vulnerability(v *database.RHELv2Vulnerability) {
 	// PackageInfos is deprecated, so it is no longer populated.
 	// However, we need to ensure we diff correctly with older genesis dumps
