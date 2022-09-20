@@ -19,11 +19,13 @@ import (
 
 // Information about extracted files.
 type fileMetadata struct {
-	// If true, the file has executable permissions.
+	// If true, the file is regular and has executable permissions.
 	isExecutable bool
 	// If true, contents can be extracted from the filesystem.
 	isExtractable bool
 }
+
+var _ analyzer.Files = (*filesMap)(nil)
 
 // filesMap is an analyzer.Files implementation mapping files extracted from
 // filesystem directories. In this implementation the file content is read lazily
@@ -40,7 +42,7 @@ type filesMap struct {
 	readError error
 }
 
-// Components contains the result of a node analyzis, listing the O.S. namespace,
+// Components contains the result of a node analysis, listing the OS namespace,
 // components and language components.
 type Components struct {
 	OSNamespace             *database.Namespace
@@ -64,7 +66,7 @@ func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, err
 	if err != nil {
 		return nil, nil
 	}
-	// File reading errors during analysis are not exposed to DetectFiles, hence we
+	// File reading errors during analysis are not exposed to DetectComponents, hence we
 	// check it and if there were any we fail.
 	if err := files.readErr(); err != nil {
 		return nil, errors.Wrapf(err, "analysis of node %q failed", nodeName)
