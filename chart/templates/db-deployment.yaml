@@ -20,9 +20,12 @@ spec:
       initContainers:
       - name: init-db
         image: {{.Values.scannerDBImage}}:{{.Values.tag}}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         env:
         - name: POSTGRES_PASSWORD_FILE
           value: "/run/secrets/stackrox.io/secrets/password"
+        command: ["docker-entrypoint.sh"]
+        args: ["init", "postgres", "-c", "config_file=/etc/postgresql.conf"]
         resources:
           limits:
             cpu: 2
@@ -42,6 +45,7 @@ spec:
       containers:
       - name: db
         image: {{.Values.scannerDBImage}}:{{.Values.tag}}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         ports:
         - name: postgresql
           protocol: TCP
