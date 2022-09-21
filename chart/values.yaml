@@ -3,6 +3,7 @@ namespace: stackrox
 scannerImage: quay.io/stackrox-io/scanner
 scannerDBImage: quay.io/stackrox-io/scanner-db
 tag: latest
+imagePullPolicy: IfNotPresent
 
 logLevel: info
 updateInterval: 1h
