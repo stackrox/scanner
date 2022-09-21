@@ -247,7 +247,8 @@ func getComponentResolutions(def oval.Definition) map[string]string {
 			stringSlice := strings.Split(component, "/")
 			var componentName string
 			// Some components are prefixed with superfluous information followed by a /.
-			// For example, TODO.
+			// For example, virt:rhel/qemu-guest-agent. This is prefixed with unnecessary information
+			// about the environment.
 			if len(stringSlice) > 1 {
 				componentName = stringSlice[len(stringSlice)-1]
 			} else {
