@@ -248,12 +248,12 @@ slim-deploy: clean-helm-rendered
 	helm template scanner chart/ --set scannerImage=quay.io/stackrox-io/scanner-slim,scannerDBImage=quay.io/stackrox-io/scanner-db-slim,tag=$(TAG),logLevel=$(LOGLEVEL),updateInterval=2m --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
-# deploy-local deploys locally-built full-images (i.e. stackrox/scanner:<TAG> and stackrox/scanner-db:<TAG>)
+# deploy-local deploys locally-built full-images (i.e. scanner:<TAG> and scanner-db:<TAG>)
 .PHONY: deploy-local
 deploy-local: clean-helm-rendered
 	@echo "+ $@"
 	kubectl create namespace stackrox || true
-	helm template scanner chart/ --set tag=$(TAG),logLevel=$(LOGLEVEL),updateInterval=2m,scannerImage=stackrox/scanner,scannerDBImage=stackrox/scanner-db --output-dir rendered-chart
+	helm template scanner chart/ --set tag=$(TAG),logLevel=$(LOGLEVEL),updateInterval=2m,scannerImage=scanner,scannerDBImage=scanner-db,imagePullPolicy=Never --output-dir rendered-chart
 	kubectl apply -R -f rendered-chart
 
 .PHONY: ossls-notice

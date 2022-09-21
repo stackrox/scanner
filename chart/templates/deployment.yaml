@@ -20,6 +20,7 @@ spec:
       containers:
       - name: scanner
         image: {{ .Values.scannerImage}}:{{ .Values.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         env:
         - name: POD_NAME
           valueFrom:
