@@ -314,7 +314,7 @@ _main() {
 
 	if [ "$1" = 'postgres' ] && ! _pg_want_help "$@"; then
 		### STACKROX MODIFIED - If we are initializing, then ensure we start from scratch.
-		if [ -z "$init" ]; then
+		if [ -n "$init" ]; then
 			rm -rf "$PGDATA"
 		fi
 
@@ -331,7 +331,7 @@ _main() {
 
 		### STACKROX MODIFIED - Sanity check the database does not exist
 		### upon initialization.
-		if [ -z "$init" ] && [ -n "$DATABASE_ALREADY_EXISTS" ]; then
+		if [ -n "$init" ] && [ -n "$DATABASE_ALREADY_EXISTS" ]; then
 			echo
 			echo 'PostgreSQL Database appears to already exist upon initialization; Exiting with error...'
 			echo
