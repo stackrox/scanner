@@ -315,7 +315,14 @@ _main() {
 	if [ "$1" = 'postgres' ] && ! _pg_want_help "$@"; then
 		### STACKROX MODIFIED - If we are initializing, then ensure we start from scratch.
 		if [ -n "$init" ]; then
+			echo
+			echo 'Initializing... Clearing any previous data from directories'
+			echo
+
 			rm -rf "$PGDATA"
+			if [ -n "${POSTGRES_INITDB_WALDIR:-}" ]; then
+				rm -rf "$POSTGRES_INITDB_WALDIR"
+			fi
 		fi
 
 		docker_setup_env
