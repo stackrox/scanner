@@ -16,18 +16,18 @@ const (
 )
 
 func init() {
-	vulnloader.RegisterLoader(vulndump.K8sDirName, &loader{})
+	vulnloader.RegisterLoader(vulndump.IstioDirName, &loader{})
 }
 
 type loader struct{}
 
 func (l loader) DownloadFeedsToPath(outputDir string) error {
-	tmpK8sDir := filepath.Join(outputDir, vulndump.K8sDirName+"-tmp")
-	if err := os.MkdirAll(tmpK8sDir, 0755); err != nil {
-		return errors.Wrapf(err, "creating subdir for %s", tmpK8sDir)
+	tmpIstioDir := filepath.Join(outputDir, vulndump.IstioDirName+"-tmp")
+	if err := os.MkdirAll(tmpIstioDir, 0755); err != nil {
+		return errors.Wrapf(err, "creating subdir for %s", tmpIstioDir)
 	}
 
-	_, err := git.PlainClone(tmpK8sDir, false, &git.CloneOptions{
+	_, err := git.PlainClone(tmpIstioDir, false, &git.CloneOptions{
 		URL:           istioCVEsRepository,
 		ReferenceName: istioCVEsRefName,
 		SingleBranch:  true,
@@ -36,5 +36,5 @@ func (l loader) DownloadFeedsToPath(outputDir string) error {
 		return err
 	}
 
-	return os.Rename(filepath.Join(tmpK8sDir, "cves"), filepath.Join(outputDir, vulndump.K8sDirName))
+	return os.Rename(filepath.Join(tmpIstioDir, "cves"), filepath.Join(outputDir, vulndump.IstioDirName))
 }
