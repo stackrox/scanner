@@ -466,7 +466,7 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 				DescriptionData: []*schema.CVEJSON40LangString{
 					{
 						Lang:  "en",
-						Value: "In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers.\n\nApplications using RegexRequestMatcher with `.` in the regular expression are possibly vulnerable to an authorization bypass.",
+						Value: "In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers.\n\nApplications using RegexRequestMatcher with '.' in the regular expression are possibly vulnerable to an authorization bypass.",
 					},
 				},
 			},

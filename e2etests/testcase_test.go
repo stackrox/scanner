@@ -3574,7 +3574,9 @@ Bug Fix(es) and Enhancement(s):
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2022-22978",
-						Description:   "In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers.\\\n\\\nApplications using RegexRequestMatcher with `.` in the regular expression are possibly vulnerable to an authorization bypass.",
+						Description:   `In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers.
+
+Applications using RegexRequestMatcher with '.' in the regular expression are possibly vulnerable to an authorization bypass.`,
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2022-22978",
 						Severity:      "Important",
 						Metadata: map[string]interface{}{
