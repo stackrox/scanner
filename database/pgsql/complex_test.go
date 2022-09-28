@@ -1,3 +1,4 @@
+//go:build db_integration
 // +build db_integration
 
 // Copyright 2017 clair authors
