@@ -305,7 +305,26 @@ _main() {
 		set -- postgres "$@"
 	fi
 
+	### STACKROX MODIFIED - Declare variable useful to determine if we want to initialize the DB.
+	local init
+	if [ "$1" = 'init' ]; then
+		init='true'
+		shift
+	fi
+
 	if [ "$1" = 'postgres' ] && ! _pg_want_help "$@"; then
+		### STACKROX MODIFIED - If we are initializing, then ensure we start from scratch.
+		if [ -n "$init" ]; then
+			echo
+			echo 'Initializing... Clearing any previous data from directories'
+			echo
+
+			rm -rf "$PGDATA"
+			if [ -n "${POSTGRES_INITDB_WALDIR:-}" ]; then
+				rm -rf "$POSTGRES_INITDB_WALDIR"
+			fi
+		fi
+
 		docker_setup_env
 		# setup data directories and permissions (when run as root)
 		docker_create_db_directories
@@ -317,7 +336,16 @@ _main() {
 			exec gosu postgres "$BASH_SOURCE" "$@"
 		fi
 
-		### STACKROX MODIFIED - If there is no data, initialize and exit.
+		### STACKROX MODIFIED - Sanity check the database does not exist
+		### upon initialization.
+		if [ -n "$init" ] && [ -n "$DATABASE_ALREADY_EXISTS" ]; then
+			echo
+			echo 'PostgreSQL Database appears to already exist upon initialization; Exiting with error...'
+			echo
+
+			exit 1
+		fi
+
 		# only run initialization on an empty data directory
 		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 			docker_verify_minimum_env
