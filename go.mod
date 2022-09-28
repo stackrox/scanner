@@ -47,7 +47,7 @@ require (
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10
-	google.golang.org/api v0.97.0
+	google.golang.org/api v0.98.0
 	google.golang.org/grpc v1.49.0
 	gopkg.in/yaml.v2 v2.4.0
 )
