@@ -69,9 +69,17 @@ func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
 	return nil
 }
 
+func generateIstioDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
+	return generateDiffsHelper(outputDir, baseZipR, headZipR, vulndump.IstioDirName)
+}
+
 func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
-	k8sSubDir := filepath.Join(outputDir, vulndump.K8sDirName)
-	if err := os.MkdirAll(k8sSubDir, 0755); err != nil {
+	return generateDiffsHelper(outputDir, baseZipR, headZipR, vulndump.K8sDirName)
+}
+
+func generateDiffsHelper(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, dirName string) error {
+	subDir := filepath.Join(outputDir, dirName)
+	if err := os.MkdirAll(subDir, 0755); err != nil {
 		return errors.Wrap(err, "creating subdir for Kubernetes")
 	}
 
@@ -84,7 +92,7 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 			continue
 		}
 
-		if filepath.Dir(name) == vulndump.K8sDirName && filepath.Ext(name) == ".yaml" {
+		if filepath.Dir(name) == dirName && filepath.Ext(name) == ".yaml" {
 			baseFiles[name] = baseF
 		}
 	}
@@ -99,10 +107,10 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 		}
 
 		// Only look at YAML files in the k8s/ folder.
-		if filepath.Dir(name) != vulndump.K8sDirName || filepath.Ext(name) != ".yaml" {
+		if filepath.Dir(name) != dirName || filepath.Ext(name) != ".yaml" {
 			continue
 		}
-		if err := generateK8sDiff(k8sSubDir, baseFiles[name], headF); err != nil {
+		if err := generateK8sDiff(subDir, baseFiles[name], headF); err != nil {
 			return errors.Wrapf(err, "generating Kubernetes diff for file %q", headF.Name)
 		}
 	}
@@ -343,6 +351,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 type config struct {
 	SkipFixableCentOSVulns     bool `json:"skipFixableCentOSVulns"`
 	IgnoreKubernetesVulns      bool `json:"ignoreKubernetesVulns"`
+	IgnoreIstioVulns           bool `json:"ignoreIgnoreIstioVulns"`
 	SkipUbuntuLinuxKernelVulns bool `json:"skipUbuntuLinuxKernelVulns"`
 	SkipSeverityComparison     bool `json:"skipSeverityComparison"`
 	SkipRHELv2Vulns            bool `json:"skipRHELv2Vulns"`
@@ -404,6 +413,16 @@ func Command() *cobra.Command {
 		} else {
 			log.Info("Generating Kubernetes diff...")
 			if err := generateK8sDiffs(stagingDir, baseZipR, headZipR); err != nil {
+				return errors.Wrap(err, "creating Kubernetes diff")
+			}
+			log.Info("Done generating Kubernetes diff")
+		}
+
+		if cfg.IgnoreIstioVulns {
+			log.Info("Skipping Istio diff")
+		} else {
+			log.Info("Generating Istio diff...")
+			if err := generateIstioDiffs(stagingDir, baseZipR, headZipR); err != nil {
 				return errors.Wrap(err, "creating Kubernetes diff")
 			}
 			log.Info("Done generating Kubernetes diff")
