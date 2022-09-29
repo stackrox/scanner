@@ -40,6 +40,7 @@ get_genesis_dump() {
         mkdir -p /tmp/vuln-dump
         gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/vuln-dump/nvd-definitions.zip
         gsutil cp gs://stackrox-scanner-ci-vuln-dump/k8s-definitions.zip /tmp/vuln-dump/k8s-definitions.zip
+        gsutil cp gs://stackrox-scanner-ci-vuln-dump/istio-definitions.zip /tmp/vuln-dump/istio-definitions.zip
         gsutil cp gs://stackrox-scanner-ci-vuln-dump/repo2cpe.zip /tmp/vuln-dump/repo2cpe.zip
     fi
 
