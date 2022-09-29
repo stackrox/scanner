@@ -247,8 +247,8 @@ func getPackageResolutions(def oval.Definition) map[packageKey]string {
 	if len(resolutions) == 0 {
 		return nil
 	}
-	pkgToResolution := make(map[packageKey]string)
 
+	pkgToResolution := make(map[packageKey]string)
 	for _, resolution := range resolutions {
 		state := resolution.State
 		components := resolution.Components
