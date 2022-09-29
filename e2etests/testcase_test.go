@@ -3562,7 +3562,7 @@ Bug Fix(es) and Enhancement(s):
 		registry:                "https://quay.io",
 		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
-		source:                  "Red Hat",
+		source:                  "NVD",
 		onlyCheckSpecifiedVulns: true,
 		namespace:               "rhel:8",
 		expectedFeatures: []apiV1.Feature{
