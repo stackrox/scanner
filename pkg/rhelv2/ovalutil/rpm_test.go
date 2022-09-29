@@ -112,3 +112,31 @@ func TestGetPackageResolutions_length(t *testing.T) {
 		assert.Equal(t, expectedNumResolutions[i], len(pkgResolutions))
 	}
 }
+
+func TestRPMDefsToVulns_resolution_state(t *testing.T) {
+	_, filename, _, _ := runtime.Caller(0)
+	path := filepath.Dir(filename)
+
+	dataFilePath := filepath.Join(path, "/testdata/oval.xml")
+	f, err := os.Open(dataFilePath)
+	require.NoError(t, err)
+	defer f.Close()
+
+	var root oval.Root
+	require.NoError(t, xml.NewDecoder(f).Decode(&root))
+
+	vulns, err := RPMDefsToVulns(&root, simpleProtoVulnFunc)
+	assert.NoError(t, err)
+	assert.Len(t, vulns, 4)
+
+	// Only look at CVE-2021-26291, which is the fourth vuln.
+	v := vulns[3]
+	// Ensure the maven package in the maven:3.6 module is "Affected".
+	assert.Equal(t, "maven", v.PackageInfos[1].Packages[0].Name)
+	assert.Equal(t, "maven:3.6", v.PackageInfos[1].Packages[0].Module)
+	assert.Equal(t, "Affected", v.PackageInfos[1].Packages[0].ResolutionState)
+	// Ensure the maven package in the maven:3.5 module is "Will not fix".
+	assert.Equal(t, "maven", v.PackageInfos[2].Packages[0].Name)
+	assert.Equal(t, "maven:3.5", v.PackageInfos[2].Packages[0].Module)
+	assert.Equal(t, "Will not fix", v.PackageInfos[2].Packages[0].ResolutionState)
+}

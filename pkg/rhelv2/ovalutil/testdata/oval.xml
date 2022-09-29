@@ -1028,6 +1028,68 @@
 </definition>
 
 </definitions>
+<tests>
+<red-def:rpmverifyfile_test check="at least one" comment="Red Hat Enterprise Linux 8 is installed" id="oval:com.redhat.cve:tst:20052541003" version="636">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20052541002"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541002"/>
+</red-def:rpmverifyfile_test>
+<red-def:rpmverifyfile_test check="none satisfy" comment="Red Hat Enterprise Linux must be installed" id="oval:com.redhat.cve:tst:20052541004" version="636">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20052541002"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541003"/>
+</red-def:rpmverifyfile_test>
+<ind-def:textfilecontent54_test check="all" comment="Module maven:3.6 is enabled" id="oval:com.redhat.cve:tst:20208908014" version="636">
+ <ind-def:object object_ref="oval:com.redhat.cve:obj:20208908004"/>
+ <ind-def:state state_ref="oval:com.redhat.cve:ste:201520107002"/>
+</ind-def:textfilecontent54_test>
+<ind-def:textfilecontent54_test check="all" comment="Module maven:3.5 is enabled" id="oval:com.redhat.cve:tst:20208908007" version="636">
+ <ind-def:object object_ref="oval:com.redhat.cve:obj:20208908004"/>
+ <ind-def:state state_ref="oval:com.redhat.cve:ste:20208908002"/>
+</ind-def:textfilecontent54_test>
+<red-def:rpminfo_test check="at least one" comment="maven is installed" id="oval:com.redhat.cve:tst:202126291073" version="636">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:202126291037"/>
+</red-def:rpminfo_test>
+<red-def:rpminfo_test check="at least one" comment="maven is signed with Red Hat redhatrelease2 key" id="oval:com.redhat.cve:tst:202126291074" version="636">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:202126291037"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541001"/>
+</red-def:rpminfo_test>
+</tests>
+<objects>
+<red-def:rpmverifyfile_object id="oval:com.redhat.cve:obj:20052541002" version="636">
+ <red-def:behaviors noconfigfiles="true" noghostfiles="true" nogroup="true" nolinkto="true" nomd5="true" nomode="true" nomtime="true" nordev="true" nosize="true" nouser="true"/>
+ <red-def:name operation="pattern match"/>
+ <red-def:epoch operation="pattern match"/>
+ <red-def:version operation="pattern match"/>
+ <red-def:release operation="pattern match"/>
+ <red-def:arch operation="pattern match"/>
+ <red-def:filepath>/etc/redhat-release</red-def:filepath>
+</red-def:rpmverifyfile_object>
+<ind-def:textfilecontent54_object id="oval:com.redhat.cve:obj:20208908004" version="636">
+ <ind-def:filepath datatype="string">/etc/dnf/modules.d/maven.module</ind-def:filepath>
+ <ind-def:pattern operation="pattern match">\[maven\][\w\W]*</ind-def:pattern>
+ <ind-def:instance datatype="int">1</ind-def:instance>
+</ind-def:textfilecontent54_object>
+<red-def:rpminfo_object id="oval:com.redhat.cve:obj:202126291037" version="636">
+ <red-def:name>maven</red-def:name>
+</red-def:rpminfo_object>
+</objects>
+<state>
+<red-def:rpminfo_state id="oval:com.redhat.cve:ste:20052541001" version="636">
+ <red-def:signature_keyid operation="equals">199e2f91fd431d51</red-def:signature_keyid>
+</red-def:rpminfo_state>
+<red-def:rpmverifyfile_state id="oval:com.redhat.cve:ste:20052541002" version="636">
+ <red-def:name operation="pattern match">^redhat-release</red-def:name>
+ <red-def:version operation="pattern match">^8[^\d]</red-def:version>
+</red-def:rpmverifyfile_state>
+<red-def:rpmverifyfile_state id="oval:com.redhat.cve:ste:20052541003" version="636">
+ <red-def:name operation="pattern match">^redhat-release</red-def:name>
+</red-def:rpmverifyfile_state>
+<ind-def:textfilecontent54_state id="oval:com.redhat.cve:ste:201520107002" version="636">
+ <ind-def:text operation="pattern match">\nstream\s*=\s*3\.6\b[\w\W]*\nstate\s*=\s*(enabled|1|true)|\nstate\s*=\s*(enabled|1|true)[\w\W]*\nstream\s*=\s*3\.6\b</ind-def:text>
+</ind-def:textfilecontent54_state>
+<ind-def:textfilecontent54_state id="oval:com.redhat.cve:ste:20208908002" version="636">
+ <ind-def:text operation="pattern match">\nstream\s*=\s*3\.5\b[\w\W]*\nstate\s*=\s*(enabled|1|true)|\nstate\s*=\s*(enabled|1|true)[\w\W]*\nstream\s*=\s*3\.5\b</ind-def:text>
+</ind-def:textfilecontent54_state>
+</state>
 <variables>
 <local_variable comment="Get saved_entry in /boot/grub2/grubenv" datatype="int" id="oval:com.redhat.rhsa:var:20191167001" version="643">
  <arithmetic arithmetic_operation="add">
