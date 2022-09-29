@@ -163,10 +163,11 @@ type RHELv2PackageInfo struct {
 type RHELv2Package struct {
 	Model
 
-	Name    string `json:"name"`
-	Version string `json:"version,omitempty"`
-	Module  string `json:"module,omitempty"`
-	Arch    string `json:"arch,omitempty"`
+	Name            string `json:"name"`
+	Version         string `json:"version,omitempty"`
+	Module          string `json:"module,omitempty"`
+	Arch            string `json:"arch,omitempty"`
+	ResolutionState string `json:"resolution_state"`
 
 	// ExecutableToDependencies maps a feature provided executable to its dependencies.
 	// Eg, If executable E is provided by this feature, and it imports a library B, we will have a map for E -> [B]
@@ -177,8 +178,7 @@ type RHELv2Package struct {
 	// Executables lists the executables determined from ExecutableToDependencies and
 	// LibraryToDependencies. This is only populated when both ExecutableToDependencies and
 	// LibraryToDependencies are empty.
-	Executables     []*v1.Executable `json:"executables,omitempty"`
-	ResolutionState string           `json:"resolution_state"`
+	Executables []*v1.Executable `json:"executables,omitempty"`
 }
 
 func (p *RHELv2Package) String() string {
