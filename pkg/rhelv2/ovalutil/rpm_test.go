@@ -7,6 +7,7 @@ package ovalutil
 
 import (
 	"encoding/xml"
+	"github.com/stackrox/scanner/database"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -21,6 +22,12 @@ type definitionTypeTestCase struct {
 	def        oval.Definition
 	want, name string
 	err        bool
+}
+
+func simpleProtoVulnFunc(def oval.Definition) (*database.RHELv2Vulnerability, error) {
+	return &database.RHELv2Vulnerability{
+		Name: def.References[0].RefID,
+	}, nil
 }
 
 func TestGetDefinitionType(t *testing.T) {
@@ -83,11 +90,11 @@ func TestGetDefinitionType(t *testing.T) {
 	}
 }
 
-func TestGetComponentResolutions(t *testing.T) {
+func TestGetPackageResolutions_length(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	path := filepath.Dir(filename)
 
-	dataFilePath := filepath.Join(path, "/testdata/RHEL-8-including-unpatched-test.xml")
+	dataFilePath := filepath.Join(path, "/testdata/oval.xml")
 	f, err := os.Open(dataFilePath)
 	require.NoError(t, err)
 	defer f.Close()
@@ -97,12 +104,11 @@ func TestGetComponentResolutions(t *testing.T) {
 
 	definitions := root.Definitions.Definitions
 	nDefinitions := len(definitions)
-	assert.Lenf(t, definitions, 3, "Definition list length is incorrect, current definition list size is: %d", nDefinitions)
+	assert.Lenf(t, definitions, 4, "Definition list length is incorrect, current definition list size is: %d", nDefinitions)
 
-	exampleSize := []int{1, 9, 1}
+	expectedNumResolutions := []int{1, 9, 1, 159}
 	for i := 0; i < nDefinitions; i++ {
-		componentMap := getComponentResolutions(definitions[i])
-		assert.Equal(t, exampleSize[i], len(componentMap))
+		pkgResolutions := getPackageResolutions(definitions[i])
+		assert.Equal(t, expectedNumResolutions[i], len(pkgResolutions))
 	}
-
 }
