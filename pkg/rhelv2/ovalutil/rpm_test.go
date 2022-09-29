@@ -7,13 +7,13 @@ package ovalutil
 
 import (
 	"encoding/xml"
-	"github.com/stackrox/scanner/database"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
 	"github.com/quay/goval-parser/oval"
+	"github.com/stackrox/scanner/database"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
