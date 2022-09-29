@@ -3580,7 +3580,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2022-22978",
 						Severity:      "Important",
 						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
+							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
