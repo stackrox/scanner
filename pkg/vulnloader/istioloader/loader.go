@@ -36,5 +36,5 @@ func (l loader) DownloadFeedsToPath(outputDir string) error {
 		return err
 	}
 
-	return os.Rename(filepath.Join(tmpIstioDir, "cves"), filepath.Join(outputDir, vulndump.IstioDirName))
+	return os.Rename(filepath.Join(tmpIstioDir, "vulns"), filepath.Join(outputDir, vulndump.IstioDirName))
 }
