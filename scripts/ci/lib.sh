@@ -186,9 +186,9 @@ is_in_PR_context() {
         local pull_request
         pull_request=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].pulls[0].number' 2>&1) || return 1
         [[ "$pull_request" =~ ^[0-9]+$ ]] && return 0
-    else
-        return 1
     fi
+
+    return 1
 }
 
 is_openshift_CI_rehearse_PR() {
@@ -506,19 +506,19 @@ openshift_ci_mods() {
         if [[ -n "${PULL_PULL_SHA:-}" ]]; then
             sha="${PULL_PULL_SHA}"
         else
-            sha=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].pulls[0].sha') || echo "WARNING: Cannot find pull sha"
+            sha=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].pulls[0].sha') || warn "Cannot find pull sha"
         fi
         if [[ -n "${sha:-}" ]] && [[ "$sha" != "null" ]]; then
             info "Will checkout SHA to match PR: $sha"
             git checkout "$sha"
         else
-            echo "WARNING: Could not determine a SHA for this PR, ${sha:-}"
+            warn "Could not determine a SHA for this PR, ${sha:-}"
         fi
     fi
 
     # Provide Circle CI vars that are commonly used
     export CIRCLE_JOB="${JOB_NAME:-${OPENSHIFT_BUILD_NAME}}"
-    CIRCLE_TAG="$(git tag --sort=creatordate --contains | tail -1)" || echo "Warning: Cannot get tag"
+    CIRCLE_TAG="$(make --quiet --no-print-directory tag)" || warn "Cannot get tag"
     export CIRCLE_TAG
 
     handle_nightly_runs
@@ -539,7 +539,7 @@ openshift_ci_import_creds() {
     done
 }
 
-openshift_ci_e2e_mods() {
+unset_namespace_env_var() {
     # NAMESPACE is injected by OpenShift CI for the cluster that is running the
     # tests but this can have side effects for scanner tests due to its use as
     # the default namespace e.g. with helm.
@@ -547,8 +547,13 @@ openshift_ci_e2e_mods() {
         export OPENSHIFT_CI_NAMESPACE="$NAMESPACE"
         unset NAMESPACE
     fi
+}
 
-    # Similarly the incoming KUBECONFIG is best avoided.
+openshift_ci_e2e_mods() {
+    unset_namespace_env_var
+
+    # The incoming KUBECONFIG is for the openshift/release cluster and not the
+    # e2e test cluster.
     if [[ -n "${KUBECONFIG:-}" ]]; then
         info "There is an incoming KUBECONFIG in ${KUBECONFIG}"
         export OPENSHIFT_CI_KUBECONFIG="$KUBECONFIG"
@@ -557,7 +562,7 @@ openshift_ci_e2e_mods() {
     info "KUBECONFIG set: ${KUBECONFIG}"
     export KUBECONFIG
 
-    # KUBERNETES_{PORT,SERVICE} env values also interact with commandline kubectl tests
+    # KUBERNETES_{PORT,SERVICE} env values interact with commandline kubectl tests
     if env | grep -e ^KUBERNETES_; then
         local envfile
         envfile="$(mktemp)"
@@ -573,25 +578,10 @@ handle_nightly_runs() {
         die "Only for OpenShift CI"
     fi
 
-    if ! is_in_PR_context; then
-        info "Debug:"
-        echo "JOB_NAME: ${JOB_NAME:-}"
-        echo "JOB_NAME_SAFE: ${JOB_NAME_SAFE:-}"
-    fi
-
     local nightly_tag_prefix
     nightly_tag_prefix="$(git describe --tags --abbrev=0 --exclude '*-nightly-*')-nightly-"
     if ! is_in_PR_context && [[ "${JOB_NAME_SAFE:-}" =~ ^nightly- ]]; then
         ci_export CIRCLE_TAG "${nightly_tag_prefix}$(date '+%Y%m%d')"
-    elif is_in_PR_context && pr_has_label "simulate-nightly-run"; then
-        local sha
-        if [[ -n "${PULL_PULL_SHA:-}" ]]; then
-            sha="${PULL_PULL_SHA}"
-        else
-            sha=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].pulls[0].sha') || die "Cannot find pull sha"
-            [[ "$sha" != "null" ]] || die "Cannot find pull sha"
-        fi
-        ci_export CIRCLE_TAG "${nightly_tag_prefix}${sha:0:8}"
     fi
 }
 
