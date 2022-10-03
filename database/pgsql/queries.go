@@ -216,7 +216,8 @@ const (
 			link, severity, cvss3, cvss2,
 			package_name, package_module, package_arch,
 			cpe,
-			fixed_in_version, arch_operation, package_resolution_state
+			resolution_state,
+			fixed_in_version, arch_operation
 		) VALUES (
 			$1,
 			$2, $3, $4,
@@ -224,7 +225,8 @@ const (
 			$7, $8, $9, $10,
 			$11, $12, $13,
 			$14,
-			$15, $16, $17
+			$15,
+			$16, $17
 		)
 		ON CONFLICT (hash) DO NOTHING;`
 
@@ -250,9 +252,9 @@ const (
 			vuln.cvss2,
 			vuln.package_name,
 			vuln.package_arch,
+			vuln.resolution_state,
 			vuln.fixed_in_version,
-			vuln.arch_operation,
-			vuln.package_resolution_state
+			vuln.arch_operation
 		FROM
 			vuln_v2 as vuln
 			LEFT JOIN vuln_description ON vuln.description_hash = vuln_description.hash
