@@ -14,6 +14,7 @@ ensure_CI() {
     fi
 }
 
+# ci_export is a wrapper around export. This is here for legacy purposes.
 ci_export() {
     if [[ "$#" -ne 2 ]]; then
         die "missing args. usage: ci_export <env-name> <env-value>"
@@ -22,11 +23,7 @@ ci_export() {
     local env_name="$1"
     local env_value="$2"
 
-    if command -v cci-export >/dev/null; then
-        cci-export "$env_name" "$env_value"
-    else
-        export "$env_name"="$env_value"
-    fi
+    export "$env_name"="$env_value"
 }
 
 ci_exit_trap() {
@@ -173,7 +170,7 @@ is_tagged() {
 }
 
 is_nightly_run() {
-    [[ "${CIRCLE_TAG:-}" =~ -nightly- ]]
+    [[ "${NIGHTLY_TAG:-}" =~ -nightly- ]]
 }
 
 is_in_PR_context() {
@@ -516,11 +513,6 @@ openshift_ci_mods() {
         fi
     fi
 
-    # Provide Circle CI vars that are commonly used
-    export CIRCLE_JOB="${JOB_NAME:-${OPENSHIFT_BUILD_NAME}}"
-    CIRCLE_TAG="$(make --quiet --no-print-directory tag)" || warn "Cannot get tag"
-    export CIRCLE_TAG
-
     handle_nightly_runs
 
     info "Status after mods:"
@@ -581,7 +573,7 @@ handle_nightly_runs() {
     local nightly_tag_prefix
     nightly_tag_prefix="$(git describe --tags --abbrev=0 --exclude '*-nightly-*')-nightly-"
     if ! is_in_PR_context && [[ "${JOB_NAME_SAFE:-}" =~ ^nightly- ]]; then
-        ci_export CIRCLE_TAG "${nightly_tag_prefix}$(date '+%Y%m%d')"
+        ci_export NIGHTLY_TAG "${nightly_tag_prefix}$(date '+%Y%m%d')"
     fi
 }
 

@@ -12,6 +12,12 @@ BASE_DIR=$(CURDIR)
 
 TAG := # make sure tag is never injectable as an env var
 
+ifdef CI
+ifneq ($(NIGHTLY_TAG),)
+TAG := $(NIGHTLY_TAG)
+endif
+endif
+
 ifeq ($(TAG),)
 TAG=$(shell git describe --tags --abbrev=10 --dirty --long)
 endif
