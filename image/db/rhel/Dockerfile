@@ -1,14 +1,14 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8/ubi
+ARG BASE_IMAGE=ubi8-minimal
 ARG BASE_TAG=8.6
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 COPY bundle.tar.gz /
 
 WORKDIR /bundle
-RUN tar -xzf /bundle.tar.gz
+RUN microdnf -y install tar gzip && tar -zxf /bundle.tar.gz
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}-minimal:${BASE_TAG} AS base
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
 LABEL name="scanner-db" \
       vendor="StackRox" \
