@@ -111,7 +111,7 @@ func encodeValues(opts *types.GetImageDataOpts) url.Values {
 
 // Ping verifies that Clairify is accessible.
 func (c *Clairify) Ping() error {
-	request, err := http.NewRequest("GET", c.endpoint+"/scanner/ping", nil)
+	request, err := http.NewRequest(http.MethodGet, c.endpoint+"/scanner/ping", nil)
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func (c *Clairify) AddImage(username, password string, req *types.ImageRequest) 
 	if err != nil {
 		return nil, err
 	}
-	request, err := http.NewRequest("POST", c.endpoint+"/scanner/image", bytes.NewBuffer(data))
+	request, err := http.NewRequest(http.MethodPost, c.endpoint+"/scanner/image", bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func (c *Clairify) AddImage(username, password string, req *types.ImageRequest) 
 // RetrieveImageDataBySHA contacts Clairify to fetch vulnerability data by the image SHA.
 func (c *Clairify) RetrieveImageDataBySHA(sha string, opts *types.GetImageDataOpts) (*v1.LayerEnvelope, error) {
 	values := encodeValues(opts)
-	request, err := http.NewRequest("GET", c.endpoint+"/scanner/sha/"+sha, nil)
+	request, err := http.NewRequest(http.MethodGet, c.endpoint+"/scanner/sha/"+sha, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +172,7 @@ func (c *Clairify) RetrieveImageDataBySHA(sha string, opts *types.GetImageDataOp
 func (c *Clairify) RetrieveImageDataByName(image *types.Image, opts *types.GetImageDataOpts) (*v1.LayerEnvelope, error) {
 	values := encodeValues(opts)
 	url := fmt.Sprintf("%s/scanner/image/%s/%s/%s", c.endpoint, image.Registry, image.Remote, image.Tag)
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +191,7 @@ func (c *Clairify) RetrieveImageDataByName(image *types.Image, opts *types.GetIm
 // GetVulnDefsMetadata contacts Clairify to fetch vulnerability definitions metadata.
 func (c *Clairify) GetVulnDefsMetadata() (*protoV1.VulnDefsMetadata, error) {
 	url := fmt.Sprintf("%s/scanner/vulndefs/metadata", c.endpoint)
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -36,7 +36,7 @@ func GetWithUserAgent(url string) (*http.Response, error) {
 		Transport: proxy.RoundTripper(),
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
