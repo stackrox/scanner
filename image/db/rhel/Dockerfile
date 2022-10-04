@@ -8,9 +8,9 @@ COPY bundle.tar.gz /
 WORKDIR /bundle
 RUN tar -xzf /bundle.tar.gz
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS slim
 
-LABEL name="scanner-db" \
+LABEL name="scanner-db-slim" \
       vendor="StackRox" \
       maintainer="support@stackrox.com" \
       summary="Image scanner database for the StackRox Kubernetes Security Platform" \
@@ -45,9 +45,13 @@ RUN groupadd -g 70 postgres && \
 # This is equivalent to postgres:postgres.
 USER 70:70
 
-COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
 CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
+
+FROM slim AS base
+
+LABEL name="scanner-db"
+COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/

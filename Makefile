@@ -215,24 +215,24 @@ $(CURDIR)/image/db/rhel/bundle.tar.gz:
 .PHONY: scanner-image
 scanner-image: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build -t scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
+	@docker build --target base -t scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: scanner-image-slim
 scanner-image-slim: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build -t scanner-slim:$(TAG) -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
+	@docker build --target slim -t scanner-slim:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: db-image
 db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t scanner-db:$(TAG) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile image/db/rhel
+	@docker build --target base -t scanner-db:$(TAG) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: db-image-slim
 db-image-slim: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t scanner-db-slim:$(TAG) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile.slim image/db/rhel
+	@docker build --target slim -t scanner-db-slim:$(TAG) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered
