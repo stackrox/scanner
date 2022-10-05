@@ -307,9 +307,8 @@ _main() {
 
 	### STACKROX MODIFIED - Declare variable useful to determine if we want to initialize the DB.
 	local init
-	if [ "$1" = 'init' ]; then
+	if [ -n "$ROX_SCANNER_DB_INIT" ]; then
 		init='true'
-		shift
 	fi
 
 	if [ "$1" = 'postgres' ] && ! _pg_want_help "$@"; then
