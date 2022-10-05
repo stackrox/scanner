@@ -305,15 +305,9 @@ _main() {
 		set -- postgres "$@"
 	fi
 
-	### STACKROX MODIFIED - Declare variable useful to determine if we want to initialize the DB.
-	local init
-	if [ -n "$ROX_SCANNER_DB_INIT" ]; then
-		init='true'
-	fi
-
 	if [ "$1" = 'postgres' ] && ! _pg_want_help "$@"; then
 		### STACKROX MODIFIED - If we are initializing, then ensure we start from scratch.
-		if [ -n "$init" ]; then
+		if [ -n "$ROX_SCANNER_DB_INIT" ]; then
 			echo
 			echo 'Initializing... Clearing any previous data from directories'
 			echo
@@ -337,7 +331,7 @@ _main() {
 
 		### STACKROX MODIFIED - Sanity check the database does not exist
 		### upon initialization.
-		if [ -n "$init" ] && [ -n "$DATABASE_ALREADY_EXISTS" ]; then
+		if [ -n "$ROX_SCANNER_DB_INIT" ] && [ -n "$DATABASE_ALREADY_EXISTS" ]; then
 			echo
 			echo 'PostgreSQL Database appears to already exist upon initialization; Exiting with error...'
 			echo
