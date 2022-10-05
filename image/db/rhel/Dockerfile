@@ -34,6 +34,12 @@ RUN microdnf install -y shadow-utils && \
     microdnf install -y \
         ca-certificates libicu systemd-sysv glibc-locale-source glibc-langpack-en \
         postgresql12-server && \
+    # The removal of /usr/share/zoneinfo from UBI minimal images is intentional.
+    # After building the image, the image is reduced in size as much as possible,
+    # and the /usr/share/zoneinfo directory is purged as it saves space
+    # in the final distribution of the image.
+    # https://access.redhat.com/solutions/5616681
+    microdnf reinstall tzdata && \
     microdnf clean all && \
     rpm -e --nodeps $(rpm -qa 'pgdg-redhat-repo*') && \
     # (Optional) Remove line below to keep package management utilities
