@@ -28,6 +28,10 @@ ARG POSTGRESQL_ARCH=x86_64
 RUN microdnf install -y shadow-utils && \
     groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
+    curl -sSLf https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-${PG_MAJOR} -o /tmp/pg_repo.key && \
+    rpm --import /tmp/pg_repo.key && \
+    curl -sSLf https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-AARCH64 -o /tmp/pg_repo.key && \
+    rpm --import /tmp/pg_repo.key && \
     curl -sSLf https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-${POSTGRESQL_ARCH}/pgdg-redhat-repo-latest.noarch.rpm -o /tmp/pg_repo.rpm && \
     rpm -i /tmp/pg_repo.rpm && \
     microdnf upgrade -y && \
@@ -44,7 +48,7 @@ RUN microdnf install -y shadow-utils && \
     rpm -e --nodeps $(rpm -qa 'pgdg-redhat-repo*') && \
     # (Optional) Remove line below to keep package management utilities
     rpm -e --nodeps $(rpm -qa shadow-utils curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/dnf /var/cache/yum  /tmp/pg_repo.rpm && \
+    rm -rf /var/cache/dnf /var/cache/yum  /tmp/pg_repo.rpm /tmp/pg_repo.key && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh && \
