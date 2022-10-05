@@ -50,6 +50,13 @@ type criterionWithModule struct {
 	module string
 }
 
+// packageKey is meant to be a unique identifier of a package
+// to be used as a key in a map.
+type packageKey struct {
+	module string
+	name   string
+}
+
 // RPMDefsToVulns iterates over the definitions in an oval root and assumes RPMInfo objects and states.
 //
 // Each Criterion encountered with an EVR string will be translated into a database.RHELv2Vulnerability
@@ -67,8 +74,7 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 			continue
 		}
 
-		// parse unpatched CVE component resolution for each def
-		componentResolutions := ParseUnpatchedCVEComponents(def)
+		pkgResolutions := getPackageResolutions(def)
 
 		// recursively collect criterions for this definition
 		cris := cris[:0]
@@ -141,7 +147,10 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				pkg.Arch = state.Arch.Body
 			}
 
-			if val, ok := componentResolutions[object.Name]; ok {
+			if val, ok := pkgResolutions[packageKey{
+				module: pkg.Module,
+				name:   pkg.Name,
+			}]; ok {
 				pkg.ResolutionState = val
 			}
 
@@ -232,29 +241,31 @@ func GetDefinitionType(def oval.Definition) (string, error) {
 	return match[1], nil
 }
 
-// ParseUnpatchedCVEComponents parse components and resolution states of these components in an OVAL definition
-func ParseUnpatchedCVEComponents(def oval.Definition) map[string]string {
+// getPackageResolutions parses the given oval.Definition to determine a mapping from package to its resolution state.
+func getPackageResolutions(def oval.Definition) map[packageKey]string {
 	resolutions := def.Advisory.Affected.Resolutions
 	if len(resolutions) == 0 {
 		return nil
 	}
-	result := make(map[string]string)
 
+	pkgToResolution := make(map[packageKey]string)
 	for _, resolution := range resolutions {
 		state := resolution.State
 		components := resolution.Components
 
 		for _, component := range components {
-			stringSlice := strings.Split(component, "/")
-			var componentName string
-			if len(stringSlice) > 1 {
-				componentName = stringSlice[len(stringSlice)-1]
-			} else {
-				componentName = stringSlice[0]
+			module, pkgName, found := strings.Cut(component, "/")
+			if !found {
+				pkgName = module
+				module = ""
 			}
-			result[componentName] = state
+
+			pkgToResolution[packageKey{
+				module: module,
+				name:   pkgName,
+			}] = state
 		}
 	}
 
-	return result
+	return pkgToResolution
 }

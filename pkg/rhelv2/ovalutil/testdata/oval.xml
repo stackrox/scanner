@@ -1,0 +1,1101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:unix-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#unix" xmlns:red-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#linux" xmlns:ind-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#independent" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#unix unix-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#linux linux-definitions-schema.xsd">
+<generator>
+<oval:product_name>Red Hat OVAL Patch Definition Merger</oval:product_name>
+<oval:product_version>3</oval:product_version>
+<oval:schema_version>5.10</oval:schema_version>
+<oval:timestamp>2022-08-17T11:19:45</oval:timestamp>
+<oval:content_version>1660735185</oval:content_version>
+</generator>
+<definitions>
+<definition class="vulnerability" id="oval:com.redhat.cve:def:20052541" version="636">
+ <metadata>
+  <title>CVE-2005-2541 tar: does not properly warn the user when extracting setuid or setgid files (moderate)</title>
+  <reference ref_id="CVE-2005-2541" ref_url="https://access.redhat.com/security/cve/CVE-2005-2541" source="CVE"/>
+  <description>DOCUMENTATION: The MITRE CVE dictionary describes this issue as: Tar 1.15.1 does not properly warn the user when extracting setuid or setgid files, which may allow local users or remote attackers to gain privileges. 
+            STATEMENT: This CVE was assigned to what is the documented and expected behaviour of tar.  There are currently no plans to change tar behaviour to strip setuid and setgid bits when extracting archives.</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Moderate</severity>
+   <updated date="2021-06-28"/>
+   <cve cvss3="7.0/CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H" href="https://access.redhat.com/security/cve/CVE-2005-2541" impact="moderate" public="20050804">CVE-2005-2541</cve>
+   <affected>
+    <resolution state="Will not fix">
+     <component>tar</component>
+    </resolution>
+   </affected>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:8</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:8</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:8::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.cve:tst:20052541004"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 8 is installed" test_ref="oval:com.redhat.cve:tst:20052541003"/>
+   <criterion comment="tar is installed" test_ref="oval:com.redhat.cve:tst:20052541001"/>
+   <criterion comment="tar is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20052541002"/>
+  </criteria>
+ </criteria>
+</definition>
+
+<definition class="vulnerability" id="oval:com.redhat.cve:def:201620012" version="636">
+ <metadata>
+  <title>CVE-2016-20012 openssh: Public key information leak (low)</title>
+  <reference ref_id="CVE-2016-20012" ref_url="https://access.redhat.com/security/cve/CVE-2016-20012" source="CVE"/>
+  <description>DOCUMENTATION: The MITRE CVE dictionary describes this issue as: ** DISPUTED ** OpenSSH through 8.7 allows remote attackers, who have a suspicion that a certain combination of username and public key is known to an SSH server, to test whether this suspicion is correct. This occurs because a challenge is sent only when that combination could be valid for a login session. NOTE: the vendor does not recognize user enumeration as a vulnerability for this product. 
+            STATEMENT: Although a CVE was assigned upstream and Red Hat doesn't consider it to be a security flaw and won't receive any patch, also the CVE was made as disputed by MITRE. Considering that Red Hat is closing this flaw as NOTABUG.</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Low</severity>
+   <updated date="2022-03-16"/>
+   <cve cvss3="5.9/CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N" cwe="CWE-200" href="https://access.redhat.com/security/cve/CVE-2016-20012" impact="low" public="20160207">CVE-2016-20012</cve>
+   <affected>
+    <resolution state="Will not fix">
+     <component>openssh</component>
+     <component>openssh-askpass</component>
+     <component>openssh-cavs</component>
+     <component>openssh-clients</component>
+     <component>openssh-debugsource</component>
+     <component>openssh-keycat</component>
+     <component>openssh-ldap</component>
+     <component>openssh-server</component>
+     <component>pam_ssh_agent_auth</component>
+    </resolution>
+   </affected>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:8</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:8</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:8::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.cve:tst:20052541004"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 8 is installed" test_ref="oval:com.redhat.cve:tst:20052541003"/>
+   <criteria operator="OR">
+    <criteria operator="AND">
+     <criterion comment="openssh-server is installed" test_ref="oval:com.redhat.cve:tst:201620012001"/>
+     <criterion comment="openssh-server is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:201620012002"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="openssh-ldap is installed" test_ref="oval:com.redhat.cve:tst:201620012003"/>
+     <criterion comment="openssh-ldap is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:201620012004"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="openssh-keycat is installed" test_ref="oval:com.redhat.cve:tst:201620012005"/>
+     <criterion comment="openssh-keycat is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:201620012006"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="openssh-debugsource is installed" test_ref="oval:com.redhat.cve:tst:201620012007"/>
+     <criterion comment="openssh-debugsource is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:201620012008"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="openssh is installed" test_ref="oval:com.redhat.cve:tst:201620012009"/>
+     <criterion comment="openssh is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:201620012010"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="pam_ssh_agent_auth is installed" test_ref="oval:com.redhat.cve:tst:201620012011"/>
+     <criterion comment="pam_ssh_agent_auth is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:201620012012"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="openssh-cavs is installed" test_ref="oval:com.redhat.cve:tst:201620012013"/>
+     <criterion comment="openssh-cavs is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:201620012014"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="openssh-askpass is installed" test_ref="oval:com.redhat.cve:tst:201620012015"/>
+     <criterion comment="openssh-askpass is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:201620012016"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="openssh-clients is installed" test_ref="oval:com.redhat.cve:tst:201620012017"/>
+     <criterion comment="openssh-clients is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:201620012018"/>
+    </criteria>
+   </criteria>
+  </criteria>
+ </criteria>
+</definition>
+<definition class="vulnerability" id="oval:com.redhat.cve:def:20052541" version="636">
+ <metadata>
+  <title>CVE-2005-2541 tar: does not properly warn the user when extracting setuid or setgid files (moderate)</title>
+  <reference ref_id="CVE-2005-2541" ref_url="https://access.redhat.com/security/cve/CVE-2005-2541" source="CVE"/>
+  <description>DOCUMENTATION: The MITRE CVE dictionary describes this issue as: Tar 1.15.1 does not properly warn the user when extracting setuid or setgid files, which may allow local users or remote attackers to gain privileges. 
+            STATEMENT: This CVE was assigned to what is the documented and expected behaviour of tar.  There are currently no plans to change tar behaviour to strip setuid and setgid bits when extracting archives.</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Moderate</severity>
+   <updated date="2021-06-28"/>
+   <cve cvss3="7.0/CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H" href="https://access.redhat.com/security/cve/CVE-2005-2541" impact="moderate" public="20050804">CVE-2005-2541</cve>
+   <affected>
+    <resolution state="Will not fix">
+     <component>tar</component>
+    </resolution>
+   </affected>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:8</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:8</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:8::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.cve:tst:20052541004"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 8 is installed" test_ref="oval:com.redhat.cve:tst:20052541003"/>
+   <criterion comment="tar is installed" test_ref="oval:com.redhat.cve:tst:20052541001"/>
+   <criterion comment="tar is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20052541002"/>
+  </criteria>
+ </criteria>
+</definition>
+
+<definition class="vulnerability" id="oval:com.redhat.cve:def:202126291" version="636">
+ <metadata>
+  <title>CVE-2021-26291 maven: Block repositories using http by default (moderate)</title>
+  <reference ref_id="CVE-2021-26291" ref_url="https://access.redhat.com/security/cve/CVE-2021-26291" source="CVE"/>
+  <description>DOCUMENTATION: A flaw was found in maven. Repositories that are defined in a dependency’s Project Object Model (pom), which may be unknown to users, are used by default resulting in potential risk if a malicious actor takes over that repository or is able to insert themselves into a position to pretend to be that repository. The highest threat from this vulnerability is to data confidentiality and integrity.
+
+   MITIGATION: To avoid possible man-in-the-middle related attacks with this flaw, ensure any linked repositories in maven POMs use https and not http.</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Moderate</severity>
+   <updated date="2022-08-18"/>
+   <cve cvss3="7.4/CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N" cwe="CWE-200" href="https://access.redhat.com/security/cve/CVE-2021-26291" impact="moderate" public="20210423">CVE-2021-26291</cve>
+   <affected>
+    <resolution state="Affected">
+     <component>maven:3.6/aopalliance</component>
+     <component>maven:3.6/apache-commons-cli</component>
+     <component>maven:3.6/apache-commons-codec</component>
+     <component>maven:3.6/apache-commons-io</component>
+     <component>maven:3.6/apache-commons-lang3</component>
+     <component>maven:3.6/apache-commons-logging</component>
+     <component>maven:3.6/atinject</component>
+     <component>maven:3.6/cdi-api</component>
+     <component>maven:3.6/geronimo-annotation</component>
+     <component>maven:3.6/glassfish-el</component>
+     <component>maven:3.6/glassfish-el-api</component>
+     <component>maven:3.6/google-guice</component>
+     <component>maven:3.6/guava</component>
+     <component>maven:3.6/guava20</component>
+     <component>maven:3.6/hawtjni</component>
+     <component>maven:3.6/hawtjni-runtime</component>
+     <component>maven:3.6/httpcomponents-client</component>
+     <component>maven:3.6/httpcomponents-core</component>
+     <component>maven:3.6/jansi</component>
+     <component>maven:3.6/jansi-native</component>
+     <component>maven:3.6/jboss-interceptors-1.2-api</component>
+     <component>maven:3.6/jcl-over-slf4j</component>
+     <component>maven:3.6/jsoup</component>
+     <component>maven:3.6/jsr-305</component>
+     <component>maven:3.6/maven</component>
+     <component>maven:3.6/maven-lib</component>
+     <component>maven:3.6/maven-openjdk11</component>
+     <component>maven:3.6/maven-openjdk17</component>
+     <component>maven:3.6/maven-openjdk8</component>
+     <component>maven:3.6/maven-resolver</component>
+     <component>maven:3.6/maven-resolver-api</component>
+     <component>maven:3.6/maven-resolver-connector-basic</component>
+     <component>maven:3.6/maven-resolver-impl</component>
+     <component>maven:3.6/maven-resolver-spi</component>
+     <component>maven:3.6/maven-resolver-transport-wagon</component>
+     <component>maven:3.6/maven-resolver-util</component>
+     <component>maven:3.6/maven-shared-utils</component>
+     <component>maven:3.6/maven-wagon</component>
+     <component>maven:3.6/maven-wagon-file</component>
+     <component>maven:3.6/maven-wagon-http</component>
+     <component>maven:3.6/maven-wagon-http-shared</component>
+     <component>maven:3.6/maven-wagon-provider-api</component>
+     <component>maven:3.6/plexus-cipher</component>
+     <component>maven:3.6/plexus-classworlds</component>
+     <component>maven:3.6/plexus-containers</component>
+     <component>maven:3.6/plexus-containers-component-annotations</component>
+     <component>maven:3.6/plexus-interpolation</component>
+     <component>maven:3.6/plexus-sec-dispatcher</component>
+     <component>maven:3.6/plexus-utils</component>
+     <component>maven:3.6/sisu</component>
+     <component>maven:3.6/sisu-inject</component>
+     <component>maven:3.6/sisu-plexus</component>
+     <component>maven:3.6/slf4j</component>
+    </resolution>
+    <resolution state="Will not fix">
+     <component>javapackages-tools:201801/aopalliance</component>
+     <component>javapackages-tools:201801/apache-commons-cli</component>
+     <component>javapackages-tools:201801/apache-commons-codec</component>
+     <component>javapackages-tools:201801/apache-commons-io</component>
+     <component>javapackages-tools:201801/apache-commons-lang3</component>
+     <component>javapackages-tools:201801/apache-commons-logging</component>
+     <component>javapackages-tools:201801/atinject</component>
+     <component>javapackages-tools:201801/cdi-api</component>
+     <component>javapackages-tools:201801/geronimo-annotation</component>
+     <component>javapackages-tools:201801/glassfish-el</component>
+     <component>javapackages-tools:201801/glassfish-el-api</component>
+     <component>javapackages-tools:201801/google-guice</component>
+     <component>javapackages-tools:201801/guava</component>
+     <component>javapackages-tools:201801/guava20</component>
+     <component>javapackages-tools:201801/hawtjni</component>
+     <component>javapackages-tools:201801/hawtjni-runtime</component>
+     <component>javapackages-tools:201801/httpcomponents-client</component>
+     <component>javapackages-tools:201801/httpcomponents-core</component>
+     <component>javapackages-tools:201801/jansi</component>
+     <component>javapackages-tools:201801/jansi-native</component>
+     <component>javapackages-tools:201801/jboss-interceptors-1.2-api</component>
+     <component>javapackages-tools:201801/jcl-over-slf4j</component>
+     <component>javapackages-tools:201801/jsoup</component>
+     <component>javapackages-tools:201801/jsr-305</component>
+     <component>javapackages-tools:201801/maven</component>
+     <component>javapackages-tools:201801/maven-lib</component>
+     <component>javapackages-tools:201801/maven-openjdk11</component>
+     <component>javapackages-tools:201801/maven-openjdk17</component>
+     <component>javapackages-tools:201801/maven-openjdk8</component>
+     <component>javapackages-tools:201801/maven-resolver</component>
+     <component>javapackages-tools:201801/maven-resolver-api</component>
+     <component>javapackages-tools:201801/maven-resolver-connector-basic</component>
+     <component>javapackages-tools:201801/maven-resolver-impl</component>
+     <component>javapackages-tools:201801/maven-resolver-spi</component>
+     <component>javapackages-tools:201801/maven-resolver-transport-wagon</component>
+     <component>javapackages-tools:201801/maven-resolver-util</component>
+     <component>javapackages-tools:201801/maven-shared-utils</component>
+     <component>javapackages-tools:201801/maven-wagon</component>
+     <component>javapackages-tools:201801/maven-wagon-file</component>
+     <component>javapackages-tools:201801/maven-wagon-http</component>
+     <component>javapackages-tools:201801/maven-wagon-http-shared</component>
+     <component>javapackages-tools:201801/maven-wagon-provider-api</component>
+     <component>javapackages-tools:201801/plexus-cipher</component>
+     <component>javapackages-tools:201801/plexus-classworlds</component>
+     <component>javapackages-tools:201801/plexus-containers</component>
+     <component>javapackages-tools:201801/plexus-containers-component-annotations</component>
+     <component>javapackages-tools:201801/plexus-interpolation</component>
+     <component>javapackages-tools:201801/plexus-sec-dispatcher</component>
+     <component>javapackages-tools:201801/plexus-utils</component>
+     <component>javapackages-tools:201801/sisu</component>
+     <component>javapackages-tools:201801/sisu-inject</component>
+     <component>javapackages-tools:201801/sisu-plexus</component>
+     <component>javapackages-tools:201801/slf4j</component>
+     <component>maven:3.5/aopalliance</component>
+     <component>maven:3.5/apache-commons-cli</component>
+     <component>maven:3.5/apache-commons-codec</component>
+     <component>maven:3.5/apache-commons-io</component>
+     <component>maven:3.5/apache-commons-lang3</component>
+     <component>maven:3.5/apache-commons-logging</component>
+     <component>maven:3.5/atinject</component>
+     <component>maven:3.5/cdi-api</component>
+     <component>maven:3.5/geronimo-annotation</component>
+     <component>maven:3.5/glassfish-el</component>
+     <component>maven:3.5/glassfish-el-api</component>
+     <component>maven:3.5/google-guice</component>
+     <component>maven:3.5/guava</component>
+     <component>maven:3.5/guava20</component>
+     <component>maven:3.5/hawtjni</component>
+     <component>maven:3.5/hawtjni-runtime</component>
+     <component>maven:3.5/httpcomponents-client</component>
+     <component>maven:3.5/httpcomponents-core</component>
+     <component>maven:3.5/jansi</component>
+     <component>maven:3.5/jansi-native</component>
+     <component>maven:3.5/jboss-interceptors-1.2-api</component>
+     <component>maven:3.5/jcl-over-slf4j</component>
+     <component>maven:3.5/jsoup</component>
+     <component>maven:3.5/jsr-305</component>
+     <component>maven:3.5/maven</component>
+     <component>maven:3.5/maven-lib</component>
+     <component>maven:3.5/maven-openjdk11</component>
+     <component>maven:3.5/maven-openjdk17</component>
+     <component>maven:3.5/maven-openjdk8</component>
+     <component>maven:3.5/maven-resolver</component>
+     <component>maven:3.5/maven-resolver-api</component>
+     <component>maven:3.5/maven-resolver-connector-basic</component>
+     <component>maven:3.5/maven-resolver-impl</component>
+     <component>maven:3.5/maven-resolver-spi</component>
+     <component>maven:3.5/maven-resolver-transport-wagon</component>
+     <component>maven:3.5/maven-resolver-util</component>
+     <component>maven:3.5/maven-shared-utils</component>
+     <component>maven:3.5/maven-wagon</component>
+     <component>maven:3.5/maven-wagon-file</component>
+     <component>maven:3.5/maven-wagon-http</component>
+     <component>maven:3.5/maven-wagon-http-shared</component>
+     <component>maven:3.5/maven-wagon-provider-api</component>
+     <component>maven:3.5/plexus-cipher</component>
+     <component>maven:3.5/plexus-classworlds</component>
+     <component>maven:3.5/plexus-containers</component>
+     <component>maven:3.5/plexus-containers-component-annotations</component>
+     <component>maven:3.5/plexus-interpolation</component>
+     <component>maven:3.5/plexus-sec-dispatcher</component>
+     <component>maven:3.5/plexus-utils</component>
+     <component>maven:3.5/sisu</component>
+     <component>maven:3.5/sisu-inject</component>
+     <component>maven:3.5/sisu-plexus</component>
+     <component>maven:3.5/slf4j</component>
+    </resolution>
+   </affected>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:8</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:8::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:8</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:8::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.cve:tst:20052541004"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 8 is installed" test_ref="oval:com.redhat.cve:tst:20052541003"/>
+   <criteria operator="OR">
+    <criteria operator="AND">
+     <criterion comment="Module javapackages-tools:201801 is enabled" test_ref="oval:com.redhat.cve:tst:20208908015"/>
+     <criteria operator="OR">
+      <criteria operator="AND">
+       <criterion comment="aopalliance is installed" test_ref="oval:com.redhat.cve:tst:202126291001"/>
+       <criterion comment="aopalliance is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291002"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-openjdk17 is installed" test_ref="oval:com.redhat.cve:tst:202126291003"/>
+       <criterion comment="maven-openjdk17 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291004"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-interpolation is installed" test_ref="oval:com.redhat.cve:tst:202126291005"/>
+       <criterion comment="plexus-interpolation is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291006"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="sisu is installed" test_ref="oval:com.redhat.cve:tst:202126291007"/>
+       <criterion comment="sisu is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291008"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jansi is installed" test_ref="oval:com.redhat.cve:tst:202126291009"/>
+       <criterion comment="jansi is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291010"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-lang3 is installed" test_ref="oval:com.redhat.cve:tst:202126291011"/>
+       <criterion comment="apache-commons-lang3 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291012"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-openjdk8 is installed" test_ref="oval:com.redhat.cve:tst:202126291013"/>
+       <criterion comment="maven-openjdk8 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291014"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jsoup is installed" test_ref="oval:com.redhat.cve:tst:202126291015"/>
+       <criterion comment="jsoup is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291016"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-api is installed" test_ref="oval:com.redhat.cve:tst:202126291017"/>
+       <criterion comment="maven-resolver-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291018"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="hawtjni is installed" test_ref="oval:com.redhat.cve:tst:202126291019"/>
+       <criterion comment="hawtjni is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291020"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="sisu-inject is installed" test_ref="oval:com.redhat.cve:tst:202126291021"/>
+       <criterion comment="sisu-inject is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291022"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-io is installed" test_ref="oval:com.redhat.cve:tst:202126291023"/>
+       <criterion comment="apache-commons-io is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291024"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="hawtjni-runtime is installed" test_ref="oval:com.redhat.cve:tst:202126291025"/>
+       <criterion comment="hawtjni-runtime is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291026"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-file is installed" test_ref="oval:com.redhat.cve:tst:202126291027"/>
+       <criterion comment="maven-wagon-file is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291028"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-containers is installed" test_ref="oval:com.redhat.cve:tst:202126291029"/>
+       <criterion comment="plexus-containers is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291030"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="guava is installed" test_ref="oval:com.redhat.cve:tst:20208908010"/>
+       <criterion comment="guava is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20208908011"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-http is installed" test_ref="oval:com.redhat.cve:tst:202126291033"/>
+       <criterion comment="maven-wagon-http is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291034"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="guava20 is installed" test_ref="oval:com.redhat.cve:tst:20208908001"/>
+       <criterion comment="guava20 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20208908002"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-classworlds is installed" test_ref="oval:com.redhat.cve:tst:202126291037"/>
+       <criterion comment="plexus-classworlds is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291038"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jcl-over-slf4j is installed" test_ref="oval:com.redhat.cve:tst:202126291039"/>
+       <criterion comment="jcl-over-slf4j is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291040"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon is installed" test_ref="oval:com.redhat.cve:tst:202126291041"/>
+       <criterion comment="maven-wagon is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291042"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-connector-basic is installed" test_ref="oval:com.redhat.cve:tst:202126291043"/>
+       <criterion comment="maven-resolver-connector-basic is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291044"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-lib is installed" test_ref="oval:com.redhat.cve:tst:202126291045"/>
+       <criterion comment="maven-lib is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291046"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="glassfish-el is installed" test_ref="oval:com.redhat.cve:tst:202126291047"/>
+       <criterion comment="glassfish-el is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291048"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="sisu-plexus is installed" test_ref="oval:com.redhat.cve:tst:202126291049"/>
+       <criterion comment="sisu-plexus is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291050"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-cli is installed" test_ref="oval:com.redhat.cve:tst:202126291051"/>
+       <criterion comment="apache-commons-cli is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291052"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="glassfish-el-api is installed" test_ref="oval:com.redhat.cve:tst:202126291053"/>
+       <criterion comment="glassfish-el-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291054"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-openjdk11 is installed" test_ref="oval:com.redhat.cve:tst:202126291055"/>
+       <criterion comment="maven-openjdk11 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291056"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-impl is installed" test_ref="oval:com.redhat.cve:tst:202126291057"/>
+       <criterion comment="maven-resolver-impl is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291058"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-spi is installed" test_ref="oval:com.redhat.cve:tst:202126291059"/>
+       <criterion comment="maven-resolver-spi is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291060"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="google-guice is installed" test_ref="oval:com.redhat.cve:tst:202126291061"/>
+       <criterion comment="google-guice is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291062"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver is installed" test_ref="oval:com.redhat.cve:tst:202126291063"/>
+       <criterion comment="maven-resolver is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291064"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-shared-utils is installed" test_ref="oval:com.redhat.cve:tst:202126291065"/>
+       <criterion comment="maven-shared-utils is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291066"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-cipher is installed" test_ref="oval:com.redhat.cve:tst:202126291067"/>
+       <criterion comment="plexus-cipher is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291068"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-logging is installed" test_ref="oval:com.redhat.cve:tst:202126291069"/>
+       <criterion comment="apache-commons-logging is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291070"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-utils is installed" test_ref="oval:com.redhat.cve:tst:202126291071"/>
+       <criterion comment="plexus-utils is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291072"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven is installed" test_ref="oval:com.redhat.cve:tst:202126291073"/>
+       <criterion comment="maven is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291074"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jboss-interceptors-1.2-api is installed" test_ref="oval:com.redhat.cve:tst:202126291075"/>
+       <criterion comment="jboss-interceptors-1.2-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291076"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="cdi-api is installed" test_ref="oval:com.redhat.cve:tst:202126291077"/>
+       <criterion comment="cdi-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291078"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-sec-dispatcher is installed" test_ref="oval:com.redhat.cve:tst:202126291079"/>
+       <criterion comment="plexus-sec-dispatcher is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291080"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-containers-component-annotations is installed" test_ref="oval:com.redhat.cve:tst:202126291081"/>
+       <criterion comment="plexus-containers-component-annotations is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291082"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-transport-wagon is installed" test_ref="oval:com.redhat.cve:tst:202126291083"/>
+       <criterion comment="maven-resolver-transport-wagon is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291084"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jsr-305 is installed" test_ref="oval:com.redhat.cve:tst:202126291085"/>
+       <criterion comment="jsr-305 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291086"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jansi-native is installed" test_ref="oval:com.redhat.cve:tst:202126291087"/>
+       <criterion comment="jansi-native is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291088"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="geronimo-annotation is installed" test_ref="oval:com.redhat.cve:tst:202126291089"/>
+       <criterion comment="geronimo-annotation is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291090"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="httpcomponents-core is installed" test_ref="oval:com.redhat.cve:tst:202126291091"/>
+       <criterion comment="httpcomponents-core is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291092"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-provider-api is installed" test_ref="oval:com.redhat.cve:tst:202126291093"/>
+       <criterion comment="maven-wagon-provider-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291094"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-util is installed" test_ref="oval:com.redhat.cve:tst:202126291095"/>
+       <criterion comment="maven-resolver-util is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291096"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="httpcomponents-client is installed" test_ref="oval:com.redhat.cve:tst:202126291097"/>
+       <criterion comment="httpcomponents-client is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291098"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="slf4j is installed" test_ref="oval:com.redhat.cve:tst:202126291099"/>
+       <criterion comment="slf4j is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291100"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="atinject is installed" test_ref="oval:com.redhat.cve:tst:202126291101"/>
+       <criterion comment="atinject is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291102"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-http-shared is installed" test_ref="oval:com.redhat.cve:tst:202126291103"/>
+       <criterion comment="maven-wagon-http-shared is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291104"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-codec is installed" test_ref="oval:com.redhat.cve:tst:202126291105"/>
+       <criterion comment="apache-commons-codec is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291106"/>
+      </criteria>
+     </criteria>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="Module maven:3.6 is enabled" test_ref="oval:com.redhat.cve:tst:20208908014"/>
+     <criteria operator="OR">
+      <criteria operator="AND">
+       <criterion comment="aopalliance is installed" test_ref="oval:com.redhat.cve:tst:202126291001"/>
+       <criterion comment="aopalliance is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291002"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-openjdk17 is installed" test_ref="oval:com.redhat.cve:tst:202126291003"/>
+       <criterion comment="maven-openjdk17 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291004"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-interpolation is installed" test_ref="oval:com.redhat.cve:tst:202126291005"/>
+       <criterion comment="plexus-interpolation is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291006"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="sisu is installed" test_ref="oval:com.redhat.cve:tst:202126291007"/>
+       <criterion comment="sisu is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291008"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jansi is installed" test_ref="oval:com.redhat.cve:tst:202126291009"/>
+       <criterion comment="jansi is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291010"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-lang3 is installed" test_ref="oval:com.redhat.cve:tst:202126291011"/>
+       <criterion comment="apache-commons-lang3 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291012"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-openjdk8 is installed" test_ref="oval:com.redhat.cve:tst:202126291013"/>
+       <criterion comment="maven-openjdk8 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291014"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jsoup is installed" test_ref="oval:com.redhat.cve:tst:202126291015"/>
+       <criterion comment="jsoup is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291016"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-api is installed" test_ref="oval:com.redhat.cve:tst:202126291017"/>
+       <criterion comment="maven-resolver-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291018"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="hawtjni is installed" test_ref="oval:com.redhat.cve:tst:202126291019"/>
+       <criterion comment="hawtjni is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291020"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="sisu-inject is installed" test_ref="oval:com.redhat.cve:tst:202126291021"/>
+       <criterion comment="sisu-inject is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291022"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-io is installed" test_ref="oval:com.redhat.cve:tst:202126291023"/>
+       <criterion comment="apache-commons-io is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291024"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="hawtjni-runtime is installed" test_ref="oval:com.redhat.cve:tst:202126291025"/>
+       <criterion comment="hawtjni-runtime is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291026"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-file is installed" test_ref="oval:com.redhat.cve:tst:202126291027"/>
+       <criterion comment="maven-wagon-file is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291028"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-containers is installed" test_ref="oval:com.redhat.cve:tst:202126291029"/>
+       <criterion comment="plexus-containers is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291030"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="guava is installed" test_ref="oval:com.redhat.cve:tst:20208908010"/>
+       <criterion comment="guava is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20208908011"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-http is installed" test_ref="oval:com.redhat.cve:tst:202126291033"/>
+       <criterion comment="maven-wagon-http is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291034"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="guava20 is installed" test_ref="oval:com.redhat.cve:tst:20208908001"/>
+       <criterion comment="guava20 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20208908002"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-classworlds is installed" test_ref="oval:com.redhat.cve:tst:202126291037"/>
+       <criterion comment="plexus-classworlds is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291038"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jcl-over-slf4j is installed" test_ref="oval:com.redhat.cve:tst:202126291039"/>
+       <criterion comment="jcl-over-slf4j is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291040"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon is installed" test_ref="oval:com.redhat.cve:tst:202126291041"/>
+       <criterion comment="maven-wagon is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291042"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-connector-basic is installed" test_ref="oval:com.redhat.cve:tst:202126291043"/>
+       <criterion comment="maven-resolver-connector-basic is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291044"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-lib is installed" test_ref="oval:com.redhat.cve:tst:202126291045"/>
+       <criterion comment="maven-lib is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291046"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="glassfish-el is installed" test_ref="oval:com.redhat.cve:tst:202126291047"/>
+       <criterion comment="glassfish-el is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291048"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="sisu-plexus is installed" test_ref="oval:com.redhat.cve:tst:202126291049"/>
+       <criterion comment="sisu-plexus is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291050"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-cli is installed" test_ref="oval:com.redhat.cve:tst:202126291051"/>
+       <criterion comment="apache-commons-cli is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291052"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="glassfish-el-api is installed" test_ref="oval:com.redhat.cve:tst:202126291053"/>
+       <criterion comment="glassfish-el-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291054"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-openjdk11 is installed" test_ref="oval:com.redhat.cve:tst:202126291055"/>
+       <criterion comment="maven-openjdk11 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291056"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-impl is installed" test_ref="oval:com.redhat.cve:tst:202126291057"/>
+       <criterion comment="maven-resolver-impl is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291058"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-spi is installed" test_ref="oval:com.redhat.cve:tst:202126291059"/>
+       <criterion comment="maven-resolver-spi is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291060"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="google-guice is installed" test_ref="oval:com.redhat.cve:tst:202126291061"/>
+       <criterion comment="google-guice is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291062"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver is installed" test_ref="oval:com.redhat.cve:tst:202126291063"/>
+       <criterion comment="maven-resolver is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291064"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-shared-utils is installed" test_ref="oval:com.redhat.cve:tst:202126291065"/>
+       <criterion comment="maven-shared-utils is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291066"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-cipher is installed" test_ref="oval:com.redhat.cve:tst:202126291067"/>
+       <criterion comment="plexus-cipher is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291068"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-logging is installed" test_ref="oval:com.redhat.cve:tst:202126291069"/>
+       <criterion comment="apache-commons-logging is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291070"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-utils is installed" test_ref="oval:com.redhat.cve:tst:202126291071"/>
+       <criterion comment="plexus-utils is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291072"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven is installed" test_ref="oval:com.redhat.cve:tst:202126291073"/>
+       <criterion comment="maven is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291074"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jboss-interceptors-1.2-api is installed" test_ref="oval:com.redhat.cve:tst:202126291075"/>
+       <criterion comment="jboss-interceptors-1.2-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291076"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="cdi-api is installed" test_ref="oval:com.redhat.cve:tst:202126291077"/>
+       <criterion comment="cdi-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291078"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-sec-dispatcher is installed" test_ref="oval:com.redhat.cve:tst:202126291079"/>
+       <criterion comment="plexus-sec-dispatcher is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291080"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-containers-component-annotations is installed" test_ref="oval:com.redhat.cve:tst:202126291081"/>
+       <criterion comment="plexus-containers-component-annotations is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291082"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-transport-wagon is installed" test_ref="oval:com.redhat.cve:tst:202126291083"/>
+       <criterion comment="maven-resolver-transport-wagon is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291084"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jsr-305 is installed" test_ref="oval:com.redhat.cve:tst:202126291085"/>
+       <criterion comment="jsr-305 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291086"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jansi-native is installed" test_ref="oval:com.redhat.cve:tst:202126291087"/>
+       <criterion comment="jansi-native is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291088"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="geronimo-annotation is installed" test_ref="oval:com.redhat.cve:tst:202126291089"/>
+       <criterion comment="geronimo-annotation is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291090"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="httpcomponents-core is installed" test_ref="oval:com.redhat.cve:tst:202126291091"/>
+       <criterion comment="httpcomponents-core is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291092"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-provider-api is installed" test_ref="oval:com.redhat.cve:tst:202126291093"/>
+       <criterion comment="maven-wagon-provider-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291094"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-util is installed" test_ref="oval:com.redhat.cve:tst:202126291095"/>
+       <criterion comment="maven-resolver-util is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291096"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="httpcomponents-client is installed" test_ref="oval:com.redhat.cve:tst:202126291097"/>
+       <criterion comment="httpcomponents-client is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291098"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="slf4j is installed" test_ref="oval:com.redhat.cve:tst:202126291099"/>
+       <criterion comment="slf4j is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291100"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="atinject is installed" test_ref="oval:com.redhat.cve:tst:202126291101"/>
+       <criterion comment="atinject is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291102"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-http-shared is installed" test_ref="oval:com.redhat.cve:tst:202126291103"/>
+       <criterion comment="maven-wagon-http-shared is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291104"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-codec is installed" test_ref="oval:com.redhat.cve:tst:202126291105"/>
+       <criterion comment="apache-commons-codec is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291106"/>
+      </criteria>
+     </criteria>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="Module maven:3.5 is enabled" test_ref="oval:com.redhat.cve:tst:20208908007"/>
+     <criteria operator="OR">
+      <criteria operator="AND">
+       <criterion comment="aopalliance is installed" test_ref="oval:com.redhat.cve:tst:202126291001"/>
+       <criterion comment="aopalliance is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291002"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-openjdk17 is installed" test_ref="oval:com.redhat.cve:tst:202126291003"/>
+       <criterion comment="maven-openjdk17 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291004"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-interpolation is installed" test_ref="oval:com.redhat.cve:tst:202126291005"/>
+       <criterion comment="plexus-interpolation is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291006"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="sisu is installed" test_ref="oval:com.redhat.cve:tst:202126291007"/>
+       <criterion comment="sisu is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291008"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jansi is installed" test_ref="oval:com.redhat.cve:tst:202126291009"/>
+       <criterion comment="jansi is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291010"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-lang3 is installed" test_ref="oval:com.redhat.cve:tst:202126291011"/>
+       <criterion comment="apache-commons-lang3 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291012"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-openjdk8 is installed" test_ref="oval:com.redhat.cve:tst:202126291013"/>
+       <criterion comment="maven-openjdk8 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291014"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jsoup is installed" test_ref="oval:com.redhat.cve:tst:202126291015"/>
+       <criterion comment="jsoup is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291016"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-api is installed" test_ref="oval:com.redhat.cve:tst:202126291017"/>
+       <criterion comment="maven-resolver-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291018"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="hawtjni is installed" test_ref="oval:com.redhat.cve:tst:202126291019"/>
+       <criterion comment="hawtjni is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291020"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="sisu-inject is installed" test_ref="oval:com.redhat.cve:tst:202126291021"/>
+       <criterion comment="sisu-inject is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291022"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-io is installed" test_ref="oval:com.redhat.cve:tst:202126291023"/>
+       <criterion comment="apache-commons-io is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291024"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="hawtjni-runtime is installed" test_ref="oval:com.redhat.cve:tst:202126291025"/>
+       <criterion comment="hawtjni-runtime is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291026"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-file is installed" test_ref="oval:com.redhat.cve:tst:202126291027"/>
+       <criterion comment="maven-wagon-file is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291028"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-containers is installed" test_ref="oval:com.redhat.cve:tst:202126291029"/>
+       <criterion comment="plexus-containers is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291030"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="guava is installed" test_ref="oval:com.redhat.cve:tst:20208908010"/>
+       <criterion comment="guava is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20208908011"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-http is installed" test_ref="oval:com.redhat.cve:tst:202126291033"/>
+       <criterion comment="maven-wagon-http is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291034"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="guava20 is installed" test_ref="oval:com.redhat.cve:tst:20208908001"/>
+       <criterion comment="guava20 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20208908002"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-classworlds is installed" test_ref="oval:com.redhat.cve:tst:202126291037"/>
+       <criterion comment="plexus-classworlds is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291038"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jcl-over-slf4j is installed" test_ref="oval:com.redhat.cve:tst:202126291039"/>
+       <criterion comment="jcl-over-slf4j is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291040"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon is installed" test_ref="oval:com.redhat.cve:tst:202126291041"/>
+       <criterion comment="maven-wagon is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291042"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-connector-basic is installed" test_ref="oval:com.redhat.cve:tst:202126291043"/>
+       <criterion comment="maven-resolver-connector-basic is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291044"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-lib is installed" test_ref="oval:com.redhat.cve:tst:202126291045"/>
+       <criterion comment="maven-lib is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291046"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="glassfish-el is installed" test_ref="oval:com.redhat.cve:tst:202126291047"/>
+       <criterion comment="glassfish-el is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291048"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="sisu-plexus is installed" test_ref="oval:com.redhat.cve:tst:202126291049"/>
+       <criterion comment="sisu-plexus is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291050"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-cli is installed" test_ref="oval:com.redhat.cve:tst:202126291051"/>
+       <criterion comment="apache-commons-cli is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291052"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="glassfish-el-api is installed" test_ref="oval:com.redhat.cve:tst:202126291053"/>
+       <criterion comment="glassfish-el-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291054"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-openjdk11 is installed" test_ref="oval:com.redhat.cve:tst:202126291055"/>
+       <criterion comment="maven-openjdk11 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291056"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-impl is installed" test_ref="oval:com.redhat.cve:tst:202126291057"/>
+       <criterion comment="maven-resolver-impl is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291058"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-spi is installed" test_ref="oval:com.redhat.cve:tst:202126291059"/>
+       <criterion comment="maven-resolver-spi is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291060"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="google-guice is installed" test_ref="oval:com.redhat.cve:tst:202126291061"/>
+       <criterion comment="google-guice is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291062"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver is installed" test_ref="oval:com.redhat.cve:tst:202126291063"/>
+       <criterion comment="maven-resolver is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291064"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-shared-utils is installed" test_ref="oval:com.redhat.cve:tst:202126291065"/>
+       <criterion comment="maven-shared-utils is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291066"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-cipher is installed" test_ref="oval:com.redhat.cve:tst:202126291067"/>
+       <criterion comment="plexus-cipher is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291068"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-logging is installed" test_ref="oval:com.redhat.cve:tst:202126291069"/>
+       <criterion comment="apache-commons-logging is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291070"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-utils is installed" test_ref="oval:com.redhat.cve:tst:202126291071"/>
+       <criterion comment="plexus-utils is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291072"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven is installed" test_ref="oval:com.redhat.cve:tst:202126291073"/>
+       <criterion comment="maven is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291074"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jboss-interceptors-1.2-api is installed" test_ref="oval:com.redhat.cve:tst:202126291075"/>
+       <criterion comment="jboss-interceptors-1.2-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291076"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="cdi-api is installed" test_ref="oval:com.redhat.cve:tst:202126291077"/>
+       <criterion comment="cdi-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291078"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-sec-dispatcher is installed" test_ref="oval:com.redhat.cve:tst:202126291079"/>
+       <criterion comment="plexus-sec-dispatcher is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291080"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="plexus-containers-component-annotations is installed" test_ref="oval:com.redhat.cve:tst:202126291081"/>
+       <criterion comment="plexus-containers-component-annotations is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291082"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-transport-wagon is installed" test_ref="oval:com.redhat.cve:tst:202126291083"/>
+       <criterion comment="maven-resolver-transport-wagon is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291084"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jsr-305 is installed" test_ref="oval:com.redhat.cve:tst:202126291085"/>
+       <criterion comment="jsr-305 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291086"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="jansi-native is installed" test_ref="oval:com.redhat.cve:tst:202126291087"/>
+       <criterion comment="jansi-native is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291088"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="geronimo-annotation is installed" test_ref="oval:com.redhat.cve:tst:202126291089"/>
+       <criterion comment="geronimo-annotation is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291090"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="httpcomponents-core is installed" test_ref="oval:com.redhat.cve:tst:202126291091"/>
+       <criterion comment="httpcomponents-core is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291092"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-provider-api is installed" test_ref="oval:com.redhat.cve:tst:202126291093"/>
+       <criterion comment="maven-wagon-provider-api is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291094"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-resolver-util is installed" test_ref="oval:com.redhat.cve:tst:202126291095"/>
+       <criterion comment="maven-resolver-util is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291096"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="httpcomponents-client is installed" test_ref="oval:com.redhat.cve:tst:202126291097"/>
+       <criterion comment="httpcomponents-client is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291098"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="slf4j is installed" test_ref="oval:com.redhat.cve:tst:202126291099"/>
+       <criterion comment="slf4j is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291100"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="atinject is installed" test_ref="oval:com.redhat.cve:tst:202126291101"/>
+       <criterion comment="atinject is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291102"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="maven-wagon-http-shared is installed" test_ref="oval:com.redhat.cve:tst:202126291103"/>
+       <criterion comment="maven-wagon-http-shared is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291104"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="apache-commons-codec is installed" test_ref="oval:com.redhat.cve:tst:202126291105"/>
+       <criterion comment="apache-commons-codec is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:202126291106"/>
+      </criteria>
+     </criteria>
+    </criteria>
+   </criteria>
+  </criteria>
+ </criteria>
+</definition>
+
+</definitions>
+<tests>
+<red-def:rpmverifyfile_test check="at least one" comment="Red Hat Enterprise Linux 8 is installed" id="oval:com.redhat.cve:tst:20052541003" version="636">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20052541002"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541002"/>
+</red-def:rpmverifyfile_test>
+<red-def:rpmverifyfile_test check="none satisfy" comment="Red Hat Enterprise Linux must be installed" id="oval:com.redhat.cve:tst:20052541004" version="636">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20052541002"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541003"/>
+</red-def:rpmverifyfile_test>
+<ind-def:textfilecontent54_test check="all" comment="Module maven:3.6 is enabled" id="oval:com.redhat.cve:tst:20208908014" version="636">
+ <ind-def:object object_ref="oval:com.redhat.cve:obj:20208908004"/>
+ <ind-def:state state_ref="oval:com.redhat.cve:ste:201520107002"/>
+</ind-def:textfilecontent54_test>
+<ind-def:textfilecontent54_test check="all" comment="Module maven:3.5 is enabled" id="oval:com.redhat.cve:tst:20208908007" version="636">
+ <ind-def:object object_ref="oval:com.redhat.cve:obj:20208908004"/>
+ <ind-def:state state_ref="oval:com.redhat.cve:ste:20208908002"/>
+</ind-def:textfilecontent54_test>
+<red-def:rpminfo_test check="at least one" comment="maven is installed" id="oval:com.redhat.cve:tst:202126291073" version="636">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:202126291037"/>
+</red-def:rpminfo_test>
+<red-def:rpminfo_test check="at least one" comment="maven is signed with Red Hat redhatrelease2 key" id="oval:com.redhat.cve:tst:202126291074" version="636">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:202126291037"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541001"/>
+</red-def:rpminfo_test>
+</tests>
+<objects>
+<red-def:rpmverifyfile_object id="oval:com.redhat.cve:obj:20052541002" version="636">
+ <red-def:behaviors noconfigfiles="true" noghostfiles="true" nogroup="true" nolinkto="true" nomd5="true" nomode="true" nomtime="true" nordev="true" nosize="true" nouser="true"/>
+ <red-def:name operation="pattern match"/>
+ <red-def:epoch operation="pattern match"/>
+ <red-def:version operation="pattern match"/>
+ <red-def:release operation="pattern match"/>
+ <red-def:arch operation="pattern match"/>
+ <red-def:filepath>/etc/redhat-release</red-def:filepath>
+</red-def:rpmverifyfile_object>
+<ind-def:textfilecontent54_object id="oval:com.redhat.cve:obj:20208908004" version="636">
+ <ind-def:filepath datatype="string">/etc/dnf/modules.d/maven.module</ind-def:filepath>
+ <ind-def:pattern operation="pattern match">\[maven\][\w\W]*</ind-def:pattern>
+ <ind-def:instance datatype="int">1</ind-def:instance>
+</ind-def:textfilecontent54_object>
+<red-def:rpminfo_object id="oval:com.redhat.cve:obj:202126291037" version="636">
+ <red-def:name>maven</red-def:name>
+</red-def:rpminfo_object>
+</objects>
+<state>
+<red-def:rpminfo_state id="oval:com.redhat.cve:ste:20052541001" version="636">
+ <red-def:signature_keyid operation="equals">199e2f91fd431d51</red-def:signature_keyid>
+</red-def:rpminfo_state>
+<red-def:rpmverifyfile_state id="oval:com.redhat.cve:ste:20052541002" version="636">
+ <red-def:name operation="pattern match">^redhat-release</red-def:name>
+ <red-def:version operation="pattern match">^8[^\d]</red-def:version>
+</red-def:rpmverifyfile_state>
+<red-def:rpmverifyfile_state id="oval:com.redhat.cve:ste:20052541003" version="636">
+ <red-def:name operation="pattern match">^redhat-release</red-def:name>
+</red-def:rpmverifyfile_state>
+<ind-def:textfilecontent54_state id="oval:com.redhat.cve:ste:201520107002" version="636">
+ <ind-def:text operation="pattern match">\nstream\s*=\s*3\.6\b[\w\W]*\nstate\s*=\s*(enabled|1|true)|\nstate\s*=\s*(enabled|1|true)[\w\W]*\nstream\s*=\s*3\.6\b</ind-def:text>
+</ind-def:textfilecontent54_state>
+<ind-def:textfilecontent54_state id="oval:com.redhat.cve:ste:20208908002" version="636">
+ <ind-def:text operation="pattern match">\nstream\s*=\s*3\.5\b[\w\W]*\nstate\s*=\s*(enabled|1|true)|\nstate\s*=\s*(enabled|1|true)[\w\W]*\nstream\s*=\s*3\.5\b</ind-def:text>
+</ind-def:textfilecontent54_state>
+</state>
+<variables>
+<local_variable comment="Get saved_entry in /boot/grub2/grubenv" datatype="int" id="oval:com.redhat.rhsa:var:20191167001" version="643">
+ <arithmetic arithmetic_operation="add">
+  <literal_component datatype="int">1</literal_component>
+  <object_component item_field="text" object_ref="oval:com.redhat.rhsa:obj:20191167027"/>
+ </arithmetic>
+</local_variable>
+</variables>
+</oval_definitions>

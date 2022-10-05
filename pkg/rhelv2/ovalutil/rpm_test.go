@@ -8,16 +8,26 @@ package ovalutil
 import (
 	"encoding/xml"
 	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/quay/goval-parser/oval"
+	"github.com/stackrox/scanner/database"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type definitionTypeTestCase struct {
 	def        oval.Definition
 	want, name string
 	err        bool
+}
+
+func simpleProtoVulnFunc(def oval.Definition) (*database.RHELv2Vulnerability, error) {
+	return &database.RHELv2Vulnerability{
+		Name: def.References[0].RefID,
+	}, nil
 }
 
 func TestGetDefinitionType(t *testing.T) {
@@ -80,31 +90,53 @@ func TestGetDefinitionType(t *testing.T) {
 	}
 }
 
-func TestParseUnpatchedCVEComponents(t *testing.T) {
-	f, err := os.Open("../../../testdata/cve/RHEL-8-including-unpatched-test.xml")
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestGetPackageResolutions_length(t *testing.T) {
+	_, filename, _, _ := runtime.Caller(0)
+	path := filepath.Dir(filename)
+
+	dataFilePath := filepath.Join(path, "/testdata/oval.xml")
+	f, err := os.Open(dataFilePath)
+	require.NoError(t, err)
 	defer f.Close()
 
 	var root oval.Root
-	if err := xml.NewDecoder(f).Decode(&root); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, xml.NewDecoder(f).Decode(&root))
 
-	definitions := root.Definitions
+	definitions := root.Definitions.Definitions
+	nDefinitions := len(definitions)
+	assert.Lenf(t, definitions, 4, "Definition list length is incorrect, current definition list size is: %d", nDefinitions)
 
-	arr := definitions.Definitions
-	m := len(arr)
-	if !cmp.Equal(m, 3) {
-		t.Errorf("Definition list length is incorrect, current definition list size is: %d", m)
+	expectedNumResolutions := []int{1, 9, 1, 159}
+	for i := 0; i < nDefinitions; i++ {
+		pkgResolutions := getPackageResolutions(definitions[i])
+		assert.Equal(t, expectedNumResolutions[i], len(pkgResolutions))
 	}
-	exampleSize := [3]int{1, 9, 1}
-	for i := 0; i < m; i++ {
-		componentMap := ParseUnpatchedCVEComponents(arr[i])
-		if !cmp.Equal(exampleSize[i], len(componentMap)) {
-			t.Errorf("Parsed CVE component map size is incorrect")
-		}
-	}
+}
 
+func TestRPMDefsToVulns_resolution_state(t *testing.T) {
+	_, filename, _, _ := runtime.Caller(0)
+	path := filepath.Dir(filename)
+
+	dataFilePath := filepath.Join(path, "/testdata/oval.xml")
+	f, err := os.Open(dataFilePath)
+	require.NoError(t, err)
+	defer f.Close()
+
+	var root oval.Root
+	require.NoError(t, xml.NewDecoder(f).Decode(&root))
+
+	vulns, err := RPMDefsToVulns(&root, simpleProtoVulnFunc)
+	assert.NoError(t, err)
+	assert.Len(t, vulns, 4)
+
+	// Only look at CVE-2021-26291, which is the fourth vuln.
+	v := vulns[3]
+	// Ensure the maven package in the maven:3.6 module is "Affected".
+	assert.Equal(t, "maven", v.PackageInfos[1].Packages[0].Name)
+	assert.Equal(t, "maven:3.6", v.PackageInfos[1].Packages[0].Module)
+	assert.Equal(t, "Affected", v.PackageInfos[1].Packages[0].ResolutionState)
+	// Ensure the maven package in the maven:3.5 module is "Will not fix".
+	assert.Equal(t, "maven", v.PackageInfos[2].Packages[0].Name)
+	assert.Equal(t, "maven:3.5", v.PackageInfos[2].Packages[0].Module)
+	assert.Equal(t, "Will not fix", v.PackageInfos[2].Packages[0].ResolutionState)
 }
