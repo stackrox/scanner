@@ -41,10 +41,12 @@ RUN microdnf -y upgrade && \
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
+ENV ISTIO_DEFINITIONS_DIR="/istio_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 --from=extracted_bundle "/bundle${ISTIO_DEFINITIONS_DIR}/" ".${ISTIO_DEFINITIONS_DIR}/"
 COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 COPY --chown=65534:65534 --from=extracted_bundle /bundle/genesis_manifests.json ./
 
