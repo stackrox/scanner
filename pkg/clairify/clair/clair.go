@@ -67,7 +67,7 @@ func (c *Client) analyzeLayer(path, layerName, parentLayerName string, h map[str
 	}
 	fullURL := fmt.Sprintf("%v/v1/layers", c.endpoint)
 	logrus.Debugf("Pushing layer %v to Clair", path)
-	request, err := http.NewRequest("POST", fullURL, bytes.NewBuffer(jsonPayload))
+	request, err := http.NewRequest(http.MethodPost, fullURL, bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func (c *Client) sendRequest(req *http.Request) ([]byte, int, error) {
 // RetrieveLayerData fetches the layer information for the passed layer.
 func (c *Client) RetrieveLayerData(layer string, values url.Values) (*v1.LayerEnvelope, bool, error) {
 	url := fmt.Sprintf("%v/v1/layers/%v", c.endpoint, layer)
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, false, err
 	}
