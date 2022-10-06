@@ -1497,8 +1497,8 @@ github.com/stackrox/docker-registry-client v0.0.0-20220204234128-07f109db0819 h1
 github.com/stackrox/docker-registry-client v0.0.0-20220204234128-07f109db0819/go.mod h1:tEU0CD7y2mq9HAWFZY48THyKPFy6oMv19UT5bnTvrRo=
 github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd h1:vEjp7Q66zd4W72//Uk3uyVN50Mh/nFLbN9pb7CVK7mE=
 github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd/go.mod h1:HILeV3i/EyJz844GcrC3+oU7oZONhjfujaIYBMJ/bZE=
-github.com/stackrox/istio-cves v0.0.0-20220930154156-8769388bfba7 h1:YVbocLyOYIcC1XWYxPYomSWdDntu0fFAGkkUm+XFum8=
-github.com/stackrox/istio-cves v0.0.0-20220930154156-8769388bfba7/go.mod h1:ZF7mH4kH1G+82HxR3uFDHvyLG8eCOdrh1RDyQcTGkBA=
+github.com/stackrox/istio-cves v0.0.0-20221007013142-0bde9b541ec8 h1:rUIvoAHokPcd92aJT2gJwVeyE8tMuaqS5l5s3cEgXFY=
+github.com/stackrox/istio-cves v0.0.0-20221007013142-0bde9b541ec8/go.mod h1:ZF7mH4kH1G+82HxR3uFDHvyLG8eCOdrh1RDyQcTGkBA=
 github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d h1:88Iui7fSMKgXvpyfBlbP3qosrqyv3qMgOJ6JJ4V4tFQ=
 github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d/go.mod h1:GJwFpFwCxiYhgpJWrAkM+v9Z9gpgtyWxkRdK4JjsOIg=
 github.com/stackrox/nvdtools v0.0.0-20220608171543-e758756071a0 h1:hLexaI/zJBDP4OlxN1za3IJM7cfH+Kie7F/wdWn3xGA=

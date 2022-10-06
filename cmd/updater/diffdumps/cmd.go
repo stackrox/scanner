@@ -351,7 +351,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, c
 type config struct {
 	SkipFixableCentOSVulns     bool `json:"skipFixableCentOSVulns"`
 	IgnoreKubernetesVulns      bool `json:"ignoreKubernetesVulns"`
-	IgnoreIstioVulns           bool `json:"ignoreIgnoreIstioVulns"`
+	IgnoreIstioVulns           bool `json:"ignoreIstioVulns"`
 	SkipUbuntuLinuxKernelVulns bool `json:"skipUbuntuLinuxKernelVulns"`
 	SkipSeverityComparison     bool `json:"skipSeverityComparison"`
 	SkipRHELv2Vulns            bool `json:"skipRHELv2Vulns"`
@@ -418,6 +418,16 @@ func Command() *cobra.Command {
 			log.Info("Done generating Kubernetes diff")
 		}
 
+		if cfg.IgnoreIstioVulns {
+			log.Info("Skipping Istio diff")
+		} else {
+			log.Info("Generating Istio diff...")
+			if err := generateIstioDiffs(stagingDir, baseZipR, headZipR); err != nil {
+				return errors.Wrap(err, "creating Istio diff")
+			}
+			log.Info("Done generating Kubernetes diff")
+		}
+
 		log.Info("Generating NVD diff...")
 		if err := generateNVDDiffs(stagingDir, baseManifest.Until, headZipR); err != nil {
 			return errors.Wrap(err, "creating NVD diff")
@@ -449,7 +459,7 @@ func Command() *cobra.Command {
 		}
 
 		log.Info("Zipping up the dump...")
-		err = vulndump.WriteZip(stagingDir, outFile, cfg.IgnoreKubernetesVulns, cfg.SkipRHELv2Vulns, true)
+		err = vulndump.WriteZip(stagingDir, outFile, cfg.IgnoreKubernetesVulns, cfg.SkipRHELv2Vulns, cfg.IgnoreIstioVulns)
 		if err != nil {
 			return errors.Wrap(err, "writing final zip")
 		}

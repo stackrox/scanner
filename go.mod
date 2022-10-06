@@ -129,7 +129,7 @@ require (
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stackrox/istio-cves v0.0.0-20220930154156-8769388bfba7
+	github.com/stackrox/istio-cves v0.0.0-20221007013142-0bde9b541ec8
 	github.com/tkuchiki/go-timezone v0.2.2 // indirect
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802 // indirect
 	github.com/transparency-dev/merkle v0.0.1 // indirect

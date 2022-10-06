@@ -12,6 +12,7 @@
       "config": {
         "skipFixableCentOSVulns": true,
         "ignoreKubernetesVulns": true,
+        "ignoreIstioVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true,
@@ -28,6 +29,7 @@
       "config": {
         "skipFixableCentOSVulns": true,
         "ignoreKubernetesVulns": true,
+        "ignoreIstioVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true,
@@ -43,6 +45,7 @@
       "uuid": "56f04dff-7fac-43d5-b042-b17813929c14",
       "config": {
         "ignoreKubernetesVulns": true,
+        "ignoreIstioVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true,
@@ -58,6 +61,7 @@
       "uuid": "843a826a-2599-4761-a68e-3498749c7b8f",
       "config": {
         "ignoreKubernetesVulns": true,
+        "ignoreIstioVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true,
@@ -73,6 +77,7 @@
       "uuid": "e500a8ae-fed1-4e21-b482-3680f093d4db",
       "config": {
         "ignoreKubernetesVulns": true,
+        "ignoreIstioVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true,
@@ -88,6 +93,7 @@
       "uuid": "0133c2cf-8abe-4d79-9250-9b64b5b3e43e",
       "config": {
         "ignoreKubernetesVulns": true,
+        "ignoreIstioVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true,
@@ -103,6 +109,7 @@
       "uuid": "393a3dce-2a0e-4645-b0b6-2835270eb93c",
       "config": {
         "ignoreKubernetesVulns": true,
+        "ignoreIstioVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true,
@@ -118,6 +125,7 @@
       "uuid": "8d6951e9-52af-4840-9e0b-c9d7a5191a7d",
       "config": {
         "ignoreKubernetesVulns": true,
+        "ignoreIstioVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true,
@@ -133,6 +141,7 @@
       "uuid": "474f36bb-3ba5-40b8-bc56-3dcc4f2a3c0c",
       "config": {
         "ignoreKubernetesVulns": true,
+        "ignoreIstioVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true,
@@ -148,6 +157,7 @@
       "uuid": "8838c700-8743-4bc6-8e25-fafdf867cadc",
       "config": {
         "ignoreKubernetesVulns": true,
+        "ignoreIstioVulns": true,
         "skipUbuntuLinuxKernelVulns": true,
         "skipSeverityComparison": true,
         "skipRHELv2Vulns": true,
@@ -168,7 +178,8 @@
         "useDPKGParserForAlpine": true,
         "keepUnusedRHELv2CPEs": true,
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -181,7 +192,8 @@
         "useDPKGParserForAlpine": true,
         "keepUnusedRHELv2CPEs": true,
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -194,7 +206,8 @@
         "useDPKGParserForAlpine": true,
         "keepUnusedRHELv2CPEs": true,
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -207,7 +220,8 @@
         "useDPKGParserForAlpine": true,
         "keepUnusedRHELv2CPEs": true,
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -220,7 +234,8 @@
         "useDPKGParserForAlpine": true,
         "keepUnusedRHELv2CPEs": true,
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -232,7 +247,8 @@
         "skipRHELv2TitleComparison": true,
         "keepUnusedRHELv2CPEs": true,
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -242,7 +258,8 @@
       "config": {
         "keepUnusedRHELv2CPEs": true,
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -252,7 +269,8 @@
       "config": {
         "keepUnusedRHELv2CPEs": true,
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -262,7 +280,8 @@
       "config": {
         "keepUnusedRHELv2CPEs": true,
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -272,7 +291,8 @@
       "config": {
         "keepUnusedRHELv2CPEs": true,
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -281,7 +301,8 @@
       "uuid": "d0711bbc-9227-4cb5-85ef-76dabf202da3",
       "config": {
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -290,7 +311,8 @@
       "uuid": "5ca69bf7-08ab-4f17-9e4f-e342a020d977",
       "config": {
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -299,7 +321,8 @@
       "uuid": "64f45145-9392-4a29-8782-72cb78206a0d",
       "config": {
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -308,7 +331,8 @@
       "uuid": "8d54d209-931c-47b2-a5ef-edc32d39b639",
       "config": {
         "useLegacyUbuntuCVEURLPrefix": true,
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -316,7 +340,8 @@
       "timestamp": "2022-01-24T20:04:51.981143049Z",
       "uuid": "76920bf9-d0d2-47cd-9d53-ae4943edc02a",
       "config": {
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -324,7 +349,8 @@
       "timestamp": "2022-03-07T20:04:31.050240005Z",
       "uuid": "4d2f8c67-af86-443e-9c21-58261672f262",
       "config": {
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -332,7 +358,8 @@
       "timestamp": "2022-03-23T16:04:52.001764069Z",
       "uuid": "90ed7d2d-7839-4f65-93fb-e56f37a62224",
       "config": {
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
@@ -340,18 +367,25 @@
       "timestamp": "2022-05-04T15:04:39.974939191Z",
       "uuid": "56f8939b-653c-468c-8114-ff8a009d67cd",
       "config": {
-        "useLegacyAlpineCVEURLPrefix": true
+        "useLegacyAlpineCVEURLPrefix": true,
+        "ignoreIstioVulns": true
       }
     },
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20220707001950.zip",
       "timestamp": "2022-07-07T00:19:50.023423474Z",
-      "uuid": "b36af074-8f40-4221-a4f6-b96d05d177dd"
+      "uuid": "b36af074-8f40-4221-a4f6-b96d05d177dd",
+      "config": {
+        "ignoreIstioVulns": true
+      }
     },
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20220908183429.zip",
       "timestamp": "2022-09-08T18:34:29.343211144Z",
-      "uuid": "f81dbc6b-5899-433b-bc86-9127219a9d89"
+      "uuid": "f81dbc6b-5899-433b-bc86-9127219a9d89",
+      "config": {
+        "ignoreIstioVulns": true
+      }
     }
   ]
 }
