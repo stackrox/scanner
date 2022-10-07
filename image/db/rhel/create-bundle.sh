@@ -44,7 +44,7 @@ else
 fi
 
 # Create output bundle of all files in $bundle_root
-tar cz --file "$OUTPUT_BUNDLE" --directory "${bundle_root}" .
+tar cz "${tar_chown_args[@]}" --file "$OUTPUT_BUNDLE" --directory "${bundle_root}" .
 
 # Create checksum
 sha512sum "${OUTPUT_BUNDLE}" > "${OUTPUT_BUNDLE}.sha512"
