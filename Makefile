@@ -13,8 +13,8 @@ BASE_DIR=$(CURDIR)
 TAG := # make sure tag is never injectable as an env var
 
 ifdef CI
-ifneq ($(CIRCLE_TAG),)
-TAG := $(CIRCLE_TAG)
+ifneq ($(NIGHTLY_TAG),)
+TAG := $(NIGHTLY_TAG)
 endif
 endif
 

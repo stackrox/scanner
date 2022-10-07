@@ -88,6 +88,18 @@ func TestDetector(t *testing.T) {
 			}),
 		},
 		{
+			ExpectedNamespace: &database.Namespace{Name: "rocky:8", VersionFormat: rpm.ParserName},
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"etc/rocky-release": {Contents: []byte(`Rocky Linux release 8.6 (Green Obsidian)`)},
+			}),
+		},
+		{
+			ExpectedNamespace: &database.Namespace{Name: "rocky:9", VersionFormat: rpm.ParserName},
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"etc/rocky-release": {Contents: []byte(`Rocky Linux release 9.0 (Blue Onyx)`)},
+			}),
+		},
+		{
 			ExpectedNamespace: nil,
 			Files:             tarutil.CreateNewLayerFiles(nil),
 		},
