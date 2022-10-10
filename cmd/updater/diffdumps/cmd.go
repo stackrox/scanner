@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/stackrox/istio-cves/types"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/cmd/updater/common"
@@ -24,10 +25,13 @@ import (
 	"github.com/stackrox/scanner/ext/vulnsrc/alpine"
 	"github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
 	"github.com/stackrox/scanner/pkg/vulndump"
+	"github.com/stackrox/scanner/pkg/vulnloader/istioloader"
 	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
 	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
 	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
+
+type generateDiffFunc func(outputDir string, baseF, headF *zip.File) error
 
 func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
 	headReader, err := headF.Open()
@@ -69,15 +73,55 @@ func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
 	return nil
 }
 
+func generateIstioDiffHelper(outputDir string, baseF, headF *zip.File) error {
+	headReader, err := headF.Open()
+	if err != nil {
+		return errors.Wrap(err, "opening file")
+	}
+	defer utils.IgnoreError(headReader.Close)
+	istioDump, err := istioloader.LoadYAMLFileFromReader(headReader)
+	if err != nil {
+		return errors.Wrap(err, "reading Istio dump")
+	}
+
+	var baseIstioDump types.Vuln
+	if baseF != nil {
+		baseReader, err := baseF.Open()
+		if err != nil {
+			return errors.Wrap(err, "opening file")
+		}
+		defer utils.IgnoreError(baseReader.Close)
+		baseIstioDump, err = istioloader.LoadYAMLFileFromReader(baseReader)
+		if err != nil {
+			return errors.Wrap(err, "reading base Istio dump")
+		}
+	}
+
+	outF, err := os.Create(filepath.Join(outputDir, filepath.Base(headF.Name)))
+	if err != nil {
+		return errors.Wrap(err, "creating Istio output file")
+	}
+	defer utils.IgnoreError(outF.Close)
+
+	if !reflect.DeepEqual(baseIstioDump, istioDump) {
+		log.Infof("Istio CVE file %q is in the diff", headF.Name)
+		if _, err := io.Copy(outF, headReader); err != nil {
+			return errors.Wrap(err, "copying Istio CVE file")
+		}
+	}
+
+	return nil
+}
+
 func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
-	return generateDiffsHelper(outputDir, baseZipR, headZipR, vulndump.K8sDirName)
+	return generateDiffsHelper(outputDir, baseZipR, headZipR, vulndump.K8sDirName, generateK8sDiff)
 }
 
 func generateIstioDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
-	return generateDiffsHelper(outputDir, baseZipR, headZipR, vulndump.IstioDirName)
+	return generateDiffsHelper(outputDir, baseZipR, headZipR, vulndump.IstioDirName, generateIstioDiffHelper)
 }
 
-func generateDiffsHelper(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, dirName string) error {
+func generateDiffsHelper(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, dirName string, generateDiffs generateDiffFunc) error {
 	subDir := filepath.Join(outputDir, dirName)
 	if err := os.MkdirAll(subDir, 0755); err != nil {
 		return errors.Wrap(err, "creating subdir for Kubernetes")
@@ -106,12 +150,12 @@ func generateDiffsHelper(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 			continue
 		}
 
-		// Only look at YAML files in the k8s/ folder.
+		// Only look at YAML files in the <dirName> folder.
 		if filepath.Dir(name) != dirName || filepath.Ext(name) != ".yaml" {
 			continue
 		}
-		if err := generateK8sDiff(subDir, baseFiles[name], headF); err != nil {
-			return errors.Wrapf(err, "generating Kubernetes diff for file %q", headF.Name)
+		if err := generateDiffs(subDir, baseFiles[name], headF); err != nil {
+			return errors.Wrapf(err, "generating Istio diff for file %q", headF.Name)
 		}
 	}
 	return nil
@@ -425,7 +469,7 @@ func Command() *cobra.Command {
 			if err := generateIstioDiffs(stagingDir, baseZipR, headZipR); err != nil {
 				return errors.Wrap(err, "creating Istio diff")
 			}
-			log.Info("Done generating Kubernetes diff")
+			log.Info("Done generating Isio diff")
 		}
 
 		log.Info("Generating NVD diff...")

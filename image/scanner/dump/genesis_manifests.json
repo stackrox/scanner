@@ -382,7 +382,10 @@
     {
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20220908183429.zip",
       "timestamp": "2022-09-08T18:34:29.343211144Z",
-      "uuid": "f81dbc6b-5899-433b-bc86-9127219a9d89"
+      "uuid": "f81dbc6b-5899-433b-bc86-9127219a9d89",
+      "config": {
+        "ignoreIstioVulns": true
+      }
     }
   ]
 }
