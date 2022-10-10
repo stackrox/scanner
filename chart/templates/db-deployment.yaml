@@ -24,8 +24,8 @@ spec:
         env:
         - name: POSTGRES_PASSWORD_FILE
           value: "/run/secrets/stackrox.io/secrets/password"
-        command: ["docker-entrypoint.sh"]
-        args: ["init", "postgres", "-c", "config_file=/etc/postgresql.conf"]
+        - name: ROX_SCANNER_DB_INIT
+          value: "true"
         resources:
           limits:
             cpu: 2
