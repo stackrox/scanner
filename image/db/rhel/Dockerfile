@@ -27,6 +27,7 @@ ARG POSTGRESQL_ARCH=x86_64
 
 RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-${POSTGRESQL_ARCH}/pgdg-redhat-repo-latest.noarch.rpm -o /tmp/pg_repo.rpm && \
     rpm -i /tmp/pg_repo.rpm && \
+    # Skip repo check for ARM as it's used only for development purposes and package has wrong signature.
     if [[ "$POSTGRESQL_ARCH" == "aarch64" ]]; then sed -i 's/repo_gpgcheck = 1/repo_gpgcheck = 0/g' /etc/yum.repos.d/pgdg-redhat-all.repo; fi && \
     microdnf upgrade -y && \
     microdnf install -y shadow-utils && \
