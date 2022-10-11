@@ -1984,7 +1984,7 @@ var testCases = []testCase{
 								},
 							},
 						},
-						FixedBy:  "2.14.0",
+						FixedBy:  "2.12.6.1",
 						Severity: "Important",
 					},
 				},
