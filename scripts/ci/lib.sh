@@ -14,7 +14,8 @@ ensure_CI() {
     fi
 }
 
-# ci_export is a wrapper around export. This is here for legacy purposes.
+# ci_export is a wrapper around cci-export which persists exported variables
+# between bash processes.
 ci_export() {
     if [[ "$#" -ne 2 ]]; then
         die "missing args. usage: ci_export <env-name> <env-value>"
@@ -23,7 +24,11 @@ ci_export() {
     local env_name="$1"
     local env_value="$2"
 
-    export "$env_name"="$env_value"
+    if command -v cci-export >/dev/null; then
+        cci-export "$env_name" "$env_value"
+    else
+        export "$env_name"="$env_value"
+    fi
 }
 
 ci_exit_trap() {
@@ -485,6 +490,7 @@ openshift_ci_mods() {
     # For ci_export(), override BASH_ENV from stackrox-test with something that is writable.
     BASH_ENV=$(mktemp)
     export BASH_ENV
+    info "BASH_ENV is now ${BASH_ENV}"
 
     # These are not set in the binary_build_commands or image build envs.
     export CI=true
