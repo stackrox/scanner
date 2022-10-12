@@ -240,16 +240,6 @@ refresh_gke_token() {
 teardown_gke_cluster() {
     info "Tearing down the GKE cluster: ${CLUSTER_NAME:-}"
 
-    if [[ -z "${CLUSTER_NAME:-}" ]]; then
-        # CLUSTER_NAME is not propagating as it _should_ via ci_export / BASH_ENV
-        echo "DEBUG missing CLUSTER_NAME"
-        echo "BASH_ENV: ${BASH_ENV:-}"
-        if [[ -n "${BASH_ENV:-}" ]]; then
-            ls -l "${BASH_ENV:-}" || true
-            cat "${BASH_ENV:-}" || true
-        fi
-    fi
-
     require_environment "CLUSTER_NAME"
     require_executable "gcloud"
 
