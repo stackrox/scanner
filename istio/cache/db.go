@@ -16,7 +16,7 @@ type cacheImpl struct {
 	// Consider switching to BoltDB if this gets absurdly large (on the scale of NVD).
 	// Vulns that are not associated with a particular component are kept in the map with
 	// component Generic.
-	cache map[string]map[string]types.Vuln
+	cache map[string]types.Vuln
 
 	dir             string
 	timeRWLock      sync.RWMutex
@@ -24,14 +24,24 @@ type cacheImpl struct {
 }
 
 func (c *cacheImpl) GetVulnsByVersion(version string) []types.Vuln {
-	//TODO implement me
-	panic("implement me")
+	c.cacheRWLock.RLock()
+	defer c.cacheRWLock.RUnlock()
+
+	var vulns []types.Vuln
+	for _, vuln := range c.cache {
+		if isAffected(version, vuln) {
+			// Only return vulnerabilities relevant to the given version.
+			vulns = append(vulns, vuln)
+		}
+	}
+
+	return vulns
 }
 
 // New returns a new Kubernetes vulnerability cache.
 func New() Cache {
 	return &cacheImpl{
-		cache: make(map[string]map[string]types.Vuln),
+		cache: make(map[string]types.Vuln),
 		dir:   vulndump.IstioDirName,
 	}
 }

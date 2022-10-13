@@ -80,10 +80,16 @@ func (c *cacheImpl) handleYAMLFile(path string) (bool, error) {
 func (c *cacheImpl) handleReader(r *ziputil.ReadCloser) (bool, error) {
 	defer utils.IgnoreError(r.Close)
 
-	_, err := istioloader.LoadYAMLFileFromReader(r)
+	cveData, err := istioloader.LoadYAMLFileFromReader(r)
 	if err != nil {
 		return false, errors.Wrapf(err, "loading YAML file at path %q", r.Name)
 	}
+
+	c.cacheRWLock.Lock()
+	defer c.cacheRWLock.Unlock()
+
+	name := cveData.Name
+	c.cache[name] = cveData
 
 	return true, nil
 }
