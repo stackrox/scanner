@@ -2,13 +2,13 @@ package cache
 
 import (
 	"archive/zip"
-	"github.com/stackrox/scanner/pkg/vulnloader/istioloader"
 	"os"
 	"path/filepath"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/vulnloader/istioloader"
 	"github.com/stackrox/scanner/pkg/ziputil"
 )
 
@@ -80,10 +80,16 @@ func (c *cacheImpl) handleYAMLFile(path string) (bool, error) {
 func (c *cacheImpl) handleReader(r *ziputil.ReadCloser) (bool, error) {
 	defer utils.IgnoreError(r.Close)
 
-	_, err := istioloader.LoadYAMLFileFromReader(r)
+	cveData, err := istioloader.LoadYAMLFileFromReader(r)
 	if err != nil {
 		return false, errors.Wrapf(err, "loading YAML file at path %q", r.Name)
 	}
+
+	c.cacheRWLock.Lock()
+	defer c.cacheRWLock.Unlock()
+
+	name := cveData.Name
+	c.cache[name] = cveData
 
 	return true, nil
 }
