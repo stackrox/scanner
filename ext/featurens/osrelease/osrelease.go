@@ -35,6 +35,7 @@ var (
 		"etc/fedora-release",
 		"etc/oracle-release",
 		"etc/redhat-release",
+		"etc/rocky-release",
 		"usr/lib/centos-release",
 	}
 
