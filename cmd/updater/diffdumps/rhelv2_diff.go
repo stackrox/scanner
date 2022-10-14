@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/hashstructure"
+	"github.com/mitchellh/hashstructure/v2"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
@@ -207,5 +207,5 @@ func generateRHELv2RepoToCPE(fileName string, file *zip.File) error {
 
 // vulnHash creates a hash from the members of the passed-in Vulnerability.
 func vulnHash(v *database.RHELv2Vulnerability) (uint64, error) {
-	return hashstructure.Hash(v, nil)
+	return hashstructure.Hash(v, hashstructure.FormatV2, nil)
 }

@@ -30,7 +30,7 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/mailru/easyjson v0.7.7
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/mitchellh/hashstructure v1.1.0
+	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.0-rc2
 	github.com/pborman/uuid v1.2.1
