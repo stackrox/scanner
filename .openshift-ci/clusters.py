@@ -7,6 +7,7 @@ Copied from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/clust
 """
 
 import os
+import signal
 import subprocess
 import time
 
