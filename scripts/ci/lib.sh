@@ -51,7 +51,7 @@ ci_exit_trap() {
 # processes _should_ be cleaned up by their creators it is common that some are
 # not, so this exists as a fail safe.
 handle_dangling_processes() {
-    if ! ( command -v ps >/dev/null ); then
+    if ! command -v ps >/dev/null; then
         return 0
     fi
 
