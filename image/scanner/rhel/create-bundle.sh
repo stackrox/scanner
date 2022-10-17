@@ -3,6 +3,7 @@
 
 NVD_DEFINITIONS_DIR="/nvd_definitions"
 K8S_DEFINITIONS_DIR="/k8s_definitions"
+ISTIO_DEFINITIONS_DIR="/istio_definitions"
 REPO_TO_CPE_DIR="/repo2cpe"
 
 set -euo pipefail
@@ -28,6 +29,7 @@ OUTPUT_BUNDLE="${OUTPUT_DIR}/bundle.tar.gz"
 bundle_root="$(mktemp -d)"
 mkdir -p "${bundle_root}/${NVD_DEFINITIONS_DIR}"
 mkdir -p "${bundle_root}/${K8S_DEFINITIONS_DIR}"
+mkdir -p "${bundle_root}/${ISTIO_DEFINITIONS_DIR}"
 mkdir -p "${bundle_root}/${REPO_TO_CPE_DIR}"
 chmod -R 755 "${bundle_root}"
 
@@ -50,6 +52,7 @@ cp -p  "${INPUT_ROOT}/bin/scanner"                        "${bundle_root}/"
 cp -p  "${INPUT_ROOT}/dump/genesis_manifests.json"        "${bundle_root}/"
 cp -p  "${INPUT_ROOT}/dump/nvd/"*.json                    "${bundle_root}/${NVD_DEFINITIONS_DIR}"
 cp -p  "${INPUT_ROOT}/dump/k8s/"*.yaml                    "${bundle_root}/${K8S_DEFINITIONS_DIR}"
+cp -p  "${INPUT_ROOT}/dump/istio/"*.yaml                  "${bundle_root}/${ISTIO_DEFINITIONS_DIR}"
 cp -p  "${INPUT_ROOT}/dump/rhelv2/repository-to-cpe.json" "${bundle_root}/${REPO_TO_CPE_DIR}"
 cp -pr "${INPUT_ROOT}/rhel/THIRD_PARTY_NOTICES"           "${bundle_root}/"
 
