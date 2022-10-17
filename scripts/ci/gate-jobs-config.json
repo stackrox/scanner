@@ -53,7 +53,7 @@
     "run_with_changed_path": "",
     "changed_path_to_ignore": "",
     "run_on_master": "true",
-    "run_on_tags": "true"
+    "run_on_tags": "false"
   },
   "upload-dumps-for-downstream": {
     "run_with_labels": [],
