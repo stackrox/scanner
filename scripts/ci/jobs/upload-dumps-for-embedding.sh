@@ -19,6 +19,7 @@ upload_dumps_for_embedding() {
     info "Uploading dumps"
     gsutil cp /tmp/vuln-dump/nvd-definitions.zip gs://stackrox-scanner-ci-vuln-dump
     gsutil cp /tmp/vuln-dump/k8s-definitions.zip gs://stackrox-scanner-ci-vuln-dump
+    gsutil cp /tmp/vuln-dump/istio-definitions.zip gs://stackrox-scanner-ci-vuln-dump
     gsutil cp /tmp/vuln-dump/repo2cpe.zip gs://stackrox-scanner-ci-vuln-dump
 }
 

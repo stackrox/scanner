@@ -40,6 +40,7 @@ upload_dumps_for_downstream() {
     info "Uploading dumps"
     gsutil cp /tmp/vuln-dump/nvd-definitions.zip "$destination"
     gsutil cp /tmp/vuln-dump/k8s-definitions.zip "$destination"
+    gsutil cp /tmp/vuln-dump/istio-definitions.zip "$destination"
     gsutil cp /tmp/vuln-dump/repo2cpe.zip "$destination"
     gsutil cp /tmp/postgres/pg-definitions.sql.gz "$destination"
     # Note that we include genesis manifests for the downstream to avoid the situation when dumps taken from
