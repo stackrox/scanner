@@ -27,6 +27,7 @@ generate_genesis_dump() {
     mkdir -p /tmp/vuln-dump
     zip /tmp/genesis-dump/genesis-dump.zip 'nvd/*' --copy --out /tmp/vuln-dump/nvd-definitions.zip
     zip /tmp/genesis-dump/genesis-dump.zip 'k8s/*' --copy --out /tmp/vuln-dump/k8s-definitions.zip
+    zip /tmp/genesis-dump/genesis-dump.zip 'istio/*' --copy --out /tmp/vuln-dump/istio-definitions.zip
     zip /tmp/genesis-dump/genesis-dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/vuln-dump/repo2cpe.zip
 }
 
