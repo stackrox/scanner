@@ -2,13 +2,13 @@ package cache
 
 import (
 	"archive/zip"
-	"github.com/stackrox/scanner/pkg/vulnloader/istioloader"
 	"os"
 	"path/filepath"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/vulnloader/istioloader"
 	"github.com/stackrox/scanner/pkg/ziputil"
 )
 
