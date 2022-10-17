@@ -42,6 +42,47 @@ ci_exit_trap() {
         info "Holding this job for debug"
         sleep 60
     done
+
+    handle_dangling_processes
+}
+
+# handle_dangling_processes() - The OpenShift CI ci-operator will not complete a
+# test job if there are processes remaining that were started by the job. While
+# processes _should_ be cleaned up by their creators it is common that some are
+# not, so this exists as a fail safe.
+handle_dangling_processes() {
+    info "Process state at exit:"
+    ps -e -O ppid
+
+    local psline this_pid pid
+    ps -e -O ppid | while read -r psline; do
+        # trim leading whitespace
+        psline="$(echo "$psline" | xargs)"
+        if [[ "$psline" =~ ^PID ]]; then
+            # Ignoring header
+            continue
+        fi
+        this_pid="$$"
+        if [[ "$psline" =~ ^$this_pid ]]; then
+            echo "Ignoring self: $psline"
+            continue
+        fi
+        # shellcheck disable=SC1087
+        if [[ "$psline" =~ [[:space:]]$this_pid[[:space:]] ]]; then
+            echo "Ignoring child: $psline"
+            continue
+        fi
+        if [[ "$psline" =~ entrypoint|defunct ]]; then
+            echo "Ignoring ci-operator entrypoint or defunct process: $psline"
+            continue
+        fi
+        echo "A candidate to kill: $psline"
+        pid="$(echo "$psline" | cut -d' ' -f1)"
+        echo "Will kill $pid"
+        kill "$pid" || {
+            echo "Error killing $pid"
+        }
+    done
 }
 
 create_exit_trap() {
@@ -189,6 +230,28 @@ is_in_PR_context() {
         pull_request=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].pulls[0].number' 2>&1) || return 1
         [[ "$pull_request" =~ ^[0-9]+$ ]] && return 0
     fi
+
+    return 1
+}
+
+get_PR_number() {
+    if is_OPENSHIFT_CI && [[ -n "${PULL_NUMBER:-}" ]]; then
+        echo "${PULL_NUMBER}"
+        return 0
+    elif is_OPENSHIFT_CI && [[ -n "${CLONEREFS_OPTIONS:-}" ]]; then
+        # bin, test-bin, images
+        local pull_request
+        pull_request=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].pulls[0].number' 2>&1) || {
+            echo 2>&1 "ERROR: Could not determine a PR number"
+            return 1
+        }
+        if [[ "$pull_request" =~ ^[0-9]+$ ]]; then
+            echo "$pull_request"
+            return 0
+        fi
+    fi
+
+    echo 2>&1 "ERROR: Could not determine a PR number"
 
     return 1
 }
