@@ -73,7 +73,7 @@ func generateK8sDiff(outputDir string, baseF, headF *zip.File) error {
 	return nil
 }
 
-func generateIstioDiffHelper(outputDir string, baseF, headF *zip.File) error {
+func generateIstioDiff(outputDir string, baseF, headF *zip.File) error {
 	headReader, err := headF.Open()
 	if err != nil {
 		return errors.Wrap(err, "opening file")
@@ -118,7 +118,7 @@ func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.
 }
 
 func generateIstioDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
-	return generateDiffsHelper(outputDir, baseZipR, headZipR, vulndump.IstioDirName, generateIstioDiffHelper)
+	return generateDiffsHelper(outputDir, baseZipR, headZipR, vulndump.IstioDirName, generateIstioDiff)
 }
 
 func generateDiffsHelper(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, dirName string, generateDiffs generateDiffFunc) error {
@@ -155,7 +155,7 @@ func generateDiffsHelper(outputDir string, baseZipR *zip.ReadCloser, headZipR *z
 			continue
 		}
 		if err := generateDiffs(subDir, baseFiles[name], headF); err != nil {
-			return errors.Wrapf(err, "generating Istio diff for file %q", headF.Name)
+			return errors.Wrapf(err, "generating diffs for file %q", headF.Name)
 		}
 	}
 	return nil
