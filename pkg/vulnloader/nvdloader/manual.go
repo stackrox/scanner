@@ -454,6 +454,71 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 		LastModifiedDate: "2022-03-31T00:00Z",
 		PublishedDate:    "2022-03-31T00:00Z",
 	},
+	"CVE-2022-22978": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ID: "CVE-2022-22978",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: "In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers.\n\nApplications using RegexRequestMatcher with '.' in the regular expression are possibly vulnerable to an authorization bypass.",
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name: "https://tanzu.vmware.com/security/cve-2022-22978",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:              `cpe:2.3:a:vmware:spring\-security\-web:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "5.6.4",
+							VersionStartIncluding: "5.6.0",
+						},
+						{
+							Cpe23Uri:            `cpe:2.3:a:vmware:spring\-security\-web:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "5.5.7",
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "NONE",
+					BaseScore:             8.2,
+					ConfidentialityImpact: "HIGH",
+					IntegrityImpact:       "LOW",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         4.2,
+			},
+		},
+		LastModifiedDate: "2022-05-16T00:00Z",
+		PublishedDate:    "2022-05-16T00:00Z",
+	},
 	"CVE-2017-5638": {
 		CVE: &schema.CVEJSON40{
 			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{

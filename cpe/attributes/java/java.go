@@ -35,6 +35,36 @@ var (
 	immutableIndicators = []string{
 		"agent",
 	}
+
+	knownSpringVendors    = []string{"pivotal", "pivotal_software", "vmware"}
+	knownSpringComponents = set.NewFrozenStringSet(
+		"spring_advanced_message_queuing_protocol",
+		"spring_aop",
+		"spring_beans",
+		"spring_boot",
+		"spring_boot_autoconfigure",
+		"spring_boot_jarmode_layertools",
+		"spring_cloud_function",
+		"spring_cloud_function_core",
+		"spring_cloud_gateway",
+		"spring_cloud_netflix",
+		"spring_cloud_openfeign",
+		"spring_context",
+		"spring_core",
+		"spring_data_mongodb",
+		"spring_data_rest",
+		"spring_expression",
+		"spring_jcl",
+		"spring_security",
+		"spring_security_core",
+		"spring_security_crypto",
+		"spring_security_oath",
+		"spring_security_web",
+		"spring_web",
+		"spring_web_flow",
+		"spring_webflux",
+		"spring_webmvc",
+	)
 )
 
 func isMutableName(name string) bool {
@@ -70,7 +100,7 @@ func ignored(c *component.Component) bool {
 	return false
 }
 
-func getPossibleVendors(origins []string) set.StringSet {
+func getPossibleVendors(origins []string, names set.StringSet) set.StringSet {
 	// Try splitting on periods
 	vendorSet := set.NewStringSet()
 	for _, orig := range origins {
@@ -90,6 +120,15 @@ func getPossibleVendors(origins []string) set.StringSet {
 	if vendorSet.Cardinality() == 0 {
 		vendorSet.Add("apache")
 	}
+
+	// Add Spring-specific vendors.
+	for name := range names {
+		if knownSpringComponents.Contains(name) {
+			vendorSet.AddAll(knownSpringVendors...)
+			break
+		}
+	}
+
 	return vendorSet
 }
 
@@ -109,8 +148,8 @@ func GetJavaAttributes(c *component.Component) []*wfn.Attributes {
 		return nil
 	}
 
-	vendorSet := getPossibleVendors(java.Origins)
 	nameSet := common.GenerateNameKeys(c)
+	vendorSet := getPossibleVendors(java.Origins, nameSet)
 	versionSet := common.GenerateVersionKeys(c)
 	for k := range versionSet {
 		versionSet.Add(extensionRegex.ReplaceAllString(k, ""))
