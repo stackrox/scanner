@@ -23,6 +23,15 @@ message GetKubeVulnerabilitiesResponse {
     repeated Vulnerability generic_vulnerabilities            = 5;
 }
 
+message GetIstioVulnerabilitiesRequest {
+    string istio_version = 1;
+}
+
+message GetIstioVulnerabilitiesResponse {
+    string                 scanner_version                    = 2;
+    repeated Vulnerability vulnerabilities         = 1;
+}
+
 message GetOpenShiftVulnerabilitiesRequest {
     string openShift_version = 1;
 }
