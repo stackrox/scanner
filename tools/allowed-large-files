@@ -3,6 +3,7 @@ ext/featurefmt/rpm/testdata/Packages
 generated/scanner/api/v1/component.pb.go
 generated/scanner/api/v1/image_scan_service.pb.go
 generated/scanner/api/v1/node_scan_service.pb.go
+generated/scanner/api/v1/orchestrator_scan_service.pb.go
 generated/scanner/api/v1/vulnerability.pb.go
 go.sum
 pkg/rhelv2/ovalutil/testdata/oval.xml

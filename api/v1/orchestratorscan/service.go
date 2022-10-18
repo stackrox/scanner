@@ -12,6 +12,7 @@ import (
 	"github.com/stackrox/scanner/api/v1/convert"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
+	istioCache "github.com/stackrox/scanner/istio/cache"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
@@ -27,18 +28,20 @@ type Service interface {
 }
 
 // NewService returns the service for scanning
-func NewService(db database.Datastore, k8sCache k8scache.Cache) Service {
+func NewService(db database.Datastore, k8sCache k8scache.Cache, istioCache istioCache.Cache) Service {
 	return &serviceImpl{
-		version:  version.Version,
-		db:       db,
-		k8sCache: k8sCache,
+		version:    version.Version,
+		db:         db,
+		k8sCache:   k8sCache,
+		istioCache: istioCache,
 	}
 }
 
 type serviceImpl struct {
-	version  string
-	db       database.Datastore
-	k8sCache k8scache.Cache
+	version    string
+	db         database.Datastore
+	k8sCache   k8scache.Cache
+	istioCache istioCache.Cache
 }
 
 func filterInvalidVulns(vulns []*v1.Vulnerability) []*v1.Vulnerability {
