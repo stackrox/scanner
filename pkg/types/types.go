@@ -7,6 +7,7 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/facebookincubator/nvdtools/cvss2"
 	"github.com/facebookincubator/nvdtools/cvss3"
+	"github.com/stackrox/istio-cves/types"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
@@ -20,6 +21,13 @@ type Metadata struct {
 	PublishedDateTime    string
 	LastModifiedDateTime string
 	CVSSv2               MetadataCVSSv2
+	CVSSv3               MetadataCVSSv3
+}
+
+// MetadataIstio is the Istio vulnerability metadata.
+type MetadataIstio struct {
+	PublishedDateTime    string
+	LastModifiedDateTime string
 	CVSSv3               MetadataCVSSv3
 }
 
@@ -68,6 +76,29 @@ func (m *Metadata) GetDatabaseSeverity() database.Severity {
 			return database.MediumSeverity
 		case score >= 7 && score <= 10:
 			return database.HighSeverity
+		}
+	}
+	return database.UnknownSeverity
+}
+
+// GetDatabaseSeverityIstio determines the database.Severity based on the given *MetadataIstio.
+// The database.Severity is determined based on the CVSS score(s) and using the proper
+// qualitative severity rating scale https://nvd.nist.gov/vuln-metrics/cvss.
+func (m *MetadataIstio) GetDatabaseSeverityIstio() database.Severity {
+	if m == nil {
+		return database.UnknownSeverity
+	}
+	if m.CVSSv3.Score != 0 {
+		score := m.CVSSv3.Score
+		switch {
+		case score > 0 && score < 4:
+			return database.LowSeverity
+		case score >= 4 && score < 7:
+			return database.MediumSeverity
+		case score >= 7 && score < 9:
+			return database.HighSeverity
+		case score >= 9 && score <= 10:
+			return database.CriticalSeverity
 		}
 	}
 	return database.UnknownSeverity
@@ -165,6 +196,21 @@ func ConvertMetadataFromK8s(cve *validation.CVESchema) (*Metadata, error) {
 	return &m, nil
 }
 
+// ConvertMetadataFromIstio takes the Kubernetes' vulnerability definition,
+// and it returns *Metadata based on the given data.
+func ConvertMetadataFromIstio(vuln types.Vuln) (*MetadataIstio, error) {
+	var m MetadataIstio
+	if vuln.CVSS.ScoreV3 > 0 {
+		cvssv3, err := ConvertCVSSv3(vuln.CVSS.VectorV3)
+		if err != nil {
+			return nil, err
+		}
+		m.CVSSv3 = *cvssv3
+	}
+	m.PublishedDateTime = vuln.Published.Format(NVDTimeLayout)
+	return &m, nil
+}
+
 // ConvertCVSSv2 converts the given CVSS2 vector into MetadataCVSSv2.
 func ConvertCVSSv2(cvss2Vector string) (*MetadataCVSSv2, error) {
 	v, err := cvss2.VectorFromString(cvss2Vector)
@@ -212,4 +258,13 @@ func (m *Metadata) IsNilOrEmpty() bool {
 	}
 
 	return stringutils.AllEmpty(m.LastModifiedDateTime, m.PublishedDateTime, m.CVSSv2.Vectors, m.CVSSv3.Vectors)
+}
+
+// IsNilOrEmpty returns "true" if the passed Metadata is nil or its contents are empty
+func (m *MetadataIstio) IsNilOrEmpty() bool {
+	if m == nil {
+		return true
+	}
+
+	return stringutils.AllEmpty(m.LastModifiedDateTime, m.PublishedDateTime, m.CVSSv3.Vectors)
 }

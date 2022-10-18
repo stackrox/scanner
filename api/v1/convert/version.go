@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
+	"github.com/stackrox/istio-cves/types"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 )
 
@@ -24,6 +25,26 @@ func TruncateVersion(v string) (string, error) {
 
 // GetFixedBy gets the fixed-by version for vStr in vuln.
 func GetFixedBy(vStr string, vuln *validation.CVESchema) (string, error) {
+	v, err := version.NewVersion(vStr)
+	if err != nil {
+		return "", err
+	}
+
+	for _, affected := range vuln.Affected {
+		constraint, err := version.NewConstraint(affected.Range)
+		if err != nil {
+			return "", err
+		}
+		if constraint.Check(v) {
+			return affected.FixedBy, nil
+		}
+	}
+
+	return "", nil
+}
+
+// GetFixedByIstioVuln gets the fixed-by version for vStr in Istion vuln.
+func GetFixedByIstioVuln(vStr string, vuln types.Vuln) (string, error) {
 	v, err := version.NewVersion(vStr)
 	if err != nil {
 		return "", err
