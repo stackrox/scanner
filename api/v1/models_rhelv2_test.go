@@ -107,32 +107,26 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 	db.vulns[0] = []*database.RHELv2Vulnerability{
 		{
 			Name: "v1",
-			PackageInfos: []*database.RHELv2PackageInfo{
+			Packages: []*database.RHELv2Package{
 				{
+					Name: "pkg",
+					Arch: "x86_64",
+
 					FixedInVersion: "4",
-					Packages: []*database.RHELv2Package{
-						{
-							Name: "pkg",
-							Arch: "x86_64",
-						},
-					},
-					ArchOperation: archop.OpEquals,
+					ArchOperation:  archop.OpEquals,
 				},
 			},
 			Issued: now,
 		},
 		{
 			Name: "v2",
-			PackageInfos: []*database.RHELv2PackageInfo{
+			Packages: []*database.RHELv2Package{
 				{
+					Name: "pkg",
+					Arch: "i686|ppc64|s390x|x86_64",
+
 					FixedInVersion: "5",
-					Packages: []*database.RHELv2Package{
-						{
-							Name: "pkg",
-							Arch: "i686|ppc64|s390x|x86_64",
-						},
-					},
-					ArchOperation: archop.OpPatternMatch,
+					ArchOperation:  archop.OpPatternMatch,
 				},
 			},
 			Issued:  now,
@@ -140,16 +134,13 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 		},
 		{
 			Name: "v3",
-			PackageInfos: []*database.RHELv2PackageInfo{
+			Packages: []*database.RHELv2Package{
 				{
+					Name: "pkg",
+					Arch: "x86_64",
+
 					FixedInVersion: "6",
-					Packages: []*database.RHELv2Package{
-						{
-							Name: "pkg",
-							Arch: "x86_64",
-						},
-					},
-					ArchOperation: archop.OpNotEquals,
+					ArchOperation:  archop.OpNotEquals,
 				},
 			},
 		},

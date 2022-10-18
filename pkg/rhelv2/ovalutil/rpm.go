@@ -125,26 +125,17 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				}
 			}
 
-			pkgInfo := &database.RHELv2PackageInfo{}
-			if state != nil {
-				pkgInfo.FixedInVersion = state.EVR.Body
-				if state.Arch != nil {
-					pkgInfo.ArchOperation = mapArchOp(state.Arch.Operation)
-				}
-			}
-
-			if pkgInfo.FixedInVersion == "" {
-				// Title is used only as supplementary to FixedInVersion without a patch number.
-				// If FixedInVersion is not defined, we keep the title empty to reduce the scale of the database.
-				vuln.Title = ""
-			}
 			pkg := &database.RHELv2Package{
 				// object.Name will never be empty.
 				Name:   object.Name,
 				Module: criterion.module,
 			}
-			if state != nil && state.Arch != nil {
-				pkg.Arch = state.Arch.Body
+			if state != nil {
+				pkg.FixedInVersion = state.EVR.Body
+				if state.Arch != nil {
+					pkg.Arch = state.Arch.Body
+					pkg.ArchOperation = mapArchOp(state.Arch.Operation)
+				}
 			}
 
 			if val, ok := pkgResolutions[packageKey{
@@ -154,9 +145,13 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 				pkg.ResolutionState = val
 			}
 
-			pkgInfo.Packages = append(pkgInfo.Packages, pkg)
+			if pkg.FixedInVersion == "" {
+				// Title is used only as supplementary to FixedInVersion without a patch number.
+				// If FixedInVersion is not defined, we keep the title empty to reduce the scale of the database.
+				vuln.Title = ""
+			}
 
-			vuln.PackageInfos = append(vuln.PackageInfos, pkgInfo)
+			vuln.Packages = append(vuln.Packages, pkg)
 		}
 
 		vulns = append(vulns, vuln)

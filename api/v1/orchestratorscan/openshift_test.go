@@ -126,16 +126,13 @@ func TestOpenShiftVulnVersion(t *testing.T) {
 							CPEs: []string{
 								cpe,
 							},
-							PackageInfos: []*database.RHELv2PackageInfo{
+							Packages: []*database.RHELv2Package{
 								{
+									Name: "package",
+									Arch: "x86_64",
+
 									FixedInVersion: fixedIn,
 									ArchOperation:  archop.OpEquals,
-									Packages: []*database.RHELv2Package{
-										{
-											Name: "package",
-											Arch: "x86_64",
-										},
-									},
 								},
 							},
 						})

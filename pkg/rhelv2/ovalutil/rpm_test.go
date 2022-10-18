@@ -132,11 +132,11 @@ func TestRPMDefsToVulns_resolution_state(t *testing.T) {
 	// Only look at CVE-2021-26291, which is the fourth vuln.
 	v := vulns[3]
 	// Ensure the maven package in the maven:3.6 module is "Affected".
-	assert.Equal(t, "maven", v.PackageInfos[1].Packages[0].Name)
-	assert.Equal(t, "maven:3.6", v.PackageInfos[1].Packages[0].Module)
-	assert.Equal(t, "Affected", v.PackageInfos[1].Packages[0].ResolutionState)
+	assert.Equal(t, "maven", v.Packages[1].Name)
+	assert.Equal(t, "maven:3.6", v.Packages[1].Module)
+	assert.Equal(t, "Affected", v.Packages[1].ResolutionState)
 	// Ensure the maven package in the maven:3.5 module is "Will not fix".
-	assert.Equal(t, "maven", v.PackageInfos[2].Packages[0].Name)
-	assert.Equal(t, "maven:3.5", v.PackageInfos[2].Packages[0].Module)
-	assert.Equal(t, "Will not fix", v.PackageInfos[2].Packages[0].ResolutionState)
+	assert.Equal(t, "maven", v.Packages[2].Name)
+	assert.Equal(t, "maven:3.5", v.Packages[2].Module)
+	assert.Equal(t, "Will not fix", v.Packages[2].ResolutionState)
 }
