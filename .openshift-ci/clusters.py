@@ -7,6 +7,7 @@ Copied from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/clust
 """
 
 import os
+import signal
 import subprocess
 import time
 
@@ -30,13 +31,21 @@ class GKECluster:
     REFRESH_PATH = "scripts/ci/gke.sh"
     TEARDOWN_PATH = "scripts/ci/gke.sh"
 
-    def __init__(self, cluster_id):
+    def __init__(self, cluster_id, num_nodes=3, machine_type="e2-standard-4"):
         self.cluster_id = cluster_id
+        self.num_nodes = num_nodes
+        self.machine_type = machine_type
         self.refresh_token_cmd = None
 
     def provision(self):
         with subprocess.Popen(
-            [GKECluster.PROVISION_PATH, "provision_gke_cluster", self.cluster_id]
+                [
+                    GKECluster.PROVISION_PATH,
+                    "provision_gke_cluster",
+                    self.cluster_id,
+                    str(self.num_nodes),
+                    self.machine_type,
+                ]
         ) as cmd:
 
             try:
@@ -46,6 +55,9 @@ class GKECluster:
             except subprocess.TimeoutExpired as err:
                 popen_graceful_kill(cmd)
                 raise err
+
+        # OpenShift CI sends a SIGINT when tests are canceled
+        signal.signal(signal.SIGINT, self.sigint_handler)
 
         subprocess.run(
             [GKECluster.WAIT_PATH, "wait_for_cluster"],
@@ -65,10 +77,12 @@ class GKECluster:
             print("Pausing teardown because /tmp/hold-cluster exists")
             time.sleep(60)
 
-        try:
-            popen_graceful_kill(self.refresh_token_cmd)
-        except Exception as err:
-            print(f"Could not terminate the token refresh: {err}")
+        if self.refresh_token_cmd is not None:
+            print("Terminating GKE token refresh")
+            try:
+                popen_graceful_kill(self.refresh_token_cmd)
+            except Exception as err:
+                print(f"Could not terminate the token refresh: {err}")
 
         subprocess.run(
             [GKECluster.TEARDOWN_PATH, "teardown_gke_cluster"],
@@ -77,3 +91,7 @@ class GKECluster:
         )
 
         return self
+
+    def sigint_handler(self, signum, frame):
+        print("Tearing down the cluster due to SIGINT", signum, frame)
+        self.teardown()
