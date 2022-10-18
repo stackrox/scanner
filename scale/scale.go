@@ -31,9 +31,9 @@ const (
 
 	registry = "https://registry-1.docker.io"
 
-	maxConcurrentScans    = 20
+	maxConcurrentScans    = 30
 	maxAllowedScanFailure = 180
-	scanTimeOut           = 8
+	scanTimeOut           = 8 * time.Minute
 )
 
 func main() {
@@ -60,7 +60,7 @@ func main() {
 
 	endpoint := urlfmt.FormatURL(scannerHTTPEndpoint, urlfmt.HTTPS, urlfmt.NoTrailingSlash)
 	cli := client.NewWithClient(endpoint, httpClient)
-	client.ScanTimeout = scanTimeOut * time.Minute
+	client.ScanTimeout = scanTimeOut
 
 	// scanFailures is the number of failed image scans.
 	// This is a sanity check to validate the test result.
