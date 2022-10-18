@@ -39,7 +39,6 @@ import (
 	"github.com/stackrox/scanner/api/v1/vulndefs"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
-	istiocache "github.com/stackrox/scanner/istio/cache"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/clairify/metrics"
@@ -120,7 +119,6 @@ func Boot(config *Config, slimMode bool) {
 
 	var nvdVulnCache nvdtoolscache.Cache
 	var k8sVulnCache k8scache.Cache
-	var istioVulnCache istiocache.Cache
 
 	if !slimMode {
 		wg.Add(1)
@@ -133,12 +131,6 @@ func Boot(config *Config, slimMode bool) {
 		go func() {
 			defer wg.Add(-1)
 			k8sVulnCache = k8scache.Singleton()
-		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Add(-1)
-			istioVulnCache = istiocache.Singleton()
 		}()
 	}
 
@@ -188,7 +180,7 @@ func Boot(config *Config, slimMode bool) {
 	grpcAPI.Register(
 		ping.NewService(),
 		imagescan.NewService(db, nvdVulnCache),
-		orchestratorscan.NewService(db, k8sVulnCache, istioVulnCache),
+		orchestratorscan.NewService(db, k8sVulnCache),
 		nodescan.NewService(db, nvdVulnCache, k8sVulnCache),
 		vulndefs.NewService(db),
 	)

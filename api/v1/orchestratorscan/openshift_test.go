@@ -141,7 +141,7 @@ func TestOpenShiftVulnVersion(t *testing.T) {
 				resp[record.Pkg.ID] = vulns
 				return resp, nil
 			}
-			service := NewService(db, nil, nil)
+			service := NewService(db, nil)
 			req := &scannerV1.GetOpenShiftVulnerabilitiesRequest{
 				OpenShiftVersion: c.version,
 			}
