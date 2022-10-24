@@ -25,6 +25,8 @@ func NewService() Service {
 }
 
 type serviceImpl struct {
+	v1.UnimplementedPingServiceServer
+
 	version string
 }
 

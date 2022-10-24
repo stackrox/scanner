@@ -36,6 +36,8 @@ func NewService(db database.Datastore, k8sCache k8scache.Cache) Service {
 }
 
 type serviceImpl struct {
+	v1.UnimplementedOrchestratorScanServiceServer
+
 	version  string
 	db       database.Datastore
 	k8sCache k8scache.Cache
