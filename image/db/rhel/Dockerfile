@@ -25,7 +25,9 @@ COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf
 
 ARG POSTGRESQL_ARCH=x86_64
 
-RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-${POSTGRESQL_ARCH}/pgdg-redhat-repo-latest.noarch.rpm -o /tmp/pg_repo.rpm && \
+RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-${PG_MAJOR} -o /tmp/pg_repo.key && \
+    rpm --import /tmp/pg_repo.key && \
+    curl -sSLf https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-${POSTGRESQL_ARCH}/pgdg-redhat-repo-latest.noarch.rpm -o /tmp/pg_repo.rpm && \
     rpm -i /tmp/pg_repo.rpm && \
     # Skip repo check for ARM as it's used only for development purposes and package has wrong signature.
     if [[ "$POSTGRESQL_ARCH" == "aarch64" ]]; then sed -i 's/repo_gpgcheck = 1/repo_gpgcheck = 0/g' /etc/yum.repos.d/pgdg-redhat-all.repo; fi && \
@@ -46,7 +48,7 @@ RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-${POS
     rpm -e --nodeps $(rpm -qa 'pgdg-redhat-repo*') && \
     # (Optional) Remove line below to keep package management utilities
     rpm -e --nodeps $(rpm -qa shadow-utils curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/dnf /var/cache/yum  /tmp/pg_repo.rpm && \
+    rm -rf /var/cache/dnf /var/cache/yum  /tmp/pg_repo.rpm /tmp/pg_repo.key && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh && \
