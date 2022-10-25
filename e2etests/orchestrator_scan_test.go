@@ -20,6 +20,34 @@ var (
 	patchRegex = regexp.MustCompile(`^[0-9]+\.[0-9]+\.([0-9]+)$`)
 )
 
+func TestGRPCGetIstioVulnerabilities(t *testing.T) {
+	conn := connectToScanner(t)
+	client := v1.NewOrchestratorScanServiceClient(conn)
+
+	testCases := []*struct {
+		addressFamily string
+		knownFixed    string
+	}{
+		{
+			addressFamily: "1.13.6",
+			knownFixed:    "1.13.7",
+		},
+	}
+
+	for _, c := range testCases {
+		t.Run(fmt.Sprintf("case-%s", c.addressFamily), func(t *testing.T) {
+			req := &v1.GetIstioVulnerabilitiesRequest{IstioVersion: c.addressFamily}
+			resp, err := client.GetIstioVulnerabilities(context.Background(), req)
+			assert.NoError(t, err)
+			for _, vuln := range resp.GetVulnerabilities() {
+				assert.True(t, vuln.MetadataV2.CvssV3 != nil)
+				assert.True(t, vuln.FixedBy != "")
+				assert.Equal(t, vuln.FixedBy, c.knownFixed)
+			}
+		})
+	}
+}
+
 func TestGRPCGetOpenShiftVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewOrchestratorScanServiceClient(conn)
