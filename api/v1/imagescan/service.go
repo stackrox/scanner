@@ -38,6 +38,8 @@ func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache) Service {
 }
 
 type serviceImpl struct {
+	v1.UnimplementedImageScanServiceServer
+
 	version  string
 	db       database.Datastore
 	nvdCache nvdtoolscache.Cache

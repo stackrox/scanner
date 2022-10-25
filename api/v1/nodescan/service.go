@@ -42,6 +42,8 @@ func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8
 }
 
 type serviceImpl struct {
+	v1.UnimplementedNodeScanServiceServer
+
 	version  string
 	db       database.Datastore
 	nvdCache nvdtoolscache.Cache

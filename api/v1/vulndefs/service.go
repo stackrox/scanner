@@ -29,6 +29,8 @@ func NewService(db database.Datastore) Service {
 }
 
 type serviceImpl struct {
+	v1.UnimplementedVulnDefsServiceServer
+
 	db database.Datastore
 }
 
