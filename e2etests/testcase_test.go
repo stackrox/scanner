@@ -1990,7 +1990,7 @@ var testCases = []testCase{
 				},
 				AddedBy:  "sha256:36e8e9714b9a509fae9e515ff16237928c3d809f5ae228b14d2f7d7605c02623",
 				Location: "jars/jackson-databind-2.9.10.4.jar",
-				FixedBy:  "2.12.6.1",
+				FixedBy:  "2.12.7.1",
 			},
 		},
 		unexpectedFeatures: []apiV1.Feature{
@@ -3352,7 +3352,7 @@ var testCases = []testCase{
 					{
 						Name:          "CVE-2017-10684",
 						NamespaceName: "centos:7",
-						Description:   "STATEMENT: Red Hat Product Security has rated this issue as having Moderate security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
+						Description:   "DOCUMENTATION: The MITRE CVE dictionary describes this issue as: In ncurses 6.0, there is a stack-based buffer overflow in the fmt_entry function. A crafted input will lead to a remote arbitrary code execution attack.              STATEMENT: Red Hat Product Security has rated this issue as having Moderate security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2017-10684",
 						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
@@ -3375,7 +3375,7 @@ var testCases = []testCase{
 					{
 						Name:          "CVE-2017-10685",
 						NamespaceName: "centos:7",
-						Description:   "STATEMENT: Red Hat considers this issue as a duplicate of CVE-2017-10684.",
+						Description:   "DOCUMENTATION: The MITRE CVE dictionary describes this issue as: In ncurses 6.0, there is a format string vulnerability in the fmt_entry function. A crafted input will lead to a remote arbitrary code execution attack.              STATEMENT: Red Hat considers this issue as a duplicate of CVE-2017-10684.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2017-10685",
 						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
