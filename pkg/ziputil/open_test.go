@@ -25,7 +25,7 @@ func TestOpenFile(t *testing.T) {
 	defer utils.IgnoreError(zipR.Close)
 
 	m := repo2cpe.NewMapping()
-	assert.NoError(t, m.LoadFromZip(zipR, "rhelv2"))
+	assert.NoError(t, m.LoadFromZip(&zipR.Reader, "rhelv2"))
 }
 
 func TestOpenFilesInDir(t *testing.T) {
@@ -36,7 +36,7 @@ func TestOpenFilesInDir(t *testing.T) {
 	require.NoError(t, err)
 	defer utils.IgnoreError(zipR.Close)
 
-	rcs, err := ziputil.OpenFilesInDir(zipR, "rhelv2/vulns", ".json")
+	rcs, err := ziputil.OpenFilesInDir(&zipR.Reader, "rhelv2/vulns", ".json")
 	assert.NoError(t, err)
 	assert.Len(t, rcs, 1)
 

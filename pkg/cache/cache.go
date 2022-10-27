@@ -9,7 +9,7 @@ import (
 type Cache interface {
 	Dir() string
 	LoadFromDirectory(definitionsDir string) error
-	LoadFromZip(zipR *zip.ReadCloser, definitionsDir string) error
+	LoadFromZip(zipR *zip.Reader, definitionsDir string) error
 	GetLastUpdate() time.Time
 	SetLastUpdate(t time.Time)
 }
