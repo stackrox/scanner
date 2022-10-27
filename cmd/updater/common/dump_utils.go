@@ -19,7 +19,7 @@ func OpenGenesisDumpAndExtractManifest(zipPath string) (*zip.ReadCloser, *vulndu
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "opening zip")
 	}
-	manifest, err := vulndump.LoadManifestFromDump(zipR)
+	manifest, err := vulndump.LoadManifestFromDump(&zipR.Reader)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -113,15 +113,15 @@ func generateIstioDiff(outputDir string, baseF, headF *zip.File) error {
 	return nil
 }
 
-func generateK8sDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
+func generateK8sDiffs(outputDir string, baseZipR, headZipR *zip.Reader) error {
 	return generateDiffsHelper(outputDir, baseZipR, headZipR, vulndump.K8sDirName, generateK8sDiff)
 }
 
-func generateIstioDiffs(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser) error {
+func generateIstioDiffs(outputDir string, baseZipR, headZipR *zip.Reader) error {
 	return generateDiffsHelper(outputDir, baseZipR, headZipR, vulndump.IstioDirName, generateIstioDiff)
 }
 
-func generateDiffsHelper(outputDir string, baseZipR *zip.ReadCloser, headZipR *zip.ReadCloser, dirName string, generateDiffs generateDiffFunc) error {
+func generateDiffsHelper(outputDir string, baseZipR, headZipR *zip.Reader, dirName string, generateDiffs generateDiffFunc) error {
 	subDir := filepath.Join(outputDir, dirName)
 	if err := os.MkdirAll(subDir, 0755); err != nil {
 		return errors.Wrap(err, "creating subdir for Kubernetes")
@@ -198,7 +198,7 @@ func generateNVDDiff(outputDir string, baseLastModifiedTime time.Time, headF *zi
 	return nil
 }
 
-func generateNVDDiffs(outputDir string, baseLastModifiedTime time.Time, headZipR *zip.ReadCloser) error {
+func generateNVDDiffs(outputDir string, baseLastModifiedTime time.Time, headZipR *zip.Reader) error {
 	nvdSubDir := filepath.Join(outputDir, vulndump.NVDDirName)
 	if err := os.MkdirAll(nvdSubDir, 0755); err != nil {
 		return errors.Wrap(err, "creating subdir for NVD")
@@ -321,7 +321,7 @@ func updateAlpineLink(cfg config, vuln *database.Vulnerability) {
 	}
 }
 
-func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.ReadCloser, cfg config) error {
+func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg config) error {
 	baseVulns, err := vulndump.LoadOSVulnsFromDump(baseZipR)
 	if err != nil {
 		return errors.Wrap(err, "loading OS vulns from base dump")
@@ -436,6 +436,7 @@ func Command() *cobra.Command {
 		if err != nil {
 			return errors.Wrap(err, "loading head dump")
 		}
+		defer utils.IgnoreError(headZipR.Close)
 
 		// Intentionally return an error even in the equal case, they are only going to be equal if two dumps are literally
 		// exactly the same, and that's probably a mistake by the invoker of the program.
@@ -456,7 +457,7 @@ func Command() *cobra.Command {
 			log.Info("Skipping Kubernetes diff")
 		} else {
 			log.Info("Generating Kubernetes diff...")
-			if err := generateK8sDiffs(stagingDir, baseZipR, headZipR); err != nil {
+			if err := generateK8sDiffs(stagingDir, &baseZipR.Reader, &headZipR.Reader); err != nil {
 				return errors.Wrap(err, "creating Kubernetes diff")
 			}
 			log.Info("Done generating Kubernetes diff")
@@ -466,20 +467,20 @@ func Command() *cobra.Command {
 			log.Info("Skipping Istio diff")
 		} else {
 			log.Info("Generating Istio diff...")
-			if err := generateIstioDiffs(stagingDir, baseZipR, headZipR); err != nil {
+			if err := generateIstioDiffs(stagingDir, &baseZipR.Reader, &headZipR.Reader); err != nil {
 				return errors.Wrap(err, "creating Istio diff")
 			}
 			log.Info("Done generating Isio diff")
 		}
 
 		log.Info("Generating NVD diff...")
-		if err := generateNVDDiffs(stagingDir, baseManifest.Until, headZipR); err != nil {
+		if err := generateNVDDiffs(stagingDir, baseManifest.Until, &headZipR.Reader); err != nil {
 			return errors.Wrap(err, "creating NVD diff")
 		}
 		log.Info("Done generating NVD diff")
 
 		log.Info("Generating OS vulns diff...")
-		if err := generateOSVulnsDiff(stagingDir, baseZipR, headZipR, cfg); err != nil {
+		if err := generateOSVulnsDiff(stagingDir, &baseZipR.Reader, &headZipR.Reader, cfg); err != nil {
 			return errors.Wrap(err, "creating OS vulns diff")
 		}
 		log.Info("Generated OS vulns diff")
@@ -488,7 +489,7 @@ func Command() *cobra.Command {
 			log.Info("Skipping RHELv2 diff")
 		} else {
 			log.Info("Generating RHELv2 vulns diff")
-			if err := generateRHELv2VulnsDiff(cfg, stagingDir, baseManifest.Until, baseZipR, headZipR); err != nil {
+			if err := generateRHELv2VulnsDiff(cfg, stagingDir, baseManifest.Until, &baseZipR.Reader, &headZipR.Reader); err != nil {
 				return errors.Wrap(err, "creating RHELv2 vulns diff")
 			}
 			log.Info("Generated RHELv2 vulns diff")

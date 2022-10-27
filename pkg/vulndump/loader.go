@@ -30,8 +30,7 @@ var (
 	updateLockName = "update"
 )
 
-func validateAndLoadManifest(f io.ReadCloser) (*Manifest, error) {
-	defer utils.IgnoreError(f.Close)
+func validateAndLoadManifest(f io.Reader) (*Manifest, error) {
 	var m Manifest
 	err := json.NewDecoder(f).Decode(&m)
 	if err != nil {
@@ -89,11 +88,13 @@ func determineWhetherToUpdate(db database.Datastore, manifest *Manifest) (bool, 
 }
 
 // LoadManifestFromDump validates and loads the manifest from the given zip file.
-func LoadManifestFromDump(zipR *zip.ReadCloser) (*Manifest, error) {
+func LoadManifestFromDump(zipR *zip.Reader) (*Manifest, error) {
 	manifestFile, err := ziputil.OpenFile(zipR, ManifestFileName)
 	if err != nil {
 		return nil, errors.Wrap(err, "opening manifest file")
 	}
+	defer utils.IgnoreError(manifestFile.Close)
+
 	manifest, err := validateAndLoadManifest(manifestFile)
 	if err != nil {
 		return nil, errors.Wrap(err, "loading/validating manifest")
@@ -102,7 +103,7 @@ func LoadManifestFromDump(zipR *zip.ReadCloser) (*Manifest, error) {
 }
 
 // LoadOSVulnsFromDump loads the os vulns file from the dump into an in-memory slice.
-func LoadOSVulnsFromDump(zipR *zip.ReadCloser) ([]database.Vulnerability, error) {
+func LoadOSVulnsFromDump(zipR *zip.Reader) ([]database.Vulnerability, error) {
 	osVulnsFile, err := ziputil.OpenFile(zipR, OSVulnsFileName)
 	if err != nil {
 		return nil, errors.Wrap(err, "opening OS vulns file")
@@ -185,7 +186,7 @@ func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval tim
 	}, nil
 }
 
-func loadOSVulns(zipR *zip.ReadCloser, db database.Datastore) error {
+func loadOSVulns(zipR *zip.Reader, db database.Datastore) error {
 	log.Info("Loading OS vulns...")
 	osVulns, err := LoadOSVulnsFromDump(zipR)
 	if err != nil {
@@ -200,7 +201,7 @@ func loadOSVulns(zipR *zip.ReadCloser, db database.Datastore) error {
 	return nil
 }
 
-func loadRHELv2Vulns(db database.Datastore, zipR *zip.ReadCloser, repoToCPE *repo2cpe.Mapping) error {
+func loadRHELv2Vulns(db database.Datastore, zipR *zip.Reader, repoToCPE *repo2cpe.Mapping) error {
 	log.Info("Loading RHELv2 vulns...")
 	if repoToCPE != nil {
 		if err := repoToCPE.LoadFromZip(zipR, RHELv2DirName); err != nil {
@@ -245,7 +246,7 @@ func insertRHELv2Vulns(db database.Datastore, r *ziputil.ReadCloser) error {
 
 // This loads application-level vulnerabilities.
 // At the moment, this consists of vulnerabilities from NVD and K8s.
-func loadApplicationUpdater(cache cache.Cache, manifest *Manifest, zipR *zip.ReadCloser) error {
+func loadApplicationUpdater(cache cache.Cache, manifest *Manifest, zipR *zip.Reader) error {
 	if cache != nil {
 		updateTime := cache.GetLastUpdate()
 		if !updateTime.IsZero() && !manifest.Until.After(updateTime) {
@@ -275,7 +276,7 @@ func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval ti
 	defer utils.IgnoreError(zipR.Close)
 
 	log.Info("Loading manifest...")
-	manifest, err := LoadManifestFromDump(zipR)
+	manifest, err := LoadManifestFromDump(&zipR.Reader)
 	if err != nil {
 		return err
 	}
@@ -287,12 +288,12 @@ func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval ti
 			return errors.Wrap(err, "error beginning vuln loading")
 		}
 		if performUpdate {
-			if err := loadRHELv2Vulns(db, zipR, repoToCPE); err != nil {
+			if err := loadRHELv2Vulns(db, &zipR.Reader, repoToCPE); err != nil {
 				_ = finishFn(err)
 				return errors.Wrap(err, "error loading RHEL vulns")
 			}
 
-			if err := loadOSVulns(zipR, db); err != nil {
+			if err := loadOSVulns(&zipR.Reader, db); err != nil {
 				_ = finishFn(err)
 				return errors.Wrap(err, "error loading OS vulns")
 			}
@@ -305,7 +306,7 @@ func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval ti
 
 	errorList := errorhelpers.NewErrorList("loading application-level caches")
 	for _, appCache := range caches {
-		if err := loadApplicationUpdater(appCache, manifest, zipR); err != nil {
+		if err := loadApplicationUpdater(appCache, manifest, &zipR.Reader); err != nil {
 			errorList.AddError(errors.Wrapf(err, "error loading into in-mem cache %q", appCache.Dir()))
 		}
 	}

@@ -56,6 +56,8 @@ func New() (Cache, error) {
 	return newWithDB(db), nil
 }
 
+var _ Cache = (*cacheImpl)(nil)
+
 type cacheImpl struct {
 	*bbolt.DB
 

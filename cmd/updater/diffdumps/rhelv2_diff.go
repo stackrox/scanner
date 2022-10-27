@@ -153,7 +153,7 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 	return nil
 }
 
-func generateRHELv2VulnsDiff(cfg config, outputDir string, baseLastModifiedTime time.Time, baseZipR, headZipR *zip.ReadCloser) error {
+func generateRHELv2VulnsDiff(cfg config, outputDir string, baseLastModifiedTime time.Time, baseZipR, headZipR *zip.Reader) error {
 	rhelv2VulnsSubDir := filepath.Join(outputDir, vulndump.RHELv2DirName, vulndump.RHELv2VulnsSubDirName)
 	if err := os.MkdirAll(rhelv2VulnsSubDir, 0755); err != nil {
 		return errors.Wrap(err, "creating subdir for RHELv2")

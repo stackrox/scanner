@@ -9,6 +9,8 @@ import (
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
+var _ Cache = (*cacheImpl)(nil)
+
 type cacheImpl struct {
 	cacheRWLock sync.RWMutex
 	// The expectation is that the number of Kubernetes vulns is rather low (100 or fewer).
