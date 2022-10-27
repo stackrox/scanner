@@ -54,7 +54,7 @@ func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 	return nil
 }
 
-func (c *cacheImpl) LoadFromZip(zipR *zip.ReadCloser, definitionsDir string) error {
+func (c *cacheImpl) LoadFromZip(zipR *zip.Reader, definitionsDir string) error {
 	log.WithField("dir", definitionsDir).Info("Loading definitions directory")
 
 	rs, err := ziputil.OpenFilesInDir(zipR, definitionsDir, ".yaml")

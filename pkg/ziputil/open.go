@@ -18,7 +18,7 @@ type ReadCloser struct {
 // OpenFile opens the given file in the zip, and returns the ReadCloser.
 // It returns an error if the file was not found, or if there was an error opening
 // the file.
-func OpenFile(zipR *zip.ReadCloser, name string) (*ReadCloser, error) {
+func OpenFile(zipR *zip.Reader, name string) (*ReadCloser, error) {
 	for _, file := range zipR.File {
 		if file.Name == name {
 			f, err := file.Open()
@@ -37,7 +37,7 @@ func OpenFile(zipR *zip.ReadCloser, name string) (*ReadCloser, error) {
 
 // OpenFilesInDir opens the files with the given suffix which are in the given dir.
 // It returns an error if any of the files cannot be opened.
-func OpenFilesInDir(zipR *zip.ReadCloser, dir string, suffix string) ([]*ReadCloser, error) {
+func OpenFilesInDir(zipR *zip.Reader, dir string, suffix string) ([]*ReadCloser, error) {
 	var rs []*ReadCloser
 	for _, file := range zipR.File {
 		if within(dir, file.Name) && strings.HasSuffix(file.Name, suffix) {
