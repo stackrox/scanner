@@ -35,12 +35,12 @@ func (c *cacheImpl) LoadFromDirectory(definitionsDir string) error {
 		}
 	}
 
-	log.Infof("Total vulns in %q: %d", definitionsDir, totalVulns)
+	log.Infof("Total updated vulns in %q: %d", definitionsDir, totalVulns)
 
 	return nil
 }
 
-func (c *cacheImpl) LoadFromZip(zipR *zip.ReadCloser, definitionsDir string) error {
+func (c *cacheImpl) LoadFromZip(zipR *zip.Reader, definitionsDir string) error {
 	log.WithField("dir", definitionsDir).Info("Loading definitions directory")
 
 	rs, err := ziputil.OpenFilesInDir(zipR, definitionsDir, ".yaml")
@@ -59,7 +59,7 @@ func (c *cacheImpl) LoadFromZip(zipR *zip.ReadCloser, definitionsDir string) err
 		}
 	}
 
-	log.Infof("Total vulns in %s: %d", definitionsDir, totalVulns)
+	log.Infof("Total vuln files in %s: %d", definitionsDir, totalVulns)
 
 	return nil
 }

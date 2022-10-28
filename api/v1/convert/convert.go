@@ -71,29 +71,6 @@ func Metadata(m *types.Metadata) *v1.Metadata {
 	return metadata
 }
 
-// MetadataIstio converts from types.Metadata to v1.Metadata
-func MetadataIstio(m *types.MetadataIstio) *v1.Metadata {
-	if m.IsNilOrEmpty() {
-		return nil
-	}
-	metadata := &v1.Metadata{
-		PublishedDateTime:    m.PublishedDateTime,
-		LastModifiedDateTime: m.LastModifiedDateTime,
-	}
-
-	if m.CVSSv3.Vectors != "" {
-		cvssV3 := m.CVSSv3
-		metadata.CvssV3 = &v1.CVSSMetadata{
-			Vector:              cvssV3.Vectors,
-			Score:               float32(cvssV3.Score),
-			ExploitabilityScore: float32(cvssV3.ExploitabilityScore),
-			ImpactScore:         float32(cvssV3.ImpactScore),
-		}
-	}
-
-	return metadata
-}
-
 // MetadataMap converts the internal map[string]interface{} into the API metadata
 func MetadataMap(metadataMap map[string]interface{}) (*v1.Metadata, error) {
 	var metadataBytes interface{}

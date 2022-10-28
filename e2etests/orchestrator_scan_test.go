@@ -24,26 +24,28 @@ func TestGRPCGetIstioVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewOrchestratorScanServiceClient(conn)
 
-	testCases := []*struct {
-		addressFamily string
-		knownFixed    string
+	testCases := []struct {
+		version string
+		fixedBy string
 	}{
 		{
-			addressFamily: "1.13.6",
-			knownFixed:    "1.13.7",
+			version: "1.13.6",
+			fixedBy: "1.13.7",
 		},
 	}
 
 	for _, c := range testCases {
-		t.Run(fmt.Sprintf("case-%s", c.addressFamily), func(t *testing.T) {
-			req := &v1.GetIstioVulnerabilitiesRequest{IstioVersion: c.addressFamily}
+		t.Run(fmt.Sprintf("case-%s", c.version), func(t *testing.T) {
+			req := &v1.GetIstioVulnerabilitiesRequest{IstioVersion: c.version}
 			resp, err := client.GetIstioVulnerabilities(context.Background(), req)
 			assert.NoError(t, err)
+			testSet := make(map[string]bool)
 			for _, vuln := range resp.GetVulnerabilities() {
-				assert.True(t, vuln.MetadataV2.CvssV3 != nil)
-				assert.True(t, vuln.FixedBy != "")
-				assert.Equal(t, vuln.FixedBy, c.knownFixed)
+				assert.NotNil(t, vuln.GetMetadataV2().GetCvssV3())
+				assert.NotEmpty(t, vuln.FixedBy)
+				testSet[vuln.FixedBy] = true
 			}
+			assert.True(t, testSet[c.fixedBy])
 		})
 	}
 }

@@ -28,8 +28,8 @@ message GetIstioVulnerabilitiesRequest {
 }
 
 message GetIstioVulnerabilitiesResponse {
-    string                 scanner_version = 2;
-    repeated Vulnerability vulnerabilities = 1;
+    string                 scanner_version = 1;
+    repeated Vulnerability vulnerabilities = 2;
 }
 
 message GetOpenShiftVulnerabilitiesRequest {

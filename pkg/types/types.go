@@ -24,13 +24,6 @@ type Metadata struct {
 	CVSSv3               MetadataCVSSv3
 }
 
-// MetadataIstio is the Istio vulnerability metadata.
-type MetadataIstio struct {
-	PublishedDateTime    string
-	LastModifiedDateTime string
-	CVSSv3               MetadataCVSSv3
-}
-
 // MetadataCVSSv2 is the CVSSv2 data.
 type MetadataCVSSv2 struct {
 	Vectors             string
@@ -76,29 +69,6 @@ func (m *Metadata) GetDatabaseSeverity() database.Severity {
 			return database.MediumSeverity
 		case score >= 7 && score <= 10:
 			return database.HighSeverity
-		}
-	}
-	return database.UnknownSeverity
-}
-
-// GetDatabaseSeverityIstio determines the database.Severity based on the given *MetadataIstio.
-// The database.Severity is determined based on the CVSS score(s) and using the proper
-// qualitative severity rating scale https://nvd.nist.gov/vuln-metrics/cvss.
-func (m *MetadataIstio) GetDatabaseSeverityIstio() database.Severity {
-	if m == nil {
-		return database.UnknownSeverity
-	}
-	if m.CVSSv3.Score != 0 {
-		score := m.CVSSv3.Score
-		switch {
-		case score > 0 && score < 4:
-			return database.LowSeverity
-		case score >= 4 && score < 7:
-			return database.MediumSeverity
-		case score >= 7 && score < 9:
-			return database.HighSeverity
-		case score >= 9 && score <= 10:
-			return database.CriticalSeverity
 		}
 	}
 	return database.UnknownSeverity
@@ -196,10 +166,10 @@ func ConvertMetadataFromK8s(cve *validation.CVESchema) (*Metadata, error) {
 	return &m, nil
 }
 
-// ConvertMetadataFromIstio takes the Kubernetes' vulnerability definition,
+// ConvertMetadataFromIstio takes the Istio' vulnerability definition,
 // and it returns *Metadata based on the given data.
-func ConvertMetadataFromIstio(vuln types.Vuln) (*MetadataIstio, error) {
-	var m MetadataIstio
+func ConvertMetadataFromIstio(vuln types.Vuln) (*Metadata, error) {
+	var m Metadata
 	if vuln.CVSS.ScoreV3 > 0 {
 		cvssv3, err := ConvertCVSSv3(vuln.CVSS.VectorV3)
 		if err != nil {
@@ -258,13 +228,4 @@ func (m *Metadata) IsNilOrEmpty() bool {
 	}
 
 	return stringutils.AllEmpty(m.LastModifiedDateTime, m.PublishedDateTime, m.CVSSv2.Vectors, m.CVSSv3.Vectors)
-}
-
-// IsNilOrEmpty returns "true" if the passed Metadata is nil or its contents are empty
-func (m *MetadataIstio) IsNilOrEmpty() bool {
-	if m == nil {
-		return true
-	}
-
-	return stringutils.AllEmpty(m.LastModifiedDateTime, m.PublishedDateTime, m.CVSSv3.Vectors)
 }

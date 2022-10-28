@@ -108,24 +108,6 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 	return resp, nil
 }
 
-func (s *serviceImpl) getIstioVuln(version string) ([]*v1.Vulnerability, error) {
-	if version == "" {
-		return nil, errors.New("Can't get vulnerabilities for empty version.")
-	}
-	version, err := convert.TruncateVersion(version)
-	if err != nil {
-		log.Warnf("Unable to convert version of %s - %v. Skipping...", version, err)
-		return nil, nil
-	}
-
-	vulns := s.istioCache.GetVulnsByVersion(version)
-	converted, err := convert.IstioVulnerabilities(version, vulns)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to convert vulnerabilities")
-	}
-	return filterInvalidVulns(converted), nil
-}
-
 // GetIstioVulnerabilities returns Istio vulnerabilities for requested Kubernetes version.
 func (s *serviceImpl) GetIstioVulnerabilities(_ context.Context, req *v1.GetIstioVulnerabilitiesRequest) (*v1.GetIstioVulnerabilitiesResponse, error) {
 	var err error
@@ -133,7 +115,22 @@ func (s *serviceImpl) GetIstioVulnerabilities(_ context.Context, req *v1.GetIsti
 		ScannerVersion: s.version,
 	}
 
-	resp.Vulnerabilities, err = s.getIstioVuln(req.GetIstioVersion())
+	getIstioVuln := func(version string) ([]*v1.Vulnerability, error) {
+		if version == "" {
+			return nil, errors.New("Can't get vulnerabilities for empty version.")
+		}
+		version, err := convert.TruncateVersion(version)
+		if err != nil {
+			log.Warnf("Unable to convert Istio version of %s - %v. Skipping...", version, err)
+			return nil, nil
+		}
+
+		vulns := s.istioCache.GetVulnsByVersion(version)
+		converted := convert.IstioVulnerabilities(version, vulns)
+		return filterInvalidVulns(converted), nil
+	}
+
+	resp.Vulnerabilities, err = getIstioVuln(req.GetIstioVersion())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
