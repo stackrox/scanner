@@ -3335,6 +3335,29 @@ var testCases = []testCase{
 		},
 	},
 	{
+		image:                   "ubuntu:22.10@sha256:4f9ec2c0aa321966bfe625bc485aa1d6e96549679cfdf98bb404dfcb8e141a7f",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:22.10",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "adduser",
+				NamespaceName: "ubuntu:22.10",
+				VersionFormat: "dpkg",
+				Version:       "3.121ubuntu1",
+				AddedBy:       "sha256:bcd446fbf8a137bbf135b63332ebcd0c3e9880060bc5b41962fbbb07e94062b7",
+			},
+			{
+				Name:          "apt",
+				NamespaceName: "ubuntu:22.10",
+				VersionFormat: "dpkg",
+				Version:       "2.5.3",
+				AddedBy:       "sha256:bcd446fbf8a137bbf135b63332ebcd0c3e9880060bc5b41962fbbb07e94062b7",
+			},
+		},
+	},
+	{
 		image:                   "quay.io/rhacs-eng/qa:ansibleplaybookbundle--gluster-s3object-apb--481960439934084fb041431f27cb98b89666e1a0daaeb2078bcbe1209790368c",
 		registry:                "https://quay.io",
 		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
@@ -3573,12 +3596,12 @@ Bug Fix(es) and Enhancement(s):
 				Location:      "application/app.jar:BOOT-INF/lib/spring-security-web-5.5.5.jar",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2022-22978",
-						Description:   `In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers.
+						Name: "CVE-2022-22978",
+						Description: `In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers.
 
 Applications using RegexRequestMatcher with '.' in the regular expression are possibly vulnerable to an authorization bypass.`,
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2022-22978",
-						Severity:      "Important",
+						Link:     "https://nvd.nist.gov/vuln/detail/CVE-2022-22978",
+						Severity: "Important",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{

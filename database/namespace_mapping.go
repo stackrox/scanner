@@ -61,4 +61,5 @@ var UbuntuReleasesMapping = map[string]string{
 	"hirsute": "21.04",
 	"impish":  "21.10",
 	"jammy":   "22.04",
+	"kinetic": "22.10",
 }
