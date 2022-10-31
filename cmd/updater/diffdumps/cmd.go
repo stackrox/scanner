@@ -375,7 +375,6 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg c
 		// skip it. Else, add.
 		if !(found && vulnsAreEqual(matchingBaseVuln, headVuln, cfg.SkipSeverityComparison)) {
 			filtered = append(filtered, headVuln)
-
 		}
 	}
 	if cfg.SkipUbuntuLinuxKernelVulns {
@@ -388,7 +387,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg c
 		log.Infof("Skipping fixable centOS vulns: filtered out %d", countBefore-len(filtered))
 	}
 
-	// Add manual vulnerabilities if they do not already exist due to some other source.
+	// Add manual vulnerabilities ONLY if they do not already exist due to some other source.
 	uniqueFiltered := make(map[clairVulnUniqueKey]database.Vulnerability, len(filtered))
 	for i := range filtered {
 		vuln := filtered[i]
