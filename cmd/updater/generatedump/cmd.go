@@ -108,10 +108,17 @@ func Command() *cobra.Command {
 func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.Vulnerability, err error) {
 	errSig := concurrency.NewErrorSignal()
 
+	updaters := vulnsrc.Updaters()
+	defer func() {
+		for _, u := range updaters {
+			u.Clean()
+		}
+	}()
+
 	// Fetch updates in parallel.
 	log.Info("fetching vulnerability updates")
 	responseC := make(chan *vulnsrc.UpdateResponse)
-	for n, u := range vulnsrc.Updaters() {
+	for n, u := range updaters {
 		go func(name string, u vulnsrc.Updater) {
 			response, err := u.Update(datastore)
 			if err != nil {
@@ -129,14 +136,8 @@ func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.V
 		}(n, u)
 	}
 
-	defer func() {
-		for _, updaters := range vulnsrc.Updaters() {
-			updaters.Clean()
-		}
-	}()
-
 	// Collect results of updates.
-	for i := 0; i < len(vulnsrc.Updaters()); i++ {
+	for range updaters {
 		select {
 		case resp := <-responseC:
 			vulns = append(vulns, doVulnerabilitiesNamespacing(resp.Vulnerabilities)...)
@@ -222,8 +223,8 @@ func isValidVuln(vuln *database.Vulnerability) bool {
 // and only contains the FixedIn FeatureVersions corresponding to their
 // Namespace.
 //
-// It helps simplifying the fetchers that share the same metadata about a
-// Vulnerability regardless of their actual namespace (ie. same vulnerability
+// It helps simplify the fetchers that share the same metadata about a
+// Vulnerability regardless of their actual namespace (i.e. same vulnerability
 // information for every version of a distro).
 func doVulnerabilitiesNamespacing(nonNamespacedVulns []database.Vulnerability) []database.Vulnerability {
 	namespacedVulnsMap := make(map[string]*database.Vulnerability)

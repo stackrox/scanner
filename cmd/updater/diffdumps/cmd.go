@@ -23,6 +23,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/ext/vulnsrc/alpine"
+	"github.com/stackrox/scanner/ext/vulnsrc/manual"
 	"github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader/istioloader"
@@ -374,6 +375,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg c
 		// skip it. Else, add.
 		if !(found && vulnsAreEqual(matchingBaseVuln, headVuln, cfg.SkipSeverityComparison)) {
 			filtered = append(filtered, headVuln)
+
 		}
 	}
 	if cfg.SkipUbuntuLinuxKernelVulns {
@@ -385,6 +387,20 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg c
 		filtered = filterFixableCentOSVulns(filtered)
 		log.Infof("Skipping fixable centOS vulns: filtered out %d", countBefore-len(filtered))
 	}
+
+	// Add manual vulnerabilities if they do not already exist due to some other source.
+	uniqueFiltered := make(map[clairVulnUniqueKey]database.Vulnerability, len(filtered))
+	for i := range filtered {
+		vuln := filtered[i]
+		uniqueFiltered[keyFromVuln(&vuln)] = vuln
+	}
+	for i := range manual.Vulnerabilities {
+		vuln := manual.Vulnerabilities[i]
+		if _, exists := uniqueFiltered[keyFromVuln(&vuln)]; !exists {
+			filtered = append(filtered, vuln)
+		}
+	}
+
 	log.Infof("Diffed OS vulns; base had %d, head had %d, and the diff has %d", len(baseVulns), len(headVulns), len(filtered))
 	if err := vulndump.WriteOSVulns(outputDir, filtered); err != nil {
 		return err

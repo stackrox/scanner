@@ -1,7 +1,7 @@
 package all
 
 import (
-	// Import all the vulnsrc providers.
+	// Import all the vulnsrc providers EXCEPT for the manual source.
 	_ "github.com/stackrox/scanner/ext/vulnsrc/alpine"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/amzn"
 	_ "github.com/stackrox/scanner/ext/vulnsrc/debian"
