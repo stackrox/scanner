@@ -32,10 +32,11 @@ var Vulnerabilities = []database.Vulnerability{
 	//					VersionFormat: dpkg.ParserName,
 	//				},
 	//			},
+	//			// Keep this version if the vulnerability is not fixed.
 	//			Version: versionfmt.MaxVersion,
 	//		},
 	//	},
-	// },
+	//},
 }
 
 func (u updater) Update(_ vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, _ error) {
