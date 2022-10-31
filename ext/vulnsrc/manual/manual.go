@@ -17,7 +17,7 @@ func init() {
 
 // Vulnerabilities lists vulnerabilities which may not already exist in the feeds for other distros.
 var Vulnerabilities = []database.Vulnerability{
-	// Example valid entry.
+	// Example valid and complete entry.
 	//{
 	//	Name:        "CVE-2022-12342",
 	//	Description: "Description",
