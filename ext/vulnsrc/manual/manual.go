@@ -22,7 +22,7 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "X.509 Email Address Buffer Overflow",
 		Link:        "https://ubuntu.com/security/CVE-2022-3786",
-		Severity:    "Important",
+		Severity:    database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -60,7 +60,7 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "X.509 Email Address Buffer Overflow",
 		Link:        "https://ubuntu.com/security/CVE-2022-3786",
-		Severity:    "Important",
+		Severity:    database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
