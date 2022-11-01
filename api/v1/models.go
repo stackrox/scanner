@@ -155,9 +155,16 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 
 func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, versionFormat string) {
 	allVulnsFixedBy := feature.FixedBy
+	if feature.Name == "openssl" && feature.NamespaceName == "ubuntu:22.04" {
+		log.Info("LOOKING AT OPENSSL ON UBUNTU")
+	}
 	for _, dbVuln := range dbVulns {
 		vuln := vulnerabilityFromDatabaseModel(dbVuln)
 		feature.Vulnerabilities = append(feature.Vulnerabilities, vuln)
+
+		if feature.Name == "openssl" && feature.NamespaceName == "ubuntu:22.04" {
+			log.Infof("OPENSSL VULN %s FIXED BY %q", vuln.Name, vuln.FixedBy)
+		}
 
 		// If at least one vulnerability is not fixable, then we mark it the component as not fixable.
 		if vuln.FixedBy == "" {
@@ -170,6 +177,9 @@ func updateFeatureWithVulns(feature *Feature, dbVulns []database.Vulnerability, 
 			continue
 		}
 		allVulnsFixedBy = higherVersion
+	}
+	if feature.Name == "openssl" && feature.NamespaceName == "ubuntu:22.04" {
+		log.Infof("OPENSSL IS FIXED BY %q", allVulnsFixedBy)
 	}
 	feature.FixedBy = allVulnsFixedBy
 }

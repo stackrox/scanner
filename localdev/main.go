@@ -168,13 +168,16 @@ func main() {
 	utils.Must(os.Setenv("NVD_DEFINITIONS_DIR", nvdPath))
 	nvdtoolscache.Singleton()
 
-	path := "TODO: Absolute path to local image tar.gz files"
+	path := "/Users/rtannenb/go/src/github.com/stackrox/scanner/local-images"
 
 	fis, err := os.ReadDir(path)
 	if err != nil {
 		panic(err)
 	}
 	for _, fi := range fis {
+		if fi.Name() != "ubuntu2204openssl.tar" {
+			continue
+		}
 		analyzeLocalImage(filepath.Join(path, fi.Name()))
 	}
 }
