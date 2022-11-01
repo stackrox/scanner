@@ -116,7 +116,7 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 		return nil, err
 	}
 
-	if layer.Namespace.Name == "ubuntu:22.04" {
+	if layer.Namespace != nil && layer.Namespace.Name == "ubuntu:22.04" {
 		for _, feature := range layer.Features {
 			if feature.Feature.Name == "openssl" {
 				log.Infof("FOUND OPENSSL ON UBUNTU IN LAYER %q", layer.Name)
