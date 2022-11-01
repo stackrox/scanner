@@ -3,7 +3,6 @@ package manual
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
-	"github.com/stackrox/scanner/ext/versionfmt"
 	"github.com/stackrox/scanner/ext/versionfmt/dpkg"
 	"github.com/stackrox/scanner/ext/vulnsrc"
 )
@@ -23,13 +22,13 @@ var Vulnerabilities = []database.Vulnerability{
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
-					Name:       "openssl",
-					Namespace:  database.Namespace{
+					Name: "openssl",
+					Namespace: database.Namespace{
 						Name:          "ubuntu:22.04",
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "3.0.2-0ubuntu1.7",
 			},
 		},
 		Metadata: map[string]interface{}{
@@ -57,13 +56,13 @@ var Vulnerabilities = []database.Vulnerability{
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
-					Name:       "openssl",
-					Namespace:  database.Namespace{
+					Name: "openssl",
+					Namespace: database.Namespace{
 						Name:          "ubuntu:22.04",
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "3.0.2-0ubuntu1.7",
 			},
 		},
 		Metadata: map[string]interface{}{

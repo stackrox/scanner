@@ -3638,6 +3638,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 								},
 							},
 						},
+						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 					{
 						Name: "CVE-2022-3786",
@@ -3660,8 +3661,10 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 								},
 							},
 						},
+						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 				},
+				FixedBy: "3.0.2-0ubuntu1.7",
 				AddedBy: "sha256:8862c07555c9317d3dd31b6d8a755244a5e215737e45f67fa4c4ec7e03ca3b37",
 			},
 		},
