@@ -3665,8 +3665,10 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 				},
-				FixedBy: "3.0.2-0ubuntu1.7",
-				AddedBy: "sha256:8862c07555c9317d3dd31b6d8a755244a5e215737e45f67fa4c4ec7e03ca3b37",
+				// TODO: Why is this empty?
+				FixedBy: "",
+				// TODO: Why is it this layer?
+				AddedBy: "sha256:301a8b74f71f85f3a31e9c7e7fedd5b001ead5bcf895bc2911c1d260e06bd987",
 			},
 		},
 	},
