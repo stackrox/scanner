@@ -11,10 +11,6 @@ var _ vulnsrc.Updater = (*updater)(nil)
 type updater struct {
 }
 
-func init() {
-	vulnsrc.RegisterUpdater("manual", &updater{})
-}
-
 // Vulnerabilities lists vulnerabilities which may not already exist in the feeds for other distros.
 var Vulnerabilities = []database.Vulnerability{
 	// Example valid and complete entry.
