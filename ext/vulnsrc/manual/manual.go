@@ -15,7 +15,11 @@ type updater struct {
 // Vulnerabilities lists vulnerabilities which may not already exist in the feeds for other distros.
 var Vulnerabilities = []database.Vulnerability{
 	{
-		Name:        "CVE-2022-3602",
+		Name: "CVE-2022-3602",
+		Namespace: database.Namespace{
+			Name:          "ubuntu:22.04",
+			VersionFormat: dpkg.ParserName,
+		},
 		Description: "X.509 Email Address Buffer Overflow",
 		Link:        "https://ubuntu.com/security/CVE-2022-3786",
 		Severity:    "Important",
@@ -49,7 +53,11 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 	},
 	{
-		Name:        "CVE-2022-3786",
+		Name: "CVE-2022-3786",
+		Namespace: database.Namespace{
+			Name:          "ubuntu:22.04",
+			VersionFormat: dpkg.ParserName,
+		},
 		Description: "X.509 Email Address Buffer Overflow",
 		Link:        "https://ubuntu.com/security/CVE-2022-3786",
 		Severity:    "Important",

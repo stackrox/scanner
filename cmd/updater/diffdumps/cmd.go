@@ -396,7 +396,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg c
 	for i := range manual.Vulnerabilities {
 		vuln := manual.Vulnerabilities[i]
 		if _, exists := uniqueFiltered[keyFromVuln(&vuln)]; !exists {
-			log.Infof("Manually adding %s", vuln.Name)
+			log.Infof("Manually adding %s for %s", vuln.Name, vuln.Namespace.Name)
 			filtered = append(filtered, vuln)
 		}
 	}
