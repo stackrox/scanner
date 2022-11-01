@@ -3603,4 +3603,67 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:ubuntu-22.04-openssl",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:22.04",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "openssl",
+				VersionFormat: "dpkg",
+				Version:       "3.0.2-0ubuntu1.6",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name: "CVE-2022-3602",
+						Description: "X.509 Email Address Buffer Overflow",
+						Link:     "https://ubuntu.com/security/CVE-2022-3602",
+						Severity: "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.8,
+									"ImpactScore":         5.9,
+									"Score":               8.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+								},
+							},
+						},
+					},
+					{
+						Name: "CVE-2022-3786",
+						Description: "X.509 Email Address Buffer Overflow",
+						Link:     "https://ubuntu.com/security/CVE-2022-3786",
+						Severity: "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								},
+							},
+						},
+					},
+				},
+				AddedBy: "sha256:8862c07555c9317d3dd31b6d8a755244a5e215737e45f67fa4c4ec7e03ca3b37",
+			},
+		},
+	},
 }
