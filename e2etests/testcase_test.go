@@ -3419,7 +3419,7 @@ var testCases = []testCase{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
 				Name:          "openssl",
 				NamespaceName: "rhel:9",
-				Version:       "3.0.1-23.el9_0.x86_64",
+				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
@@ -3475,7 +3475,7 @@ var testCases = []testCase{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
 				Name:          "openssl-libs",
 				NamespaceName: "rhel:9",
-				Version:       "3.0.1-23.el9_0.x86_64",
+				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
