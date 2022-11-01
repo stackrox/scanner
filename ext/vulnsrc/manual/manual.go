@@ -15,26 +15,6 @@ type updater struct {
 
 // Vulnerabilities lists vulnerabilities which may not already exist in the feeds for other distros.
 var Vulnerabilities = []database.Vulnerability{
-	// Example valid and complete entry.
-	//{
-	//	Name:        "CVE-2022-12342",
-	//	Description: "Description",
-	//	Link:        "https://ubuntu.com/security/CVE-2022-12342",
-	//	Severity:    database.CriticalSeverity,
-	//	FixedIn: []database.FeatureVersion{
-	//		{
-	//			Feature: database.Feature{
-	//				Name: "my-package",
-	//				Namespace: database.Namespace{
-	//					Name:          "ubuntu:22.04",
-	//					VersionFormat: dpkg.ParserName,
-	//				},
-	//			},
-	//			// Keep this version if the vulnerability is not fixed.
-	//			Version: versionfmt.MaxVersion,
-	//		},
-	//	},
-	// },
 	{
 		Name:        "CVE-2022-3602",
 		Description: "X.509 Email Address Buffer Overflow",
