@@ -36,7 +36,7 @@ var Vulnerabilities = []database.Vulnerability{
 	//			Version: versionfmt.MaxVersion,
 	//		},
 	//	},
-	//},
+	// },
 }
 
 func (u updater) Update(_ vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, _ error) {
