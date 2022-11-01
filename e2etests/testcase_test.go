@@ -3508,7 +3508,7 @@ var testCases = []testCase{
 					{
 						Name:          "CVE-2022-3786",
 						NamespaceName: "rhel:9",
-						Description: `DOCUMENTATION: A stack-based buffer overflow was found in the way OpenSSL processes X.509 certificates with a specially crafted email address field. This issue could cause a server or a client application compiled with OpenSSL to crash or possibly execute remote code when trying to process the malicious certificate.
+						Description: `DOCUMENTATION: A stack-based buffer overflow was found in the way OpenSSL processes X.509 certificates with a specially crafted email address field. This issue could cause a server or a client application compiled with OpenSSL to crash or possibly execute remote code when trying to process the malicious certificate. 
             STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. A client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
 						Link:     "https://access.redhat.com/security/cve/CVE-2022-3786",
 						Severity: "Important",
