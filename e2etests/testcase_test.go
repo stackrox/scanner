@@ -3454,7 +3454,7 @@ var testCases = []testCase{
 						Link:     "https://access.redhat.com/security/cve/CVE-2022-3786",
 						Severity: "Important",
 						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
+							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
@@ -3511,7 +3511,7 @@ var testCases = []testCase{
 						Link:     "https://access.redhat.com/security/cve/CVE-2022-3786",
 						Severity: "Important",
 						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
+							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
