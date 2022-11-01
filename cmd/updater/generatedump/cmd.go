@@ -13,8 +13,10 @@ import (
 	"github.com/stackrox/scanner/ext/vulnmdsrc"
 	"github.com/stackrox/scanner/ext/vulnmdsrc/types"
 	"github.com/stackrox/scanner/ext/vulnsrc"
+	"github.com/stackrox/scanner/ext/vulnsrc/manual"
 	"github.com/stackrox/scanner/pkg/rhelv2"
 	"github.com/stackrox/scanner/pkg/vulndump"
+	"github.com/stackrox/scanner/pkg/vulnkey"
 	"github.com/stackrox/scanner/pkg/vulnloader"
 
 	// Needed to register all vuln loaders.
@@ -153,6 +155,26 @@ func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.V
 	if err != nil {
 		return nil, errors.Wrap(err, "adding metadata to vulns")
 	}
+
+	// Add manual vulnerabilities ONLY if they do not already exist due to some other source.
+	manualVulns := make(map[vulnkey.Key]database.Vulnerability, len(manual.Vulnerabilities))
+	for _, vuln := range manual.Vulnerabilities {
+		// Prevent aliasing.
+		vuln := vuln
+		manualVulns[vulnkey.FromVuln(&vuln)] = vuln
+	}
+	for _, vuln := range vulnsWithMetadata {
+		// Prevent aliasing.
+		vuln := vuln
+		key := vulnkey.FromVuln(&vuln)
+		// Delete the vulnerability from the manual entries if it is already populated from another source.
+		delete(manualVulns, key)
+	}
+	for _, vuln := range manualVulns {
+		vulnsWithMetadata = append(vulnsWithMetadata, vuln)
+		log.Infof("Manually adding %s for %s", vuln.Name, vuln.Namespace.Name)
+	}
+
 	return vulnsWithMetadata, nil
 }
 
