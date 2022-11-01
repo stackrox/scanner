@@ -3421,6 +3421,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
+				FixedBy: "1:3.0.1-41.el9_0",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2022-3602",
@@ -3477,6 +3478,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
+				FixedBy: "1:3.0.1-41.el9_0",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2022-3602",
