@@ -3614,6 +3614,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "openssl",
+				NamespaceName: "ubuntu:22.04",
 				VersionFormat: "dpkg",
 				Version:       "3.0.2-0ubuntu1.6",
 				Vulnerabilities: []apiV1.Vulnerability{
