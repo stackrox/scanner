@@ -3448,7 +3448,8 @@ var testCases = []testCase{
 						},
 					},
 					{
-						Name: "CVE-2022-3786",
+						Name:          "CVE-2022-3786",
+						NamespaceName: "rhel:9",
 						Description: `DOCUMENTATION: No description is available for this CVE. 
             STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. The converse of a client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
 						Link:     "https://access.redhat.com/security/cve/CVE-2022-3786",
@@ -3505,7 +3506,8 @@ var testCases = []testCase{
 						},
 					},
 					{
-						Name: "CVE-2022-3786",
+						Name:          "CVE-2022-3786",
+						NamespaceName: "rhel:9",
 						Description: `DOCUMENTATION: No description is available for this CVE. 
             STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. The converse of a client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
 						Link:     "https://access.redhat.com/security/cve/CVE-2022-3786",
