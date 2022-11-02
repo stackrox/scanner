@@ -3826,7 +3826,6 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				NamespaceName: "ubuntu:22.10",
 				VersionFormat: "dpkg",
 				Version:       "3.0.5-2ubuntu2",
-				FixedBy:       "3.0.5-2ubuntu2",
 				AddedBy:       "sha256:2b441754735ea7decb684ef19d54115fc309c270fe7b87ed36aa3773ce50b78b",
 			},
 		},
