@@ -3417,6 +3417,122 @@ var testCases = []testCase{
 		expectedFeatures: []apiV1.Feature{
 			{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
+				Name:          "openssl",
+				NamespaceName: "rhel:9",
+				Version:       "1:3.0.1-23.el9_0.x86_64",
+				VersionFormat: "rpm",
+				FixedBy: "1:3.0.1-41.el9_0",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2022-3602",
+						NamespaceName: "rhel:9",
+						Description: `DOCUMENTATION: A stack-based buffer overflow was found in the way OpenSSL processes X.509 certificates with a specially crafted email address field. This issue could cause a server or a client application compiled with OpenSSL to crash or possibly execute remote code when trying to process the malicious certificate. 
+            STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. A client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
+						Link:     "https://access.redhat.com/security/cve/CVE-2022-3602",
+						Severity: "Important",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.8,
+									"ImpactScore":         5.9,
+									"Score":               8.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2022-3786",
+						NamespaceName: "rhel:9",
+						Description: `DOCUMENTATION: A stack-based buffer overflow was found in the way OpenSSL processes X.509 certificates with a specially crafted email address field. This issue could cause a server or a client application compiled with OpenSSL to crash or possibly execute remote code when trying to process the malicious certificate. 
+            STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. A client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
+						Link:     "https://access.redhat.com/security/cve/CVE-2022-3786",
+						Severity: "Important",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
+				Name:          "openssl-libs",
+				NamespaceName: "rhel:9",
+				Version:       "1:3.0.1-23.el9_0.x86_64",
+				VersionFormat: "rpm",
+				FixedBy: "1:3.0.1-41.el9_0",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2022-3602",
+						NamespaceName: "rhel:9",
+						Description: `DOCUMENTATION: A stack-based buffer overflow was found in the way OpenSSL processes X.509 certificates with a specially crafted email address field. This issue could cause a server or a client application compiled with OpenSSL to crash or possibly execute remote code when trying to process the malicious certificate. 
+            STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. A client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
+						Link:     "https://access.redhat.com/security/cve/CVE-2022-3602",
+						Severity: "Important",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.8,
+									"ImpactScore":         5.9,
+									"Score":               8.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2022-3786",
+						NamespaceName: "rhel:9",
+						Description: `DOCUMENTATION: A stack-based buffer overflow was found in the way OpenSSL processes X.509 certificates with a specially crafted email address field. This issue could cause a server or a client application compiled with OpenSSL to crash or possibly execute remote code when trying to process the malicious certificate. 
+            STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. A client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
+						Link:     "https://access.redhat.com/security/cve/CVE-2022-3786",
+						Severity: "Important",
+						Metadata: map[string]interface{}{
+							"Red Hat": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
 				Name:          "python3-urllib3",
 				NamespaceName: "rhel:9",
 				Version:       "1.26.5-3.el9.noarch",
