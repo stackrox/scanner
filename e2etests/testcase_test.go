@@ -3476,6 +3476,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 								},
 							},
 						},
+						FixedBy: "1:3.0.1-43.el9_0",
 					},
 				},
 			},
@@ -3517,6 +3518,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 								},
 							},
 						},
+						FixedBy: "1:3.0.1-43.el9_0",
 					},
 				},
 			},
@@ -3724,10 +3726,11 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				Version:       "3.0.2-0ubuntu1.6",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name: "CVE-2022-3602",
-						Description: "X.509 Email Address Buffer Overflow",
-						Link:     "https://ubuntu.com/security/CVE-2022-3602",
-						Severity: "Important",
+						Name:          "CVE-2022-3602",
+						NamespaceName: "ubuntu:22.04",
+						Description:   "X.509 Email Address Buffer Overflow",
+						Link:          "https://ubuntu.com/security/CVE-2022-3602",
+						Severity:      "Important",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -3747,10 +3750,11 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 					{
-						Name: "CVE-2022-3786",
-						Description: "X.509 Email Address Buffer Overflow",
-						Link:     "https://ubuntu.com/security/CVE-2022-3786",
-						Severity: "Important",
+						Name:          "CVE-2022-3786",
+						NamespaceName: "ubuntu:22.04",
+						Description:   "X.509 Email Address Buffer Overflow",
+						Link:          "https://ubuntu.com/security/CVE-2022-3786",
+						Severity:      "Important",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
