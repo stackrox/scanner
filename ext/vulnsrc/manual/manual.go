@@ -21,7 +21,7 @@ var Vulnerabilities = []database.Vulnerability{
 			VersionFormat: dpkg.ParserName,
 		},
 		Description: "X.509 Email Address Buffer Overflow",
-		Link:        "https://ubuntu.com/security/CVE-2022-3786",
+		Link:        "https://ubuntu.com/security/CVE-2022-3602",
 		Severity:    database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
@@ -37,6 +37,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2022-11-01T16:00Z",
+				"LastModifiedDateTime": "2022-11-01T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
@@ -75,6 +77,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2022-11-01T16:00Z",
+				"LastModifiedDateTime": "2022-11-01T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
