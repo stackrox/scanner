@@ -3719,4 +3719,73 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:ubuntu-22.04-openssl",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:22.04",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "openssl",
+				NamespaceName: "ubuntu:22.04",
+				VersionFormat: "dpkg",
+				Version:       "3.0.2-0ubuntu1.6",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name: "CVE-2022-3602",
+						Description: "X.509 Email Address Buffer Overflow",
+						Link:     "https://ubuntu.com/security/CVE-2022-3602",
+						Severity: "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.8,
+									"ImpactScore":         5.9,
+									"Score":               8.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+								},
+							},
+						},
+						FixedBy: "3.0.2-0ubuntu1.7",
+					},
+					{
+						Name: "CVE-2022-3786",
+						Description: "X.509 Email Address Buffer Overflow",
+						Link:     "https://ubuntu.com/security/CVE-2022-3786",
+						Severity: "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								},
+							},
+						},
+						FixedBy: "3.0.2-0ubuntu1.7",
+					},
+				},
+				// TODO: Why is this empty?
+				FixedBy: "",
+				// TODO: Why is it this layer?
+				AddedBy: "sha256:301a8b74f71f85f3a31e9c7e7fedd5b001ead5bcf895bc2911c1d260e06bd987",
+			},
+		},
+	},
 }

@@ -25,6 +25,7 @@ import (
 	"github.com/stackrox/scanner/ext/vulnsrc/alpine"
 	"github.com/stackrox/scanner/ext/vulnsrc/ubuntu"
 	"github.com/stackrox/scanner/pkg/vulndump"
+	"github.com/stackrox/scanner/pkg/vulnkey"
 	"github.com/stackrox/scanner/pkg/vulnloader/istioloader"
 	"github.com/stackrox/scanner/pkg/vulnloader/k8sloader"
 	"github.com/stackrox/scanner/pkg/vulnloader/nvdloader"
@@ -224,18 +225,6 @@ func generateNVDDiffs(outputDir string, baseLastModifiedTime time.Time, headZipR
 	return nil
 }
 
-type clairVulnUniqueKey struct {
-	name      string
-	namespace string
-}
-
-func keyFromVuln(v *database.Vulnerability) clairVulnUniqueKey {
-	return clairVulnUniqueKey{
-		name:      v.Name,
-		namespace: v.Namespace.Name,
-	}
-}
-
 type stringPair struct {
 	first  string
 	second string
@@ -331,11 +320,11 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg c
 		return errors.Wrap(err, "loading OS vulns from head dump")
 	}
 
-	baseVulnsMap := make(map[clairVulnUniqueKey]database.Vulnerability, len(baseVulns))
+	baseVulnsMap := make(map[vulnkey.Key]database.Vulnerability, len(baseVulns))
 	for i := range baseVulns {
 		// This removes the possibility of memory aliasing.
 		vuln := baseVulns[i]
-		key := keyFromVuln(&vuln)
+		key := vulnkey.FromVuln(&vuln)
 		if _, ok := baseVulnsMap[key]; ok {
 			// Should really never happen, but being defensive.
 			return errors.Errorf("UNEXPECTED: got multiple vulns for key: %v", key)
@@ -368,7 +357,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg c
 
 		updateAlpineLink(cfg, &headVuln)
 
-		key := keyFromVuln(&headVuln)
+		key := vulnkey.FromVuln(&headVuln)
 		matchingBaseVuln, found := baseVulnsMap[key]
 		// If the vuln was in the base, and equal to what was in the base,
 		// skip it. Else, add.
@@ -385,6 +374,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg c
 		filtered = filterFixableCentOSVulns(filtered)
 		log.Infof("Skipping fixable centOS vulns: filtered out %d", countBefore-len(filtered))
 	}
+
 	log.Infof("Diffed OS vulns; base had %d, head had %d, and the diff has %d", len(baseVulns), len(headVulns), len(filtered))
 	if err := vulndump.WriteOSVulns(outputDir, filtered); err != nil {
 		return err
