@@ -168,7 +168,7 @@ func main() {
 	utils.Must(os.Setenv("NVD_DEFINITIONS_DIR", nvdPath))
 	nvdtoolscache.Singleton()
 
-	path := "TODO"
+	path := "TODO: Absolute path to local image tar.gz files"
 
 	fis, err := os.ReadDir(path)
 	if err != nil {
