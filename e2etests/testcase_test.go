@@ -3780,4 +3780,23 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 			},
 		},
 	},
+	// This image is not affected by CVE-2022-3602 nor CVE-2022-3786, as it has a fixed version of OpenSSL.
+	{
+		image:                   "quay.io/rhacs-eng/qa:ubuntu-22.10-openssl",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:22.10",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "openssl",
+				NamespaceName: "ubuntu:22.10",
+				VersionFormat: "dpkg",
+				Version:       "3.0.5-2ubuntu2",
+				AddedBy:       "sha256:2b441754735ea7decb684ef19d54115fc309c270fe7b87ed36aa3773ce50b78b",
+			},
+		},
+	},
 }
