@@ -3444,38 +3444,21 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy: "1:3.0.1-41.el9_0",
+				FixedBy: "1:3.0.1-43.el9_0",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2022-3602",
+						Name:          "RHSA-2022:7288",
 						NamespaceName: "rhel:9",
-						Description: `DOCUMENTATION: A stack-based buffer overflow was found in the way OpenSSL processes X.509 certificates with a specially crafted email address field. This issue could cause a server or a client application compiled with OpenSSL to crash or possibly execute remote code when trying to process the malicious certificate. 
-            STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. A client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
-						Link:     "https://access.redhat.com/security/cve/CVE-2022-3602",
-						Severity: "Important",
-						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 0.0,
-									"ImpactScore":         0.0,
-									"Score":               0.0,
-									"Vectors":             "",
-								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.8,
-									"ImpactScore":         5.9,
-									"Score":               8.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
-								},
-							},
-						},
-					},
-					{
-						Name:          "CVE-2022-3786",
-						NamespaceName: "rhel:9",
-						Description: `DOCUMENTATION: A stack-based buffer overflow was found in the way OpenSSL processes X.509 certificates with a specially crafted email address field. This issue could cause a server or a client application compiled with OpenSSL to crash or possibly execute remote code when trying to process the malicious certificate. 
-            STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. A client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
-						Link:     "https://access.redhat.com/security/cve/CVE-2022-3786",
+						Description: `OpenSSL is a toolkit that implements the Secure Sockets Layer (SSL) and Transport Layer Security (TLS) protocols, as well as a full strength general purpose cryptography library.
+
+Security Fix(es):
+
+* OpenSSL: X.509 Email Address Buffer Overflow (CVE-2022-3602)
+
+* OpenSSL: X.509 Email Address Variable Length Buffer Overflow (CVE-2022-3786)
+
+For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.`,
+						Link:     "https://access.redhat.com/errata/RHSA-2022:7288",
 						Severity: "Important",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
@@ -3493,6 +3476,7 @@ var testCases = []testCase{
 								},
 							},
 						},
+						FixedBy: "1:3.0.1-43.el9_0",
 					},
 				},
 			},
@@ -3502,38 +3486,21 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy: "1:3.0.1-41.el9_0",
+				FixedBy: "1:3.0.1-43.el9_0",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2022-3602",
+						Name:          "RHSA-2022:7288",
 						NamespaceName: "rhel:9",
-						Description: `DOCUMENTATION: A stack-based buffer overflow was found in the way OpenSSL processes X.509 certificates with a specially crafted email address field. This issue could cause a server or a client application compiled with OpenSSL to crash or possibly execute remote code when trying to process the malicious certificate. 
-            STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. A client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
-						Link:     "https://access.redhat.com/security/cve/CVE-2022-3602",
-						Severity: "Important",
-						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 0.0,
-									"ImpactScore":         0.0,
-									"Score":               0.0,
-									"Vectors":             "",
-								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.8,
-									"ImpactScore":         5.9,
-									"Score":               8.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
-								},
-							},
-						},
-					},
-					{
-						Name:          "CVE-2022-3786",
-						NamespaceName: "rhel:9",
-						Description: `DOCUMENTATION: A stack-based buffer overflow was found in the way OpenSSL processes X.509 certificates with a specially crafted email address field. This issue could cause a server or a client application compiled with OpenSSL to crash or possibly execute remote code when trying to process the malicious certificate. 
-            STATEMENT: As per upstream, the most common situation where this can be triggered is when a server requests client authentication after a malicious client connects. A client connecting to a malicious server is also believed to be vulnerable in the same manner. Only OpenSSL versions 3.0.0 to 3.0.6 are vulnerable to this attack.`,
-						Link:     "https://access.redhat.com/security/cve/CVE-2022-3786",
+						Description: `OpenSSL is a toolkit that implements the Secure Sockets Layer (SSL) and Transport Layer Security (TLS) protocols, as well as a full strength general purpose cryptography library.
+
+Security Fix(es):
+
+* OpenSSL: X.509 Email Address Buffer Overflow (CVE-2022-3602)
+
+* OpenSSL: X.509 Email Address Variable Length Buffer Overflow (CVE-2022-3786)
+
+For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.`,
+						Link:     "https://access.redhat.com/errata/RHSA-2022:7288",
 						Severity: "Important",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
@@ -3551,6 +3518,7 @@ var testCases = []testCase{
 								},
 							},
 						},
+						FixedBy: "1:3.0.1-43.el9_0",
 					},
 				},
 			},
@@ -3758,10 +3726,11 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				Version:       "3.0.2-0ubuntu1.6",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name: "CVE-2022-3602",
-						Description: "X.509 Email Address Buffer Overflow",
-						Link:     "https://ubuntu.com/security/CVE-2022-3602",
-						Severity: "Important",
+						Name:          "CVE-2022-3602",
+						NamespaceName: "ubuntu:22.04",
+						Description:   "A buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed the malicious certificate or for the application to continue certificate verification despite failure to construct a path to a trusted issuer. An attacker can craft a malicious email address to overflow four attacker-controlled bytes on the stack. This buffer overflow could result in a crash (causing a denial of service) or potentially remote code execution. Many platforms implement stack overflow protections which would mitigate against the risk of remote code execution. The risk may be further mitigated based on stack layout for any given platform/compiler. Pre-announcements of CVE-2022-3602 described this issue as CRITICAL. Further analysis based on some of the mitigating factors described above have led this to be downgraded to HIGH. Users are still encouraged to upgrade to a new version as soon as possible. In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects. Fixed in OpenSSL 3.0.7 (Affected 3.0.0,3.0.1,3.0.2,3.0.3,3.0.4,3.0.5,3.0.6).",
+						Link:          "https://ubuntu.com/security/CVE-2022-3602",
+						Severity:      "Important",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -3771,20 +3740,21 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 									"Vectors":             "",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.8,
+									"ExploitabilityScore": 3.9,
 									"ImpactScore":         5.9,
-									"Score":               8.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+									"Score":               9.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 								},
 							},
 						},
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 					{
-						Name: "CVE-2022-3786",
-						Description: "X.509 Email Address Buffer Overflow",
-						Link:     "https://ubuntu.com/security/CVE-2022-3786",
-						Severity: "Important",
+						Name:          "CVE-2022-3786",
+						NamespaceName: "ubuntu:22.04",
+						Description:   "A buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed a malicious certificate or for an application to continue certificate verification despite failure to construct a path to a trusted issuer. An attacker can craft a malicious email address in a certificate to overflow an arbitrary number of bytes containing the `.' character (decimal 46) on the stack. This buffer overflow could result in a crash (causing a denial of service). In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects. Fixed in OpenSSL 3.0.7 (Affected 3.0.0,3.0.1,3.0.2,3.0.3,3.0.4,3.0.5,3.0.6).",
+						Link:          "https://ubuntu.com/security/CVE-2022-3786",
+						Severity:      "Important",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -3804,8 +3774,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 				},
-				// TODO: Why is this empty?
-				FixedBy: "",
+				FixedBy: "3.0.2-0ubuntu1.7",
 				// TODO: Why is it this layer?
 				AddedBy: "sha256:301a8b74f71f85f3a31e9c7e7fedd5b001ead5bcf895bc2911c1d260e06bd987",
 			},
