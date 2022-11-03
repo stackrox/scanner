@@ -3335,6 +3335,29 @@ var testCases = []testCase{
 		},
 	},
 	{
+		image:                   "ubuntu:22.10@sha256:4f9ec2c0aa321966bfe625bc485aa1d6e96549679cfdf98bb404dfcb8e141a7f",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:22.10",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "adduser",
+				NamespaceName: "ubuntu:22.10",
+				VersionFormat: "dpkg",
+				Version:       "3.121ubuntu1",
+				AddedBy:       "sha256:bcd446fbf8a137bbf135b63332ebcd0c3e9880060bc5b41962fbbb07e94062b7",
+			},
+			{
+				Name:          "apt",
+				NamespaceName: "ubuntu:22.10",
+				VersionFormat: "dpkg",
+				Version:       "2.5.3",
+				AddedBy:       "sha256:bcd446fbf8a137bbf135b63332ebcd0c3e9880060bc5b41962fbbb07e94062b7",
+			},
+		},
+	},
+	{
 		image:                   "quay.io/rhacs-eng/qa:ansibleplaybookbundle--gluster-s3object-apb--481960439934084fb041431f27cb98b89666e1a0daaeb2078bcbe1209790368c",
 		registry:                "https://quay.io",
 		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
@@ -3446,13 +3469,14 @@ For more details about the security issue(s), including the impact, a CVSS score
 									"Vectors":             "",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.8,
-									"ImpactScore":         5.9,
-									"Score":               8.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
 								},
 							},
 						},
+						FixedBy: "1:3.0.1-43.el9_0",
 					},
 				},
 			},
@@ -3487,13 +3511,14 @@ For more details about the security issue(s), including the impact, a CVSS score
 									"Vectors":             "",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.8,
-									"ImpactScore":         5.9,
-									"Score":               8.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
 								},
 							},
 						},
+						FixedBy: "1:3.0.1-43.el9_0",
 					},
 				},
 			},
@@ -3655,12 +3680,12 @@ Bug Fix(es) and Enhancement(s):
 				Location:      "application/app.jar:BOOT-INF/lib/spring-security-web-5.5.5.jar",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2022-22978",
-						Description:   `In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers.
+						Name: "CVE-2022-22978",
+						Description: `In Spring Security versions 5.5.6 and 5.6.3 and older unsupported versions, RegexRequestMatcher can easily be misconfigured to be bypassed on some servlet containers.
 
 Applications using RegexRequestMatcher with '.' in the regular expression are possibly vulnerable to an authorization bypass.`,
-						Link:          "https://nvd.nist.gov/vuln/detail/CVE-2022-22978",
-						Severity:      "Important",
+						Link:     "https://nvd.nist.gov/vuln/detail/CVE-2022-22978",
+						Severity: "Important",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -3701,10 +3726,11 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				Version:       "3.0.2-0ubuntu1.6",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name: "CVE-2022-3602",
-						Description: "X.509 Email Address Buffer Overflow",
-						Link:     "https://ubuntu.com/security/CVE-2022-3602",
-						Severity: "Important",
+						Name:          "CVE-2022-3602",
+						NamespaceName: "ubuntu:22.04",
+						Description:   "A buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed the malicious certificate or for the application to continue certificate verification despite failure to construct a path to a trusted issuer. An attacker can craft a malicious email address to overflow four attacker-controlled bytes on the stack. This buffer overflow could result in a crash (causing a denial of service) or potentially remote code execution. Many platforms implement stack overflow protections which would mitigate against the risk of remote code execution. The risk may be further mitigated based on stack layout for any given platform/compiler. Pre-announcements of CVE-2022-3602 described this issue as CRITICAL. Further analysis based on some of the mitigating factors described above have led this to be downgraded to HIGH. Users are still encouraged to upgrade to a new version as soon as possible. In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects. Fixed in OpenSSL 3.0.7 (Affected 3.0.0,3.0.1,3.0.2,3.0.3,3.0.4,3.0.5,3.0.6).",
+						Link:          "https://ubuntu.com/security/CVE-2022-3602",
+						Severity:      "Important",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -3714,20 +3740,21 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 									"Vectors":             "",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.8,
+									"ExploitabilityScore": 3.9,
 									"ImpactScore":         5.9,
-									"Score":               8.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+									"Score":               9.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 								},
 							},
 						},
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 					{
-						Name: "CVE-2022-3786",
-						Description: "X.509 Email Address Buffer Overflow",
-						Link:     "https://ubuntu.com/security/CVE-2022-3786",
-						Severity: "Important",
+						Name:          "CVE-2022-3786",
+						NamespaceName: "ubuntu:22.04",
+						Description:   "A buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed a malicious certificate or for an application to continue certificate verification despite failure to construct a path to a trusted issuer. An attacker can craft a malicious email address in a certificate to overflow an arbitrary number of bytes containing the `.' character (decimal 46) on the stack. This buffer overflow could result in a crash (causing a denial of service). In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects. Fixed in OpenSSL 3.0.7 (Affected 3.0.0,3.0.1,3.0.2,3.0.3,3.0.4,3.0.5,3.0.6).",
+						Link:          "https://ubuntu.com/security/CVE-2022-3786",
+						Severity:      "Important",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
