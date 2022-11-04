@@ -17,7 +17,7 @@ message GetNodeVulnerabilitiesRequest {
     string             kernel_version     = 2;
     string             kubelet_version    = 3;
     string             kubeproxy_version  = 4;
-    Components         components         = 6;
+    Components         node_inventory     = 6;
     message ContainerRuntime {
         string name    = 1;
         string version = 2;
@@ -33,7 +33,7 @@ message GetNodeVulnerabilitiesResponse {
     repeated Vulnerability kubelet_vulnerabilities   = 2;
     repeated Vulnerability kubeproxy_vulnerabilities = 3;
     repeated Vulnerability runtime_vulnerabilities   = 4;
-    repeated Feature                       features  = 9;
+    repeated Feature             inventory_features  = 9;
 
     message KernelComponent {
         string name    = 1;

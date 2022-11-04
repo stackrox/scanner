@@ -10,7 +10,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
+	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/convert"
+	"github.com/stackrox/scanner/api/v1/imagescan"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
@@ -233,7 +235,7 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 }
 
 func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
-	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) {
+	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) && req.GetNodeInventory() == nil {
 		return nil, status.Error(codes.InvalidArgument, "both os image and kernel version are required")
 	}
 
@@ -270,6 +272,21 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	// Handle new format of the request and scan node inventory additionally
+	if req.GetNodeInventory() != nil {
+		log.Infof("scanning node inventory...")
+		// TODO(ROX-12968): resolve hardcoded value uncertifiedRHEL
+		layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetNodeInventory(), false)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		log.Infof("node inventory scan result: %+v", layer)
+		resp.InventoryFeatures = imagescan.ConvertFeatures(layer.Features)
+		log.Infof("attaching node inventory scan as: %+v", resp.InventoryFeatures)
+
+	} else {
+		log.Infof("node scan request missing node inventory")
+	}
 	return resp, nil
 }
 
