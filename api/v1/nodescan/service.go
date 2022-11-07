@@ -238,6 +238,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) && req.GetNodeInventory() == nil {
 		return nil, status.Error(codes.InvalidArgument, "both os image and kernel version are required")
 	}
+	log.Infof("GetNodeVulnerabilities - request arrived: %+v", req)
 
 	var err error
 	resp := &v1.GetNodeVulnerabilitiesResponse{
@@ -274,7 +275,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 
 	// Handle new format of the request and scan node inventory additionally
 	if req.GetNodeInventory() != nil {
-		log.Infof("scanning node inventory...")
+		log.Infof("scanning node inventory: %+v", req.GetNodeInventory())
 		// TODO(ROX-12968): resolve hardcoded value uncertifiedRHEL
 		layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetNodeInventory(), false)
 		if err != nil {
