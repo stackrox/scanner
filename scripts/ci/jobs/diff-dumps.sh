@@ -68,7 +68,7 @@ create_offline_dump() {
 
     # Prepare k8s and istio dump
     mkdir -p /tmp/scratch
-    gsutil cp -r gs://definitions.stackrox.io/cve/* /tmp/scratch/
+    gsutil cp -r gs://definitions.stackrox.io/cve2/* /tmp/scratch/
     cd /tmp/scratch
     zip -r /tmp/offline-dump/k8s-istio.zip *
 
