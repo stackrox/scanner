@@ -45,12 +45,15 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 			return nil, nil
 		}
 
+		name := name(def)
+		if name == "" {
+			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
+		}
+
 		// This is the typical case: each listed CPE maps to a single CPE
 		// associated with the vulnerability.
 		// However, unpatched OpenShift 4 vulnerabilities are different.
-		// There is only a single OVAL v2 file for all OpenShift 4.x versions,
-		// so it is assumed the CPE specified for the vulnerability actually indicates
-		// versions y such that 4.0 <= y <= 4.x are affected.
+		// See below for more information.
 		cpes := make([]string, 0, len(def.Advisory.AffectedCPEList))
 
 		for _, affected := range def.Advisory.AffectedCPEList {
@@ -72,11 +75,14 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 
 			// If this is an unfixed OpenShift 4.x vulnerability, add a CPE for each minor version
 			// below the given minor version.
+			// There is only a single OVAL v2 file for all OpenShift 4 versions,
+			// so it is assumed the CPE specified for the vulnerability actually indicates
+			// versions x such that 4.0 <= x <= 4.y are affected, where y is the specified OpenShift 4 minor version.
 			// It is expected the CPE is of the form cpe:/a:redhat:openshift:4.x or cpe:/a:redhat:openshift:4.x::el8.
 			// Any other formats are not supported at this time.
 			if defType == ovalutil.CVEDefinition && cpeutils.IsOpenShift4CPE(affected) {
 				if openshiftCPEs, err := cpeutils.GetRelatedCPEsForOpenShift4(affected); err != nil {
-					log.Warnf("Skipping addition of lower OpenShift 4 CPEs: %v", err)
+					log.Warnf("Skipping addition of extra OpenShift 4 CPEs for the unpatched vulnerability %q: %v", name, err)
 				} else {
 					cpes = append(cpes, openshiftCPEs...)
 				}
@@ -85,11 +91,6 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 
 		if len(cpes) == 0 {
 			return nil, nil
-		}
-
-		name := name(def)
-		if name == "" {
-			return nil, errors.Errorf("Unable to determine name of vuln %q in %s", def.Title, uri)
 		}
 
 		var cvss3, cvss2 struct {
