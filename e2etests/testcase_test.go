@@ -3813,7 +3813,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "4.10.1650890594-1.el8.noarch",
-				AddedBy:       "sha256:2b441754735ea7decb684ef19d54115fc309c270fe7b87ed36aa3773ce50b78b",
+				AddedBy:       "sha256:3fa3f612bdcb92746bf76be1b9c9e1c1c80de777aedaf48b7068f4a129ded3c2",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-26291",
