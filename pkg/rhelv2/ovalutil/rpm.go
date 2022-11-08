@@ -29,6 +29,9 @@ const (
 	// UnaffectedDefinition indicates the vulnerability definition is for
 	// a package that is unaffected by the CVE.
 	UnaffectedDefinition = "unaffected"
+	// NoneDefinition indicates this is not a vulnerability.
+	// This is typically used to indicate an, essentially, empty OVAL v2 file.
+	NoneDefinition = "none"
 )
 
 var (

@@ -26,6 +26,10 @@ func isValidCPE(cpeSet set.StringSet, cpe string) bool {
 	return cpeutils.IsOpenShiftCPE(cpe) || cpeSet.Contains(cpe)
 }
 
+func isSkippableDefType(defType string) bool {
+	return defType == ovalutil.UnaffectedDefinition || defType == ovalutil.NoneDefinition
+}
+
 func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vulnerability, error) {
 	var root oval.Root
 	if err := xml.NewDecoder(r).Decode(&root); err != nil {
@@ -41,7 +45,7 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 		// Red Hat OVAL v2 data include information about vulnerabilities,
 		// that actually don't affect the package in any way. Storing them
 		// would increase number of records in DB without adding any value.
-		if defType == ovalutil.UnaffectedDefinition {
+		if isSkippableDefType(defType) {
 			return nil, nil
 		}
 
