@@ -3799,4 +3799,72 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:ose-jenkins",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "Red Hat",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:8",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "jenkins-2-plugins",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "4.10.1650890594-1.el8.noarch",
+				AddedBy:       "sha256:2b441754735ea7decb684ef19d54115fc309c270fe7b87ed36aa3773ce50b78b",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2021-26291",
+						NamespaceName: "rhel:8",
+						Description:   `DOCUMENTATION: A flaw was found in maven. Repositories that are defined in a dependency’s Project Object Model (pom), which may be unknown to users, are used by default resulting in potential risk if a malicious actor takes over that repository or is able to insert themselves into a position to pretend to be that repository. The highest threat from this vulnerability is to data confidentiality and integrity. 
+            
+            MITIGATION: To avoid possible man-in-the-middle related attacks with this flaw, ensure any linked repositories in maven POMs use https and not http.`,
+						Link:     "https://access.redhat.com/security/cve/CVE-2021-26291",
+						Severity: "Moderate",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         5.2,
+									"Score":               7.4,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2022-30945",
+						NamespaceName: "rhel:8",
+						Description:   "DOCUMENTATION: The MITRE CVE dictionary describes this issue as: Jenkins Pipeline: Groovy Plugin 2689.v434009a_31b_f1 and earlier allows loading any Groovy source files on the classpath of Jenkins and Jenkins plugins in sandboxed pipelines.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2022-30945",
+						Severity:      "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 1.6,
+									"ImpactScore":         5.9,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
 }

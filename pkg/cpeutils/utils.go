@@ -1,10 +1,27 @@
 package cpeutils
 
 import (
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/nvdtools/wfn"
+	"github.com/pkg/errors"
 )
+
+// *** START Regexp-related consts/vars. ***
+
+// These must all stay in-sync at all times.
+const (
+	openshiftVersionIdx = 1
+	minorVersionIdx     = 2
+)
+
+var (
+	openshiftCPEPattern = regexp.MustCompile(`^cpe:/a:redhat:openshift:(?P<openshiftVersion>4\.(?P<minorVersion>\d+))(::el8)?$`)
+)
+
+// *** END Regexp-related consts/vars. ***
 
 // GetMostSpecificCPE deterministically returns the CPE that is the most specific
 // from the set of matches. This function requires that len(cpes) > 0
@@ -28,7 +45,35 @@ func compareAttributes(c1, c2 wfn.AttributesWithFixedIn) int {
 	return strings.Compare(c1.Version, c2.Version)
 }
 
-// IsOpenShiftCPE returns if the passed CPE is a known OpenShift CPE
+// IsOpenShiftCPE determines whether the passed CPE is an OpenShift CPE.
 func IsOpenShiftCPE(cpe string) bool {
 	return strings.HasPrefix(cpe, "cpe:/a:redhat:openshift:")
+}
+
+// IsOpenShift4CPE determines whether the passed CPE is an OpenShift 4.x CPE.
+func IsOpenShift4CPE(cpe string) bool {
+	// This should be faster than performing regex matching.
+	return strings.HasPrefix(cpe, "cpe:/a:redhat:openshift:4")
+}
+
+// GetRelatedCPEsForOpenShift4 returns a slice of other CPEs related to the given Red Hat OpenShift 4 CPE.
+// For example, given "cpe:/a:redhat:openshift:4.2", this returns
+// ["cpe:/a:redhat:openshift:4.0", "cpe:/a:redhat:openshift:4.1"].
+func GetRelatedCPEsForOpenShift4(cpe string) ([]string, error) {
+	match := openshiftCPEPattern.FindStringSubmatch(cpe)
+	if len(match) == 0 {
+		return nil, errors.New("CPE does not match an expected OpenShift 4 CPE")
+	}
+
+	minorVersion, err := strconv.Atoi(match[minorVersionIdx])
+	if err != nil {
+		return nil, err
+	}
+	openshiftVersion := match[openshiftVersionIdx]
+	cpes := make([]string, 0, minorVersion)
+	for i := 0; i < minorVersion; i++ {
+		version := strconv.Itoa(i)
+		cpes = append(cpes, strings.Replace(cpe, openshiftVersion, "4."+version, 1))
+	}
+	return cpes, nil
 }

@@ -45,6 +45,12 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 			return nil, nil
 		}
 
+		// This is the typical case: each listed CPE maps to a single CPE
+		// associated with the vulnerability.
+		// However, unpatched OpenShift 4 vulnerabilities are different.
+		// There is only a single OVAL v2 file for all OpenShift 4.x versions,
+		// so it is assumed the CPE specified for the vulnerability actually indicates
+		// versions y such that 4.0 <= y <= 4.x are affected.
 		cpes := make([]string, 0, len(def.Advisory.AffectedCPEList))
 
 		for _, affected := range def.Advisory.AffectedCPEList {
@@ -61,7 +67,20 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 				return nil, err
 			}
 
+			// Add the given CPE to the slice.
 			cpes = append(cpes, affected)
+
+			// If this is an unfixed OpenShift 4.x vulnerability, add a CPE for each minor version
+			// below the given minor version.
+			// It is expected the CPE is of the form cpe:/a:redhat:openshift:4.x or cpe:/a:redhat:openshift:4.x::el8.
+			// Any other formats are not supported at this time.
+			if defType == ovalutil.CVEDefinition && cpeutils.IsOpenShift4CPE(affected) {
+				if openshiftCPEs, err := cpeutils.GetRelatedCPEsForOpenShift4(affected); err != nil {
+					log.Warnf("Skipping addition of lower OpenShift 4 CPEs: %v", err)
+				} else {
+					cpes = append(cpes, openshiftCPEs...)
+				}
+			}
 		}
 
 		if len(cpes) == 0 {
