@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.27.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.8.0
-	github.com/ckaznocha/protoc-gen-lint v0.2.4
+	github.com/ckaznocha/protoc-gen-lint v0.3.0
 	github.com/containers/image/v5 v5.23.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.8.1+incompatible
