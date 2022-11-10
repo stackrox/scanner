@@ -20,19 +20,29 @@ import (
 )
 
 //nolint:staticcheck
-func processRHELv2Vulnerability(v *database.RHELv2Vulnerability) {
+func processHeadRHELv2Vulnerability(cfg config, v *database.RHELv2Vulnerability) {
 	// PackageInfos is deprecated, so it is no longer populated.
 	// However, we need to ensure we diff correctly with older genesis dumps
-	// which populate this field. We simply convert each RHELv2PackageInfo
-	// into its respective RHELv2Package.
-	for _, pkgInfo := range v.PackageInfos {
-		for _, pkg := range pkgInfo.Packages {
-			pkg.FixedInVersion = pkgInfo.FixedInVersion
-			pkg.ArchOperation = pkgInfo.ArchOperation
-			v.Packages = append(v.Packages, pkg)
+	// which do populate this field.
+	// We simply convert each RHELv2Package into its respective RHELv2PackageInfo.
+	if cfg.UseLegacyRHELv2PackageInfos {
+		for _, pkg := range v.Packages {
+			pkgInfo := &database.RHELv2PackageInfo{
+				FixedInVersion: pkg.FixedInVersion,
+				ArchOperation:  pkg.ArchOperation,
+			}
+
+			// Set these fields to their defaults, to minimize space.
+			pkg.FixedInVersion = ""
+			pkg.ArchOperation = 0
+
+			pkgInfo.Packages = append(pkgInfo.Packages, pkg)
+
+			v.PackageInfos = append(v.PackageInfos, pkgInfo)
 		}
+
+		v.Packages = nil
 	}
-	v.PackageInfos = nil
 }
 
 func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.Time, baseF, headF *zip.File, rhelExists bool) error {
@@ -78,7 +88,6 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 
 	baseVulnsMap := make(map[string]*database.RHELv2Vulnerability, len(baseRHEL.Vulns))
 	for _, vuln := range baseRHEL.Vulns {
-		processRHELv2Vulnerability(vuln)
 		if _, ok := baseVulnsMap[vuln.Name]; ok {
 			// Should really never happen, but being defensive.
 			return errors.Errorf("UNEXPECTED: got multiple vulns for key: %s", vuln.Name)
@@ -88,6 +97,8 @@ func generateRHELv2Diff(cfg config, outputDir string, baseLastModifiedTime time.
 
 	var filtered []*database.RHELv2Vulnerability
 	for _, headVuln := range rhel.Vulns {
+		processHeadRHELv2Vulnerability(cfg, headVuln)
+
 		matchingBaseVuln, found := baseVulnsMap[headVuln.Name]
 		// If the vuln was not in the base, add it.
 		if !found {

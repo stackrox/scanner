@@ -395,6 +395,7 @@ type config struct {
 	KeepUnusedRHELv2CPEs        bool `json:"keepUnusedRHELv2CPEs"`
 	UseLegacyUbuntuCVEURLPrefix bool `json:"useLegacyUbuntuCVEURLPrefix"`
 	UseLegacyAlpineCVEURLPrefix bool `json:"useLegacyAlpineCVEURLPrefix"`
+	UseLegacyRHELv2PackageInfos bool `json:"useLegacyRHELv2PackageInfos"`
 }
 
 // Command defines the diff-dumps command.
