@@ -38,6 +38,8 @@ func NewService(db database.Datastore, k8sCache k8scache.Cache, istioCache istio
 }
 
 type serviceImpl struct {
+	v1.UnimplementedOrchestratorScanServiceServer
+
 	version    string
 	db         database.Datastore
 	k8sCache   k8scache.Cache
@@ -110,30 +112,23 @@ func (s *serviceImpl) GetKubeVulnerabilities(_ context.Context, req *v1.GetKubeV
 
 // GetIstioVulnerabilities returns Istio vulnerabilities for requested Kubernetes version.
 func (s *serviceImpl) GetIstioVulnerabilities(_ context.Context, req *v1.GetIstioVulnerabilitiesRequest) (*v1.GetIstioVulnerabilitiesResponse, error) {
-	var err error
 	resp := &v1.GetIstioVulnerabilitiesResponse{
 		ScannerVersion: s.version,
 	}
 
-	getIstioVuln := func(version string) ([]*v1.Vulnerability, error) {
-		if version == "" {
-			return nil, errors.New("Can't get vulnerabilities for empty version.")
-		}
-		version, err := convert.TruncateVersion(version)
-		if err != nil {
-			log.Warnf("Unable to convert Istio version of %s - %v. Skipping...", version, err)
-			return nil, nil
-		}
-
-		vulns := s.istioCache.GetVulnsByVersion(version)
-		converted := convert.IstioVulnerabilities(version, vulns)
-		return filterInvalidVulns(converted), nil
+	if req.GetIstioVersion() == "" {
+		return nil, errors.New("Can't get vulnerabilities for empty version.")
 	}
-
-	resp.Vulnerabilities, err = getIstioVuln(req.GetIstioVersion())
+	version, err := convert.TruncateVersion(req.GetIstioVersion())
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Warnf("Unable to convert Istio version of %s - %v. Skipping...", version, err)
+		return nil, nil
 	}
+
+	vulns := s.istioCache.GetVulnsByVersion(version)
+	converted := convert.IstioVulnerabilities(version, vulns)
+
+	resp.Vulnerabilities = filterInvalidVulns(converted)
 
 	return resp, nil
 }

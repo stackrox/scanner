@@ -4,8 +4,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/go-version"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/istio-cves/types"
-	"github.com/stackrox/scanner/pkg/istioUtil"
+	"github.com/stackrox/scanner/pkg/istioutil"
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
@@ -23,15 +25,23 @@ type cacheImpl struct {
 	lastUpdatedTime time.Time
 }
 
-func (c *cacheImpl) GetVulnsByVersion(version string) []types.Vuln {
+func (c *cacheImpl) GetVulnsByVersion(vStr string) []types.Vuln {
 	c.cacheRWLock.RLock()
 	defer c.cacheRWLock.RUnlock()
 
 	var vulns []types.Vuln
+	v, err := version.NewVersion(vStr)
+	if err != nil {
+		log.Infof("Failed to get version: %s", vStr)
+		return nil
+	}
 	for _, vuln := range c.cache {
-		isAffected, _, _ := istioUtil.IstioIsAffected(version, vuln)
+		isAffected, _, error := istioutil.IsAffected(v, vuln)
+		if error != nil {
+			continue
+		}
 		if isAffected {
-			// Only return vulnerabilities relevant to the given version.
+			// Only return vulnerabilities relevant to the given vStr.
 			vulns = append(vulns, vuln)
 		}
 	}

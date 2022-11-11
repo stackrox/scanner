@@ -24,28 +24,52 @@ func TestGRPCGetIstioVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewOrchestratorScanServiceClient(conn)
 
-	testCases := []struct {
-		version string
-		fixedBy string
-	}{
+	type istionVulnStruct struct {
+		version  string
+		name     string
+		fixedBy  string
+		severity string
+		score    float32
+	}
+
+	testCases := []istionVulnStruct{
 		{
-			version: "1.13.6",
-			fixedBy: "1.13.7",
+			version:  "1.13.6",
+			name:     "ISTIO-SECURITY-2022-006",
+			fixedBy:  "1.13.7",
+			severity: "Moderate",
+			score:    5.9,
+		},
+		{
+			version:  "1.14.0",
+			name:     "ISTIO-SECURITY-2022-007",
+			fixedBy:  "1.14.5",
+			severity: "Important",
+			score:    7.5,
 		},
 	}
+
+	testSet := make(map[string]istionVulnStruct)
 
 	for _, c := range testCases {
 		t.Run(fmt.Sprintf("case-%s", c.version), func(t *testing.T) {
 			req := &v1.GetIstioVulnerabilitiesRequest{IstioVersion: c.version}
 			resp, err := client.GetIstioVulnerabilities(context.Background(), req)
 			assert.NoError(t, err)
-			testSet := make(map[string]bool)
+
 			for _, vuln := range resp.GetVulnerabilities() {
 				assert.NotNil(t, vuln.GetMetadataV2().GetCvssV3())
+				assert.NotEmpty(t, vuln.Name)
 				assert.NotEmpty(t, vuln.FixedBy)
-				testSet[vuln.FixedBy] = true
+				assert.NotEmpty(t, vuln.Severity)
+				sample := istionVulnStruct{version: c.version, name: vuln.Name, fixedBy: vuln.FixedBy, severity: vuln.Severity, score: vuln.GetMetadataV2().GetCvssV3().Score}
+				testSet[vuln.Name] = sample
 			}
-			assert.True(t, testSet[c.fixedBy])
+
+			assert.NotEmpty(t, testSet[c.name])
+			assert.Equal(t, c.fixedBy, testSet[c.name].fixedBy)
+			assert.Equal(t, c.severity, testSet[c.name].severity)
+			assert.Equal(t, c.score, testSet[c.name].score)
 		})
 	}
 }
