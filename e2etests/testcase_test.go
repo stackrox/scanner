@@ -2314,6 +2314,8 @@ var testCases = []testCase{
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "2.9.1-4.el8.x86_64",
+				AddedBy:       "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
+				FixedBy:       "2.9.1-9.el8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2020:4952",
@@ -2340,8 +2342,6 @@ var testCases = []testCase{
 						FixedBy: "0:2.9.1-4.el8_3.1",
 					},
 				},
-				AddedBy: "sha256:35ad9b4fba1fa6b00a6f266303348dc0cf9a7c341616e800c2738030c0f64167",
-				FixedBy: "2.9.1-4.el8_3.1",
 			},
 			{
 				Name:          "libsolv",
