@@ -17,21 +17,24 @@ import (
 	coreovalutil "github.com/stackrox/scanner/pkg/ovalutil"
 )
 
+// DefinitionType represents a vulnerability definition's type.
+type DefinitionType string
+
 const (
 	// CVEDefinition indicates the vulnerability definition is for a CVE.
-	CVEDefinition = "cve"
+	CVEDefinition DefinitionType = "cve"
 	// RHBADefinition indicates the vulnerability definition is for a RHBA.
-	RHBADefinition = "rhba"
+	RHBADefinition DefinitionType = "rhba"
 	// RHEADefinition indicates the vulnerability definition is for a RHEA.
-	RHEADefinition = "rhea"
+	RHEADefinition DefinitionType = "rhea"
 	// RHSADefinition indicates the vulnerability definition is for a RHSA.
-	RHSADefinition = "rhsa"
+	RHSADefinition DefinitionType = "rhsa"
 	// UnaffectedDefinition indicates the vulnerability definition is for
 	// a package that is unaffected by the CVE.
-	UnaffectedDefinition = "unaffected"
+	UnaffectedDefinition DefinitionType = "unaffected"
 	// NoneDefinition indicates this is not a vulnerability.
 	// This is typically used to indicate an, essentially, empty OVAL v2 file.
-	NoneDefinition = "none"
+	NoneDefinition DefinitionType = "none"
 )
 
 var (
@@ -231,12 +234,12 @@ func rpmStateLookup(root *oval.Root, ref string) (*oval.RPMInfoState, error) {
 }
 
 // GetDefinitionType parses an OVAL definition and extracts its type from ID.
-func GetDefinitionType(def oval.Definition) (string, error) {
+func GetDefinitionType(def oval.Definition) (DefinitionType, error) {
 	match := definitionTypeRegex.FindStringSubmatch(def.ID)
 	if len(match) != 2 { // we should have match of the whole string and one submatch
 		return "", errors.New("cannot parse definition ID for its type")
 	}
-	return match[1], nil
+	return DefinitionType(match[1]), nil
 }
 
 // getPackageResolutions parses the given oval.Definition to determine a mapping from package to its resolution state.

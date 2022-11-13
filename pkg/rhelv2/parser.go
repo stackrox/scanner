@@ -26,7 +26,7 @@ func isValidCPE(cpeSet set.StringSet, cpe string) bool {
 	return cpeutils.IsOpenShiftCPE(cpe) || cpeSet.Contains(cpe)
 }
 
-func isSkippableDefType(defType string) bool {
+func isSkippableDefType(defType ovalutil.DefinitionType) bool {
 	return defType == ovalutil.UnaffectedDefinition || defType == ovalutil.NoneDefinition
 }
 
@@ -74,22 +74,24 @@ func parse(cpeSet set.StringSet, uri string, r io.Reader) ([]*database.RHELv2Vul
 				return nil, err
 			}
 
-			// Add the given CPE to the slice.
-			cpes = append(cpes, affected)
-
 			// If this is an unfixed OpenShift 4.x vulnerability, add a CPE for each minor version
-			// below the given minor version.
+			// below the given minor version. If there is no given minor version, a default is used.
 			// There is only a single OVAL v2 file for all OpenShift 4 versions,
-			// so it is assumed the CPE specified for the vulnerability actually indicates
-			// versions x such that 4.0 <= x <= 4.y are affected, where y is the specified OpenShift 4 minor version.
-			// It is expected the CPE is of the form cpe:/a:redhat:openshift:4.x or cpe:/a:redhat:openshift:4.x::el8.
-			// Any other formats are not supported at this time.
+			// so it is assumed the CPE specified for the vulnerability indicates
+			// versions x such that 4.0 <= y <= 4.x are affected, where x is the specified OpenShift 4 minor version
+			// (or a default, if no version is given).
+			// It is expected the CPE is of the form cpe:/a:redhat:openshift:4.x, cpe:/a:redhat:openshift:4.x::el8,
+			// cpe:/a:redhat:openshift:4, or cpe:/a:redhat:openshift:4::el8.
+			// Any other OpenShift 4-related CPEs are not supported at this time.
 			if defType == ovalutil.CVEDefinition && cpeutils.IsOpenShift4CPE(affected) {
-				if openshiftCPEs, err := cpeutils.GetRelatedCPEsForOpenShift4(affected); err != nil {
+				if openshiftCPEs, err := cpeutils.GetAllOpenShift4CPEs(affected); err != nil {
 					log.Warnf("Skipping addition of extra OpenShift 4 CPEs for the unpatched vulnerability %q: %v", name, err)
 				} else {
 					cpes = append(cpes, openshiftCPEs...)
 				}
+			} else {
+				// Add the given CPE to the slice.
+				cpes = append(cpes, affected)
 			}
 		}
 
