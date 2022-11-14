@@ -7,6 +7,7 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/facebookincubator/nvdtools/cvss2"
 	"github.com/facebookincubator/nvdtools/cvss3"
+	"github.com/stackrox/istio-cves/types"
 	"github.com/stackrox/k8s-cves/pkg/validation"
 	"github.com/stackrox/rox/pkg/stringutils"
 	"github.com/stackrox/scanner/database"
@@ -162,6 +163,21 @@ func ConvertMetadataFromK8s(cve *validation.CVESchema) (*Metadata, error) {
 
 	m.PublishedDateTime = cve.Published.Format(NVDTimeLayout)
 
+	return &m, nil
+}
+
+// ConvertMetadataFromIstio takes the Istio' vulnerability definition,
+// and it returns *Metadata based on the given data.
+func ConvertMetadataFromIstio(vuln types.Vuln) (*Metadata, error) {
+	var m Metadata
+	if vuln.CVSS.ScoreV3 > 0 {
+		cvssv3, err := ConvertCVSSv3(vuln.CVSS.VectorV3)
+		if err != nil {
+			return nil, err
+		}
+		m.CVSSv3 = *cvssv3
+	}
+	m.PublishedDateTime = vuln.Published.Format(NVDTimeLayout)
 	return &m, nil
 }
 

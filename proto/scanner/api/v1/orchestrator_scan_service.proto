@@ -23,6 +23,15 @@ message GetKubeVulnerabilitiesResponse {
     repeated Vulnerability generic_vulnerabilities            = 5;
 }
 
+message GetIstioVulnerabilitiesRequest {
+    string istio_version = 1;
+}
+
+message GetIstioVulnerabilitiesResponse {
+    string                 scanner_version = 1;
+    repeated Vulnerability vulnerabilities = 2;
+}
+
 message GetOpenShiftVulnerabilitiesRequest {
     string openShift_version = 1;
 }
@@ -43,6 +52,12 @@ service OrchestratorScanService {
     rpc GetOpenShiftVulnerabilities(GetOpenShiftVulnerabilitiesRequest) returns (GetOpenShiftVulnerabilitiesResponse) {
         option (google.api.http) = {
             get: "/v1/orchestrator/openshift/vulnerabilities"
+        };
+    }
+
+    rpc GetIstioVulnerabilities(GetIstioVulnerabilitiesRequest) returns (GetIstioVulnerabilitiesResponse) {
+        option (google.api.http) = {
+            get: "/v1/orchestrator/istio/vulnerabilities/{istio_version}"
         };
     }
 }
