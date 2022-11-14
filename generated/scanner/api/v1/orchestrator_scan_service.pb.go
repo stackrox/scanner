@@ -217,6 +217,140 @@ func (m *GetKubeVulnerabilitiesResponse) Clone() *GetKubeVulnerabilitiesResponse
 	return cloned
 }
 
+type GetIstioVulnerabilitiesRequest struct {
+	IstioVersion         string   `protobuf:"bytes,1,opt,name=istio_version,json=istioVersion,proto3" json:"istio_version,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetIstioVulnerabilitiesRequest) Reset()         { *m = GetIstioVulnerabilitiesRequest{} }
+func (m *GetIstioVulnerabilitiesRequest) String() string { return proto.CompactTextString(m) }
+func (*GetIstioVulnerabilitiesRequest) ProtoMessage()    {}
+func (*GetIstioVulnerabilitiesRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_ac93c27c111ff4a6, []int{2}
+}
+func (m *GetIstioVulnerabilitiesRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetIstioVulnerabilitiesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetIstioVulnerabilitiesRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetIstioVulnerabilitiesRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetIstioVulnerabilitiesRequest.Merge(m, src)
+}
+func (m *GetIstioVulnerabilitiesRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetIstioVulnerabilitiesRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetIstioVulnerabilitiesRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetIstioVulnerabilitiesRequest proto.InternalMessageInfo
+
+func (m *GetIstioVulnerabilitiesRequest) GetIstioVersion() string {
+	if m != nil {
+		return m.IstioVersion
+	}
+	return ""
+}
+
+func (m *GetIstioVulnerabilitiesRequest) MessageClone() proto.Message {
+	return m.Clone()
+}
+func (m *GetIstioVulnerabilitiesRequest) Clone() *GetIstioVulnerabilitiesRequest {
+	if m == nil {
+		return nil
+	}
+	cloned := new(GetIstioVulnerabilitiesRequest)
+	*cloned = *m
+
+	return cloned
+}
+
+type GetIstioVulnerabilitiesResponse struct {
+	ScannerVersion       string           `protobuf:"bytes,1,opt,name=scanner_version,json=scannerVersion,proto3" json:"scanner_version,omitempty"`
+	Vulnerabilities      []*Vulnerability `protobuf:"bytes,2,rep,name=vulnerabilities,proto3" json:"vulnerabilities,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
+}
+
+func (m *GetIstioVulnerabilitiesResponse) Reset()         { *m = GetIstioVulnerabilitiesResponse{} }
+func (m *GetIstioVulnerabilitiesResponse) String() string { return proto.CompactTextString(m) }
+func (*GetIstioVulnerabilitiesResponse) ProtoMessage()    {}
+func (*GetIstioVulnerabilitiesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_ac93c27c111ff4a6, []int{3}
+}
+func (m *GetIstioVulnerabilitiesResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetIstioVulnerabilitiesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetIstioVulnerabilitiesResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetIstioVulnerabilitiesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetIstioVulnerabilitiesResponse.Merge(m, src)
+}
+func (m *GetIstioVulnerabilitiesResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetIstioVulnerabilitiesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetIstioVulnerabilitiesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetIstioVulnerabilitiesResponse proto.InternalMessageInfo
+
+func (m *GetIstioVulnerabilitiesResponse) GetScannerVersion() string {
+	if m != nil {
+		return m.ScannerVersion
+	}
+	return ""
+}
+
+func (m *GetIstioVulnerabilitiesResponse) GetVulnerabilities() []*Vulnerability {
+	if m != nil {
+		return m.Vulnerabilities
+	}
+	return nil
+}
+
+func (m *GetIstioVulnerabilitiesResponse) MessageClone() proto.Message {
+	return m.Clone()
+}
+func (m *GetIstioVulnerabilitiesResponse) Clone() *GetIstioVulnerabilitiesResponse {
+	if m == nil {
+		return nil
+	}
+	cloned := new(GetIstioVulnerabilitiesResponse)
+	*cloned = *m
+
+	if m.Vulnerabilities != nil {
+		cloned.Vulnerabilities = make([]*Vulnerability, len(m.Vulnerabilities))
+		for idx, v := range m.Vulnerabilities {
+			cloned.Vulnerabilities[idx] = v.Clone()
+		}
+	}
+	return cloned
+}
+
 type GetOpenShiftVulnerabilitiesRequest struct {
 	OpenShiftVersion     string   `protobuf:"bytes,1,opt,name=openShift_version,json=openShiftVersion,proto3" json:"openShift_version,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -228,7 +362,7 @@ func (m *GetOpenShiftVulnerabilitiesRequest) Reset()         { *m = GetOpenShift
 func (m *GetOpenShiftVulnerabilitiesRequest) String() string { return proto.CompactTextString(m) }
 func (*GetOpenShiftVulnerabilitiesRequest) ProtoMessage()    {}
 func (*GetOpenShiftVulnerabilitiesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ac93c27c111ff4a6, []int{2}
+	return fileDescriptor_ac93c27c111ff4a6, []int{4}
 }
 func (m *GetOpenShiftVulnerabilitiesRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -289,7 +423,7 @@ func (m *GetOpenShiftVulnerabilitiesResponse) Reset()         { *m = GetOpenShif
 func (m *GetOpenShiftVulnerabilitiesResponse) String() string { return proto.CompactTextString(m) }
 func (*GetOpenShiftVulnerabilitiesResponse) ProtoMessage()    {}
 func (*GetOpenShiftVulnerabilitiesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ac93c27c111ff4a6, []int{3}
+	return fileDescriptor_ac93c27c111ff4a6, []int{5}
 }
 func (m *GetOpenShiftVulnerabilitiesResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -354,6 +488,8 @@ func (m *GetOpenShiftVulnerabilitiesResponse) Clone() *GetOpenShiftVulnerabiliti
 func init() {
 	proto.RegisterType((*GetKubeVulnerabilitiesRequest)(nil), "scannerV1.GetKubeVulnerabilitiesRequest")
 	proto.RegisterType((*GetKubeVulnerabilitiesResponse)(nil), "scannerV1.GetKubeVulnerabilitiesResponse")
+	proto.RegisterType((*GetIstioVulnerabilitiesRequest)(nil), "scannerV1.GetIstioVulnerabilitiesRequest")
+	proto.RegisterType((*GetIstioVulnerabilitiesResponse)(nil), "scannerV1.GetIstioVulnerabilitiesResponse")
 	proto.RegisterType((*GetOpenShiftVulnerabilitiesRequest)(nil), "scannerV1.GetOpenShiftVulnerabilitiesRequest")
 	proto.RegisterType((*GetOpenShiftVulnerabilitiesResponse)(nil), "scannerV1.GetOpenShiftVulnerabilitiesResponse")
 }
@@ -363,40 +499,45 @@ func init() {
 }
 
 var fileDescriptor_ac93c27c111ff4a6 = []byte{
-	// 518 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0x3f, 0x6f, 0xd3, 0x40,
-	0x18, 0xc6, 0x7b, 0x69, 0xa9, 0xd4, 0x43, 0xa2, 0xf4, 0x86, 0x36, 0x35, 0x60, 0x45, 0x46, 0xa8,
-	0xe1, 0x4f, 0x6c, 0x25, 0xcc, 0x2c, 0x5d, 0x3a, 0x20, 0xa8, 0x9a, 0x88, 0x80, 0x58, 0xa2, 0x8b,
-	0x79, 0xeb, 0x9c, 0x6a, 0xee, 0xcc, 0xdd, 0xd9, 0xa2, 0x2b, 0x2b, 0x1b, 0x2c, 0x0c, 0x7c, 0x08,
-	0x3e, 0x06, 0x23, 0x12, 0x5f, 0x00, 0x05, 0x36, 0xbe, 0x04, 0xb2, 0x9d, 0x38, 0xe9, 0xc5, 0x89,
-	0xc3, 0xea, 0xf7, 0x79, 0x7e, 0xf7, 0xf8, 0xbd, 0xf7, 0x3d, 0xec, 0x2a, 0x9f, 0x72, 0x0e, 0xd2,
-	0xa3, 0x11, 0xf3, 0x92, 0xb6, 0x27, 0xa4, 0x3f, 0x02, 0xa5, 0x25, 0xd5, 0x42, 0x0e, 0xd2, 0xda,
-	0x40, 0x81, 0x4c, 0x98, 0x0f, 0x6e, 0x24, 0x85, 0x16, 0x64, 0x67, 0xa2, 0xef, 0xb7, 0xad, 0xdb,
-	0x81, 0x10, 0x41, 0x08, 0x99, 0x93, 0x72, 0x2e, 0x34, 0xd5, 0x4c, 0x70, 0x95, 0x0b, 0x2d, 0xc7,
-	0x00, 0x27, 0x71, 0xc8, 0x41, 0xd2, 0x21, 0x0b, 0x99, 0xbe, 0xcc, 0x35, 0xce, 0x73, 0x7c, 0xe7,
-	0x04, 0xf4, 0xd3, 0x78, 0x08, 0xfd, 0xb9, 0x2a, 0x03, 0xd5, 0x85, 0x77, 0x31, 0x28, 0x4d, 0x5a,
-	0x98, 0x5c, 0xc4, 0x43, 0x90, 0x1c, 0x34, 0xa8, 0x41, 0x02, 0x52, 0x31, 0xc1, 0xeb, 0xa8, 0x81,
-	0x9a, 0x3b, 0xdd, 0xbd, 0x59, 0xa5, 0x9f, 0x17, 0x9c, 0x8f, 0x5b, 0xd8, 0x5e, 0x06, 0x54, 0x91,
-	0xe0, 0x0a, 0xc8, 0x11, 0xde, 0x9d, 0x04, 0x2b, 0x70, 0xdb, 0x19, 0xee, 0xc6, 0xf4, 0xc7, 0xf2,
-	0xaf, 0xe4, 0x25, 0xb6, 0x68, 0x10, 0x48, 0x08, 0xb2, 0x4e, 0x24, 0x57, 0x71, 0x75, 0xd4, 0xd8,
-	0x6c, 0x5e, 0xef, 0xd4, 0xdd, 0xa2, 0x1b, 0xee, 0xfc, 0x81, 0x97, 0xdd, 0xc3, 0x99, 0xd7, 0x48,
-	0x42, 0x5e, 0xe0, 0x43, 0x1a, 0xb1, 0xb4, 0xab, 0xb0, 0xc8, 0xad, 0x55, 0x70, 0xeb, 0x85, 0xd5,
-	0xc4, 0x9e, 0x63, 0xc7, 0x17, 0x5c, 0x4b, 0x11, 0x86, 0x20, 0x07, 0x6f, 0x29, 0xa7, 0x41, 0x09,
-	0x7f, 0xb3, 0x82, 0xdf, 0x98, 0x31, 0x9e, 0xe5, 0x88, 0x92, 0xf8, 0xca, 0x1f, 0xc1, 0x9b, 0x38,
-	0x2c, 0xc1, 0x6f, 0x55, 0xc5, 0x2f, 0xac, 0x26, 0xf6, 0x0c, 0x1f, 0x04, 0xc0, 0x41, 0x32, 0x7f,
-	0x01, 0x7a, 0xad, 0x02, 0xba, 0x3f, 0x31, 0x1a, 0x48, 0xe7, 0x0c, 0x3b, 0x27, 0xa0, 0x4f, 0x23,
-	0xe0, 0xbd, 0x11, 0x3b, 0xd7, 0x4b, 0x46, 0xec, 0x21, 0xde, 0x13, 0x53, 0x89, 0x31, 0x61, 0x37,
-	0x8b, 0xc2, 0x74, 0xc0, 0x3e, 0x21, 0x7c, 0x77, 0x25, 0x73, 0xf9, 0x94, 0xd5, 0x4a, 0xa7, 0xec,
-	0x18, 0xef, 0xfe, 0xef, 0x68, 0x99, 0x86, 0xce, 0xdf, 0x1a, 0x3e, 0x38, 0x9d, 0x5b, 0xdb, 0x9e,
-	0x4f, 0x79, 0x2f, 0x5f, 0x5a, 0xf2, 0x15, 0xe1, 0xfd, 0xf2, 0x8d, 0x20, 0xcd, 0xb9, 0x13, 0x56,
-	0x6e, 0xa1, 0x75, 0x7f, 0x0d, 0x65, 0xfe, 0xe3, 0x4e, 0xeb, 0xc3, 0xcf, 0x3f, 0x9f, 0x6b, 0x47,
-	0xe4, 0x9e, 0xf9, 0x96, 0x78, 0xe9, 0xb6, 0x7a, 0x46, 0x74, 0xf2, 0x0d, 0xe1, 0x5b, 0x2b, 0xfa,
-	0x49, 0x5a, 0x57, 0x4f, 0xae, 0xb8, 0x4b, 0xcb, 0x5d, 0x57, 0x3e, 0x49, 0xdb, 0xc9, 0xd2, 0x3e,
-	0x22, 0x0f, 0x16, 0xd2, 0xa6, 0x37, 0xaf, 0x52, 0xab, 0x19, 0xf9, 0xf8, 0xc9, 0xf7, 0xb1, 0x8d,
-	0x7e, 0x8c, 0x6d, 0xf4, 0x6b, 0x6c, 0xa3, 0x2f, 0xbf, 0xed, 0x0d, 0xdc, 0x60, 0xc2, 0x55, 0x9a,
-	0xfa, 0x17, 0x52, 0xbc, 0xcf, 0x1f, 0x36, 0x97, 0x46, 0x6c, 0x1a, 0xc5, 0x4d, 0xda, 0xaf, 0x67,
-	0x8f, 0xe6, 0xab, 0x8d, 0xe1, 0x76, 0x26, 0x79, 0xfc, 0x2f, 0x00, 0x00, 0xff, 0xff, 0x30, 0xd0,
-	0x69, 0x25, 0x7a, 0x05, 0x00, 0x00,
+	// 595 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x95, 0xcd, 0x6e, 0xd3, 0x40,
+	0x10, 0xc7, 0xbb, 0x6d, 0xa9, 0xd4, 0xe5, 0xa3, 0x74, 0x0f, 0x6d, 0x6a, 0x20, 0x44, 0xae, 0x50,
+	0x4b, 0x21, 0xb6, 0x12, 0x24, 0xc4, 0x05, 0x0e, 0x95, 0x50, 0x85, 0x10, 0x54, 0x4d, 0x44, 0x40,
+	0x5c, 0xa2, 0x8d, 0x99, 0x3a, 0xab, 0x9a, 0x5d, 0xb3, 0xbb, 0xb1, 0xa8, 0x10, 0x17, 0xae, 0x48,
+	0x1c, 0xe0, 0xc2, 0x01, 0xf1, 0x0c, 0x3c, 0x06, 0x47, 0x24, 0x5e, 0x00, 0x05, 0x1e, 0x04, 0xd9,
+	0xce, 0xe7, 0xc6, 0x4e, 0xd2, 0xab, 0xe7, 0x3f, 0xbf, 0xfd, 0xcf, 0xec, 0xec, 0x18, 0x3b, 0xca,
+	0xa3, 0x9c, 0x83, 0x74, 0x69, 0xc8, 0xdc, 0xa8, 0xe2, 0x0a, 0xe9, 0xb5, 0x41, 0x69, 0x49, 0xb5,
+	0x90, 0xcd, 0x38, 0xd6, 0x54, 0x20, 0x23, 0xe6, 0x81, 0x13, 0x4a, 0xa1, 0x05, 0x59, 0xed, 0xe9,
+	0x1b, 0x15, 0xeb, 0xaa, 0x2f, 0x84, 0x1f, 0x40, 0x92, 0x49, 0x39, 0x17, 0x9a, 0x6a, 0x26, 0xb8,
+	0x4a, 0x85, 0x96, 0x6d, 0x80, 0xa3, 0x4e, 0xc0, 0x41, 0xd2, 0x16, 0x0b, 0x98, 0x3e, 0x4d, 0x35,
+	0xf6, 0x53, 0x7c, 0xed, 0x00, 0xf4, 0xe3, 0x4e, 0x0b, 0x1a, 0x23, 0x51, 0x06, 0xaa, 0x06, 0x6f,
+	0x3a, 0xa0, 0x34, 0x29, 0x63, 0x72, 0xd2, 0x69, 0x81, 0xe4, 0xa0, 0x41, 0x35, 0x23, 0x90, 0x8a,
+	0x09, 0x5e, 0x40, 0x25, 0xb4, 0xbb, 0x5a, 0x5b, 0x1f, 0x46, 0x1a, 0x69, 0xc0, 0xfe, 0xb8, 0x8c,
+	0x8b, 0x79, 0x40, 0x15, 0x0a, 0xae, 0x80, 0xec, 0xe0, 0xb5, 0x9e, 0xb1, 0x01, 0x6e, 0x25, 0xc1,
+	0x5d, 0xea, 0x17, 0x96, 0x7e, 0x25, 0xcf, 0xb1, 0x45, 0x7d, 0x5f, 0x82, 0x9f, 0x74, 0x22, 0x1a,
+	0xc7, 0x15, 0x50, 0x69, 0x69, 0xf7, 0x7c, 0xb5, 0xe0, 0x0c, 0xba, 0xe1, 0x8c, 0x1e, 0x78, 0x5a,
+	0xdb, 0x1a, 0xe6, 0x1a, 0x4e, 0xc8, 0x33, 0xbc, 0x45, 0x43, 0x16, 0x77, 0x15, 0x26, 0xb9, 0x8b,
+	0x33, 0xb8, 0x85, 0x41, 0xaa, 0x89, 0x3d, 0xc6, 0xb6, 0x27, 0xb8, 0x96, 0x22, 0x08, 0x40, 0x36,
+	0x5f, 0x53, 0x4e, 0xfd, 0x0c, 0xfe, 0xd2, 0x0c, 0x7e, 0x69, 0xc8, 0x78, 0x92, 0x22, 0x32, 0xec,
+	0x2b, 0xaf, 0x0d, 0xaf, 0x3a, 0x41, 0x06, 0x7e, 0x79, 0x96, 0xfd, 0x41, 0xaa, 0x89, 0x3d, 0xc2,
+	0x9b, 0x3e, 0x70, 0x90, 0xcc, 0x9b, 0x80, 0x9e, 0x9b, 0x01, 0xdd, 0xe8, 0x25, 0x1a, 0x48, 0xfb,
+	0x61, 0x32, 0x0c, 0x8f, 0x94, 0x66, 0x22, 0x67, 0xbc, 0xb6, 0xf1, 0x45, 0x16, 0x87, 0x8d, 0xc9,
+	0xba, 0x90, 0x7c, 0xec, 0x0f, 0xd5, 0x27, 0x84, 0xaf, 0xe7, 0x72, 0xf2, 0xa7, 0x0a, 0x65, 0x4e,
+	0xd5, 0x3e, 0x5e, 0x3b, 0xeb, 0x95, 0x9b, 0x09, 0xf6, 0x11, 0xb6, 0x0f, 0x40, 0x1f, 0x86, 0xc0,
+	0xeb, 0x6d, 0x76, 0xac, 0x73, 0x6a, 0xbb, 0x85, 0xd7, 0x45, 0x5f, 0x62, 0x98, 0xba, 0x3c, 0x08,
+	0xf4, 0x6b, 0xfc, 0x8c, 0xf0, 0xf6, 0x54, 0x66, 0x7e, 0x9d, 0x8b, 0xf3, 0xd6, 0x89, 0xce, 0x58,
+	0x67, 0xf5, 0xfb, 0x32, 0xde, 0x3c, 0x1c, 0x59, 0x47, 0x75, 0x8f, 0xf2, 0x7a, 0xba, 0x8c, 0xc8,
+	0x37, 0x84, 0x37, 0xb2, 0x5f, 0x3a, 0xd9, 0x1d, 0x39, 0x61, 0xea, 0x76, 0xb1, 0x6e, 0xce, 0xa1,
+	0x4c, 0x0b, 0xb7, 0xcb, 0x1f, 0x7e, 0xff, 0xfb, 0xb2, 0xb8, 0x43, 0x6e, 0x98, 0x3b, 0xd2, 0x8d,
+	0xb7, 0x90, 0x6b, 0x58, 0x27, 0x3f, 0x10, 0xbe, 0x32, 0xa5, 0x9f, 0xa4, 0x3c, 0x7e, 0xf2, 0x8c,
+	0xbb, 0xb4, 0x9c, 0x79, 0xe5, 0x3d, 0xb7, 0xd5, 0xc4, 0xed, 0x6d, 0xb2, 0x37, 0xe1, 0x36, 0xbe,
+	0x79, 0x15, 0xa7, 0x66, 0x59, 0xde, 0xcc, 0x19, 0x73, 0x62, 0x34, 0x6a, 0xca, 0x93, 0xb2, 0xf6,
+	0xe6, 0x91, 0xf6, 0x6c, 0x3e, 0x48, 0x6c, 0xde, 0x23, 0x77, 0x27, 0x6c, 0x26, 0x0f, 0xd0, 0xb4,
+	0xe8, 0xbe, 0x1b, 0x7b, 0xac, 0xef, 0xf7, 0xef, 0xff, 0xec, 0x16, 0xd1, 0xaf, 0x6e, 0x11, 0xfd,
+	0xe9, 0x16, 0xd1, 0xd7, 0xbf, 0xc5, 0x05, 0x5c, 0x62, 0xc2, 0x51, 0x9a, 0x7a, 0x27, 0x52, 0xbc,
+	0x4d, 0xff, 0x31, 0x0e, 0x0d, 0x59, 0xdf, 0x92, 0x13, 0x55, 0x5e, 0x0e, 0xff, 0x5f, 0x2f, 0x16,
+	0x5a, 0x2b, 0x89, 0xe4, 0xce, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0x21, 0x4c, 0x9d, 0x7b, 0x05,
+	0x07, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -413,6 +554,7 @@ const _ = grpc.SupportPackageIsVersion6
 type OrchestratorScanServiceClient interface {
 	GetKubeVulnerabilities(ctx context.Context, in *GetKubeVulnerabilitiesRequest, opts ...grpc.CallOption) (*GetKubeVulnerabilitiesResponse, error)
 	GetOpenShiftVulnerabilities(ctx context.Context, in *GetOpenShiftVulnerabilitiesRequest, opts ...grpc.CallOption) (*GetOpenShiftVulnerabilitiesResponse, error)
+	GetIstioVulnerabilities(ctx context.Context, in *GetIstioVulnerabilitiesRequest, opts ...grpc.CallOption) (*GetIstioVulnerabilitiesResponse, error)
 }
 
 type orchestratorScanServiceClient struct {
@@ -441,10 +583,20 @@ func (c *orchestratorScanServiceClient) GetOpenShiftVulnerabilities(ctx context.
 	return out, nil
 }
 
+func (c *orchestratorScanServiceClient) GetIstioVulnerabilities(ctx context.Context, in *GetIstioVulnerabilitiesRequest, opts ...grpc.CallOption) (*GetIstioVulnerabilitiesResponse, error) {
+	out := new(GetIstioVulnerabilitiesResponse)
+	err := c.cc.Invoke(ctx, "/scannerV1.OrchestratorScanService/GetIstioVulnerabilities", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrchestratorScanServiceServer is the server API for OrchestratorScanService service.
 type OrchestratorScanServiceServer interface {
 	GetKubeVulnerabilities(context.Context, *GetKubeVulnerabilitiesRequest) (*GetKubeVulnerabilitiesResponse, error)
 	GetOpenShiftVulnerabilities(context.Context, *GetOpenShiftVulnerabilitiesRequest) (*GetOpenShiftVulnerabilitiesResponse, error)
+	GetIstioVulnerabilities(context.Context, *GetIstioVulnerabilitiesRequest) (*GetIstioVulnerabilitiesResponse, error)
 }
 
 // UnimplementedOrchestratorScanServiceServer can be embedded to have forward compatible implementations.
@@ -456,6 +608,9 @@ func (*UnimplementedOrchestratorScanServiceServer) GetKubeVulnerabilities(ctx co
 }
 func (*UnimplementedOrchestratorScanServiceServer) GetOpenShiftVulnerabilities(ctx context.Context, req *GetOpenShiftVulnerabilitiesRequest) (*GetOpenShiftVulnerabilitiesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOpenShiftVulnerabilities not implemented")
+}
+func (*UnimplementedOrchestratorScanServiceServer) GetIstioVulnerabilities(ctx context.Context, req *GetIstioVulnerabilitiesRequest) (*GetIstioVulnerabilitiesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetIstioVulnerabilities not implemented")
 }
 
 func RegisterOrchestratorScanServiceServer(s *grpc.Server, srv OrchestratorScanServiceServer) {
@@ -498,6 +653,24 @@ func _OrchestratorScanService_GetOpenShiftVulnerabilities_Handler(srv interface{
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrchestratorScanService_GetIstioVulnerabilities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetIstioVulnerabilitiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestratorScanServiceServer).GetIstioVulnerabilities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scannerV1.OrchestratorScanService/GetIstioVulnerabilities",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestratorScanServiceServer).GetIstioVulnerabilities(ctx, req.(*GetIstioVulnerabilitiesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _OrchestratorScanService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "scannerV1.OrchestratorScanService",
 	HandlerType: (*OrchestratorScanServiceServer)(nil),
@@ -509,6 +682,10 @@ var _OrchestratorScanService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOpenShiftVulnerabilities",
 			Handler:    _OrchestratorScanService_GetOpenShiftVulnerabilities_Handler,
+		},
+		{
+			MethodName: "GetIstioVulnerabilities",
+			Handler:    _OrchestratorScanService_GetIstioVulnerabilities_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -649,6 +826,88 @@ func (m *GetKubeVulnerabilitiesResponse) MarshalToSizedBuffer(dAtA []byte) (int,
 			i--
 			dAtA[i] = 0xa
 		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetIstioVulnerabilitiesRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetIstioVulnerabilitiesRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetIstioVulnerabilitiesRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.IstioVersion) > 0 {
+		i -= len(m.IstioVersion)
+		copy(dAtA[i:], m.IstioVersion)
+		i = encodeVarintOrchestratorScanService(dAtA, i, uint64(len(m.IstioVersion)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetIstioVulnerabilitiesResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetIstioVulnerabilitiesResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetIstioVulnerabilitiesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.Vulnerabilities) > 0 {
+		for iNdEx := len(m.Vulnerabilities) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Vulnerabilities[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintOrchestratorScanService(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.ScannerVersion) > 0 {
+		i -= len(m.ScannerVersion)
+		copy(dAtA[i:], m.ScannerVersion)
+		i = encodeVarintOrchestratorScanService(dAtA, i, uint64(len(m.ScannerVersion)))
+		i--
+		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -801,6 +1060,44 @@ func (m *GetKubeVulnerabilitiesResponse) Size() (n int) {
 	l = len(m.ScannerVersion)
 	if l > 0 {
 		n += 1 + l + sovOrchestratorScanService(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *GetIstioVulnerabilitiesRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.IstioVersion)
+	if l > 0 {
+		n += 1 + l + sovOrchestratorScanService(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *GetIstioVulnerabilitiesResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ScannerVersion)
+	if l > 0 {
+		n += 1 + l + sovOrchestratorScanService(uint64(l))
+	}
+	if len(m.Vulnerabilities) > 0 {
+		for _, e := range m.Vulnerabilities {
+			l = e.Size()
+			n += 1 + l + sovOrchestratorScanService(uint64(l))
+		}
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -1165,6 +1462,206 @@ func (m *GetKubeVulnerabilitiesResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.ScannerVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipOrchestratorScanService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthOrchestratorScanService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetIstioVulnerabilitiesRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowOrchestratorScanService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetIstioVulnerabilitiesRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetIstioVulnerabilitiesRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IstioVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOrchestratorScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthOrchestratorScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthOrchestratorScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.IstioVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipOrchestratorScanService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthOrchestratorScanService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetIstioVulnerabilitiesResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowOrchestratorScanService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetIstioVulnerabilitiesResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetIstioVulnerabilitiesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ScannerVersion", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOrchestratorScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthOrchestratorScanService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthOrchestratorScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ScannerVersion = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Vulnerabilities", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOrchestratorScanService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthOrchestratorScanService
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthOrchestratorScanService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Vulnerabilities = append(m.Vulnerabilities, &Vulnerability{})
+			if err := m.Vulnerabilities[len(m.Vulnerabilities)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
