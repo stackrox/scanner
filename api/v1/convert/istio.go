@@ -30,7 +30,7 @@ func IstioVulnerabilities(vStr string, istioVulns []types.Vuln) []*v1.Vulnerabil
 		}
 
 		link := stringutils.OrDefault(istioVuln.Link, "https://istio.io/latest/news/security/")
-		// Only second returned value is needed for fixed by version in response
+		// Fixedby version is needed for response and isAffected has already been checked
 		_, fixedBy, err := istioutil.IsAffected(v, istioVuln)
 		if err != nil {
 			log.Errorf("unable to get fixedBy for %s: %v", istioVuln.Name, err)
