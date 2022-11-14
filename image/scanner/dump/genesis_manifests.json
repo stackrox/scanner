@@ -416,6 +416,11 @@
         "useLegacyRHELv2PackageInfos": true,
         "ignoreIstioVulns": true
       }
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-TODO.zip",
+      "timestamp": "TODO",
+      "uuid": "4e3cc4f5-3d03-46e1-af92-6f3a8795c557"
     }
   ]
 }
