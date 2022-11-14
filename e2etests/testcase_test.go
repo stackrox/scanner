@@ -3906,6 +3906,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 								},
 							},
 						},
+						FixedBy: "0:4.10.1663147786-1.el8",
 					},
 				},
 			},
