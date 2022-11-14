@@ -5,7 +5,8 @@ import (
 	"github.com/stackrox/istio-cves/types"
 )
 
-// IsAffected gets the fixed-by version for vStr in Istion vuln.
+// IsAffected returns whether the given version of Istio is affected by the given vulnerability.
+// If it is, then the fixed-by version is returned as well.
 func IsAffected(v *version.Version, vuln types.Vuln) (bool, string, error) {
 	for _, affected := range vuln.Affected {
 		constraint, err := version.NewConstraint(affected.Range)

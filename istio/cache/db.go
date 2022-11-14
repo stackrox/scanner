@@ -26,18 +26,18 @@ type cacheImpl struct {
 }
 
 func (c *cacheImpl) GetVulnsByVersion(vStr string) []types.Vuln {
-	c.cacheRWLock.RLock()
-	defer c.cacheRWLock.RUnlock()
-
 	var vulns []types.Vuln
 	v, err := version.NewVersion(vStr)
 	if err != nil {
 		log.Infof("Failed to get version: %s", vStr)
 		return nil
 	}
+	c.cacheRWLock.RLock()
+	defer c.cacheRWLock.RUnlock()
+
 	for _, vuln := range c.cache {
-		isAffected, _, error := istioutil.IsAffected(v, vuln)
-		if error != nil {
+		isAffected, _, err := istioutil.IsAffected(v, vuln)
+		if err != nil {
 			continue
 		}
 		if isAffected {
