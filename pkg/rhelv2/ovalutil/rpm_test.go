@@ -19,9 +19,10 @@ import (
 )
 
 type definitionTypeTestCase struct {
-	def        oval.Definition
-	want, name string
-	err        bool
+	def  oval.Definition
+	want DefinitionType
+	name string
+	err  bool
 }
 
 func simpleProtoVulnFunc(def oval.Definition) (*database.RHELv2Vulnerability, error) {
