@@ -418,8 +418,8 @@
       }
     },
     {
-      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-TODO.zip",
-      "timestamp": "TODO",
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20221115211823.zip",
+      "timestamp": "2022-11-15T21:18:23.283783178Z",
       "uuid": "4e3cc4f5-3d03-46e1-af92-6f3a8795c557"
     }
   ]
