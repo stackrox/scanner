@@ -108,7 +108,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 						foundMatch = true
 						checkMatch(t, test.source, expectedVuln, matchingVuln)
 					}
-					assert.True(t, foundMatch)
+					assert.Truef(t, foundMatch, "Expected to find %s in scan results", expectedVuln.Name)
 				}
 			}
 			feature.Vulnerabilities = nil
