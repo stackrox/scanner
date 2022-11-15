@@ -257,7 +257,7 @@ func Test_filesMap_Get(t *testing.T) {
 			wantError:    os.ErrNotExist,
 		},
 		{
-			name: "when file is in map, is extractable, and is a symlink, should return with contents",
+			name: "when file is in map, is extractable, and is an absolute symlink, should return with contents",
 			fields: fields{
 				root: filepath.Join("testdata", "rootfs-rhcos"),
 				fileMap: map[string]*fileMetadata{
@@ -272,6 +272,25 @@ func Test_filesMap_Get(t *testing.T) {
 			path: "etc/redhat-release",
 			wantFileData: analyzer.FileData{
 				Contents: []byte("Red Hat Enterprise Linux CoreOS release 4.11\n"),
+			},
+			wantExists: true,
+		},
+		{
+			name: "when file is in map, is extractable, and is a relative symlink, should return with contents",
+			fields: fields{
+				root: filepath.Join("testdata", "rootfs-rhcos-rel-symlink"),
+				fileMap: map[string]*fileMetadata{
+					"etc/redhat-release": {
+						isExecutable:  false,
+						isExtractable: true,
+						isSymlink:     true,
+					},
+				},
+				readError: nil,
+			},
+			path: "etc/redhat-release",
+			wantFileData: analyzer.FileData{
+				Contents: []byte("Hello"),
 			},
 			wantExists: true,
 		},
@@ -335,6 +354,9 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 	rhcosRoot := filepath.Join("testdata", "rootfs-rhcos")
 	rhcosRootAbs, err := filepath.Abs(rhcosRoot)
 	require.NoError(t, err)
+	symlinkRelRoot := filepath.Join("testdata", "rootfs-rhcos-rel-symlink")
+	symlinkRelRootAbs, err := filepath.Abs(symlinkRelRoot)
+	require.NoError(t, err)
 
 	testcases := []struct {
 		name             string
@@ -357,10 +379,25 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 			},
 		},
 		{
-			name: "etc/redhat-release with symlink",
+			name: "etc/redhat-release with absolute symlink",
 			root: rhcosRoot,
 			expectedFilesMap: &filesMap{
 				root: rhcosRootAbs,
+				files: map[string]*fileMetadata{
+					"etc/redhat-release": {
+						isExecutable:  false,
+						isExtractable: true,
+						isSymlink:     true,
+					},
+				},
+				readError: nil,
+			},
+		},
+		{
+			name: "etc/redhat-release with relative symlink",
+			root: symlinkRelRoot,
+			expectedFilesMap: &filesMap{
+				root: symlinkRelRootAbs,
 				files: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
