@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
+	"github.com/stackrox/scanner/pkg/fsutil/fileinfo"
 	"io"
 	"os/exec"
 	"path"
@@ -113,7 +114,7 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 		case tar.TypeReg, tar.TypeLink:
 			var fileData analyzer.FileData
 
-			executable := matcher.IsFileExecutable(hdr.FileInfo())
+			executable := fileinfo.IsFileExecutable(hdr.FileInfo())
 			if hdr.Size > analyzer.GetMaxELFExecutableFileSize() {
 				log.Warnf("Skipping ELF executable check for file %q (%d bytes) because it is larger than the configured maxELFExecutableFileSize of %d MiB",
 					filename, hdr.Size, analyzer.GetMaxELFExecutableFileSize()/1024/1024)

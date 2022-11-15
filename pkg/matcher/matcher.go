@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"github.com/stackrox/scanner/pkg/fsutil/fileinfo"
 	"io"
 	"io/fs"
 	"os"
@@ -121,7 +122,7 @@ func NewExecutableMatcher() Matcher {
 }
 
 func (e *executableMatcher) Match(_ string, fi os.FileInfo, _ io.ReaderAt) (matches bool, extract bool) {
-	return IsFileExecutable(fi), false
+	return fileinfo.IsFileExecutable(fi), false
 }
 
 type regexpMatcher struct {
@@ -197,9 +198,4 @@ func (a *andMatcher) Match(fullPath string, fileInfo os.FileInfo, contents io.Re
 		extract = extract && extractable
 	}
 	return true, extract
-}
-
-// IsFileExecutable returns if the file is an executable regular file.
-func IsFileExecutable(fileInfo fs.FileInfo) bool {
-	return fileInfo.Mode().IsRegular() && fileInfo.Mode()&0111 != 0
 }

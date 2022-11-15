@@ -1,9 +1,9 @@
 package dotnetcoreruntime
 
 import (
+	"github.com/stackrox/scanner/pkg/fsutil/fileinfo/mock"
 	"testing"
 
-	"github.com/stackrox/scanner/pkg/fileinfo/mock"
 	"github.com/stretchr/testify/assert"
 )
 

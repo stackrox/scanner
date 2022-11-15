@@ -12,6 +12,7 @@ import (
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/analyzer/detection"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/fsutil/fileinfo"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
@@ -23,6 +24,9 @@ type fileMetadata struct {
 	isExecutable bool
 	// If true, contents can be extracted from the filesystem.
 	isExtractable bool
+
+	// If true, the file is a symlink to some other file.
+	isSymlink bool
 }
 
 var _ analyzer.Files = (*filesMap)(nil)
@@ -168,8 +172,10 @@ func extractFile(path string, entry fs.DirEntry, pathMatcher matcher.Matcher, m 
 		return nil, nil
 	}
 	return &fileMetadata{
-		isExecutable:  matcher.IsFileExecutable(fileInfo),
+		isExecutable:  fileinfo.IsFileExecutable(fileInfo),
 		isExtractable: isExtractable,
+
+		isSymlink: fileinfo.IsFileSymlink(fileInfo),
 	}, nil
 }
 
@@ -182,7 +188,25 @@ func (n *filesMap) Get(path string) (analyzer.FileData, bool) {
 		if !f.isExtractable {
 			return fileData, true
 		}
-		fileData.Contents, n.readError = os.ReadFile(filepath.Join(n.root, filepath.FromSlash(path)))
+		// Prepend the root to make this an absolute file path.
+		absPath := filepath.Join(n.root, filepath.FromSlash(path))
+		if f.isSymlink {
+			// Resolve the symlink to the correct destination.
+			var linkDest string
+			linkDest, n.readError = os.Readlink(absPath)
+			if n.readError != nil {
+				return analyzer.FileData{}, false
+			}
+			// If the symlink is an absolute path,
+			// prepend n.root to the link's destination
+			// and read that file, instead.
+			// Note: this only matters for symlinks to absolute paths.
+			// Symlinks to relative paths are followed correctly.
+			if filepath.IsAbs(linkDest) {
+				absPath = filepath.Join(n.root, filepath.FromSlash(linkDest))
+			}
+		}
+		fileData.Contents, n.readError = os.ReadFile(absPath)
 		if n.readError == nil {
 			return fileData, true
 		}

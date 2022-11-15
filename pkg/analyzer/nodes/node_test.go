@@ -1,6 +1,8 @@
 package nodes
 
 import (
+	"github.com/stackrox/scanner/singletons/requiredfilenames"
+	"github.com/stretchr/testify/require"
 	"io"
 	"io/fs"
 	"os"
@@ -184,8 +186,6 @@ func Test_filesMap_extractFile(t *testing.T) {
 }
 
 func Test_filesMap_Get(t *testing.T) {
-	wd, _ := os.Getwd()
-	testdata := filepath.Join(wd, "testdata")
 	type fields struct {
 		root      string
 		fileMap   map[string]*fileMetadata
@@ -224,7 +224,7 @@ func Test_filesMap_Get(t *testing.T) {
 		{
 			name: "when file is in map and is extractable, should return with contents",
 			fields: fields{
-				root: filepath.Join(testdata, "rootfs-foo"),
+				root: filepath.Join("testdata", "rootfs-foo"),
 				fileMap: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
@@ -242,7 +242,7 @@ func Test_filesMap_Get(t *testing.T) {
 		{
 			name: "when file is in map and is extractable but does not exist, then keep error",
 			fields: fields{
-				root: filepath.Join(testdata, "rootfs-foo"),
+				root: filepath.Join("testdata", "rootfs-foo"),
 				fileMap: map[string]*fileMetadata{
 					"foo/does/not/exist": {
 						isExecutable:  false,
@@ -255,6 +255,25 @@ func Test_filesMap_Get(t *testing.T) {
 			wantFileData: analyzer.FileData{},
 			wantExists:   false,
 			wantError:    os.ErrNotExist,
+		},
+		{
+			name: "when file is in map, is extractable, and is a soft-link, should return with contents",
+			fields: fields{
+				root: filepath.Join("testdata", "rootfs-rhcos"),
+				fileMap: map[string]*fileMetadata{
+					"etc/redhat-release": {
+						isExecutable:  false,
+						isExtractable: true,
+						isSymlink:     true,
+					},
+				},
+				readError: nil,
+			},
+			path: "etc/redhat-release",
+			wantFileData: analyzer.FileData{
+				Contents: []byte("Red Hat Enterprise Linux CoreOS release 4.11\n"),
+			},
+			wantExists: true,
 		},
 	}
 	for _, tt := range tests {
@@ -305,6 +324,69 @@ func Test_filesMap_ReadErr(t *testing.T) {
 			}
 			tt.wantErr(t, n.readErr(), "readErr()")
 			assert.NoError(t, n.readError)
+		})
+	}
+}
+
+func Test_extractFilesFromDirectory(t *testing.T) {
+	fooRoot := filepath.Join("testdata", "rootfs-foo")
+	fooRootAbs, err := filepath.Abs(fooRoot)
+	require.NoError(t, err)
+	rhcosRoot := filepath.Join("testdata", "rootfs-rhcos")
+	rhcosRootAbs, err := filepath.Abs(rhcosRoot)
+	require.NoError(t, err)
+
+	testcases := []struct{
+		name             string
+		root             string
+		expectedFilesMap *filesMap
+	}{
+		{
+			name: "redhat-release no symlink",
+			root: fooRoot,
+			expectedFilesMap: &filesMap{
+				root:      fooRootAbs,
+				files: map[string]*fileMetadata{
+					"etc/redhat-release": {
+						isExecutable:  false,
+						isExtractable: true,
+						isSymlink:     false,
+					},
+				},
+				readError: nil,
+			},
+		},
+		{
+			name: "redhat-release with symlink",
+			root: rhcosRoot,
+			expectedFilesMap: &filesMap{
+				root:      rhcosRootAbs,
+				files: map[string]*fileMetadata{
+					"etc/redhat-release": {
+						isExecutable:  false,
+						isExtractable: true,
+						isSymlink:     true,
+					},
+				},
+				readError: nil,
+			},
+		},
+	}
+
+	for _, testcase := range testcases {
+		t.Run(testcase.name, func(t *testing.T) {
+			filesMap, err := extractFilesFromDirectory(testcase.root, requiredfilenames.SingletonOSMatcher())
+			assert.NoError(t, err)
+			assert.NoError(t, filesMap.readError)
+
+			assert.Equal(t, testcase.expectedFilesMap.root, filesMap.root)
+			assert.Len(t, filesMap.files, len(testcase.expectedFilesMap.files))
+			for expectedPath, expectedMetadata := range testcase.expectedFilesMap.files {
+				metadata, hasFile := filesMap.files[expectedPath]
+				assert.True(t, hasFile)
+				assert.NotNil(t, metadata)
+				assert.Equal(t, *expectedMetadata, *metadata)
+			}
 		})
 	}
 }
