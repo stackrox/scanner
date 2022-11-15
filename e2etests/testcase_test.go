@@ -3827,7 +3827,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						Link:     "https://access.redhat.com/security/cve/CVE-2021-26291",
 						Severity: "Moderate",
 						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
+							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
@@ -3850,7 +3850,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						Link:          "https://access.redhat.com/security/cve/CVE-2022-30945",
 						Severity:      "Important",
 						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
+							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
@@ -3891,7 +3891,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						Link:     "https://access.redhat.com/errata/RHSA-2022:6531",
 						Severity: "Important",
 						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
+							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
