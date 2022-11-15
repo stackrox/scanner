@@ -24,7 +24,6 @@ type fileMetadata struct {
 	isExecutable bool
 	// If true, contents can be extracted from the filesystem.
 	isExtractable bool
-
 	// If true, the file is a symlink to some other file.
 	isSymlink bool
 }
@@ -174,8 +173,7 @@ func extractFile(path string, entry fs.DirEntry, pathMatcher matcher.Matcher, m 
 	return &fileMetadata{
 		isExecutable:  fileinfo.IsFileExecutable(fileInfo),
 		isExtractable: isExtractable,
-
-		isSymlink: fileinfo.IsFileSymlink(fileInfo),
+		isSymlink:     fileinfo.IsFileSymlink(fileInfo),
 	}, nil
 }
 

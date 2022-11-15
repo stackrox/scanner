@@ -1,7 +1,6 @@
 package matcher
 
 import (
-	"github.com/stackrox/scanner/pkg/fsutil/fileinfo"
 	"io"
 	"io/fs"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/stackrox/rox/pkg/set"
+	"github.com/stackrox/scanner/pkg/fsutil/fileinfo"
 	"github.com/stackrox/scanner/pkg/whiteout"
 )
 

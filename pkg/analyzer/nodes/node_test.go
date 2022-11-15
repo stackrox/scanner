@@ -1,8 +1,6 @@
 package nodes
 
 import (
-	"github.com/stackrox/scanner/singletons/requiredfilenames"
-	"github.com/stretchr/testify/require"
 	"io"
 	"io/fs"
 	"os"
@@ -12,7 +10,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/analyzer/analyzertest"
+	"github.com/stackrox/scanner/singletons/requiredfilenames"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type matcherMock struct {
@@ -257,7 +257,7 @@ func Test_filesMap_Get(t *testing.T) {
 			wantError:    os.ErrNotExist,
 		},
 		{
-			name: "when file is in map, is extractable, and is a soft-link, should return with contents",
+			name: "when file is in map, is extractable, and is a symlink, should return with contents",
 			fields: fields{
 				root: filepath.Join("testdata", "rootfs-rhcos"),
 				fileMap: map[string]*fileMetadata{
@@ -336,16 +336,16 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 	rhcosRootAbs, err := filepath.Abs(rhcosRoot)
 	require.NoError(t, err)
 
-	testcases := []struct{
+	testcases := []struct {
 		name             string
 		root             string
 		expectedFilesMap *filesMap
 	}{
 		{
-			name: "redhat-release no symlink",
+			name: "etc/redhat-release no symlink",
 			root: fooRoot,
 			expectedFilesMap: &filesMap{
-				root:      fooRootAbs,
+				root: fooRootAbs,
 				files: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
@@ -357,10 +357,10 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 			},
 		},
 		{
-			name: "redhat-release with symlink",
+			name: "etc/redhat-release with symlink",
 			root: rhcosRoot,
 			expectedFilesMap: &filesMap{
-				root:      rhcosRootAbs,
+				root: rhcosRootAbs,
 				files: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
