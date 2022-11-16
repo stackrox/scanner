@@ -588,6 +588,8 @@ openshift_ci_mods() {
 
     handle_nightly_runs
 
+    handle_release_runs
+
     info "Status after mods:"
     "$ROOT/status.sh" || true
 
@@ -647,6 +649,18 @@ handle_nightly_runs() {
     nightly_tag_prefix="$(git describe --tags --abbrev=0 --exclude '*-nightly-*')-nightly-"
     if ! is_in_PR_context && [[ "${JOB_NAME_SAFE:-}" =~ ^nightly- ]]; then
         ci_export NIGHTLY_TAG "${nightly_tag_prefix}$(date '+%Y%m%d')"
+    fi
+}
+
+handle_release_runs() {
+    if ! is_OPENSHIFT_CI; then
+        die "Only for OpenShift CI"
+    fi
+
+    local base_ref
+    base_ref="$(get_base_ref)"
+    if is_tagged && [[ "$base_ref" =~ ^release- ]]; then
+        ci_export RELEASE_TAG "$(git tag --sort=creatordate --contains | tail -1)"
     fi
 }
 
