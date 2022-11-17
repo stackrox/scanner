@@ -15,6 +15,8 @@ TAG := # make sure tag is never injectable as an env var
 ifdef CI
 ifneq ($(NIGHTLY_TAG),)
 TAG := $(NIGHTLY_TAG)
+else ifneq ($(RELEASE_TAG),)
+TAG := $(RELEASE_TAG)
 endif
 endif
 
