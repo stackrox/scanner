@@ -37,7 +37,7 @@ func (pgSQL *pgSQL) insertFeature(feature database.Feature) (int, error) {
 		id, found := pgSQL.cache.Get("feature:" + feature.Namespace.Name + ":" + feature.Name)
 		if found {
 			metrics.IncCacheHits("feature")
-			return id.(int), nil
+			return id, nil
 		}
 	}
 
@@ -87,7 +87,7 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 		id, found := pgSQL.cache.Get(cacheIndex)
 		if found {
 			metrics.IncCacheHits("featureversion")
-			return id.(int), nil
+			return id, nil
 		}
 	}
 

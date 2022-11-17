@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	lru "github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/remind101/migrate"
@@ -51,7 +51,7 @@ type Queryer interface {
 
 type pgSQL struct {
 	*sql.DB
-	cache  *lru.Cache
+	cache  *lru.Cache[string, int]
 	config Config
 }
 

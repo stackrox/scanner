@@ -32,7 +32,7 @@ func (pgSQL *pgSQL) insertNamespace(namespace database.Namespace) (int, error) {
 		metrics.IncCacheQueries("namespace")
 		if id, found := pgSQL.cache.Get("namespace:" + namespace.Name); found {
 			metrics.IncCacheHits("namespace")
-			return id.(int), nil
+			return id, nil
 		}
 	}
 
