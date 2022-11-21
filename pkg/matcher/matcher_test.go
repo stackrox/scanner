@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/stackrox/scanner/pkg/fileinfo/mock"
+	"github.com/stackrox/scanner/pkg/fsutil/fileinfo/mock"
 	"github.com/stretchr/testify/assert"
 )
 
