@@ -771,7 +771,7 @@ send_slack_notice_for_vuln_check_failure() {
 
     local repo="scanner"
     local job_name="sanity-check-vuln-updates"
-    local mentions="@scanner-defs-oncall @shane"
+    local mentions="@scanner-defs-oncall"
     local log_url="https://prow.ci.openshift.org/view/gs/origin-ci-test/logs/${JOB_NAME}/${BUILD_ID}"
 
     # shellcheck disable=SC2016
