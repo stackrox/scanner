@@ -9,5 +9,5 @@ func IsFileExecutable(fileInfo fs.FileInfo) bool {
 
 // IsFileSymlink returns true if fileInfo represents a symlink.
 func IsFileSymlink(fileInfo fs.FileInfo) bool {
-	return fileInfo.Mode().Type() == fs.ModeSymlink
+	return fileInfo.Mode().Type()&fs.ModeSymlink != 0
 }
