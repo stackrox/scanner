@@ -33,7 +33,7 @@ message GetNodeVulnerabilitiesResponse {
     repeated Vulnerability kubelet_vulnerabilities   = 2;
     repeated Vulnerability kubeproxy_vulnerabilities = 3;
     repeated Vulnerability runtime_vulnerabilities   = 4;
-    repeated Feature             inventory_features  = 9;
+    repeated Feature       inventory_features        = 9;
 
     message KernelComponent {
         string name    = 1;
