@@ -2,7 +2,6 @@ package nodescan
 
 import (
 	"context"
-	"github.com/stackrox/scanner/pkg/features"
 	"sort"
 	"strings"
 
@@ -21,6 +20,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
