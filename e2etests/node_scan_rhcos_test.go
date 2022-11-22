@@ -13,7 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var libksbaVuln = &v1.Vulnerability{
+// vulnLibksba is an example of a fixable vulnerability
+var vulnLibksba = &v1.Vulnerability{
 	Name:        "RHSA-2022:7089",
 	Description: "KSBA (pronounced Kasbah) is a library to make X.509 certificates as well as the CMS easily accessible by other applications.  Both specifications are building blocks of S/MIME and TLS.\n\nSecurity Fix(es):\n\n* libksba: integer overflow may lead to remote code execution (CVE-2022-3515)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
 	Link:        "https://access.redhat.com/errata/RHSA-2022:7089",
@@ -30,6 +31,24 @@ var libksbaVuln = &v1.Vulnerability{
 	},
 	FixedBy:  "0:1.3.5-8.el8_6",
 	Severity: "Important",
+}
+
+// vulnTar is an example of a non-fixable vulnerability
+var vulnTar = &v1.Vulnerability{
+	Name:        "CVE-2005-2541",
+	Description: "DOCUMENTATION: The MITRE CVE dictionary describes this issue as: Tar 1.15.1 does not properly warn the user when extracting setuid or setgid files, which may allow local users or remote attackers to gain privileges. \n            STATEMENT: This CVE was assigned to what is the documented and expected behaviour of tar.  There are currently no plans to change tar behaviour to strip setuid and setgid bits when extracting archives.",
+	Link:        "https://access.redhat.com/security/cve/CVE-2005-2541",
+	MetadataV2: &v1.Metadata{
+		CvssV2: nil,
+		CvssV3: &v1.CVSSMetadata{
+			Score:               7,
+			Vector:              "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H",
+			ExploitabilityScore: 1,
+			ImpactScore:         5.9,
+		},
+	},
+	FixedBy:  "",
+	Severity: "Moderate",
 }
 
 func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
@@ -54,7 +73,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 					Namespace: "Red Hat CoreOS",
 					RhelComponents: []*v1.RHELComponent{
 						{
-							Id:        int64(2),
+							Id:        int64(1),
 							Name:      "libksba",
 							Namespace: "rhel:8",
 							Version:   "1.3.5-7.el8",
@@ -63,6 +82,19 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 							// From: https://www.redhat.com/security/data/metrics/repository-to-cpe.json
 							// "rhel-8-for-x86_64-appstream-rpms": {"cpes": ["cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream"]},
 							// "rhel-8-for-x86_64-baseos-rpms": {"cpes": ["cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/o:redhat:rhel:8.3::baseos"]}
+							Cpes: []string{
+								"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
+								"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
+							},
+							AddedBy: "",
+						},
+						{
+							Id:        int64(2),
+							Name:      "tar",
+							Namespace: "rhel:8",
+							Version:   "1.27.1.el8",
+							Arch:      "x86_64",
+							Module:    "",
 							Cpes: []string{
 								"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
 								"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
@@ -78,7 +110,12 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 					{
 						Name:            "libksba",
 						Version:         "1.3.5-7.el8.x86_64",
-						Vulnerabilities: []*v1.Vulnerability{libksbaVuln},
+						Vulnerabilities: []*v1.Vulnerability{vulnLibksba},
+					},
+					{
+						Name:            "tar",
+						Version:         "1.27.1.el8.x86_64",
+						Vulnerabilities: []*v1.Vulnerability{vulnTar},
 					},
 				},
 			},
@@ -99,11 +136,9 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 						assert.NotNil(t, gotFeat.Vulnerabilities, "Expected to find vulnerabilities for %s:%s", expectedFeat.GetName(), expectedFeat.GetVersion())
 						t.Logf("gotFeat.InventoryFeatures: %+v\n", resp.InventoryFeatures)
 						assertContainsVuln(t, gotFeat.Vulnerabilities, expectedFeat.Vulnerabilities)
-					} else {
-						t.Logf("skipping feat found in the reply '%s:%s' - no match", gotFeat.GetName(), gotFeat.GetVersion())
 					}
 				}
-				assert.Truef(t, found, "expected feat '%s:%s' in the reply, but got none", expectedFeat.GetName(), expectedFeat.GetVersion())
+				assert.Truef(t, found, "expected to find feat '%s:%s' in the reply, but got none", expectedFeat.GetName(), expectedFeat.GetVersion())
 			}
 			assert.Equal(t, c.responseContains.Notes, resp.Notes)
 		})
