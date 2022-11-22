@@ -128,7 +128,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			resp, err := client.GetNodeVulnerabilities(context.Background(), c.request)
 			require.NoError(t, err)
 			for _, expectedFeat := range c.responseContains.InventoryFeatures {
-				found := false
+				var found bool
 				for _, gotFeat := range resp.InventoryFeatures {
 					if expectedFeat.GetName() == gotFeat.GetName() && expectedFeat.GetVersion() == gotFeat.GetVersion() {
 						found = true
