@@ -90,7 +90,6 @@ func getFullRHELv2Features(db database.Datastore, pkgEnvs map[int]*database.RHEL
 func getFullFeaturesForRHELv2Packages(db database.Datastore, pkgs []*v1.RHELComponent) ([]Feature, error) {
 	pkgEnvs := make(map[int]*database.RHELv2PackageEnv, len(pkgs))
 	for _, pkg := range pkgs {
-		log.Infof("getFullFeaturesForRHELv2Packages: Rhel component name: %s, ID:'%d'", pkg.GetName(), pkg.GetId())
 		pkgEnvs[int(pkg.GetId())] = &database.RHELv2PackageEnv{
 			Pkg: &database.RHELv2Package{
 				Model:       database.Model{ID: int(pkg.GetId())},

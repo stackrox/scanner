@@ -235,11 +235,9 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 }
 
 func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
-	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) && req.GetNodeInventory() == nil {
+	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) {
 		return nil, status.Error(codes.InvalidArgument, "both os image and kernel version are required")
 	}
-	log.Infof("GetNodeVulnerabilities - request arrived: %+v", req)
-
 	var err error
 	resp := &v1.GetNodeVulnerabilitiesResponse{
 		ScannerVersion: s.version,
@@ -281,12 +279,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		log.Infof("node inventory scan result: %+v", layer)
 		resp.InventoryFeatures = imagescan.ConvertFeatures(layer.Features)
-		log.Infof("attaching node inventory scan as: %+v", resp.InventoryFeatures)
-
-	} else {
-		log.Infof("node scan request missing node inventory")
 	}
 	return resp, nil
 }

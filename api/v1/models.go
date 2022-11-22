@@ -266,8 +266,6 @@ func GetVulnerabilitiesForComponents(db database.Datastore, components *v1.Compo
 
 	if !uncertifiedRHEL {
 		rhelv2Features, err := getFullFeaturesForRHELv2Packages(db, components.GetRhelComponents())
-		log.Infof("GetVulnerabilitiesForComponents rhelv2Features: %+v", rhelv2Features)
-
 		if err != nil {
 			return nil, errors.Wrap(err, "getting RHELv2 features")
 		}
