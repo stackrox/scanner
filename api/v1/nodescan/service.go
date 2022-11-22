@@ -239,6 +239,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) {
 		return nil, status.Error(codes.InvalidArgument, "both os image and kernel version are required")
 	}
+
 	var err error
 	resp := &v1.GetNodeVulnerabilitiesResponse{
 		ScannerVersion: s.version,
