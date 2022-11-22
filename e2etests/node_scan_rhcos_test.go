@@ -61,7 +61,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	}{
 		{
 			request: &v1.GetNodeVulnerabilitiesRequest{
-				OsImage:          "Ubuntu 20.04.1 LTS",
+				OsImage:          "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 				KernelVersion:    "0.0.1",
 				KubeletVersion:   "0.0.1",
 				KubeproxyVersion: "0.0.1",
@@ -70,7 +70,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 					Version: "0.0.1",
 				},
 				NodeInventory: &v1.Components{
-					Namespace: "Red Hat CoreOS",
+					Namespace: "Namespace-Name",
 					RhelComponents: []*v1.RHELComponent{
 						{
 							Id:        int64(1),
