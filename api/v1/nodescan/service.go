@@ -2,6 +2,7 @@ package nodescan
 
 import (
 	"context"
+	"github.com/stackrox/scanner/pkg/features"
 	"sort"
 	"strings"
 
@@ -271,9 +272,8 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// Handle new format of the request and scan node inventory additionally
-	if req.GetNodeInventory() != nil {
-		log.Infof("scanning node inventory: %+v", req.GetNodeInventory())
+	// Handle the new format of the request and scan node inventory additionally
+	if features.RHCOSNodeScanning.Enabled() && req.GetNodeInventory() != nil {
 		// TODO(ROX-12968): resolve hardcoded value uncertifiedRHEL
 		layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetNodeInventory(), false)
 		if err != nil {
