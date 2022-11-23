@@ -6,6 +6,7 @@ package e2etests
 import (
 	"context"
 	"fmt"
+	"github.com/stackrox/scanner/pkg/features"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
@@ -54,6 +55,9 @@ var vulnTar = &v1.Vulnerability{
 func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewNodeScanServiceClient(conn)
+	if !features.RHCOSNodeScanning.Enabled() {
+		t.Skipf("Feature RHCOS Node Scanning is disabled")
+	}
 
 	cases := []struct {
 		request          *v1.GetNodeVulnerabilitiesRequest
