@@ -138,7 +138,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 						assertContainsVuln(t, gotFeat.Vulnerabilities, expectedFeat.Vulnerabilities)
 					}
 				}
-				assert.Truef(t, found, "expected to find feat '%s:%s' in the reply, but got none. Feature in the reply: %+v", expectedFeat.GetName(), expectedFeat.GetVersion(), gotFeat)
+				assert.Truef(t, found, "expected to find feat '%s:%s' in the reply, but got none. Features in the reply: %+v", expectedFeat.GetName(), expectedFeat.GetVersion(), resp.InventoryFeatures)
 			}
 			assert.Equal(t, c.responseContains.Notes, resp.Notes)
 		})
