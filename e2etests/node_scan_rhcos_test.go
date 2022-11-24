@@ -82,7 +82,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 							Namespace: "rhel:8",
 							Version:   "1.3.5-7.el8",
 							Arch:      "x86_64",
-							Module:    "",
+							Module:    "", // must be empty, otherwise scanner does not return any vulns
 							// From: https://www.redhat.com/security/data/metrics/repository-to-cpe.json
 							// "rhel-8-for-x86_64-appstream-rpms": {"cpes": ["cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream"]},
 							// "rhel-8-for-x86_64-baseos-rpms": {"cpes": ["cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/o:redhat:rhel:8.3::baseos"]}
