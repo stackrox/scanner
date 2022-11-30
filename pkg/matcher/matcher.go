@@ -48,6 +48,7 @@ type PrefixMatcher interface {
 	//   - usr/
 	//   - etc/
 	GetCommonPrefixDirs() []string
+	GetAllowList() []string
 }
 
 type allowlistMatcher struct {
@@ -67,6 +68,10 @@ func (m *allowlistMatcher) Match(fullPath string, _ os.FileInfo, _ io.ReaderAt) 
 		}
 	}
 	return false, false
+}
+
+func (m *allowlistMatcher) GetAllowList() []string {
+	return m.allowlist
 }
 
 func (m *allowlistMatcher) GetCommonPrefixDirs() []string {

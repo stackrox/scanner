@@ -89,7 +89,7 @@ func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*fil
 		files: make(map[string]*fileMetadata),
 	}
 	m := metrics.FileExtractionMetrics{}
-	for _, dir := range matcher.GetCommonPrefixDirs() {
+	for _, dir := range matcher.GetAllowList() {
 		if err := n.addFiles(filepath.FromSlash(dir), matcher, &m); err != nil {
 			return nil, errors.Wrapf(err, "failed to match filesMap at %q (at %q)", dir, n.root)
 		}
