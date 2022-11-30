@@ -126,6 +126,7 @@ func (n *filesMap) addFiles(dir string, matcher matcher.Matcher, m *metrics.File
 			}).Error("extract file")
 			return err
 		}
+		logrus.WithFields(logrus.Fields{"path": path, "file": f}).Info("added files from directory")
 		if f != nil {
 			n.files[path] = f
 		}
