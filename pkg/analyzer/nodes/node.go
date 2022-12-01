@@ -67,7 +67,8 @@ func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, err
 	c.OSNamespace, c.OSComponents, c.CertifiedRHELComponents, _, err =
 		detection.DetectComponents(nodeName, files, nil, nil, uncertifiedRHEL)
 	if err != nil {
-		return nil, nil
+		logrus.Error(err)
+		return nil, err
 	}
 	// File reading errors during analysis are not exposed to DetectComponents, hence we
 	// check it and if there were any we fail.
@@ -89,7 +90,7 @@ func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*fil
 		files: make(map[string]*fileMetadata),
 	}
 	m := metrics.FileExtractionMetrics{}
-	for _, dir := range matcher.GetAllowList() {
+	for _, dir := range matcher.GetCommonPrefixDirs() { //GetAllowList() {
 		if err := n.addFiles(filepath.FromSlash(dir), matcher, &m); err != nil {
 			return nil, errors.Wrapf(err, "failed to match filesMap at %q (at %q)", dir, n.root)
 		}
