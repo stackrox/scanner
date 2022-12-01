@@ -61,13 +61,15 @@ func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, err
 	matcher := requiredfilenames.SingletonOSMatcher()
 	files, err := extractFilesFromDirectory(rootFSdir, matcher)
 	if err != nil {
+		logrus.Errorf("error exrtracting files from directory: %v", err)
 		return nil, err
 	}
 	c := &Components{}
+	logrus.Info("Detecting components")
 	c.OSNamespace, c.OSComponents, c.CertifiedRHELComponents, _, err =
 		detection.DetectComponents(nodeName, files, nil, nil, uncertifiedRHEL)
 	if err != nil {
-		logrus.Error(err)
+		logrus.Errorf("error detecting components: %v", err)
 		return nil, err
 	}
 	// File reading errors during analysis are not exposed to DetectComponents, hence we
@@ -75,6 +77,8 @@ func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, err
 	if err := files.readErr(); err != nil {
 		return nil, errors.Wrapf(err, "analysis of node %q failed", nodeName)
 	}
+
+	logrus.Infof("Analysis of node %q succeeded", nodeName)
 	return c, nil
 }
 
