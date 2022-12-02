@@ -93,6 +93,11 @@ build-updater: deps
 	@echo "+ $@"
 	go build -trimpath -o ./bin/updater ./cmd/updater
 
+.PHONY: local-nodescanner-linux
+local-nodescanner-linux:
+	@echo "+ $@"
+	GOOS=linux GOARCH=amd64 go build -trimpath -o ./bin/local-nodescanner ./tools/local-nodescanner
+
 ###########
 ## Style ##
 ###########
