@@ -34,6 +34,7 @@ var (
 	oracleReleaseRegexp = regexp.MustCompile(`(?P<os>Oracle) (Linux Server release) (?P<version>[\d]+)`)
 	centosReleaseRegexp = regexp.MustCompile(`(?P<os>CentOS) (Linux release|release) (?P<version>[\d]+)`)
 	redhatReleaseRegexp = regexp.MustCompile(`(?P<os>Red Hat Enterprise Linux) (Client release|Server release|Workstation release|release) (?P<version>[\d]+)`)
+	rhcosReleaseRegexp  = regexp.MustCompile(`(?P<os>Red Hat Enterprise Linux) (CoreOS release) (?P<version>[\d]+[\.]?[\d]*)`)
 	rockyReleaseRegexp  = regexp.MustCompile(`(?P<os>Rocky) (Linux release) (?P<version>[\d]+)`)
 
 	// RequiredFilenames defines the names of the files required to identify the RHEL-based release.
@@ -87,6 +88,15 @@ func (d detector) Detect(files analyzer.Files, opts *featurens.DetectorOptions) 
 				namespace.Name = "rhel:" + r[3]
 			}
 			return namespace
+		}
+
+		// Attempt to match CoreOS.
+		r = rhcosReleaseRegexp.FindStringSubmatch(string(f.Contents))
+		if len(r) == 4 {
+			return &database.Namespace{
+				Name:          "rhcos:" + r[3],
+				VersionFormat: rpm.ParserName,
+			}
 		}
 
 		// Attempt to match Rocky.
