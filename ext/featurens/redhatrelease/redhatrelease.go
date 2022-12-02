@@ -32,7 +32,7 @@ import (
 var (
 	amazonReleaseRegexp = regexp.MustCompile(`(?P<os>Amazon) (Linux release|Linux AMI release) (?P<version>[\d]+\.[\d]+|[\d]+)`)
 	oracleReleaseRegexp = regexp.MustCompile(`(?P<os>Oracle) (Linux Server release) (?P<version>[\d]+)`)
-	centosReleaseRegexp = regexp.MustCompile(`(?P<os>[^\s]*) (Linux release|release) (?P<version>[\d]+)`)
+	centosReleaseRegexp = regexp.MustCompile(`(?P<os>CentOS) (Linux release|release) (?P<version>[\d]+)`)
 	redhatReleaseRegexp = regexp.MustCompile(`(?P<os>Red Hat Enterprise Linux) (Client release|Server release|Workstation release|release) (?P<version>[\d]+)`)
 	rockyReleaseRegexp  = regexp.MustCompile(`(?P<os>Rocky) (Linux release) (?P<version>[\d]+)`)
 
