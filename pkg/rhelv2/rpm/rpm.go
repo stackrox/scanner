@@ -45,9 +45,9 @@ func ListFeatures(files analyzer.Files) ([]*database.RHELv2Package, []string, er
 
 func listFeatures(files analyzer.Files, testing bool) ([]*database.RHELv2Package, []string, error) {
 	cpes, err := getCPEsUsingEmbeddedContentSets(files)
-	if err != nil {
-		return nil, nil, err
-	}
+	//if err != nil {
+	//	return nil, nil, err
+	//}
 	pkgs, err := getFeaturesFromRPMDatabase(files, testing)
 	if err != nil {
 		return nil, nil, err
