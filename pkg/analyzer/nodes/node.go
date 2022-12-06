@@ -1,6 +1,7 @@
 package nodes
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -89,11 +90,12 @@ func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*fil
 		files: make(map[string]*fileMetadata),
 	}
 	m := metrics.FileExtractionMetrics{}
-	for _, dir := range matcher.GetCommonPrefixDirs() {
+	for _, dir := range []string{"etc/", "usr/share/rpm", "var/lib/rpm"} { //TODO(ROX-13771): Use range matcher.GetCommonPrefixDirs() again after fixing
 		if err := n.addFiles(filepath.FromSlash(dir), matcher, &m); err != nil {
 			return nil, errors.Wrapf(err, "failed to match filesMap at %q (at %q)", dir, n.root)
 		}
 	}
+	fmt.Printf("added following files to filesMap: %v\n", n.files)
 	m.Emit()
 	return n, nil
 }
@@ -188,6 +190,7 @@ func (n *filesMap) Get(path string) (analyzer.FileData, bool) {
 		}
 		// Prepend the root to make this an absolute file path.
 		absPath := filepath.Join(n.root, filepath.FromSlash(path))
+		fmt.Printf("filesMap.Get full absPath: %v\n", absPath)
 		if f.isSymlink {
 			// Resolve the symlink to the correct destination.
 			var linkDest string
