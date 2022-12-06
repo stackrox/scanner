@@ -20,7 +20,6 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
-	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -274,7 +273,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	}
 
 	// Handle the new format of the request and scan node inventory additionally
-	if features.RHCOSNodeScanning.Enabled() && req.GetNodeInventory() != nil {
+	if req.GetNodeInventory() != nil {
 		// TODO(ROX-12968): resolve hardcoded value uncertifiedRHEL
 		layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetNodeInventory(), false)
 		if err != nil {
