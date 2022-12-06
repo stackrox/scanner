@@ -27,7 +27,7 @@ func DetectComponents(name string, files analyzer.Files, parent *database.Layer,
 	var featureVersions []database.FeatureVersion
 	var rhelfeatures *database.RHELv2Components
 
-	if namespace != nil && wellknownnamespaces.IsRHELNamespace(namespace.Name) {
+	if namespace != nil && (wellknownnamespaces.IsRHELNamespace(namespace.Name) || wellknownnamespaces.IsRHCOSNamespace(namespace.Name)) {
 		// This is a RHEL-based image that must be scanned in a certified manner.
 		// Use the RHELv2 scanner instead.
 		packages, cpes, err := rpm.ListFeatures(files)

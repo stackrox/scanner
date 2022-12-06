@@ -124,7 +124,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 
 	notes := getNotes(layer.NamespaceName, uncertifiedRHEL)
 
-	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
+	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName) || namespaces.IsRHCOSNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL(), depMap)
 
@@ -135,7 +135,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, dbFeatureVersion.Feature.Namespace.VersionFormat)
 			layer.Features = append(layer.Features, *feature)
 		}
-		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
+		if !uncertifiedRHEL && (namespaces.IsRHELNamespace(layer.NamespaceName) || namespaces.IsRHCOSNamespace(layer.NamespaceName)) {
 			certified, err := addRHELv2Vulns(db, &layer)
 			if err != nil {
 				return layer, notes, err
@@ -202,7 +202,7 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 		}
 	}
 
-	if !uncertifiedRHEL && namespaces.IsRHELNamespace(namespaceName) {
+	if !uncertifiedRHEL && (namespaces.IsRHELNamespace(namespaceName) || namespaces.IsRHCOSNamespace(namespaceName)) {
 		var certified bool
 		var err error
 		rhelv2PkgEnvs, certified, err = getRHELv2PkgEnvs(db, dbLayer.Name)
