@@ -70,7 +70,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 					Version: "0.0.1",
 				},
 				NodeInventory: &v1.Components{
-					Namespace: "Namespace-Name",
+					Namespace: "rhcos:4.11",
 					RhelComponents: []*v1.RHELComponent{
 						{
 							Id:        int64(1),
