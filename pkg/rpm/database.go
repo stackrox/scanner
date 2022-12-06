@@ -41,6 +41,9 @@ const (
 	// databaseDir is the directory where the RPM database is expected to be in
 	// the container filesystem.
 	databaseDir = "var/lib/rpm"
+	// rhcosDbDir is an alternative to databaseDir, as RHCOS saves its RPM DB in
+	// a different path.
+	rhcosDbDir = "usr/share/rpm"
 )
 
 var (
@@ -100,6 +103,7 @@ func DatabaseFiles() []string {
 	paths := make([]string, 0, databaseFiles.Cardinality())
 	for filename := range databaseFiles {
 		paths = append(paths, path.Join(databaseDir, filename))
+		paths = append(paths, path.Join(rhcosDbDir, filename))
 	}
 	return paths
 }
@@ -114,9 +118,16 @@ func CreateDatabaseFromImage(imageFiles analyzer.Files) (*rpmDatabase, error) {
 	// and rely on the fact that `rpm` will select the most up-to-date database
 	// model, instead of replicating that knowledge in the code.
 	dbFiles := make(map[string]analyzer.FileData)
+	fmt.Printf("Trying known DB paths: %v\n", databaseFiles)
+
 	for name := range databaseFiles {
+		fmt.Printf("checking whether DB exists at %v\n", path.Join(databaseDir, name))
 		if data, exists := imageFiles.Get(path.Join(databaseDir, name)); exists {
+			fmt.Println("DB exists!")
 			dbFiles[name] = data
+		} else if rhcosData, rhcosExists := imageFiles.Get(path.Join(rhcosDbDir, name)); rhcosExists {
+			fmt.Println("RHCOS DB exists!")
+			dbFiles[name] = rhcosData
 		}
 	}
 	if len(dbFiles) == 0 {
@@ -142,6 +153,7 @@ func CreateDatabaseFromImage(imageFiles analyzer.Files) (*rpmDatabase, error) {
 			logrus.WithError(err).Error("failed to create rpm database file")
 			return nil, commonerr.ErrFilesystem
 		}
+		fmt.Printf("Created rpm db %v\n", dbFilename)
 	}
 	// Rebuild the rpm database, it will recreate indexes and convert old formats
 	// to the latest supported by the current rpm version.
