@@ -127,36 +127,31 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			c := c
 			resp, err := client.GetNodeVulnerabilities(context.Background(), c.request)
 			require.NoError(t, err)
-			for _, expectedFeat := range c.responseContains.InventoryFeatures {
+			for _, expectedFeat := range c.responseContains.GetInventoryFeatures() {
 				var found bool
-				for _, gotFeat := range resp.InventoryFeatures {
+				for _, gotFeat := range resp.GetInventoryFeatures() {
 					if expectedFeat.GetName() == gotFeat.GetName() && expectedFeat.GetVersion() == gotFeat.GetVersion() {
 						found = true
 						assert.NotNil(t, gotFeat)
-						assert.NotNil(t, gotFeat.Vulnerabilities, "Expected to find vulnerabilities for %s:%s", expectedFeat.GetName(), expectedFeat.GetVersion())
-						t.Logf("gotFeat.InventoryFeatures: %+v\n", resp.InventoryFeatures)
-						assertContainsVuln(t, gotFeat.Vulnerabilities, expectedFeat.Vulnerabilities)
+						assert.NotNil(t, gotFeat.GetVulnerabilities(), "Expected to find vulnerabilities for %s:%s", expectedFeat.GetName(), expectedFeat.GetVersion())
+						assertIsSubset(t, gotFeat.GetVulnerabilities(), expectedFeat.GetVulnerabilities())
 					}
 				}
-				assert.Truef(t, found, "expected to find feat '%s:%s' in the reply, but got none. Features in the reply: %+v", expectedFeat.GetName(), expectedFeat.GetVersion(), resp.InventoryFeatures)
+				assert.Truef(t, found, "expected to find feat '%s:%s' in the reply, but got none. Features in the reply: %+v", expectedFeat.GetName(), expectedFeat.GetVersion(), resp.GetInventoryFeatures())
 			}
-			assert.Equal(t, c.responseContains.Notes, resp.Notes)
+			assert.Equal(t, c.responseContains.GetNotes(), resp.GetNotes())
 		})
 	}
 }
 
-func assertContainsVuln(t *testing.T, foundVulns, expectedContains []*v1.Vulnerability) {
+// assertIsSubset asserts that every element of expectedToExist exists in gotVulns
+func assertIsSubset(t *testing.T, gotVulns, expectedToExist []*v1.Vulnerability) {
 	// Prune last modified time
-	for _, v := range foundVulns {
+	for _, v := range gotVulns {
 		v.MetadataV2.LastModifiedDateTime = ""
 	}
-	if expectedContains != nil {
-		for _, contains := range expectedContains {
-			contains.MetadataV2.LastModifiedDateTime = ""
-			if !assert.Contains(t, foundVulns, contains) {
-				fmt.Printf("Found vulns: %v\n", foundVulns)
-				fmt.Printf("Expected vuln: %v\n", contains)
-			}
-		}
+	for _, v := range expectedToExist {
+		v.MetadataV2.LastModifiedDateTime = ""
+		assert.Contains(t, gotVulns, v, "Expected to find %v among %v", v, gotVulns)
 	}
 }
