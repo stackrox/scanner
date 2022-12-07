@@ -249,10 +249,10 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	case nil: // Normal
 	case kernelparser.ErrNodeUnsupported:
 		// The node is unsupported, exit early.
-		resp.Notes = append(resp.Notes, v1.NodeNote_NODE_UNSUPPORTED)
+		resp.NodeNotes = append(resp.GetNodeNotes(), v1.NodeNote_NODE_UNSUPPORTED)
 		return resp, nil
 	case kernelparser.ErrKernelUnsupported:
-		resp.Notes = append(resp.Notes, v1.NodeNote_NODE_KERNEL_UNSUPPORTED)
+		resp.NodeNotes = append(resp.GetNodeNotes(), v1.NodeNote_NODE_KERNEL_UNSUPPORTED)
 	default:
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -273,13 +273,13 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	}
 
 	// Handle the new format of the request and scan node inventory additionally
-	if req.GetNodeInventory() != nil {
+	if req.GetComponents() != nil {
 		// TODO(ROX-12968): resolve hardcoded value uncertifiedRHEL
-		layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetNodeInventory(), false)
+		layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetComponents(), false)
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		resp.InventoryFeatures = imagescan.ConvertFeatures(layer.Features)
+		resp.Features = imagescan.ConvertFeatures(layer.Features)
 	}
 	return resp, nil
 }
