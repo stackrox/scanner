@@ -118,15 +118,11 @@ func CreateDatabaseFromImage(imageFiles analyzer.Files) (*rpmDatabase, error) {
 	// and rely on the fact that `rpm` will select the most up-to-date database
 	// model, instead of replicating that knowledge in the code.
 	dbFiles := make(map[string]analyzer.FileData)
-	fmt.Printf("Trying known DB paths: %v\n", databaseFiles)
 
 	for name := range databaseFiles {
-		fmt.Printf("checking whether DB exists at %v\n", path.Join(databaseDir, name))
 		if data, exists := imageFiles.Get(path.Join(databaseDir, name)); exists {
-			fmt.Println("DB exists!")
 			dbFiles[name] = data
 		} else if rhcosData, rhcosExists := imageFiles.Get(path.Join(rhcosDbDir, name)); rhcosExists {
-			fmt.Println("RHCOS DB exists!")
 			dbFiles[name] = rhcosData
 		}
 	}
@@ -153,7 +149,6 @@ func CreateDatabaseFromImage(imageFiles analyzer.Files) (*rpmDatabase, error) {
 			logrus.WithError(err).Error("failed to create rpm database file")
 			return nil, commonerr.ErrFilesystem
 		}
-		fmt.Printf("Created rpm db %v\n", dbFilename)
 	}
 	// Rebuild the rpm database, it will recreate indexes and convert old formats
 	// to the latest supported by the current rpm version.
@@ -166,7 +161,6 @@ func CreateDatabaseFromImage(imageFiles analyzer.Files) (*rpmDatabase, error) {
 	var errBuffer bytes.Buffer
 	dbCmd.Stderr = &errBuffer
 	if err := dbCmd.Run(); err != nil {
-		fmt.Printf("Error: %v\n%v", err, errBuffer.String())
 		logrus.Warnf("failed to rebuild the rpm database: %s", errBuffer.String())
 		return nil, errors.Wrap(err, "failed to rebuild rpm database")
 	}
