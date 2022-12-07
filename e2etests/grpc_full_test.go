@@ -11,7 +11,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/stackrox/scanner/api/v1/imagescan"
+	"github.com/stackrox/scanner/api/v1/features"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -43,7 +43,7 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 		feature.Vulnerabilities = filteredVulns
 	}
 
-	for _, feature := range imagescan.ConvertFeatures(test.expectedFeatures) {
+	for _, feature := range features.ConvertFeatures(test.expectedFeatures) {
 		t.Run(fmt.Sprintf("%s/%s/%s", test.image, feature.Name, feature.Version), func(t *testing.T) {
 			matching := getMatchingGRPCFeature(t, imgScan.Features, feature, false)
 			if matching.Vulnerabilities != nil {
@@ -96,7 +96,7 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 		})
 	}
 
-	for _, feature := range imagescan.ConvertFeatures(test.unexpectedFeatures) {
+	for _, feature := range features.ConvertFeatures(test.unexpectedFeatures) {
 		assert.Nil(t, getMatchingGRPCFeature(t, imgScan.Features, feature, true))
 	}
 }

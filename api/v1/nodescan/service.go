@@ -13,7 +13,7 @@ import (
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/api/v1/convert"
-	"github.com/stackrox/scanner/api/v1/imagescan"
+	"github.com/stackrox/scanner/api/v1/features"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
@@ -279,7 +279,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		resp.Features = imagescan.ConvertFeatures(layer.Features)
+		resp.Features = features.ConvertFeatures(layer.Features)
 	}
 	return resp, nil
 }

@@ -9,6 +9,7 @@ import (
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/common"
+	"github.com/stackrox/scanner/api/v1/features"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
@@ -91,7 +92,7 @@ func (s *serviceImpl) GetImageScan(_ context.Context, req *v1.GetImageScanReques
 		Status:         v1.ScanStatus_SUCCEEDED,
 		Image: &v1.Image{
 			Namespace: layer.NamespaceName,
-			Features:  ConvertFeatures(layer.Features),
+			Features:  features.ConvertFeatures(layer.Features),
 		},
 		Notes: convertNotes(notes),
 	}, nil
@@ -216,7 +217,7 @@ func (s *serviceImpl) GetImageVulnerabilities(_ context.Context, req *v1.GetImag
 		Status:         v1.ScanStatus_SUCCEEDED,
 		Image: &v1.Image{
 			Namespace: layer.NamespaceName,
-			Features:  ConvertFeatures(layer.Features),
+			Features:  features.ConvertFeatures(layer.Features),
 		},
 	}, nil
 }
