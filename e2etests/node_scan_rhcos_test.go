@@ -153,6 +153,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			c := c
 			resp, err := client.GetNodeVulnerabilities(context.Background(), c.request)
 			require.NoError(t, err)
+			assert.Len(t, resp.GetFeatures(), len(c.responseContains.GetFeatures()))
 			for _, expectedFeat := range c.responseContains.GetFeatures() {
 				var found bool
 				for _, gotFeat := range resp.GetFeatures() {
