@@ -51,6 +51,13 @@ var vulnTar = &v1.Vulnerability{
 }
 
 func buildRequestCase(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
+	// From: https://www.redhat.com/security/data/metrics/repository-to-cpe.json
+	// "rhel-8-for-x86_64-appstream-rpms": {"cpes": ["cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream"]},
+	// "rhel-8-for-x86_64-baseos-rpms": {"cpes": ["cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/o:redhat:rhel:8.3::baseos"]}
+	cpes := []string{
+		"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
+		"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
+	}
 	return &v1.GetNodeVulnerabilitiesRequest{
 		OsImage:          "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 		KernelVersion:    "0.0.1",
@@ -71,14 +78,8 @@ func buildRequestCase(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 					Version:   "1.3.5-7.el8",
 					Arch:      "x86_64",
 					Module:    "", // must be empty, otherwise scanner does not return any vulns
-					// From: https://www.redhat.com/security/data/metrics/repository-to-cpe.json
-					// "rhel-8-for-x86_64-appstream-rpms": {"cpes": ["cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream"]},
-					// "rhel-8-for-x86_64-baseos-rpms": {"cpes": ["cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/o:redhat:rhel:8.3::baseos"]}
-					Cpes: []string{
-						"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
-						"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
-					},
-					AddedBy: "",
+					Cpes:      cpes,
+					AddedBy:   "",
 				},
 				{
 					Id:        int64(2),
@@ -87,11 +88,18 @@ func buildRequestCase(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 					Version:   "1.27.1.el8",
 					Arch:      "x86_64",
 					Module:    "",
-					Cpes: []string{
-						"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
-						"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
-					},
-					AddedBy: "",
+					Cpes:      cpes,
+					AddedBy:   "",
+				},
+				{
+					Id:        int64(3),
+					Name:      "grep",
+					Namespace: "rhel:8",
+					Version:   "3.1-6.el8",
+					Arch:      "x86_64",
+					Module:    "",
+					Cpes:      cpes,
+					AddedBy:   "",
 				},
 			},
 			LanguageComponents: nil,
@@ -123,6 +131,11 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 						Version:         "1.27.1.el8.x86_64",
 						Vulnerabilities: []*v1.Vulnerability{vulnTar},
 					},
+					{
+						Name:            "grep",
+						Version:         "3.1-6.el8.x86_64",
+						Vulnerabilities: []*v1.Vulnerability{},
+					},
 				},
 			},
 		},
@@ -146,8 +159,10 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 					if expectedFeat.GetName() == gotFeat.GetName() && expectedFeat.GetVersion() == gotFeat.GetVersion() {
 						found = true
 						assert.NotNil(t, gotFeat)
-						assert.NotNil(t, gotFeat.GetVulnerabilities(), "Expected to find vulnerabilities for %s:%s", expectedFeat.GetName(), expectedFeat.GetVersion())
-						assertIsSubset(t, gotFeat.GetVulnerabilities(), expectedFeat.GetVulnerabilities())
+						if expectedFeat.Vulnerabilities != nil && len(expectedFeat.Vulnerabilities) > 0 {
+							assert.NotNil(t, gotFeat.GetVulnerabilities(), "Expected to find vulnerabilities for %s:%s", expectedFeat.GetName(), expectedFeat.GetVersion())
+							assertIsSubset(t, gotFeat.GetVulnerabilities(), expectedFeat.GetVulnerabilities())
+						}
 					}
 				}
 				assert.Truef(t, found, "expected to find feat '%s:%s' in the reply, but got none. Features in the reply: %+v", expectedFeat.GetName(), expectedFeat.GetVersion(), resp.GetFeatures())

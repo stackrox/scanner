@@ -213,7 +213,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 				KubeletVulnerabilities:   nil,
 				KubeproxyVulnerabilities: nil,
 				RuntimeVulnerabilities:   nil,
-				Notes:                    []v1.NodeNote{v1.NodeNote_NODE_UNSUPPORTED},
+				NodeNotes:                []v1.NodeNote{v1.NodeNote_NODE_UNSUPPORTED},
 			},
 		},
 	}
@@ -242,7 +242,7 @@ func TestGRPCGetNodeVulnerabilities(t *testing.T) {
 			contains(t, resp.RuntimeVulnerabilities, c.responseContains.RuntimeVulnerabilities)
 			contains(t, resp.KubeletVulnerabilities, c.responseContains.KubeletVulnerabilities)
 			contains(t, resp.KubeproxyVulnerabilities, c.responseContains.KubeproxyVulnerabilities)
-			assert.Equal(t, c.responseContains.Notes, resp.Notes)
+			assert.Equal(t, c.responseContains.GetNodeNotes(), resp.GetNodeNotes())
 		})
 	}
 }
@@ -525,7 +525,7 @@ func TestNodeKernelVulnerabilities(t *testing.T) {
 			})
 			require.NoError(t, err)
 
-			assert.Equal(t, c.expectedNotes, resp.Notes)
+			assert.Equal(t, c.expectedNotes, resp.GetNodeNotes())
 			assert.Equal(t, c.expectedOS, resp.GetOperatingSystem())
 			assert.Equal(t, c.expectedKernelComponent, resp.KernelComponent)
 

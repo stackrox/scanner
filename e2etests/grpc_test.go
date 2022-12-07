@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/api/v1/common"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	namespaces "github.com/stackrox/scanner/pkg/wellknownnamespaces"
 	"github.com/stretchr/testify/assert"
