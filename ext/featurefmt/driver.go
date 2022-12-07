@@ -26,7 +26,6 @@ import (
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/analyzer"
-	"github.com/stackrox/scanner/pkg/rhcos"
 	rhelv2 "github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/tarutil"
 	"github.com/stretchr/testify/assert"
@@ -106,7 +105,6 @@ func RequiredFilenames() (files []string) {
 	}
 
 	files = append(files, rhelv2.RequiredFilenames()...)
-	files = append(files, rhcos.RequiredFilenames()...)
 
 	return
 }
