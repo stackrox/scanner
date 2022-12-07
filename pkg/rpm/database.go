@@ -118,7 +118,6 @@ func CreateDatabaseFromImage(imageFiles analyzer.Files) (*rpmDatabase, error) {
 	// and rely on the fact that `rpm` will select the most up-to-date database
 	// model, instead of replicating that knowledge in the code.
 	dbFiles := make(map[string]analyzer.FileData)
-
 	for name := range databaseFiles {
 		if data, exists := imageFiles.Get(path.Join(databaseDir, name)); exists {
 			dbFiles[name] = data
@@ -157,7 +156,6 @@ func CreateDatabaseFromImage(imageFiles analyzer.Files) (*rpmDatabase, error) {
 		"--dbpath", dbDir,
 		"--rebuilddb",
 	)
-
 	var errBuffer bytes.Buffer
 	dbCmd.Stderr = &errBuffer
 	if err := dbCmd.Run(); err != nil {
