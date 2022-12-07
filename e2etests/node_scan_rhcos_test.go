@@ -51,60 +51,85 @@ var vulnTar = &v1.Vulnerability{
 	Severity: "Moderate",
 }
 
+func buildRequestCase(notes []*v1.Note) *v1.GetNodeVulnerabilitiesRequest {
+	return &v1.GetNodeVulnerabilitiesRequest{
+		OsImage:          "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
+		KernelVersion:    "0.0.1",
+		KubeletVersion:   "0.0.1",
+		KubeproxyVersion: "0.0.1",
+		Runtime: &v1.GetNodeVulnerabilitiesRequest_ContainerRuntime{
+			Name:    "docker",
+			Version: "0.0.1",
+		},
+		Notes: notes,
+		NodeInventory: &v1.Components{
+			Namespace: "rhcos:4.11",
+			RhelComponents: []*v1.RHELComponent{
+				{
+					Id:        int64(1),
+					Name:      "libksba",
+					Namespace: "rhel:8",
+					Version:   "1.3.5-7.el8",
+					Arch:      "x86_64",
+					Module:    "", // must be empty, otherwise scanner does not return any vulns
+					// From: https://www.redhat.com/security/data/metrics/repository-to-cpe.json
+					// "rhel-8-for-x86_64-appstream-rpms": {"cpes": ["cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream"]},
+					// "rhel-8-for-x86_64-baseos-rpms": {"cpes": ["cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/o:redhat:rhel:8.3::baseos"]}
+					Cpes: []string{
+						"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
+						"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
+					},
+					AddedBy: "",
+				},
+				{
+					Id:        int64(2),
+					Name:      "tar",
+					Namespace: "rhel:8",
+					Version:   "1.27.1.el8",
+					Arch:      "x86_64",
+					Module:    "",
+					Cpes: []string{
+						"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
+						"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
+					},
+					AddedBy: "",
+				},
+			},
+			LanguageComponents: nil,
+		},
+	}
+}
+
 func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewNodeScanServiceClient(conn)
 
 	cases := []struct {
+		name             string
 		request          *v1.GetNodeVulnerabilitiesRequest
 		responseContains *v1.GetNodeVulnerabilitiesResponse
 	}{
 		{
-			request: &v1.GetNodeVulnerabilitiesRequest{
-				OsImage:          "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
-				KernelVersion:    "0.0.1",
-				KubeletVersion:   "0.0.1",
-				KubeproxyVersion: "0.0.1",
-				Runtime: &v1.GetNodeVulnerabilitiesRequest_ContainerRuntime{
-					Name:    "docker",
-					Version: "0.0.1",
-				},
-				NodeInventory: &v1.Components{
-					Namespace: "rhcos:4.11",
-					RhelComponents: []*v1.RHELComponent{
-						{
-							Id:        int64(1),
-							Name:      "libksba",
-							Namespace: "rhel:8",
-							Version:   "1.3.5-7.el8",
-							Arch:      "x86_64",
-							Module:    "", // must be empty, otherwise scanner does not return any vulns
-							// From: https://www.redhat.com/security/data/metrics/repository-to-cpe.json
-							// "rhel-8-for-x86_64-appstream-rpms": {"cpes": ["cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream"]},
-							// "rhel-8-for-x86_64-baseos-rpms": {"cpes": ["cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/o:redhat:rhel:8.3::baseos"]}
-							Cpes: []string{
-								"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
-								"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
-							},
-							AddedBy: "",
-						},
-						{
-							Id:        int64(2),
-							Name:      "tar",
-							Namespace: "rhel:8",
-							Version:   "1.27.1.el8",
-							Arch:      "x86_64",
-							Module:    "",
-							Cpes: []string{
-								"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
-								"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
-							},
-							AddedBy: "",
-						},
+			name:    "Certified scan",
+			request: buildRequestCase([]v1.Note{}),
+			responseContains: &v1.GetNodeVulnerabilitiesResponse{
+				InventoryFeatures: []*v1.Feature{
+					{
+						Name:            "libksba",
+						Version:         "1.3.5-7.el8.x86_64",
+						Vulnerabilities: []*v1.Vulnerability{vulnLibksba},
 					},
-					LanguageComponents: nil,
+					{
+						Name:            "tar",
+						Version:         "1.27.1.el8.x86_64",
+						Vulnerabilities: []*v1.Vulnerability{vulnTar},
+					},
 				},
 			},
+		},
+		{
+			name:    "Uncertified scan",
+			request: buildRequestCase([]v1.Note{v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE}),
 			responseContains: &v1.GetNodeVulnerabilitiesResponse{
 				InventoryFeatures: []*v1.Feature{
 					{
