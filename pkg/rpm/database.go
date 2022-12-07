@@ -162,9 +162,11 @@ func CreateDatabaseFromImage(imageFiles analyzer.Files) (*rpmDatabase, error) {
 		"--dbpath", dbDir,
 		"--rebuilddb",
 	)
+
 	var errBuffer bytes.Buffer
 	dbCmd.Stderr = &errBuffer
 	if err := dbCmd.Run(); err != nil {
+		fmt.Printf("Error: %v\n%v", err, errBuffer.String())
 		logrus.Warnf("failed to rebuild the rpm database: %s", errBuffer.String())
 		return nil, errors.Wrap(err, "failed to rebuild rpm database")
 	}
