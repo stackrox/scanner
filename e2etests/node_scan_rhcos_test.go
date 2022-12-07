@@ -140,7 +140,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			},
 		},
 		{
-			name:    "Uncertified scan",
+			name:    "Uncertified scan is unsupported for RHCOS and returns no features",
 			request: buildRequestCase([]v1.Note{v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE}),
 			responseContains: &v1.GetNodeVulnerabilitiesResponse{
 				Features: []*v1.Feature{},
@@ -160,7 +160,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 					if expectedFeat.GetName() == gotFeat.GetName() && expectedFeat.GetVersion() == gotFeat.GetVersion() {
 						found = true
 						assert.NotNil(t, gotFeat)
-						if expectedFeat.Vulnerabilities != nil && len(expectedFeat.Vulnerabilities) > 0 {
+						if len(expectedFeat.GetVulnerabilities()) > 0 {
 							assert.NotNil(t, gotFeat.GetVulnerabilities(), "Expected to find vulnerabilities for %s:%s", expectedFeat.GetName(), expectedFeat.GetVersion())
 							assertIsSubset(t, gotFeat.GetVulnerabilities(), expectedFeat.GetVulnerabilities())
 						}
