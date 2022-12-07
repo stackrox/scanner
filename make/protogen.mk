@@ -61,7 +61,7 @@ $(PROTOC_FILE): $(PROTOC_DOWNLOADS_DIR)
 ifeq (, $(shell which wget))
 	$(SILENT)wget -q "https://github.com/protocolbuffers/protobuf/releases/download/v$(PROTOC_VERSION)/$(PROTOC_ZIP)" -O "$@"
 else
-	$(SILENT)curl -sSL "https://github.com/protocolbuffers/protobuf/releases/download/v$(PROTOC_VERSION)/$(PROTOC_ZIP)" -o "$@"
+	$(SILENT)curl -sSL --fail "https://github.com/protocolbuffers/protobuf/releases/download/v$(PROTOC_VERSION)/$(PROTOC_ZIP)" -o "$@"
 endif
 
 .PRECIOUS: $(PROTOC_FILE)
