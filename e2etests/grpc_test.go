@@ -34,21 +34,11 @@ func TestGRPCGetImageComponents(t *testing.T) {
 			require.NotNil(t, imgComponentsResp.GetStatus())
 
 			assert.Equal(t, imgComponentsResp.GetStatus(), v1.ScanStatus_SUCCEEDED, "Image %s", testCase.image)
-			assert.Equal(t, testCase.uncertifiedRHEL, hasUncertifiedRHEL(imgComponentsResp.GetNotes()), "Image %s", testCase.image)
+			assert.Equal(t, testCase.uncertifiedRHEL, common.HasUncertifiedRHEL(imgComponentsResp.GetNotes()), "Image %s", testCase.image)
 			assert.Equal(t, testCase.namespace, imgComponentsResp.GetComponents().GetNamespace())
 			verifyComponents(t, imgComponentsResp.GetComponents(), testCase)
 		})
 	}
-}
-
-func hasUncertifiedRHEL(notes []v1.Note) bool {
-	for _, note := range notes {
-		if note == v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE {
-			return true
-		}
-	}
-
-	return false
 }
 
 func verifyComponents(t *testing.T, components *v1.Components, test testCase) {

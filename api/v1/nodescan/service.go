@@ -11,6 +11,7 @@ import (
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/api/v1/convert"
 	"github.com/stackrox/scanner/api/v1/imagescan"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
@@ -274,8 +275,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 
 	// Handle the new format of the request and scan node inventory additionally
 	if req.GetComponents() != nil {
-		// TODO(ROX-12968): resolve hardcoded value uncertifiedRHEL
-		layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetComponents(), false)
+		layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes()))
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}

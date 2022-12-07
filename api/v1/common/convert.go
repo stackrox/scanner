@@ -33,3 +33,13 @@ func toFeatureNameVersions(keys FeatureKeySet) []*scannerV1.FeatureNameVersion {
 	}
 	return features
 }
+
+func HasUncertifiedRHEL(notes []scannerV1.Note) bool {
+	for _, note := range notes {
+		if note == scannerV1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE {
+			return true
+		}
+	}
+
+	return false
+}
