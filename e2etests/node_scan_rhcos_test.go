@@ -5,7 +5,6 @@ package e2etests
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
@@ -131,24 +130,13 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			name:    "Uncertified scan",
 			request: buildRequestCase([]v1.Note{v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE}),
 			responseContains: &v1.GetNodeVulnerabilitiesResponse{
-				Features: []*v1.Feature{
-					{
-						Name:            "libksba",
-						Version:         "1.3.5-7.el8.x86_64",
-						Vulnerabilities: []*v1.Vulnerability{vulnLibksba},
-					},
-					{
-						Name:            "tar",
-						Version:         "1.27.1.el8.x86_64",
-						Vulnerabilities: []*v1.Vulnerability{vulnTar},
-					},
-				},
+				Features: []*v1.Feature{},
 			},
 		},
 	}
 
-	for i, c := range cases {
-		t.Run(fmt.Sprintf("case-%d", i), func(t *testing.T) {
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
 			c := c
 			resp, err := client.GetNodeVulnerabilities(context.Background(), c.request)
 			require.NoError(t, err)
