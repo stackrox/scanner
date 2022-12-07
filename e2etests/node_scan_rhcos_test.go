@@ -51,7 +51,7 @@ var vulnTar = &v1.Vulnerability{
 	Severity: "Moderate",
 }
 
-func buildRequestCase(notes []*v1.Note) *v1.GetNodeVulnerabilitiesRequest {
+func buildRequestCase(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 	return &v1.GetNodeVulnerabilitiesRequest{
 		OsImage:          "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 		KernelVersion:    "0.0.1",
@@ -62,7 +62,7 @@ func buildRequestCase(notes []*v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 			Version: "0.0.1",
 		},
 		Notes: notes,
-		NodeInventory: &v1.Components{
+		Components: &v1.Components{
 			Namespace: "rhcos:4.11",
 			RhelComponents: []*v1.RHELComponent{
 				{
@@ -113,7 +113,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			name:    "Certified scan",
 			request: buildRequestCase([]v1.Note{}),
 			responseContains: &v1.GetNodeVulnerabilitiesResponse{
-				InventoryFeatures: []*v1.Feature{
+				Features: []*v1.Feature{
 					{
 						Name:            "libksba",
 						Version:         "1.3.5-7.el8.x86_64",
@@ -131,7 +131,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			name:    "Uncertified scan",
 			request: buildRequestCase([]v1.Note{v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE}),
 			responseContains: &v1.GetNodeVulnerabilitiesResponse{
-				InventoryFeatures: []*v1.Feature{
+				Features: []*v1.Feature{
 					{
 						Name:            "libksba",
 						Version:         "1.3.5-7.el8.x86_64",
@@ -152,9 +152,9 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			c := c
 			resp, err := client.GetNodeVulnerabilities(context.Background(), c.request)
 			require.NoError(t, err)
-			for _, expectedFeat := range c.responseContains.GetInventoryFeatures() {
+			for _, expectedFeat := range c.responseContains.GetFeatures() {
 				var found bool
-				for _, gotFeat := range resp.GetInventoryFeatures() {
+				for _, gotFeat := range resp.GetFeatures() {
 					if expectedFeat.GetName() == gotFeat.GetName() && expectedFeat.GetVersion() == gotFeat.GetVersion() {
 						found = true
 						assert.NotNil(t, gotFeat)
@@ -162,9 +162,9 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 						assertIsSubset(t, gotFeat.GetVulnerabilities(), expectedFeat.GetVulnerabilities())
 					}
 				}
-				assert.Truef(t, found, "expected to find feat '%s:%s' in the reply, but got none. Features in the reply: %+v", expectedFeat.GetName(), expectedFeat.GetVersion(), resp.GetInventoryFeatures())
+				assert.Truef(t, found, "expected to find feat '%s:%s' in the reply, but got none. Features in the reply: %+v", expectedFeat.GetName(), expectedFeat.GetVersion(), resp.GetFeatures())
 			}
-			assert.Equal(t, c.responseContains.GetNotes(), resp.GetNotes())
+			assert.Equal(t, c.responseContains.GetNodeNotes(), resp.GetNodeNotes())
 		})
 	}
 }
