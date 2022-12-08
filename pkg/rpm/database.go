@@ -102,8 +102,7 @@ func init() {
 func DatabaseFiles() []string {
 	paths := make([]string, 0, databaseFiles.Cardinality())
 	for filename := range databaseFiles {
-		paths = append(paths, path.Join(databaseDir, filename))
-		paths = append(paths, path.Join(rhcosDbDir, filename))
+		paths = append(paths, path.Join(databaseDir, filename), path.Join(rhcosDbDir, filename))
 	}
 	return paths
 }
