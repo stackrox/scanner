@@ -137,13 +137,15 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 						Vulnerabilities: []*v1.Vulnerability{},
 					},
 				},
+				NodeNotes: nil,
 			},
 		},
 		{
 			name:    "Uncertified scan is unsupported for RHCOS and returns no features",
 			request: buildRequestCase([]v1.Note{v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE}),
 			responseContains: &v1.GetNodeVulnerabilitiesResponse{
-				Features: []*v1.Feature{},
+				Features:  []*v1.Feature{},
+				NodeNotes: nil,
 			},
 		},
 	}
@@ -155,18 +157,14 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			require.NoError(t, err)
 			assert.Len(t, resp.GetFeatures(), len(c.responseContains.GetFeatures()))
 			for _, expectedFeat := range c.responseContains.GetFeatures() {
-				var found bool
+				var feat *v1.Feature
 				for _, gotFeat := range resp.GetFeatures() {
 					if expectedFeat.GetName() == gotFeat.GetName() && expectedFeat.GetVersion() == gotFeat.GetVersion() {
-						found = true
-						assert.NotNil(t, gotFeat)
-						if len(expectedFeat.GetVulnerabilities()) > 0 {
-							assert.NotNil(t, gotFeat.GetVulnerabilities(), "Expected to find vulnerabilities for %s:%s", expectedFeat.GetName(), expectedFeat.GetVersion())
-							assertIsSubset(t, gotFeat.GetVulnerabilities(), expectedFeat.GetVulnerabilities())
-						}
+						feat = gotFeat
 					}
 				}
-				assert.Truef(t, found, "expected to find feat '%s:%s' in the reply, but got none. Features in the reply: %+v", expectedFeat.GetName(), expectedFeat.GetVersion(), resp.GetFeatures())
+				assert.NotNil(t, feat, "expected to find feat '%s:%s' in the reply, but got none. Features in the reply: %+v", expectedFeat.GetName(), expectedFeat.GetVersion(), resp.GetFeatures())
+				assertIsSubset(t, feat.GetVulnerabilities(), expectedFeat.GetVulnerabilities())
 			}
 			assert.Equal(t, c.responseContains.GetNodeNotes(), resp.GetNodeNotes())
 		})
@@ -175,12 +173,12 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 
 // assertIsSubset asserts that every element of expectedToExist exists in gotVulns
 func assertIsSubset(t *testing.T, gotVulns, expectedToExist []*v1.Vulnerability) {
+	assert.GreaterOrEqual(t, len(gotVulns), len(expectedToExist), "Expected %d vulnerabilities to be a subset of a set that has %d elements", len(gotVulns), len(expectedToExist))
 	// Prune last modified time
 	for _, v := range gotVulns {
 		v.MetadataV2.LastModifiedDateTime = ""
 	}
 	for _, v := range expectedToExist {
-		v.MetadataV2.LastModifiedDateTime = ""
 		assert.Contains(t, gotVulns, v, "Expected to find %v among %v", v, gotVulns)
 	}
 }
