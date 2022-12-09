@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// vulnLibksba is an example of a fixable vulnerability
+// vulnLibksba is an example of a fixable vulnerability (potentially one of many others that exist for this version)
 var vulnLibksba = &v1.Vulnerability{
 	Name:        "RHSA-2022:7089",
 	Description: "KSBA (pronounced Kasbah) is a library to make X.509 certificates as well as the CMS easily accessible by other applications.  Both specifications are building blocks of S/MIME and TLS.\n\nSecurity Fix(es):\n\n* libksba: integer overflow may lead to remote code execution (CVE-2022-3515)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
@@ -32,7 +32,7 @@ var vulnLibksba = &v1.Vulnerability{
 	Severity: "Important",
 }
 
-// vulnTar is an example of a non-fixable vulnerability
+// vulnTar is an example of a non-fixable vulnerability (potentially one of many others that exist for this version)
 var vulnTar = &v1.Vulnerability{
 	Name:        "CVE-2005-2541",
 	Description: "DOCUMENTATION: The MITRE CVE dictionary describes this issue as: Tar 1.15.1 does not properly warn the user when extracting setuid or setgid files, which may allow local users or remote attackers to gain privileges. \n            STATEMENT: This CVE was assigned to what is the documented and expected behaviour of tar.  There are currently no plans to change tar behaviour to strip setuid and setgid bits when extracting archives.",
@@ -117,9 +117,12 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 		responseContains *v1.GetNodeVulnerabilitiesResponse
 	}{
 		{
-			name:    "Certified scan",
+			name:    "Selected vulnerabilities should be returned by the certified scan",
 			request: buildRequestCase([]v1.Note{}),
 			responseContains: &v1.GetNodeVulnerabilitiesResponse{
+				// We conduct a spot-checking here - more vulns can be returned from scanner for libksba and tar,
+				// but we care only about the selected one as it is sufficient for this test case.
+				// (We do not test that the set of vulns is complete, we test that the API returns any vulns if expected)
 				Features: []*v1.Feature{
 					{
 						Name:            "libksba",
