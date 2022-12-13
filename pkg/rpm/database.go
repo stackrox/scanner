@@ -41,8 +41,11 @@ const (
 	// databaseDir is the directory where the RPM database is expected to be in
 	// the container filesystem.
 	databaseDir = "var/lib/rpm"
+
 	// rhcosDbDir is an alternative to databaseDir, as RHCOS saves its RPM DB in
-	// a different path.
+	// a different path that symlinks to var/lib/rpm.
+	// Since PR #1014, Scanner code follows symlinks , but usr/share/rpm will get filtered out
+	// as it is not a well known database dir unless defined here.
 	rhcosDbDir = "usr/share/rpm"
 )
 
@@ -100,7 +103,7 @@ func init() {
 // files known for the different backend we support. The paths are relative to
 // root.
 func DatabaseFiles() []string {
-	paths := make([]string, 0, databaseFiles.Cardinality())
+	paths := make([]string, 0, 2*databaseFiles.Cardinality())
 	for filename := range databaseFiles {
 		paths = append(paths, path.Join(databaseDir, filename), path.Join(rhcosDbDir, filename))
 	}

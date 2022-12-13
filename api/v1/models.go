@@ -124,7 +124,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 
 	notes := getNotes(layer.NamespaceName, uncertifiedRHEL)
 
-	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName) || namespaces.IsRHCOSNamespace(layer.NamespaceName)) {
+	if (withFeatures || withVulnerabilities) && (dbLayer.Features != nil || namespaces.IsRHELNamespace(layer.NamespaceName)) {
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL(), depMap)
 

@@ -67,7 +67,7 @@ func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, err
 	c.OSNamespace, c.OSComponents, c.CertifiedRHELComponents, _, err =
 		detection.DetectComponents(nodeName, files, nil, nil, uncertifiedRHEL)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	// File reading errors during analysis are not exposed to DetectComponents, hence we
 	// check it and if there were any we fail.
