@@ -4,15 +4,17 @@
 
 set -e
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+
 SCANNER_TLS_FILE=$1
 SCANNER_DB_TLS_FILE=$2
 
 echo "Generating CA for Scanner and Scanner DB"
-cfssl genkey -initca csr.json | cfssljson -bare ca
+cfssl genkey -initca "$ROOT/scripts/cert/csr.json" | cfssljson -bare ca
 SCANNER_CA=$(base64 -in ca.pem)
 
 echo "Generating Cert/Key pair for Scanner"
-cfssl gencert -ca ca.pem -ca-key ca-key.pem -hostname scanner.stackrox csr.json | cfssljson -bare
+cfssl gencert -ca ca.pem -ca-key ca-key.pem -hostname scanner.stackrox "$ROOT/scripts/cert/csr.json" | cfssljson -bare
 SCANNER_CERT=$(base64 -in cert.pem)
 SCANNER_KEY=$(base64 -in cert-key.pem)
 yq eval ".data[\"ca.pem\"] = \"${SCANNER_CA}\"" "${SCANNER_TLS_FILE}" > tmp.yaml
@@ -23,7 +25,7 @@ mv tmp3.yaml "${SCANNER_TLS_FILE}"
 rm *.yaml
 
 echo "Generating Cert/Key pair for Scanner DB"
-cfssl gencert -ca ca.pem -ca-key ca-key.pem -hostname scanner-db.stackrox csr.json | cfssljson -bare
+cfssl gencert -ca ca.pem -ca-key ca-key.pem -hostname scanner-db.stackrox "$ROOT/scripts/cert/csr.json" | cfssljson -bare
 SCANNER_DB_CERT=$(base64 -in cert.pem)
 SCANNER_DB_KEY=$(base64 -in cert-key.pem)
 yq eval ".data[\"ca.pem\"] = \"${SCANNER_CA}\"" "${SCANNER_DB_TLS_FILE}" > tmp.yaml
