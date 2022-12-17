@@ -11,7 +11,6 @@ import (
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/component"
-	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -117,12 +116,9 @@ func TestShouldDedupeLanguageFeature(t *testing.T) {
 }
 
 func TestLatestLanguageFeatureVersion(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
 	_, filename, _, _ := runtime.Caller(0)
 	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	envIsolator.Setenv("NVD_DEFINITIONS_DIR", defsDir)
+	t.Setenv("NVD_DEFINITIONS_DIR", defsDir)
 
 	prevBoltPath := nvdtoolscache.BoltPath
 	defer func() {
@@ -160,12 +156,9 @@ func TestLatestLanguageFeatureVersion(t *testing.T) {
 }
 
 func TestAddLanguageVulns(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
 	_, filename, _, _ := runtime.Caller(0)
 	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	envIsolator.Setenv("NVD_DEFINITIONS_DIR", defsDir)
+	t.Setenv("NVD_DEFINITIONS_DIR", defsDir)
 
 	prevBoltPath := nvdtoolscache.BoltPath
 	defer func() {
@@ -229,12 +222,9 @@ func TestGetLanguageComponents(t *testing.T) {
 	// This should have similar results as TestAddLanguageVulns.
 	// The component duplicates are not filtered, and vulnerabilities are not included.
 
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
 	_, filename, _, _ := runtime.Caller(0)
 	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	envIsolator.Setenv("NVD_DEFINITIONS_DIR", defsDir)
+	t.Setenv("NVD_DEFINITIONS_DIR", defsDir)
 
 	prevBoltPath := nvdtoolscache.BoltPath
 	defer func() {
@@ -289,12 +279,9 @@ func TestGetLanguageComponents(t *testing.T) {
 func TestGetLanguageFeatures(t *testing.T) {
 	// This should give the same results as TestAddLanguageVulns.
 
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
 	_, filename, _, _ := runtime.Caller(0)
 	defsDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	envIsolator.Setenv("NVD_DEFINITIONS_DIR", defsDir)
+	t.Setenv("NVD_DEFINITIONS_DIR", defsDir)
 
 	prevBoltPath := nvdtoolscache.BoltPath
 	defer func() {

@@ -11,7 +11,6 @@ import (
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/tarutil"
-	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -277,9 +276,7 @@ func Test_listFeatures(t *testing.T) {
 
 		// Run test.
 		t.Run(tt.name, func(t *testing.T) {
-			envIsolator := testutils.NewEnvIsolator(t)
-			defer envIsolator.RestoreAll()
-			envIsolator.Setenv("REPO_TO_CPE_DIR", filepath.Join(testDirectory, "/testdata"))
+			t.Setenv("REPO_TO_CPE_DIR", filepath.Join(testDirectory, "/testdata"))
 			tt.args.layerFiles = tarutil.CreateNewLayerFiles(tt.files)
 
 			// Functions call.
