@@ -24,11 +24,14 @@ func TestMapping(t *testing.T) {
 		"fakerepo",
 	}
 	expectedCPEs := []string{
+		"cpe:/a:redhat:3scale:2.13::el8",
 		"cpe:/a:redhat:3scale_amp:2.10::el8",
 		"cpe:/a:redhat:3scale_amp:2.11::el8",
+		"cpe:/a:redhat:3scale_amp:2.12::el8",
 		"cpe:/a:redhat:3scale_amp:2.8::el8",
 		"cpe:/a:redhat:3scale_amp:2.9::el8",
 		"cpe:/o:redhat:enterprise_linux:8::baseos",
+		"cpe:/o:redhat:rhel:8.3::baseos",
 	}
 
 	m := Singleton()

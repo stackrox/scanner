@@ -2,23 +2,37 @@
   "data": {
     "3scale-amp-2-rpms-for-rhel-8-x86_64-debug-rpms": {
       "cpes": [
+        "cpe:/a:redhat:3scale:2.13::el8",
         "cpe:/a:redhat:3scale_amp:2.10::el8",
         "cpe:/a:redhat:3scale_amp:2.11::el8",
+        "cpe:/a:redhat:3scale_amp:2.12::el8",
         "cpe:/a:redhat:3scale_amp:2.8::el8",
         "cpe:/a:redhat:3scale_amp:2.9::el8"
+      ],
+      "repo_relative_urls": [
+        "content/dist/layered/rhel8/x86_64/3scale-amp/2/debug"
       ]
     },
     "3scale-amp-2-rpms-for-rhel-8-x86_64-rpms": {
       "cpes": [
+        "cpe:/a:redhat:3scale:2.13::el8",
         "cpe:/a:redhat:3scale_amp:2.10::el8",
         "cpe:/a:redhat:3scale_amp:2.11::el8",
+        "cpe:/a:redhat:3scale_amp:2.12::el8",
         "cpe:/a:redhat:3scale_amp:2.8::el8",
         "cpe:/a:redhat:3scale_amp:2.9::el8"
+      ],
+      "repo_relative_urls": [
+        "content/dist/layered/rhel8/x86_64/3scale-amp/2/os"
       ]
     },
     "rhel-8-for-x86_64-baseos-rpms": {
       "cpes": [
-        "cpe:/o:redhat:enterprise_linux:8::baseos"
+        "cpe:/o:redhat:enterprise_linux:8::baseos",
+        "cpe:/o:redhat:rhel:8.3::baseos"
+      ],
+      "repo_relative_urls": [
+        "content/dist/rhel8/8/x86_64/baseos/os"
       ]
     }
   }
