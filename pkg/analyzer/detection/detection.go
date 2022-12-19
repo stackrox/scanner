@@ -27,10 +27,10 @@ func DetectComponents(name string, files analyzer.Files, parent *database.Layer,
 	var featureVersions []database.FeatureVersion
 	var rhelfeatures *database.RHELv2Components
 
-	// In the current state, RHCOS will always be handled as certified system,
-	// no matter what value uncertifiedRHEL is.
-	// This is in contrast to RHEL, where uncertifiedRHEL determines whether we scan for RHEL or CentOS.
-	// TODO(ROX-13906): Verify RHCOS logic
+	// In the current state, RHCOS will always be handled as certified system.
+	// If no CPEs are found on RHCOS, a note needs to be added that informs users of it.
+	// Also, the bool logic can be refactored into a single UseCertifiedWorkflow function.
+	// TODO(ROX-13906, ROX-14028): Implement note and refactor
 	if namespace != nil && (wellknownnamespaces.IsRHELNamespace(namespace.Name) || wellknownnamespaces.IsRHCOSNamespace(namespace.Name)) {
 		// This is a certified image that needs to be scanned differently.
 		// Use the RHELv2 scanner instead.
