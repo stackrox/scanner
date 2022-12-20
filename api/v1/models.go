@@ -202,7 +202,7 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 		}
 	}
 
-	if !uncertifiedRHEL && namespaces.IsRHCOSNamespace(namespaceName) {
+	if !uncertifiedRHEL && namespaces.IsRHELNamespace(namespaceName) {
 		var certified bool
 		var err error
 		rhelv2PkgEnvs, certified, err = getRHELv2PkgEnvs(db, dbLayer.Name)
