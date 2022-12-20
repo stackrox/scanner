@@ -43,7 +43,9 @@ const (
 	databaseDir = "var/lib/rpm"
 
 	// rhcosDBDir is an alternative to databaseDir, as RHCOS saves its RPM DB in
-	// a different path that symlinks to var/lib/rpm.
+	// a different path that symlinks to var/lib/rpm and our approach to listing filesystem
+	// contents does not respect symlinks.
+	// TODO(ROX-14050): get rid of this when symlink support is added
 	rhcosDBDir = "usr/share/rpm"
 )
 
