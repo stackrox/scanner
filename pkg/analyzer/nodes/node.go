@@ -99,7 +99,7 @@ func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*fil
 }
 
 // addFiles searches the directory for files using the matcher and adds them to the file map.
-// TODO(ROX-14050): Improve handling of symlinks - if possible, follow instead of ignore them
+// TODO(ROX-14050): Improve handling of symlinks - if possible, follow instead of ignoring them
 func (n *filesMap) addFiles(dir string, matcher matcher.Matcher, m *metrics.FileExtractionMetrics) error {
 	logrus.WithFields(logrus.Fields{
 		"root":      n.root,
