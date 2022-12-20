@@ -44,8 +44,6 @@ const (
 
 	// rhcosDBDir is an alternative to databaseDir, as RHCOS saves its RPM DB in
 	// a different path that symlinks to var/lib/rpm.
-	// Since PR #1014, Scanner code follows symlinks , but usr/share/rpm will get filtered out
-	// as it is not a well known database dir unless defined here.
 	rhcosDBDir = "usr/share/rpm"
 )
 

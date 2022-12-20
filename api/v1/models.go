@@ -135,7 +135,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			updateFeatureWithVulns(feature, dbFeatureVersion.AffectedBy, dbFeatureVersion.Feature.Namespace.VersionFormat)
 			layer.Features = append(layer.Features, *feature)
 		}
-		if !uncertifiedRHEL && (namespaces.IsRHELNamespace(layer.NamespaceName) || namespaces.IsRHCOSNamespace(layer.NamespaceName)) {
+		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
 			certified, err := addRHELv2Vulns(db, &layer)
 			if err != nil {
 				return layer, notes, err
@@ -202,7 +202,7 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 		}
 	}
 
-	if !uncertifiedRHEL && (namespaces.IsRHELNamespace(namespaceName) || namespaces.IsRHCOSNamespace(namespaceName)) {
+	if !uncertifiedRHEL && namespaces.IsRHCOSNamespace(namespaceName) {
 		var certified bool
 		var err error
 		rhelv2PkgEnvs, certified, err = getRHELv2PkgEnvs(db, dbLayer.Name)
