@@ -8,7 +8,6 @@ import (
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/component"
 	"github.com/stackrox/scanner/pkg/env"
-	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 
 	// Register the CPE validators.
@@ -20,9 +19,7 @@ import (
 )
 
 func TestLatestUbuntuFeatureVersion(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
-	defer envIsolator.RestoreAll()
+	t.Setenv(env.LanguageVulns.EnvVar(), "false")
 
 	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
 	expectedExecs := make([]*v1.Executable, 0, len(providedExecs))
@@ -80,9 +77,7 @@ func TestLatestUbuntuFeatureVersion(t *testing.T) {
 }
 
 func TestLatestCentOSFeatureVersion(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
-	defer envIsolator.RestoreAll()
+	t.Setenv(env.LanguageVulns.EnvVar(), "false")
 
 	providedExecs := map[string]set.StringSet{"/exec/me": {}, "/pls/exec/me": {}}
 	expectedExecs := make([]*v1.Executable, 0, len(providedExecs))
@@ -152,9 +147,7 @@ func TestLatestCentOSFeatureVersion(t *testing.T) {
 }
 
 func TestNotesNoLanguageVulns(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
-	defer envIsolator.RestoreAll()
+	t.Setenv(env.LanguageVulns.EnvVar(), "false")
 
 	dbLayer := database.Layer{
 		Name:          "example",

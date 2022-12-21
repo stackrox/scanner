@@ -11,7 +11,6 @@ import (
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/archop"
 	"github.com/stackrox/scanner/pkg/env"
-	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stackrox/scanner/pkg/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -53,9 +52,7 @@ func newMockRHELv2Datastore() *mockRHELv2Datastore {
 }
 
 func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
+	t.Setenv(env.LanguageVulns.EnvVar(), "false")
 
 	now := time.Now()
 	db := newMockRHELv2Datastore()
@@ -220,9 +217,7 @@ func TestLayerFromDatabaseModelRHELv2(t *testing.T) {
 }
 
 func TestComponentsFromDatabaseModelRHELv2(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-	envIsolator.Setenv(env.LanguageVulns.EnvVar(), "false")
+	t.Setenv(env.LanguageVulns.EnvVar(), "false")
 
 	db := newMockRHELv2Datastore()
 	db.layers["layer1"] = []*database.RHELv2Layer{

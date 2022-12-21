@@ -5,17 +5,13 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMapping(t *testing.T) {
-	envIsolator := testutils.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
 	_, filename, _, _ := runtime.Caller(0)
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
+	t.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
 	repos := []string{
 		"3scale-amp-2-rpms-for-rhel-8-x86_64-debug-rpms",
@@ -24,11 +20,14 @@ func TestMapping(t *testing.T) {
 		"fakerepo",
 	}
 	expectedCPEs := []string{
+		"cpe:/a:redhat:3scale:2.13::el8",
 		"cpe:/a:redhat:3scale_amp:2.10::el8",
 		"cpe:/a:redhat:3scale_amp:2.11::el8",
+		"cpe:/a:redhat:3scale_amp:2.12::el8",
 		"cpe:/a:redhat:3scale_amp:2.8::el8",
 		"cpe:/a:redhat:3scale_amp:2.9::el8",
 		"cpe:/o:redhat:enterprise_linux:8::baseos",
+		"cpe:/o:redhat:rhel:8.3::baseos",
 	}
 
 	m := Singleton()

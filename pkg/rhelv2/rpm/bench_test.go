@@ -8,7 +8,6 @@ import (
 
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/tarutil"
-	"github.com/stackrox/scanner/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,10 +19,8 @@ func BenchmarkListFeatures(b *testing.B) {
 	manifest, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "/testdata/test.json"))
 	require.NoError(b, err)
 
-	envIsolator := testutils.NewEnvIsolator(b)
 	cpesDir := filepath.Join(filepath.Dir(filename), "/testdata")
-	envIsolator.Setenv("REPO_TO_CPE_DIR", cpesDir)
-	defer envIsolator.RestoreAll()
+	b.Setenv("REPO_TO_CPE_DIR", cpesDir)
 
 	filemap := tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 		"var/lib/rpm/Packages":                       {Contents: d},
