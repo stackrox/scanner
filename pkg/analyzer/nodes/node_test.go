@@ -186,6 +186,8 @@ func Test_filesMap_extractFile(t *testing.T) {
 }
 
 func Test_filesMap_Get(t *testing.T) {
+	testDataRoot := makeTestData(t)
+
 	type fields struct {
 		root      string
 		fileMap   map[string]*fileMetadata
@@ -224,7 +226,7 @@ func Test_filesMap_Get(t *testing.T) {
 		{
 			name: "when file is in map and is extractable, should return with contents",
 			fields: fields{
-				root: filepath.Join("testdata", "rootfs-foo"),
+				root: filepath.Join(testDataRoot, "rootfs-foo"),
 				fileMap: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
@@ -242,7 +244,7 @@ func Test_filesMap_Get(t *testing.T) {
 		{
 			name: "when file is in map and is extractable but does not exist, then keep error",
 			fields: fields{
-				root: filepath.Join("testdata", "rootfs-foo"),
+				root: filepath.Join(testDataRoot, "rootfs-foo"),
 				fileMap: map[string]*fileMetadata{
 					"foo/does/not/exist": {
 						isExecutable:  false,
@@ -259,7 +261,7 @@ func Test_filesMap_Get(t *testing.T) {
 		{
 			name: "when file is in map, is extractable, and is an absolute symlink, should return with contents",
 			fields: fields{
-				root: filepath.Join("testdata", "rootfs-rhcos"),
+				root: filepath.Join(testDataRoot, "rootfs-rhcos"),
 				fileMap: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
@@ -278,7 +280,7 @@ func Test_filesMap_Get(t *testing.T) {
 		{
 			name: "when file is in map, is extractable, and is a relative symlink, should return with contents",
 			fields: fields{
-				root: filepath.Join("testdata", "rootfs-rhcos-rel-symlink"),
+				root: filepath.Join(testDataRoot, "rootfs-rhcos-rel-symlink"),
 				fileMap: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
@@ -348,15 +350,11 @@ func Test_filesMap_ReadErr(t *testing.T) {
 }
 
 func Test_extractFilesFromDirectory(t *testing.T) {
-	fooRoot := filepath.Join("testdata", "rootfs-foo")
-	fooRootAbs, err := filepath.Abs(fooRoot)
-	require.NoError(t, err)
-	rhcosRoot := filepath.Join("testdata", "rootfs-rhcos")
-	rhcosRootAbs, err := filepath.Abs(rhcosRoot)
-	require.NoError(t, err)
-	symlinkRelRoot := filepath.Join("testdata", "rootfs-rhcos-rel-symlink")
-	symlinkRelRootAbs, err := filepath.Abs(symlinkRelRoot)
-	require.NoError(t, err)
+	testDataRoot := makeTestData(t)
+
+	fooRoot := filepath.Join(testDataRoot, "rootfs-foo")
+	rhcosRoot := filepath.Join(testDataRoot, "rootfs-rhcos")
+	symlinkRelRoot := filepath.Join(testDataRoot, "rootfs-rhcos-rel-symlink")
 
 	testcases := []struct {
 		name             string
@@ -367,7 +365,7 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 			name: "etc/redhat-release no symlink",
 			root: fooRoot,
 			expectedFilesMap: &filesMap{
-				root: fooRootAbs,
+				root: fooRoot,
 				files: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
@@ -382,7 +380,7 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 			name: "etc/redhat-release with absolute symlink",
 			root: rhcosRoot,
 			expectedFilesMap: &filesMap{
-				root: rhcosRootAbs,
+				root: rhcosRoot,
 				files: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
@@ -397,7 +395,7 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 			name: "etc/redhat-release with relative symlink",
 			root: symlinkRelRoot,
 			expectedFilesMap: &filesMap{
-				root: symlinkRelRootAbs,
+				root: symlinkRelRoot,
 				files: map[string]*fileMetadata{
 					"etc/redhat-release": {
 						isExecutable:  false,
@@ -426,4 +424,52 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 			}
 		})
 	}
+}
+
+func makeTestData(t *testing.T) string {
+	mkdirs := func(file string) {
+		require.NoError(t, os.MkdirAll(filepath.Dir(file), 0755))
+	}
+	write := func(file, data string) {
+		require.NoError(t, os.WriteFile(file, []byte(data), 0644))
+	}
+
+	root := t.TempDir()
+
+	fooRedhatRelease := filepath.Join(root, "rootfs-foo/etc/redhat-release")
+	mkdirs(fooRedhatRelease)
+	write(fooRedhatRelease, "Some random red hat release that does not exist (X.Y) (foo bar)\n")
+
+	// This directory structure mirrors what we have found in RHCOS 4.11.
+	//
+	// * `usr/lib/system-release` contains the distro identification data.
+	// * `etc/redhat-release` is a symlink to `/usr/lib/system-release`
+	//
+	//    $ ls -l etc/redhat-release
+	//    total 0
+	//    lrwxr-xr-x  1 <OWNER>  <GROUP>  <DATE> redhat-release -> /usr/lib/system-release
+	//
+	rhcosRedhatRelease := filepath.Join(root, "rootfs-rhcos/etc/redhat-release")
+	mkdirs(rhcosRedhatRelease)
+	require.NoError(t, os.Symlink("/usr/lib/system-release", rhcosRedhatRelease))
+	rhcosSystemRelease := filepath.Join(root, "rootfs-rhcos/usr/lib/system-release")
+	mkdirs(rhcosSystemRelease)
+	write(rhcosSystemRelease, "Red Hat Enterprise Linux CoreOS release 4.11\n")
+
+	// This directory structure mirrors what we have found in RHCOS 4.11
+	// except it uses a symlink to a relative path.
+	//
+	// * `release` contains the data.
+	// * `etc/redhat-release` is a symlink to `release`
+	//
+	//    $ ls -l etc/redhat-release
+	//    total 0
+	//    lrwxr-xr-x  1 <OWNER>  <GROUP>  <DATE> redhat-release -> ../release
+	//
+	relSymlinkRedhatRelease := filepath.Join(root, "rootfs-rhcos-rel-symlink/etc/redhat-release")
+	mkdirs(relSymlinkRedhatRelease)
+	require.NoError(t, os.Symlink("../release", relSymlinkRedhatRelease))
+	write(filepath.Join(root, "rootfs-rhcos-rel-symlink/release"), "Hello")
+
+	return root
 }
