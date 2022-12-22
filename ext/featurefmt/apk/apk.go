@@ -58,6 +58,8 @@ func (l lister) ListFeatures(files analyzer.Files) ([]database.FeatureVersion, e
 	libToDeps := make(database.StringToStringsMap)
 	scanner := bufio.NewScanner(bytes.NewBuffer(file.Contents))
 	var dir string
+	var source string
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		// Parse the package name or version.
@@ -74,11 +76,20 @@ func (l lister) ListFeatures(files analyzer.Files) ([]database.FeatureVersion, e
 				if len(libToDeps) != 0 {
 					pkg.LibraryToDependencies = libToDeps
 				}
+				if source != "" {
+					pkg.Feature.Name = source
+					source = ""
+				}
 
 				key := featurefmt.PackageKey{
 					Name:    pkg.Feature.Name,
 					Version: pkg.Version,
 				}
+				if oldPkg, exists := pkgSet[key]; exists {
+					pkg.ExecutableToDependencies.Merge(oldPkg.ExecutableToDependencies)
+					pkg.LibraryToDependencies.Merge(oldPkg.LibraryToDependencies)
+				}
+
 				pkgSet[key] = pkg
 			}
 
@@ -103,6 +114,8 @@ func (l lister) ListFeatures(files analyzer.Files) ([]database.FeatureVersion, e
 			pkg.Version = version
 		case line[:2] == "F:":
 			dir = line[2:]
+		case line[:2] == "o:":
+			source = line[2:]
 		case line[:2] == "R:":
 			filename := fmt.Sprintf("/%s/%s", dir, line[2:])
 			// The first character is always "/", which is removed when inserted into the layer files.

@@ -89,6 +89,14 @@ func verifyComponents(t *testing.T, components *v1.Components, test testCase) {
 						exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()
 				})
 			}
+
+			for _, exec := range expectedFeature.Executables {
+				sort.Slice(exec.RequiredFeatures, func(i, j int) bool {
+					return exec.RequiredFeatures[i].GetName() < exec.RequiredFeatures[j].GetName() ||
+						exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()
+				})
+			}
+
 			assert.ElementsMatch(t, expectedFeature.Executables, f.Executables)
 		}
 		expectedFeature.Executables = nil
