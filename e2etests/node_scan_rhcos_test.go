@@ -50,7 +50,7 @@ var vulnTar = &v1.Vulnerability{
 	Severity: "Moderate",
 }
 
-func buildRequestCase(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
+func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 	// From: https://www.redhat.com/security/data/metrics/repository-to-cpe.json
 	// "rhel-8-for-x86_64-appstream-rpms": {"cpes": ["cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream"]},
 	// "rhel-8-for-x86_64-baseos-rpms": {"cpes": ["cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/o:redhat:rhel:8.3::baseos"]}
@@ -60,12 +60,12 @@ func buildRequestCase(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 	}
 	return &v1.GetNodeVulnerabilitiesRequest{
 		OsImage:          "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
-		KernelVersion:    "0.0.1",
-		KubeletVersion:   "0.0.1",
-		KubeproxyVersion: "0.0.1",
+		KernelVersion:    "0.0.1", // dummy value - out of scope for this test
+		KubeletVersion:   "0.0.1", // dummy value - out of scope for this test
+		KubeproxyVersion: "0.0.1", // dummy value - out of scope for this test
 		Runtime: &v1.GetNodeVulnerabilitiesRequest_ContainerRuntime{
 			Name:    "docker",
-			Version: "0.0.1",
+			Version: "0.0.1", // dummy value - out of scope for this test
 		},
 		Notes: notes,
 		Components: &v1.Components{
@@ -110,19 +110,20 @@ func buildRequestCase(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewNodeScanServiceClient(conn)
-
 	cases := []struct {
 		name             string
 		request          *v1.GetNodeVulnerabilitiesRequest
-		responseContains *v1.GetNodeVulnerabilitiesResponse
+		expectedResponse *v1.GetNodeVulnerabilitiesResponse
+		assertVulnsLen   func(t *testing.T, expected, got int, msgAndArgs ...interface{}) bool
 	}{
 		{
 			name:    "Selected vulnerabilities should be returned by the certified scan",
-			request: buildRequestCase([]v1.Note{}),
-			responseContains: &v1.GetNodeVulnerabilitiesResponse{
+			request: buildRequest([]v1.Note{}),
+			expectedResponse: &v1.GetNodeVulnerabilitiesResponse{
 				// We conduct a spot-checking here - more vulns can be returned from scanner for libksba and tar,
 				// but we care only about the selected one as it is sufficient for this test case.
-				// (We do not test that the set of vulns is complete, we test that the API returns any vulns if expected)
+				// (We do not test that the set of vulns is complete, we test that the API returns any vulns if expected).
+				// We use 'equals' assertion if 0 vulns are expected.
 				Features: []*v1.Feature{
 					{
 						Name:            "libksba",
@@ -145,8 +146,8 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 		},
 		{
 			name:    "Uncertified scan is unsupported for RHCOS and returns no features",
-			request: buildRequestCase([]v1.Note{v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE}),
-			responseContains: &v1.GetNodeVulnerabilitiesResponse{
+			request: buildRequest([]v1.Note{v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE}),
+			expectedResponse: &v1.GetNodeVulnerabilitiesResponse{
 				Features:  []*v1.Feature{},
 				NodeNotes: nil,
 			},
@@ -156,32 +157,48 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			c := c
-			resp, err := client.GetNodeVulnerabilities(context.Background(), c.request)
+			gotResponse, err := client.GetNodeVulnerabilities(context.Background(), c.request)
 			require.NoError(t, err)
-			assert.Len(t, resp.GetFeatures(), len(c.responseContains.GetFeatures()))
-			for _, expectedFeat := range c.responseContains.GetFeatures() {
-				var feat *v1.Feature
-				for _, gotFeat := range resp.GetFeatures() {
-					if expectedFeat.GetName() == gotFeat.GetName() && expectedFeat.GetVersion() == gotFeat.GetVersion() {
-						feat = gotFeat
-					}
+			assert.Len(t, gotResponse.GetFeatures(), len(c.expectedResponse.GetFeatures()), "Unexpected number of features") // unusual got-expected order of Len
+			assert.Len(t, gotResponse.GetNodeNotes(), len(c.expectedResponse.GetNodeNotes()))
+
+			for _, expectedFeat := range c.expectedResponse.GetFeatures() {
+				foundFeat := findFeat(expectedFeat.GetName(), expectedFeat.GetVersion(), gotResponse.GetFeatures())
+				assert.NotNil(t, foundFeat, "Expected to find feature '%s:%s'", expectedFeat.GetName(), expectedFeat.GetVersion())
+				if foundFeat == nil {
+					continue
 				}
-				assert.NotNil(t, feat, "expected to find feat '%s:%s' in the reply, but got none. Features in the reply: %+v", expectedFeat.GetName(), expectedFeat.GetVersion(), resp.GetFeatures())
-				assertIsSubset(t, feat.GetVulnerabilities(), expectedFeat.GetVulnerabilities())
+				// when 0 vulns are expected, then use stronger assertion, because empty set is a subset of any set
+				if len(expectedFeat.GetVulnerabilities()) == 0 {
+					assert.Len(t, foundFeat.GetVulnerabilities(), 0, "Expected to find 0 vulnerabilities for feature '%s:%s'", expectedFeat.GetName(), expectedFeat.GetVersion())
+				} else {
+					assertIsSubset(t, expectedFeat.GetVulnerabilities(), foundFeat.GetVulnerabilities())
+				}
 			}
-			assert.Equal(t, c.responseContains.GetNodeNotes(), resp.GetNodeNotes())
 		})
 	}
 }
 
-// assertIsSubset asserts that every element of expectedToExist exists in gotVulns
-func assertIsSubset(t *testing.T, gotVulns, expectedToExist []*v1.Vulnerability) {
-	assert.GreaterOrEqual(t, len(gotVulns), len(expectedToExist), "Expected %d vulnerabilities to be a subset of a set that has %d elements", len(gotVulns), len(expectedToExist))
+func findFeat(name, version string, set []*v1.Feature) *v1.Feature {
+	for _, gotFeat := range set {
+		if gotFeat.GetName() == name && gotFeat.GetVersion() == version {
+			return gotFeat
+		}
+	}
+	return nil
+}
+
+// assertIsSubset asserts that every element of 'subset' exists in 'set'
+func assertIsSubset(t *testing.T, subset, set []*v1.Vulnerability) {
+	assert.GreaterOrEqual(t, len(set), len(subset), "Expected to find at least %d vulnerabilities", len(subset))
 	// Prune last modified time
-	for _, v := range gotVulns {
+	for _, v := range set {
+		if v == nil {
+			continue
+		}
 		v.MetadataV2.LastModifiedDateTime = ""
 	}
-	for _, v := range expectedToExist {
-		assert.Contains(t, gotVulns, v, "Expected to find %v among %v", v, gotVulns)
+	for _, v := range subset {
+		assert.Contains(t, set, v)
 	}
 }
