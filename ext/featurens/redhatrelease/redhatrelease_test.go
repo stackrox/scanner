@@ -82,6 +82,12 @@ func TestDetector(t *testing.T) {
 			}),
 		},
 		{
+			ExpectedNamespace: &database.Namespace{Name: "rhcos:4.11", VersionFormat: rpm.ParserName},
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"etc/redhat-release": {Contents: []byte(`Red Hat Enterprise Linux CoreOS release 4.11`)},
+			}),
+		},
+		{
 			ExpectedNamespace: &database.Namespace{Name: "centos:7", VersionFormat: rpm.ParserName},
 			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
 				"etc/system-release": {Contents: []byte(`CentOS Linux release 7.1.1503 (Core)`)},

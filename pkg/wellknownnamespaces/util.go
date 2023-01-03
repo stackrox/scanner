@@ -23,6 +23,13 @@ func IsRHELNamespace(namespace string) bool {
 	return strings.HasPrefix(namespace, "rhel")
 }
 
+// IsRHCOSNamespace returns true if the given argument identifies an RHCOS namespace.
+// The namespace is expected to be of form `namespacename:version` but only `namespacename` is required.
+// For example: rhel:7, rhel:8, centos:8, ubuntu:14.04.
+func IsRHCOSNamespace(namespace string) bool {
+	return strings.HasPrefix(namespace, "rhcos")
+}
+
 // IsUbuntuNamespace returns true if the given argument identifies an Ubuntu namespace.
 // The namespace is expected to be of form `namespacename:version` but only `namespacename` is required.
 // For example: rhel:7, rhel:8, centos:8, ubuntu:14.04.

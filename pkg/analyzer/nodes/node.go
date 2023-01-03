@@ -67,7 +67,7 @@ func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, err
 	c.OSNamespace, c.OSComponents, c.CertifiedRHELComponents, _, err =
 		detection.DetectComponents(nodeName, files, nil, nil, uncertifiedRHEL)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	// File reading errors during analysis are not exposed to DetectComponents, hence we
 	// check it and if there were any we fail.
@@ -89,7 +89,7 @@ func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*fil
 		files: make(map[string]*fileMetadata),
 	}
 	m := metrics.FileExtractionMetrics{}
-	for _, dir := range matcher.GetCommonPrefixDirs() {
+	for _, dir := range []string{"etc/", "usr/share/rpm", "var/lib/rpm"} { // TODO(ROX-13771): Use range matcher.GetCommonPrefixDirs() again after fixing
 		if err := n.addFiles(filepath.FromSlash(dir), matcher, &m); err != nil {
 			return nil, errors.Wrapf(err, "failed to match filesMap at %q (at %q)", dir, n.root)
 		}
@@ -99,6 +99,7 @@ func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*fil
 }
 
 // addFiles searches the directory for files using the matcher and adds them to the file map.
+// TODO(ROX-14050): Improve handling of symlinks - if possible, follow instead of ignoring them
 func (n *filesMap) addFiles(dir string, matcher matcher.Matcher, m *metrics.FileExtractionMetrics) error {
 	logrus.WithFields(logrus.Fields{
 		"root":      n.root,

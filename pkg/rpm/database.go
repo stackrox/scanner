@@ -41,6 +41,12 @@ const (
 	// databaseDir is the directory where the RPM database is expected to be in
 	// the container filesystem.
 	databaseDir = "var/lib/rpm"
+
+	// rhcosDBDir is an alternative to databaseDir, as RHCOS saves its RPM DB in
+	// a different path that symlinks to var/lib/rpm and our approach to listing filesystem
+	// contents does not respect symlinks.
+	// TODO(ROX-14050): get rid of this when symlink support is added
+	rhcosDBDir = "usr/share/rpm"
 )
 
 var (
@@ -97,9 +103,9 @@ func init() {
 // files known for the different backend we support. The paths are relative to
 // root.
 func DatabaseFiles() []string {
-	paths := make([]string, 0, databaseFiles.Cardinality())
+	paths := make([]string, 0, 2*databaseFiles.Cardinality())
 	for filename := range databaseFiles {
-		paths = append(paths, path.Join(databaseDir, filename))
+		paths = append(paths, path.Join(databaseDir, filename), path.Join(rhcosDBDir, filename))
 	}
 	return paths
 }
@@ -117,6 +123,8 @@ func CreateDatabaseFromImage(imageFiles analyzer.Files) (*rpmDatabase, error) {
 	for name := range databaseFiles {
 		if data, exists := imageFiles.Get(path.Join(databaseDir, name)); exists {
 			dbFiles[name] = data
+		} else if rhcosData, rhcosExists := imageFiles.Get(path.Join(rhcosDBDir, name)); rhcosExists {
+			dbFiles[name] = rhcosData
 		}
 	}
 	if len(dbFiles) == 0 {
