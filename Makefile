@@ -34,7 +34,8 @@ BUILD_IMAGE := $(DEFAULT_IMAGE_REGISTRY)/apollo-ci:$(BUILD_IMAGE_VERSION)
 
 ifeq ($(shell uname -ms),Darwin arm64)
 	# TODO(ROX-12064) build these images in the CI pipeline
-	# BUILD_IMAGE = quay.io/rhacs-eng/sandbox:apollo-ci-scanner-build-0.3.44-arm64
+	# Uncomment the line below to enable native arm64 builder images
+	# BUILD_IMAGE = quay.io/rhacs-eng/sandbox:apollo-ci-stackrox-build-0.3.49-arm64
 	ARCH := aarch64
 	GOARCH := arm64
 else
