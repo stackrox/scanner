@@ -12,7 +12,7 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/facebookincubator/nvdtools v0.1.5
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-git/go-billy/v5 v5.3.1
+	github.com/go-git/go-billy/v5 v5.4.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2
@@ -46,7 +46,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8
+	golang.org/x/sys v0.3.0
 	google.golang.org/api v0.105.0
 	google.golang.org/grpc v1.51.0
 	gopkg.in/yaml.v2 v2.4.0
