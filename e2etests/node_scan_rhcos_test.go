@@ -110,14 +110,12 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewNodeScanServiceClient(conn)
-	cases := []struct {
-		name             string
+	cases := map[string]struct {
 		request          *v1.GetNodeVulnerabilitiesRequest
 		expectedResponse *v1.GetNodeVulnerabilitiesResponse
 		assertVulnsLen   func(t *testing.T, expected, got int, msgAndArgs ...interface{}) bool
 	}{
-		{
-			name:    "Selected vulnerabilities should be returned by the certified scan",
+		"Selected vulnerabilities should be returned by the certified scan": {
 			request: buildRequest([]v1.Note{}),
 			expectedResponse: &v1.GetNodeVulnerabilitiesResponse{
 				// We conduct a spot-checking here - more vulns can be returned from scanner for libksba and tar,
@@ -147,8 +145,7 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 				NodeNotes: nil,
 			},
 		},
-		{
-			name:    "Uncertified scan is unsupported for RHCOS and returns no features",
+		"Uncertified scan is unsupported for RHCOS and returns no features": {
 			request: buildRequest([]v1.Note{v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE}),
 			expectedResponse: &v1.GetNodeVulnerabilitiesResponse{
 				Features:  []*v1.Feature{},
@@ -157,8 +154,8 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
 			c := c
 			gotResponse, err := client.GetNodeVulnerabilities(context.Background(), c.request)
 			require.NoError(t, err)
