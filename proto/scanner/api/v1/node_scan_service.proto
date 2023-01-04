@@ -9,7 +9,6 @@ import "scanner/api/v1/note.proto";
 import "scanner/api/v1/vulnerability.proto";
 import "scanner/api/v1/component.proto";
 
-
 package scannerV1;
 
 message GetNodeVulnerabilitiesRequest {

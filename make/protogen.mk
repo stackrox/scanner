@@ -60,7 +60,6 @@ $(PROTOC_FILE): $(PROTOC_DOWNLOADS_DIR)
 	@echo "+ $@"
 	$(SILENT)wget -q "https://github.com/protocolbuffers/protobuf/releases/download/v$(PROTOC_VERSION)/$(PROTOC_ZIP)" -O "$@"
 
-
 .PRECIOUS: $(PROTOC_FILE)
 
 $(PROTOC):
