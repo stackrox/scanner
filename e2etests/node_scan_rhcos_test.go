@@ -193,9 +193,6 @@ func assertIsSubset(t *testing.T, subset, set []*v1.Vulnerability) {
 	assert.GreaterOrEqual(t, len(set), len(subset), "Expected to find at least %d vulnerabilities", len(subset))
 	// Prune last modified time
 	for _, v := range set {
-		if v == nil {
-			continue
-		}
 		v.MetadataV2.LastModifiedDateTime = ""
 	}
 	for _, v := range subset {
