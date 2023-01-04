@@ -210,14 +210,17 @@ func (n *filesMap) Get(path string) (analyzer.FileData, bool) {
 		}
 	}
 
+	// Protect against potentially reading from a path outside root.
 	if !fsutil.Within(n.root, absPath) {
-
+		return analyzer.FileData{}, false
 	}
 
 	fileData.Contents, n.readError = os.ReadFile(absPath)
-	if n.readError == nil {
-		return fileData, true
+	if n.readError != nil {
+		return analyzer.FileData{}, false
 	}
+
+	return fileData, true
 }
 
 // GetFilesPrefix implements analyzer.Files
