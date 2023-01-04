@@ -1,7 +1,6 @@
 package nodes
 
 import (
-	"github.com/stackrox/scanner/pkg/fsutil"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -13,6 +12,7 @@ import (
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/analyzer/detection"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/fsutil"
 	"github.com/stackrox/scanner/pkg/fsutil/fileinfo"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
