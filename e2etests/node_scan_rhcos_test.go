@@ -136,8 +136,11 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 						Vulnerabilities: []*v1.Vulnerability{vulnTar},
 					},
 					{
-						Name:            "grep",
-						Version:         "3.1-6.el8.x86_64",
+						Name:    "grep",
+						Version: "3.1-6.el8.x86_64",
+						// Warning: if this test fails, it may mean that new vulnerabilities have been found for grep:3.1-6
+						// To fix that, one would need to find another package/version that has 0 vulnerabilities
+						// or mock the scanning behavior of scanner to always return 0 vulnerabilities for the pkg used in this case.
 						Vulnerabilities: []*v1.Vulnerability{},
 					},
 				},
