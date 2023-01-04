@@ -2,8 +2,8 @@ package ziputil
 
 import (
 	"archive/zip"
+	"github.com/stackrox/scanner/pkg/fsutil"
 	"io"
-	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -40,7 +40,7 @@ func OpenFile(zipR *zip.Reader, name string) (*ReadCloser, error) {
 func OpenFilesInDir(zipR *zip.Reader, dir string, suffix string) ([]*ReadCloser, error) {
 	var rs []*ReadCloser
 	for _, file := range zipR.File {
-		if within(dir, file.Name) && strings.HasSuffix(file.Name, suffix) {
+		if fsutil.Within(dir, file.Name) && strings.HasSuffix(file.Name, suffix) {
 			f, err := file.Open()
 			if err != nil {
 				return nil, errors.Wrapf(err, "unable to open file %s in directory %s", file.Name, dir)
@@ -53,14 +53,4 @@ func OpenFilesInDir(zipR *zip.Reader, dir string, suffix string) ([]*ReadCloser,
 	}
 
 	return rs, nil
-}
-
-// within returns true if sub is within the parent.
-// This function is inspired by https://github.com/mholt/archiver/blob/v3.5.0/archiver.go#L360
-func within(parent, sub string) bool {
-	rel, err := filepath.Rel(parent, sub)
-	if err != nil {
-		return false
-	}
-	return !strings.Contains(rel, "..")
 }
