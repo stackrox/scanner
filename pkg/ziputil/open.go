@@ -2,11 +2,11 @@ package ziputil
 
 import (
 	"archive/zip"
-	"github.com/stackrox/scanner/pkg/fsutil"
 	"io"
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/stackrox/scanner/pkg/fsutil"
 )
 
 // ReadCloser is a wrapper around io.ReadCloser for reading files in a ZIP.

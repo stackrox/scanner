@@ -2,54 +2,55 @@ package fsutil
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWithin(t *testing.T) {
-	testcases := []struct{
+	testcases := []struct {
 		parent string
 		child  string
 		within bool
 	}{
 		{
 			parent: "/a/b",
-			child: "/a/b/c",
+			child:  "/a/b/c",
 			within: true,
 		},
 		{
 			parent: "/a/b/c",
-			child: "/a/b",
+			child:  "/a/b",
 			within: false,
 		},
 		{
 			parent: "/a/b",
-			child: "/a/b",
+			child:  "/a/b",
 			within: true,
 		},
 		{
 			parent: "a/b",
-			child: "a/b",
+			child:  "a/b",
 			within: true,
 		},
 		{
 			parent: "a/b",
-			child: "/a/b",
+			child:  "/a/b",
 			within: false,
 		},
 		{
 			parent: "/a/b",
-			child: "a/b",
+			child:  "a/b",
 			within: false,
 		},
 		{
 			parent: "/a",
-			child: "/a/b/../c/..",
+			child:  "/a/b/../c/..",
 			within: true,
 		},
 		{
 			parent: "/a",
-			child: "/a/b/../..",
+			child:  "/a/b/../..",
 			within: false,
 		},
 	}
