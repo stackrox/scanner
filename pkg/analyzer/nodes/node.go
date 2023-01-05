@@ -211,6 +211,7 @@ func (n *filesMap) Get(path string) (analyzer.FileData, bool) {
 	}
 
 	// Protect against potentially reading from a path outside root.
+	// This is possible when reading a symlinked file.
 	if !fsutil.Within(n.root, absPath) {
 		return analyzer.FileData{}, false
 	}
