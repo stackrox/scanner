@@ -118,3 +118,4 @@ simple add the `generate-dumps-on-pr` label to your PR.
 DB integration tests also run in CI upon every commit.
 However, to test these locally, be sure to [install PostgreSQL 12](https://postgresapp.com/downloads.html)
 and run it prior to running the tests.
+
