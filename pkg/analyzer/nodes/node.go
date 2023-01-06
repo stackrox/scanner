@@ -12,6 +12,7 @@ import (
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/analyzer/detection"
 	"github.com/stackrox/scanner/pkg/component"
+	"github.com/stackrox/scanner/pkg/fsutil"
 	"github.com/stackrox/scanner/pkg/fsutil/fileinfo"
 	"github.com/stackrox/scanner/pkg/matcher"
 	"github.com/stackrox/scanner/pkg/metrics"
@@ -182,35 +183,46 @@ func extractFile(path string, entry fs.DirEntry, pathMatcher matcher.Matcher, m 
 func (n *filesMap) Get(path string) (analyzer.FileData, bool) {
 	// When a previous read error has happened, we act as if all the files map is
 	// empty. Analyzer are expected to handle it gracefully.
-	if f, ok := n.files[path]; n.readError == nil && ok {
-		fileData := analyzer.FileData{Executable: f.isExecutable}
-		if !f.isExtractable {
-			return fileData, true
+	f, ok := n.files[path]
+	if n.readError != nil || !ok {
+		return analyzer.FileData{}, false
+	}
+
+	fileData := analyzer.FileData{Executable: f.isExecutable}
+	if !f.isExtractable {
+		return fileData, true
+	}
+	// Prepend the root to make this an absolute file path.
+	absPath := filepath.Join(n.root, filepath.FromSlash(path))
+	if f.isSymlink {
+		// Resolve the symlink to the correct destination.
+		var linkDest string
+		linkDest, n.readError = os.Readlink(absPath)
+		if n.readError != nil {
+			return analyzer.FileData{}, false
 		}
-		// Prepend the root to make this an absolute file path.
-		absPath := filepath.Join(n.root, filepath.FromSlash(path))
-		if f.isSymlink {
-			// Resolve the symlink to the correct destination.
-			var linkDest string
-			linkDest, n.readError = os.Readlink(absPath)
-			if n.readError != nil {
-				return analyzer.FileData{}, false
-			}
-			// If the symlink is an absolute path,
-			// prepend n.root to the link's destination
-			// and read that file, instead.
-			// Note: this only matters for symlinks to absolute paths.
-			// Symlinks to relative paths are followed correctly.
-			if filepath.IsAbs(linkDest) {
-				absPath = filepath.Join(n.root, filepath.FromSlash(linkDest))
-			}
-		}
-		fileData.Contents, n.readError = os.ReadFile(absPath)
-		if n.readError == nil {
-			return fileData, true
+		// If the symlink is an absolute path,
+		// prepend n.root to the link's destination
+		// and read that file, instead.
+		// Note: this only matters for symlinks to absolute paths.
+		// Symlinks to relative paths are followed correctly.
+		if filepath.IsAbs(linkDest) {
+			absPath = filepath.Join(n.root, filepath.FromSlash(linkDest))
 		}
 	}
-	return analyzer.FileData{}, false
+
+	// Protect against potentially reading from a path outside root.
+	// This is possible when reading a symlinked file.
+	if !fsutil.Within(n.root, absPath) {
+		return analyzer.FileData{}, false
+	}
+
+	fileData.Contents, n.readError = os.ReadFile(absPath)
+	if n.readError != nil {
+		return analyzer.FileData{}, false
+	}
+
+	return fileData, true
 }
 
 // GetFilesPrefix implements analyzer.Files

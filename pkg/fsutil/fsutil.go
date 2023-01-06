@@ -17,6 +17,7 @@ package fsutil
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -63,4 +64,14 @@ func Readdir(path string, filter dirFilter) ([]string, error) {
 	}
 
 	return files, nil
+}
+
+// Within returns true if sub is within parent.
+// This function is inspired by https://github.com/mholt/archiver/blob/v3.5.0/archiver.go#L360
+func Within(parent, sub string) bool {
+	rel, err := filepath.Rel(parent, sub)
+	if err != nil {
+		return false
+	}
+	return !strings.Contains(rel, "..")
 }
