@@ -10,7 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
+	apiV1 "github.com/stackrox/scanner/api/v1"
+	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/api/v1/convert"
+	"github.com/stackrox/scanner/api/v1/features"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
@@ -247,10 +250,10 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	case nil: // Normal
 	case kernelparser.ErrNodeUnsupported:
 		// The node is unsupported, exit early.
-		resp.Notes = append(resp.Notes, v1.NodeNote_NODE_UNSUPPORTED)
+		resp.NodeNotes = append(resp.GetNodeNotes(), v1.NodeNote_NODE_UNSUPPORTED)
 		return resp, nil
 	case kernelparser.ErrKernelUnsupported:
-		resp.Notes = append(resp.Notes, v1.NodeNote_NODE_KERNEL_UNSUPPORTED)
+		resp.NodeNotes = append(resp.GetNodeNotes(), v1.NodeNote_NODE_KERNEL_UNSUPPORTED)
 	default:
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -270,6 +273,14 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	// Handle the new format of the request and scan node inventory additionally
+	if req.GetComponents() != nil {
+		layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes()))
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		resp.Features = features.ConvertFeatures(layer.Features)
+	}
 	return resp, nil
 }
 

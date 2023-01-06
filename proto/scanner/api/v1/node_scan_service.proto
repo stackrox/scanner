@@ -7,6 +7,7 @@ option java_package = "io.stackrox.proto.api.scanner.v1";
 import weak "google/api/annotations.proto";
 import "scanner/api/v1/note.proto";
 import "scanner/api/v1/vulnerability.proto";
+import "scanner/api/v1/component.proto";
 
 package scannerV1;
 
@@ -20,9 +21,11 @@ message GetNodeVulnerabilitiesRequest {
         string version = 2;
     }
     ContainerRuntime runtime              = 5;
+    Components       components           = 6;
+    repeated Note    notes                = 7;
 }
 
-// Next tag: 9
+// Next tag: 10
 message GetNodeVulnerabilitiesResponse {
     string                 scanner_version           = 7;
     string                 operating_system          = 6;
@@ -37,7 +40,8 @@ message GetNodeVulnerabilitiesResponse {
     }
     KernelComponent       kernel_component           = 5;
 
-    repeated NodeNote     notes                      = 8;
+    repeated NodeNote     node_notes                 = 8;
+    repeated Feature      features                   = 9;
 }
 
 // NodeScanService APIs can be used to get vulnerabilities for nodes.

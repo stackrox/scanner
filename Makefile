@@ -1,7 +1,7 @@
 # Store tooling in a location that does not affect the system.
 GOBIN := $(CURDIR)/.gobin
 export GOBIN
-PATH := $(GOBIN):$(PATH)
+PATH := $(GOBIN):"$(PATH)"
 export PATH
 
 # Set to empty string to echo some command lines which are hidden by default.
