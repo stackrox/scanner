@@ -116,14 +116,14 @@ ifdef CI
 	@echo 'The environment indicates we are in CI; running linters in check mode.'
 	@echo 'If this fails, run `make style`.'
 	@echo "Running with no tags..."
-	golangci-lint run
+	$(GOLANGCILINT_BIN) run
 	@echo "Running with release tags..."
 	@# We use --tests=false because some unit tests don't compile with release tags,
 	@# since they use functions that we don't define in the release build. That's okay.
-	golangci-lint run --build-tags "$(subst $(comma),$(space),$(RELEASE_GOTAGS))" --tests=false
+	$(GOLANGCILINT_BIN) run --build-tags "$(subst $(comma),$(space),$(RELEASE_GOTAGS))" --tests=false
 else
-	golangci-lint run --fix
-	golangci-lint run --fix --build-tags "$(subst $(comma),$(space),$(RELEASE_GOTAGS))" --tests=false
+	$(GOLANGCILINT_BIN) run --fix
+	$(GOLANGCILINT_BIN) run --fix --build-tags "$(subst $(comma),$(space),$(RELEASE_GOTAGS))" --tests=false
 endif
 
 .PHONY: blanks
@@ -261,8 +261,8 @@ deploy-local: clean-helm-rendered
 
 .PHONY: ossls-notice
 ossls-notice: deps $(OSSLS_BIN)
-	ossls version
-	ossls audit --export image/scanner/rhel/THIRD_PARTY_NOTICES
+	$(OSSLS_BIN) version
+	$(OSSLS_BIN) audit --export image/scanner/rhel/THIRD_PARTY_NOTICES
 
 ###########
 ## Tests ##
@@ -314,7 +314,7 @@ scale-tests: deps
 .PHONY: report
 report: $(GO_JUNIT_REPORT_BIN)
 	@echo "+ $@"
-	@cat test.log | go-junit-report > report.xml
+	@cat test.log | $(GO_JUNIT_REPORT_BIN) > report.xml
 	@mkdir -p $(JUNIT_OUT)
 	@cp test.log report.xml $(JUNIT_OUT)
 	@echo
@@ -353,8 +353,8 @@ proto-generated-srcs: $(PROTO_GENERATED_SRCS)
 .PHONY: go-easyjson-srcs
 go-easyjson-srcs: $(EASYJSON_BIN)
 	@echo "+ $@"
-	@easyjson -pkg pkg/vulnloader/nvdloader
-	@easyjson -pkg api/v1
+	$(SILENT)$(EASYJSON_BIN) -pkg pkg/vulnloader/nvdloader
+	$(SILENT)$(EASYJSON_BIN) -pkg api/v1
 
 clean-proto-generated-srcs:
 	@echo "+ $@"
@@ -364,7 +364,7 @@ clean-proto-generated-srcs:
 ## Clean ##
 ###########
 .PHONY: clean
-clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof clean-test
+clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof clean-test clean-gobin
 	@echo "+ $@"
 
 .PHONY: clean-image
@@ -380,7 +380,7 @@ clean-helm-rendered:
 .PHONY: clean-pprof
 clean-pprof:
 	@echo "+ $@"
-	rm /tmp/pprof.zip || true
+	rm -f /tmp/pprof.zip
 	rm -rf /tmp/pprof
 
 .PHONY: clean-test
@@ -388,6 +388,11 @@ clean-test:
 	@echo "+ $@"
 	rm -rf test-output/
 	rm -rf junit-reports/
+
+.PHONY: clean-gobin
+clean-gobin:
+	@echo "+ $@"
+	rm -rf .gobin
 
 ##################
 ## Genesis Dump ##
