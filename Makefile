@@ -380,7 +380,7 @@ clean-helm-rendered:
 .PHONY: clean-pprof
 clean-pprof:
 	@echo "+ $@"
-	rm -f /tmp/pprof.zip
+	rm -f /tmp/pprof-out/pprof.zip
 	rm -rf /tmp/pprof
 
 .PHONY: clean-test
@@ -392,7 +392,7 @@ clean-test:
 .PHONY: clean-gobin
 clean-gobin:
 	@echo "+ $@"
-	rm -rf .gobin
+	rm -rf $(GOBIN)
 
 ##################
 ## Genesis Dump ##
