@@ -113,7 +113,6 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	cases := map[string]struct {
 		request          *v1.GetNodeVulnerabilitiesRequest
 		expectedResponse *v1.GetNodeVulnerabilitiesResponse
-		assertVulnsLen   func(t *testing.T, expected, got int, msgAndArgs ...interface{}) bool
 	}{
 		"Selected vulnerabilities should be returned by the certified scan": {
 			request: buildRequest([]v1.Note{}),
