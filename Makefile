@@ -207,32 +207,32 @@ endif
 scanner-build-nodeps:
 	$(BUILD_FLAGS) $(BUILD_CMD)
 
-.PHONY: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
-$(CURDIR)/image/scanner/rhel/bundle.tar.gz:
+.PHONY: $(CURDIR)/image/scanner/rhel/bundle.tar.xz
+$(CURDIR)/image/scanner/rhel/bundle.tar.xz:
 	$(CURDIR)/image/scanner/rhel/create-bundle.sh $(CURDIR)/image/scanner $(CURDIR)/image/scanner/rhel
 
-.PHONY: $(CURDIR)/image/db/rhel/bundle.tar.gz
-$(CURDIR)/image/db/rhel/bundle.tar.gz:
+.PHONY: $(CURDIR)/image/db/rhel/bundle.tar.xz
+$(CURDIR)/image/db/rhel/bundle.tar.xz:
 	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $(CURDIR)/image/db/rhel
 
 .PHONY: scanner-image
-scanner-image: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.xz
 	@echo "+ $@"
 	@docker build -t scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: scanner-image-slim
-scanner-image-slim: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image-slim: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.xz
 	@echo "+ $@"
 	@docker build -t scanner-slim:$(TAG) -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
 
 .PHONY: db-image
-db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
+db-image: $(CURDIR)/image/db/rhel/bundle.tar.xz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
 	@docker build -t scanner-db:$(TAG) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: db-image-slim
-db-image-slim: $(CURDIR)/image/db/rhel/bundle.tar.gz
+db-image-slim: $(CURDIR)/image/db/rhel/bundle.tar.xz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
 	@docker build -t scanner-db-slim:$(TAG) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile.slim image/db/rhel

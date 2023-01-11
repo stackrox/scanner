@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Execute the build steps required to create the scanner image's bundle.tar.gz.
+# Execute the build steps required to create the scanner image's bundle.tar.xz.
 #
 # Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/build/build-main-and-bundle.sh
 

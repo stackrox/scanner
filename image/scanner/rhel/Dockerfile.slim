@@ -4,9 +4,9 @@ ARG BASE_TAG=8.7
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 
-COPY bundle.tar.gz /
+COPY bundle.tar.xz /
 WORKDIR /bundle
-RUN microdnf -y install tar gzip && tar -zxf /bundle.tar.gz
+RUN microdnf -y install tar xz && tar -xf /bundle.tar.xz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 

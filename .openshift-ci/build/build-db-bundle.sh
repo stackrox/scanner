@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Execute the build steps required to create the scanner-db image's bundle.tar.gz.
+# Execute the build steps required to create the scanner-db image's bundle.tar.xz.
 #
 # Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/build/build-central-db-bundle.sh
 
@@ -28,7 +28,7 @@ get_db_dump() {
 build_db_bundle() {
     get_db_dump
 
-    info "Creating scanner-db bundle.tar.gz"
+    info "Creating scanner-db bundle.tar.xz"
     "$ROOT/image/db/rhel/create-bundle.sh" "$ROOT/image/db" "$ROOT/image/db/rhel"
 }
 

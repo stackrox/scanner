@@ -1,5 +1,5 @@
-bundle.tar.gz
-bundle.tar.gz.sha512
+bundle.tar.xz
+bundle.tar.xz.sha512
 prebuild.sh
 scripts
 /THIRD_PARTY_NOTICES/

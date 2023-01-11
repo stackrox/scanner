@@ -23,7 +23,7 @@ OUTPUT_DIR="$2"
 [[ -d "$OUTPUT_DIR" ]] \
     || die "Output directory doesn't exist or is not a directory."
 
-OUTPUT_BUNDLE="${OUTPUT_DIR}/bundle.tar.gz"
+OUTPUT_BUNDLE="${OUTPUT_DIR}/bundle.tar.xz"
 
 # Create tmp directory with stackrox directory structure
 bundle_root="$(mktemp -d)"
@@ -58,15 +58,14 @@ cp -pr "${INPUT_ROOT}/rhel/THIRD_PARTY_NOTICES"           "${bundle_root}/"
 
 # =============================================================================
 
-# Files should have owner/group equal to root:root
-if tar --version | grep -q "gnu" ; then
-  tar_chown_args=("--owner=root:0" "--group=root:0")
-else
-  tar_chown_args=("--uid=0" "--uname=root" "--gid=0" "--gname=root")
-fi
-
 # Create output bundle of all files in $bundle_root
-tar cz "${tar_chown_args[@]}" --file "$OUTPUT_BUNDLE" --directory "${bundle_root}" .
+COPYFILE_DISABLE=true tar -c \
+    --sort=name \
+    --mtime='UTC 1970-01-01' \
+    --owner=0 --group=0 --numeric-owner \
+    --file - \
+    --directory "${bundle_root}" . | \
+    xz --compress -1 --threads=8 - > "$OUTPUT_BUNDLE"
 
 # Create checksum
 sha512sum "${OUTPUT_BUNDLE}" > "${OUTPUT_BUNDLE}.sha512"
