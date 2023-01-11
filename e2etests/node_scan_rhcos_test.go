@@ -93,10 +93,10 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 				},
 				{
 					Id:        int64(3),
-					Name:      "grep",
+					Name:      "tzdata",
 					Namespace: "rhel:8",
-					Version:   "3.1-6.el8",
-					Arch:      "x86_64",
+					Version:   "2022g.el8",
+					Arch:      "noarch",
 					Module:    "",
 					Cpes:      cpes,
 					AddedBy:   "",
@@ -113,7 +113,6 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	cases := map[string]struct {
 		request          *v1.GetNodeVulnerabilitiesRequest
 		expectedResponse *v1.GetNodeVulnerabilitiesResponse
-		assertVulnsLen   func(t *testing.T, expected, got int, msgAndArgs ...interface{}) bool
 	}{
 		"Selected vulnerabilities should be returned by the certified scan": {
 			request: buildRequest([]v1.Note{}),
@@ -134,9 +133,9 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 						Vulnerabilities: []*v1.Vulnerability{vulnTar},
 					},
 					{
-						Name:    "grep",
-						Version: "3.1-6.el8.x86_64",
-						// Warning: if this test fails, it may mean that new vulnerabilities have been found for grep:3.1-6
+						Name:    "tzdata",
+						Version: "2022g.el8.noarch",
+						// Warning: if this test fails, then probably vulnerabilities have been found for tzdata:2022g
 						// To fix that, one would need to find another package/version that has 0 vulnerabilities
 						// or mock the scanning behavior of scanner to always return 0 vulnerabilities for the pkg used in this case.
 						Vulnerabilities: []*v1.Vulnerability{},
