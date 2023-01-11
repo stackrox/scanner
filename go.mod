@@ -46,7 +46,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/sys v0.3.0
+	golang.org/x/sys v0.4.0
 	google.golang.org/api v0.106.0
 	google.golang.org/grpc v1.52.0
 	gopkg.in/yaml.v2 v2.4.0
