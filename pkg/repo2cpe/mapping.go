@@ -90,14 +90,14 @@ func (m *Mapping) LoadFromZip(zipR *zip.Reader, dir string) error {
 }
 
 // Get returns the CPEs for the given repositories.
-func (m *Mapping) Get(repos []string) ([]string, error) {
+func (m *Mapping) Get(repos []string) []string {
 	if len(repos) == 0 {
-		return []string{}, nil
+		return []string{}
 	}
 
 	mapping := m.mapping.Load().(*RHELv2MappingFile)
 	if mapping == nil {
-		return []string{}, nil
+		return []string{}
 	}
 
 	cpes := set.NewStringSet()
@@ -112,5 +112,5 @@ func (m *Mapping) Get(repos []string) ([]string, error) {
 		}
 	}
 
-	return cpes.AsSlice(), nil
+	return cpes.AsSlice()
 }

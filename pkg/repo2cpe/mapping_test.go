@@ -31,7 +31,6 @@ func TestMapping(t *testing.T) {
 	}
 
 	m := Singleton()
-	cpes, err := m.Get(repos)
-	assert.NoError(t, err)
+	cpes := m.Get(repos)
 	assert.ElementsMatch(t, cpes, expectedCPEs)
 }

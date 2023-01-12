@@ -12,6 +12,7 @@ message Components {
   repeated OSComponent       os_components       = 1;
   repeated RHELComponent     rhel_components     = 2;
   repeated LanguageComponent language_components = 3;
+  repeated string            rhel_content_sets   = 5;
 }
 
 message OSComponent {
