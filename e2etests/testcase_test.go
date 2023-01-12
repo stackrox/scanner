@@ -3620,7 +3620,7 @@ Bug Fix(es) and Enhancement(s):
 						FixedBy: "0:6.0.7-1.el8_6",
 					},
 				},
-				FixedBy: "6.0.10-1.el8_6",
+				FixedBy: "6.0.13-1.el8_7",
 				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 			{
@@ -3659,7 +3659,7 @@ Bug Fix(es) and Enhancement(s):
 						FixedBy: "0:6.0.7-1.el8_6",
 					},
 				},
-				FixedBy: "6.0.10-1.el8_6",
+				FixedBy: "6.0.13-1.el8_7",
 				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 		},
