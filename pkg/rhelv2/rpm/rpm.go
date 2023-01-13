@@ -17,34 +17,39 @@ import (
 	"github.com/stackrox/scanner/ext/featurens/redhatrelease"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/metrics"
-	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/rpm"
 )
 
 const (
-	contentManifests = `root/buildinfo/content_manifests`
-
 	pkgFmt = `rpmv2`
 )
 
 // AllRHELRequiredFiles lists all the names of the files required to identify RHEL-based releases.
 var AllRHELRequiredFiles set.StringSet
 
+// contentManifests set with all known directories that might contain content manifest files.
+var contentManifestDirs set.StringSet
+
 func init() {
 	AllRHELRequiredFiles.AddAll(RequiredFilenames()...)
 	AllRHELRequiredFiles.AddAll(redhatrelease.RequiredFilenames...)
 	AllRHELRequiredFiles.AddAll(osrelease.RequiredFilenames...)
+	contentManifestDirs.AddAll(
+		// Certified RHEL images.
+		"root/buildinfo/content_manifests",
+		// RHCOS nodes.
+		"usr/share/buildinfo")
 }
 
-// ListFeatures returns the features found from the given files.
-// returns a slice of packages found via rpm and a slice of CPEs found in
-// /root/buildinfo/content_manifests.
+// ListFeatures returns the features found in the given files as a slice of
+// packages found via rpm, and a slice of content sets found in
+// content manifest files (e.g. `/root/buildinfo/content_manifests`).
 func ListFeatures(files analyzer.Files) ([]*database.RHELv2Package, []string, error) {
 	return listFeatures(files, false)
 }
 
 func listFeatures(files analyzer.Files, testing bool) ([]*database.RHELv2Package, []string, error) {
-	cpes, err := getCPEsUsingEmbeddedContentSets(files)
+	contentSets, err := getContentManifestSets(files)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -52,7 +57,7 @@ func listFeatures(files analyzer.Files, testing bool) ([]*database.RHELv2Package
 	if err != nil {
 		return nil, nil, err
 	}
-	return pkgs, cpes, nil
+	return pkgs, contentSets, nil
 }
 
 // AddToDependencyMap checks and adds files to executable and library dependency for RHEL package
@@ -77,33 +82,26 @@ func AddToDependencyMap(filename string, fileData analyzer.FileData, execToDeps,
 	}
 }
 
-func getCPEsUsingEmbeddedContentSets(files analyzer.Files) ([]string, error) {
-	defer metrics.ObserveListFeaturesTime(pkgFmt, "cpes", time.Now())
-
-	// Get CPEs using embedded content-set files.
-	// The files are stored in /root/buildinfo/content_manifests/ and will need to
-	// be translated using mapping file provided by Red Hat's PST team.
-	contents := getContentManifestFileContents(files)
+// getContentManifestSets returns the list of content sets defined in the content
+// manifest, if found in the files. Otherwise, `nil` or empty slice is returned.
+func getContentManifestSets(files analyzer.Files) ([]string, error) {
+	var contents []byte
+	for _, prefix := range contentManifestDirs.AsSlice() {
+		for name, file := range files.GetFilesPrefix(prefix) {
+			if strings.HasSuffix(name, ".json") {
+				// Return the first one found, as there should be only one dir per layer/node.
+				contents = file.Contents
+			}
+		}
+	}
 	if contents == nil {
 		return nil, nil
 	}
-
 	var contentManifest database.ContentManifest
 	if err := json.Unmarshal(contents, &contentManifest); err != nil {
 		return nil, err
 	}
-
-	return repo2cpe.Singleton().Get(contentManifest.ContentSets), nil
-}
-
-func getContentManifestFileContents(files analyzer.Files) []byte {
-	for name, file := range files.GetFilesPrefix(contentManifests) {
-		if strings.HasSuffix(name, ".json") {
-			// Return the first one found, as there should only be one per layer.
-			return file.Contents
-		}
-	}
-	return nil
+	return contentManifest.ContentSets, nil
 }
 
 func getFeaturesFromRPMDatabase(files analyzer.Files, testing bool) ([]*database.RHELv2Package, error) {
@@ -164,5 +162,5 @@ func getFeaturesFromRPMDatabase(files analyzer.Files, testing bool) ([]*database
 
 // RequiredFilenames lists the files required to be present for analysis to be run.
 func RequiredFilenames() []string {
-	return append(rpm.DatabaseFiles(), contentManifests)
+	return append(rpm.DatabaseFiles(), contentManifestDirs.AsSlice()...)
 }

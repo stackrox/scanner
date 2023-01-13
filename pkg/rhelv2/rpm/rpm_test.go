@@ -45,11 +45,11 @@ func Test_listFeatures(t *testing.T) {
 		isActiveVulnMgmt bool
 
 		// Expected values for assertion.
-		sampleExpectedPkgs []*database.RHELv2Package
-		unexpectedPkgs     []*database.RHELv2Package
-		expectedCPEs       []string
-		wantErr            assert.ErrorAssertionFunc
-		requireRHEL9       bool
+		sampleExpectedPkgs  []*database.RHELv2Package
+		unexpectedPkgs      []*database.RHELv2Package
+		expectedContentSets []string
+		wantErr             assert.ErrorAssertionFunc
+		requireRHEL9        bool
 	}{
 		{
 			name: "TestRPMFeatureDetection with BerkeleyDB",
@@ -87,9 +87,9 @@ func Test_listFeatures(t *testing.T) {
 					Version: "d4082792-5b32db75",
 				},
 			},
-			expectedCPEs: []string{
-				"cpe:/o:redhat:enterprise_linux:8::baseos",
-				"cpe:/a:redhat:enterprise_linux:8::appstream",
+			expectedContentSets: []string{
+				"rhel-8-for-x86_64-baseos-rpms",
+				"rhel-8-for-x86_64-appstream-rpms",
 			},
 		},
 		{
@@ -147,9 +147,9 @@ func Test_listFeatures(t *testing.T) {
 					Version: "d4082792-5b32db75",
 				},
 			},
-			expectedCPEs: []string{
-				"cpe:/o:redhat:enterprise_linux:8::baseos",
-				"cpe:/a:redhat:enterprise_linux:8::appstream",
+			expectedContentSets: []string{
+				"rhel-8-for-x86_64-baseos-rpms",
+				"rhel-8-for-x86_64-appstream-rpms",
 			},
 		},
 		{
@@ -189,9 +189,9 @@ func Test_listFeatures(t *testing.T) {
 					Version: "d4082792-5b32db75",
 				},
 			},
-			expectedCPEs: []string{
-				"cpe:/o:redhat:enterprise_linux:8::baseos",
-				"cpe:/a:redhat:enterprise_linux:8::appstream",
+			expectedContentSets: []string{
+				"rhel-8-for-x86_64-baseos-rpms",
+				"rhel-8-for-x86_64-appstream-rpms",
 			},
 		},
 		{
@@ -250,9 +250,9 @@ func Test_listFeatures(t *testing.T) {
 					Version: "d4082792-5b32db75",
 				},
 			},
-			expectedCPEs: []string{
-				"cpe:/o:redhat:enterprise_linux:8::baseos",
-				"cpe:/a:redhat:enterprise_linux:8::appstream",
+			expectedContentSets: []string{
+				"rhel-8-for-x86_64-baseos-rpms",
+				"rhel-8-for-x86_64-appstream-rpms",
 			},
 		},
 	}
@@ -280,13 +280,13 @@ func Test_listFeatures(t *testing.T) {
 			tt.args.layerFiles = tarutil.CreateNewLayerFiles(tt.files)
 
 			// Functions call.
-			pkgs, cpes, err := listFeatures(tt.args.layerFiles, true)
+			pkgs, contentSets, err := listFeatures(tt.args.layerFiles, true)
 
 			// Assertions.
 			if !tt.wantErr(t, err, fmt.Sprintf("listFeatures(%v, %v)", tt.args.layerFiles, tt.args.queryFmt)) {
 				return
 			}
-			assert.ElementsMatch(t, cpes, tt.expectedCPEs)
+			assert.ElementsMatch(t, contentSets, tt.expectedContentSets)
 			assert.Subset(t, pkgs, tt.sampleExpectedPkgs)
 			assert.NotSubset(t, pkgs, tt.unexpectedPkgs)
 		})

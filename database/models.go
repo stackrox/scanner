@@ -214,9 +214,10 @@ type RHELv2Layer struct {
 
 // RHELv2Components defines the RHELv2 components found in a layer.
 type RHELv2Components struct {
-	Dist     string
-	Packages []*RHELv2Package
-	CPEs     []string
+	Dist        string
+	Packages    []*RHELv2Package
+	CPEs        []string
+	ContentSets []string
 }
 
 func (r *RHELv2Components) String() string {
