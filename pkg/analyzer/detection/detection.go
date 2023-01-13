@@ -26,7 +26,7 @@ func DetectComponents(name string, files analyzer.Files, parent *database.Layer,
 	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
 	if namespace != nil && isRHCOSRequired && !wellknownnamespaces.IsRHCOSNamespace(namespace.Name) {
 		logrus.WithFields(logrus.Fields{LogLayerName: name, "detected namespace": namespace.Name}).Warning("Not able to start node scanning for this namespace")
-		return nil, nil, nil, nil, errors.New("No RHCOS detected for node scanning")
+		return nil, nil, nil, nil, errors.New("Node scanning unavailable")
 	}
 	var featureVersions []database.FeatureVersion
 	var rhelfeatures *database.RHELv2Components
