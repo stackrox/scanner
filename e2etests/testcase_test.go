@@ -3620,7 +3620,7 @@ Bug Fix(es) and Enhancement(s):
 						FixedBy: "0:6.0.7-1.el8_6",
 					},
 				},
-				FixedBy: "6.0.10-1.el8_6",
+				FixedBy: "6.0.13-1.el8_7",
 				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 			{
@@ -3659,7 +3659,7 @@ Bug Fix(es) and Enhancement(s):
 						FixedBy: "0:6.0.7-1.el8_6",
 					},
 				},
-				FixedBy: "6.0.10-1.el8_6",
+				FixedBy: "6.0.13-1.el8_7",
 				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 		},
@@ -3816,7 +3816,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				VersionFormat: "rpm",
 				Version:       "4.10.1650890594-1.el8.noarch",
 				AddedBy:       "sha256:3fa3f612bdcb92746bf76be1b9c9e1c1c80de777aedaf48b7068f4a129ded3c2",
-				FixedBy:       "4.10.1667388055-1.el8",
+				FixedBy:       "4.10.1670851835-1.el8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-26291",
