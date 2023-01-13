@@ -196,7 +196,7 @@ func DetectContentFromReader(reader io.ReadCloser, format, name string, parent *
 		log.WithFields(log.Fields{detection.LogLayerName: name, "component count": len(m.components)}).Debug("detected components")
 	}
 
-	namespace, features, rhelv2Components, languageComponents, err := detection.DetectComponents(name, *files, parent, m.components, uncertifiedRHEL)
+	namespace, features, rhelv2Components, languageComponents, err := detection.DetectComponents(name, *files, parent, m.components, uncertifiedRHEL, false)
 	distroless := isDistroless(*files) || (parent != nil && parent.Distroless)
 
 	return namespace, distroless, features, rhelv2Components, languageComponents, files, err

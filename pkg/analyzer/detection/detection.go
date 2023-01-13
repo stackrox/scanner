@@ -1,6 +1,7 @@
 package detection
 
 import (
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -21,9 +22,12 @@ const LogLayerName = "layer"
 // layers, or the root layer, use `nil`. Notice that language components are not
 // extracted by DetectComponents, but if provided they are annotated with
 // certified RHEL dependencies, and returned.
-func DetectComponents(name string, files analyzer.Files, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
+func DetectComponents(name string, files analyzer.Files, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool, isRHCOSRequired bool) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
 	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
-
+	if namespace != nil && isRHCOSRequired && !wellknownnamespaces.IsRHCOSNamespace(namespace.Name) {
+		logrus.WithFields(logrus.Fields{LogLayerName: name, "detected namespace": namespace.Name}).Warning("Not able to start node scanning for this namespace")
+		return nil, nil, nil, nil, errors.New("No RHCOS detected for node scanning")
+	}
 	var featureVersions []database.FeatureVersion
 	var rhelfeatures *database.RHELv2Components
 
