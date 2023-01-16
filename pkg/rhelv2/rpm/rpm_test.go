@@ -292,3 +292,79 @@ func Test_listFeatures(t *testing.T) {
 		})
 	}
 }
+
+func Test_getContentManifestSets(t *testing.T) {
+	tests := []struct {
+		name     string
+		filesArg analyzer.Files
+		want     []string
+		wantErr  assert.ErrorAssertionFunc
+	}{
+		{
+			name:    "when no content sets, then nil",
+			want:    nil,
+			wantErr: assert.NoError,
+		},
+		{
+			name: "when irrelevant json and no content, then nil",
+			filesArg: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"foo/bar/foobar.json": analyzer.FileData{},
+			}),
+			wantErr: assert.NoError,
+		},
+		{
+			name: "when invalid json, then error",
+			filesArg: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"root/buildinfo/content_manifests/foobar.json": {
+					Contents: []byte("not json"),
+				},
+			}),
+			wantErr: assert.Error,
+		},
+
+		{
+			name: "when rhel content sets found, then return",
+			filesArg: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"root/buildinfo/content_manifests/foobar.json": {
+					Contents: []byte(`
+{
+    "content_sets": [
+        "rhel-8-for-x86_64-baseos-rpms",
+        "rhel-8-for-x86_64-appstream-rpms"
+    ]
+}`),
+				},
+			}),
+			want:    []string{"rhel-8-for-x86_64-baseos-rpms", "rhel-8-for-x86_64-appstream-rpms"},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "when rhcos content sets found, then return",
+			filesArg: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"usr/share/buildinfo/foobar.json": {
+					Contents: []byte(`
+{
+    "content_sets": [
+        "rhel-8-for-x86_64-baseos-rpms",
+        "rhel-8-for-x86_64-appstream-rpms"
+    ]
+}`),
+				},
+			}),
+			want:    []string{"rhel-8-for-x86_64-baseos-rpms", "rhel-8-for-x86_64-appstream-rpms"},
+			wantErr: assert.NoError,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.filesArg == nil {
+				tt.filesArg = tarutil.LayerFiles{}
+			}
+			got, err := getContentManifestSets(tt.filesArg)
+			if !tt.wantErr(t, err, fmt.Sprintf("getContentManifestSets(%v)", tt.filesArg)) {
+				return
+			}
+			assert.ElementsMatch(t, tt.want, got, "Content sets returned are unexpected")
+		})
+	}
+}
