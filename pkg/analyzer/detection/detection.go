@@ -16,15 +16,24 @@ import (
 // LogLayerName is the name of the log field holding the detection target.
 const LogLayerName = "layer"
 
+// DetectComponentOpts contains namespace information for DetectComponents
+type DetectComponentOpts struct {
+	// UncertifiedRHEL is boolean to decide if OS is uncertified RHEL
+	UncertifiedRHEL bool
+
+	// IsRHCOSRequired: if CoreOS is required for DetectComponents
+	IsRHCOSRequired bool
+}
+
 // DetectComponents detects the namespace and extracts the components present in
 // the files of a filesystem or image layer. For layers, the parent layer should
 // be specified. For filesystems, which don't have the concept of intermediate
 // layers, or the root layer, use `nil`. Notice that language components are not
 // extracted by DetectComponents, but if provided they are annotated with
 // certified RHEL dependencies, and returned.
-func DetectComponents(name string, files analyzer.Files, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool, isRHCOSRequired bool) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
-	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
-	if namespace != nil && isRHCOSRequired && !wellknownnamespaces.IsRHCOSNamespace(namespace.Name) {
+func DetectComponents(name string, files analyzer.Files, parent *database.Layer, languageComponents []*component.Component, opts DetectComponentOpts) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
+	namespace := DetectNamespace(name, files, parent, opts.UncertifiedRHEL)
+	if namespace != nil && opts.IsRHCOSRequired && !wellknownnamespaces.IsRHCOSNamespace(namespace.Name) {
 		logrus.WithFields(logrus.Fields{LogLayerName: name, "detected namespace": namespace.Name}).Warning("Not able to start node scanning for this namespace")
 		return nil, nil, nil, nil, errors.New("Node scanning unavailable")
 	}

@@ -56,7 +56,7 @@ type Components struct {
 }
 
 // Analyze performs analysis of node's hosts filesystem and return the detected components.
-func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, error) {
+func Analyze(nodeName, rootFSdir string, opts detection.DetectComponentOpts) (*Components, error) {
 	// Currently, the node analyzer can only identify operating system components
 	// without active vulnerability, so we use the OS matcher.
 	matcher := requiredfilenames.SingletonOSMatcher()
@@ -66,7 +66,7 @@ func Analyze(nodeName, rootFSdir string, uncertifiedRHEL bool) (*Components, err
 	}
 	c := &Components{}
 	c.OSNamespace, c.OSComponents, c.CertifiedRHELComponents, _, err =
-		detection.DetectComponents(nodeName, files, nil, nil, uncertifiedRHEL, true)
+		detection.DetectComponents(nodeName, files, nil, nil, opts)
 	if err != nil {
 		return nil, err
 	}
