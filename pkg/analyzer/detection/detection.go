@@ -45,17 +45,14 @@ func DetectComponents(name string, files analyzer.Files, parent *database.Layer,
 			"rhel content sets":  len(rhelFeatures.ContentSets),
 		}).Debug("detected rhelv2 features")
 	} else {
-		// Detect features.
 		featureVersions, err = detectFeatureVersions(name, files, namespace, parent)
 		if err != nil {
 			return nil, nil, nil, nil, err
 		}
-		if len(featureVersions) > 0 {
-			logrus.WithFields(logrus.Fields{
-				LogLayerName:    name,
-				"feature count": len(featureVersions),
-			}).Debug("detected features")
-		}
+		logrus.WithFields(logrus.Fields{
+			LogLayerName:    name,
+			"feature count": len(featureVersions),
+		}).Debug("detected features")
 	}
 	return namespace, featureVersions, rhelFeatures, languageComponents, nil
 }
@@ -76,8 +73,9 @@ func detectAndAnnotateCertifiedRHELComponents(name string, files analyzer.Files,
 		return nil, nil, err
 	}
 	rhelfeatures := &database.RHELv2Components{
-		Dist:        namespace.Name,
-		Packages:    packages,
+		Dist:     namespace.Name,
+		Packages: packages,
+		// CPEs are mapped and returned with content sets for backward compatibility.
 		CPEs:        repo2cpe.Singleton().Get(contentSets),
 		ContentSets: contentSets,
 	}
