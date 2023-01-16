@@ -308,7 +308,7 @@ func Test_getContentManifestSets(t *testing.T) {
 		{
 			name: "when irrelevant json and no content, then nil",
 			filesArg: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
-				"foo/bar/foobar.json": analyzer.FileData{},
+				"foo/bar/foobar.json": {},
 			}),
 			wantErr: assert.NoError,
 		},
