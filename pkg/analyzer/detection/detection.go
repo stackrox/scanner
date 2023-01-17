@@ -16,12 +16,12 @@ import (
 // LogLayerName is the name of the log field holding the detection target.
 const LogLayerName = "layer"
 
-// DetectComponentOpts contains namespace information for DetectComponents
+// DetectComponentOpts contains configurations how components detection works
 type DetectComponentOpts struct {
 	// UncertifiedRHEL is boolean to decide if OS is uncertified RHEL
 	UncertifiedRHEL bool
 
-	// IsRHCOSRequired: if CoreOS is required for DetectComponents
+	// IsRHCOSRequired: if CoreOS is required for DetectComponents, Node scanning is disabled if false
 	IsRHCOSRequired bool
 }
 
