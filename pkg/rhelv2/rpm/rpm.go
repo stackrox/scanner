@@ -24,11 +24,13 @@ const (
 	pkgFmt = `rpmv2`
 )
 
-// AllRHELRequiredFiles lists all the names of the files required to identify RHEL-based releases.
-var AllRHELRequiredFiles set.StringSet
+var (
+	// AllRHELRequiredFiles lists all the names of the files required to identify RHEL-based releases.
+	AllRHELRequiredFiles set.StringSet
 
-// contentManifests set with all known directories that might contain content manifest files.
-var contentManifestDirs set.StringSet
+	// contentManifestsDirs set with all known directories that might contain content manifest files.
+	contentManifestDirs set.StringSet
+)
 
 func init() {
 	AllRHELRequiredFiles.AddAll(RequiredFilenames()...)
