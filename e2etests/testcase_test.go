@@ -3844,29 +3844,6 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						},
 					},
 					{
-						Name:          "CVE-2022-30945",
-						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: The MITRE CVE dictionary describes this issue as: Jenkins Pipeline: Groovy Plugin 2689.v434009a_31b_f1 and earlier allows loading any Groovy source files on the classpath of Jenkins and Jenkins plugins in sandboxed pipelines.",
-						Link:          "https://access.redhat.com/security/cve/CVE-2022-30945",
-						Severity:      "Important",
-						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 0.0,
-									"ImpactScore":         0.0,
-									"Score":               0.0,
-									"Vectors":             "",
-								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.8,
-									"ImpactScore":         6.0,
-									"Score":               8.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:H",
-								},
-							},
-						},
-					},
-					{
 						Name:          "RHSA-2022:6531",
 						NamespaceName: "rhel:8",
 						Description: `Red Hat OpenShift Container Platform is Red Hat's cloud computing

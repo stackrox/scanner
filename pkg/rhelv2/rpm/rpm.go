@@ -93,7 +93,7 @@ func getCPEsUsingEmbeddedContentSets(files analyzer.Files) ([]string, error) {
 		return nil, err
 	}
 
-	return repo2cpe.Singleton().Get(contentManifest.ContentSets)
+	return repo2cpe.Singleton().Get(contentManifest.ContentSets), nil
 }
 
 func getContentManifestFileContents(files analyzer.Files) []byte {
