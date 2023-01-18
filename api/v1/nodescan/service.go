@@ -2,10 +2,10 @@ package nodescan
 
 import (
 	"context"
-	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"sort"
 	"strings"
 
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
