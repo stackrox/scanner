@@ -5,7 +5,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -22,6 +21,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
