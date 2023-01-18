@@ -55,8 +55,17 @@ type Components struct {
 	LanguageComponents      []*component.Component
 }
 
+// AnalyzeOpts contains configuration of how to analyze nodes
+type AnalyzeOpts struct {
+	// UncertifiedRHEL is boolean to decide if OS is uncertified RHEL
+	UncertifiedRHEL bool
+
+	// IsRHCOSRequired: if CoreOS is required for DetectComponents, Node scanning is disabled if false
+	IsRHCOSRequired bool
+}
+
 // Analyze performs analysis of node's hosts filesystem and return the detected components.
-func Analyze(nodeName, rootFSdir string, opts detection.DetectComponentOpts) (*Components, error) {
+func Analyze(nodeName, rootFSdir string, opts AnalyzeOpts) (*Components, error) {
 	// Currently, the node analyzer can only identify operating system components
 	// without active vulnerability, so we use the OS matcher.
 	matcher := requiredfilenames.SingletonOSMatcher()
@@ -66,7 +75,9 @@ func Analyze(nodeName, rootFSdir string, opts detection.DetectComponentOpts) (*C
 	}
 	c := &Components{}
 	c.OSNamespace, c.OSComponents, c.CertifiedRHELComponents, _, err =
-		detection.DetectComponents(nodeName, files, nil, nil, opts)
+		detection.DetectComponents(nodeName, files, nil, nil,
+			detection.DetectComponentOpts{UncertifiedRHEL: opts.UncertifiedRHEL, IsRHCOSRequired: opts.IsRHCOSRequired})
+
 	if err != nil {
 		return nil, err
 	}
