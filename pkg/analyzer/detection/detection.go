@@ -29,10 +29,9 @@ func DetectComponents(name string, files analyzer.Files, parent *database.Layer,
 	var rhelFeatures *database.RHELv2Components
 	var err error
 
-	// In the current state, RHCOS will always be handled as certified system.
-	// If no CPEs are found on RHCOS, a note needs to be added that informs users of it.
-	// Also, the bool logic can be refactored into a single UseCertifiedWorkflow function.
-	// TODO(ROX-13906, ROX-14028): Implement note and refactor
+	// TODO: In the current state, RHCOS will always be handled as certified system. But if
+	//       Content Sets are not found in a RHCOS installation, a note needs to be added
+	//       informs users of it. See ROX-13906.
 	if isCertifiedRHELNamespace(namespace) {
 		rhelFeatures, languageComponents, err = detectAndAnnotateCertifiedRHELComponents(name, files, namespace, languageComponents)
 		if err != nil {
