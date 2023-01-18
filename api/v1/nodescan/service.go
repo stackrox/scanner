@@ -2,6 +2,7 @@ package nodescan
 
 import (
 	"context"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"sort"
 	"strings"
 
@@ -35,22 +36,24 @@ type Service interface {
 }
 
 // NewService returns the service for node scanning
-func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8scache.Cache) Service {
+func NewService(db database.Datastore, nvdCache nvdtoolscache.Cache, k8sCache k8scache.Cache, repoToCPE *repo2cpe.Mapping) Service {
 	return &serviceImpl{
-		version:  version.Version,
-		db:       db,
-		nvdCache: nvdCache,
-		k8sCache: k8sCache,
+		version:   version.Version,
+		db:        db,
+		nvdCache:  nvdCache,
+		k8sCache:  k8sCache,
+		repoToCPE: repoToCPE,
 	}
 }
 
 type serviceImpl struct {
 	v1.UnimplementedNodeScanServiceServer
 
-	version  string
-	db       database.Datastore
-	nvdCache nvdtoolscache.Cache
-	k8sCache k8scache.Cache
+	version   string
+	db        database.Datastore
+	nvdCache  nvdtoolscache.Cache
+	k8sCache  k8scache.Cache
+	repoToCPE *repo2cpe.Mapping
 }
 
 func filterInvalidVulns(vulns []*v1.Vulnerability) []*v1.Vulnerability {
@@ -273,15 +276,29 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// Handle the new format of the request and scan node inventory additionally
+	// Scan Components containing pkgs from NodeInventory
 	if req.GetComponents() != nil {
-		layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes()))
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
+		if resp.Features, err = s.getNodeInventoryVulns(req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes())); err != nil {
+			return nil, err
 		}
-		resp.Features = features.ConvertFeatures(layer.Features)
 	}
 	return resp, nil
+}
+
+func (s *serviceImpl) getNodeInventoryVulns(components *v1.Components, isUncertifiedRHEL bool) ([]*v1.Feature, error) {
+	log.Debugf("Scanning NodeInventory")
+	// Convert content sets to CPEs
+	cpes := s.repoToCPE.Get(components.GetRhelContentSets())
+	log.Debugf("Converted content sets '%v' to CPEs '%v'", components.GetRhelContentSets(), cpes)
+	for _, comp := range components.GetRhelComponents() {
+		comp.Cpes = append(comp.Cpes, cpes...)
+	}
+	layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, components, isUncertifiedRHEL)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	log.Debugf("Scanned %d components from NodeInventory and returning %d features", len(components.GetRhelComponents()), len(layer.Features))
+	return features.ConvertFeatures(layer.Features), nil
 }
 
 // RegisterServiceServer registers this service with the given gRPC Server.

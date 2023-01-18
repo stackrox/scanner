@@ -189,7 +189,7 @@ func Boot(config *Config, slimMode bool) {
 		ping.NewService(),
 		imagescan.NewService(db, nvdVulnCache),
 		orchestratorscan.NewService(db, k8sVulnCache, istioVulnCache),
-		nodescan.NewService(db, nvdVulnCache, k8sVulnCache),
+		nodescan.NewService(db, nvdVulnCache, k8sVulnCache, repoToCPE),
 		vulndefs.NewService(db),
 	)
 	go grpcAPI.Start()
