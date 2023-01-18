@@ -91,9 +91,14 @@ func getContentManifestSets(files analyzer.Files) ([]string, error) {
 	for _, prefix := range contentManifestDirs.AsSlice() {
 		for name, file := range files.GetFilesPrefix(prefix) {
 			if strings.HasSuffix(name, ".json") {
-				// Return the first one found, as there should be only one dir per layer/node.
+				// Return the first one found, as we are currently assuming there is only one per
+				// layer/node.
 				contents = file.Contents
+				break
 			}
+		}
+		if contents != nil {
+			break
 		}
 	}
 	if contents == nil {
