@@ -291,7 +291,9 @@ func (s *serviceImpl) getNodeInventoryVulns(components *v1.Components, isUncerti
 	cpes := s.repoToCPE.Get(components.GetRhelContentSets())
 	log.Debugf("Converted content sets '%v' to CPEs '%v'", components.GetRhelContentSets(), cpes)
 	for _, comp := range components.GetRhelComponents() {
-		comp.Cpes = append(comp.Cpes, cpes...)
+		// TODO(ROX-14414): Handle situation when CPEs are provided in parallel to content sets
+		// Overwrite any potential CPEs and stick to content sets to sanitize the API input
+		comp.Cpes = cpes
 	}
 	layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, components, isUncertifiedRHEL)
 	if err != nil {
