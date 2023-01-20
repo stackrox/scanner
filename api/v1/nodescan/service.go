@@ -299,7 +299,7 @@ func (s *serviceImpl) getNodeInventoryVulns(components *v1.Components, isUncerti
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	log.Debugf("Scanned %d components from NodeInventory and returning %d features", len(components.GetRhelComponents()), len(layer.Features))
+	log.Infof("Matched vulnerabilities on %d RHEL components in node inventory", len(components.GetRhelComponents()))
 	return features.ConvertFeatures(layer.Features), nil
 }
 
