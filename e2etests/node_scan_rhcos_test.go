@@ -51,13 +51,6 @@ var vulnTar = &v1.Vulnerability{
 }
 
 func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
-	// From: https://www.redhat.com/security/data/metrics/repository-to-cpe.json
-	// "rhel-8-for-x86_64-appstream-rpms": {"cpes": ["cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream"]},
-	// "rhel-8-for-x86_64-baseos-rpms": {"cpes": ["cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/o:redhat:rhel:8.3::baseos"]}
-	cpes := []string{
-		"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
-		"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
-	}
 	return &v1.GetNodeVulnerabilitiesRequest{
 		OsImage:          "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 		KernelVersion:    "0.0.1", // dummy value - out of scope for this test
@@ -78,7 +71,7 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 					Version:   "1.3.5-7.el8",
 					Arch:      "x86_64",
 					Module:    "", // must be empty, otherwise scanner does not return any vulns
-					Cpes:      cpes,
+					Cpes:      []string{},
 					AddedBy:   "",
 				},
 				{
@@ -88,7 +81,7 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 					Version:   "1.27.1.el8",
 					Arch:      "x86_64",
 					Module:    "",
-					Cpes:      cpes,
+					Cpes:      []string{},
 					AddedBy:   "",
 				},
 				{
@@ -98,11 +91,12 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 					Version:   "2022g.el8",
 					Arch:      "noarch",
 					Module:    "",
-					Cpes:      cpes,
+					Cpes:      []string{},
 					AddedBy:   "",
 				},
 			},
 			LanguageComponents: nil,
+			RhelContentSets:    []string{"rhel-8-for-x86_64-appstream-rpms", "rhel-8-for-x86_64-baseos-rpms"},
 		},
 	}
 }
