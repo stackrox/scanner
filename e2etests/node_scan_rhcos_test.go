@@ -51,13 +51,6 @@ var vulnTar = &v1.Vulnerability{
 }
 
 func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
-	// From: https://www.redhat.com/security/data/metrics/repository-to-cpe.json
-	// "rhel-8-for-x86_64-appstream-rpms": {"cpes": ["cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream"]},
-	// "rhel-8-for-x86_64-baseos-rpms": {"cpes": ["cpe:/o:redhat:enterprise_linux:8::baseos", "cpe:/o:redhat:rhel:8.3::baseos"]}
-	cpes := []string{
-		"cpe:/a:redhat:enterprise_linux:8::appstream", "cpe:/a:redhat:rhel:8.3::appstream",
-		"cpe:/a:redhat:enterprise_linux:8::baseos", "cpe:/a:redhat:rhel:8.3::baseos",
-	}
 	return &v1.GetNodeVulnerabilitiesRequest{
 		OsImage:          "Red Hat Enterprise Linux CoreOS 45.82.202008101249-0 (Ootpa)",
 		KernelVersion:    "0.0.1", // dummy value - out of scope for this test
@@ -78,7 +71,7 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 					Version:   "1.3.5-7.el8",
 					Arch:      "x86_64",
 					Module:    "", // must be empty, otherwise scanner does not return any vulns
-					Cpes:      cpes,
+					Cpes:      []string{},
 					AddedBy:   "",
 				},
 				{
@@ -88,21 +81,22 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 					Version:   "1.27.1.el8",
 					Arch:      "x86_64",
 					Module:    "",
-					Cpes:      cpes,
+					Cpes:      []string{},
 					AddedBy:   "",
 				},
 				{
 					Id:        int64(3),
-					Name:      "grep",
+					Name:      "tzdata",
 					Namespace: "rhel:8",
-					Version:   "3.1-6.el8",
-					Arch:      "x86_64",
+					Version:   "2022g.el8",
+					Arch:      "noarch",
 					Module:    "",
-					Cpes:      cpes,
+					Cpes:      []string{},
 					AddedBy:   "",
 				},
 			},
 			LanguageComponents: nil,
+			RhelContentSets:    []string{"rhel-8-for-x86_64-appstream-rpms", "rhel-8-for-x86_64-baseos-rpms"},
 		},
 	}
 }
@@ -113,7 +107,6 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	cases := map[string]struct {
 		request          *v1.GetNodeVulnerabilitiesRequest
 		expectedResponse *v1.GetNodeVulnerabilitiesResponse
-		assertVulnsLen   func(t *testing.T, expected, got int, msgAndArgs ...interface{}) bool
 	}{
 		"Selected vulnerabilities should be returned by the certified scan": {
 			request: buildRequest([]v1.Note{}),
@@ -134,9 +127,9 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 						Vulnerabilities: []*v1.Vulnerability{vulnTar},
 					},
 					{
-						Name:    "grep",
-						Version: "3.1-6.el8.x86_64",
-						// Warning: if this test fails, it may mean that new vulnerabilities have been found for grep:3.1-6
+						Name:    "tzdata",
+						Version: "2022g.el8.noarch",
+						// Warning: if this test fails, then probably vulnerabilities have been found for tzdata:2022g
 						// To fix that, one would need to find another package/version that has 0 vulnerabilities
 						// or mock the scanning behavior of scanner to always return 0 vulnerabilities for the pkg used in this case.
 						Vulnerabilities: []*v1.Vulnerability{},

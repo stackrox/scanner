@@ -3620,7 +3620,7 @@ Bug Fix(es) and Enhancement(s):
 						FixedBy: "0:6.0.7-1.el8_6",
 					},
 				},
-				FixedBy: "6.0.10-1.el8_6",
+				FixedBy: "6.0.13-1.el8_7",
 				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 			{
@@ -3659,7 +3659,7 @@ Bug Fix(es) and Enhancement(s):
 						FixedBy: "0:6.0.7-1.el8_6",
 					},
 				},
-				FixedBy: "6.0.10-1.el8_6",
+				FixedBy: "6.0.13-1.el8_7",
 				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 		},
@@ -3816,7 +3816,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				VersionFormat: "rpm",
 				Version:       "4.10.1650890594-1.el8.noarch",
 				AddedBy:       "sha256:3fa3f612bdcb92746bf76be1b9c9e1c1c80de777aedaf48b7068f4a129ded3c2",
-				FixedBy:       "4.10.1667388055-1.el8",
+				FixedBy:       "4.10.1670851835-1.el8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-26291",
@@ -3839,29 +3839,6 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 									"ImpactScore":         5.2,
 									"Score":               7.4,
 									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
-								},
-							},
-						},
-					},
-					{
-						Name:          "CVE-2022-30945",
-						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: The MITRE CVE dictionary describes this issue as: Jenkins Pipeline: Groovy Plugin 2689.v434009a_31b_f1 and earlier allows loading any Groovy source files on the classpath of Jenkins and Jenkins plugins in sandboxed pipelines.",
-						Link:          "https://access.redhat.com/security/cve/CVE-2022-30945",
-						Severity:      "Important",
-						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 0.0,
-									"ImpactScore":         0.0,
-									"Score":               0.0,
-									"Vectors":             "",
-								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.8,
-									"ImpactScore":         6.0,
-									"Score":               8.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:H",
 								},
 							},
 						},

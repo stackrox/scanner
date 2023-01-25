@@ -1,6 +1,7 @@
 package detection
 
 import (
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -8,6 +9,7 @@ import (
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/component"
 	features2 "github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
 )
@@ -15,50 +17,86 @@ import (
 // LogLayerName is the name of the log field holding the detection target.
 const LogLayerName = "layer"
 
+// DetectComponentOpts contains configurations how components detection works
+type DetectComponentOpts struct {
+	// UncertifiedRHEL is boolean to decide if OS is uncertified RHEL
+	UncertifiedRHEL bool
+
+	// IsRHCOSRequired: if IsRHCOSRequired is true for DetectComponents, the namespace must start with `rhcos`
+	// Also, Node scanning is disabled if IsRHCOSRequired is false
+	IsRHCOSRequired bool
+}
+
 // DetectComponents detects the namespace and extracts the components present in
 // the files of a filesystem or image layer. For layers, the parent layer should
 // be specified. For filesystems, which don't have the concept of intermediate
 // layers, or the root layer, use `nil`. Notice that language components are not
 // extracted by DetectComponents, but if provided they are annotated with
 // certified RHEL dependencies, and returned.
-func DetectComponents(name string, files analyzer.Files, parent *database.Layer, languageComponents []*component.Component, uncertifiedRHEL bool) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
-	namespace := DetectNamespace(name, files, parent, uncertifiedRHEL)
-
+// if CoreOS is required for DetectComponents, the namespace must start with `rhcos`
+func DetectComponents(name string, files analyzer.Files, parent *database.Layer, languageComponents []*component.Component, opts DetectComponentOpts) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
+	namespace := DetectNamespace(name, files, parent, opts.UncertifiedRHEL)
+	if namespace != nil && opts.IsRHCOSRequired && !wellknownnamespaces.IsRHCOSNamespace(namespace.Name) {
+		logrus.WithFields(logrus.Fields{LogLayerName: name, "detected namespace": namespace.Name}).Warning("Not able to start node scanning for this namespace")
+		return namespace, nil, nil, nil, errors.New("Node scanning unavailable")
+	}
 	var featureVersions []database.FeatureVersion
-	var rhelfeatures *database.RHELv2Components
+	var rhelFeatures *database.RHELv2Components
+	var err error
 
-	// In the current state, RHCOS will always be handled as certified system.
-	// If no CPEs are found on RHCOS, a note needs to be added that informs users of it.
-	// Also, the bool logic can be refactored into a single UseCertifiedWorkflow function.
-	// TODO(ROX-13906, ROX-14028): Implement note and refactor
-	if namespace != nil && (wellknownnamespaces.IsRHELNamespace(namespace.Name) || wellknownnamespaces.IsRHCOSNamespace(namespace.Name)) {
-		// This is a certified image that needs to be scanned differently.
-		// Use the RHELv2 scanner instead.
-		packages, cpes, err := rpm.ListFeatures(files)
+	// TODO: In the current state, RHCOS will always be handled as certified system. But if
+	//       Content Sets are not found in a RHCOS installation, a note needs to be added
+	//       informs users of it. See ROX-13906.
+	if isCertifiedRHELNamespace(namespace) {
+		rhelFeatures, languageComponents, err = detectAndAnnotateCertifiedRHELComponents(name, files, namespace, languageComponents)
 		if err != nil {
 			return nil, nil, nil, nil, err
 		}
-		rhelfeatures = &database.RHELv2Components{
-			Dist:     namespace.Name,
-			Packages: packages,
-			CPEs:     cpes,
-		}
-		logrus.WithFields(logrus.Fields{LogLayerName: name, "rhel package count": len(packages), "rhel cpe count": len(cpes)}).Debug("detected rhelv2 features")
-		if err := rpm.AnnotateComponentsWithPackageManagerInfo(files, languageComponents); err != nil {
-			logrus.WithError(err).Errorf("Failed to analyze package manager info for language components: %s", name)
-		}
+		logrus.WithFields(logrus.Fields{
+			LogLayerName:         name,
+			"rhel package count": len(rhelFeatures.Packages),
+			"rhel cpe count":     len(rhelFeatures.CPEs),
+			"rhel content sets":  len(rhelFeatures.ContentSets),
+		}).Debug("detected rhelv2 features")
 	} else {
-		var err error
-		// Detect features.
 		featureVersions, err = detectFeatureVersions(name, files, namespace, parent)
 		if err != nil {
 			return nil, nil, nil, nil, err
 		}
-		if len(featureVersions) > 0 {
-			logrus.WithFields(logrus.Fields{LogLayerName: name, "feature count": len(featureVersions)}).Debug("detected features")
-		}
+		logrus.WithFields(logrus.Fields{
+			LogLayerName:    name,
+			"feature count": len(featureVersions),
+		}).Debug("detected features")
 	}
-	return namespace, featureVersions, rhelfeatures, languageComponents, nil
+	return namespace, featureVersions, rhelFeatures, languageComponents, nil
+}
+
+func isCertifiedRHELNamespace(namespace *database.Namespace) bool {
+	if namespace == nil {
+		return false
+	}
+	return wellknownnamespaces.IsRHELNamespace(namespace.Name) ||
+		wellknownnamespaces.IsRHCOSNamespace(namespace.Name)
+}
+
+func detectAndAnnotateCertifiedRHELComponents(name string, files analyzer.Files, namespace *database.Namespace, languageComponents []*component.Component) (*database.RHELv2Components, []*component.Component, error) {
+	// This is a certified image that needs to be scanned differently.
+	// Use the RHELv2 scanner instead.
+	packages, contentSets, err := rpm.ListFeatures(files)
+	if err != nil {
+		return nil, nil, err
+	}
+	rhelfeatures := &database.RHELv2Components{
+		Dist:     namespace.Name,
+		Packages: packages,
+		// CPEs are mapped and returned with content sets for backward compatibility.
+		CPEs:        repo2cpe.Singleton().Get(contentSets),
+		ContentSets: contentSets,
+	}
+	if err := rpm.AnnotateComponentsWithPackageManagerInfo(files, languageComponents); err != nil {
+		logrus.WithError(err).Errorf("Failed to analyze package manager info for language components: %s", name)
+	}
+	return rhelfeatures, languageComponents, nil
 }
 
 // DetectNamespace detects the layer's namespace.
