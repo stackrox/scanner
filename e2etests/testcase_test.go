@@ -2771,6 +2771,22 @@ var testCases = []testCase{
 		},
 	},
 	{
+		image:                   "alpine:3.17.0",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "alpine:v3.17",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "apk-tools",
+				NamespaceName: "alpine:v3.17",
+				VersionFormat: "apk",
+				Version:       "2.12.10-r1",
+				AddedBy:       "sha256:c158987b05517b6f2c5913f3acef1f2182a32345a304fe357e3ace5fadcad715",
+			},
+		},
+	},
+	{
 		image:    "quay.io/rhacs-eng/qa:debian-package-removal",
 		registry: "https://quay.io",
 		username: os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
