@@ -238,16 +238,27 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 	return nil, nil
 }
 
-func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
+func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
+	resp := &v1.GetNodeVulnerabilitiesResponse{
+		ScannerVersion: s.version,
+	}
+
+	// Scan Components containing pkgs from NodeInventory
+	if req.GetComponents() != nil {
+		var err error
+		if resp.Features, err = s.getNodeInventoryVulns(req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes())); err != nil {
+			log.Warnf("Scanning node inventory failed: %v", err)
+		}
+	}
+	return s.getNodeVulnerabilitiesLegacy(ctx, req, resp)
+}
+
+func (s *serviceImpl) getNodeVulnerabilitiesLegacy(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest, resp *v1.GetNodeVulnerabilitiesResponse) (*v1.GetNodeVulnerabilitiesResponse, error) {
 	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) {
 		return nil, status.Error(codes.InvalidArgument, "both os image and kernel version are required")
 	}
 
 	var err error
-	resp := &v1.GetNodeVulnerabilitiesResponse{
-		ScannerVersion: s.version,
-	}
-
 	resp.OperatingSystem, resp.KernelVulnerabilities, resp.KernelComponent, err = s.evaluateLinuxKernelVulns(req)
 	switch err {
 	case nil: // Normal
@@ -275,14 +286,6 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	// Scan Components containing pkgs from NodeInventory
-	if req.GetComponents() != nil {
-		if resp.Features, err = s.getNodeInventoryVulns(req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes())); err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
 }
 
 func (s *serviceImpl) getNodeInventoryVulns(components *v1.Components, isUncertifiedRHEL bool) ([]*v1.Feature, error) {
