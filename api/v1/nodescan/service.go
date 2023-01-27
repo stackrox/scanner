@@ -13,7 +13,6 @@ import (
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/api/v1/convert"
-	"github.com/stackrox/scanner/api/v1/features"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
@@ -21,6 +20,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
@@ -238,19 +238,30 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 	return nil, nil
 }
 
+func isRHCOS(ns string) bool {
+	return strings.HasPrefix(ns, "rhcos")
+}
+
 func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
 	resp := &v1.GetNodeVulnerabilitiesResponse{
 		ScannerVersion: s.version,
 	}
-
-	// Scan Components containing pkgs from NodeInventory
-	if req.GetComponents() != nil {
-		var err error
-		if resp.Features, err = s.getNodeInventoryVulns(req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes())); err != nil {
-			log.Warnf("Scanning node inventory failed: %v", err)
-		}
+	// If NodeInventory is empty `req.GetComponents() == nil` then fallback to v1 scanning
+	if req.GetComponents() == nil || !features.RHCOSNodeScanning.Enabled() {
+		return s.getNodeVulnerabilitiesLegacy(ctx, req, resp)
 	}
-	return s.getNodeVulnerabilitiesLegacy(ctx, req, resp)
+
+	if !isRHCOS(req.GetComponents().GetNamespace()) {
+		// Non-RHCOS system detecetd, we can provide list of pkgs but cannot scan them, thus a node to inform the user
+		resp.NodeNotes = append(resp.GetNodeNotes(), v1.NodeNote_NODE_UNSUPPORTED)
+	}
+
+	var err error
+	if resp.Features, err = s.getNodeInventoryVulns(req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes())); err != nil {
+		log.Warnf("Scanning node inventory failed: %v", err)
+		return nil, err
+	}
+	return resp, nil
 }
 
 func (s *serviceImpl) getNodeVulnerabilitiesLegacy(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest, resp *v1.GetNodeVulnerabilitiesResponse) (*v1.GetNodeVulnerabilitiesResponse, error) {
