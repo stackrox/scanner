@@ -387,6 +387,11 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 						isExtractable: true,
 						isSymlink:     true,
 					},
+					"usr/share/buildinfo/content_manifest.json": {
+						isExecutable:  false,
+						isExtractable: true,
+						isSymlink:     false,
+					},
 				},
 				readError: nil,
 			},
@@ -443,7 +448,8 @@ func makeTestData(t *testing.T) string {
 	// This directory structure mirrors what we have found in RHCOS 4.11.
 	//
 	// * `usr/lib/system-release` contains the distro identification data.
-	// * `etc/redhat-release` is a symlink to `/usr/lib/system-release`
+	// * `etc/redhat-release` is a symlink to `/usr/lib/system-release`.
+	// * `usr/share/buildinfo` contains content manifest json.
 	//
 	//    $ ls -l etc/redhat-release
 	//    total 0
@@ -452,9 +458,14 @@ func makeTestData(t *testing.T) string {
 	rhcosRedhatRelease := filepath.Join(root, "rootfs-rhcos/etc/redhat-release")
 	mkdirs(rhcosRedhatRelease)
 	require.NoError(t, os.Symlink("/usr/lib/system-release", rhcosRedhatRelease))
+
 	rhcosSystemRelease := filepath.Join(root, "rootfs-rhcos/usr/lib/system-release")
 	mkdirs(rhcosSystemRelease)
 	write(rhcosSystemRelease, "Red Hat Enterprise Linux CoreOS release 4.11\n")
+
+	contentManifestJSON := filepath.Join(root, "rootfs-rhcos/usr/share/buildinfo/content_manifest.json")
+	mkdirs(contentManifestJSON)
+	write(contentManifestJSON, `{"content_sets": ["foo", "bar"]}`)
 
 	// This directory structure mirrors what we have found in RHCOS 4.11
 	// except it uses a symlink to a relative path.
