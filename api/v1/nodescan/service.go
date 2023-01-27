@@ -24,6 +24,7 @@ import (
 	featureFlags "github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/version"
+	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -239,10 +240,6 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 	return nil, nil
 }
 
-func isRHCOS(ns string) bool {
-	return strings.HasPrefix(ns, "rhcos")
-}
-
 func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
 	resp := &v1.GetNodeVulnerabilitiesResponse{
 		ScannerVersion: s.version,
@@ -252,8 +249,8 @@ func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNod
 		return s.getNodeVulnerabilitiesLegacy(ctx, req, resp)
 	}
 
-	if !isRHCOS(req.GetComponents().GetNamespace()) {
-		// Non-RHCOS system detecetd, we can provide list of pkgs but cannot scan them, thus a node to inform the user
+	if !wellknownnamespaces.IsRHCOSNamespace(req.GetComponents().GetNamespace()) {
+		// Non-RHCOS system detected, we can provide list of pkgs but cannot scan them -> setting a note to inform the user
 		resp.NodeNotes = append(resp.GetNodeNotes(), v1.NodeNote_NODE_UNSUPPORTED)
 	}
 
