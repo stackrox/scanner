@@ -5,6 +5,7 @@ package e2etests
 
 import (
 	"context"
+	"github.com/stackrox/scanner/pkg/features"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
@@ -153,6 +154,9 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			c := c
+			if !features.RHCOSNodeScanning.Enabled() {
+				t.Skip("This test requires ROX_RHCOS_NODE_SCANNING=true")
+			}
 			gotResponse, err := client.GetNodeVulnerabilities(context.Background(), c.request)
 			require.NoError(t, err)
 			assert.Len(t, gotResponse.GetFeatures(), len(c.expectedFeatures), "Unexpected number of features") // unusual got-expected order of Len
