@@ -13,6 +13,7 @@ import (
 	apiV1 "github.com/stackrox/scanner/api/v1"
 	"github.com/stackrox/scanner/api/v1/common"
 	"github.com/stackrox/scanner/api/v1/convert"
+	"github.com/stackrox/scanner/api/v1/features"
 	"github.com/stackrox/scanner/cpe/nvdtoolscache"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/kernelparser"
@@ -20,7 +21,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
-	"github.com/stackrox/scanner/pkg/features"
+	featureFlags "github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/version"
 	"google.golang.org/grpc"
@@ -247,7 +248,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNod
 		ScannerVersion: s.version,
 	}
 	// If NodeInventory is empty `req.GetComponents() == nil` then fallback to v1 scanning
-	if req.GetComponents() == nil || !features.RHCOSNodeScanning.Enabled() {
+	if req.GetComponents() == nil || !featureFlags.RHCOSNodeScanning.Enabled() {
 		return s.getNodeVulnerabilitiesLegacy(ctx, req, resp)
 	}
 
@@ -297,6 +298,7 @@ func (s *serviceImpl) getNodeVulnerabilitiesLegacy(_ context.Context, req *v1.Ge
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	return resp, nil
 }
 
 func (s *serviceImpl) getNodeInventoryVulns(components *v1.Components, isUncertifiedRHEL bool) ([]*v1.Feature, error) {
