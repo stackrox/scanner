@@ -1,6 +1,6 @@
 module github.com/stackrox/scanner
 
-go 1.18
+go 1.19
 
 require (
 	cloud.google.com/go/storage v1.29.0
@@ -52,8 +52,6 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-require github.com/containers/storage v1.45.3 // indirect
-
 require (
 	bitbucket.org/creachadair/shell v0.0.7 // indirect
 	cloud.google.com/go v0.107.0 // indirect
@@ -77,6 +75,7 @@ require (
 	github.com/cncf/xds/go v0.0.0-20211130200136-a8f946100490 // indirect
 	github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 // indirect
 	github.com/containers/ocicrypt v1.1.7 // indirect
+	github.com/containers/storage v1.45.3 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.4.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect

@@ -1,6 +1,6 @@
 module github.com/stackrox/scanner/tools/linters
 
-go 1.18
+go 1.19
 
 require (
 	// ROX-14255: remove the github.com/sourcegraph/go-diff replacement once updated to > v1.50.1.
