@@ -463,9 +463,9 @@ func makeTestData(t *testing.T) string {
 	mkdirs(rhcosSystemRelease)
 	write(rhcosSystemRelease, "Red Hat Enterprise Linux CoreOS release 4.11\n")
 
-	contentManifestJson := filepath.Join(root, "rootfs-rhcos/usr/share/buildinfo/content_manifest.json")
-	mkdirs(contentManifestJson)
-	write(contentManifestJson, `{"content_sets": ["foo", "bar"]}`)
+	contentManifestJSON := filepath.Join(root, "rootfs-rhcos/usr/share/buildinfo/content_manifest.json")
+	mkdirs(contentManifestJSON)
+	write(contentManifestJSON, `{"content_sets": ["foo", "bar"]}`)
 
 	// This directory structure mirrors what we have found in RHCOS 4.11
 	// except it uses a symlink to a relative path.
