@@ -265,14 +265,15 @@ func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNod
 }
 
 func (s *serviceImpl) getNodeVulnerabilitiesLegacy(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
-	resp := &v1.GetNodeVulnerabilitiesResponse{
-		ScannerVersion: s.version,
-	}
 	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) {
 		return nil, status.Error(codes.InvalidArgument, "both os image and kernel version are required")
 	}
 
 	var err error
+	resp := &v1.GetNodeVulnerabilitiesResponse{
+		ScannerVersion: s.version,
+	}
+
 	resp.OperatingSystem, resp.KernelVulnerabilities, resp.KernelComponent, err = s.evaluateLinuxKernelVulns(req)
 	switch err {
 	case nil: // Normal
