@@ -241,12 +241,13 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 }
 
 func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
-	resp := &v1.GetNodeVulnerabilitiesResponse{
-		ScannerVersion: s.version,
-	}
 	// If NodeInventory is empty `req.GetComponents() == nil` then fallback to v1 scanning
 	if req.GetComponents() == nil || !featureFlags.RHCOSNodeScanning.Enabled() {
-		return s.getNodeVulnerabilitiesLegacy(ctx, req, resp)
+		return s.getNodeVulnerabilitiesLegacy(ctx, req)
+	}
+
+	resp := &v1.GetNodeVulnerabilitiesResponse{
+		ScannerVersion: s.version,
 	}
 
 	if !wellknownnamespaces.IsRHCOSNamespace(req.GetComponents().GetNamespace()) {
@@ -263,7 +264,10 @@ func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNod
 	return resp, nil
 }
 
-func (s *serviceImpl) getNodeVulnerabilitiesLegacy(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest, resp *v1.GetNodeVulnerabilitiesResponse) (*v1.GetNodeVulnerabilitiesResponse, error) {
+func (s *serviceImpl) getNodeVulnerabilitiesLegacy(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
+	resp := &v1.GetNodeVulnerabilitiesResponse{
+		ScannerVersion: s.version,
+	}
 	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) {
 		return nil, status.Error(codes.InvalidArgument, "both os image and kernel version are required")
 	}
