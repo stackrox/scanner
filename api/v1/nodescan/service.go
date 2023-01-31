@@ -250,7 +250,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNod
 		ScannerVersion: s.version,
 	}
 
-	if !wellknownnamespaces.IsRHCOSNamespace(req.GetComponents().GetNamespace()) {
+	if !wellknownnamespaces.IsRHCOSNamespace(req.GetComponents().GetNamespace()) || len(req.GetComponents().GetRhelContentSets()) == 0 {
 		// Non-RHCOS system with node inventory detected!
 		// We can provide a list of pkgs but cannot scan them -> setting a note to inform the user.
 		resp.NodeNotes = append(resp.GetNodeNotes(), v1.NodeNote_NODE_UNSUPPORTED)
