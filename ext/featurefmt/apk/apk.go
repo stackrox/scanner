@@ -56,6 +56,8 @@ func (l lister) ListFeatures(files analyzer.Files) ([]database.FeatureVersion, e
 	// Use map to ensures only unique executables or libraries are stored per package.
 	execToDeps := make(database.StringToStringsMap)
 	libToDeps := make(database.StringToStringsMap)
+	// source indicates the package's source package.
+	var source string
 	scanner := bufio.NewScanner(bytes.NewBuffer(file.Contents))
 	var dir string
 	for scanner.Scan() {
@@ -75,16 +77,26 @@ func (l lister) ListFeatures(files analyzer.Files) ([]database.FeatureVersion, e
 					pkg.LibraryToDependencies = libToDeps
 				}
 
+				if source != "" {
+					pkg.Feature.Name = source
+				}
+
 				key := featurefmt.PackageKey{
 					Name:    pkg.Feature.Name,
 					Version: pkg.Version,
 				}
+				if oldPkg, exists := pkgSet[key]; exists {
+					pkg.ExecutableToDependencies.Merge(oldPkg.ExecutableToDependencies)
+					pkg.LibraryToDependencies.Merge(oldPkg.LibraryToDependencies)
+				}
+
 				pkgSet[key] = pkg
 			}
 
 			pkg = database.FeatureVersion{}
 			execToDeps = make(database.StringToStringsMap)
 			libToDeps = make(database.StringToStringsMap)
+			source = ""
 		case len(line) < 2:
 			// Invalid line.
 			continue
@@ -101,6 +113,8 @@ func (l lister) ListFeatures(files analyzer.Files) ([]database.FeatureVersion, e
 			}
 
 			pkg.Version = version
+		case line[:2] == "o:":
+			source = line[2:]
 		case line[:2] == "F:":
 			dir = line[2:]
 		case line[:2] == "R:":

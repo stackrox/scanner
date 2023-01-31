@@ -2570,9 +2570,8 @@ var testCases = []testCase{
 						Path: "/lib/libapk.so.3.12.0",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apk-tools", Version: "2.12.0-r4"},
-							{Name: "libcrypto1.1", Version: "1.1.1i-r0"},
-							{Name: "libssl1.1", Version: "1.1.1i-r0"},
 							{Name: "musl", Version: "1.2.2_pre7-r0"},
+							{Name: "openssl", Version: "1.1.1i-r0"},
 							{Name: "zlib", Version: "1.2.11-r3"},
 						},
 					},
@@ -2580,9 +2579,8 @@ var testCases = []testCase{
 						Path: "/sbin/apk",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apk-tools", Version: "2.12.0-r4"},
-							{Name: "libcrypto1.1", Version: "1.1.1i-r0"},
-							{Name: "libssl1.1", Version: "1.1.1i-r0"},
 							{Name: "musl", Version: "1.2.2_pre7-r0"},
+							{Name: "openssl", Version: "1.1.1i-r0"},
 							{Name: "zlib", Version: "1.2.11-r3"},
 						},
 					},
