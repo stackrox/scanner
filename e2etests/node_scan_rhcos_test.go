@@ -103,6 +103,9 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 }
 
 func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
+	if !features.RHCOSNodeScanning.Enabled() {
+		t.Skip("This test requires ROX_RHCOS_NODE_SCANNING=true")
+	}
 	conn := connectToScanner(t)
 	client := v1.NewNodeScanServiceClient(conn)
 
@@ -150,13 +153,9 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			expectedNotes:    nil,
 		},
 	}
-
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			c := c
-			if !features.RHCOSNodeScanning.Enabled() {
-				t.Skip("This test requires ROX_RHCOS_NODE_SCANNING=true")
-			}
 			gotResponse, err := client.GetNodeVulnerabilities(context.Background(), c.request)
 			require.NoError(t, err)
 			assert.Len(t, gotResponse.GetFeatures(), len(c.expectedFeatures), "Unexpected number of features") // unusual got-expected order of Len
