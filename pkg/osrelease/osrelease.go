@@ -32,6 +32,10 @@ func GetOSReleaseMap(data []byte, fields ...string) map[string]string {
 	for scanner.Scan() {
 		line := scanner.Text()
 		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			// Ignore malformed or empty lines.
+			continue
+		}
 		key := parts[0]
 		if len(fields) == 0 || fieldsSet.Contains(key) {
 			osReleaseMap[key] = strings.Replace(strings.ToLower(strings.TrimSpace(parts[1])), `"`, "", -1)
