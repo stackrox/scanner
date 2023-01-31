@@ -2621,22 +2621,31 @@ var testCases = []testCase{
 				FixedBy: "1.32.1-r9",
 				Executables: []*v1.Executable{
 					{
+						Path: "/bin/busybox",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "busybox", Version: "1.32.1-r0"},
+							{Name: "musl", Version: "1.2.2_pre7-r0"},
+						},
+					},
+					{
 						Path: "/etc/network/if-up.d/dad",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "busybox", Version: "1.32.1-r0"},
 						},
 					},
 					{
-						Path: "/usr/share/udhcpc/default.script",
+						Path: "/usr/bin/ssl_client",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "busybox", Version: "1.32.1-r0"},
+							{Name: "libtls-standalone", Version: "2.9.1-r1"},
+							{Name: "musl", Version: "1.2.2_pre7-r0"},
+							{Name: "openssl", Version: "1.1.1i-r0"},
 						},
 					},
 					{
-						Path: "/bin/busybox",
+						Path: "/usr/share/udhcpc/default.script",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "busybox", Version: "1.32.1-r0"},
-							{Name: "musl", Version: "1.2.2_pre7-r0"},
 						},
 					},
 				},
