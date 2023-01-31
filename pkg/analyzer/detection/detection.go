@@ -1,14 +1,20 @@
 package detection
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
 	"github.com/stackrox/scanner/ext/featurens"
+	"github.com/stackrox/scanner/ext/versionfmt"
+	versionfmtrpm "github.com/stackrox/scanner/ext/versionfmt/rpm"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/component"
 	features2 "github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/osrelease"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/rhelv2/rpm"
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
@@ -86,6 +92,17 @@ func detectAndAnnotateCertifiedRHELComponents(name string, files analyzer.Files,
 	if err != nil {
 		return nil, nil, err
 	}
+	// There is still a chance to set content sets for some RHCOS versions.
+	if len(contentSets) == 0 && wellknownnamespaces.IsRHCOSNamespace(namespace.Name) {
+		contentSets, err = getHardcodedRHCOSContentSets(files)
+		if err != nil {
+			logrus.WithError(err).Errorf("failed to get RHCOS content sets for %v: %v", namespace, err)
+		}
+	}
+	// Leave a warning for certified scans without content sets.
+	if len(contentSets) == 0 {
+		logrus.Warningf("empty content sets for RHEL certified namespace %v", namespace)
+	}
 	rhelfeatures := &database.RHELv2Components{
 		Dist:     namespace.Name,
 		Packages: packages,
@@ -97,6 +114,65 @@ func detectAndAnnotateCertifiedRHELComponents(name string, files analyzer.Files,
 		logrus.WithError(err).Errorf("Failed to analyze package manager info for language components: %s", name)
 	}
 	return rhelfeatures, languageComponents, nil
+}
+
+// getHardcodedRHCOSContentSets returns hard coded content sets for supported
+// RHCOS versions. When the RHCOS version is not supported, it returns empty. The
+// function assumes we are working in a RHCOS namespace, and uses
+// `/etc/os-release` to gather versions and metadata. But, if the expected
+// metadata is not found, is inconsistent or cannot be retrieved, it returns an
+// error.
+func getHardcodedRHCOSContentSets(files analyzer.Files) ([]string, error) {
+	// Get metadata from etc/os-release, ensure it exists.
+	osReleaseData, exists := files.Get("etc/os-release")
+	if !exists {
+		return nil, fmt.Errorf("etc/os-release not found")
+	}
+	keys := []string{"ID", "OPENSHIFT_VERSION", "RHEL_VERSION", "VERSION_ID"}
+	metadata := osrelease.GetOSReleaseMap(osReleaseData.Contents, keys...)
+	for _, k := range keys {
+		if _, ok := metadata[k]; !ok {
+			return nil, fmt.Errorf("not a RHCOS namespace: missing %s in etc/os-release", k)
+		}
+	}
+	if metadata["ID"] != "rhcos" {
+		return nil, fmt.Errorf("not a RHCOS namespace: ID is %v", metadata["ID"])
+	}
+	// Verify the RHCOS version is supported.
+	ok, err := isRPMVersionInInterval(metadata["VERSION_ID"], "4.7", "4.10")
+	if !ok {
+		return nil, err
+	}
+	// Format the content sets based on the metadata found.
+	rhelSuffix := strings.Replace(metadata["RHEL_VERSION"], ".", "_DOT_", 1)
+	return []string{
+		// The mapping from RHCOS version to RHEL minor releases can be found here:
+		// https://access.redhat.com/articles/6907891
+		fmt.Sprintf("rhel-8-for-x86_64-baseos-eus-rpms__%s", rhelSuffix),
+		fmt.Sprintf("rhel-8-for-x86_64-appstream-eus-rpms__%s", rhelSuffix),
+		"fast-datapath-for-rhel-8-x86_64-rpms",
+		fmt.Sprintf("rhocp-%s-for-rhel-8-x86_64-rpms", metadata["OPENSHIFT_VERSION"]),
+	}, nil
+}
+
+// isRPMVersionInInterval checks if the provided rpm version is within the specified interval
+// `(minExcluded, maxIncluded]`.
+func isRPMVersionInInterval(version, minIncluded, maxExcluded string) (bool, error) {
+	cmp, err := versionfmt.Compare(versionfmtrpm.ParserName, version, minIncluded)
+	if err != nil {
+		return false, err
+	}
+	if cmp < 0 {
+		return false, nil
+	}
+	cmp, err = versionfmt.Compare(versionfmtrpm.ParserName, version, maxExcluded)
+	if err != nil {
+		return false, err
+	}
+	if cmp >= 0 {
+		return false, nil
+	}
+	return true, nil
 }
 
 // DetectNamespace detects the layer's namespace.
