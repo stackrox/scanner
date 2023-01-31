@@ -156,7 +156,7 @@ func getHardcodedRHCOSContentSets(files analyzer.Files) ([]string, error) {
 }
 
 // isRPMVersionInInterval checks if the provided rpm version is within the specified interval
-// `(minExcluded, maxIncluded]`.
+// `[minIncluded, maxExcluded)`.
 func isRPMVersionInInterval(version, minIncluded, maxExcluded string) (bool, error) {
 	cmp, err := versionfmt.Compare(versionfmtrpm.ParserName, version, minIncluded)
 	if err != nil {
