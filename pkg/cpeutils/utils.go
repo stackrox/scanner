@@ -10,7 +10,7 @@ import (
 )
 
 // Note: this must be updated with each new OpenShift release.
-const maxKnownOpenShift4MinorVersion = 12
+const maxKnownOpenShift4MinorVersion = 13
 
 // *** START Regex-related consts/vars. ***
 
