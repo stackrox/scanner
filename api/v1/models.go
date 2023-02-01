@@ -95,9 +95,9 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 	}
 }
 
-// isPackageBlacklistedInScan returns true if the given package name in the
+// isPackageBlocklistedInScan returns true if the given package name in the
 // namespace should be skipped in vulnerability matching scans.
-func isPackageBlacklistedInScan(namespace, pkgName string) bool {
+func isPackageBlocklistedInScan(namespace, pkgName string) bool {
 	// Allow kernel packages in RHCOS.
 	if namespaces.IsRHCOSNamespace(namespace) {
 		return false
@@ -135,7 +135,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL(), depMap)
 
-			if isPackageBlacklistedInScan(layer.NamespaceName, feature.Name) {
+			if isPackageBlocklistedInScan(layer.NamespaceName, feature.Name) {
 				continue
 			}
 
@@ -201,7 +201,7 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL, depMap)
 
-			if isPackageBlacklistedInScan(dbLayer.Namespace.Name, feature.Name) {
+			if isPackageBlocklistedInScan(dbLayer.Namespace.Name, feature.Name) {
 				continue
 			}
 
