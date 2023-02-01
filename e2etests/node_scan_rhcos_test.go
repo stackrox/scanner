@@ -104,46 +104,49 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 	conn := connectToScanner(t)
 	client := v1.NewNodeScanServiceClient(conn)
+
+	type expectedFeatures struct {
+		Name                     string
+		Version                  string
+		ExpectedVulnerabilities  []*v1.Vulnerability
+		VulnerabilitiesAssertion func(t2 *testing.T, name, version string, got, expected []*v1.Vulnerability)
+	}
+
 	cases := map[string]struct {
 		request          *v1.GetNodeVulnerabilitiesRequest
-		expectedResponse *v1.GetNodeVulnerabilitiesResponse
+		expectedFeatures []expectedFeatures
+		expectedNotes    []*v1.NodeNote
 	}{
 		"Selected vulnerabilities should be returned by the certified scan": {
 			request: buildRequest([]v1.Note{}),
-			expectedResponse: &v1.GetNodeVulnerabilitiesResponse{
-				// We conduct a spot-checking here - more vulns can be returned from scanner for libksba and tar,
-				// but we care only about the selected one as it is sufficient for this test case.
-				// (We do not test that the set of vulns is complete, we test that the API returns any vulns if expected).
-				// We use 'equals' assertion if 0 vulns are expected.
-				Features: []*v1.Feature{
-					{
-						Name:            "libksba",
-						Version:         "1.3.5-7.el8.x86_64",
-						Vulnerabilities: []*v1.Vulnerability{vulnLibksba},
-					},
-					{
-						Name:            "tar",
-						Version:         "1.27.1.el8.x86_64",
-						Vulnerabilities: []*v1.Vulnerability{vulnTar},
-					},
-					{
-						Name:    "tzdata",
-						Version: "2022g.el8.noarch",
-						// Warning: if this test fails, then probably vulnerabilities have been found for tzdata:2022g
-						// To fix that, one would need to find another package/version that has 0 vulnerabilities
-						// or mock the scanning behavior of scanner to always return 0 vulnerabilities for the pkg used in this case.
-						Vulnerabilities: []*v1.Vulnerability{},
-					},
+			expectedFeatures: []expectedFeatures{
+				{
+					Name:                     "libksba",
+					Version:                  "1.3.5-7.el8.x86_64",
+					ExpectedVulnerabilities:  []*v1.Vulnerability{vulnLibksba},
+					VulnerabilitiesAssertion: assertExists,
 				},
-				NodeNotes: nil,
+				{
+					Name:                     "tar",
+					Version:                  "1.27.1.el8.x86_64",
+					ExpectedVulnerabilities:  []*v1.Vulnerability{vulnTar},
+					VulnerabilitiesAssertion: assertExists,
+				},
+				{
+					Name:    "tzdata",
+					Version: "2022g.el8.noarch",
+					// Warning: if this test fails, then probably vulnerabilities have been found for tzdata:2022g
+					// To fix that, one would need to find another package/version that has 0 vulnerabilities
+					// or mock the scanning behavior of scanner to always return 0 vulnerabilities for the pkg used in this case.
+					ExpectedVulnerabilities:  []*v1.Vulnerability{},
+					VulnerabilitiesAssertion: assertEquals,
+				},
 			},
 		},
 		"Uncertified scan is unsupported for RHCOS and returns no features": {
-			request: buildRequest([]v1.Note{v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE}),
-			expectedResponse: &v1.GetNodeVulnerabilitiesResponse{
-				Features:  []*v1.Feature{},
-				NodeNotes: nil,
-			},
+			request:          buildRequest([]v1.Note{v1.Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE}),
+			expectedFeatures: []expectedFeatures{},
+			expectedNotes:    nil,
 		},
 	}
 
@@ -152,21 +155,16 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			c := c
 			gotResponse, err := client.GetNodeVulnerabilities(context.Background(), c.request)
 			require.NoError(t, err)
-			assert.Len(t, gotResponse.GetFeatures(), len(c.expectedResponse.GetFeatures()), "Unexpected number of features") // unusual got-expected order of Len
-			assert.Len(t, gotResponse.GetNodeNotes(), len(c.expectedResponse.GetNodeNotes()))
+			assert.Len(t, gotResponse.GetFeatures(), len(c.expectedFeatures), "Unexpected number of features") // unusual got-expected order of Len
+			assert.Len(t, gotResponse.GetNodeNotes(), len(c.expectedNotes))
 
-			for _, expectedFeat := range c.expectedResponse.GetFeatures() {
-				foundFeat := findFeat(expectedFeat.GetName(), expectedFeat.GetVersion(), gotResponse.GetFeatures())
-				assert.NotNil(t, foundFeat, "Expected to find feature '%s:%s'", expectedFeat.GetName(), expectedFeat.GetVersion())
+			for _, expectedFeat := range c.expectedFeatures {
+				foundFeat := findFeat(expectedFeat.Name, expectedFeat.Version, gotResponse.GetFeatures())
+				assert.NotNil(t, foundFeat, "Expected to find feature '%s:%s'", expectedFeat.Name, expectedFeat.Version)
 				if foundFeat == nil {
 					continue
 				}
-				// when 0 vulns are expected, then use stronger assertion, because empty set is a subset of any set
-				if len(expectedFeat.GetVulnerabilities()) == 0 {
-					assert.Len(t, foundFeat.GetVulnerabilities(), 0, "Expected to find 0 vulnerabilities for feature '%s:%s'", expectedFeat.GetName(), expectedFeat.GetVersion())
-				} else {
-					assertIsSubset(t, expectedFeat.GetVulnerabilities(), foundFeat.GetVulnerabilities())
-				}
+				expectedFeat.VulnerabilitiesAssertion(t, expectedFeat.Name, expectedFeat.Version, expectedFeat.ExpectedVulnerabilities, foundFeat.GetVulnerabilities())
 			}
 		})
 	}
@@ -181,14 +179,20 @@ func findFeat(name, version string, set []*v1.Feature) *v1.Feature {
 	return nil
 }
 
-// assertIsSubset asserts that every element of 'subset' exists in 'set'
-func assertIsSubset(t *testing.T, subset, set []*v1.Vulnerability) {
-	assert.GreaterOrEqual(t, len(set), len(subset), "Expected to find at least %d vulnerabilities", len(subset))
+// assertEquals asserts that sets 'expected' and 'got' are identical
+func assertEquals(t *testing.T, name, version string, expected, got []*v1.Vulnerability) {
+	assert.Len(t, got, len(expected), "Expected to find %d vulnerabilities for feature '%s:%s'", len(expected), name, version)
+	assertExists(t, name, version, expected, got)
+}
+
+// assertExists asserts that all 'needles' exist in 'haystack'
+func assertExists(t *testing.T, name, version string, needles, haystack []*v1.Vulnerability) {
+	assert.GreaterOrEqual(t, len(haystack), len(needles), "Expected to find at least %d vulnerabilities for feature '%s:%s'", len(needles), name, version)
 	// Prune last modified time
-	for _, v := range set {
+	for _, v := range haystack {
 		v.MetadataV2.LastModifiedDateTime = ""
 	}
-	for _, v := range subset {
-		assert.Contains(t, set, v)
+	for _, v := range needles {
+		assert.Contains(t, haystack, v)
 	}
 }
