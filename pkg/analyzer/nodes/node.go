@@ -101,7 +101,8 @@ func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*fil
 		files: make(map[string]*fileMetadata),
 	}
 	m := metrics.FileExtractionMetrics{}
-	for _, dir := range []string{"etc/", "usr/share/rpm", "var/lib/rpm"} { // TODO(ROX-13771): Use range matcher.GetCommonPrefixDirs() again after fixing
+	// TODO(ROX-13771): Use `range matcher.GetCommonPrefixDirs()` again after fixing.
+	for _, dir := range []string{"etc/", "usr/share/rpm", "var/lib/rpm", "usr/share/buildinfo"} {
 		if err := n.addFiles(filepath.FromSlash(dir), matcher, &m); err != nil {
 			return nil, errors.Wrapf(err, "failed to match filesMap at %q (at %q)", dir, n.root)
 		}
