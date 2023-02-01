@@ -1,7 +1,6 @@
 package detection
 
 import (
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/ext/featurefmt"
@@ -36,10 +35,10 @@ type DetectComponentOpts struct {
 // if CoreOS is required for DetectComponents, the namespace must start with `rhcos`
 func DetectComponents(name string, files analyzer.Files, parent *database.Layer, languageComponents []*component.Component, opts DetectComponentOpts) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
 	namespace := DetectNamespace(name, files, parent, opts.UncertifiedRHEL)
-	if namespace != nil && opts.IsRHCOSRequired && !wellknownnamespaces.IsRHCOSNamespace(namespace.Name) {
-		logrus.WithFields(logrus.Fields{LogLayerName: name, "detected namespace": namespace.Name}).Warning("Not able to start node scanning for this namespace")
-		return namespace, nil, nil, nil, errors.New("Node scanning unavailable")
-	}
+	//if namespace != nil && opts.IsRHCOSRequired && !wellknownnamespaces.IsRHCOSNamespace(namespace.Name) {
+	//	logrus.WithFields(logrus.Fields{LogLayerName: name, "detected namespace": namespace.Name}).Warning("Not able to start node scanning for this namespace")
+	//	return namespace, nil, nil, nil, errors.New("Node scanning unavailable")
+	//}
 	var featureVersions []database.FeatureVersion
 	var rhelFeatures *database.RHELv2Components
 	var err error
