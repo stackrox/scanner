@@ -22,6 +22,14 @@ spec:
         image: {{ .Values.scannerImage}}:{{ .Values.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         env:
+        - name: GOMEMLIMIT
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
+        - name: GOMAXPROCS
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.cpu
         - name: POD_NAME
           valueFrom:
             fieldRef:
