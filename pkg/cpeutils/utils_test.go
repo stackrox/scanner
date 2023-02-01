@@ -63,6 +63,7 @@ func TestGetAllOpenShift4CPEs(t *testing.T) {
 				"cpe:/a:redhat:openshift:4.10",
 				"cpe:/a:redhat:openshift:4.11",
 				"cpe:/a:redhat:openshift:4.12",
+				"cpe:/a:redhat:openshift:4.13",
 			},
 		},
 		{
@@ -81,6 +82,7 @@ func TestGetAllOpenShift4CPEs(t *testing.T) {
 				"cpe:/a:redhat:openshift:4.10::el8",
 				"cpe:/a:redhat:openshift:4.11::el8",
 				"cpe:/a:redhat:openshift:4.12::el8",
+				"cpe:/a:redhat:openshift:4.13::el8",
 			},
 		},
 	}
