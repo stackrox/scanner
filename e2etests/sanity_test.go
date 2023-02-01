@@ -46,6 +46,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 	env, err := client.RetrieveImageDataBySHA(img.SHA, &types.GetImageDataOpts{
 		UncertifiedRHELResults: imageRequest.UncertifiedRHELScan,
 	})
+
 	require.NoError(t, err)
 	require.Nil(t, env.Error)
 	require.NotNil(t, env.Layer)
@@ -75,6 +76,13 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 
 			if test.checkProvidedExecutables {
 				for _, exec := range matching.Executables {
+					sort.Slice(exec.RequiredFeatures, func(i, j int) bool {
+						return exec.RequiredFeatures[i].GetName() < exec.RequiredFeatures[j].GetName() ||
+							exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()
+					})
+				}
+
+				for _, exec := range feature.Executables {
 					sort.Slice(exec.RequiredFeatures, func(i, j int) bool {
 						return exec.RequiredFeatures[i].GetName() < exec.RequiredFeatures[j].GetName() ||
 							exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()

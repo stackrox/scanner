@@ -64,11 +64,7 @@ func TestAPKFeatureDetection(t *testing.T) {
 					Version: "1.2.8-r2",
 				},
 				{
-					Feature: database.Feature{Name: "libcrypto1.0"},
-					Version: "1.0.2h-r1",
-				},
-				{
-					Feature: database.Feature{Name: "libssl1.0"},
+					Feature: database.Feature{Name: "openssl"},
 					Version: "1.0.2h-r1",
 				},
 				{
@@ -76,15 +72,11 @@ func TestAPKFeatureDetection(t *testing.T) {
 					Version: "2.6.7-r0",
 				},
 				{
-					Feature: database.Feature{Name: "scanelf"},
+					Feature: database.Feature{Name: "pax-utils"},
 					Version: "1.1.6-r0",
 				},
 				{
-					Feature: database.Feature{Name: "musl-utils"},
-					Version: "1.1.14-r10",
-				},
-				{
-					Feature: database.Feature{Name: "libc-utils"},
+					Feature: database.Feature{Name: "libc-dev"},
 					Version: "0.7-r0",
 				},
 			},

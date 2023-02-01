@@ -59,6 +59,13 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 							exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()
 					})
 				}
+
+				for _, exec := range feature.ProvidedExecutables {
+					sort.Slice(exec.RequiredFeatures, func(i, j int) bool {
+						return exec.RequiredFeatures[i].GetName() < exec.RequiredFeatures[j].GetName() ||
+							exec.RequiredFeatures[i].GetName() == exec.RequiredFeatures[j].GetName() && exec.RequiredFeatures[i].GetVersion() < exec.RequiredFeatures[j].GetVersion()
+					})
+				}
 				assert.ElementsMatch(t, feature.ProvidedExecutables, matching.ProvidedExecutables)
 			}
 			feature.ProvidedExecutables = nil

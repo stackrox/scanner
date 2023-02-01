@@ -20,7 +20,7 @@ type testCase struct {
 	namespace          string
 	expectedFeatures   []apiV1.Feature
 	unexpectedFeatures []apiV1.Feature
-	// This specifies that the features only need to contain at least the vulnerabilities specified
+	// This specifies that the features only need to contain at least the vulnerabilities specified.
 	onlyCheckSpecifiedVulns  bool
 	uncertifiedRHEL          bool
 	checkProvidedExecutables bool
@@ -2570,9 +2570,8 @@ var testCases = []testCase{
 						Path: "/lib/libapk.so.3.12.0",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apk-tools", Version: "2.12.0-r4"},
-							{Name: "libcrypto1.1", Version: "1.1.1i-r0"},
-							{Name: "libssl1.1", Version: "1.1.1i-r0"},
 							{Name: "musl", Version: "1.2.2_pre7-r0"},
+							{Name: "openssl", Version: "1.1.1i-r0"},
 							{Name: "zlib", Version: "1.2.11-r3"},
 						},
 					},
@@ -2580,8 +2579,7 @@ var testCases = []testCase{
 						Path: "/sbin/apk",
 						RequiredFeatures: []*v1.FeatureNameVersion{
 							{Name: "apk-tools", Version: "2.12.0-r4"},
-							{Name: "libcrypto1.1", Version: "1.1.1i-r0"},
-							{Name: "libssl1.1", Version: "1.1.1i-r0"},
+							{Name: "openssl", Version: "1.1.1i-r0"},
 							{Name: "musl", Version: "1.2.2_pre7-r0"},
 							{Name: "zlib", Version: "1.2.11-r3"},
 						},
@@ -2622,6 +2620,15 @@ var testCases = []testCase{
 				AddedBy: "sha256:596ba82af5aaa3e2fd9d6f955b8b94f0744a2b60710e3c243ba3e4a467f051d1",
 				FixedBy: "1.32.1-r9",
 				Executables: []*v1.Executable{
+					{
+						Path: "/usr/bin/ssl_client",
+						RequiredFeatures: []*v1.FeatureNameVersion{
+							{Name: "busybox", Version: "1.32.1-r0"},
+							{Name: "libtls-standalone", Version: "2.9.1-r1"},
+							{Name: "musl", Version: "1.2.2_pre7-r0"},
+							{Name: "openssl", Version: "1.1.1i-r0"},
+						},
+					},
 					{
 						Path: "/etc/network/if-up.d/dad",
 						RequiredFeatures: []*v1.FeatureNameVersion{
@@ -2767,6 +2774,40 @@ var testCases = []testCase{
 				},
 				AddedBy: "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
 				FixedBy: "1.35.0-r15",
+			},
+			{
+				Name:          "openssl",
+				NamespaceName: "alpine:v3.16",
+				VersionFormat: "apk",
+				Version:       "1.1.1o-r0",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2022-2097",
+						NamespaceName: "alpine:v3.16",
+						Description:   "AES OCB mode for 32-bit x86 platforms using the AES-NI assembly optimised implementation will not encrypt the entirety of the data under some circumstances. This could reveal sixteen bytes of data that was preexisting in the memory that wasn't written. In the special case of \"in place\" encryption, sixteen bytes of the plaintext would be revealed. Since OpenSSL does not support OCB based cipher suites for TLS and DTLS, they are both unaffected. Fixed in OpenSSL 3.0.5 (Affected 3.0.0-3.0.4). Fixed in OpenSSL 1.1.1q (Affected 1.1.1-1.1.1p).",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2022-2097",
+						Severity:      "Moderate",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         1.4,
+									"Score":               5.3,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 10.0,
+									"ImpactScore":         2.9,
+									"Score":               5.0,
+									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+								},
+							},
+						},
+						FixedBy: "1.1.1q-r0",
+					},
+				},
+				AddedBy: "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
+				FixedBy: "1.1.1q-r0",
 			},
 		},
 	},
