@@ -251,8 +251,9 @@ func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNod
 	}
 
 	if !wellknownnamespaces.IsRHCOSNamespace(req.GetComponents().GetNamespace()) || len(req.GetComponents().GetRhelContentSets()) == 0 {
-		// Non-RHCOS system with node inventory detected!
-		// We can provide a list of pkgs but cannot scan them -> setting a note to inform the user.
+		// Node components exist in the request, but we cannot perform vulnerability matching
+		// if (a.) it's not an RHCOS namespace or (b.) if it is an RHCOS namespace missing content
+		// sets. The latter occurs for RHCOS versions we don't support.
 		resp.NodeNotes = append(resp.GetNodeNotes(), v1.NodeNote_NODE_UNSUPPORTED)
 	}
 
