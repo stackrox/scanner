@@ -241,6 +241,7 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 }
 
 func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
+	log.Infof("Received call to GetNodeVulnerabilities. RHCOSNodeScanning=%t (%s)", env.RHCOSNodeScanning.Enabled(), env.RHCOSNodeScanning.Value())
 	// If NodeInventory is empty `req.GetComponents() == nil` then fallback to v1 scanning
 	if req.GetComponents() == nil || !env.RHCOSNodeScanning.Enabled() {
 		return s.getNodeVulnerabilitiesLegacy(ctx, req)
