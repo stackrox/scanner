@@ -21,7 +21,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
-	featureFlags "github.com/stackrox/scanner/pkg/features"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/version"
 	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
@@ -242,7 +242,7 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 
 func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
 	// If NodeInventory is empty `req.GetComponents() == nil` then fallback to v1 scanning
-	if req.GetComponents() == nil || !featureFlags.RHCOSNodeScanning.Enabled() {
+	if req.GetComponents() == nil || !env.RHCOSNodeScanning.Enabled() {
 		return s.getNodeVulnerabilitiesLegacy(ctx, req)
 	}
 
