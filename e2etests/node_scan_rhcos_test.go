@@ -103,9 +103,8 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 }
 
 func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
-	if !features.RHCOSNodeScanning.Enabled() {
-		t.Skip("This test requires ROX_RHCOS_NODE_SCANNING=true")
-	}
+	// Enable feature flag only for the scope of this test
+	t.Setenv(features.RHCOSNodeScanning.EnvVar(), "true")
 	conn := connectToScanner(t)
 	client := v1.NewNodeScanServiceClient(conn)
 
