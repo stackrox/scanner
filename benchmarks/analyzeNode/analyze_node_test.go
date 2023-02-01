@@ -6,14 +6,12 @@ import (
 	"testing"
 
 	node "github.com/stackrox/scanner/pkg/analyzer/nodes"
-	"github.com/stretchr/testify/require"
-
 	// Register the Docker image extractor
 	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
 )
 
 func BenchmarkAnalyzeNode(b *testing.B) {
-	runBenchmarkAnalyzeNode(b, "fake path")
+	runBenchmarkAnalyzeNode(b, "your/local/path/to/file/system")
 }
 
 func runBenchmarkAnalyzeNode(b *testing.B, pathName string) {
@@ -21,15 +19,12 @@ func runBenchmarkAnalyzeNode(b *testing.B, pathName string) {
 	b.ResetTimer()
 	runtime.GC()
 	runtime.ReadMemStats(&m1)
-	//d := 1
+
 	for i := 0; i < b.N; i++ {
-		var err error
-		path := "/Users/yili/node-scanning/demoV8"
-		_, err = node.Analyze("testNode", path, node.AnalyzeOpts{false, true})
-		require.NoError(b, err)
+		node.Analyze("testNode", pathName, node.AnalyzeOpts{UncertifiedRHEL: false, IsRHCOSRequired: true})
 	}
 	runtime.ReadMemStats(&m2)
-	//fmt.Println("total:", m2.TotalAlloc-m1.TotalAlloc)
-	fmt.Println("total:", m2.TotalAlloc-m1.TotalAlloc)
+	// This is optional as we can use go test -bench=foo -benchmem for memory measuring
+	fmt.Println("Total memory allocation:", float64(m2.TotalAlloc-m1.TotalAlloc)/float64(b.N))
 
 }
