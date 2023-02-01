@@ -60,7 +60,7 @@ func getFullRHELv2Features(db database.Datastore, pkgEnvs map[int]*database.RHEL
 	for _, pkgEnv := range pkgEnvs {
 		pkg := pkgEnv.Pkg
 
-		if hasKernelPrefix(pkg.Name) {
+		if isPackageBlacklistedInScan(pkgEnv.Namespace, pkg.Name) {
 			continue
 		}
 

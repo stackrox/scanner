@@ -95,9 +95,16 @@ func featureFromDatabaseModel(dbFeatureVersion database.FeatureVersion, uncertif
 	}
 }
 
-func hasKernelPrefix(name string) bool {
+// isPackageBlacklistedInScan returns true if the given package name in the
+// namespace should be skipped in vulnerability matching scans.
+func isPackageBlacklistedInScan(namespace, pkgName string) bool {
+	// Allow kernel packages in RHCOS.
+	if namespaces.IsRHCOSNamespace(namespace) {
+		return false
+	}
+	// Blacklist kernel prefixes everywhere else.
 	for _, prefix := range kernelPrefixes {
-		if strings.HasPrefix(name, prefix) {
+		if strings.HasPrefix(pkgName, prefix) {
 			return true
 		}
 	}
@@ -128,7 +135,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion, opts.GetUncertifiedRHEL(), depMap)
 
-			if hasKernelPrefix(feature.Name) {
+			if isPackageBlacklistedInScan(layer.NamespaceName, feature.Name) {
 				continue
 			}
 
@@ -194,7 +201,7 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 		for _, dbFeatureVersion := range dbLayer.Features {
 			feature := featureFromDatabaseModel(dbFeatureVersion, uncertifiedRHEL, depMap)
 
-			if hasKernelPrefix(feature.Name) {
+			if isPackageBlacklistedInScan(dbLayer.Namespace.Name, feature.Name) {
 				continue
 			}
 
