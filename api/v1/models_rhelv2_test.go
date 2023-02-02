@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"sort"
 	"testing"
 	"time"
@@ -276,4 +277,69 @@ func TestComponentsFromDatabaseModelRHELv2(t *testing.T) {
 	assert.Empty(t, imgComponents.LanguageComponents)
 	assert.Equal(t, expectedRHELv2PkgEnvs, imgComponents.RHELv2PkgEnvs)
 	assert.ElementsMatch(t, expectedNotes, imgComponents.Notes)
+}
+
+func Test_getFullRHELv2Features(t *testing.T) {
+	type args struct {
+		db             database.Datastore
+		pkgEnvs        map[int]*database.RHELv2PackageEnv
+		execsPopulated bool
+	}
+	tests := []struct {
+		name       string
+		args       args
+		want       []Feature
+		wantErr    assert.ErrorAssertionFunc
+		initDBFunc func(datastore *database.Datastore)
+	}{
+		{
+			name: "when kernel and linux packages then match vulns",
+			args: args{
+				db: nil,
+				pkgEnvs: map[int]*database.RHELv2PackageEnv{
+					1: {
+						Pkg: &database.RHELv2Package{
+							Name: "linux-firmware",
+						},
+						Namespace: "rhcos:4.12",
+					},
+					2: {
+						Pkg: &database.RHELv2Package{
+							Name: "kernel",
+						},
+						Namespace: "rhcos:4.12",
+					},
+				},
+			},
+			want: []Feature{
+				{
+					Name:          "linux-firmware",
+					NamespaceName: "rhcos:4.12",
+					VersionFormat: "rpm",
+					Executables:   []*v1.Executable{},
+				},
+				{
+					Name:          "kernel",
+					NamespaceName: "rhcos:4.12",
+					VersionFormat: "rpm",
+					Executables:   []*v1.Executable{},
+				},
+			},
+			wantErr:    assert.NoError,
+			initDBFunc: nil,
+		},
+	}
+	t.Setenv(env.LanguageVulns.EnvVar(), "false")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.args.db == nil {
+				tt.args.db = newMockRHELv2Datastore()
+			}
+			got, err := getFullRHELv2Features(tt.args.db, tt.args.pkgEnvs, tt.args.execsPopulated)
+			if !tt.wantErr(t, err, fmt.Sprintf("getFullRHELv2Features(%v, %v, %v)", tt.args.db, tt.args.pkgEnvs, tt.args.execsPopulated)) {
+				return
+			}
+			assert.Equalf(t, tt.want, got, "getFullRHELv2Features(%v, %v, %v)", tt.args.db, tt.args.pkgEnvs, tt.args.execsPopulated)
+		})
+	}
 }
