@@ -88,8 +88,26 @@ OSTREE_VERSION='49.84.202212201621-0'
 			want: []string{
 				"rhel-8-for-x86_64-baseos-eus-rpms__8_DOT_4",
 				"rhel-8-for-x86_64-appstream-eus-rpms__8_DOT_4",
+				"rhel-8-for-x86_64-nfv-tus-rpms__8_DOT_4",
 				"fast-datapath-for-rhel-8-x86_64-rpms",
 				"rhocp-4.9-for-rhel-8-x86_64-rpms",
+				"advanced-virt-for-rhel-8-x86_64-eus-rpms",
+			},
+		},
+		{
+			name: "when ocp/4.7 then should not use advanced-virt",
+			osReleaseContents: `
+ID="rhcos"
+VERSION_ID="4.7"
+OPENSHIFT_VERSION="4.7"
+RHEL_VERSION="8.3"
+`,
+			want: []string{
+				"rhel-8-for-x86_64-baseos-eus-rpms__8_DOT_3",
+				"rhel-8-for-x86_64-appstream-eus-rpms__8_DOT_3",
+				"rhel-8-for-x86_64-nfv-tus-rpms__8_DOT_3",
+				"fast-datapath-for-rhel-8-x86_64-rpms",
+				"rhocp-4.7-for-rhel-8-x86_64-rpms",
 			},
 		},
 		{

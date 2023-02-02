@@ -145,14 +145,21 @@ func getHardcodedRHCOSContentSets(files analyzer.Files) ([]string, error) {
 	}
 	// Format the content sets based on the metadata found.
 	rhelSuffix := strings.Replace(metadata["RHEL_VERSION"], ".", "_DOT_", 1)
-	return []string{
-		// The mapping from RHCOS version to RHEL minor releases can be found here:
-		// https://access.redhat.com/articles/6907891
+	sets := []string{
+		// RHEL8.
 		fmt.Sprintf("rhel-8-for-x86_64-baseos-eus-rpms__%s", rhelSuffix),
 		fmt.Sprintf("rhel-8-for-x86_64-appstream-eus-rpms__%s", rhelSuffix),
+		fmt.Sprintf("rhel-8-for-x86_64-nfv-tus-rpms__%s", rhelSuffix),
+		// Fast datapath.
 		"fast-datapath-for-rhel-8-x86_64-rpms",
+		// Openshift RHOCP.
 		fmt.Sprintf("rhocp-%s-for-rhel-8-x86_64-rpms", metadata["OPENSHIFT_VERSION"]),
-	}, nil
+	}
+	if metadata["VERSION_ID"] != "4.7" {
+		// This is only specified for 4.8 and 4.9
+		sets = append(sets, "advanced-virt-for-rhel-8-x86_64-eus-rpms")
+	}
+	return sets, nil
 }
 
 // isRPMVersionInInterval checks if the provided rpm version is within the specified interval
