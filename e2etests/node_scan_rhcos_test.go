@@ -149,7 +149,6 @@ func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
 			expectedNotes:    nil,
 		},
 	}
-
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			c := c
