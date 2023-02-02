@@ -68,7 +68,7 @@ func IsOpenShift4CPE(cpe string) bool {
 func GetAllOpenShift4CPEs(cpe string) ([]string, error) {
 	match := openshift4CPEPattern.FindStringSubmatch(cpe)
 	if len(match) != submatchLen {
-		return nil, errors.New("CPE does not match an expected OpenShift 4 CPE format")
+		return nil, errors.Errorf("CPE %s does not match an expected OpenShift 4 CPE format", cpe)
 	}
 
 	maxMinorVersion := maxKnownOpenShift4MinorVersion
