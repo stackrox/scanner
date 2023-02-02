@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
-	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -103,8 +102,6 @@ func buildRequest(notes []v1.Note) *v1.GetNodeVulnerabilitiesRequest {
 }
 
 func TestGRPCGetRHCOSNodeVulnerabilities(t *testing.T) {
-	// Enable feature flag only for the scope of this test
-	t.Setenv(env.RHCOSNodeScanning.EnvVar(), "true")
 	conn := connectToScanner(t)
 	client := v1.NewNodeScanServiceClient(conn)
 

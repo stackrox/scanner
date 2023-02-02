@@ -19,7 +19,4 @@ var (
 	// This is ignored if SkipPeerValidation is enabled.
 	// This variable was copied over from the stackrox repo.
 	OpenshiftAPI = RegisterBooleanSetting("ROX_OPENSHIFT_API", false)
-
-	// RHCOSNodeScanning enables phase 1 functions of "Full host level vulnerability scanning for RHCOS nodes" (ROX-10818)
-	RHCOSNodeScanning = RegisterBooleanSetting("ROX_RHCOS_NODE_SCANNING", false)
 )
