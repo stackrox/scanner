@@ -1,7 +1,6 @@
 package detectconent
 
 import (
-	"fmt"
 	"runtime"
 	"testing"
 
@@ -11,12 +10,11 @@ import (
 )
 
 func BenchmarkAnalyzeNode(b *testing.B) {
-	runBenchmarkAnalyzeNode(b, "your/local/path/to/file/system")
+	runBenchmarkAnalyzeNode(b, "/local/path/to/file/system")
 }
 
 func runBenchmarkAnalyzeNode(b *testing.B, pathName string) {
 	var m1, m2 runtime.MemStats
-	b.ResetTimer()
 	runtime.GC()
 	runtime.ReadMemStats(&m1)
 
@@ -24,7 +22,6 @@ func runBenchmarkAnalyzeNode(b *testing.B, pathName string) {
 		node.Analyze("testNode", pathName, node.AnalyzeOpts{UncertifiedRHEL: false, IsRHCOSRequired: true})
 	}
 	runtime.ReadMemStats(&m2)
-	// This is optional as we can use go test -bench=foo -benchmem for memory measuring
-	fmt.Println("Total memory allocation:", float64(m2.TotalAlloc-m1.TotalAlloc)/float64(b.N))
+	// Memory measuring command: go test -bench=foo -benchmem
 
 }
