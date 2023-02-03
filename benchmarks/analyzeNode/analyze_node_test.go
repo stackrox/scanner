@@ -14,14 +14,11 @@ func BenchmarkAnalyzeNode(b *testing.B) {
 }
 
 func runBenchmarkAnalyzeNode(b *testing.B, pathName string) {
-	var m1, m2 runtime.MemStats
 	runtime.GC()
-	runtime.ReadMemStats(&m1)
 
 	for i := 0; i < b.N; i++ {
 		node.Analyze("testNode", pathName, node.AnalyzeOpts{UncertifiedRHEL: false, IsRHCOSRequired: true})
 	}
-	runtime.ReadMemStats(&m2)
 	// Memory measuring command: go test -bench=foo -benchmem
 
 }
