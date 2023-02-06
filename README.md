@@ -86,8 +86,8 @@ for CI. Sometimes, it is necessary to update the image used
 
 To do this, only the following is necessary:
 
-* Update BUILD_IMAGE_VERSION
-* Update .openshift-ci/Dockerfile.build_root
+* Update [BUILD_IMAGE_VERSION](BUILD_IMAGE_VERSION)
+* Update [.openshift-ci/Dockerfile.build_root](.openshift-ci/Dockerfile.build_root)
 
 There are other references to apollo-ci images within .openshift-ci/build.
 It is not necessary to update those for CI, as OpenShift CI will NOT use the
