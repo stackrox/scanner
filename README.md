@@ -78,6 +78,21 @@ $ make image
 
 For any other time, just run `make image`.
 
+## Updating CI base image
+
+The Scanner repository relies on the images built in https://github.com/stackrox/rox-ci-image
+for CI. Sometimes, it is necessary to update the image used
+(for example, to build Scanner with an updated Go version).
+
+To do this, only the following is necessary:
+
+* Update BUILD_IMAGE_VERSION
+* Update .openshift-ci/Dockerfile.build_root
+
+There are other references to apollo-ci images within .openshift-ci/build.
+It is not necessary to update those for CI, as OpenShift CI will NOT use the
+FROM inside the respective Dockerfile. 
+
 ## Testing
 
 There are various unit tests and bench tests scattered around the codebase.
