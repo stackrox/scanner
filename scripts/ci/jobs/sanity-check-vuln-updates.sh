@@ -102,8 +102,8 @@ function run_tests_for_diff_id {
   diff_archive_cloudflare=/tmp/diff1.zip
   diff_archive_gcs=/tmp/diff2.zip
 
-  curl_verbose_cloudflare=$(curl -s -H 'Accept-encoding: gzip' -o "$diff_archive_cloudflare" -v "$url_cloudflare" 2>&1 \
-    | sed -e "s#^< ##g; s#\r##g;") \
+  curl_verbose_cloudflare=$(curl -s -H 'Accept-encoding: gzip' -o "$diff_archive_cloudflare" \
+    -v "$url_cloudflare" 2>&1 | sed -e "s#^< ##g; s#\r##g;") \
     || bash_exit_failure "curl failed on $url_cloudflare"
   cache_control_gcs_https=$(curl -s -H 'Accept-encoding: gzip' -o "$diff_archive_gcs" \
     -v "$url_gcs_https" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
@@ -113,7 +113,7 @@ function run_tests_for_diff_id {
   md5sum_gcs_https=$(md5sum "$diff_archive_gcs" | awk '{print $1}')
 
   metadata_cloudflare=$(unzip -q -c "$diff_archive_cloudflare" manifest.json | jq -cr '.' && rm -f $diff_archive_cloudflare) \
-    || bash_exit_failure "manifest extraction failed on $diff_archive_cloudflare"
+    || bash_exit_failure "metadata extraction failed on $diff_archive_cloudflare"
   metadata_gcs_https=$(unzip -q -c "$diff_archive_gcs" manifest.json | jq -cr '.' && rm -f "$diff_archive_gcs") \
     || bash_exit_failure "metadata extraction failed on $diff_archive_gcs"
 
