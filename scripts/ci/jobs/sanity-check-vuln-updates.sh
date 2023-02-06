@@ -88,39 +88,53 @@ function run_tests_for_diff_id {
   local diff_id gsutil_last_update
   local url_gsutil url_cloudflare url_gcs_https
   local metadata_cloudflare metadata_gcs_https
-  local cache_control_cloudflare cache_control_gcs_https
+  local cache_control_cloudflare cache_control_gcs_https cache_age_cloudflare_secs
   local md5sum_cloudflare md5sum_gcs_https
+  local gcs_object_age_seconds gcs_object_age_secs_now update_time_epoc_secs 
+  local curl_verbose_cloudflare
+  local diff_archive_cloudflare diff_archive_gcs
 
   diff_id=${1:-0133c2cf-8abe-4d79-9250-9b64b5b3e43e}
 
   url_cloudflare="https://definitions.stackrox.io/$diff_id/diff.zip"
   url_gcs_https="https://storage.googleapis.com/definitions.stackrox.io/$diff_id/diff.zip"
 
-  metadata_cloudflare=$(wget -q "$url_cloudflare" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip) \
-    || bash_exit_failure "curl failed on $url_cloudflare"
-  metadata_gcs_https=$(wget -q "$url_gcs_https" && unzip -q -c diff.zip manifest.json | jq -cr '.' && rm -f diff.zip) \
-    || bash_exit_failure "curl failed on $url_gcs_https"
+  diff_archive_cloudflare=/tmp/diff1.zip
+  diff_archive_gcs=/tmp/diff2.zip
 
-  cache_control_cloudflare=$(curl -s -H 'Accept-encoding: gzip' -o /tmp/diff1.zip \
-    -v "$url_cloudflare" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
+  curl_verbose_cloudflare=$(curl -s -H 'Accept-encoding: gzip' -o "$diff_archive_cloudflare" -v "$url_cloudflare" 2>&1 \
+    | sed -e "s#^< ##g; s#\r##g;") \
     || bash_exit_failure "curl failed on $url_cloudflare"
-  cache_control_gcs_https=$(curl -s -H 'Accept-encoding: gzip' -o /tmp/diff2.zip \
+  cache_control_gcs_https=$(curl -s -H 'Accept-encoding: gzip' -o "$diff_archive_gcs" \
     -v "$url_gcs_https" 2>&1 | grep "cache-control" | sed -e "s#^< ##g; s#\r##g;") \
     || bash_exit_failure "curl failed on $url_gcs_https"
 
-  md5sum_cloudflare=$(md5sum /tmp/diff1.zip | awk '{print $1}')
-  md5sum_gcs_https=$(md5sum /tmp/diff2.zip | awk '{print $1}')
-  rm -f /tmp/diff{1,2,3}.zip
+  md5sum_cloudflare=$(md5sum "$diff_archive_cloudflare" | awk '{print $1}')
+  md5sum_gcs_https=$(md5sum "$diff_archive_gcs" | awk '{print $1}')
+
+  metadata_cloudflare=$(unzip -q -c "$diff_archive_cloudflare" manifest.json | jq -cr '.' && rm -f $diff_archive_cloudflare) \
+    || bash_exit_failure "manifest extraction failed on $diff_archive_cloudflare"
+  metadata_gcs_https=$(unzip -q -c "$diff_archive_gcs" manifest.json | jq -cr '.' && rm -f "$diff_archive_gcs") \
+    || bash_exit_failure "metadata extraction failed on $diff_archive_gcs"
+
+  cache_control_cloudflare=$(echo "$curl_verbose_cloudflare" | grep "cache-control") \
+    || bash_exit_failure "extract cache-control failed on $url_cloudflare"
+  cache_age_cloudflare_secs=$(echo "$curl_verbose_cloudflare" | grep "age: " | sed -e "s#age: ##g" ) \
+    || cache_age_cloudflare_secs=0
 
   url_gsutil="gs://definitions.stackrox.io/$diff_id/diff.zip"
   gsutil_last_update=$(gsutil stat "$url_gsutil" | sed -Ene 's/^ +Update time: +(.*)/\1/p')
   gcs_object_age_seconds=$(get_gcs_object_age_seconds "$diff_id")
+
+  update_time_epoc_secs=$(parse_date_to_epoch_sec "$gsutil_last_update" "%a, %d %b %Y %H:%M:%S %Z")
+  gcs_object_age_secs_now=$(get_age_seconds "$update_time_epoc_secs")
 
   cat <<EOF
 -----------------------------------------------------------------------
 diff_id                  : $diff_id
 gsutil_last_update       : $gsutil_last_update
 gcs_object_age_seconds   : $gcs_object_age_seconds
+gcs_object_age_secs_now  : $gcs_object_age_secs_now
 
 url_gsutil               : $url_gsutil
 url_cloudflare           : $url_cloudflare
@@ -129,6 +143,7 @@ url_gcs_https            : $url_gcs_https
 metadata_cloudflare      : $metadata_cloudflare
 metadata_gcs_https       : $metadata_gcs_https
 
+cache_age_cloudflare     : $cache_age_cloudflare_secs
 cache_control_cloudflare : $cache_control_cloudflare
 cache_control_gcs_https  : $cache_control_gcs_https
 
@@ -154,7 +169,7 @@ EOF
   # based on the cache-control max-age value. Therefore the checksum should match that
   # from the content pulled directly from the gcs-https endpoint. But the object is
   # updated hourly so I might need to track hashes across runs to test this properly.
-  if [[ "$gcs_object_age_seconds" -gt 3600 ]]; then
+  if [[ "$gcs_object_age_secs_now" -gt 3600 ]]; then
     if [[ "$md5sum_cloudflare" != "$md5sum_gcs_https" ]]; then
       testfail "Cloudflare CDN content mistmatch against reference after cache should have been invalidated"
     fi
@@ -167,8 +182,15 @@ function get_gcs_object_age_seconds {
   diff_id="$1"
   created_time_raw=$(grep -A3 "$diff_id" "$FPATH_DIFF_GSUTIL_STAT" | sed -Ene 's/^ +Update time: +(.*)/\1/p')
   created_time_epoch_sec=$(parse_date_to_epoch_sec "$created_time_raw" "%a, %d %b %Y %H:%M:%S %Z")
+
+  get_age_seconds "$created_time_epoch_sec"
+}
+
+function get_age_seconds {
+  local last_update_secs="$1"
+
   now_epoch_sec=$(date "+%s")
-  obj_age_seconds=$(( now_epoch_sec - created_time_epoch_sec ))
+  obj_age_seconds=$(( now_epoch_sec - last_update_secs ))
   echo "$obj_age_seconds"
 }
 
