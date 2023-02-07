@@ -99,8 +99,8 @@ function run_tests_for_diff_id {
   url_cloudflare="https://definitions.stackrox.io/$diff_id/diff.zip"
   url_gcs_https="https://storage.googleapis.com/definitions.stackrox.io/$diff_id/diff.zip"
 
-  diff_archive_cloudflare=$WORKING_DIR/diff1.zip
-  diff_archive_gcs=$WORKING_DIR/diff2.zip
+  diff_archive_cloudflare="$WORKING_DIR/diff1.zip"
+  diff_archive_gcs="$WORKING_DIR/diff2.zip"
 
   curl_verbose_cloudflare=$(curl -s -H 'Accept-encoding: gzip' -o "$diff_archive_cloudflare" \
     -v "$url_cloudflare" 2>&1 | sed -e "s#^< ##g; s#\r##g;") \
