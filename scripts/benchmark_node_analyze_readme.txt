@@ -4,7 +4,7 @@ Pre steps:
 
     1.Make sure docker is installed on your local laptop
     2.execute docker run -it --rm registry.access.redhat.com/ubi8/ubi
-    3.make sure Vim, Python3, RPM and RPM-build are installed in the running ubi8 bash
+    3.make sure Vim, RPM and RPM-build are installed in the running ubi8 bash
         if not, do yum search <package name> and yum install <package name>
 
 ---------------------------------------------------------------------------------------------
