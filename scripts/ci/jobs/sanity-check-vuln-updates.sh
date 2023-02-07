@@ -177,7 +177,7 @@ EOF
 }
 
 function get_gcs_object_age_seconds {
-  local diff_id created_time_raw created_time_epoch_sec now_epoch_sec obj_age_seconds
+  local diff_id created_time_raw created_time_epoch_sec
 
   diff_id="$1"
   created_time_raw=$(grep -A3 "$diff_id" "$FPATH_DIFF_GSUTIL_STAT" | sed -Ene 's/^ +Update time: +(.*)/\1/p')
@@ -187,10 +187,12 @@ function get_gcs_object_age_seconds {
 }
 
 function get_age_seconds {
-  local last_update_secs="$1"
+  local last_update_secs now_epoch_sec obj_age_seconds
 
+  last_update_secs="$1"
   now_epoch_sec=$(date "+%s")
   obj_age_seconds=$(( now_epoch_sec - last_update_secs ))
+
   echo "$obj_age_seconds"
 }
 
@@ -213,8 +215,8 @@ MAX_GCS_OBJECT_AGE_SECONDS=$((4 * 3600))
 FAILURE_COUNT=0
 
 # Setup GCP
-require_environment "GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER"
-setup_gcp "${GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER}"
+# require_environment "GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER"
+# setup_gcp "${GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER}"
 
 # Initialize working dir
 rm -rf "$WORKING_DIR"
