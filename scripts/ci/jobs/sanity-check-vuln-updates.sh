@@ -119,13 +119,15 @@ function run_tests_for_diff_id {
 
   cache_control_cloudflare=$(echo "$curl_verbose_cloudflare" | grep "cache-control") \
     || bash_exit_failure "extract cache-control failed on $url_cloudflare"
+
+  # On CloudFlare cache hit there will be no age header, in that case assume the cache age is 0
   cache_age_cloudflare_secs=$(echo "$curl_verbose_cloudflare" | grep "age: " | sed -e "s#age: ##g" ) \
     || cache_age_cloudflare_secs=0
 
-  url_gsutil="gs://definitions.stackrox.io/$diff_id/diff.zip"
-  gsutil_last_update=$(gsutil stat "$url_gsutil" | sed -Ene 's/^ +Update time: +(.*)/\1/p')
   gcs_object_age_seconds=$(get_gcs_object_age_seconds "$diff_id")
 
+  url_gsutil="gs://definitions.stackrox.io/$diff_id/diff.zip"
+  gsutil_last_update=$(gsutil stat "$url_gsutil" | sed -Ene 's/^ +Update time: +(.*)/\1/p')
   update_time_epoc_secs=$(parse_date_to_epoch_sec "$gsutil_last_update" "%a, %d %b %Y %H:%M:%S %Z")
   gcs_object_age_secs_now=$(get_age_seconds "$update_time_epoc_secs")
 
@@ -169,6 +171,10 @@ EOF
   # based on the cache-control max-age value. Therefore the checksum should match that
   # from the content pulled directly from the gcs-https endpoint. But the object is
   # updated hourly so I might need to track hashes across runs to test this properly.
+  #
+  # Using gcs_object_age_secs_now instead of previously used gcs_object_age_seconds to
+  # reduce the liklihood of a race condition if the GCS bucket was updated after this job
+  # had started
   if [[ "$gcs_object_age_secs_now" -gt 3600 ]]; then
     if [[ "$md5sum_cloudflare" != "$md5sum_gcs_https" ]]; then
       testfail "Cloudflare CDN content mistmatch against reference after cache should have been invalidated"
