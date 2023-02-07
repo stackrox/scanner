@@ -120,7 +120,7 @@ function run_tests_for_diff_id {
   cache_control_cloudflare=$(echo "$curl_verbose_cloudflare" | grep "cache-control") \
     || bash_exit_failure "extract cache-control failed on $url_cloudflare"
 
-  # On CloudFlare cache hit there will be no age header, in that case assume the cache age is 0
+  # On CloudFlare cache miss there will be no age header, in that case assume the cache age is 0
   cache_age_cloudflare_secs=$(echo "$curl_verbose_cloudflare" | grep "age: " | sed -e "s#age: ##g" ) \
     || cache_age_cloudflare_secs=0
 
