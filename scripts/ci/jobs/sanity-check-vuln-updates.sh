@@ -91,7 +91,7 @@ function run_tests_for_diff_id {
   local cache_control_cloudflare cache_control_gcs_https cache_age_cloudflare_secs
   local md5sum_cloudflare md5sum_gcs_https
   local gcs_object_age_seconds gcs_object_age_secs_now update_time_epoc_secs 
-  local curl_verbose_cloudflare
+  local verbose_cloudflare
   local diff_archive_cloudflare diff_archive_gcs
 
   diff_id=${1:-0133c2cf-8abe-4d79-9250-9b64b5b3e43e}
@@ -102,7 +102,7 @@ function run_tests_for_diff_id {
   diff_archive_cloudflare="$WORKING_DIR/diff1.zip"
   diff_archive_gcs="$WORKING_DIR/diff2.zip"
 
-  curl_verbose_cloudflare=$(curl -s -H 'Accept-encoding: gzip' -o "$diff_archive_cloudflare" \
+  verbose_cloudflare=$(curl -s -H 'Accept-encoding: gzip' -o "$diff_archive_cloudflare" \
     -v "$url_cloudflare" 2>&1 | sed -e "s#^< ##g; s#\r##g;") \
     || bash_exit_failure "curl failed on $url_cloudflare"
   cache_control_gcs_https=$(curl -s -H 'Accept-encoding: gzip' -o "$diff_archive_gcs" \
@@ -117,11 +117,11 @@ function run_tests_for_diff_id {
   metadata_gcs_https=$(unzip -q -c "$diff_archive_gcs" manifest.json | jq -cr '.' && rm -f "$diff_archive_gcs") \
     || bash_exit_failure "metadata extraction failed on $diff_archive_gcs"
 
-  cache_control_cloudflare=$(echo "$curl_verbose_cloudflare" | grep "cache-control") \
+  cache_control_cloudflare=$(echo "$verbose_cloudflare" | grep "cache-control") \
     || bash_exit_failure "extract cache-control failed on $url_cloudflare"
 
   # On CloudFlare cache miss there will be no age header, in that case assume the cache age is 0
-  cache_age_cloudflare_secs=$(echo "$curl_verbose_cloudflare" | grep "age: " | sed -e "s#age: ##g" ) \
+  cache_age_cloudflare_secs=$(echo "$verbose_cloudflare" | grep "age: " | sed -e "s#age: ##g" ) \
     || cache_age_cloudflare_secs=0
 
   gcs_object_age_seconds=$(get_gcs_object_age_seconds "$diff_id")
