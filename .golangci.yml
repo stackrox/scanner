@@ -28,6 +28,9 @@ issues:
     - linters:
         - revive
       text: "don't use leading k in Go names"
+    - linters:
+        - revive
+      text: "package-comments: should have a package comment"
 
 linters-settings:
   gosec:
