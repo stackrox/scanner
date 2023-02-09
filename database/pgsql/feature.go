@@ -17,7 +17,6 @@ package pgsql
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/stackrox/scanner/database"
@@ -29,16 +28,6 @@ import (
 func (pgSQL *pgSQL) insertFeature(feature database.Feature) (int, error) {
 	if feature.Name == "" {
 		return 0, commonerr.NewBadRequestError("could not find/insert invalid Feature")
-	}
-
-	// Do cache lookup.
-	if pgSQL.cache != nil {
-		metrics.IncCacheQueries("feature")
-		id, found := pgSQL.cache.Get("feature:" + feature.Namespace.Name + ":" + feature.Name)
-		if found {
-			metrics.IncCacheHits("feature")
-			return id.(int), nil
-		}
 	}
 
 	// We do `defer metrics.ObserveQueryTime` here because we don't want to observe cached features.
@@ -67,10 +56,6 @@ func (pgSQL *pgSQL) insertFeature(feature database.Feature) (int, error) {
 		}
 	}
 
-	if pgSQL.cache != nil {
-		pgSQL.cache.Add("feature:"+feature.Namespace.Name+":"+feature.Name, id)
-	}
-
 	return id, nil
 }
 
@@ -78,17 +63,6 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	err = versionfmt.Valid(fv.Feature.Namespace.VersionFormat, fv.Version)
 	if err != nil {
 		return 0, commonerr.NewBadRequestError("could not find/insert invalid FeatureVersion")
-	}
-
-	// Do cache lookup.
-	cacheIndex := strings.Join([]string{"featureversion", fv.Feature.Namespace.Name, fv.Feature.Name, fv.Version}, ":")
-	if pgSQL.cache != nil {
-		metrics.IncCacheQueries("featureversion")
-		id, found := pgSQL.cache.Get(cacheIndex)
-		if found {
-			metrics.IncCacheHits("featureversion")
-			return id.(int), nil
-		}
 	}
 
 	// We do `defer metrics.ObserveQueryTime` here because we don't want to observe cached featureversions.
@@ -114,10 +88,6 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 		return 0, handleError("searchFeatureVersion", err)
 	}
 	if err == nil {
-		if pgSQL.cache != nil {
-			pgSQL.cache.Add(cacheIndex, fv.ID)
-		}
-
 		return fv.ID, nil
 	}
 
@@ -171,10 +141,6 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 		// vulnerabilities.
 		tx.Commit()
 
-		if pgSQL.cache != nil {
-			pgSQL.cache.Add(cacheIndex, fv.ID)
-		}
-
 		return fv.ID, nil
 	}
 
@@ -193,10 +159,6 @@ func (pgSQL *pgSQL) insertFeatureVersion(fv database.FeatureVersion) (id int, er
 	err = tx.Commit()
 	if err != nil {
 		return 0, handleError("insertFeatureVersion.Commit()", err)
-	}
-
-	if pgSQL.cache != nil {
-		pgSQL.cache.Add(cacheIndex, fv.ID)
 	}
 
 	return fv.ID, nil

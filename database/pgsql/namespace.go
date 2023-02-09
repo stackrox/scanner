@@ -28,14 +28,6 @@ func (pgSQL *pgSQL) insertNamespace(namespace database.Namespace) (int, error) {
 		return 0, commonerr.NewBadRequestError("could not find/insert invalid Namespace")
 	}
 
-	if pgSQL.cache != nil {
-		metrics.IncCacheQueries("namespace")
-		if id, found := pgSQL.cache.Get("namespace:" + namespace.Name); found {
-			metrics.IncCacheHits("namespace")
-			return id.(int), nil
-		}
-	}
-
 	// We do `defer metrics.ObserveQueryTime` here because we don't want to observe cached namespaces.
 	defer metrics.ObserveQueryTime("insertNamespace", "all", time.Now())
 
@@ -53,10 +45,6 @@ func (pgSQL *pgSQL) insertNamespace(namespace database.Namespace) (int, error) {
 		if id == 0 {
 			return 0, handleError("searchNamespace", commonerr.ErrNotFound)
 		}
-	}
-
-	if pgSQL.cache != nil {
-		pgSQL.cache.Add("namespace:"+namespace.Name, id)
 	}
 
 	return id, nil
