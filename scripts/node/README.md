@@ -4,20 +4,16 @@
 
 quay.io/repository/rhacs-eng/sandbox:benchmark-node-analyze-1.0 is an Ubi8 based image with vim, RPM and RPM-build installed. Those packages are necessary for benchmark node analyze function
 
-back-up image: `quay.io/rh_ee_yli3/nodes:benchmark-node-analyze-1.0`
+back-up image: `quay.io/rh_ee_yli3/nodes:benchmark-node-analyze-1.1`
 
 execute
 ```
-docker run -it --rm quay.io/repository/rhacs-eng/sandbox:benchmark-node-analyze-1.0
+docker run -it --rm quay.io/repository/rhacs-eng/sandbox:benchmark-node-analyze-1.1
 ```
 ---------------------------------------------------------------------------------------------
 
-(optional) create a temporary/target folder in the running ubi8 bash for RPM specs. e.g mkdir temp-specs
+1.In the running ubi8 container, go to the `/tmp-specs` folder and make sure `generate-rpm-specs.sh` is there (check dockerfile line 6)
 
-1.go to the target folder and create a bash script to generate RPM specs (see scanner/scripts/node/generate-rpm-specs.sh)
-```
-vim generate-junit-reports.sh
-```
 2.execute the bash file: bash generate-rpm-specs.sh <number of the RPM specs>  . You will be able to see the RPM spec files in the folder
 ```
 bash generate-rpm-specs.sh 100
@@ -36,7 +32,7 @@ yum localinstall /root/rpmbuild/RPMS/x86_64/.*rpm
 
 6.execute `docker export [container id]>[tar name].tar` (e.g `docker export c8c57bb7e926>demoV1.tar`) and unzip the tar ball to get the file system
 
-7.Go to **scanner/blob/master/benchmarks/analyzeNode** folder and make sure to add local path to file system in line 13, then execute command:
+7.Go to **scanner/benchmarks/analyzeNode** folder and make sure to add local path to file system in line 13, then execute command:
 ```
 go test -bench=. -benchmem
 ```
