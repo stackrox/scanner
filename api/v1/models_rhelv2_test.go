@@ -339,7 +339,7 @@ func Test_getFullRHELv2Features(t *testing.T) {
 			if !tt.wantErr(t, err, fmt.Sprintf("getFullRHELv2Features(%v, %v, %v)", tt.args.db, tt.args.pkgEnvs, tt.args.execsPopulated)) {
 				return
 			}
-			assert.Equalf(t, tt.want, got, "getFullRHELv2Features(%v, %v, %v)", tt.args.db, tt.args.pkgEnvs, tt.args.execsPopulated)
+			assert.ElementsMatchf(t, tt.want, got, "getFullRHELv2Features(%v, %v, %v)", tt.args.db, tt.args.pkgEnvs, tt.args.execsPopulated)
 		})
 	}
 }

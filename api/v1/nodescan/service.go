@@ -21,8 +21,10 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	k8scache "github.com/stackrox/scanner/k8s/cache"
+	featureFlags "github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/version"
+	"github.com/stackrox/scanner/pkg/wellknownnamespaces"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -238,7 +240,32 @@ func (s *serviceImpl) getRuntimeVulns(containerRuntime *v1.GetNodeVulnerabilitie
 	return nil, nil
 }
 
-func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
+func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
+	// If NodeInventory is empty `req.GetComponents() == nil` then fallback to v1 scanning
+	if req.GetComponents() == nil || !featureFlags.RHCOSNodeScanning.Enabled() {
+		return s.getNodeVulnerabilitiesLegacy(ctx, req)
+	}
+
+	resp := &v1.GetNodeVulnerabilitiesResponse{
+		ScannerVersion: s.version,
+	}
+
+	if !wellknownnamespaces.IsRHCOSNamespace(req.GetComponents().GetNamespace()) || len(req.GetComponents().GetRhelContentSets()) == 0 {
+		// Node components exist in the request, but we cannot perform vulnerability matching
+		// if (a.) it's not an RHCOS namespace or (b.) if it is an RHCOS namespace missing content
+		// sets. The latter occurs for RHCOS versions we don't support.
+		resp.NodeNotes = append(resp.GetNodeNotes(), v1.NodeNote_NODE_UNSUPPORTED)
+	}
+
+	var err error
+	if resp.Features, err = s.getNodeInventoryVulns(req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes())); err != nil {
+		log.Warnf("Scanning node inventory failed: %v", err)
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (s *serviceImpl) getNodeVulnerabilitiesLegacy(_ context.Context, req *v1.GetNodeVulnerabilitiesRequest) (*v1.GetNodeVulnerabilitiesResponse, error) {
 	if stringutils.AtLeastOneEmpty(req.GetKernelVersion(), req.GetOsImage()) {
 		return nil, status.Error(codes.InvalidArgument, "both os image and kernel version are required")
 	}
@@ -274,13 +301,6 @@ func (s *serviceImpl) GetNodeVulnerabilities(_ context.Context, req *v1.GetNodeV
 	resp.RuntimeVulnerabilities, err = s.getRuntimeVulns(req.GetRuntime())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	// Scan Components containing pkgs from NodeInventory
-	if req.GetComponents() != nil {
-		if resp.Features, err = s.getNodeInventoryVulns(req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes())); err != nil {
-			return nil, err
-		}
 	}
 	return resp, nil
 }
