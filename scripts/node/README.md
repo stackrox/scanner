@@ -2,21 +2,23 @@
 
 ## Pre steps:
 
-1.Make sure docker is installed on your local laptop
-2.execute
-```
-docker run -it --rm registry.access.redhat.com/ubi8/ubi
-```
-3.make sure **Vim, RPM and RPM-build** are installed in the running ubi8 bash. If not, do yum search <package name> and yum install <package name>
+quay.io/repository/rhacs-eng/sandbox:benchmark-node-analyze-1.0 is an Ubi8 based image with vim, RPM and RPM-build installed. Those packages are necessary for benchmark node analyze function
 
+back-up image: `quay.io/rh_ee_yli3/nodes:benchmark-node-analyze-1.0`
+
+execute
+```
+docker run -it --rm quay.io/repository/rhacs-eng/sandbox:benchmark-node-analyze-1.0
+```
 ---------------------------------------------------------------------------------------------
 
 (optional) create a temporary/target folder in the running ubi8 bash for RPM specs. e.g mkdir temp-specs
-1.go to the target folder and create a python file to generate RPM specs (see the generate-junit-reports.sh in scanner/scripts folder)
+
+1.go to the target folder and create a bash script to generate RPM specs (see scanner/scripts/node/generate-rpm-specs.sh)
 ```
 vim generate-junit-reports.sh
 ```
-2.execute the bash file: bash generate-rpm-specs.sh <number of the specs>  . You will be able to see the RPM spec files in the folder
+2.execute the bash file: bash generate-rpm-specs.sh <number of the RPM specs>  . You will be able to see the RPM spec files in the folder
 ```
 bash generate-rpm-specs.sh 100
 ```
@@ -24,14 +26,17 @@ bash generate-rpm-specs.sh 100
 ```
 rpmbuild -bb *.spec
 ```
-You will see output like: Wrote: /root/rpmbuild/RPMS/x86_64/package_name9-0-0.x86_64.rpm Obviously this tells you where the rpm files are
+You will see output like: `Wrote: /root/rpmbuild/RPMS/x86_64/package_name9-0-0.x86_64.rpm` This gives you the path where RPM files were generated to.
+
 4.install all packages using the rpm files just created: yum localinstall <path to rpm files>/.*rpm  
 ```
 yum localinstall /root/rpmbuild/RPMS/x86_64/.*rpm
 ```
-5.check the running ubi containers by executing: docker container ls and get the container id of the container where you are currently installing the rpm packages
-6.execute docker export [container id]>[tar name].tar (e.g docker export c8c57bb7e926>demoV1.tar) and unzip the tar ball to get the file system
-7.Go to **github.com/stackrox/scanner/blob/master/benchmarks/analyzeNode** folder and make sure to add local path to file system in line 13, then execute command:
+5.check the running ubi containers by executing: `docker container ls` and get the container id of the container where you are currently installing the rpm packages
+
+6.execute `docker export [container id]>[tar name].tar` (e.g `docker export c8c57bb7e926>demoV1.tar`) and unzip the tar ball to get the file system
+
+7.Go to **scanner/blob/master/benchmarks/analyzeNode** folder and make sure to add local path to file system in line 13, then execute command:
 ```
-go test -bench=. -benchmem to run the test
+go test -bench=. -benchmem
 ```

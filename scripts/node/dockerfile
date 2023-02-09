@@ -1,0 +1,5 @@
+FROM registry.access.redhat.com/ubi8/ubi
+
+RUN yum -y install rpm-build rpm-libs rpm-build-libs rpm
+RUN yum -y install vim-common vim-enhanced vim-filesystem
+
