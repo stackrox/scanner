@@ -12,7 +12,7 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/facebookincubator/nvdtools v0.1.5
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-git/go-billy/v5 v5.4.0
+	github.com/go-git/go-billy/v5 v5.4.1
 	github.com/go-git/go-git/v5 v5.5.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2
