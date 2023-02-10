@@ -1,6 +1,8 @@
 package detectconent
 
 import (
+	"fmt"
+	"os"
 	"runtime"
 	"testing"
 
@@ -10,7 +12,13 @@ import (
 )
 
 func BenchmarkAnalyzeNode(b *testing.B) {
-	runBenchmarkAnalyzeNode(b, "/local/path/to/file/system")
+	var path = os.Getenv("RHCOS_TEST_PATH")
+	if len(path) < 1 {
+		b.Fatal("Invalid file path")
+	}
+	fmt.Printf("Current path to file system is: %s", path)
+	fmt.Println()
+	runBenchmarkAnalyzeNode(b, path)
 }
 
 func runBenchmarkAnalyzeNode(b *testing.B, pathName string) {

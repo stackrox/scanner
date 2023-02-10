@@ -1,21 +1,7 @@
 FROM registry.access.redhat.com/ubi8/ubi
 
 RUN yum -y install rpm-build rpm-libs rpm-build-libs rpm
-RUN yum -y install vim-common vim-enhanced vim-filesystem
 
 RUN mkdir tmp-specs
 
-RUN   echo 'pkgcount=${1:?missing package count}' >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo 'for n in $(seq 1 $pkgcount); do cat >pkg-$(printf "%03d" ${n}).spec <<EOF' >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo 'Name: package_name_${n}' >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo 'Summary: Package number ${n}' >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo "Version: 0" >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo "Release: 0" >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo "License: Public" >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo "Group: Applications/System" >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo "Requires: bash" >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo "%description" >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo 'Package number ${n}' >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo "%files" >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo "EOF" >> /tmp-specs/generate-rpm-specs.sh
-RUN   echo "done" >> /tmp-specs/generate-rpm-specs.sh
+COPY generate-rpm-specs.sh tmp-specs/generate-rpm-specs.sh
