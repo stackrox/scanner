@@ -4,8 +4,9 @@
 # spec => rpm files: run rpmbuild -bb *.spec
 # install rpm: yum localinstall /root/rpmbuild/RPMS/x86_64/*.rpm
 
-for n in {1..100}; do
-    cat >pkg-$(printf "%03d" ${n}).spec <<EOF
+pkgcount=${1:?missing package count}
+for n in $(seq 1 $pkgcount); do
+	cat >pkg-$(printf "%03d" ${n}).spec <<EOF
 Name: package_name_${n}
 Summary: Package number ${n}
 Version: 0
