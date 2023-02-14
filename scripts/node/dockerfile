@@ -1,0 +1,7 @@
+FROM registry.access.redhat.com/ubi8/ubi
+
+RUN yum -y install rpm-build rpm-libs rpm-build-libs rpm
+
+RUN mkdir tmp-specs
+
+COPY generate-rpm-specs.sh tmp-specs/generate-rpm-specs.sh
