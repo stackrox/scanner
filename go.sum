@@ -1017,8 +1017,8 @@ github.com/stackrox/istio-cves v0.0.0-20221007013142-0bde9b541ec8 h1:rUIvoAHokPc
 github.com/stackrox/istio-cves v0.0.0-20221007013142-0bde9b541ec8/go.mod h1:ZF7mH4kH1G+82HxR3uFDHvyLG8eCOdrh1RDyQcTGkBA=
 github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d h1:88Iui7fSMKgXvpyfBlbP3qosrqyv3qMgOJ6JJ4V4tFQ=
 github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d/go.mod h1:GJwFpFwCxiYhgpJWrAkM+v9Z9gpgtyWxkRdK4JjsOIg=
-github.com/stackrox/nvdtools v0.0.0-20220608171543-e758756071a0 h1:hLexaI/zJBDP4OlxN1za3IJM7cfH+Kie7F/wdWn3xGA=
-github.com/stackrox/nvdtools v0.0.0-20220608171543-e758756071a0/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
+github.com/stackrox/nvdtools v0.0.0-20230214202552-24e684e3ad9d h1:sc34LMHnCCvnDBWmFmDnm2ph+IU7zMXR3kummBnkP5g=
+github.com/stackrox/nvdtools v0.0.0-20230214202552-24e684e3ad9d/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
 github.com/stackrox/stackrox v0.0.0-20221004225457-0e5037e513f1 h1:/dkkUSV4CAEIT1gKDR+XF1eGw7dmnHMLMrsmW5RDALs=
 github.com/stackrox/stackrox v0.0.0-20221004225457-0e5037e513f1/go.mod h1:wqJK92FalO/obU7Et5frBaryzeSzdXUQVFZRwm7PM2Y=
 github.com/stackrox/zap v1.15.1-0.20200720133746-810fd602fd0f h1:Ofa3PAa609eSHcHP2kCJDUWUnuEWfiqXhsuppk/QtOE=
