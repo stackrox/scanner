@@ -3873,7 +3873,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				VersionFormat: "rpm",
 				Version:       "4.10.1650890594-1.el8.noarch",
 				AddedBy:       "sha256:3fa3f612bdcb92746bf76be1b9c9e1c1c80de777aedaf48b7068f4a129ded3c2",
-				FixedBy:       "4.10.1675144701-1.el8",
+				FixedBy:       "4.10.1675407676-1.el8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-26291",
