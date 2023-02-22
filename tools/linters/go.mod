@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/golangci/golangci-lint v1.51.1
-	honnef.co/go/tools v0.4.1
+	honnef.co/go/tools v0.4.2
 )
 
 require (
