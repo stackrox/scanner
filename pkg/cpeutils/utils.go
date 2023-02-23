@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	openshift4CPEPattern = regexp.MustCompile(`^cpe:/a:redhat:openshift:(?P<openshiftVersion>4(\.(?P<minorVersion>\d+))?)(::el8)?$`)
+	openshift4CPEPattern = regexp.MustCompile(`^cpe:/a:redhat:openshift:(?P<openshiftVersion>4(\.(?P<minorVersion>\d+))?)(::el8|::el9)?$`)
 )
 
 // *** END Regex-related consts/vars. ***
@@ -68,7 +68,7 @@ func IsOpenShift4CPE(cpe string) bool {
 func GetAllOpenShift4CPEs(cpe string) ([]string, error) {
 	match := openshift4CPEPattern.FindStringSubmatch(cpe)
 	if len(match) != submatchLen {
-		return nil, errors.New("CPE does not match an expected OpenShift 4 CPE format")
+		return nil, errors.Errorf("CPE %s does not match an expected OpenShift 4 CPE format", cpe)
 	}
 
 	maxMinorVersion := maxKnownOpenShift4MinorVersion
