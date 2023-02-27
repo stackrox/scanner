@@ -123,6 +123,23 @@ func TestGetAllOpenShift4CPEs(t *testing.T) {
 				"cpe:/a:redhat:openshift:4.13::el9",
 			},
 		},
+		{
+			cpe: "cpe:/a:redhat:openshift:4.11::el7",
+			expected: []string{
+				"cpe:/a:redhat:openshift:4.0::el7",
+				"cpe:/a:redhat:openshift:4.1::el7",
+				"cpe:/a:redhat:openshift:4.2::el7",
+				"cpe:/a:redhat:openshift:4.3::el7",
+				"cpe:/a:redhat:openshift:4.4::el7",
+				"cpe:/a:redhat:openshift:4.5::el7",
+				"cpe:/a:redhat:openshift:4.6::el7",
+				"cpe:/a:redhat:openshift:4.7::el7",
+				"cpe:/a:redhat:openshift:4.8::el7",
+				"cpe:/a:redhat:openshift:4.9::el7",
+				"cpe:/a:redhat:openshift:4.10::el7",
+				"cpe:/a:redhat:openshift:4.11::el7",
+			},
+		},
 	}
 	for _, testcase := range testcases {
 		t.Run(testcase.cpe, func(t *testing.T) {
