@@ -22,10 +22,10 @@ var vulnLibksba = &v1.Vulnerability{
 		LastModifiedDateTime: "",
 		CvssV2:               nil,
 		CvssV3: &v1.CVSSMetadata{
-			Vector:              "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
-			Score:               9.8,
+			Vector:              "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H",
+			Score:               8.6,
 			ExploitabilityScore: 3.9,
-			ImpactScore:         5.9,
+			ImpactScore:         4.7,
 		},
 	},
 	FixedBy:  "0:1.3.5-8.el8_6",
