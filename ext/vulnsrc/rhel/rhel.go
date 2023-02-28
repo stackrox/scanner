@@ -42,6 +42,8 @@ import (
 const (
 	ovalURI     = "https://www.redhat.com/security/data/oval/"
 	bulkOVALURI = ovalURI + "v2/"
+
+	rhelMustBeInstalled = "Red Hat Enterprise Linux must be installed"
 )
 
 var (
@@ -372,6 +374,10 @@ func toFeatureVersions(criteria criteria, osVersion string) []database.FeatureVe
 
 	possibilities := getPossibilities(criteria)
 	for _, criterions := range possibilities {
+		if len(criterions) == 1 && criterions[0].Comment == rhelMustBeInstalled {
+			continue
+		}
+
 		var featureVersion database.FeatureVersion
 		featureVersion.Version = versionfmt.MaxVersion
 
