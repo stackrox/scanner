@@ -2,7 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/stackrox/scanner/cmd/nodescanner/inventory"
+	"net"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -10,34 +11,36 @@ import (
 )
 
 var (
-	scanner  = &NodeInventoryCollector{}
-	nodeName = "FIXME"
+	scanner = &inventory.NodeInventoryCollector{}
 )
 
-// NEED: env var Node name
-// NEED: /cache mounted as EmptyDir
 func main() {
 	log.Infof("Using NodeInventoryCollector")
 
-	http.HandleFunc("/", handleHTTPRequest)
-	utils.CrashOnError(http.ListenAndServe(":8080", nil))
+	http.HandleFunc("/", getNodeInventoryHandler)
+
+	serverAddr := net.JoinHostPort("", nodeScannerHTTPPort.Value())
+	utils.CrashOnError(http.ListenAndServe(serverAddr, nil))
 }
 
-func handleHTTPRequest(w http.ResponseWriter, r *http.Request) {
-	// first scan should happen on start
-	inventory, err := scanner.Scan(nodeName) // FIXME
+func getNodeInventoryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(405)
+		_, err := w.Write([]byte("Only GET HTTP method supported"))
+		utils.CrashOnError(err)
+	}
+
+	inventoryScan, err := scanner.Scan(nodeName.Value())
 	if err != nil {
-		log.Errorf("error running cachedScanNode: %v", err)
+		log.Errorf("Error running cachedScanNode: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		_, err = w.Write([]byte("Internal scanner error"))
 		utils.CrashOnError(err)
 	} else {
-
-		//cmetrics.ObserveInventoryProtobufMessage(msg)
-		fmt.Println(inventory)
-		js, err := json.Marshal(inventory)
+		log.Debugf("InventoryScan: %+v", inventoryScan)
+		js, err := json.Marshal(inventoryScan)
 		if err != nil {
-			log.Warnf("Encountered error marshalling message. Err: %v", err)
+			log.Errorf("Encountered error marshalling message. Err: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			_, err = w.Write([]byte("Internal scanner error"))
 			utils.CrashOnError(err)
