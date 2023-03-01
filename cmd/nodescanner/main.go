@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
 )
 
 var (
-	scanner  *CachingScanner
+	scanner  = &NodeInventoryCollector{}
 	nodeName = "FIXME"
 )
 
@@ -19,16 +18,6 @@ var (
 // NEED: /cache mounted as EmptyDir
 func main() {
 	log.Infof("Using NodeInventoryCollector")
-	cacheDuration := 4 * time.Hour
-	initialBackoff := 30 * time.Second
-	maxBackoff := 5 * time.Minute
-
-	scanner = NewCachingScanner(
-		"/cache/inventory-cache",
-		cacheDuration,
-		initialBackoff,
-		maxBackoff,
-		func(duration time.Duration) { time.Sleep(duration) })
 
 	http.HandleFunc("/", handleHTTPRequest)
 	utils.CrashOnError(http.ListenAndServe(":8080", nil))
