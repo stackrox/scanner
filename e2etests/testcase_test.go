@@ -3501,7 +3501,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.1-43.el9_0",
+				FixedBy:       "1:3.0.1-47.el9_1",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3543,7 +3543,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.1-43.el9_0",
+				FixedBy:       "1:3.0.1-47.el9_1",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3588,7 +3588,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 			},
 			{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
-				FixedBy:       "2:8.2.2637-16.el9_0.3",
+				FixedBy:       "2:8.2.2637-20.el9_1",
 				Name:          "vim-minimal",
 				NamespaceName: "rhel:9",
 				Version:       "2:8.2.2637-16.el9_0.2.x86_64",
