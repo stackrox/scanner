@@ -154,7 +154,7 @@ replace (
 	github.com/heroku/docker-registry-client => github.com/stackrox/docker-registry-client v0.0.0-20220204234128-07f109db0819
 
 	github.com/operator-framework/helm-operator-plugins => github.com/stackrox/helm-operator v0.0.10-0.20220919093109-89f9785764c6
-	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20230301152031-4f0c46d17aa0
+	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20230301153935-a7fafd5bc0bd
 
 	go.uber.org/zap => github.com/stackrox/zap v1.15.1-0.20200720133746-810fd602fd0f
 )

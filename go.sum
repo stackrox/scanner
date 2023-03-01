@@ -840,8 +840,8 @@ github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d h1:88Iui7fSMKgXv
 github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d/go.mod h1:GJwFpFwCxiYhgpJWrAkM+v9Z9gpgtyWxkRdK4JjsOIg=
 github.com/stackrox/nvdtools v0.0.0-20230214202552-24e684e3ad9d h1:sc34LMHnCCvnDBWmFmDnm2ph+IU7zMXR3kummBnkP5g=
 github.com/stackrox/nvdtools v0.0.0-20230214202552-24e684e3ad9d/go.mod h1:AIeN7k60Q/kcW9aeiMpA0PY8CU3zsrLV0UhIksolMn4=
-github.com/stackrox/stackrox v0.0.0-20230301152031-4f0c46d17aa0 h1:mXse7eqwoxMju2B7xRi1Zakg4D/r7cTnfLi6sIoJukA=
-github.com/stackrox/stackrox v0.0.0-20230301152031-4f0c46d17aa0/go.mod h1:em2DVZGMWX9MCuBpWZ7QoIng//vqMbH42uXVziP3pBk=
+github.com/stackrox/stackrox v0.0.0-20230301153935-a7fafd5bc0bd h1:HxmAHxYuS2TxD0P+D9BpN2TlUP6+ma/c/poYRxnMMGI=
+github.com/stackrox/stackrox v0.0.0-20230301153935-a7fafd5bc0bd/go.mod h1:em2DVZGMWX9MCuBpWZ7QoIng//vqMbH42uXVziP3pBk=
 github.com/stackrox/zap v1.15.1-0.20200720133746-810fd602fd0f h1:Ofa3PAa609eSHcHP2kCJDUWUnuEWfiqXhsuppk/QtOE=
 github.com/stackrox/zap v1.15.1-0.20200720133746-810fd602fd0f/go.mod h1:MA8QOfq0BHJwdXa996Y4dYkAqRKB8/1K1QMMZVaNZjQ=
 github.com/stefanberger/go-pkcs11uri v0.0.0-20201008174630-78d3cae3a980/go.mod h1:AO3tvPzVZ/ayst6UlUKUv6rcPQInYe3IknH3jYhAKu8=
