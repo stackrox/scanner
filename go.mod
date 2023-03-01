@@ -42,7 +42,7 @@ require (
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
 	github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d
 	github.com/stackrox/rox v0.0.0-20210914215712-9ac265932e28
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	go.etcd.io/bbolt v1.3.6
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/sys v0.5.0
