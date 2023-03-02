@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	openshift4CPEPattern = regexp.MustCompile(`^cpe:/a:redhat:openshift:(?P<openshiftVersion>4(\.(?P<minorVersion>\d+))?)(::el8|::el9)?$`)
+	openshift4CPEPattern = regexp.MustCompile(`^cpe:/a:redhat:openshift:(?P<openshiftVersion>4(\.(?P<minorVersion>\d+))?)(::el[7-9])?$`)
 )
 
 // *** END Regex-related consts/vars. ***
