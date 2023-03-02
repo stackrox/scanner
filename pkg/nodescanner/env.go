@@ -1,4 +1,4 @@
-package main
+package nodescanner
 
 import "github.com/stackrox/scanner/pkg/env"
 
