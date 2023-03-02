@@ -1139,7 +1139,7 @@ var testCases = []testCase{
 				VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
 				Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/",
 				AddedBy:       "sha256:b48f8e1b0b06887c382543e23275911a388c1010e3436dc9b708ef29885bb594",
-				FixedBy:       "3.1.23",
+				FixedBy:       "3.1.32",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:        "CVE-2020-1108",
@@ -1720,7 +1720,7 @@ var testCases = []testCase{
 				},
 				AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
 				Location: "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.0/",
-				FixedBy:  "3.1.23",
+				FixedBy:  "3.1.32",
 			},
 		},
 	},
