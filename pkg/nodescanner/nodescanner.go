@@ -1,8 +1,8 @@
-package main
+package nodescanner
 
 import (
 	"encoding/json"
-	"github.com/stackrox/scanner/cmd/nodescanner/inventory"
+	"github.com/stackrox/scanner/pkg/nodescanner/inventory"
 	"net"
 	"net/http"
 
@@ -14,11 +14,8 @@ var (
 	scanner = &inventory.NodeInventoryCollector{}
 )
 
-func main() {
-	log.Infof("Using NodeInventoryCollector")
-
+func StartNodeScanningHTTPServer() {
 	http.HandleFunc("/", getNodeInventoryHandler)
-
 	serverAddr := net.JoinHostPort("", nodeScannerHTTPPort.Value())
 	utils.CrashOnError(http.ListenAndServe(serverAddr, nil))
 }
