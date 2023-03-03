@@ -1,25 +1,29 @@
-package inventory
+package nodeinventory
 
 import (
 	"time"
 
-	timestamp "github.com/gogo/protobuf/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/compliance/collection/metrics"
-	"github.com/stackrox/rox/generated/storage"
-	"github.com/stackrox/rox/pkg/uuid"
 	"github.com/stackrox/scanner/database"
 	scannerV1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stackrox/scanner/pkg/analyzer/nodes"
 	"golang.org/x/exp/maps"
 )
 
-// NodeInventoryCollector is an implementation of NodeInventorizer
-type NodeInventoryCollector struct {
+// Scanner is an implementation of NodeInventorizer
+type Scanner struct {
 }
 
-// Scan scans the current node and returns the results as storage.NodeInventory object
-func (n *NodeInventoryCollector) Scan(nodeName string) (*storage.NodeInventory, error) {
+// ScanResult wraps scanned node components, scanner notes and the node name in a result message.
+type ScanResult struct {
+	NodeName   string
+	Components *scannerV1.Components
+	Notes      []scannerV1.Note
+}
+
+// Scan scans the current node and returns the results as ScanResult object
+func (n *Scanner) Scan(nodeName string) (*ScanResult, error) {
 	metrics.ObserveScansTotal(nodeName)
 	startTime := time.Now()
 
@@ -39,29 +43,14 @@ func (n *NodeInventoryCollector) Scan(nodeName string) (*storage.NodeInventory, 
 
 	protoComponents := protoComponentsFromScanComponents(componentsHost)
 
-	if protoComponents == nil {
-		log.Warn("Empty components returned from NodeInventory")
-	} else {
-		log.Infof("Node inventory has been built with %d packages and %d content sets",
-			len(protoComponents.GetRhelComponents()), len(protoComponents.GetRhelContentSets()))
-	}
-
-	// uncertifiedRHEL is false since scanning is only supported on RHCOS for now,
-	// which only exists in certified versions. Therefore, no specific notes needed
-	// if uncertifiedRHEL can be true in the future, we can add Note_CERTIFIED_RHEL_SCAN_UNAVAILABLE
-	m := &storage.NodeInventory{
-		NodeId:     uuid.Nil.String(),
+	return &ScanResult{
 		NodeName:   nodeName,
-		ScanTime:   timestamp.TimestampNow(),
 		Components: protoComponents,
-		Notes:      []storage.NodeInventory_Note{storage.NodeInventory_LANGUAGE_CVES_UNAVAILABLE},
-	}
-
-	metrics.ObserveNodeInventoryScan(m)
-	return m, nil
+		Notes:      []scannerV1.Note{scannerV1.Note_LANGUAGE_CVES_UNAVAILABLE},
+	}, nil
 }
 
-func protoComponentsFromScanComponents(c *nodes.Components) *storage.NodeInventory_Components {
+func protoComponentsFromScanComponents(c *nodes.Components) *scannerV1.Components {
 	if c == nil {
 		return nil
 	}
@@ -75,14 +64,14 @@ func protoComponentsFromScanComponents(c *nodes.Components) *storage.NodeInvento
 	}
 
 	// For now, we only care about RHEL components, but this must be extended once we support non-RHCOS
-	var rhelComponents []*storage.NodeInventory_Components_RHELComponent
+	var rhelComponents []*scannerV1.RHELComponent
 	var contentSets []string
 	if c.CertifiedRHELComponents != nil {
 		rhelComponents = convertAndDedupRHELComponents(c.CertifiedRHELComponents)
 		contentSets = c.CertifiedRHELComponents.ContentSets
 	}
 
-	protoComponents := &storage.NodeInventory_Components{
+	protoComponents := &scannerV1.Components{
 		Namespace:       namespace,
 		RhelComponents:  rhelComponents,
 		RhelContentSets: contentSets,
@@ -90,18 +79,18 @@ func protoComponentsFromScanComponents(c *nodes.Components) *storage.NodeInvento
 	return protoComponents
 }
 
-func convertAndDedupRHELComponents(rc *database.RHELv2Components) []*storage.NodeInventory_Components_RHELComponent {
+func convertAndDedupRHELComponents(rc *database.RHELv2Components) []*scannerV1.RHELComponent {
 	if rc == nil || rc.Packages == nil {
 		log.Warn("No RHEL packages found in scan result")
 		return nil
 	}
 
-	convertedComponents := make(map[string]*storage.NodeInventory_Components_RHELComponent, 0)
+	convertedComponents := make(map[string]*scannerV1.RHELComponent, 0)
 	for i, rhelc := range rc.Packages {
 		if rhelc == nil {
 			continue
 		}
-		comp := &storage.NodeInventory_Components_RHELComponent{
+		comp := &scannerV1.RHELComponent{
 			// The loop index is used as ID, as this field only needs to be unique for each NodeInventory result slice
 			Id:          int64(i),
 			Name:        rhelc.Name,
@@ -128,17 +117,17 @@ func convertAndDedupRHELComponents(rc *database.RHELv2Components) []*storage.Nod
 	return maps.Values(convertedComponents)
 }
 
-func convertExecutables(exe []*scannerV1.Executable) []*storage.NodeInventory_Components_RHELComponent_Executable {
-	arr := make([]*storage.NodeInventory_Components_RHELComponent_Executable, len(exe))
+func convertExecutables(exe []*scannerV1.Executable) []*scannerV1.Executable {
+	arr := make([]*scannerV1.Executable, len(exe))
 	for i, executable := range exe {
-		arr[i] = &storage.NodeInventory_Components_RHELComponent_Executable{
+		arr[i] = &scannerV1.Executable{
 			Path:             executable.GetPath(),
 			RequiredFeatures: nil,
 		}
 		if executable.GetRequiredFeatures() != nil {
-			arr[i].RequiredFeatures = make([]*storage.NodeInventory_Components_RHELComponent_Executable_FeatureNameVersion, len(executable.GetRequiredFeatures()))
+			arr[i].RequiredFeatures = make([]*scannerV1.FeatureNameVersion, len(executable.GetRequiredFeatures()))
 			for i2, fnv := range executable.GetRequiredFeatures() {
-				arr[i].RequiredFeatures[i2] = &storage.NodeInventory_Components_RHELComponent_Executable_FeatureNameVersion{
+				arr[i].RequiredFeatures[i2] = &scannerV1.FeatureNameVersion{
 					Name:    fnv.GetName(),
 					Version: fnv.GetVersion(),
 				}
@@ -148,6 +137,6 @@ func convertExecutables(exe []*scannerV1.Executable) []*storage.NodeInventory_Co
 	return arr
 }
 
-func makeComponentKey(component *storage.NodeInventory_Components_RHELComponent) string {
+func makeComponentKey(component *scannerV1.RHELComponent) string {
 	return component.Name + ":" + component.Version + ":" + component.Arch + ":" + component.Module
 }

@@ -18,7 +18,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/stackrox/scanner/pkg/nodescanner"
 	"math/rand"
 	"net/http"
 	"net/http/pprof"
@@ -34,6 +33,7 @@ import (
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/imagescan"
+	"github.com/stackrox/scanner/api/v1/nodeinventory"
 	"github.com/stackrox/scanner/api/v1/nodescan"
 	"github.com/stackrox/scanner/api/v1/orchestratorscan"
 	"github.com/stackrox/scanner/api/v1/ping"
@@ -202,6 +202,25 @@ func Boot(config *Config, slimMode bool) {
 	serv.Close()
 }
 
+func bootNodeInventoryScanner() {
+	// TODO: Check: Unify with Scanner boot and run as a different configuration rather than a different function.
+
+	grpcAPI := grpc.NewAPI(grpc.Config{
+		Port:         8081, // TODO Get port from config or env
+		CustomRoutes: debugRoutes,
+	})
+
+	grpcAPI.Register(
+		ping.NewService(),
+		nodeinventory.NewService(env.NodeName.Value()),
+	)
+	go grpcAPI.Start()
+
+	// Wait for interruption and shutdown gracefully.
+	waitForSignals(os.Interrupt, unix.SIGTERM)
+	log.Info("Received interruption, gracefully stopping ...")
+}
+
 func main() {
 	// Parse command-line arguments
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
@@ -211,7 +230,7 @@ func main() {
 
 	if *flagNodeScannerMode {
 		log.Info("Starting Scanner in Node Scanning mode")
-		nodescanner.StartNodeScanningHTTPServer()
+		bootNodeInventoryScanner()
 		return
 	}
 
