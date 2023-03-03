@@ -234,11 +234,11 @@ func main() {
 	// Parse command-line arguments
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	flagConfigPath := flag.String("config", "/etc/scanner/config.yaml", "Load configuration from the specified file.")
-	flagNodeScannerMode := flag.Bool("nodescanner", false, "Run Scanner binary in NodeScanning mode (this should only be used in Secured Clusters)")
+	flagNodeScannerMode := flag.Bool("nodeinventory", false, "Run Scanner binary in Node Inventory mode (this should only be used in Secured Clusters)")
 	flag.Parse()
 
 	if *flagNodeScannerMode {
-		log.Info("Starting Scanner in Node Scanning mode")
+		log.Info("Starting Scanner in Node Inventory mode")
 		bootNodeInventoryScanner()
 		return
 	}

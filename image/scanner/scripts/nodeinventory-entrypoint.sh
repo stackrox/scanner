@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-exec /scanner -nodescanner
+exec /scanner -nodeinventory
