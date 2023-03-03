@@ -16,7 +16,7 @@ import (
 type Service interface {
 	apiGRPC.APIService
 
-	v1.NodeInventoryScanServiceServer
+	v1.NodeInventoryServiceServer
 }
 
 // NewService returns the service for node scanning
@@ -32,7 +32,7 @@ type serviceImpl struct {
 	nodeName           string
 }
 
-func (s *serviceImpl) GetNodeInventory(ctx context.Context, req *v1.GetNodeInventoryScanRequest) (*v1.GetNodeInventoryScanResponse, error) {
+func (s *serviceImpl) GetNodeInventory(ctx context.Context, req *v1.GetNodeInventoryRequest) (*v1.GetNodeInventoryResponse, error) {
 	inventoryScan, err := s.inventoryCollector.Scan(s.nodeName)
 	if err != nil {
 		log.Errorf("Error running inventoryCollector.Scan(%s): %v", s.nodeName, err)
@@ -41,7 +41,7 @@ func (s *serviceImpl) GetNodeInventory(ctx context.Context, req *v1.GetNodeInven
 
 	log.Debugf("InventoryScan: %+v", inventoryScan)
 
-	return &v1.GetNodeInventoryScanResponse{
+	return &v1.GetNodeInventoryResponse{
 		NodeName:   s.nodeName,
 		Components: inventoryScan.Components,
 		Notes:      inventoryScan.Notes,
@@ -50,10 +50,10 @@ func (s *serviceImpl) GetNodeInventory(ctx context.Context, req *v1.GetNodeInven
 
 // RegisterServiceServer registers this service with the given gRPC Server.
 func (s *serviceImpl) RegisterServiceServer(grpcServer *grpc.Server) {
-	v1.RegisterNodeInventoryScanServiceServer(grpcServer, s)
+	v1.RegisterNodeInventoryServiceServer(grpcServer, s)
 }
 
 // RegisterServiceHandler registers this service with the given gRPC Gateway endpoint.
 func (s *serviceImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return v1.RegisterNodeInventoryScanServiceHandler(ctx, mux, conn)
+	return v1.RegisterNodeInventoryServiceHandler(ctx, mux, conn)
 }

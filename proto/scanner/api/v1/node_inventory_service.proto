@@ -11,18 +11,18 @@ import "scanner/api/v1/component.proto";
 
 package scannerV1;
 
-message GetNodeInventoryScanResponse {
+message GetNodeInventoryResponse {
     string                      node_name   = 1;
     Components                  components  = 2;
     repeated Note               notes       = 3;
 }
 
-message GetNodeInventoryScanRequest {}
+message GetNodeInventoryRequest {}
 
-// NodeInventoryScanService is used in Secured Clusters to fetch information from Nodes and communicate with other
+// NodeInventoryService is used in Secured Clusters to fetch information from Nodes and communicate with other
 // Secured Cluster components, like the compliance container in Collector.
-service NodeInventoryScanService {
-    rpc GetNodeInventory(GetNodeInventoryScanRequest) returns (GetNodeInventoryScanResponse) {
+service NodeInventoryService {
+    rpc GetNodeInventory(GetNodeInventoryRequest) returns (GetNodeInventoryResponse) {
         option (google.api.http) = {
             get: "/v1/nodescan/scan"
         };
