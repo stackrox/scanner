@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"strconv"
 	"strings"
 	"time"
 
@@ -205,8 +206,16 @@ func Boot(config *Config, slimMode bool) {
 func bootNodeInventoryScanner() {
 	// TODO: Check: Unify with Scanner boot and run as a different configuration rather than a different function.
 
+	var grpcPort int
+	var err error
+	if grpcPort, err = strconv.Atoi(env.NodeInventoryGRPCPort.Value()); err != nil {
+		log.Warnf("Value provided in env %s=%s can't be parsed as an integer: %s. Using default port 8081",
+			env.NodeInventoryGRPCPort.EnvVar(), env.NodeInventoryGRPCPort.Value(), err)
+		grpcPort = 8081
+	}
+
 	grpcAPI := grpc.NewAPI(grpc.Config{
-		Port:         8081, // TODO Get port from config or env
+		Port:         grpcPort,
 		CustomRoutes: debugRoutes,
 	})
 
