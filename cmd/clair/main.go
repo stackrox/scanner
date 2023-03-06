@@ -18,13 +18,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"math/rand"
 	"net/http"
 	"net/http/pprof"
 	"os"
 	"os/exec"
 	"os/signal"
-	"strconv"
 	"strings"
 	"time"
 
@@ -182,10 +182,10 @@ func Boot(config *Config, slimMode bool) {
 	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db)
 	go api.RunClairify(serv)
 
-	grpcAPI := grpc.NewAPI(grpc.Config{
-		Port:         config.API.GRPCPort,
-		CustomRoutes: debugRoutes,
-	})
+	grpcAPI := grpc.NewAPI(
+		grpc.WithTLSEndpoint(config.API.GRPCPort),
+		grpc.WithDefaultInterceptors(),
+		grpc.WithCustomRoutes(debugRoutes))
 
 	grpcAPI.Register(
 		ping.NewService(),
@@ -205,19 +205,9 @@ func Boot(config *Config, slimMode bool) {
 
 func bootNodeInventoryScanner() {
 	// TODO: Check: Unify with Scanner boot and run as a different configuration rather than a different function.
-
-	var grpcPort int
-	var err error
-	if grpcPort, err = strconv.Atoi(env.NodeInventoryGRPCPort.Value()); err != nil {
-		log.Warnf("Value provided in env %s=%s can't be parsed as an integer: %s. Using default port 8081",
-			env.NodeInventoryGRPCPort.EnvVar(), env.NodeInventoryGRPCPort.Value(), err)
-		grpcPort = 8081
-	}
-
-	grpcAPI := grpc.NewAPI(grpc.Config{
-		Port:         grpcPort,
-		CustomRoutes: debugRoutes,
-	})
+	grpcAPI := grpc.NewAPI(
+		grpc.WithCustomRoutes(debugRoutes),
+		grpc.WithCustomUnaryInterceptors(grpcprometheus.UnaryServerInterceptor))
 
 	grpcAPI.Register(
 		ping.NewService(),

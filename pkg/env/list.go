@@ -23,8 +23,4 @@ var (
 	// NodeName is used when running Scanner in Node Inventory mode. This should be set by
 	// Kubernetes in the Secured Cluster.
 	NodeName = RegisterSetting("ROX_NODE_NAME", WithDefault("unset"))
-
-	// NodeInventoryGRPCPort is used when running Scanner in Node Inventory mode. It sets the gRPC port
-	// which the Node Inventory should listen to.
-	NodeInventoryGRPCPort = RegisterSetting("ROX_NODE_INVENTORY_PORT", WithDefault("8081"))
 )
