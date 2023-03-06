@@ -91,18 +91,15 @@ func (a *apiImpl) Start() {
 		}
 
 		publicListener = tls.NewListener(lis, conf)
-	}
-
-	handler := httpGrpcRouter(grpcServer, gwHandler)
-	go func() {
-		server := http.Server{
-			Handler:  handler,
-			ErrorLog: golog.New(httpErrorLogger{}, "", golog.LstdFlags),
-		}
-		if publicListener != nil {
+		handler := httpGrpcRouter(grpcServer, gwHandler)
+		go func() {
+			server := http.Server{
+				Handler:  handler,
+				ErrorLog: golog.New(httpErrorLogger{}, "", golog.LstdFlags),
+			}
 			log.Fatal(server.Serve(publicListener))
-		}
-	}()
+		}()
+	}
 }
 
 // APIService is the service interface
