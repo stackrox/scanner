@@ -18,7 +18,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"math/rand"
 	"net/http"
 	"net/http/pprof"
@@ -28,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/sync"
