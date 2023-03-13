@@ -1,6 +1,7 @@
 package detectconent
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"runtime"
@@ -25,7 +26,7 @@ func runBenchmarkAnalyzeNode(b *testing.B, pathName string) {
 	runtime.GC()
 
 	for i := 0; i < b.N; i++ {
-		node.Analyze("testNode", pathName, node.AnalyzeOpts{UncertifiedRHEL: false, IsRHCOSRequired: false})
+		node.Analyze(context.Background(), "testNode", pathName, node.AnalyzeOpts{UncertifiedRHEL: false, IsRHCOSRequired: false})
 	}
 	// Memory measuring command: go test -bench=foo -benchmem
 

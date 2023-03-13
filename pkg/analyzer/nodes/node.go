@@ -1,6 +1,7 @@
 package nodes
 
 import (
+	"context"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -65,11 +66,11 @@ type AnalyzeOpts struct {
 }
 
 // Analyze performs analysis of node's hosts filesystem and return the detected components.
-func Analyze(nodeName, rootFSdir string, opts AnalyzeOpts) (*Components, error) {
+func Analyze(ctx context.Context, nodeName, rootFSdir string, opts AnalyzeOpts) (*Components, error) {
 	// Currently, the node analyzer can only identify operating system components
 	// without active vulnerability, so we use the OS matcher.
 	matcher := requiredfilenames.SingletonOSMatcher()
-	files, err := extractFilesFromDirectory(rootFSdir, matcher)
+	files, err := extractFilesFromDirectory(ctx, rootFSdir, matcher)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +92,7 @@ func Analyze(nodeName, rootFSdir string, opts AnalyzeOpts) (*Components, error) 
 
 // extractFilesFromDirectory extracts files from the specified root directory
 // using a file matcher.
-func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*filesMap, error) {
+func extractFilesFromDirectory(ctx context.Context, root string, matcher matcher.PrefixMatcher) (*filesMap, error) {
 	absRoot, err := filepath.Abs(root)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid root path %q", root)
@@ -103,7 +104,7 @@ func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*fil
 	m := metrics.FileExtractionMetrics{}
 	// TODO(ROX-13771): Use `range matcher.GetCommonPrefixDirs()` again after fixing.
 	for _, dir := range []string{"etc/", "usr/share/rpm", "var/lib/rpm", "usr/share/buildinfo"} {
-		if err := n.addFiles(filepath.FromSlash(dir), matcher, &m); err != nil {
+		if err := n.addFiles(ctx, filepath.FromSlash(dir), matcher, &m); err != nil {
 			return nil, errors.Wrapf(err, "failed to match filesMap at %q (at %q)", dir, n.root)
 		}
 	}
@@ -111,14 +112,37 @@ func extractFilesFromDirectory(root string, matcher matcher.PrefixMatcher) (*fil
 	return n, nil
 }
 
+func walkDirWithContext(ctx context.Context, dir string, fn fs.WalkDirFunc) error {
+	errC := make(chan error)
+	go func(ctx context.Context) {
+		defer close(errC)
+		errC <- filepath.WalkDir(dir, func(path string, info fs.DirEntry, err error) error {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+				return fn(path, info, err)
+			}
+		})
+	}(ctx)
+
+	// Wait for the WalkDir to complete or for the context to be cancelled.
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case err := <-errC:
+		return err
+	}
+}
+
 // addFiles searches the directory for files using the matcher and adds them to the file map.
 // TODO(ROX-14050): Improve handling of symlinks - if possible, follow instead of ignoring them
-func (n *filesMap) addFiles(dir string, matcher matcher.Matcher, m *metrics.FileExtractionMetrics) error {
+func (n *filesMap) addFiles(ctx context.Context, dir string, matcher matcher.Matcher, m *metrics.FileExtractionMetrics) error {
 	logrus.WithFields(logrus.Fields{
 		"root":      n.root,
 		"directory": dir,
 	}).Info("add files from directory")
-	return filepath.WalkDir(filepath.Join(n.root, dir), func(fullPath string, entry fs.DirEntry, err error) error {
+	return walkDirWithContext(ctx, filepath.Join(n.root, dir), func(fullPath string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			if filesIsNotAccessible(err) {
 				m.InaccessibleCount()

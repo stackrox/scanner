@@ -1,11 +1,13 @@
 package nodes
 
 import (
+	"context"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/scanner/pkg/analyzer"
@@ -415,7 +417,7 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 
 	for _, testcase := range testcases {
 		t.Run(testcase.name, func(t *testing.T) {
-			filesMap, err := extractFilesFromDirectory(testcase.root, requiredfilenames.SingletonOSMatcher())
+			filesMap, err := extractFilesFromDirectory(context.Background(), testcase.root, requiredfilenames.SingletonOSMatcher())
 			assert.NoError(t, err)
 			assert.NoError(t, filesMap.readError)
 
@@ -426,6 +428,46 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 				assert.True(t, hasFile)
 				assert.NotNil(t, metadata)
 				assert.Equal(t, *expectedMetadata, *metadata)
+			}
+		})
+	}
+}
+
+func Test_extractFilesFromDirectory_Context(t *testing.T) {
+	testDataRoot := makeTestData(t)
+	testcases := []struct {
+		name            string
+		root            string
+		ctxDeadline     time.Duration
+		expectedErr     error
+		expectNilResult bool
+	}{
+		{
+			name:            "context cancellation should return early with error",
+			root:            testDataRoot,
+			ctxDeadline:     5 * time.Microsecond,
+			expectedErr:     context.DeadlineExceeded,
+			expectNilResult: true,
+		},
+		{
+			name:            "function should return before context deadline",
+			root:            testDataRoot,
+			ctxDeadline:     5 * time.Second,
+			expectedErr:     nil,
+			expectNilResult: false,
+		},
+	}
+
+	for _, testcase := range testcases {
+		t.Run(testcase.name, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), testcase.ctxDeadline)
+			filesMap, err := extractFilesFromDirectory(ctx, testcase.root, requiredfilenames.SingletonOSMatcher())
+			cancel()
+			assert.ErrorIs(t, err, testcase.expectedErr)
+			if testcase.expectNilResult {
+				assert.Nil(t, filesMap)
+			} else {
+				assert.NotNil(t, filesMap)
 			}
 		})
 	}
