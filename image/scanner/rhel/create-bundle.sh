@@ -38,7 +38,6 @@ chmod -R 755 "${bundle_root}"
 
 mkdir -p "${OUTPUT_DIR}/scripts"
 cp "${INPUT_ROOT}/scripts/entrypoint.sh"               "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/nodeinventory-entrypoint.sh" "${OUTPUT_DIR}/scripts"
 cp "${INPUT_ROOT}/scripts/import-additional-cas"       "${OUTPUT_DIR}/scripts"
 cp "${INPUT_ROOT}/scripts/restore-all-dir-contents"    "${OUTPUT_DIR}/scripts"
 cp "${INPUT_ROOT}/scripts/save-dir-contents"           "${OUTPUT_DIR}/scripts"
