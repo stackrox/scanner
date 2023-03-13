@@ -22,9 +22,5 @@ message GetNodeInventoryRequest {}
 // NodeInventoryService is used in Secured Clusters to fetch information from Nodes and communicate with other
 // Secured Cluster components, like the compliance container in Collector.
 service NodeInventoryService {
-    rpc GetNodeInventory(GetNodeInventoryRequest) returns (GetNodeInventoryResponse) {
-        option (google.api.http) = {
-            get: "/v1/nodescan/scan"
-        };
-    }
+    rpc GetNodeInventory(GetNodeInventoryRequest) returns (GetNodeInventoryResponse) {}
 }
