@@ -105,7 +105,10 @@ func extractFilesFromDirectory(ctx context.Context, root string, matcher matcher
 	// TODO(ROX-13771): Use `range matcher.GetCommonPrefixDirs()` again after fixing.
 	for _, dir := range []string{"etc/", "usr/share/rpm", "var/lib/rpm", "usr/share/buildinfo"} {
 		if err := n.addFiles(ctx, filepath.FromSlash(dir), matcher, &m); err != nil {
-			return nil, errors.Wrapf(err, "failed to match filesMap at %q (at %q)", dir, n.root)
+			if errors.Is(err, context.DeadlineExceeded) {
+				err = errors.Wrapf(err, "operation took longer than expected and was interrupted")
+			}
+			return nil, errors.Wrapf(err, "failed to extract files from %q at root %q", dir, n.root)
 		}
 	}
 	m.Emit()
