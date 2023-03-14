@@ -15,6 +15,7 @@ import (
 	"github.com/stackrox/scanner/singletons/requiredfilenames"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/goleak"
 )
 
 type matcherMock struct {
@@ -434,6 +435,7 @@ func Test_extractFilesFromDirectory(t *testing.T) {
 }
 
 func Test_extractFilesFromDirectory_Context(t *testing.T) {
+	defer goleak.VerifyNone(t)
 	testDataRoot := makeTestData(t)
 	testcases := []struct {
 		name            string

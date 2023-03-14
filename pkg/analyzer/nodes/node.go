@@ -116,14 +116,23 @@ func walkDirWithContext(ctx context.Context, dir string, fn fs.WalkDirFunc) erro
 	errC := make(chan error)
 	go func(ctx context.Context) {
 		defer close(errC)
-		errC <- filepath.WalkDir(dir, func(path string, info fs.DirEntry, err error) error {
+		// this select prevents goroutine leak when ctx times out first
+		select {
+		case <-ctx.Done():
+			return
+		case errC <- filepath.WalkDir(dir, func(path string, info fs.DirEntry, err error) error {
+			if err = fn(path, info, err); err != nil {
+				return err
+			}
+			// this select prevents further calls to fn if ctx was canceled
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
-				return fn(path, info, err)
+				return nil
 			}
-		})
+		}):
+		}
 	}(ctx)
 
 	// Wait for the WalkDir to complete or for the context to be cancelled.
