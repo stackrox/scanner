@@ -99,9 +99,9 @@ func TestGRPCGetOpenShiftVulnerabilities(t *testing.T) {
 		},
 		{
 			addressFamily: "4.7",
-			maxPatch:      12,
+			maxPatch:      32,
 			step:          1,
-			knownFixed:    3,
+			knownFixed:    4,
 		},
 	}
 
@@ -152,6 +152,12 @@ func TestGRPCGetOpenShiftVulnerabilities(t *testing.T) {
 				}
 
 				lastPatch = patch
+			}
+
+			// Log remaining vulns for easy debugging.
+			t.Logf("Remaining vulns at %s.%d:", c.addressFamily, c.maxPatch)
+			for name, vuln := range vulnNameMap {
+				t.Logf("- %q (FixedBy: %s)", name, vuln.GetFixedBy())
 			}
 
 			// Check for regression. All vulns known to be fixed should not be unfixed.
