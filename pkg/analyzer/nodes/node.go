@@ -116,29 +116,23 @@ func extractFilesFromDirectory(ctx context.Context, root string, matcher matcher
 }
 
 func walkDirWithContext(ctx context.Context, dir string, fn fs.WalkDirFunc) error {
-	errC := make(chan error)
-	go func(ctx context.Context) {
+	// Buffering so we can give up on reading the channel and not block the
+	// child goroutine.
+	errC := make(chan error, 1)
+	go func() {
 		defer close(errC)
-		// this select prevents goroutine leak when ctx times out first
-		select {
-		case <-ctx.Done():
-			return
-		case errC <- filepath.WalkDir(dir, func(path string, info fs.DirEntry, err error) error {
+		errC <- filepath.WalkDir(dir, func(path string, info fs.DirEntry, err error) error {
 			if err = fn(path, info, err); err != nil {
 				return err
 			}
-			// this select prevents further calls to fn if ctx was canceled
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
 				return nil
 			}
-		}):
-		}
-	}(ctx)
-
-	// Wait for the WalkDir to complete or for the context to be cancelled.
+		})
+	}()
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
