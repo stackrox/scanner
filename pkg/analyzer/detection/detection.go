@@ -99,10 +99,7 @@ func detectAndAnnotateCertifiedRHELComponents(name string, files analyzer.Files,
 			logrus.WithError(err).Errorf("failed to get RHCOS content sets for %v: %v", namespace, err)
 		}
 	}
-	// Leave a warning for certified scans without content sets.
-	if len(contentSets) == 0 {
-		logrus.Warningf("empty content sets for RHEL certified namespace %v", namespace)
-	}
+
 	rhelfeatures := &database.RHELv2Components{
 		Dist:     namespace.Name,
 		Packages: packages,
