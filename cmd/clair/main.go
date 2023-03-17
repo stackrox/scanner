@@ -277,7 +277,7 @@ func main() {
 	ioutils.CleanUpTempFiles()
 
 	if *flagNodeInventoryMode {
-		log.Info("Running Scanner version %s in Node Inventory mode", version.Version)
+		log.Infof("Running Scanner version %s in Node Inventory mode", version.Version)
 		bootNodeInventoryScanner()
 		return
 	}
