@@ -204,7 +204,6 @@ func Boot(config *Config, slimMode bool) {
 }
 
 func bootNodeInventoryScanner() {
-	// TODO: Check: Unify with Scanner boot and run as a different configuration rather than a different function.
 	grpcAPI := grpc.NewAPI(
 		grpc.WithCustomRoutes(debugRoutes),
 		grpc.WithCustomUnaryInterceptors(grpcprometheus.UnaryServerInterceptor))
@@ -226,14 +225,6 @@ func main() {
 	flagConfigPath := flag.String("config", "/etc/scanner/config.yaml", "Load configuration from the specified file.")
 	flagNodeInventoryMode := flag.Bool("nodeinventory", false, "Run Scanner binary in Node Inventory mode (this should only be used in Secured Clusters)")
 	flag.Parse()
-
-	if *flagNodeInventoryMode {
-		log.Info("Starting Scanner in Node Inventory mode")
-		bootNodeInventoryScanner()
-		return
-	}
-
-	proxy.WatchProxyConfig(context.Background(), proxyConfigPath, proxyConfigFile, true)
 
 	// Check for dependencies.
 	for _, bin := range []string{"rpm", "xz"} {
@@ -279,6 +270,14 @@ func main() {
 
 	// Cleanup any residue temporary files.
 	ioutils.CleanUpTempFiles()
+
+	if *flagNodeInventoryMode {
+		log.Info("Running Scanner version %s in Node Inventory mode", version.Version)
+		bootNodeInventoryScanner()
+		return
+	}
+
+	proxy.WatchProxyConfig(context.Background(), proxyConfigPath, proxyConfigFile, true)
 
 	slimMode := env.SlimMode.Enabled()
 
