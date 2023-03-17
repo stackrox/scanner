@@ -22,5 +22,5 @@ var (
 
 	// NodeName is used when running Scanner in Node Inventory mode. This should be set by
 	// Kubernetes in the Secured Cluster.
-	NodeName = RegisterSetting("ROX_NODE_NAME", WithDefault("unset"))
+	NodeName = RegisterSetting("ROX_NODE_NAME")
 )

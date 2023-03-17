@@ -204,6 +204,11 @@ func Boot(config *Config, slimMode bool) {
 }
 
 func bootNodeInventoryScanner() {
+	if env.NodeName.Value() == "" {
+		log.Errorf("Cannot start node inventory scanner when %s isn't set. Make sure the environment varialbe is set from value spec.nodeName in Kubernetes",
+			env.NodeName.EnvVar())
+	}
+
 	grpcAPI := grpc.NewAPI(
 		grpc.WithCustomRoutes(debugRoutes),
 		grpc.WithCustomUnaryInterceptors(grpcprometheus.UnaryServerInterceptor))
