@@ -97,6 +97,7 @@ func detectAndAnnotateCertifiedRHELComponents(name string, files analyzer.Files,
 		contentSets, err = getHardcodedRHCOSContentSets(files)
 		if err != nil {
 			logrus.WithError(err).Errorf("failed to get RHCOS content sets for %v: %v", namespace, err)
+			logrus.Warning("Continuing analysis for RHCOS without content sets...")
 		}
 	}
 
