@@ -54,7 +54,8 @@ func AllowWithoutRox() SettingOption {
 	})
 }
 
-func registerSetting(envVar string, opts ...SettingOption) Setting {
+// RegisterSetting registers an environment variable with prefix ROX_.
+func RegisterSetting(envVar string, opts ...SettingOption) Setting {
 	if !strings.HasPrefix(envVar, "ROX_") {
 		panic(fmt.Sprintf("invalid env var: %s, must start with ROX_", envVar))
 	}

@@ -37,11 +37,11 @@ chmod -R 755 "${bundle_root}"
 # Copy scripts to image build context directory
 
 mkdir -p "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/entrypoint.sh"            "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/import-additional-cas"    "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/restore-all-dir-contents" "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/save-dir-contents"        "${OUTPUT_DIR}/scripts"
-cp "${INPUT_ROOT}/scripts/trust-root-ca"            "${OUTPUT_DIR}/scripts"
+cp "${INPUT_ROOT}/scripts/entrypoint.sh"               "${OUTPUT_DIR}/scripts"
+cp "${INPUT_ROOT}/scripts/import-additional-cas"       "${OUTPUT_DIR}/scripts"
+cp "${INPUT_ROOT}/scripts/restore-all-dir-contents"    "${OUTPUT_DIR}/scripts"
+cp "${INPUT_ROOT}/scripts/save-dir-contents"           "${OUTPUT_DIR}/scripts"
+cp "${INPUT_ROOT}/scripts/trust-root-ca"               "${OUTPUT_DIR}/scripts"
 
 # =============================================================================
 # Add binaries and data files to be included in the Dockerfile here. This
