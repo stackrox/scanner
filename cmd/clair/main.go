@@ -27,12 +27,14 @@ import (
 	"strings"
 	"time"
 
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/sync"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/api/grpc"
 	"github.com/stackrox/scanner/api/v1/imagescan"
+	"github.com/stackrox/scanner/api/v1/nodeinventory"
 	"github.com/stackrox/scanner/api/v1/nodescan"
 	"github.com/stackrox/scanner/api/v1/orchestratorscan"
 	"github.com/stackrox/scanner/api/v1/ping"
@@ -180,10 +182,10 @@ func Boot(config *Config, slimMode bool) {
 	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db)
 	go api.RunClairify(serv)
 
-	grpcAPI := grpc.NewAPI(grpc.Config{
-		Port:         config.API.GRPCPort,
-		CustomRoutes: debugRoutes,
-	})
+	grpcAPI := grpc.NewAPI(
+		grpc.WithTLSEndpoint(config.API.GRPCPort),
+		grpc.WithDefaultInterceptors(),
+		grpc.WithCustomRoutes(debugRoutes))
 
 	grpcAPI.Register(
 		ping.NewService(),
@@ -201,13 +203,33 @@ func Boot(config *Config, slimMode bool) {
 	serv.Close()
 }
 
+func bootNodeInventoryScanner() {
+	if env.NodeName.Value() == "" {
+		log.Errorf("Cannot start node inventory scanner when %s isn't set. Make sure the environment varialbe is set from value spec.nodeName in Kubernetes",
+			env.NodeName.EnvVar())
+	}
+
+	grpcAPI := grpc.NewAPI(
+		grpc.WithCustomRoutes(debugRoutes),
+		grpc.WithCustomUnaryInterceptors(grpcprometheus.UnaryServerInterceptor))
+
+	grpcAPI.Register(
+		ping.NewService(),
+		nodeinventory.NewService(env.NodeName.Value()),
+	)
+	go grpcAPI.Start()
+
+	// Wait for interruption and shutdown gracefully.
+	waitForSignals(os.Interrupt, unix.SIGTERM)
+	log.Info("Received interruption, gracefully stopping ...")
+}
+
 func main() {
 	// Parse command-line arguments
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	flagConfigPath := flag.String("config", "/etc/scanner/config.yaml", "Load configuration from the specified file.")
+	flagNodeInventoryMode := flag.Bool("nodeinventory", false, "Run Scanner binary in Node Inventory mode (this should only be used in Secured Clusters)")
 	flag.Parse()
-
-	proxy.WatchProxyConfig(context.Background(), proxyConfigPath, proxyConfigFile, true)
 
 	// Check for dependencies.
 	for _, bin := range []string{"rpm", "xz"} {
@@ -253,6 +275,14 @@ func main() {
 
 	// Cleanup any residue temporary files.
 	ioutils.CleanUpTempFiles()
+
+	if *flagNodeInventoryMode {
+		log.Infof("Running Scanner version %s in Node Inventory mode", version.Version)
+		bootNodeInventoryScanner()
+		return
+	}
+
+	proxy.WatchProxyConfig(context.Background(), proxyConfigPath, proxyConfigFile, true)
 
 	slimMode := env.SlimMode.Enabled()
 

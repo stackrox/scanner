@@ -45,6 +45,7 @@ require (
 	github.com/stretchr/testify v1.8.2
 	go.etcd.io/bbolt v1.3.7
 	go.uber.org/ratelimit v0.2.0
+	golang.org/x/exp v0.0.0-20220823124025-807a23277127
 	golang.org/x/sys v0.6.0
 	google.golang.org/api v0.112.0
 	google.golang.org/grpc v1.53.0
@@ -55,7 +56,6 @@ require (
 	github.com/containers/storage v1.45.3 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
-	golang.org/x/exp v0.0.0-20220823124025-807a23277127 // indirect
 )
 
 require (

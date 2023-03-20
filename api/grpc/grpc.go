@@ -28,7 +28,12 @@ func init() {
 }
 
 // NewAPI creates a new gRPC API instantiation
-func NewAPI(config Config) API {
+func NewAPI(opts ...ConfigOpts) API {
+	var config Config
+	for _, opt := range opts {
+		opt(&config)
+	}
+
 	return &apiImpl{
 		config: config,
 	}
@@ -56,7 +61,7 @@ func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
 }
 
 func (a *apiImpl) Start() {
-	grpcServer := grpc.NewServer(grpcmiddleware.WithUnaryServerChain(a.unaryInterceptors()...))
+	grpcServer := grpc.NewServer(grpcmiddleware.WithUnaryServerChain(a.config.UnaryInterceptors...))
 	for _, serv := range a.apiServices {
 		serv.RegisterServiceServer(grpcServer)
 	}
@@ -72,26 +77,29 @@ func (a *apiImpl) Start() {
 
 	gwHandler := a.muxer(conn)
 
-	addr := fmt.Sprintf(":%d", a.config.Port)
-	log.Infof("Listening on public endpoint: %v", addr)
-	lis, err := net.Listen("tcp", addr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	conf, err := mtls.TLSServerConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	lis = tls.NewListener(lis, conf)
-	handler := httpGrpcRouter(grpcServer, gwHandler)
-	go func() {
-		server := http.Server{
-			Handler:  handler,
-			ErrorLog: golog.New(httpErrorLogger{}, "", golog.LstdFlags),
+	var publicListener net.Listener
+	if a.config.PublicEndpoint {
+		addr := fmt.Sprintf(":%d", a.config.Port)
+		log.Infof("Listening on public endpoint: %v", addr)
+		lis, err := net.Listen("tcp", addr)
+		if err != nil {
+			log.Fatal(err)
 		}
-		log.Fatal(server.Serve(lis))
-	}()
+		conf, err := mtls.TLSServerConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		publicListener = tls.NewListener(lis, conf)
+		handler := httpGrpcRouter(grpcServer, gwHandler)
+		go func() {
+			server := http.Server{
+				Handler:  handler,
+				ErrorLog: golog.New(httpErrorLogger{}, "", golog.LstdFlags),
+			}
+			log.Fatal(server.Serve(publicListener))
+		}()
+	}
 }
 
 // APIService is the service interface
@@ -115,22 +123,53 @@ type apiImpl struct {
 
 // A Config configures the server.
 type Config struct {
-	Port         int
-	CustomRoutes map[string]http.Handler
+	Port              int
+	CustomRoutes      map[string]http.Handler
+	UnaryInterceptors []grpc.UnaryServerInterceptor
+	PublicEndpoint    bool
+}
+
+// ConfigOpts defines configurations to start a gRPC server.
+type ConfigOpts func(cfg *Config)
+
+// WithTLSEndpoint starts the gRPC server with TLS enabled on port.
+func WithTLSEndpoint(port int) ConfigOpts {
+	return func(cfg *Config) {
+		cfg.Port = port
+		cfg.PublicEndpoint = true
+	}
+}
+
+// WithDefaultInterceptors should be used when starting Scanner API. This interceptors list contains interceptors
+// that check method availability on slim mode and TLS client checks.
+func WithDefaultInterceptors() ConfigOpts {
+	return func(cfg *Config) {
+		// Interceptors are executed in order.
+		cfg.UnaryInterceptors = []grpc.UnaryServerInterceptor{
+			// Ensure the user is authorized before doing anything else.
+			verifyPeerCertsUnaryServerInterceptor(),
+			slimModeUnaryServerInterceptor(),
+			grpcprometheus.UnaryServerInterceptor,
+		}
+	}
+}
+
+// WithCustomUnaryInterceptors should be used to set custom GRPC interceptors.
+func WithCustomUnaryInterceptors(interceptors ...grpc.UnaryServerInterceptor) ConfigOpts {
+	return func(cfg *Config) {
+		cfg.UnaryInterceptors = interceptors
+	}
+}
+
+// WithCustomRoutes sets custom HTTP routes.
+func WithCustomRoutes(routes map[string]http.Handler) ConfigOpts {
+	return func(cfg *Config) {
+		cfg.CustomRoutes = routes
+	}
 }
 
 func (a *apiImpl) Register(services ...APIService) {
 	a.apiServices = append(a.apiServices, services...)
-}
-
-func (a *apiImpl) unaryInterceptors() []grpc.UnaryServerInterceptor {
-	// Interceptors are executed in order.
-	return []grpc.UnaryServerInterceptor{
-		// Ensure the user is authorized before doing anything else.
-		verifyPeerCertsUnaryServerInterceptor(),
-		slimModeUnaryServerInterceptor(),
-		grpcprometheus.UnaryServerInterceptor,
-	}
 }
 
 func (a *apiImpl) muxer(localConn *grpc.ClientConn) http.Handler {

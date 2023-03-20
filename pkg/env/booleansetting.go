@@ -23,6 +23,6 @@ func (s *booleanSetting) Enabled() bool {
 // RegisterBooleanSetting globally registers and returns a new boolean setting.
 func RegisterBooleanSetting(envVar string, defaul bool, opts ...SettingOption) BooleanSetting {
 	return &booleanSetting{
-		Setting: registerSetting(envVar, append(opts, WithDefault(strconv.FormatBool(defaul)))...),
+		Setting: RegisterSetting(envVar, append(opts, WithDefault(strconv.FormatBool(defaul)))...),
 	}
 }
