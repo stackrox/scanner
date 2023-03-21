@@ -12,6 +12,11 @@ import (
 	"golang.org/x/exp/maps"
 )
 
+// NodeInventorizer is the interface that defines the interface a node scanner must implement
+type NodeInventorizer interface {
+	Scan(nodeName string) (*ScanResult, error)
+}
+
 // Scanner is an implementation of NodeInventorizer
 type Scanner struct {
 }
