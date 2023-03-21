@@ -319,7 +319,7 @@ func (s *serviceImpl) getNodeInventoryVulns(components *v1.Components, isUncerti
 		// Overwrite any potential CPEs and stick to content sets to sanitize the API input
 		comp.Cpes = cpes
 	}
-	if len(cpes) == 0 || len(cpes) != len(components.GetRhelContentSets()) {
+	if len(cpes) == 0 {
 		notes = append(notes, v1.NodeNote_NODE_CONTENT_SETS_UNAVAILABLE)
 	}
 
