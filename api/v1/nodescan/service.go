@@ -258,12 +258,12 @@ func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNod
 	}
 
 	var err error
-	var notes []v1.Note
+	var notes []v1.NodeNote
 	if resp.Features, notes, err = s.getNodeInventoryVulns(req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes())); err != nil {
 		log.Warnf("Scanning node inventory failed: %v", err)
 		return nil, err
 	}
-	req.Notes = append(req.GetNotes(), notes...)
+	resp.NodeNotes = append(resp.GetNodeNotes(), notes...)
 
 	return resp, nil
 }
@@ -308,11 +308,11 @@ func (s *serviceImpl) getNodeVulnerabilitiesLegacy(_ context.Context, req *v1.Ge
 	return resp, nil
 }
 
-func (s *serviceImpl) getNodeInventoryVulns(components *v1.Components, isUncertifiedRHEL bool) ([]*v1.Feature, []v1.Note, error) {
+func (s *serviceImpl) getNodeInventoryVulns(components *v1.Components, isUncertifiedRHEL bool) ([]*v1.Feature, []v1.NodeNote, error) {
 	log.Debugf("Scanning NodeInventory")
 	// Convert content sets to CPEs
 	cpes := s.repoToCPE.Get(components.GetRhelContentSets())
-	var notes []v1.Note
+	var notes []v1.NodeNote
 	log.Debugf("Converted content sets '%v' to CPEs '%v'", components.GetRhelContentSets(), cpes)
 	for _, comp := range components.GetRhelComponents() {
 		// TODO(ROX-14414): Handle situation when CPEs are provided in parallel to content sets
@@ -320,7 +320,7 @@ func (s *serviceImpl) getNodeInventoryVulns(components *v1.Components, isUncerti
 		comp.Cpes = cpes
 	}
 	if len(cpes) == 0 || len(cpes) != len(components.GetRhelContentSets()) {
-		notes = append(notes, v1.Note_CONTENT_SETS_UNAVAILABLE)
+		notes = append(notes, v1.NodeNote_NODE_CONTENT_SETS_UNAVAILABLE)
 	}
 
 	layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, components, isUncertifiedRHEL)
