@@ -15,7 +15,7 @@ func _() {
 	_ = x[SentinelNote-4]
 }
 
-const _Note_name = "OSCVEsUnavailableOSCVEsStaleLanguageCVEsUnavailableCertifiedRHELScanUnavailableContentSetUnavailableSentinelNote"
+const _Note_name = "OSCVEsUnavailableOSCVEsStaleLanguageCVEsUnavailableCertifiedRHELScanUnavailableSentinelNote"
 
 var _Note_index = [...]uint8{0, 17, 28, 51, 79, 91}
 
