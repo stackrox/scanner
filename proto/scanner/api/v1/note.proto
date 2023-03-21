@@ -14,7 +14,7 @@ enum Note {
 }
 
 enum NodeNote {
-  NODE_UNSUPPORTED         = 0;
-  NODE_KERNEL_UNSUPPORTED  = 1;
-  NODE_UNABLE_TO_SCAN      = 2;
+  NODE_UNSUPPORTED                     = 0;
+  NODE_KERNEL_UNSUPPORTED              = 1;
+  NODE_CERTIFIED_RHEL_CVES_UNAVAILABLE = 2;
 }
