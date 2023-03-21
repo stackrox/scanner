@@ -263,9 +263,7 @@ func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNod
 		log.Warnf("Scanning node inventory failed: %v", err)
 		return nil, err
 	}
-	for _, note := range notes {
-		req.Notes = append(req.GetNotes(), note)
-	}
+	req.Notes = append(req.GetNotes(), notes...)
 
 	return resp, nil
 }
@@ -321,7 +319,7 @@ func (s *serviceImpl) getNodeInventoryVulns(components *v1.Components, isUncerti
 		// Overwrite any potential CPEs and stick to content sets to sanitize the API input
 		comp.Cpes = cpes
 	}
-	if len(cpes) == 0 || len(cpes) != len(components.GetRhelContentSets()) { // TODO(JS) WORK HERE
+	if len(cpes) == 0 || len(cpes) != len(components.GetRhelContentSets()) {
 		notes = append(notes, v1.Note_CONTENT_SETS_UNAVAILABLE)
 	}
 
