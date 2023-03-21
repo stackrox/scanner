@@ -417,8 +417,6 @@ const (
 	// of the Red Hat Certification program.
 	// These images were made before June 2020, and they are missing content manifest JSON files.
 	CertifiedRHELScanUnavailable
-	// ContentSetUnavailable labels scans with missing or incorrect CPEs
-	ContentSetUnavailable
 
 	// SentinelNote is a fake note which should ALWAYS be last to ensure the proto is up-to-date.
 	SentinelNote

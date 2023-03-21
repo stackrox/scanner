@@ -12,8 +12,7 @@ func _() {
 	_ = x[OSCVEsStale-1]
 	_ = x[LanguageCVEsUnavailable-2]
 	_ = x[CertifiedRHELScanUnavailable-3]
-	_ = x[ContentSetUnavailable-4]
-	_ = x[SentinelNote-5]
+	_ = x[SentinelNote-4]
 }
 
 const _Note_name = "OSCVEsUnavailableOSCVEsStaleLanguageCVEsUnavailableCertifiedRHELScanUnavailableContentSetUnavailableSentinelNote"
