@@ -1,6 +1,7 @@
 package nodeinventory
 
 import (
+	"context"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -29,7 +30,14 @@ func (n *Scanner) Scan(nodeName string) (*ScanResult, error) {
 
 	// uncertifiedRHEL is set to false, as scans are only supported on RHCOS for now,
 	// which only exists in certified versions
-	componentsHost, err := nodes.Analyze(nodeName, "/host/", nodes.AnalyzeOpts{UncertifiedRHEL: false, IsRHCOSRequired: true})
+	componentsHost, err := nodes.Analyze(
+		context.Background(),
+		nodeName,
+		"/host/",
+		nodes.AnalyzeOpts{
+			UncertifiedRHEL: false,
+			IsRHCOSRequired: true},
+	)
 
 	scanDuration := time.Since(startTime)
 	metrics.ObserveScanDuration(scanDuration, nodeName, err)
