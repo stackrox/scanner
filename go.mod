@@ -44,7 +44,7 @@ require (
 	github.com/stackrox/rox v0.0.0-20210914215712-9ac265932e28
 	github.com/stretchr/testify v1.8.2
 	go.etcd.io/bbolt v1.3.7
-	go.uber.org/goleak v1.2.0
+	go.uber.org/goleak v1.2.1
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/exp v0.0.0-20220823124025-807a23277127
 	golang.org/x/sys v0.6.0
