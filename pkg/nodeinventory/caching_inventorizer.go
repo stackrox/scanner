@@ -7,9 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/rox/compliance/collection/nodeinventorizer"
-	"github.com/stackrox/rox/generated/storage"
-	"github.com/stackrox/rox/pkg/jsonutil"
 )
 
 const (
@@ -22,7 +19,7 @@ const (
 // Additionally, a cached inventory from an earlier invocation may be used instead of a full inventory run if it is fresh enough.
 // Note: This does not prevent strain in case of repeated pod recreation, as both mechanisms are based on an EmptyDir.
 type CachingScanner struct {
-	analyzer            nodeinventorizer.NodeInventorizer
+	analyzer            NodeInventorizer
 	inventoryCachePath  string              // Path to which a cached inventory is written to
 	cacheDuration       time.Duration       // Duration for which a cached inventory will be considered new enough
 	initialBackoff      time.Duration       // First backoff interval the node scan starts with
@@ -34,16 +31,16 @@ type CachingScanner struct {
 type inventoryWrap struct {
 	CacheValidUntil      time.Time // CacheValidUntil indicates whether the cached inventory is fresh enough to use.
 	RetryBackoffDuration string    // RetryBackoffDuration contains the durations string representation a scan waits before its next iteration.
-	CachedInventory      string    // Serialized form of the cached inventory
+	CachedInventory      []byte    // Serialized form of the cached inventory
 }
 
 type cacheState struct {
-	inventory *storage.NodeInventory
+	inventory *ScanResult
 	backoff   time.Duration
 }
 
 // NewCachingScanner returns a ready to use instance of Caching Scanner
-func NewCachingScanner(analyzer nodeinventorizer.NodeInventorizer, inventoryCachePath string, cacheDuration time.Duration, initialBackoff time.Duration, maxBackoff time.Duration, backoffCallback func(time.Duration)) *CachingScanner {
+func NewCachingScanner(analyzer NodeInventorizer, inventoryCachePath string, cacheDuration time.Duration, initialBackoff time.Duration, maxBackoff time.Duration, backoffCallback func(time.Duration)) *CachingScanner {
 	return &CachingScanner{
 		analyzer:            analyzer,
 		inventoryCachePath:  inventoryCachePath,
@@ -57,7 +54,7 @@ func NewCachingScanner(analyzer nodeinventorizer.NodeInventorizer, inventoryCach
 // Scan scans the current node and returns the results as storage.NodeInventory struct.
 // A cached version is returned if it exists and is fresh enough.
 // Otherwise, a new scan guarded by a backoff is run by the injected analyzer.
-func (c *CachingScanner) Scan(nodeName string) (*storage.NodeInventory, error) {
+func (c *CachingScanner) Scan(nodeName string) (*ScanResult, error) {
 	cache := c.readCacheState(c.inventoryCachePath)
 
 	if cache.inventory != nil {
@@ -126,8 +123,8 @@ func (c *CachingScanner) readCacheState(path string) *cacheState {
 	}
 
 	// Parse cached inventory
-	var cachedInv storage.NodeInventory
-	if err := jsonutil.JSONToProto(wrap.CachedInventory, &cachedInv); err != nil {
+	var cachedInv ScanResult
+	if err := json.Unmarshal(wrap.CachedInventory, &cachedInv); err != nil {
 		log.Warnf("error unmarshalling node scan from cache: %v", err)
 		return &cacheState{inventory: nil, backoff: c.maxBackoff}
 	}
@@ -147,13 +144,13 @@ func writeBackoff(backoff time.Duration, path string) error {
 	wrap := inventoryWrap{
 		CacheValidUntil:      time.Time{},
 		RetryBackoffDuration: backoff.String(),
-		CachedInventory:      "",
+		CachedInventory:      nil,
 	}
 	return writeInventoryWrap(wrap, path)
 }
 
-func writeCachedInventory(inventory *storage.NodeInventory, validUntil time.Time, path string) error {
-	strInv, err := jsonutil.ProtoToJSON(inventory, jsonutil.OptCompact)
+func writeCachedInventory(inventory *ScanResult, validUntil time.Time, path string) error {
+	strInv, err := json.Marshal(inventory)
 	if err != nil {
 		return err
 	}
