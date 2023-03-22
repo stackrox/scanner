@@ -31,7 +31,7 @@ type CachingScanner struct {
 type inventoryWrap struct {
 	CacheValidUntil      time.Time // CacheValidUntil indicates whether the cached inventory is fresh enough to use.
 	RetryBackoffDuration string    // RetryBackoffDuration contains the durations string representation a scan waits before its next iteration.
-	CachedInventory      []byte    // Serialized form of the cached inventory
+	CachedInventory      string    // Serialized form of the cached inventory
 }
 
 type cacheState struct {
@@ -124,7 +124,7 @@ func (c *CachingScanner) readCacheState(path string) *cacheState {
 
 	// Parse cached inventory
 	var cachedInv ScanResult
-	if err := json.Unmarshal(wrap.CachedInventory, &cachedInv); err != nil {
+	if err := json.Unmarshal([]byte(wrap.CachedInventory), &cachedInv); err != nil {
 		log.Warnf("error unmarshalling node scan from cache: %v", err)
 		return &cacheState{inventory: nil, backoff: c.maxBackoff}
 	}
@@ -144,7 +144,7 @@ func writeBackoff(backoff time.Duration, path string) error {
 	wrap := inventoryWrap{
 		CacheValidUntil:      time.Time{},
 		RetryBackoffDuration: backoff.String(),
-		CachedInventory:      nil,
+		CachedInventory:      "",
 	}
 	return writeInventoryWrap(wrap, path)
 }
@@ -158,7 +158,7 @@ func writeCachedInventory(inventory *ScanResult, validUntil time.Time, path stri
 	wrap := inventoryWrap{
 		CacheValidUntil:      validUntil,
 		RetryBackoffDuration: "0s",
-		CachedInventory:      strInv,
+		CachedInventory:      string(strInv),
 	}
 	return writeInventoryWrap(wrap, path)
 }
