@@ -247,7 +247,8 @@ func (s *serviceImpl) GetNodeVulnerabilities(ctx context.Context, req *v1.GetNod
 	}
 
 	resp := &v1.GetNodeVulnerabilitiesResponse{
-		ScannerVersion: s.version,
+		ScannerVersion:  s.version,
+		OperatingSystem: req.GetComponents().GetNamespace(),
 	}
 
 	if !wellknownnamespaces.IsRHCOSNamespace(req.GetComponents().GetNamespace()) || len(req.GetComponents().GetRhelContentSets()) == 0 {
