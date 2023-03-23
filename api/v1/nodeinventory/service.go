@@ -2,6 +2,7 @@ package nodeinventory
 
 import (
 	"context"
+	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
@@ -21,14 +22,23 @@ type Service interface {
 
 // NewService returns the service for node scanning
 func NewService(nodeName string) Service {
+	// TODO(ROX-16095): Migrate env.DurationSetting into Scanner repo to use env vars for this config
+	cachedCollector := nodeinventory.NewCachingScanner(
+		&nodeinventory.Scanner{},
+		"/cache/inventory-cache",
+		3*time.Hour,
+		30*time.Second,
+		300*time.Second,
+		func(duration time.Duration) { time.Sleep(duration) })
+
 	return &serviceImpl{
-		inventoryCollector: &nodeinventory.Scanner{},
+		inventoryCollector: cachedCollector,
 		nodeName:           nodeName,
 	}
 }
 
 type serviceImpl struct {
-	inventoryCollector *nodeinventory.Scanner
+	inventoryCollector nodeinventory.NodeInventorizer
 	nodeName           string
 }
 
