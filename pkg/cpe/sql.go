@@ -22,10 +22,7 @@ func (v *Value) Scan(i interface{}) error {
 		return fmt.Errorf("cpe: can't scan type %T into Value", i)
 	}
 	v.unbindFS(nil, s)
-	if err := validate(v.V); err != nil {
-		return err
-	}
-	return nil
+	return validate(v.V)
 }
 
 // Value implements driver.Valuer.

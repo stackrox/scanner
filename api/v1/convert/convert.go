@@ -132,32 +132,30 @@ func LanguageComponents(components []*component.Component) []*v1.LanguageCompone
 			if javaMetadata == nil {
 				log.Warnf("Java package %s:%s at %s is invalid; skipping...", c.Name, c.Version, c.Location)
 				continue
-			} else {
-				languageComponent.Language = &v1.LanguageComponent_Java{
-					Java: &v1.JavaComponent{
-						ImplementationVersion: javaMetadata.ImplementationVersion,
-						MavenVersion:          javaMetadata.MavenVersion,
-						Origins:               javaMetadata.Origins,
-						SpecificationVersion:  javaMetadata.SpecificationVersion,
-						BundleName:            javaMetadata.BundleName,
-					},
-				}
+			}
+			languageComponent.Language = &v1.LanguageComponent_Java{
+				Java: &v1.JavaComponent{
+					ImplementationVersion: javaMetadata.ImplementationVersion,
+					MavenVersion:          javaMetadata.MavenVersion,
+					Origins:               javaMetadata.Origins,
+					SpecificationVersion:  javaMetadata.SpecificationVersion,
+					BundleName:            javaMetadata.BundleName,
+				},
 			}
 		case component.PythonSourceType:
 			pythonMetadata := c.PythonPkgMetadata
 			if pythonMetadata == nil {
 				log.Warnf("Python package %s:%s at %s is invalid; skipping...", c.Name, c.Version, c.Location)
 				continue
-			} else {
-				languageComponent.Language = &v1.LanguageComponent_Python{
-					Python: &v1.PythonComponent{
-						Homepage:    pythonMetadata.Homepage,
-						AuthorEmail: pythonMetadata.AuthorEmail,
-						DownloadUrl: pythonMetadata.DownloadURL,
-						Summary:     pythonMetadata.Summary,
-						Description: pythonMetadata.Description,
-					},
-				}
+			}
+			languageComponent.Language = &v1.LanguageComponent_Python{
+				Python: &v1.PythonComponent{
+					Homepage:    pythonMetadata.Homepage,
+					AuthorEmail: pythonMetadata.AuthorEmail,
+					DownloadUrl: pythonMetadata.DownloadURL,
+					Summary:     pythonMetadata.Summary,
+					Description: pythonMetadata.Description,
+				},
 			}
 		}
 

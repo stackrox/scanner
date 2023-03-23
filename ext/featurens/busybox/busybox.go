@@ -54,7 +54,7 @@ func parseBusyBoxVersion(contents []byte) string {
 	return ""
 }
 
-func (detector) Detect(files analyzer.Files, options *featurens.DetectorOptions) *database.Namespace {
+func (detector) Detect(files analyzer.Files, _ *featurens.DetectorOptions) *database.Namespace {
 	for _, filePath := range blockedFiles {
 		if _, hasFile := files.Get(filePath); hasFile {
 			return nil

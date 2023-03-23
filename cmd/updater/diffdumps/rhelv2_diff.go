@@ -19,7 +19,6 @@ import (
 	"github.com/stackrox/scanner/pkg/vulndump"
 )
 
-//nolint:staticcheck
 func processHeadRHELv2Vulnerability(cfg config, v *database.RHELv2Vulnerability) {
 	// PackageInfos is deprecated, so it is no longer populated.
 	// However, we need to ensure we diff correctly with older genesis dumps
@@ -27,6 +26,7 @@ func processHeadRHELv2Vulnerability(cfg config, v *database.RHELv2Vulnerability)
 	// We simply convert each RHELv2Package into its respective RHELv2PackageInfo.
 	if cfg.UseLegacyRHELv2PackageInfos {
 		for _, pkg := range v.Packages {
+			//nolint:staticcheck // It's ok to use the deprecated struct here.
 			pkgInfo := &database.RHELv2PackageInfo{
 				FixedInVersion: pkg.FixedInVersion,
 				ArchOperation:  pkg.ArchOperation,
@@ -38,6 +38,7 @@ func processHeadRHELv2Vulnerability(cfg config, v *database.RHELv2Vulnerability)
 
 			pkgInfo.Packages = append(pkgInfo.Packages, pkg)
 
+			//nolint:staticcheck // It's ok to use the deprecated struct here.
 			v.PackageInfos = append(v.PackageInfos, pkgInfo)
 		}
 

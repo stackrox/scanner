@@ -376,10 +376,7 @@ func generateOSVulnsDiff(outputDir string, baseZipR, headZipR *zip.Reader, cfg c
 	}
 
 	log.Infof("Diffed OS vulns; base had %d, head had %d, and the diff has %d", len(baseVulns), len(headVulns), len(filtered))
-	if err := vulndump.WriteOSVulns(outputDir, filtered); err != nil {
-		return err
-	}
-	return nil
+	return vulndump.WriteOSVulns(outputDir, filtered)
 }
 
 type config struct {
