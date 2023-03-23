@@ -447,7 +447,7 @@ func Test_extractFilesFromDirectory_Context(t *testing.T) {
 		{
 			name:            "context cancellation should return early with error",
 			root:            testDataRoot,
-			ctxDeadline:     5 * time.Microsecond,
+			ctxDeadline:     0 * time.Microsecond,
 			expectedErr:     context.DeadlineExceeded,
 			expectNilResult: true,
 		},
