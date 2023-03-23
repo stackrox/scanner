@@ -5,6 +5,15 @@
 
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: 'wednesday'
+    open-pull-requests-limit: 3
+    reviewers:
+      - 'stackrox/scanner-dep-updaters'
+
   - package-ecosystem: 'gomod'
     directory: '/'
     schedule:
@@ -13,7 +22,6 @@ updates:
     open-pull-requests-limit: 3
     reviewers:
       - 'stackrox/scanner-dep-updaters'
-
   - package-ecosystem: 'gomod'
     directory: '/tools/linters/'
     schedule:
@@ -22,7 +30,6 @@ updates:
     open-pull-requests-limit: 3
     reviewers:
       - 'stackrox/scanner-dep-updaters'
-
   - package-ecosystem: 'gomod'
     directory: '/tools/test/'
     schedule:
@@ -40,7 +47,6 @@ updates:
     open-pull-requests-limit: 1
     reviewers:
       - 'stackrox/scanner-dep-updaters'
-    
   - package-ecosystem: 'docker'
     directory: 'image/db/rhel'
     schedule:
