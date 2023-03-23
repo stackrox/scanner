@@ -10,7 +10,7 @@ const ParserName = "language"
 
 type parser struct{}
 
-func (p parser) Valid(v string) bool {
+func (p parser) Valid(_ string) bool {
 	panic("required function not implemented")
 }
 

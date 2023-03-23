@@ -411,7 +411,7 @@ func (s *TestComplianceCachingSuite) TestScanFailsOnBackoffWrite() {
 
 type erroringScanner struct{}
 
-func (s erroringScanner) Scan(nodeName string) (*ScanResult, error) {
+func (s erroringScanner) Scan(_ string) (*ScanResult, error) {
 	return nil, errors.New("Cached Inventorizer Test Error")
 }
 

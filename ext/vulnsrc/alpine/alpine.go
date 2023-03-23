@@ -149,7 +149,7 @@ func (u *updater) getVulnFiles(repoPath, tempDirPrefix string) (commit string, e
 	return
 }
 
-func (u *updater) Update(db vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
+func (u *updater) Update(_ vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, err error) {
 	log.WithField("package", "Alpine").Info("Start fetching vulnerabilities")
 
 	// Pull the master branch.

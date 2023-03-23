@@ -42,7 +42,7 @@ type serviceImpl struct {
 	nodeName           string
 }
 
-func (s *serviceImpl) GetNodeInventory(ctx context.Context, req *v1.GetNodeInventoryRequest) (*v1.GetNodeInventoryResponse, error) {
+func (s *serviceImpl) GetNodeInventory(_ context.Context, _ *v1.GetNodeInventoryRequest) (*v1.GetNodeInventoryResponse, error) {
 	inventoryScan, err := s.inventoryCollector.Scan(s.nodeName)
 	if err != nil {
 		log.Errorf("Error running inventoryCollector.Scan(%s): %v", s.nodeName, err)
