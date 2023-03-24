@@ -2,13 +2,12 @@ package env
 
 type durationSettingOpts struct {
 	zeroAllowed bool
-	settingOptions
 }
 
 // DurationSettingOption represents an option which may be specified
 // for a DurationSetting environment variable.
 type DurationSettingOption interface {
-	SettingOption
+	apply(opts *durationSettingOpts)
 }
 
 type durationSettingOptsFunc func(opts *durationSettingOpts)
