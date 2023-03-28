@@ -29,7 +29,8 @@ func (d *DurationSetting) DurationSetting() time.Duration {
 	return d.defaultDuration
 }
 
-func RegisterDurationSetting(envVar string, defaultDuration time.Duration, options ...DurationSettingOption) *DurationSetting {
+// registerDurationSetting registers a setting of type time.Duration
+func registerDurationSetting(envVar string, defaultDuration time.Duration, options ...DurationSettingOption) *DurationSetting {
 	var opts durationSettingOpts
 	for _, o := range options {
 		o.apply(&opts)
