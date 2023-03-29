@@ -43,7 +43,7 @@ func registerDurationSetting(envVar string, defaultDuration time.Duration, optio
 		opts:            opts,
 	}
 
-	ValidateSettingName(envVar)
+	validateSettingName(envVar)
 	return s
 }
 
