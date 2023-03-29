@@ -145,7 +145,8 @@ func WithDefaultInterceptors() ConfigOpts {
 	return func(cfg *Config) {
 		// Interceptors are executed in order.
 		cfg.UnaryInterceptors = []grpc.UnaryServerInterceptor{
-			// Ensure the user is authorized before doing anything else.
+			loggingUnaryServerInterceptor(),
+			// Ensure the user is authorized before doing anything other than logging.
 			verifyPeerCertsUnaryServerInterceptor(),
 			slimModeUnaryServerInterceptor(),
 			grpcprometheus.UnaryServerInterceptor,

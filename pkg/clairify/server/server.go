@@ -277,7 +277,8 @@ func (s *Server) Start() error {
 	r := mux.NewRouter()
 	// Middlewares are executed in order.
 	r.Use(
-		// Ensure the user is authorized before doing anything else.
+		middleware.Log(),
+		// Ensure the user is authorized before doing anything other than logging.
 		middleware.VerifyPeerCerts(),
 		middleware.SlimMode(),
 	)
