@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/nodeinventory"
 	"google.golang.org/grpc"
 )
@@ -22,13 +23,12 @@ type Service interface {
 
 // NewService returns the service for node scanning
 func NewService(nodeName string) Service {
-	// TODO(ROX-16095): Migrate env.DurationSetting into Scanner repo to use env vars for this config
 	cachedCollector := nodeinventory.NewCachingScanner(
 		&nodeinventory.Scanner{},
 		"/cache/inventory-cache",
-		3*time.Hour,
-		30*time.Second,
-		300*time.Second,
+		env.NodeScanningCacheDuration.DurationSetting(),
+		env.NodeScanningInitialBackoff.DurationSetting(),
+		env.NodeScanningMaxBackoff.DurationSetting(),
 		func(duration time.Duration) { time.Sleep(duration) })
 
 	return &serviceImpl{
