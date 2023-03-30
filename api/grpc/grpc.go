@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/NYTimes/gziphandler"
-	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
@@ -61,7 +60,7 @@ func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
 }
 
 func (a *apiImpl) Start() {
-	grpcServer := grpc.NewServer(grpcmiddleware.WithUnaryServerChain(a.config.UnaryInterceptors...))
+	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(a.config.UnaryInterceptors...))
 	for _, serv := range a.apiServices {
 		serv.RegisterServiceServer(grpcServer)
 	}
