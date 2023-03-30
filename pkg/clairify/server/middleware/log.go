@@ -15,7 +15,7 @@ func Log() mux.MiddlewareFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			logrus.WithFields(map[string]interface{}{
 				"Method": r.Method,
-				"URI": r.URL.String(),
+				"URI":    r.URL.String(),
 			}).Infof("Received HTTP request from %s", r.RemoteAddr)
 
 			next.ServeHTTP(w, r)

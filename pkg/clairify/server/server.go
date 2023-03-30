@@ -213,11 +213,14 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logrus.Infof("Start processing image %v", image)
 	_, err = server.ProcessImage(s.storage, image, imageRequest.Registry, username, password, imageRequest.Insecure, imageRequest.UncertifiedRHELScan)
 	if err != nil {
+		logrus.Infof("End processing image %v: failure", image)
 		clairErrorString(w, http.StatusInternalServerError, "error processing image %q: %v", imageRequest.Image, err)
 		return
 	}
+	logrus.Infof("End processing image %v: success", image)
 	imageEnvelope := types.ImageEnvelope{
 		ScannerVersion: s.version,
 		Image:          image,
