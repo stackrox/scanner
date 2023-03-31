@@ -213,14 +213,23 @@ func bootNodeInventoryScanner() {
 		grpc.WithCustomRoutes(debugRoutes),
 		grpc.WithCustomUnaryInterceptors(grpcprometheus.UnaryServerInterceptor))
 
+	// This context is used to shutdown the entire container when we discover that we are not on RHCOS or openshift
+	ctx, cancel := context.WithCancel(context.Background())
+
 	grpcAPI.Register(
 		ping.NewService(),
-		nodeinventory.NewService(env.NodeName.Value()),
+		nodeinventory.NewService(env.NodeName.Value(), cancel),
 	)
 	go grpcAPI.Start()
 
-	// Wait for interruption and shutdown gracefully.
-	waitForSignals(os.Interrupt, unix.SIGTERM)
+	// Wait for interruption and shutdown gracefully, also shutdown if not on RHCOS or openshift.
+	interrupts := make(chan os.Signal, 1)
+	signal.Notify(interrupts, os.Interrupt, unix.SIGTERM)
+	select {
+	case <-interrupts:
+	case <-ctx.Done():
+	}
+
 	log.Info("Received interruption, gracefully stopping ...")
 }
 

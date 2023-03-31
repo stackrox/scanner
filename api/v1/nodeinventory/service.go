@@ -23,7 +23,7 @@ type Service interface {
 }
 
 // NewService returns the service for node scanning
-func NewService(nodeName string) Service {
+func NewService(nodeName string, shutdownContainer context.CancelFunc) Service {
 	cachedCollector := nodeinventory.NewCachingScanner(
 		&nodeinventory.Scanner{},
 		"/cache/inventory-cache",
@@ -34,12 +34,14 @@ func NewService(nodeName string) Service {
 
 	return &serviceImpl{
 		inventoryCollector: cachedCollector,
+		shutdownContainer:  shutdownContainer,
 		nodeName:           nodeName,
 	}
 }
 
 type serviceImpl struct {
 	inventoryCollector nodeinventory.NodeInventorizer
+	shutdownContainer  context.CancelFunc
 	nodeName           string
 }
 
@@ -49,6 +51,8 @@ func (s *serviceImpl) GetNodeInventory(_ context.Context, _ *v1.GetNodeInventory
 		log.Errorf("error analyzing node %q: %v", s.nodeName, err)
 		switch {
 		case errors.Is(err, detection.ErrNodeScanningUnavailable):
+			log.Infof("Replying and gracefully shutting down the container because it is not RHCOS")
+			defer s.shutdownContainer()
 			return nil, err
 		default:
 			return nil, errors.New("Internal scanner error: failed to scan node")
