@@ -2447,6 +2447,15 @@ var testCases = []testCase{
 		namespace:       "centos:7",
 	},
 	{
+		// Added to ensure no errors when analzying an image using the digest of a ManifestList
+		image:           "registry.redhat.io/advanced-cluster-security/rhacs-collector-slim-rhel8:3.74.1@sha256:8e455c6f7ee571cc8c565b2f2b1ff712f05ade5cef0c34d528d2955253469992",
+		registry:        "https://registry.redhat.io",
+		username:        os.Getenv("REDHAT_USERNAME"),
+		password:        os.Getenv("REDHAT_PASSWORD"),
+		uncertifiedRHEL: false,
+		namespace:       "rhel:8",
+	},
+	{
 		// Had an issue where Scanner claimed jq 6.1-r1 was vulnerable to
 		// a CVE fixed in 1.6_rc1-r0. We do NOT expect this version of
 		// jq to be vulnerable to this CVE (CVE-2016-4074).
