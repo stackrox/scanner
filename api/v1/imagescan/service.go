@@ -170,7 +170,7 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 	}, nil
 }
 
-func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*apiV1.ComponentsEnvelope, error) {
+func (s *serviceImpl) getImageComponents(_ context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*apiV1.ComponentsEnvelope, error) {
 	image, _, err := s.processImage(req.GetImage(), req.GetRegistry(), uncertifiedRHEL)
 	if err != nil {
 		return nil, err
