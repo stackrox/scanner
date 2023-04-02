@@ -178,17 +178,23 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 }
 
 func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*apiV1.ComponentsEnvelope, error) {
-	imageScan, err := s.ScanImage(ctx, &v1.ScanImageRequest{
-		Image:           req.GetImage(),
-		Registry:        req.GetRegistry(),
-		UncertifiedRHEL: uncertifiedRHEL,
-	})
+	image, err := types.GenerateImageFromString(req.GetImage())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "could not parse image %q", req.GetImage())
+	}
+
+	reg := req.GetRegistry()
+	_, err = server.ProcessImage(s.db, image, reg.GetUrl(), reg.GetUsername(), reg.GetPassword(), reg.GetInsecure(), uncertifiedRHEL)
 	if err != nil {
 		return nil, err
 	}
 
 	dbLayer, lineage, err := s.getLayer(&imageReq{
-		imageSpec:       imageScan.GetImage(),
+		imageSpec: &v1.ImageSpec{
+			// server.ProcessImage will ensure image.SHA is populated with either the first layer digest or the image digest from request
+			Digest: image.SHA,
+			Image:  image.TaggedName(),
+		},
 		uncertifiedRHEL: uncertifiedRHEL,
 	}, &database.DatastoreOptions{
 		WithFeatures:    true,
