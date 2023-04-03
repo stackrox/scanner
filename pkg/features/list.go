@@ -7,5 +7,5 @@ var (
 	RHEL9Scanning = registerFeature("Enable support for scanning RHEL9 images", "ROX_RHEL9_SCANNING", true)
 
 	// RHCOSNodeScanning enables phase 1 functions of "Full host level vulnerability scanning for RHCOS nodes" (ROX-10818)
-	RHCOSNodeScanning = registerFeature("Enabling Full host level vulnerability scanning for RHCOS nodes", "ROX_RHCOS_NODE_SCANNING", false)
+	RHCOSNodeScanning = registerFeature("Enabling Full host level vulnerability scanning for RHCOS nodes", "ROX_RHCOS_NODE_SCANNING", true)
 )
