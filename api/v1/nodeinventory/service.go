@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	apiGRPC "github.com/stackrox/scanner/api/grpc"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
+	"github.com/stackrox/scanner/pkg/analyzer/detection"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/nodeinventory"
 	"google.golang.org/grpc"
@@ -45,11 +46,16 @@ type serviceImpl struct {
 func (s *serviceImpl) GetNodeInventory(_ context.Context, _ *v1.GetNodeInventoryRequest) (*v1.GetNodeInventoryResponse, error) {
 	inventoryScan, err := s.inventoryCollector.Scan(s.nodeName)
 	if err != nil {
-		log.Errorf("Error running inventoryCollector.Scan(%s): %v", s.nodeName, err)
-		return nil, errors.New("Internal scanner error: failed to scan node")
+		log.Errorf("error analyzing node %q: %v", s.nodeName, err)
+		switch {
+		case errors.Is(err, detection.ErrNodeScanningUnavailable):
+			return nil, err
+		default:
+			return nil, errors.New("Internal scanner error: failed to scan node")
+		}
 	}
 
-	log.Debugf("InventoryScan: %+v", inventoryScan)
+	log.Infof("Finished node scan: %s", inventoryScan.StringSummary())
 
 	return &v1.GetNodeInventoryResponse{
 		NodeName:   s.nodeName,

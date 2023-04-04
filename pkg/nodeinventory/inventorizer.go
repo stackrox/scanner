@@ -2,6 +2,7 @@ package nodeinventory
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -26,6 +27,11 @@ type ScanResult struct {
 	NodeName   string
 	Components *scannerV1.Components
 	Notes      []scannerV1.Note
+}
+
+// StringSummary provides compact representation of scan results summarizing only the count of rhel components
+func (sr *ScanResult) StringSummary() string {
+	return fmt.Sprintf("node %q with %d rhel-components and notes: %v", sr.NodeName, len(sr.Components.RhelComponents), sr.Notes)
 }
 
 // Scan scans the current node and returns the results as ScanResult object
