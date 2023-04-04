@@ -176,7 +176,7 @@ func (s *serviceImpl) getImageComponents(_ context.Context, req *v1.GetImageComp
 		return nil, err
 	}
 
-	// If a digest was provided as part of the request, that same digest must be used in the call to getLayers.
+	// If a digest was provided as part of the request, that same digest must be used in the call to getLayer.
 	// A different digest will result in a NotFound error (observed when the request digest represents a ManifestList)
 	//
 	// server.processImage will ensure image.SHA is populated with the digest from request if exists, otherwise will be first layer digest
