@@ -51,7 +51,7 @@ func (s *serviceImpl) GetNodeInventory(_ context.Context, _ *v1.GetNodeInventory
 		log.Errorf("error analyzing node %q: %v", s.nodeName, err)
 		switch {
 		case errors.Is(err, detection.ErrNodeScanningUnavailable):
-			log.Infof("Replying and gracefully shutting down the container because it is not RHCOS")
+			log.Infof("Gracefully shutting down the container because it is not RHCOS")
 			defer s.shutdownContainer()
 			return nil, err
 		default:
