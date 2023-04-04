@@ -147,7 +147,7 @@ func (n *filesMap) addFiles(ctx context.Context, dir string, matcher matcher.Mat
 	logrus.WithFields(logrus.Fields{
 		"root":      n.root,
 		"directory": dir,
-	}).Info("add files from directory")
+	}).Debugf("Searching directory")
 	return walkDirWithContext(ctx, filepath.Join(n.root, dir), func(fullPath string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			if filesIsNotAccessible(err) {

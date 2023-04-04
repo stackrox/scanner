@@ -23,6 +23,9 @@ import (
 // LogLayerName is the name of the log field holding the detection target.
 const LogLayerName = "layer"
 
+// ErrNodeScanningUnavailable is introduced to report inability to scan the node due to incompatible OS/namespace
+var ErrNodeScanningUnavailable = errors.New("Node scanning is unsupported for this node")
+
 // DetectComponentOpts contains configurations how components detection works
 type DetectComponentOpts struct {
 	// UncertifiedRHEL is boolean to decide if OS is uncertified RHEL
@@ -43,8 +46,8 @@ type DetectComponentOpts struct {
 func DetectComponents(name string, files analyzer.Files, parent *database.Layer, languageComponents []*component.Component, opts DetectComponentOpts) (*database.Namespace, []database.FeatureVersion, *database.RHELv2Components, []*component.Component, error) {
 	namespace := DetectNamespace(name, files, parent, opts.UncertifiedRHEL)
 	if namespace != nil && opts.IsRHCOSRequired && !wellknownnamespaces.IsRHCOSNamespace(namespace.Name) {
-		logrus.WithFields(logrus.Fields{LogLayerName: name, "detected namespace": namespace.Name}).Warning("Not able to start node scanning for this namespace")
-		return namespace, nil, nil, nil, errors.New("Node scanning unavailable")
+		logrus.WithFields(logrus.Fields{LogLayerName: name, "detected namespace": namespace.Name}).Warning("Unable to start node scanning for this namespace")
+		return namespace, nil, nil, nil, ErrNodeScanningUnavailable
 	}
 	var featureVersions []database.FeatureVersion
 	var rhelFeatures *database.RHELv2Components
