@@ -47,14 +47,7 @@ type serviceImpl struct {
 }
 
 func (s *serviceImpl) ScanImage(_ context.Context, req *v1.ScanImageRequest) (*v1.ScanImageResponse, error) {
-	image, err := types.GenerateImageFromString(req.GetImage())
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "could not parse image %q", req.GetImage())
-	}
-
-	reg := req.GetRegistry()
-
-	digest, err := server.ProcessImage(s.db, image, reg.GetUrl(), reg.GetUsername(), reg.GetPassword(), reg.GetInsecure(), req.GetUncertifiedRHEL())
+	image, digest, err := s.processImage(req.GetImage(), req.GetRegistry(), req.GetUncertifiedRHEL())
 	if err != nil {
 		return nil, err
 	}
@@ -177,18 +170,21 @@ func (s *serviceImpl) GetImageComponents(ctx context.Context, req *v1.GetImageCo
 	}, nil
 }
 
-func (s *serviceImpl) getImageComponents(ctx context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*apiV1.ComponentsEnvelope, error) {
-	imageScan, err := s.ScanImage(ctx, &v1.ScanImageRequest{
-		Image:           req.GetImage(),
-		Registry:        req.GetRegistry(),
-		UncertifiedRHEL: uncertifiedRHEL,
-	})
+func (s *serviceImpl) getImageComponents(_ context.Context, req *v1.GetImageComponentsRequest, uncertifiedRHEL bool) (*apiV1.ComponentsEnvelope, error) {
+	image, _, err := s.processImage(req.GetImage(), req.GetRegistry(), uncertifiedRHEL)
 	if err != nil {
 		return nil, err
 	}
 
+	// If a digest was provided as part of the request, that same digest must be used in the call to getLayer.
+	// A different digest will result in a NotFound error (observed when the request digest represents a ManifestList)
+	//
+	// server.processImage will ensure image.SHA is populated with the digest from request if exists, otherwise will be first layer digest
 	dbLayer, lineage, err := s.getLayer(&imageReq{
-		imageSpec:       imageScan.GetImage(),
+		imageSpec: &v1.ImageSpec{
+			Digest: image.SHA,
+			Image:  image.TaggedName(),
+		},
 		uncertifiedRHEL: uncertifiedRHEL,
 	}, &database.DatastoreOptions{
 		WithFeatures:    true,
@@ -247,4 +243,14 @@ func (s *serviceImpl) RegisterServiceServer(grpcServer *grpc.Server) {
 // RegisterServiceHandler registers this service with the given gRPC Gateway endpoint.
 func (s *serviceImpl) RegisterServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
 	return v1.RegisterImageScanServiceHandler(ctx, mux, conn)
+}
+
+func (s *serviceImpl) processImage(imgStr string, reg *v1.RegistryData, uncertifiedRHEL bool) (*types.Image, string, error) {
+	image, err := types.GenerateImageFromString(imgStr)
+	if err != nil {
+		return nil, "", status.Errorf(codes.InvalidArgument, "could not parse image %q", imgStr)
+	}
+
+	digest, err := server.ProcessImage(s.db, image, reg.GetUrl(), reg.GetUsername(), reg.GetPassword(), reg.GetInsecure(), uncertifiedRHEL)
+	return image, digest, err
 }
