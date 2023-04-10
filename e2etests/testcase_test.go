@@ -3955,4 +3955,12 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
+	{
+		// OCI v1 Image Index manifest type.
+		image:                   "gcr.io/distroless/static-debian11@sha256:a01d47d4036cae5a67a9619e3d06fa14a6811a2247b4da72b4233ece4efebd57",
+		registry:                "https://gcr.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "debian:11",
+	},
 }
