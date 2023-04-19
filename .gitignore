@@ -1,5 +1,6 @@
 # IDE
 .idea
+.vscode
 
 # Mac OS hidden file
 .DS_Store
