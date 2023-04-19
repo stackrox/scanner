@@ -364,7 +364,7 @@ clean-proto-generated-srcs:
 ## Clean ##
 ###########
 .PHONY: clean
-clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof clean-test clean-gobin
+clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof clean-test clean-gobin clean-toolbin
 	@echo "+ $@"
 
 .PHONY: clean-image
@@ -393,6 +393,11 @@ clean-test:
 clean-gobin:
 	@echo "+ $@"
 	rm -rf $(GOBIN)
+
+.PHONY: clean-toolbin
+clean-gobin:
+	@echo "+ $@"
+	git clean -xdf tools/bin
 
 ##################
 ## Genesis Dump ##
@@ -460,3 +465,19 @@ else
 	mkdir -p $(dir $@)
 	uuidgen | tr '[:upper:]' '[:lower:]' > $@
 endif
+
+
+###########
+## Tools ##
+###########
+
+# Local Node Scanner
+.PHONY: local-nodescanner
+local-nodescanner:
+	@echo "+ $@"
+	GOOS=linux GOARCH=amd64 go build -trimpath -o ./tools/bin/local-nodescanner ./tools/local-nodescanner
+
+.PHONY: local-nodescanner-image
+local-nodescanner-image: local-nodescanner
+	@echo "+ $@"
+	docker build ./tools -f tools/local-nodescanner/Dockerfile -t local-nodescanner:$(TAG)
