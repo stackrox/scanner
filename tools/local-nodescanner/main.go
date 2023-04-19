@@ -24,29 +24,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Encountered error while formatting path: %v", err)
 	}
-	log.Infof("Analyzing rootfs in %v", fspath)
 
+	log.Infof("Analyzing rootfs in %v", fspath)
 	components, err := nodes.Analyze(context.Background(), "nodename", fspath, nodes.AnalyzeOpts{UncertifiedRHEL: *fUncertifiedRHEL, IsRHCOSRequired: *fRHCOSrequired})
 	if err != nil {
 		log.Errorf("Encountered error while scanning: %v", err)
 	}
-	if components == nil || components.CertifiedRHELComponents == nil {
-		log.Info("No Components discovered")
-		return
-	}
-	log.Infof("Number of discovered packages: %v", len(components.CertifiedRHELComponents.Packages))
-	for _, c := range components.CertifiedRHELComponents.Packages {
-		log.Debugf("Component: %v", c)
-	}
 
-	if components.CertifiedRHELComponents.ContentSets == nil {
-		log.Warn("Unable to determine ContentSets for FS")
-		return
-	}
-	log.Infof("Number of discovered ContentSets: %v", len(components.CertifiedRHELComponents.ContentSets))
-	for _, cs := range components.CertifiedRHELComponents.ContentSets {
-		log.Debugf("CPE: %v", cs)
-	}
+	printResultsToTTY(components)
 }
 
 func setupLog(verbose bool) {
@@ -60,4 +45,26 @@ func setupLog(verbose bool) {
 	if verbose {
 		log.SetLevel(log.DebugLevel)
 	}
+}
+
+func printResultsToTTY(components *nodes.Components) {
+	if components == nil || components.CertifiedRHELComponents == nil {
+		log.Info("No Components discovered")
+		return
+	}
+	log.Infof("Determined OS: %v", components.CertifiedRHELComponents.Dist)
+	if components.CertifiedRHELComponents.Packages != nil {
+		log.Infof("Number of installed RPM packages: %v", len(components.CertifiedRHELComponents.Packages))
+		for _, c := range components.CertifiedRHELComponents.Packages {
+			log.Debugf("Component: %v", c)
+		}
+	}
+
+	if components.CertifiedRHELComponents.ContentSets != nil {
+		log.Infof("Number of discovered ContentSets: %v", len(components.CertifiedRHELComponents.ContentSets))
+		for _, cs := range components.CertifiedRHELComponents.ContentSets {
+			log.Debugf("CPE: %v", cs)
+		}
+	}
+
 }
