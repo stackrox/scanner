@@ -7,5 +7,5 @@ pkg/rhelv2/rpm/testdata/Packages
 pkg/rhelv2/rpm/testdata/rpmdb.sqlite
 pkg/vulnloader/nvdloader/nvdloader_easyjson.go
 pkg/ziputil/testdata/test.zip
-tools/linters/go.sum
 testdata/NodeScanning/rhcos4.12-minimal.tar.gz
+tools/linters/go.sum
