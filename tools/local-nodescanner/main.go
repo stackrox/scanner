@@ -61,9 +61,9 @@ func printResultsToTTY(components *nodes.Components) {
 	}
 
 	if components.CertifiedRHELComponents.ContentSets != nil {
-		log.Infof("Number of discovered ContentSets: %v", len(components.CertifiedRHELComponents.ContentSets))
+		log.Infof("Number of discovered content sets: %v", len(components.CertifiedRHELComponents.ContentSets))
 		for _, cs := range components.CertifiedRHELComponents.ContentSets {
-			log.Debugf("CPE: %v", cs)
+			log.Debugf("Content set: %v", cs)
 		}
 	}
 
