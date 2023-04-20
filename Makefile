@@ -395,7 +395,7 @@ clean-gobin:
 	rm -rf $(GOBIN)
 
 .PHONY: clean-toolbin
-clean-gobin:
+clean-toolbin:
 	@echo "+ $@"
 	git clean -xdf tools/bin
 
