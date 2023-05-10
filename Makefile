@@ -48,6 +48,7 @@ GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
 IMAGE_BUILD_FLAGS := -e CGO_ENABLED=0 -e GOOS=linux -e GOARCH=${GOARCH}
 BUILD_FLAGS := CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH}
 BUILD_CMD := go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
+NODESCAN_BUILD_CMD := go build -trimpath -o tools/bin/local-nodescanner ./tools/local-nodescanner
 
 #####################################################################
 ###### Binaries we depend on (need to be defined on top) ############
@@ -475,9 +476,21 @@ endif
 .PHONY: local-nodescanner
 local-nodescanner:
 	@echo "+ $@"
-	GOOS=linux GOARCH=amd64 go build -trimpath -o ./tools/bin/local-nodescanner ./tools/local-nodescanner
+	$(BUILD_FLAGS) $(NODESCAN_BUILD_CMD)
+
+.PHONY: local-nodescanner-build-dockerized
+local-nodescanner-build-dockerized: 
+	@echo "+ $@"
+ifdef CI
+	docker container create --name builder $(BUILD_IMAGE) $(NODESCAN_BUILD_CMD)
+	docker cp $(GOPATH) builder:/
+	docker start -i builder
+	docker cp builder:/go/src/github.com/stackrox/scanner/tools/bin/local-nodescanner tools/bin/local-nodescanner
+else
+	docker run $(IMAGE_BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(BUILD_IMAGE) $(NODESCAN_BUILD_CMD)
+endif
 
 .PHONY: local-nodescanner-image
-local-nodescanner-image: local-nodescanner
+local-nodescanner-image: local-nodescanner-build-dockerized
 	@echo "+ $@"
-	docker build ./tools -f tools/local-nodescanner/Dockerfile -t local-nodescanner:$(TAG)
+	docker build -t local-nodescanner:$(TAG) -f tools/local-nodescanner/Dockerfile ./tools
