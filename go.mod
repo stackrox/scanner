@@ -46,14 +46,14 @@ require (
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	golang.org/x/sys v0.7.0
-	google.golang.org/api v0.120.0
+	google.golang.org/api v0.122.0
 	google.golang.org/grpc v1.54.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
 	github.com/containers/storage v1.46.0 // indirect
-	github.com/google/s2a-go v0.1.2 // indirect
+	github.com/google/s2a-go v0.1.3 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.1 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc2 // indirect
