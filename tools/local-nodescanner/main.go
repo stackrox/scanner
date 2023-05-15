@@ -26,6 +26,10 @@ func main() {
 	}
 
 	log.Infof("Analyzing rootfs in %v", fspath)
+	if err := checkTargetDir(fspath); err != nil {
+		log.Fatalf("Target directory is empty or non-existing: %v", err)
+	}
+
 	components, err := nodes.Analyze(context.Background(), "nodename", fspath, nodes.AnalyzeOpts{UncertifiedRHEL: *fUncertifiedRHEL, IsRHCOSRequired: *fRHCOSrequired})
 	if err != nil {
 		log.Errorf("Encountered error while scanning: %v", err)
@@ -45,6 +49,18 @@ func setupLog(verbose bool) {
 	if verbose {
 		log.SetLevel(log.DebugLevel)
 	}
+}
+
+func checkTargetDir(path string) error {
+	dir, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	_, err = dir.Readdirnames(10)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func printResults(components *nodes.Components) {

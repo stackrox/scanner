@@ -22,11 +22,13 @@ The only required flag is the path to a filesystem.
 This can be a RO-mount of a running system (e.g. `/host` in the Compliance or Node-Scanner images),
 or an unpacked filesystem, e.g. from a Docker image or ISO.
 Refer to `testdata/NodeScanning/rhcos4.12-minimal.tar.gz` for an archive containing a minimal example.
-This archive can be used in conjunction with the Docker image:
+This archive can be used in conjunction with the Docker image.
+**NOTE**: If you are running on OSX, mounting anyting in `/tmp` as Docker volume might not work. Resort to using a different folder, e.g. in your homefolder in that case.
 ```shell
-tar xzf testdata/NodeScanning/rhcos4.12-minimal.tar.gz -C /tmp
+TMPDIR=$(mktemp -d)
+tar xzf testdata/NodeScanning/rhcos4.12-minimal.tar.gz -C "$TMPDIR"
 make local-nodescanner-image
-docker run -it -v /tmp/rhcos-412:/host local-nodescanner:$(make tag)
+docker run -it -v "$TMPDIR"/rhcos-412:/host local-nodescanner:$(make tag)
 ```
 You should see a successful scan, indicated by the scanner noting that it found 503 installed RPM packages and 4 Content Sets.
 
