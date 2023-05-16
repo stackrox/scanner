@@ -12,7 +12,7 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 3
     reviewers:
-      - 'stackrox/scanner-dep-updaters'
+      - 'stackrox/scanner'
 
   - package-ecosystem: 'gomod'
     directory: '/'
@@ -21,7 +21,7 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 3
     reviewers:
-      - 'stackrox/scanner-dep-updaters'
+      - 'stackrox/scanner'
   - package-ecosystem: 'gomod'
     directory: '/tools/linters/'
     schedule:
@@ -29,7 +29,7 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 3
     reviewers:
-      - 'stackrox/scanner-dep-updaters'
+      - 'stackrox/scanner'
   - package-ecosystem: 'gomod'
     directory: '/tools/test/'
     schedule:
@@ -37,7 +37,7 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 3
     reviewers:
-      - 'stackrox/scanner-dep-updaters'
+      - 'stackrox/scanner'
       
   - package-ecosystem: 'docker'
     directory: 'image/scanner/rhel'
@@ -46,7 +46,7 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 1
     reviewers:
-      - 'stackrox/scanner-dep-updaters'
+      - 'stackrox/scanner'
   - package-ecosystem: 'docker'
     directory: 'image/db/rhel'
     schedule:
@@ -54,4 +54,4 @@ updates:
       day: 'wednesday'
     open-pull-requests-limit: 1
     reviewers:
-      - 'stackrox/scanner-dep-updaters'
+      - 'stackrox/scanner'
