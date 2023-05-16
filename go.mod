@@ -47,7 +47,7 @@ require (
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	golang.org/x/sys v0.8.0
 	google.golang.org/api v0.122.0
-	google.golang.org/grpc v1.54.0
+	google.golang.org/grpc v1.55.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -85,7 +85,7 @@ require (
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/gofrs/uuid v4.3.1+incompatible // indirect
-	github.com/golang/glog v1.0.0 // indirect
+	github.com/golang/glog v1.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/certificate-transparency-go v1.1.4 // indirect
