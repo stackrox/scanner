@@ -48,6 +48,7 @@ GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
 IMAGE_BUILD_FLAGS := -e CGO_ENABLED=0 -e GOOS=linux -e GOARCH=${GOARCH}
 BUILD_FLAGS := CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH}
 BUILD_CMD := go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
+NODESCAN_BUILD_CMD := go build -trimpath -o tools/bin/local-nodescanner ./tools/local-nodescanner
 
 #####################################################################
 ###### Binaries we depend on (need to be defined on top) ############
@@ -364,7 +365,7 @@ clean-proto-generated-srcs:
 ## Clean ##
 ###########
 .PHONY: clean
-clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof clean-test clean-gobin
+clean: clean-image clean-helm-rendered clean-proto-generated-srcs clean-pprof clean-test clean-gobin clean-toolbin
 	@echo "+ $@"
 
 .PHONY: clean-image
@@ -393,6 +394,11 @@ clean-test:
 clean-gobin:
 	@echo "+ $@"
 	rm -rf $(GOBIN)
+
+.PHONY: clean-toolbin
+clean-toolbin:
+	@echo "+ $@"
+	git clean -xdf tools/bin
 
 ##################
 ## Genesis Dump ##
@@ -460,3 +466,31 @@ else
 	mkdir -p $(dir $@)
 	uuidgen | tr '[:upper:]' '[:lower:]' > $@
 endif
+
+
+###########
+## Tools ##
+###########
+
+# Local Node Scanner
+.PHONY: local-nodescanner
+local-nodescanner:
+	@echo "+ $@"
+	$(BUILD_FLAGS) $(NODESCAN_BUILD_CMD)
+
+.PHONY: local-nodescanner-build-dockerized
+local-nodescanner-build-dockerized: 
+	@echo "+ $@"
+ifdef CI
+	docker container create --name builder $(BUILD_IMAGE) $(NODESCAN_BUILD_CMD)
+	docker cp $(GOPATH) builder:/
+	docker start -i builder
+	docker cp builder:/go/src/github.com/stackrox/scanner/tools/bin/local-nodescanner tools/bin/local-nodescanner
+else
+	docker run $(IMAGE_BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(BUILD_IMAGE) $(NODESCAN_BUILD_CMD)
+endif
+
+.PHONY: local-nodescanner-image
+local-nodescanner-image: local-nodescanner-build-dockerized
+	@echo "+ $@"
+	docker build -t local-nodescanner:$(TAG) -f tools/local-nodescanner/Dockerfile ./tools
