@@ -31,6 +31,7 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/elf"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/fsutil/fileinfo"
 	"github.com/stackrox/scanner/pkg/ioutils"
 	"github.com/stackrox/scanner/pkg/matcher"
@@ -44,6 +45,8 @@ var (
 	xzHeader          = []byte{0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00}
 	shebangHeader     = []byte{0x23, 0x21}
 	shebangHeaderSize = len(shebangHeader)
+
+	parseExecutables = env.ActiveVulnMgmt.Enabled()
 )
 
 // ExtractFiles decompresses and extracts only the specified files from an
@@ -114,30 +117,33 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 		case tar.TypeReg, tar.TypeLink:
 			var fileData analyzer.FileData
 
-			executable := fileinfo.IsFileExecutable(hdr.FileInfo())
-			if hdr.Size > analyzer.GetMaxELFExecutableFileSize() {
-				log.Warnf("Skipping ELF executable check for file %q (%d bytes) because it is larger than the configured maxELFExecutableFileSize of %d MiB",
-					filename, hdr.Size, analyzer.GetMaxELFExecutableFileSize()/1024/1024)
-			} else {
-				if hdr.Size >= analyzer.ElfHeaderSize { // Only bother attempting to get ELF metadata if the file is large enough for the ELF header.
-					fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
-					if err != nil {
-						log.Errorf("Failed to get dependencies for %s: %v", filename, err)
-					}
-				}
-				if executable && hdr.Typeflag != tar.TypeLink && fileData.ELFMetadata == nil {
-					// If the type is a hard link then we will not be able to read it.
-					// Keep it as an executable in order to not introduce false negatives.
-					shebangBytes := make([]byte, shebangHeaderSize)
-					if hdr.Size > int64(shebangHeaderSize) {
-						_, err := contents.ReadAt(shebangBytes, 0)
+			if parseExecutables {
+				executable := fileinfo.IsFileExecutable(hdr.FileInfo())
+				if hdr.Size > analyzer.GetMaxELFExecutableFileSize() {
+					log.Warnf("Skipping ELF executable check for file %q (%d bytes) because it is larger than the configured maxELFExecutableFileSize of %d MiB",
+						filename, hdr.Size, analyzer.GetMaxELFExecutableFileSize()/1024/1024)
+				} else {
+					if hdr.Size >= analyzer.ElfHeaderSize { // Only bother attempting to get ELF metadata if the file is large enough for the ELF header.
+						fileData.ELFMetadata, err = elf.GetExecutableMetadata(contents)
 						if err != nil {
-							log.Errorf("unable to read first two bytes of file %s: %v", filename, err)
-							continue
+							log.Errorf("Failed to get dependencies for %s: %v", filename, err)
 						}
 					}
-					executable = bytes.Equal(shebangBytes, shebangHeader)
+					if executable && hdr.Typeflag != tar.TypeLink && fileData.ELFMetadata == nil {
+						// If the type is a hard link then we will not be able to read it.
+						// Keep it as an executable in order to not introduce false negatives.
+						shebangBytes := make([]byte, shebangHeaderSize)
+						if hdr.Size > int64(shebangHeaderSize) {
+							_, err := contents.ReadAt(shebangBytes, 0)
+							if err != nil {
+								log.Errorf("unable to read first two bytes of file %s: %v", filename, err)
+								continue
+							}
+						}
+						executable = bytes.Equal(shebangBytes, shebangHeader)
+					}
 				}
+				fileData.Executable = executable
 			}
 
 			if extractContents {
@@ -160,7 +166,6 @@ func ExtractFiles(r io.Reader, filenameMatcher matcher.Matcher) (LayerFiles, err
 					numExtractedContentBytes += len(d)
 				}
 			}
-			fileData.Executable = executable
 			files.data[filename] = fileData
 		case tar.TypeSymlink:
 			if path.IsAbs(hdr.Linkname) {
