@@ -30,6 +30,8 @@ spec:
           value: "true"
         - name: ROX_RHCOS_NODE_SCANNING
           value: "true"
+        - name: ROX_ACTIVE_VULN_MGMT
+          value: "true"
         resources:
           limits:
             cpu: 2

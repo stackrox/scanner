@@ -34,4 +34,8 @@ var (
 
 	// NodeScanningMaxBackoff is the upper boundary of backoff. Defaults to 5m in seconds, being 50% of Kubernetes restart policy stability timer.
 	NodeScanningMaxBackoff = registerDurationSetting("ROX_NODE_SCANNING_MAX_BACKOFF", 300*time.Second)
+
+	// ActiveVulnMgmt is the same flag in Central that determines if active vulnerability management should be
+	// enabled and executables should be pulled from the database
+	ActiveVulnMgmt = RegisterBooleanSetting("ROX_ACTIVE_VULN_MGMT", false)
 )
