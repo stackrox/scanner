@@ -3992,10 +3992,26 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-41411",
 						Severity:    "Critical",
 						FixedBy:     "7.6.0",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 10.0,
+									"ImpactScore":         6.4,
+									"Score":               7.5,
+									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         5.9,
+									"Score":               9.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								},
+							},
+						},
 					},
 				},
 				FixedBy: "7.6.0",
-				AddedBy: "sha256:e144eb7fd976d07a81b9571592ceb6bdbb1488e5df4623b08a849792ed618920",
+				AddedBy: "sha256:3078c14ffbc62cd9a56f8951d08d6b55a45394fbb5a0aa8f9eca1b1472e3f21d",
 			},
 		},
 	},
