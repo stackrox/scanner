@@ -3972,4 +3972,31 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:drools-CVE-2021-41411",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "drools",
+				VersionFormat: component.JavaSourceType.String(),
+				Version:       "6.4.0.final",
+				Location:      "org.drools.drools-core-6.4.0.Final.jar:drools-core",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:        "CVE-2021-41411",
+						Description: "drools <=7.59.x is affected by an XML External Entity (XXE) vulnerability in KieModuleMarshaller.java. The Validator class is not used correctly, resulting in the XXE injection vulnerability.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-41411",
+						Severity:    "Critical",
+						FixedBy:     "7.6.0",
+					},
+				},
+				FixedBy: "7.6.0",
+				AddedBy: "sha256:e144eb7fd976d07a81b9571592ceb6bdbb1488e5df4623b08a849792ed618920",
+			},
+		},
+	},
 }
