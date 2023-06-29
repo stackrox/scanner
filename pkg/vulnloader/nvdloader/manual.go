@@ -874,12 +874,12 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
 						{
 							Cpe23Uri:            `cpe:2.3:a:redhat:drools:*:*:*:*:*:*:*:*`,
-							VersionEndExcluding: "7.6.0",
+							VersionEndExcluding: "7.60.0.Final",
 							Vulnerable:          true,
 						},
 						{
 							Cpe23Uri:            `cpe:2.3:a:drools:drools:*:*:*:*:*:*:*:*`,
-							VersionEndExcluding: "7.6.0",
+							VersionEndExcluding: "7.60.0.Final",
 							Vulnerable:          true,
 						},
 					},

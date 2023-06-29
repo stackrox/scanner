@@ -3991,7 +3991,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						Description: "drools <=7.59.x is affected by an XML External Entity (XXE) vulnerability in KieModuleMarshaller.java. The Validator class is not used correctly, resulting in the XXE injection vulnerability.",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-41411",
 						Severity:    "Critical",
-						FixedBy:     "7.6.0",
+						FixedBy:     "7.60.0.Final",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -4010,7 +4010,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						},
 					},
 				},
-				FixedBy: "7.6.0",
+				FixedBy: "7.60.0.Final",
 				AddedBy: "sha256:3078c14ffbc62cd9a56f8951d08d6b55a45394fbb5a0aa8f9eca1b1472e3f21d",
 			},
 		},
