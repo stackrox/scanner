@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/stackrox/scanner/api/v1/features"
@@ -99,8 +100,8 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 			if feature.GetFixedBy() != matching.GetFixedBy() {
 				var vulns []string
 				for _, v := range matching.GetVulnerabilities() {
-					if v.GetFixedBy() == matching.GetFixedBy() {
-						vulns = append(vulns, v.GetName())
+					if strings.Contains(v.GetFixedBy(), matching.GetFixedBy()) {
+						vulns = append(vulns, fmt.Sprintf("%s (FixedBy: %s)", v.GetName(), v.GetFixedBy()))
 					}
 				}
 				assert.Equalf(t, len(vulns), 0, "FixedBy: expecting %q, but found %q: Probably due to the following "+
