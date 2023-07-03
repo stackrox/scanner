@@ -3978,6 +3978,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:                  "NVD",
+		namespace:               "rhel:8",
 		onlyCheckSpecifiedVulns: true,
 		expectedFeatures: []apiV1.Feature{
 			{
