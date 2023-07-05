@@ -7,7 +7,7 @@ require (
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
-	github.com/containers/image/v5 v5.26.0
+	github.com/containers/image/v5 v5.26.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.8.2+incompatible
 	github.com/facebookincubator/nvdtools v0.1.5
@@ -52,7 +52,7 @@ require (
 )
 
 require (
-	github.com/containers/storage v1.47.0 // indirect
+	github.com/containers/storage v1.48.0 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.1 // indirect
