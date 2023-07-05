@@ -1,9 +1,11 @@
 package nvdloader
 
 import (
+	"bytes"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -87,8 +89,11 @@ func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir 
 	}
 	defer utils.IgnoreError(resp.Body.Close)
 	// Un-gzip it.
-	gr, err := gzip.NewReader(resp.Body)
+	var buf bytes.Buffer
+	tee := io.TeeReader(resp.Body, &buf)
+	gr, err := gzip.NewReader(tee)
 	if err != nil {
+		fmt.Printf("\nContents of buf: %v\n\n", buf.String())
 		return errors.Wrapf(err, "couldn't read resp body for year %d", year)
 	}
 
