@@ -824,4 +824,106 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 		LastModifiedDate: "2021-02-24T12:15Z",
 		PublishedDate:    "2017-03-11T02:59Z",
 	},
+	// CVE-2021-41411 was not being detected for `org.drools.drools-core-6.4.0.Final.jar`.
+	// This entry adds an additional CPE URI (in addition to what exists in NVD) to
+	// enable matching.
+	"CVE-2021-41411": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ASSIGNER: "cve@mitre.org",
+				ID:       "CVE-2021-41411",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: "drools <=7.59.x is affected by an XML External Entity (XXE) vulnerability in KieModuleMarshaller.java. The Validator class is not used correctly, resulting in the XXE injection vulnerability.",
+					},
+				},
+			},
+			Problemtype: &schema.CVEJSON40Problemtype{
+				ProblemtypeData: []*schema.CVEJSON40ProblemtypeProblemtypeData{
+					{
+						Description: []*schema.CVEJSON40LangString{
+							{
+								Lang:  "en",
+								Value: "CWE-611",
+							},
+						},
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name:      "https://github.com/kiegroup/drools/pull/3808",
+						Refsource: "MISC",
+						Tags:      []string{"Patch", "Third Party Advisory"},
+						URL:       "https://github.com/kiegroup/drools/pull/3808",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:            `cpe:2.3:a:redhat:drools:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "7.60.0.Final",
+							Vulnerable:          true,
+						},
+						{
+							Cpe23Uri:            `cpe:2.3:a:drools:drools:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "7.60.0.Final",
+							Vulnerable:          true,
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV2: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV2{
+				CVSSV2: &schema.CVSSV20{
+					AccessComplexity:      "LOW",
+					AccessVector:          "NETWORK",
+					Authentication:        "NONE",
+					AvailabilityImpact:    "PARTIAL",
+					BaseScore:             7.5,
+					ConfidentialityImpact: "PARTIAL",
+					IntegrityImpact:       "PARTIAL",
+					VectorString:          "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+					Version:               "2.0",
+				},
+				ExploitabilityScore: 10,
+				ImpactScore:         6.4,
+				Severity:            "HIGH",
+			},
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             9.8,
+					BaseSeverity:          "CRITICAL",
+					ConfidentialityImpact: "HIGH",
+					IntegrityImpact:       "HIGH",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         5.9,
+			},
+		},
+		LastModifiedDate: "2022-06-28T13:56Z",
+		PublishedDate:    "2022-06-16T10:15Z",
+	},
 }
