@@ -122,7 +122,7 @@ func (s *serviceImpl) GetIstioVulnerabilities(_ context.Context, req *v1.GetIsti
 	version, err := convert.TruncateVersion(req.GetIstioVersion())
 	if err != nil {
 		log.Warnf("Unable to convert Istio version of %s - %v. Skipping...", version, err)
-		return nil, nil
+		return nil, errors.Wrap(err, "Failed to convert Istio version")
 	}
 
 	vulns := s.istioCache.GetVulnsByVersion(version)
