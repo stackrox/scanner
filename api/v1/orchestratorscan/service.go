@@ -117,16 +117,16 @@ func (s *serviceImpl) GetIstioVulnerabilities(_ context.Context, req *v1.GetIsti
 	}
 
 	if req.GetIstioVersion() == "" {
-		return nil, errors.New("Can't get vulnerabilities for empty version.")
+		return nil, errors.New("Can't get vulnerabilities for empty v.")
 	}
-	version, err := convert.TruncateVersion(req.GetIstioVersion())
+	v, err := convert.TruncateVersion(req.GetIstioVersion())
 	if err != nil {
-		log.Warnf("Unable to convert Istio version of %s - %v. Skipping...", version, err)
-		return nil, errors.Wrap(err, "Failed to convert Istio version")
+		log.Warnf("Unable to convert Istio version: %v. Skipping...", err)
+		return nil, err
 	}
 
-	vulns := s.istioCache.GetVulnsByVersion(version)
-	converted := convert.IstioVulnerabilities(version, vulns)
+	vulns := s.istioCache.GetVulnsByVersion(v)
+	converted := convert.IstioVulnerabilities(v, vulns)
 
 	resp.Vulnerabilities = filterInvalidVulns(converted)
 
