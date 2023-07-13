@@ -117,7 +117,7 @@ func (s *serviceImpl) GetIstioVulnerabilities(_ context.Context, req *v1.GetIsti
 	}
 
 	if req.GetIstioVersion() == "" {
-		return nil, errors.New("Can't get vulnerabilities for empty v.")
+		return nil, errors.New("Can't get vulnerabilities for empty version.")
 	}
 	v, err := convert.TruncateVersion(req.GetIstioVersion())
 	if err != nil {
