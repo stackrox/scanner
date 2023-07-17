@@ -924,6 +924,6 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 			},
 		},
 		LastModifiedDate: "2023-07-17T21:00Z",
-		PublishedDate:    "2022-07-17T21:00Z",
+		PublishedDate:    "2023-07-17T21:00Z",
 	},
 }
