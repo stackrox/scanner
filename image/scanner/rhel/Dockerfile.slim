@@ -31,8 +31,8 @@ RUN microdnf -y upgrade && \
 
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
-COPY --chown=65534:65534 dump/rhelv2/repository-to-cpe.json ".${REPO_TO_CPE_DIR}/"
-COPY --chown=65534:65534 dump/genesis_manifests.json ./
+COPY --chown=65534:65534 ../dump/rhelv2/repository-to-cpe.json ".${REPO_TO_CPE_DIR}/"
+COPY --chown=65534:65534 ../dump/genesis_manifests.json ./
 
 # This is equivalent to nobody:nobody.
 USER 65534:65534

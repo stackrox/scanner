@@ -47,7 +47,7 @@ RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-${
 # This is equivalent to postgres:postgres.
 USER 70:70
 
-COPY dump/definitions.sql.gz /docker-entrypoint-initdb.d/
+COPY ../dump/definitions.sql.gz /docker-entrypoint-initdb.d/
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

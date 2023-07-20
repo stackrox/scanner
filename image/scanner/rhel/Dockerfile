@@ -34,11 +34,11 @@ ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV ISTIO_DEFINITIONS_DIR="/istio_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
-COPY --chown=65534:65534 dump/nvd/ ".${NVD_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 dump/k8s/ ".${K8S_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 dump/istio/ ".${ISTIO_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 dump/rhelv2/repository-to-cpe.json ".${REPO_TO_CPE_DIR}/"
-COPY --chown=65534:65534 dump/genesis_manifests.json ./
+COPY --chown=65534:65534 ../dump/nvd ".${NVD_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 ../dump/k8s ".${K8S_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 ../dump/istio ".${ISTIO_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 ../dump/rhelv2/repository-to-cpe.json ".${REPO_TO_CPE_DIR}/"
+COPY --chown=65534:65534 ../dump/genesis_manifests.json /
 
 # This is equivalent to nobody:nobody.
 USER 65534:65534
