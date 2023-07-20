@@ -153,7 +153,10 @@ deps: proto-generated-srcs go.mod
 	@echo "+ $@"
 	@go mod tidy
 ifdef CI
-	@git diff --exit-code -- go.mod go.sum || { echo "go.mod/go.sum files were updated after running 'go mod tidy', run this command on your local machine and commit the results." ; exit 1 ; }
+	$(SILENT)git diff --exit-code -- go.mod go.sum || { \
+		echo "go.mod/go.sum files were updated after running 'go mod tidy', run this command on your local machine and commit the results." ; \
+		exit 1 ; \
+	}
 	go mod verify
 endif
 	@touch deps
@@ -192,14 +195,11 @@ image: scanner-image db-image
 .PHONY: image-slim
 image-slim: scanner-image-slim db-image-slim
 
-.PHONY: scanner-build-dockerized
-scanner-build-dockerized: deps
+.PHONY: scanner-build
+scanner-build: deps
 	@echo "+ $@"
 ifdef CI
-	docker container create --name builder $(BUILD_IMAGE) $(BUILD_CMD)
-	docker cp $(GOPATH) builder:/
-	docker start -i builder
-	docker cp builder:/go/src/github.com/stackrox/scanner/image/scanner/bin/scanner image/scanner/bin/scanner
+	$(BUILD_FLAGS) $(BUILD_CMD)
 else
 	docker run $(IMAGE_BUILD_FLAGS) $(GOPATH_WD_OVERRIDES) $(LOCAL_VOLUME_ARGS) $(BUILD_IMAGE) $(BUILD_CMD)
 endif
@@ -208,32 +208,24 @@ endif
 scanner-build-nodeps:
 	$(BUILD_FLAGS) $(BUILD_CMD)
 
-.PHONY: $(CURDIR)/image/scanner/rhel/bundle.tar.gz
-$(CURDIR)/image/scanner/rhel/bundle.tar.gz:
-	$(CURDIR)/image/scanner/rhel/create-bundle.sh $(CURDIR)/image/scanner $(CURDIR)/image/scanner/rhel
-
-.PHONY: $(CURDIR)/image/db/rhel/bundle.tar.gz
-$(CURDIR)/image/db/rhel/bundle.tar.gz:
-	$(CURDIR)/image/db/rhel/create-bundle.sh $(CURDIR)/image/db $(CURDIR)/image/db/rhel
-
 .PHONY: scanner-image
-scanner-image: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image: scanner-build ossls-notice
 	@echo "+ $@"
 	@docker build -t scanner:$(TAG) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: scanner-image-slim
-scanner-image-slim: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
+scanner-image-slim: scanner-build ossls-notice
 	@echo "+ $@"
 	@docker build -t scanner-slim:$(TAG) -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
 
 .PHONY: db-image
-db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
+db-image:
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
 	@docker build -t scanner-db:$(TAG) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: db-image-slim
-db-image-slim: $(CURDIR)/image/db/rhel/bundle.tar.gz
+db-image-slim:
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
 	@docker build -t scanner-db-slim:$(TAG) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile.slim image/db/rhel

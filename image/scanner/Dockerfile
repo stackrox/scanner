@@ -1,14 +1,4 @@
-ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8-minimal
-ARG BASE_TAG=8.8
-
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
-
-COPY bundle.tar.gz /
-WORKDIR /bundle
-RUN microdnf -y install tar gzip && tar -zxf /bundle.tar.gz
-
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
 LABEL name="scanner" \
       vendor="StackRox" \
@@ -20,9 +10,9 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 COPY scripts /
 
-COPY --from=extracted_bundle /bundle/scanner ./
+COPY bin/scanner /
 
-COPY --from=extracted_bundle /bundle/THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
+COPY THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
 RUN microdnf -y upgrade && \
     microdnf -y install xz && \
@@ -44,11 +34,11 @@ ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV ISTIO_DEFINITIONS_DIR="/istio_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${ISTIO_DEFINITIONS_DIR}/" ".${ISTIO_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle /bundle/genesis_manifests.json ./
+COPY --chown=65534:65534 dump/nvd/ ".${NVD_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 dump/k8s/ ".${K8S_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 dump/istio/ ".${ISTIO_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 dump/rhelv2/repository-to-cpe.json ".${REPO_TO_CPE_DIR}/"
+COPY --chown=65534:65534 dump/genesis_manifests.json ./
 
 # This is equivalent to nobody:nobody.
 USER 65534:65534

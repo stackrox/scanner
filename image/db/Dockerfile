@@ -1,14 +1,4 @@
-ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8-minimal
-ARG BASE_TAG=8.8
-
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
-COPY bundle.tar.gz /
-
-WORKDIR /bundle
-RUN microdnf -y install tar gzip && tar -zxf /bundle.tar.gz
-
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
 LABEL name="scanner-db" \
       vendor="StackRox" \
@@ -21,7 +11,7 @@ ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
     PGDATA="/var/lib/postgresql/data/pgdata"
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
-COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
+COPY postgresql.conf pg_hba.conf /etc/
 
 ARG POSTGRESQL_ARCH=x86_64
 
@@ -57,7 +47,7 @@ RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-${
 # This is equivalent to postgres:postgres.
 USER 70:70
 
-COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
+COPY dump/definitions.sql.gz /docker-entrypoint-initdb.d/
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
