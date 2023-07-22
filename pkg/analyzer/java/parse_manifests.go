@@ -3,6 +3,7 @@ package java
 import (
 	"archive/zip"
 	"bufio"
+	"io"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -43,15 +44,7 @@ func parseVersionOutOfName(jar string) string {
 	return ""
 }
 
-func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error) {
-	reader, err := f.Open()
-	if err != nil {
-		return parsedManifestMF{}, err
-	}
-	defer func() {
-		_ = reader.Close()
-	}()
-
+func parseManifestMFFromReader(locationSoFar string, reader io.Reader) (parsedManifestMF, error) {
 	var currentValueToSet *string
 	var currentValue string
 	var manifest parsedManifestMF
@@ -83,7 +76,7 @@ func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error
 			isTemplatedManifestFile = true
 			continue
 		}
-
+		valueFromLine = strings.TrimSpace(valueFromLine)
 		keyFromLine = strings.TrimSpace(strings.TrimSpace(keyFromLine))
 		switch keyFromLine {
 		case "Specification-Version":
@@ -101,8 +94,10 @@ func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error
 		case "Bundle-SymbolicName":
 			currentValueToSet = &manifest.bundleSymbolicName
 		}
-		if currentValueToSet != nil {
+		if currentValueToSet != nil && *currentValueToSet == "" {
 			currentValue = valueFromLine
+		} else {
+			currentValueToSet = nil
 		}
 	}
 
@@ -121,6 +116,18 @@ func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error
 	}
 
 	return manifest, nil
+}
+
+func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error) {
+	reader, err := f.Open()
+	if err != nil {
+		return parsedManifestMF{}, err
+	}
+	defer func() {
+		_ = reader.Close()
+	}()
+
+	return parseManifestMFFromReader(locationSoFar, reader)
 }
 
 type parsedPomProps struct {
