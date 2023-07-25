@@ -7,8 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const testTomcat10ManifestMF = `
-Manifest-Version: 1.0
+const testTomcat10ManifestMF = `Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: tomcat-embed-core
 Bundle-SymbolicName: org.apache.tomcat-embed-core
@@ -39,8 +38,7 @@ Specification-Vendor: Eclipse Foundation
 Specification-Version: 3.0
 `
 
-const testTomcat9ManifestMF = `
-Manifest-Version: 1.0
+const testTomcat9ManifestMF = `Manifest-Version: 1.0
 Automatic-Module-Name: org.apache.tomcat.embed.core
 Bnd-LastModified: 1593547891735
 Bundle-ManifestVersion: 2

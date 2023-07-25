@@ -51,6 +51,7 @@ func parseManifestMFFromReader(locationSoFar string, reader io.Reader) (parsedMa
 	var isTemplatedManifestFile bool
 
 	scanner := bufio.NewScanner(reader)
+LOOP:
 	for scanner.Scan() {
 		currentLine := scanner.Text()
 		// This means that the valueFromLine is a continuation of the valueFromLine for the previous keyFromLine.
@@ -66,7 +67,10 @@ func parseManifestMFFromReader(locationSoFar string, reader io.Reader) (parsedMa
 			*currentValueToSet = strings.TrimSpace(currentValue)
 			currentValueToSet = nil
 		}
+
 		keyFromLine, valueFromLine := stringutils.Split2(currentLine, ":")
+
+		valueFromLine = strings.TrimSpace(valueFromLine)
 		// Should never happen, probably a malformed JAR file?
 		// Sometimes the Manifests are templated with ${revision} or ${version}
 		if valueFromLine == "" {
@@ -76,9 +80,15 @@ func parseManifestMFFromReader(locationSoFar string, reader io.Reader) (parsedMa
 			isTemplatedManifestFile = true
 			continue
 		}
-		valueFromLine = strings.TrimSpace(valueFromLine)
-		keyFromLine = strings.TrimSpace(strings.TrimSpace(keyFromLine))
+
+		keyFromLine = strings.TrimSpace(keyFromLine)
 		switch keyFromLine {
+		// The main section will not contain "Name", and the individual sections must start with "Name".
+		// Therefore, we know we are done with the main section once we see "Name".
+		//
+		// See the JAR specification: https://docs.oracle.com/en/java/javase/20/docs/specs/jar/jar.html#name-value-pairs-and-sections.
+		case "Name":
+			break LOOP
 		case "Specification-Version":
 			currentValueToSet = &manifest.specificationVersion
 		case "Specification-Vendor":
@@ -94,16 +104,16 @@ func parseManifestMFFromReader(locationSoFar string, reader io.Reader) (parsedMa
 		case "Bundle-SymbolicName":
 			currentValueToSet = &manifest.bundleSymbolicName
 		}
-		if currentValueToSet != nil && *currentValueToSet == "" {
+
+		if currentValueToSet != nil {
 			currentValue = valueFromLine
-		} else {
-			currentValueToSet = nil
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
 		return parsedManifestMF{}, err
 	}
+
 	if currentValueToSet != nil {
 		*currentValueToSet = strings.TrimSpace(currentValue)
 		// Ignore linting for potential future-proofing purposes.
