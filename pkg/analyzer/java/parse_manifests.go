@@ -86,7 +86,7 @@ LOOP:
 		// The main section will not contain "Name", and the individual sections must start with "Name".
 		// Therefore, we know we are done with the main section once we see "Name".
 		//
-		// See the JAR specification: https://docs.oracle.com/en/java/javase/20/docs/specs/jar/jar.html#name-value-pairs-and-sections.
+		// See the JAR specification: https://docs.oracle.com/en/java/javase/20/docs/specs/jar/jar.html#jar-manifest
 		case "Name":
 			break LOOP
 		case "Specification-Version":
