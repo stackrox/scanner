@@ -3,6 +3,7 @@ package java
 import (
 	"archive/zip"
 	"bufio"
+	"io"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -43,21 +44,14 @@ func parseVersionOutOfName(jar string) string {
 	return ""
 }
 
-func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error) {
-	reader, err := f.Open()
-	if err != nil {
-		return parsedManifestMF{}, err
-	}
-	defer func() {
-		_ = reader.Close()
-	}()
-
+func parseManifestMFFromReader(locationSoFar string, reader io.Reader) (parsedManifestMF, error) {
 	var currentValueToSet *string
 	var currentValue string
 	var manifest parsedManifestMF
 	var isTemplatedManifestFile bool
 
 	scanner := bufio.NewScanner(reader)
+LOOP:
 	for scanner.Scan() {
 		currentLine := scanner.Text()
 		// This means that the valueFromLine is a continuation of the valueFromLine for the previous keyFromLine.
@@ -73,7 +67,10 @@ func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error
 			*currentValueToSet = strings.TrimSpace(currentValue)
 			currentValueToSet = nil
 		}
+
 		keyFromLine, valueFromLine := stringutils.Split2(currentLine, ":")
+
+		valueFromLine = strings.TrimSpace(valueFromLine)
 		// Should never happen, probably a malformed JAR file?
 		// Sometimes the Manifests are templated with ${revision} or ${version}
 		if valueFromLine == "" {
@@ -84,8 +81,14 @@ func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error
 			continue
 		}
 
-		keyFromLine = strings.TrimSpace(strings.TrimSpace(keyFromLine))
+		keyFromLine = strings.TrimSpace(keyFromLine)
 		switch keyFromLine {
+		// The main section will not contain "Name", and the individual sections must start with "Name".
+		// Therefore, we know we are done with the main section once we see "Name".
+		//
+		// See the JAR specification: https://docs.oracle.com/en/java/javase/20/docs/specs/jar/jar.html#jar-manifest
+		case "Name":
+			break LOOP
 		case "Specification-Version":
 			currentValueToSet = &manifest.specificationVersion
 		case "Specification-Vendor":
@@ -101,6 +104,7 @@ func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error
 		case "Bundle-SymbolicName":
 			currentValueToSet = &manifest.bundleSymbolicName
 		}
+
 		if currentValueToSet != nil {
 			currentValue = valueFromLine
 		}
@@ -109,6 +113,7 @@ func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error
 	if err := scanner.Err(); err != nil {
 		return parsedManifestMF{}, err
 	}
+
 	if currentValueToSet != nil {
 		*currentValueToSet = strings.TrimSpace(currentValue)
 		// Ignore linting for potential future-proofing purposes.
@@ -121,6 +126,18 @@ func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error
 	}
 
 	return manifest, nil
+}
+
+func parseManifestMF(locationSoFar string, f *zip.File) (parsedManifestMF, error) {
+	reader, err := f.Open()
+	if err != nil {
+		return parsedManifestMF{}, err
+	}
+	defer func() {
+		_ = reader.Close()
+	}()
+
+	return parseManifestMFFromReader(locationSoFar, reader)
 }
 
 type parsedPomProps struct {

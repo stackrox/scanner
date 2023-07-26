@@ -4016,4 +4016,71 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:tomcat-9.0.59",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "NVD",
+		namespace:               "alpine:v3.15",
+		onlyCheckSpecifiedVulns: true,
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "tomcat",
+				VersionFormat: component.JavaSourceType.String(),
+				Version:       "9.0.59",
+				Location:      "tomcat-embed-core-9.0.59.jar",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:        "CVE-2022-29885",
+						Description: "The documentation of Apache Tomcat 10.1.0-M1 to 10.1.0-M14, 10.0.0-M1 to 10.0.20, 9.0.13 to 9.0.62 and 8.5.38 to 8.5.78 for the EncryptInterceptor incorrectly stated it enabled Tomcat clustering to run over an untrusted network. This was not correct. While the EncryptInterceptor does provide confidentiality and integrity protection, it does not protect against all risks associated with running over any untrusted network, particularly DoS risks.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2022-29885",
+						Severity:    "Important",
+						FixedBy:     "", // This should be fixed, but NVD did not set this properly.
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 10.0,
+									"ImpactScore":         2.9,
+									"Score":               5.0,
+									"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								},
+							},
+						},
+					},
+					{
+						Name:        "CVE-2023-28708",
+						Description: "When using the RemoteIpFilter with requests received from a reverse proxy via HTTP that include the X-Forwarded-Proto header set to https, session cookies created by Apache Tomcat 11.0.0-M1 to 11.0.0.-M2, 10.1.0-M1 to 10.1.5, 9.0.0-M1 to 9.0.71 and 8.5.0 to 8.5.85 did not include the secure attribute. This could result in the user agent transmitting the session cookie over an insecure channel.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2023-28708",
+						Severity:    "Moderate",
+						FixedBy:     "9.0.72",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.8,
+									"ImpactScore":         1.4,
+									"Score":               4.3,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N",
+								},
+							},
+						},
+					},
+				},
+				FixedBy: "9.0.72",
+				AddedBy: "sha256:97444f2bde8fa4fdfb6ec630b24fbdf95017c6813f4b5e68e64a4280b276eff2",
+			},
+		},
+	},
 }
