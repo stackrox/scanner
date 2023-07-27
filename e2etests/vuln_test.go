@@ -242,6 +242,24 @@ func TestStackroxVulnImages(t *testing.T) {
 				},
 			},
 		},
+		{
+			image: "quay.io/rhacs-eng/qa:drools-debian",
+			expectedFeatures: []feature{
+				{"drools", "6.4.0.final", []expectedVuln{
+					{name: "CVE-2021-41411", fixedBy: ""},
+				},
+				},
+			},
+		},
+		{
+			image: "quay.io/rhacs-eng/qa:drools-ubi-minimal",
+			expectedFeatures: []feature{
+				{"drools", "6.4.0.final", []expectedVuln{
+					{name: "CVE-2021-41411", fixedBy: ""},
+				},
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			testSingleVulnImage(testCase, t)
@@ -332,24 +350,6 @@ func TestDistrolessVulnImages(t *testing.T) {
 				{"netbase", "5.4", []expectedVuln{}},
 				{"tzdata", "2020a-0+deb9u1", []expectedVuln{}},
 				{"base-files", "9.9+deb9u13", []expectedVuln{}},
-			},
-		},
-		{
-			image: "quay.io/rhacs-eng/sandbox:drools-debian",
-			expectedFeatures: []feature{
-				{"drools", "6.4.0.final", []expectedVuln{
-					{name: "CVE-2021-41411", fixedBy: ""},
-				},
-				},
-			},
-		},
-		{
-			image: "quay.io/rhacs-eng/qa:drools-ubi-minimal",
-			expectedFeatures: []feature{
-				{"drools", "6.4.0.final", []expectedVuln{
-					{name: "CVE-2021-41411", fixedBy: ""},
-				},
-				},
 			},
 		},
 	} {
