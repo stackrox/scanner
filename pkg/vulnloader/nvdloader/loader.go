@@ -1,7 +1,6 @@
 package nvdloader
 
 import (
-	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,9 +8,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
+	apischema "github.com/facebookincubator/nvdtools/cveapi/nvd/schema"
+	jsonschema "github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/facebookincubator/nvdtools/wfn"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
@@ -19,16 +18,18 @@ import (
 	"github.com/stackrox/scanner/pkg/vulnloader"
 )
 
-var (
-	client = http.Client{
-		Timeout:   2 * time.Minute,
-		Transport: proxy.RoundTripper(),
-	}
-)
+const urlFmt = `https://services.nvd.nist.gov/rest/json/cves/2.0?noRejected&startIndex=%d`
+
+var client = http.Client{
+	Timeout:   2 * time.Minute,
+	Transport: proxy.RoundTripper(),
+}
 
 func init() {
 	vulnloader.RegisterLoader(vulndump.NVDDirName, &loader{})
 }
+
+var _ vulnloader.Loader = (*loader)(nil)
 
 type loader struct{}
 
@@ -37,25 +38,144 @@ type loader struct{}
 // one json file for each year of NVD data.
 func (l *loader) DownloadFeedsToPath(outputDir string) error {
 	// Fetch NVD enrichment data from curated repos
-	enrichmentMap, err := Fetch()
+	enrichments, err := Fetch()
 	if err != nil {
-		return errors.Wrap(err, "could not fetch NVD enrichment sources")
+		return fmt.Errorf("could not fetch NVD enrichment sources: %w", err)
 	}
 
 	nvdDir := filepath.Join(outputDir, vulndump.NVDDirName)
 	if err := os.MkdirAll(nvdDir, 0755); err != nil {
-		return errors.Wrapf(err, "creating subdir for %s", vulndump.NVDDirName)
+		return fmt.Errorf("creating subdir for %s: %w", vulndump.NVDDirName, err)
 	}
-	endYear := time.Now().Year()
-	for year := 2002; year <= endYear; year++ {
-		if err := downloadFeedForYear(enrichmentMap, nvdDir, year); err != nil {
+
+	var fileNo, totalVulns int
+
+	// Explicitly set startIdx to parallel how this is all done within the loop below.
+	startIdx := 0
+	apiResp, err := query(fmt.Sprintf(urlFmt, startIdx))
+	if err != nil {
+		return err
+	}
+	var i int
+	// Buffer to store vulns until they are written to a file.
+	cveItems := make([]*jsonschema.NVDCVEFeedJSON10DefCVEItem, 0, 20_000)
+	for apiResp.ResultsPerPage != 0 {
+		vulns, err := toJSON(apiResp.Vulnerabilities)
+		if err != nil {
+			return fmt.Errorf("failed to convert API vulns to JSON: %w", err)
+		}
+
+		if len(vulns) != 0 {
+			cveItems = append(cveItems, vulns...)
+
+			i++
+			// Write to disk every ~20,000 vulnerabilities.
+			if i == 10 {
+				i = 0
+
+				enrichCVEItems(&cveItems, enrichments)
+
+				feed := &jsonschema.NVDCVEFeedJSON10{
+					CVEItems: cveItems,
+				}
+				if err := writeFile(filepath.Join(nvdDir, fmt.Sprintf("%d.json", fileNo)), feed); err != nil {
+					return fmt.Errorf("writing to file: %w", err)
+				}
+
+				fileNo++
+				totalVulns += len(cveItems)
+				log.Infof("Loaded %d NVD vulnerabilities", totalVulns)
+				// Reduce, reuse, and recycle.
+				cveItems = cveItems[:0]
+			}
+		}
+
+		// Rudimentary rate-limiting.
+		// NVD limits users without an API key to roughly one call every 6 seconds.
+		// As of writing there are ~216,000 vulnerabilities, so this whole process should take ~11 minutes.
+		time.Sleep(6 * time.Second)
+
+		startIdx += apiResp.ResultsPerPage
+		apiResp, err = query(fmt.Sprintf(urlFmt, startIdx))
+		if err != nil {
 			return err
 		}
 	}
+
+	// Write the remaining vulnerabilities.
+	if len(cveItems) != 0 {
+		enrichCVEItems(&cveItems, enrichments)
+
+		feed := &jsonschema.NVDCVEFeedJSON10{
+			CVEItems: cveItems,
+		}
+		if err := writeFile(filepath.Join(nvdDir, fmt.Sprintf("%d.json", fileNo)), feed); err != nil {
+			return fmt.Errorf("writing to file: %w", err)
+		}
+
+		totalVulns += len(cveItems)
+		log.Infof("Loaded %d NVD vulnerabilities", totalVulns)
+	}
+
 	return nil
 }
 
-func removeInvalidCPEs(item *schema.NVDCVEFeedJSON10DefNode) {
+func query(url string) (*apischema.CVEAPIJSON20, error) {
+	log.Debugf("Querying %s", url)
+	resp, err := client.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("fetching NVD API results: %w", err)
+	}
+	defer utils.IgnoreError(resp.Body.Close)
+
+	log.Debugf("Queried %s with status code %d", url, resp.StatusCode)
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status code when querying %s: %d", url, resp.StatusCode)
+	}
+
+	apiResp := new(apischema.CVEAPIJSON20)
+	if err := json.NewDecoder(resp.Body).Decode(apiResp); err != nil {
+		return nil, fmt.Errorf("decoding API response: %w", err)
+	}
+
+	return apiResp, nil
+}
+
+func enrichCVEItems(cveItems *[]*jsonschema.NVDCVEFeedJSON10DefCVEItem, enrichments map[string]*FileFormatWrapper) {
+	if cveItems == nil {
+		return
+	}
+
+	cves := (*cveItems)[:0]
+	for _, item := range *cveItems {
+		if _, ok := manuallyEnrichedVulns[item.CVE.CVEDataMeta.ID]; ok {
+			log.Warnf("Skipping vuln %s because it is being manually enriched", item.CVE.CVEDataMeta.ID)
+			continue
+		}
+
+		for _, node := range item.Configurations.Nodes {
+			removeInvalidCPEs(node)
+		}
+
+		if enrichedEntry, ok := enrichments[item.CVE.CVEDataMeta.ID]; ok {
+			// Add the CPE matches instead of removing for backwards compatibility purposes
+			item.Configurations.Nodes = append(item.Configurations.Nodes, &jsonschema.NVDCVEFeedJSON10DefNode{
+				CPEMatch: enrichedEntry.AffectedPackages,
+				Operator: "OR",
+			})
+			item.LastModifiedDate = enrichedEntry.LastUpdated
+		}
+		cves = append(cves, item)
+	}
+
+	for _, item := range manuallyEnrichedVulns {
+		cves = append(cves, item)
+	}
+
+	*cveItems = cves
+}
+
+func removeInvalidCPEs(item *jsonschema.NVDCVEFeedJSON10DefNode) {
 	cpeMatches := item.CPEMatch[:0]
 	for _, cpeMatch := range item.CPEMatch {
 		if cpeMatch.Cpe23Uri == "" {
@@ -79,61 +199,16 @@ func removeInvalidCPEs(item *schema.NVDCVEFeedJSON10DefNode) {
 	}
 }
 
-func downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir string, year int) error {
-	url := jsonFeedURLForYear(year)
-	resp, err := client.Get(url)
+func writeFile(path string, feed *jsonschema.NVDCVEFeedJSON10) error {
+	outF, err := os.Create(path)
 	if err != nil {
-		return errors.Wrapf(err, "failed to download feed for year %d", year)
-	}
-	defer utils.IgnoreError(resp.Body.Close)
-	// Un-gzip it.
-	gr, err := gzip.NewReader(resp.Body)
-	if err != nil {
-		return errors.Wrapf(err, "couldn't read resp body for year %d", year)
-	}
-
-	// Strip out tabs and newlines for size savings
-	dump, err := LoadJSONFileFromReader(gr)
-	if err != nil {
-		return errors.Wrapf(err, "could not decode json for year %d", year)
-	}
-
-	cveItems := dump.CVEItems[:0]
-	for _, item := range dump.CVEItems {
-		if _, ok := manuallyEnrichedVulns[item.CVE.CVEDataMeta.ID]; ok {
-			log.Warnf("Skipping vuln %s because it is being manually enriched", item.CVE.CVEDataMeta.ID)
-			continue
-		}
-		for _, node := range item.Configurations.Nodes {
-			removeInvalidCPEs(node)
-		}
-		if enrichedEntry, ok := enrichmentMap[item.CVE.CVEDataMeta.ID]; ok {
-			// Add the CPE matches instead of removing for backwards compatibility purposes
-			item.Configurations.Nodes = append(item.Configurations.Nodes, &schema.NVDCVEFeedJSON10DefNode{
-				CPEMatch: enrichedEntry.AffectedPackages,
-				Operator: "OR",
-			})
-			item.LastModifiedDate = enrichedEntry.LastUpdated
-		}
-		cveItems = append(cveItems, item)
-	}
-	for _, item := range manuallyEnrichedVulns {
-		cveItems = append(cveItems, item)
-	}
-	dump.CVEItems = cveItems
-
-	outF, err := os.Create(filepath.Join(outputDir, fmt.Sprintf("%d.json", year)))
-	if err != nil {
-		return errors.Wrap(err, "failed to create file")
+		return fmt.Errorf("failed to create file %s: %w", outF.Name(), err)
 	}
 	defer utils.IgnoreError(outF.Close)
 
-	if err := json.NewEncoder(outF).Encode(&dump); err != nil {
-		return errors.Wrapf(err, "could not encode json map for year %d", year)
+	if err := json.NewEncoder(outF).Encode(feed); err != nil {
+		return fmt.Errorf("could not encode JSON for %s: %w", outF.Name(), err)
 	}
-	return nil
-}
 
-func jsonFeedURLForYear(year int) string {
-	return fmt.Sprintf("https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-%d.json.gz", year)
+	return nil
 }
