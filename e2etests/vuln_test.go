@@ -242,6 +242,24 @@ func TestStackroxVulnImages(t *testing.T) {
 				},
 			},
 		},
+		{
+			image: "quay.io/rhacs-eng/qa:drools-debian",
+			expectedFeatures: []feature{
+				{"drools", "6.4.0.final", []expectedVuln{
+					{name: "CVE-2021-41411", fixedBy: ""},
+				},
+				},
+			},
+		},
+		{
+			image: "quay.io/rhacs-eng/qa:drools-ubi-minimal",
+			expectedFeatures: []feature{
+				{"drools", "6.4.0.final", []expectedVuln{
+					{name: "CVE-2021-41411", fixedBy: ""},
+				},
+				},
+			},
+		},
 	} {
 		t.Run(testCase.image, func(t *testing.T) {
 			testSingleVulnImage(testCase, t)
