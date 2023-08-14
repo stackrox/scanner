@@ -29,10 +29,10 @@ var DebianReleasesMapping = map[string]string{
 	"sid":      "unstable",
 
 	// Class names
-	"oldoldstable": "9",
-	"oldstable":    "10",
-	"stable":       "11",
-	"testing":      "12",
+	"oldoldstable": "10",
+	"oldstable":    "11",
+	"stable":       "12",
+	"testing":      "13",
 	"unstable":     "unstable",
 }
 
@@ -62,4 +62,6 @@ var UbuntuReleasesMapping = map[string]string{
 	"impish":  "21.10",
 	"jammy":   "22.04",
 	"kinetic": "22.10",
+	"lunar":   "23.04",
+	"mantic":  "23.10",
 }
