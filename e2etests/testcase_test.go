@@ -2817,7 +2817,7 @@ var testCases = []testCase{
 					},
 				},
 				AddedBy: "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
-				FixedBy: "1.1.1q-r0",
+				FixedBy: "1.1.1v-r0",
 			},
 		},
 	},
@@ -3808,9 +3808,9 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 								},
 								"CVSSv3": map[string]interface{}{
 									"ExploitabilityScore": 3.9,
-									"ImpactScore":         5.9,
-									"Score":               9.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
 								},
 							},
 						},
@@ -3819,7 +3819,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 					{
 						Name:          "CVE-2022-3786",
 						NamespaceName: "ubuntu:22.04",
-						Description:   "A buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed a malicious certificate or for an application to continue certificate verification despite failure to construct a path to a trusted issuer. An attacker can craft a malicious email address in a certificate to overflow an arbitrary number of bytes containing the `.' character (decimal 46) on the stack. This buffer overflow could result in a crash (causing a denial of service). In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects. Fixed in OpenSSL 3.0.7 (Affected 3.0.0,3.0.1,3.0.2,3.0.3,3.0.4,3.0.5,3.0.6).",
+						Description:   "A buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed a malicious certificate or for an application to continue certificate verification despite failure to construct a path to a trusted issuer. An attacker can craft a malicious email address in a certificate to overflow an arbitrary number of bytes containing the `.' character (decimal 46) on the stack. This buffer overflow could result in a crash (causing a denial of service). In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects.",
 						Link:          "https://ubuntu.com/security/CVE-2022-3786",
 						Severity:      "Important",
 						Metadata: map[string]interface{}{
@@ -3841,7 +3841,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 				},
-				FixedBy: "3.0.2-0ubuntu1.7",
+				FixedBy: "3.0.2-0ubuntu1.10",
 				// This image installs the openssl pacakge in the second layer;
 				// however, the first layer already installed libssl3 whose source package is openssl.
 				// Therefore, we claim openssl was installed in the first layer.
@@ -3864,6 +3864,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				NamespaceName: "ubuntu:22.10",
 				VersionFormat: "dpkg",
 				Version:       "3.0.5-2ubuntu2",
+				FixedBy:       "3.0.5-2ubuntu2.3",
 				AddedBy:       "sha256:2b441754735ea7decb684ef19d54115fc309c270fe7b87ed36aa3773ce50b78b",
 			},
 		},
@@ -4161,15 +4162,17 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "libx11",
+				NamespaceName: "aline:v3.17",
 				VersionFormat: "apk",
 				Version:       "1.8.4-r0",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:        "CVE-2023-3138",
-						Description: "A vulnerability was found in libX11. The security flaw occurs because the functions in src/InitExt.c in libX11 do not check that the values provided for the Request, Event, or Error IDs are within the bounds of the arrays that those functions write to, using those IDs as array indexes. They trust that they were called with values provided by an Xserver adhering to the bounds specified in the X11 protocol, as all X servers provided by X.Org do. As the protocol only specifies a single byte for these values, an out-of-bounds value provided by a malicious server (or a malicious proxy-in-the-middle) can only overwrite other portions of the Display structure and not write outside the bounds of the Display structure itself, possibly causing the client to crash with this memory corruption.",
-						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2023-3138",
-						Severity:    "Important",
-						FixedBy:     "1.8.4-r1",
+						Name:          "CVE-2023-3138",
+						NamespaceName: "alpine:v3.17",
+						Description:   "A vulnerability was found in libX11. The security flaw occurs because the functions in src/InitExt.c in libX11 do not check that the values provided for the Request, Event, or Error IDs are within the bounds of the arrays that those functions write to, using those IDs as array indexes. They trust that they were called with values provided by an Xserver adhering to the bounds specified in the X11 protocol, as all X servers provided by X.Org do. As the protocol only specifies a single byte for these values, an out-of-bounds value provided by a malicious server (or a malicious proxy-in-the-middle) can only overwrite other portions of the Display structure and not write outside the bounds of the Display structure itself, possibly causing the client to crash with this memory corruption.",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2023-3138",
+						Severity:      "Important",
+						FixedBy:       "1.8.4-r1",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -4189,7 +4192,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					},
 				},
 				FixedBy: "1.8.4-r1",
-				AddedBy: "sha256:f56be85fc22e46face30e2c3de3f7fe7c15f8fd7c4e5add29d7f64b87abdaa09",
+				AddedBy: "sha256:4aacde79cec42c8d0c5886185e70a16b107ae8c6b1a67d63d6efdb6d6978ed97",
 			},
 			{
 				Name:          "nghttp2-libs",
@@ -4197,11 +4200,12 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				Version:       "1.51.0-r0",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:        "CVE-2023-35945",
-						Description: "Envoy is a cloud-native high-performance edge/middle/service proxy. Envoy’s HTTP/2 codec may leak a header map and bookkeeping structures upon receiving `RST_STREAM` immediately followed by the `GOAWAY` frames from an upstream server. In nghttp2, cleanup of pending requests due to receipt of the `GOAWAY` frame skips de-allocation of the bookkeeping structure and pending compressed header. The error return [code path] is taken if connection is already marked for not sending more requests due to `GOAWAY` frame. The clean-up code is right after the return statement, causing memory leak. Denial of service through memory exhaustion. This vulnerability was patched in versions(s) 1.26.3, 1.25.8, 1.24.9, 1.23.11.",
-						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2023-35945",
-						Severity:    "Important",
-						FixedBy:     "1.51.0-r1",
+						Name:          "CVE-2023-35945",
+						NamespaceName: "alpine:v3.17",
+						Description:   "Envoy is a cloud-native high-performance edge/middle/service proxy. Envoy’s HTTP/2 codec may leak a header map and bookkeeping structures upon receiving `RST_STREAM` immediately followed by the `GOAWAY` frames from an upstream server. In nghttp2, cleanup of pending requests due to receipt of the `GOAWAY` frame skips de-allocation of the bookkeeping structure and pending compressed header. The error return [code path] is taken if connection is already marked for not sending more requests due to `GOAWAY` frame. The clean-up code is right after the return statement, causing memory leak. Denial of service through memory exhaustion. This vulnerability was patched in versions(s) 1.26.3, 1.25.8, 1.24.9, 1.23.11.",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2023-3138",
+						Severity:      "Important",
+						FixedBy:       "1.51.0-r1",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -4221,7 +4225,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					},
 				},
 				FixedBy: "1.51.0-r1",
-				AddedBy: "sha256:f56be85fc22e46face30e2c3de3f7fe7c15f8fd7c4e5add29d7f64b87abdaa09",
+				AddedBy: "sha256:4aacde79cec42c8d0c5886185e70a16b107ae8c6b1a67d63d6efdb6d6978ed97",
 			},
 		},
 	},
