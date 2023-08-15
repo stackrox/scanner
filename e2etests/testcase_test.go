@@ -4152,4 +4152,77 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
+	{
+		image:                   "nginx:1.25.0-alpine",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		namespace:               "alpine:v3.17",
+		onlyCheckSpecifiedVulns: true,
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "libx11",
+				VersionFormat: "apk",
+				Version:       "1.8.4-r0",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:        "CVE-2023-3138",
+						Description: "A vulnerability was found in libX11. The security flaw occurs because the functions in src/InitExt.c in libX11 do not check that the values provided for the Request, Event, or Error IDs are within the bounds of the arrays that those functions write to, using those IDs as array indexes. They trust that they were called with values provided by an Xserver adhering to the bounds specified in the X11 protocol, as all X servers provided by X.Org do. As the protocol only specifies a single byte for these values, an out-of-bounds value provided by a malicious server (or a malicious proxy-in-the-middle) can only overwrite other portions of the Display structure and not write outside the bounds of the Display structure itself, possibly causing the client to crash with this memory corruption.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2023-3138",
+						Severity:    "Important",
+						FixedBy:     "1.8.4-r1",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								},
+							},
+						},
+					},
+				},
+				FixedBy: "1.8.4-r1",
+				AddedBy: "sha256:f56be85fc22e46face30e2c3de3f7fe7c15f8fd7c4e5add29d7f64b87abdaa09",
+			},
+			{
+				Name:          "nghttp2-libs",
+				VersionFormat: "apk",
+				Version:       "1.51.0-r0",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:        "CVE-2023-35945",
+						Description: "Envoy is a cloud-native high-performance edge/middle/service proxy. Envoy’s HTTP/2 codec may leak a header map and bookkeeping structures upon receiving `RST_STREAM` immediately followed by the `GOAWAY` frames from an upstream server. In nghttp2, cleanup of pending requests due to receipt of the `GOAWAY` frame skips de-allocation of the bookkeeping structure and pending compressed header. The error return [code path] is taken if connection is already marked for not sending more requests due to `GOAWAY` frame. The clean-up code is right after the return statement, causing memory leak. Denial of service through memory exhaustion. This vulnerability was patched in versions(s) 1.26.3, 1.25.8, 1.24.9, 1.23.11.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2023-35945",
+						Severity:    "Important",
+						FixedBy:     "1.51.0-r1",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								},
+							},
+						},
+					},
+				},
+				FixedBy: "1.51.0-r1",
+				AddedBy: "sha256:f56be85fc22e46face30e2c3de3f7fe7c15f8fd7c4e5add29d7f64b87abdaa09",
+			},
+		},
+	},
 }

@@ -121,7 +121,7 @@ func (n *nvdEntry) Summary() string {
 }
 
 func (n *nvdEntry) Metadata() *types.Metadata {
-	if n.Impact.BaseMetricV2.CVSSv2.String() == "" {
+	if n.Impact.BaseMetricV2.CVSSv2.String() == "" && n.Impact.BaseMetricV3.CVSSv3.String() == "" {
 		return nil
 	}
 	metadata := &types.Metadata{

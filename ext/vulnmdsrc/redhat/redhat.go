@@ -23,6 +23,7 @@ const (
 
 type appender struct {
 	metadata map[string]*metadataEnricher
+	skipped  int
 }
 
 type metadataEnricher struct {
@@ -69,7 +70,7 @@ func (a *appender) BuildCache(dumpDir string) error {
 		}
 		_ = f.Close()
 	}
-	log.Infof("Obtained metadata for %d vulns", len(a.metadata))
+	log.Infof("Obtained metadata for %d Red Hat vulns (skipped %d)", len(a.metadata), a.skipped)
 
 	return nil
 }
@@ -87,6 +88,8 @@ func (a *appender) parseDataFeed(r io.Reader) error {
 		enricher := newMetadataEnricher(&redhatEntry)
 		if enricher.metadata != nil {
 			a.metadata[redhatEntry.Name()] = enricher
+		} else {
+			a.skipped++
 		}
 	}
 
