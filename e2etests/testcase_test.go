@@ -543,6 +543,7 @@ var testCases = []testCase{
 		// This image is older than June 2020, so we need to explicitly request for an uncertified scan.
 		uncertifiedRHEL:          true,
 		checkProvidedExecutables: true,
+		onlyCheckSpecifiedVulns:  true,
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "procps-ng",
@@ -3655,7 +3656,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.20-1.el8_8",
+				FixedBy:       "6.0.21-1.el8_8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -3694,7 +3695,7 @@ Bug Fix(es) and Enhancement(s):
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.20-1.el8_8",
+				FixedBy:       "6.0.21-1.el8_8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
