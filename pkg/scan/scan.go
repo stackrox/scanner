@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
+	"runtime"
 
 	imageManifest "github.com/containers/image/v5/manifest"
 	"github.com/docker/distribution"
@@ -153,6 +154,34 @@ func renderDigest(manifest payloadGetter) (digest.Digest, error) {
 	return dig, nil
 }
 
+func handleManifestLists(reg types.Registry, remote, ref string, manifests []manifestlist.ManifestDescriptor) (digest.Digest, []string, error) {
+	if len(manifests) == 0 {
+		return "", nil, errors.Errorf("no valid manifests found for %s:%s", remote, ref)
+	}
+	if len(manifests) == 1 {
+		return handleManifest(reg, manifests[0].MediaType, remote, manifests[0].Digest.String())
+	}
+	var amdManifest manifestlist.ManifestDescriptor
+	var foundAMD bool
+	for _, m := range manifests {
+		if m.Platform.OS != "linux" {
+			continue
+		}
+		// Matching platform for GOARCH takes priority so return immediately
+		if m.Platform.Architecture == runtime.GOARCH {
+			return handleManifest(reg, m.MediaType, remote, m.Digest.String())
+		}
+		if m.Platform.Architecture == "amd64" {
+			foundAMD = true
+			amdManifest = m
+		}
+	}
+	if foundAMD {
+		return handleManifest(reg, amdManifest.MediaType, remote, amdManifest.Digest.String())
+	}
+	return "", nil, errors.Errorf("no manifest in list matched linux and amd64 or %s architectures: %q", runtime.GOARCH, ref)
+}
+
 func handleManifest(reg types.Registry, manifestType, remote, ref string) (digest.Digest, []string, error) {
 	switch manifestType {
 	case manifestV1.MediaTypeManifest:
@@ -203,25 +232,13 @@ func handleManifest(reg types.Registry, manifestType, remote, ref string) (diges
 		if err != nil {
 			return "", nil, err
 		}
-		for _, manifest := range manifestList.Manifests {
-			// TODO(ROX-13284): Support multi-arch images.
-			if manifest.Platform.OS == "linux" && manifest.Platform.Architecture == "amd64" {
-				return handleManifest(reg, manifest.MediaType, remote, manifest.Digest.String())
-			}
-		}
-		return "", nil, errors.New("No corresponding manifest found from Docker manifest list object")
+		return handleManifestLists(reg, remote, ref, manifestList.Manifests)
 	case registry.MediaTypeImageIndex:
 		imageIndex, err := reg.ImageIndex(remote, ref)
 		if err != nil {
 			return "", nil, err
 		}
-		for _, manifest := range imageIndex.Manifests {
-			// TODO(ROX-13284): Support multi-arch images.
-			if manifest.Platform.OS == "linux" && manifest.Platform.Architecture == "amd64" {
-				return handleManifest(reg, manifest.MediaType, remote, manifest.Digest.String())
-			}
-		}
-		return "", nil, errors.New("No corresponding manifest found from OCI image index object")
+		return handleManifestLists(reg, remote, ref, imageIndex.Manifests)
 	default:
 		return "", nil, fmt.Errorf("Could not parse manifest type %q", manifestType)
 	}
