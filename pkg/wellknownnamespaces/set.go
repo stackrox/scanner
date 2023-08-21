@@ -46,6 +46,7 @@ var (
 		"alpine:v3.15",
 		"alpine:v3.16",
 		"alpine:v3.17",
+		"alpine:v3.18",
 		"alpine:edge",
 		"amzn:2018.03",
 		"amzn:2",
@@ -54,6 +55,7 @@ var (
 		"centos:8",
 		"debian:10",
 		"debian:11",
+		"debian:12",
 		"debian:unstable",
 		"rhel:6",
 		"rhel:7",
@@ -65,5 +67,7 @@ var (
 		"ubuntu:20.04",
 		"ubuntu:22.04",
 		"ubuntu:22.10",
+		"ubuntu:23.04",
+		"ubuntu:23.10",
 	)
 )

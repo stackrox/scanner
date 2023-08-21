@@ -4084,4 +4084,72 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
+	{
+		image:                   "alpine:3.18.3",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "alpine:v3.18",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "apk-tools",
+				NamespaceName: "alpine:v3.18",
+				VersionFormat: "apk",
+				Version:       "2.14.0-r2",
+				AddedBy:       "sha256:7264a8db6415046d36d16ba98b79778e18accee6ffa71850405994cffa9be7de",
+			},
+		},
+	},
+	{
+		image:                   "debian:12.0",
+		registry:                "https://registry-1.docker.io",
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "debian:12",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "base-files",
+				NamespaceName: "debian:12",
+				VersionFormat: "dpkg",
+				Version:       "12.4",
+				AddedBy:       "sha256:d52e4f012db158bb7c0fe215b98af1facaddcbaee530efd69b1bae07d597b711",
+			},
+		},
+	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:ubuntu-23.04",
+		registry:                "https://quay.io",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		source:                  "NVD",
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:23.04",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "base-files",
+				NamespaceName: "ubuntu:23.04",
+				VersionFormat: "dpkg",
+				Version:       "12.3ubuntu2",
+				AddedBy:       "sha256:b631a20f124dbf4ef89945623fa5c94460561f9c7b119e17fd3c1a4bb50ced01",
+			},
+		},
+	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:ubuntu-23.10",
+		registry:                "https://quay.io",
+		source:                  "NVD",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:23.10",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "base-files",
+				NamespaceName: "ubuntu:23.10",
+				VersionFormat: "dpkg",
+				Version:       "13ubuntu1",
+				AddedBy:       "sha256:316675922a661ce4c35389bdeea6e9ec8d4708e41f08671b586c7aaea469b2c1",
+			},
+		},
+	},
 }
