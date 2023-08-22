@@ -179,7 +179,7 @@ func handleManifestLists(reg types.Registry, remote, ref string, manifests []man
 	if foundAMD {
 		return handleManifest(reg, amdManifest.MediaType, remote, amdManifest.Digest.String())
 	}
-	return "", nil, errors.Errorf("no manifest in list matched linux and amd64 or %s architectures: %q", runtime.GOARCH, ref)
+	return "", nil, errors.Errorf("no manifest in list matched linux and amd64 or %s architectures: %s:%s", runtime.GOARCH, remote, ref)
 }
 
 func handleManifest(reg types.Registry, manifestType, remote, ref string) (digest.Digest, []string, error) {
