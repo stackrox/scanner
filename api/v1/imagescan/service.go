@@ -203,10 +203,18 @@ func (s *serviceImpl) getImageComponents(_ context.Context, req *v1.GetImageComp
 }
 
 func (s *serviceImpl) GetImageVulnerabilities(_ context.Context, req *v1.GetImageVulnerabilitiesRequest) (*v1.GetImageVulnerabilitiesResponse, error) {
+	imageName := "unknown"
+	if req.GetImage() != "" {
+		imageName = req.GetImage()
+	}
+	logrus.Infof("Fetching vulnerabilities for %s", imageName)
+
 	layer, err := apiV1.GetVulnerabilitiesForComponents(s.db, req.GetComponents(), common.HasUncertifiedRHEL(req.GetNotes()))
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	logrus.Infof("Done fetching vulnerabilities for %s", imageName)
 
 	return &v1.GetImageVulnerabilitiesResponse{
 		ScannerVersion: s.version,

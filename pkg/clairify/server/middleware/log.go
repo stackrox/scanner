@@ -5,6 +5,7 @@ package middleware
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -19,7 +20,55 @@ func Log() mux.MiddlewareFunc {
 				"URI":    r.URL.String(),
 			}).Infof("Received HTTP request from %s", r.RemoteAddr)
 
-			next.ServeHTTP(w, r)
+			start := time.Now()
+
+			rw := newResponseWriter(w)
+			next.ServeHTTP(rw, r)
+
+			logrus.WithFields(map[string]interface{}{
+				"Method":   r.Method,
+				"URI":      r.URL.String(),
+				"Duration": time.Since(start).String(),
+				"Status":   rw.statusCode,
+			}).Infof("Finished HTTP request from %s", r.RemoteAddr)
 		})
 	}
+}
+
+var _ http.ResponseWriter = (*responseWriter)(nil)
+
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func newResponseWriter(w http.ResponseWriter) *responseWriter {
+	return &responseWriter{
+		ResponseWriter: w,
+		statusCode:     -1,
+	}
+}
+
+func (s *responseWriter) Write(b []byte) (int, error) {
+	n, err := s.ResponseWriter.Write(b)
+
+	// From the docs:
+	//
+	// If WriteHeader is not called explicitly, the first call to Write
+	// will trigger an implicit WriteHeader(http.StatusOK).
+	// Thus explicit calls to WriteHeader are mainly used to
+	// send error codes or 1xx informational responses.
+	//
+	// So, if s.statusCode is not set by this point, then the status code
+	// is http.StatusOK, 200.
+	if s.statusCode == -1 {
+		s.statusCode = http.StatusOK
+	}
+
+	return n, err
+}
+
+func (s *responseWriter) WriteHeader(statusCode int) {
+	s.ResponseWriter.WriteHeader(statusCode)
+	s.statusCode = statusCode
 }
