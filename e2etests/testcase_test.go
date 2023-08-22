@@ -4162,7 +4162,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "libx11",
-				NamespaceName: "aline:v3.17",
+				NamespaceName: "alpine:v3.17",
 				VersionFormat: "apk",
 				Version:       "1.8.4-r0",
 				Vulnerabilities: []apiV1.Vulnerability{
@@ -4195,7 +4195,8 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				AddedBy: "sha256:4aacde79cec42c8d0c5886185e70a16b107ae8c6b1a67d63d6efdb6d6978ed97",
 			},
 			{
-				Name:          "nghttp2-libs",
+				Name:          "nghttp2",
+				NamespaceName: "alpine:v3.17",
 				VersionFormat: "apk",
 				Version:       "1.51.0-r0",
 				Vulnerabilities: []apiV1.Vulnerability{
@@ -4203,7 +4204,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						Name:          "CVE-2023-35945",
 						NamespaceName: "alpine:v3.17",
 						Description:   "Envoy is a cloud-native high-performance edge/middle/service proxy. Envoy’s HTTP/2 codec may leak a header map and bookkeeping structures upon receiving `RST_STREAM` immediately followed by the `GOAWAY` frames from an upstream server. In nghttp2, cleanup of pending requests due to receipt of the `GOAWAY` frame skips de-allocation of the bookkeeping structure and pending compressed header. The error return [code path] is taken if connection is already marked for not sending more requests due to `GOAWAY` frame. The clean-up code is right after the return statement, causing memory leak. Denial of service through memory exhaustion. This vulnerability was patched in versions(s) 1.26.3, 1.25.8, 1.24.9, 1.23.11.",
-						Link:          "https://www.cve.org/CVERecord?id=CVE-2023-3138",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2023-35945",
 						Severity:      "Important",
 						FixedBy:       "1.51.0-r1",
 						Metadata: map[string]interface{}{
