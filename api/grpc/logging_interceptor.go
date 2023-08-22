@@ -5,25 +5,35 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/sirupsen/logrus"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/peer"
-	"google.golang.org/grpc/status"
 )
 
+// loggingUnaryServerInterceptor adapts logrus logger to interceptor logger.
+// This is a modified version of https://github.com/grpc-ecosystem/go-grpc-middleware/blob/v2.0.0/interceptors/logging/examples/logrus/example_test.go.
 func loggingUnaryServerInterceptor() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		peerInfo, exists := peer.FromContext(ctx)
-		if !exists {
-			return nil, status.Error(codes.InvalidArgument, "unable to parse peer information from request context")
+	return logging.UnaryServerInterceptor(logging.LoggerFunc(func(_ context.Context, lvl logging.Level, msg string, fields ...any) {
+		f := make(map[string]any, len(fields)/2)
+		i := logging.Fields(fields).Iterator()
+		if i.Next() {
+			k, v := i.At()
+			f[k] = v
 		}
 
-		logrus.WithFields(map[string]interface{}{
-			"Method": info.FullMethod,
-		}).Infof("Received gRPC request from %v", peerInfo.Addr)
-
-		return handler(ctx, req)
-	}
+		switch lvl {
+		case logging.LevelDebug:
+			log.WithFields(f).Debug(msg)
+		case logging.LevelInfo:
+			log.WithFields(f).Info(msg)
+		case logging.LevelWarn:
+			log.WithFields(f).Warn(msg)
+		case logging.LevelError:
+			log.WithFields(f).Error(msg)
+		default:
+			panic(fmt.Sprintf("unknown level %v", lvl))
+		}
+	}))
 }
