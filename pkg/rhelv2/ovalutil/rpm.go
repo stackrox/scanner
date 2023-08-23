@@ -70,6 +70,9 @@ func RPMDefsToVulns(root *oval.Root, protoVuln ProtoVulnFunc) ([]*database.RHELv
 	vulns := make([]*database.RHELv2Vulnerability, 0, 10000)
 	var cris []*criterionWithModule
 	for _, def := range root.Definitions.Definitions {
+		// Avoid implicit memory aliasing.
+		def := def
+
 		// create our prototype vulnerability
 		vuln, err := protoVuln(def)
 		if err != nil {
