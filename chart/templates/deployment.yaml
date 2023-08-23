@@ -28,8 +28,6 @@ spec:
               fieldPath: metadata.name
         - name: ROX_SKIP_PEER_VALIDATION
           value: "true"
-        - name: ROX_RHCOS_NODE_SCANNING
-          value: "true"
         - name: ROX_ACTIVE_VULN_MGMT
           value: "true"
         resources:
