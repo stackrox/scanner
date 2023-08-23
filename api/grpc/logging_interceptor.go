@@ -9,21 +9,23 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/peer"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/metadata"
 )
 
 func loggingUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		peerInfo, exists := peer.FromContext(ctx)
-		if !exists {
-			return nil, status.Error(codes.InvalidArgument, "unable to parse peer information from request context")
+		addr := "unknown"
+
+		addrs := metadata.ValueFromIncomingContext(ctx, "x-forwarded-for")
+		if len(addrs) > 0 {
+			addr = addrs[0]
 		}
 
+		md, _ := metadata.FromIncomingContext(ctx)
 		logrus.WithFields(map[string]interface{}{
 			"Method": info.FullMethod,
-		}).Infof("Received gRPC request from %v", peerInfo.Addr)
+			"HEADERS": md,
+		}).Infof("Received gRPC request from %s", addr)
 
 		start := time.Now()
 
@@ -32,7 +34,7 @@ func loggingUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 		logrus.WithFields(map[string]interface{}{
 			"Method":   info.FullMethod,
 			"Duration": time.Since(start).String(),
-		}).Infof("Finished gRPC request from %v", peerInfo.Addr)
+		}).Infof("Finished gRPC request from %s", addr)
 
 		return resp, err
 	}
