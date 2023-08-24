@@ -184,6 +184,7 @@ func TestGRPCGetImageVulnerabilities(t *testing.T) {
 		// This test assumes TestGRPCGetImageComponents passes, so there is no need to check the component response.
 
 		vulnsResp, err := client.GetImageVulnerabilities(context.Background(), &v1.GetImageVulnerabilitiesRequest{
+			Image:      testCase.image,
 			Components: imgComponentsResp.GetComponents(),
 			Notes:      imgComponentsResp.GetNotes(),
 		})

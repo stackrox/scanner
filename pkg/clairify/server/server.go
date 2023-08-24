@@ -213,11 +213,14 @@ func (s *Server) ScanImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logrus.Infof("Start processing image %v", image)
 	_, err = server.ProcessImage(s.storage, image, imageRequest.Registry, username, password, imageRequest.Insecure, imageRequest.UncertifiedRHELScan)
 	if err != nil {
+		logrus.Infof("End processing image %v: failure", image)
 		clairErrorString(w, http.StatusInternalServerError, "error processing image %q: %v", imageRequest.Image, err)
 		return
 	}
+	logrus.Infof("End processing image %v: success", image)
 	imageEnvelope := types.ImageEnvelope{
 		ScannerVersion: s.version,
 		Image:          image,
@@ -277,7 +280,8 @@ func (s *Server) Start() error {
 	r := mux.NewRouter()
 	// Middlewares are executed in order.
 	r.Use(
-		// Ensure the user is authorized before doing anything else.
+		middleware.Log(),
+		// Ensure the user is authorized before doing anything other than logging.
 		middleware.VerifyPeerCerts(),
 		middleware.SlimMode(),
 	)

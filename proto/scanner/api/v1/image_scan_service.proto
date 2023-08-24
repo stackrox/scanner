@@ -56,7 +56,9 @@ message GetImageComponentsResponse {
     repeated Note notes           = 3;
 }
 
+// Next tag: 4
 message GetImageVulnerabilitiesRequest {
+    string        image      = 3;
     Components    components = 1;
     repeated Note notes      = 2;
 }
