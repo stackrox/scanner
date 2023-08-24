@@ -13,7 +13,6 @@ import (
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
-	"github.com/stackrox/scanner/pkg/httputil"
 	"github.com/stackrox/scanner/pkg/mtls"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -75,8 +74,7 @@ func (a *apiImpl) Start() {
 		panic(err)
 	}
 
-	grpcHandler := httputil.WithLogging(grpcServer, httputil.GRPC)
-	gwHandler := httputil.WithLogging(a.muxer(conn), httputil.HTTP)
+	gwHandler := a.muxer(conn)
 
 	var publicListener net.Listener
 	if a.config.PublicEndpoint {
@@ -92,7 +90,7 @@ func (a *apiImpl) Start() {
 		}
 
 		publicListener = tls.NewListener(lis, conf)
-		handler := httpGrpcRouter(grpcHandler, gwHandler)
+		handler := httpGrpcRouter(grpcServer, gwHandler)
 		go func() {
 			server := http.Server{
 				Handler:  handler,
@@ -147,7 +145,8 @@ func WithDefaultInterceptors() ConfigOpts {
 	return func(cfg *Config) {
 		// Interceptors are executed in order.
 		cfg.UnaryInterceptors = []grpc.UnaryServerInterceptor{
-			// Ensure the user is authorized before doing anything else.
+			loggingUnaryServerInterceptor(),
+			// Ensure the user is authorized before doing anything other than logging.
 			verifyPeerCertsUnaryServerInterceptor(),
 			slimModeUnaryServerInterceptor(),
 			grpcprometheus.UnaryServerInterceptor,
@@ -189,10 +188,10 @@ func (a *apiImpl) muxer(localConn *grpc.ClientConn) http.Handler {
 	return mux
 }
 
-func httpGrpcRouter(grpcHandler, httpHandler http.Handler) http.Handler {
+func httpGrpcRouter(grpcServer *grpc.Server, httpHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
-			grpcHandler.ServeHTTP(w, r)
+			grpcServer.ServeHTTP(w, r)
 		} else {
 			httpHandler.ServeHTTP(w, r)
 		}
