@@ -1,12 +1,12 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8-minimal
-ARG BASE_TAG=8.8
+ARG BASE_TAG=latest
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 COPY bundle.tar.gz /
 
 WORKDIR /bundle
-RUN microdnf -y install tar gzip && tar -zxf /bundle.tar.gz
+RUN microdnf install tar gzip && tar -zxf /bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
@@ -31,11 +31,11 @@ RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-${
     rpm -i /tmp/pg_repo.rpm && \
     # Skip repo check for ARM as it's used only for development purposes and package has wrong signature.
     if [[ "$POSTGRESQL_ARCH" == "aarch64" ]]; then sed -i 's/repo_gpgcheck = 1/repo_gpgcheck = 0/g' /etc/yum.repos.d/pgdg-redhat-all.repo; fi && \
-    microdnf upgrade -y && \
-    microdnf install -y shadow-utils && \
+    microdnf upgrade --nobest && \
+    microdnf install shadow-utils && \
     groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
-    microdnf install -y \
+    microdnf install \
         ca-certificates libicu systemd-sysv glibc-locale-source glibc-langpack-en \
         postgresql12-server && \
     # The removal of /usr/share/zoneinfo from UBI minimal images is intentional.
