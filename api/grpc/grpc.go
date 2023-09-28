@@ -13,7 +13,10 @@ import (
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/mtls"
+	"github.com/stackrox/scanner/pkg/observability/tracing"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -151,6 +154,9 @@ func WithDefaultInterceptors() ConfigOpts {
 			slimModeUnaryServerInterceptor(),
 			grpcprometheus.UnaryServerInterceptor,
 		}
+		if features.Tracing.Enabled() {
+			cfg.UnaryInterceptors = append(cfg.UnaryInterceptors, tracing.UnaryServerInterceptor())
+		}
 	}
 }
 
@@ -175,6 +181,9 @@ func (a *apiImpl) Register(services ...APIService) {
 func (a *apiImpl) muxer(localConn *grpc.ClientConn) http.Handler {
 	mux := http.NewServeMux()
 	for route, handler := range a.config.CustomRoutes {
+		if features.Tracing.Enabled() {
+			handler = otelhttp.NewHandler(handler, route)
+		}
 		mux.Handle(route, handler)
 	}
 

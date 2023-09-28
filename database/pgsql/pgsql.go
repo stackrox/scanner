@@ -31,6 +31,8 @@ import (
 	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/database/pgsql/migrations"
 	"github.com/stackrox/scanner/pkg/commonerr"
+	"go.nhat.io/otelsql"
+	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
 	"gopkg.in/yaml.v2"
 )
 
@@ -132,8 +134,20 @@ func openDatabase(registrableComponentConfig database.RegistrableComponentConfig
 		}
 	}
 
+	// Register OpenTelemetry tracer.
+	driverName, err := otelsql.Register("postgres",
+		otelsql.AllowRoot(),
+		otelsql.TraceQueryWithoutArgs(),
+		otelsql.TraceRowsClose(),
+		otelsql.TraceRowsAffected(),
+		otelsql.WithSystem(semconv.DBSystemPostgreSQL),
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not register OpenTelemetry database tracer")
+	}
+
 	// Open database.
-	pg.DB, err = sql.Open("postgres", src)
+	pg.DB, err = sql.Open(driverName, src)
 	if err != nil {
 		pg.Close()
 		return nil, fmt.Errorf("pgsql: could not open database: %v", err)

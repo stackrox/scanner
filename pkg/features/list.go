@@ -5,4 +5,6 @@ var (
 	ContinueUnknownOS = registerFeature("Enable continuation upon detecting unknown OS", "ROX_CONTINUE_UNKNOWN_OS", true)
 	// RHEL9Scanning enables support for scanning RHEL9-based images.
 	RHEL9Scanning = registerFeature("Enable support for scanning RHEL9 images", "ROX_RHEL9_SCANNING", true)
+	// Tracing enables OpenTelemetry distributed tracing.
+	Tracing = registerFeature("Enable OpenTelemetry tracing", "ROX_TRACING", true)
 )

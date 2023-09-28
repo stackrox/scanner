@@ -47,7 +47,7 @@ LOCAL_VOLUME_ARGS := -v$(CURDIR):/src:delegated -v $(GOPATH):/go:delegated
 GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
 IMAGE_BUILD_FLAGS := -e CGO_ENABLED=0 -e GOOS=linux -e GOARCH=${GOARCH}
 BUILD_FLAGS := CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH}
-BUILD_CMD := go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
+BUILD_CMD := go build -trimpath  -buildvcs=false -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
 NODESCAN_BUILD_CMD := go build -trimpath -o tools/bin/local-nodescanner ./tools/local-nodescanner
 
 #####################################################################
@@ -479,7 +479,7 @@ local-nodescanner:
 	$(BUILD_FLAGS) $(NODESCAN_BUILD_CMD)
 
 .PHONY: local-nodescanner-build-dockerized
-local-nodescanner-build-dockerized: 
+local-nodescanner-build-dockerized:
 	@echo "+ $@"
 ifdef CI
 	docker container create --name builder $(BUILD_IMAGE) $(NODESCAN_BUILD_CMD)

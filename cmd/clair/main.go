@@ -47,8 +47,10 @@ import (
 	"github.com/stackrox/scanner/pkg/clairify/metrics"
 	"github.com/stackrox/scanner/pkg/clairify/server"
 	"github.com/stackrox/scanner/pkg/env"
+	"github.com/stackrox/scanner/pkg/features"
 	"github.com/stackrox/scanner/pkg/formatter"
 	"github.com/stackrox/scanner/pkg/ioutils"
+	"github.com/stackrox/scanner/pkg/observability/tracing"
 	"github.com/stackrox/scanner/pkg/repo2cpe"
 	"github.com/stackrox/scanner/pkg/updater"
 	"github.com/stackrox/scanner/pkg/version"
@@ -178,6 +180,11 @@ func Boot(config *Config, slimMode bool) {
 
 	metricsServ := metrics.NewHTTPServer(config.API)
 	go metricsServ.RunForever()
+
+	if features.Tracing.Enabled() {
+		tracing.Singleton().Start(tracing.ScannerResource())
+		defer tracing.Singleton().Stop()
+	}
 
 	serv := server.New(fmt.Sprintf(":%d", config.API.HTTPSPort), db)
 	go api.RunClairify(serv)

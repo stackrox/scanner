@@ -38,4 +38,7 @@ var (
 	// ActiveVulnMgmt is the same flag in Central that determines if active vulnerability management should be
 	// enabled and executables should be pulled from the database
 	ActiveVulnMgmt = RegisterBooleanSetting("ROX_ACTIVE_VULN_MGMT", false)
+
+	// OpenTelemetryCollectorURL is the open telemetry collector host address.
+	OpenTelemetryCollectorURL = RegisterSetting("ROX_OTEL_COLLECTOR_URL", WithDefault("jaeger-collector.default.svc.cluster.local.:4317"))
 )
