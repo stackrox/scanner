@@ -33,12 +33,20 @@ var (
 	amazonReleaseRegexp = regexp.MustCompile(`(?P<os>Amazon) (Linux release|Linux AMI release) (?P<version>[\d]+\.[\d]+|[\d]+)`)
 	oracleReleaseRegexp = regexp.MustCompile(`(?P<os>Oracle) (Linux Server release) (?P<version>[\d]+)`)
 	centosReleaseRegexp = regexp.MustCompile(`(?P<os>[^\s]*) (Linux release|release) (?P<version>[\d]+)`)
-	redhatReleaseRegexp = regexp.MustCompile(`(?P<os>Red Hat Enterprise Linux) (Client release|Server release|Workstation release|release) (?P<version>[\d]+)`)
+	redhatReleaseRegexp = regexp.MustCompile(`(?P<os>Red Hat Enterprise Linux) (Client release|Atomic Host release|Server release|Workstation release|release) (?P<version>[\d]+)`)
 	rhcosReleaseRegexp  = regexp.MustCompile(`(?P<os>Red Hat Enterprise Linux) (CoreOS release) (?P<version>[\d]+[\.]?[\d]*)`) // RHCOS can differ a lot between minor versions, so we also keep the minor for it
 	rockyReleaseRegexp  = regexp.MustCompile(`(?P<os>Rocky) (Linux release) (?P<version>[\d]+)`)
 
 	// RequiredFilenames defines the names of the files required to identify the RHEL-based release.
-	RequiredFilenames = []string{"etc/oracle-release", "etc/centos-release", "etc/redhat-release", "etc/rocky-release", "etc/system-release"}
+	RequiredFilenames = []string{
+		"etc/centos-release",
+		"usr/lib/centos-release",
+		"etc/oracle-release",
+		"etc/redhat-release",
+		"usr/lib/redhat-release",
+		"etc/rocky-release",
+		"etc/system-release",
+	}
 )
 
 type detector struct{}

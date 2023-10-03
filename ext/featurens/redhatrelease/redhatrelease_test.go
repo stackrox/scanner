@@ -106,6 +106,12 @@ func TestDetector(t *testing.T) {
 			}),
 		},
 		{
+			ExpectedNamespace: &database.Namespace{Name: "rhel:7", VersionFormat: rpm.ParserName},
+			Files: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"etc/redhat-release": {Contents: []byte(`Red Hat Enterprise Linux Atomic Host release 7.9`)},
+			}),
+		},
+		{
 			ExpectedNamespace: nil,
 			Files:             tarutil.CreateNewLayerFiles(nil),
 		},

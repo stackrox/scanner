@@ -32,11 +32,12 @@ var (
 	blocklistFilenames = []string{
 		"etc/alpine-release",
 		"etc/centos-release",
+		"usr/lib/centos-release",
 		"etc/fedora-release",
 		"etc/oracle-release",
 		"etc/redhat-release",
+		"usr/lib/redhat-release",
 		"etc/rocky-release",
-		"usr/lib/centos-release",
 	}
 
 	// RequiredFilenames defines the names of the files required to identify the release.
@@ -50,7 +51,7 @@ func init() {
 }
 
 func (d detector) Detect(files analyzer.Files, _ *featurens.DetectorOptions) *database.Namespace {
-	var OS, version string
+	var os, version string
 
 	for _, filePath := range blocklistFilenames {
 		if _, hasFile := files.Get(filePath); hasFile {
@@ -64,14 +65,14 @@ func (d detector) Detect(files analyzer.Files, _ *featurens.DetectorOptions) *da
 			continue
 		}
 
-		OS, version = osrelease.GetOSAndVersionFromOSRelease(f.Contents)
+		os, version = osrelease.GetOSAndVersionFromOSRelease(f.Contents)
 	}
 
 	// Determine the VersionFormat.
 	// This intentionally does not support alpine,
 	// as this detector does not handle alpine correctly.
 	var versionFormat string
-	switch OS {
+	switch os {
 	case "debian", "ubuntu":
 		versionFormat = dpkg.ParserName
 	case "centos", "rhel", "amzn", "oracle":
@@ -80,9 +81,9 @@ func (d detector) Detect(files analyzer.Files, _ *featurens.DetectorOptions) *da
 		return nil
 	}
 
-	if OS != "" && version != "" {
+	if os != "" && version != "" {
 		return &database.Namespace{
-			Name:          OS + ":" + version,
+			Name:          os + ":" + version,
 			VersionFormat: versionFormat,
 		}
 	}
