@@ -25,22 +25,24 @@ const (
 )
 
 var (
-	// AllRHELRequiredFiles lists all the names of the files required to identify RHEL-based releases.
-	AllRHELRequiredFiles set.StringSet
+	// allRHELRequiredFiles lists all the names of the files required to identify RHEL-based releases.
+	allRHELRequiredFiles set.StringSet
 
 	// contentManifestsDirs set with all known directories that might contain content manifest files.
 	contentManifestDirs set.StringSet
 )
 
 func init() {
-	AllRHELRequiredFiles.AddAll(RequiredFilenames()...)
-	AllRHELRequiredFiles.AddAll(redhatrelease.RequiredFilenames...)
-	AllRHELRequiredFiles.AddAll(osrelease.RequiredFilenames...)
+	// Do this first, as RequiredFilenames() requires this.
 	contentManifestDirs.AddAll(
 		// Certified RHEL images.
 		"root/buildinfo/content_manifests",
 		// RHCOS nodes.
-		"usr/share/buildinfo")
+		"usr/share/buildinfo",
+	)
+	allRHELRequiredFiles.AddAll(RequiredFilenames()...)
+	allRHELRequiredFiles.AddAll(redhatrelease.RequiredFilenames...)
+	allRHELRequiredFiles.AddAll(osrelease.RequiredFilenames...)
 }
 
 // ListFeatures returns the features found in the given files as a slice of
@@ -65,7 +67,7 @@ func listFeatures(files analyzer.Files, testing bool) ([]*database.RHELv2Package
 // AddToDependencyMap checks and adds files to executable and library dependency for RHEL package
 func AddToDependencyMap(filename string, fileData analyzer.FileData, execToDeps, libToDeps database.StringToStringsMap) {
 	// The first character is always "/", which is removed when inserted into the layer files.
-	if fileData.Executable && !AllRHELRequiredFiles.Contains(filename[1:]) {
+	if fileData.Executable && !allRHELRequiredFiles.Contains(filename[1:]) {
 		deps := set.NewStringSet()
 		if fileData.ELFMetadata != nil {
 			deps.AddAll(fileData.ELFMetadata.ImportedLibraries...)
