@@ -2,22 +2,26 @@ package osrelease
 
 import (
 	"bufio"
-	"regexp"
 	"strings"
 
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/ext/featurens/util"
 )
 
-var (
-	osPattern      = regexp.MustCompile(`^ID=(.*)`)
-	versionPattern = regexp.MustCompile(`^VERSION_ID=(.*)`)
-)
-
 // GetOSAndVersionFromOSRelease returns the value of ID= and VERSION_ID= from /etc/os-release formatted data
 func GetOSAndVersionFromOSRelease(data []byte) (os, version string) {
 	m := GetOSReleaseMap(data, "ID", "VERSION_ID")
-	return util.NormalizeOSName(m["ID"]), m["VERSION_ID"]
+
+	os = util.NormalizeOSName(m["ID"])
+	version = m["VERSION_ID"]
+	switch os {
+	case "centos", "rhel":
+		// Only use the major version.
+		version, _, _ = strings.Cut(version, ".")
+	default:
+	}
+
+	return os, version
 }
 
 // GetOSReleaseMap returns a map where keys and value are extracted from the
