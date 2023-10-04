@@ -9,7 +9,8 @@ require (
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
 	github.com/containers/image/v5 v5.28.0
 	github.com/davecgh/go-spew v1.1.1
-	github.com/docker/distribution v2.8.2+incompatible
+	github.com/distribution/reference v0.5.0
+	github.com/docker/distribution v2.8.3+incompatible
 	github.com/facebookincubator/nvdtools v0.1.5
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.5.0
