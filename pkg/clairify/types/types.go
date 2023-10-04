@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/distribution/reference"
 	"github.com/docker/distribution/manifest/manifestlist"
 	ociV1 "github.com/docker/distribution/manifest/ocischema"
 	manifestV1 "github.com/docker/distribution/manifest/schema1"
 	manifestV2 "github.com/docker/distribution/manifest/schema2"
-	"github.com/docker/distribution/reference"
 	"github.com/heroku/docker-registry-client/registry"
 	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
