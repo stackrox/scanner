@@ -926,4 +926,180 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 		LastModifiedDate: "2023-07-17T21:00Z",
 		PublishedDate:    "2023-07-17T21:00Z",
 	},
+	////////////////////////////////////////////
+	// Start cURL and libcurl vulnerabilities //
+	////////////////////////////////////////////
+	// Each vendor already has an entry for this. Only NVD is missing an entry, so we fill it here.
+	"CVE-2023-38545": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ASSIGNER: "cve@mitre.org",
+				ID:       "CVE-2023-38545",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang: "en",
+						Value: `This flaw makes curl overflow a heap based buffer in the SOCKS5 proxy handshake.
+
+When curl is asked to pass along the hostname to the SOCKS5 proxy to allow that to resolve the address instead of it getting done by curl itself, the maximum length that hostname can be is 255 bytes.
+
+If the hostname is detected to be longer than 255 bytes, curl switches to local name resolving and instead passes on the resolved address only to the proxy. Due to a bug, the local variable that means "let the host resolve the name" could get the wrong value during a slow SOCKS5 handshake, and contrary to the intention, copy the too long hostname to the target buffer instead of copying just the resolved address there.`,
+					},
+				},
+			},
+			Problemtype: &schema.CVEJSON40Problemtype{
+				ProblemtypeData: []*schema.CVEJSON40ProblemtypeProblemtypeData{
+					{
+						Description: []*schema.CVEJSON40LangString{
+							{
+								Lang:  "en",
+								Value: "CWE-611",
+							},
+						},
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name:      "https://github.com/curl/curl/discussions/12026",
+						Refsource: "MISC",
+						Tags:      []string{"Patch", "Third Party Advisory"},
+						URL:       "https://github.com/curl/curl/discussions/12026",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:            `cpe:2.3:a:ubuntu:curl:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "8.4.0",
+							Vulnerable:          true,
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             7.5,
+					BaseSeverity:          "HIGH",
+					ConfidentialityImpact: "HIGH",
+					IntegrityImpact:       "HIGH",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "REQUIRED",
+					VectorString:          "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 1.6,
+				ImpactScore:         5.9,
+			},
+		},
+		LastModifiedDate: "2023-10-11T00:00Z",
+		PublishedDate:    "2023-10-11T00:00Z",
+	},
+	// Each vendor already has an entry for this. Only NVD is missing an entry, so we fill it here.
+	"CVE-2023-38546": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ASSIGNER: "cve@mitre.org",
+				ID:       "CVE-2023-38546",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang: "en",
+						Value: `This flaw allows an attacker to insert cookies at will into a running program using libcurl, if the specific series of conditions are met.
+
+libcurl performs transfers. In its API, an application creates "easy handles" that are the individual handles for single transfers.
+
+libcurl provides a function call that duplicates an easy handle called curl_easy_duphandle.
+
+If a transfer has cookies enabled when the handle is duplicated, the cookie-enable state is also cloned - but without cloning the actual cookies. If the source handle did not read any cookies from a specific file on disk, the cloned version of the handle would instead store the file name as none (using the four ASCII letters, no quotes).
+
+Subsequent use of the cloned handle that does not explicitly set a source to load cookies from would then inadvertently load cookies from a file named none - if such a file exists and is readable in the current directory of the program using libcurl. And if using the correct file format of course.`,
+					},
+				},
+			},
+			Problemtype: &schema.CVEJSON40Problemtype{
+				ProblemtypeData: []*schema.CVEJSON40ProblemtypeProblemtypeData{
+					{
+						Description: []*schema.CVEJSON40LangString{
+							{
+								Lang:  "en",
+								Value: "CWE-611",
+							},
+						},
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name:      "https://github.com/curl/curl/discussions/12026",
+						Refsource: "MISC",
+						Tags:      []string{"Patch", "Third Party Advisory"},
+						URL:       "https://github.com/curl/curl/discussions/12026",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:            `cpe:2.3:a:ubuntu:libcurl:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "8.4.0",
+							Vulnerable:          true,
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "HIGH",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "LOW",
+					BaseScore:             5.0,
+					BaseSeverity:          "MEDIUM",
+					ConfidentialityImpact: "LOW",
+					IntegrityImpact:       "LOW",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "REQUIRED",
+					VectorString:          "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:L",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 1.6,
+				ImpactScore:         3.4,
+			},
+		},
+		LastModifiedDate: "2023-10-11T00:00Z",
+		PublishedDate:    "2023-10-11T00:00Z",
+	},
+	//////////////////////////////////////////
+	// End cURL and libcurl vulnerabilities //
+	//////////////////////////////////////////
 }
