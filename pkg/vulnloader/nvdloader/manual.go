@@ -957,7 +957,7 @@ If the hostname is detected to be longer than 255 bytes, curl switches to local 
 						Description: []*schema.CVEJSON40LangString{
 							{
 								Lang:  "en",
-								Value: "CWE-611",
+								Value: "CWE-122",
 							},
 						},
 					},
@@ -966,10 +966,10 @@ If the hostname is detected to be longer than 255 bytes, curl switches to local 
 			References: &schema.CVEJSON40References{
 				ReferenceData: []*schema.CVEJSON40Reference{
 					{
-						Name:      "https://github.com/curl/curl/discussions/12026",
+						Name:      "https://curl.se/docs/CVE-2023-38545.html",
 						Refsource: "MISC",
 						Tags:      []string{"Patch", "Third Party Advisory"},
-						URL:       "https://github.com/curl/curl/discussions/12026",
+						URL:       "https://curl.se/docs/CVE-2023-38545.html",
 					},
 				},
 			},
@@ -980,9 +980,10 @@ If the hostname is detected to be longer than 255 bytes, curl switches to local 
 				{
 					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
 						{
-							Cpe23Uri:            `cpe:2.3:a:ubuntu:curl:*:*:*:*:*:*:*:*`,
-							VersionEndExcluding: "8.4.0",
-							Vulnerable:          true,
+							Cpe23Uri:              `cpe:2.3:a:haxx:curl:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "8.4.0",
+							VersionStartIncluding: "7.69.0",
+							Vulnerable:            true,
 						},
 					},
 					Operator: "OR",
@@ -992,7 +993,7 @@ If the hostname is detected to be longer than 255 bytes, curl switches to local 
 		Impact: &schema.NVDCVEFeedJSON10DefImpact{
 			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
 				CVSSV3: &schema.CVSSV30{
-					AttackComplexity:      "LOW",
+					AttackComplexity:      "HIGH",
 					AttackVector:          "NETWORK",
 					AvailabilityImpact:    "HIGH",
 					BaseScore:             7.5,
@@ -1044,7 +1045,7 @@ Subsequent use of the cloned handle that does not explicitly set a source to loa
 						Description: []*schema.CVEJSON40LangString{
 							{
 								Lang:  "en",
-								Value: "CWE-611",
+								Value: "CWE-73",
 							},
 						},
 					},
@@ -1053,10 +1054,10 @@ Subsequent use of the cloned handle that does not explicitly set a source to loa
 			References: &schema.CVEJSON40References{
 				ReferenceData: []*schema.CVEJSON40Reference{
 					{
-						Name:      "https://github.com/curl/curl/discussions/12026",
+						Name:      "https://curl.se/docs/CVE-2023-38546.html",
 						Refsource: "MISC",
 						Tags:      []string{"Patch", "Third Party Advisory"},
-						URL:       "https://github.com/curl/curl/discussions/12026",
+						URL:       "https://curl.se/docs/CVE-2023-38546.html",
 					},
 				},
 			},
@@ -1067,9 +1068,10 @@ Subsequent use of the cloned handle that does not explicitly set a source to loa
 				{
 					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
 						{
-							Cpe23Uri:            `cpe:2.3:a:ubuntu:libcurl:*:*:*:*:*:*:*:*`,
-							VersionEndExcluding: "8.4.0",
-							Vulnerable:          true,
+							Cpe23Uri:              `cpe:2.3:a:ubuntu:libcurl:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "8.4.0",
+							VersionStartIncluding: "7.9.1",
+							Vulnerable:            true,
 						},
 					},
 					Operator: "OR",
