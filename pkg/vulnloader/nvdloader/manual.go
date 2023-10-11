@@ -1104,4 +1104,166 @@ Subsequent use of the cloned handle that does not explicitly set a source to loa
 	//////////////////////////////////////////
 	// End cURL and libcurl vulnerabilities //
 	//////////////////////////////////////////
+	////////////////////////////////////
+	// Start HTTP/2 Rapid Reset vulns //
+	////////////////////////////////////
+	"CVE-2023-39325": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ASSIGNER: "cve@mitre.org",
+				ID:       "CVE-2023-39325",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: "A flaw was found in the handling of multiplexed streams in the http/2 protocol. A client can repeatedly make requests for a new multiplex streams and immediately send a RST_STREAM frame to cancel them. This creates extra work for the server setting up and tearing down the streams while not hitting any server-side limit for maximum number of active streams per connection, resulting in a denial of service due to server resource consumption.",
+					},
+				},
+			},
+			Problemtype: &schema.CVEJSON40Problemtype{
+				ProblemtypeData: []*schema.CVEJSON40ProblemtypeProblemtypeData{
+					{
+						Description: []*schema.CVEJSON40LangString{
+							{
+								Lang:  "en",
+								Value: "CWE-611",
+							},
+						},
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name:      "https://github.com/golang/go/issues/63417",
+						Refsource: "MISC",
+						Tags:      []string{"Patch", "Third Party Advisory"},
+						URL:       "https://github.com/golang/go/issues/63417",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:            `cpe:2.3:a:go:http2:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "0.17.0",
+							Vulnerable:          true,
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             7.5,
+					BaseSeverity:          "HIGH",
+					ConfidentialityImpact: "NONE",
+					IntegrityImpact:       "NONE",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         3.6,
+			},
+		},
+		LastModifiedDate: "2023-10-11T00:00Z",
+		PublishedDate:    "2023-10-11T00:00Z",
+	},
+	"CVE-2023-44487": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ASSIGNER: "cve@mitre.org",
+				ID:       "CVE-2023-44487",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: "The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly, as exploited in the wild in August through October 2023.",
+					},
+				},
+			},
+			Problemtype: &schema.CVEJSON40Problemtype{
+				ProblemtypeData: []*schema.CVEJSON40ProblemtypeProblemtypeData{
+					{
+						Description: []*schema.CVEJSON40LangString{
+							{
+								Lang:  "en",
+								Value: "CWE-611",
+							},
+						},
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name:      "https://nvd.nist.gov/vuln/detail/CVE-2023-44487",
+						Refsource: "MISC",
+						Tags:      []string{"Patch", "Third Party Advisory"},
+						URL:       "https://nvd.nist.gov/vuln/detail/CVE-2023-44487",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:            `cpe:2.3:a:go:http2:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding: "0.17.0",
+							Vulnerable:          true,
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             7.5,
+					BaseSeverity:          "HIGH",
+					ConfidentialityImpact: "NONE",
+					IntegrityImpact:       "NONE",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         3.6,
+			},
+		},
+		LastModifiedDate: "2023-10-11T00:00Z",
+		PublishedDate:    "2023-10-11T00:00Z",
+	},
+	//////////////////////////////////
+	// End HTTP/2 Rapid Reset vulns //
+	//////////////////////////////////
 }
