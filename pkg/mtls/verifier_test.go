@@ -6,7 +6,6 @@ import (
 	"crypto/x509/pkix"
 	"testing"
 
-	"github.com/stackrox/rox/pkg/testutils/envisolator"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stretchr/testify/assert"
 )
@@ -50,10 +49,7 @@ func TestVerifyPeerCertificate_Default(t *testing.T) {
 }
 
 func TestVerifyPeerCertificate_ROX_OPENSHIFT_API(t *testing.T) {
-	envIsolator := envisolator.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
-	envIsolator.Setenv(env.OpenshiftAPI.EnvVar(), "true")
+	t.Setenv(env.OpenshiftAPI.EnvVar(), "true")
 
 	assert.NoError(t, VerifyPeerCertificate(centralTLSState))
 	assert.NoError(t, VerifyPeerCertificate(sensorTLSState))
@@ -61,11 +57,8 @@ func TestVerifyPeerCertificate_ROX_OPENSHIFT_API(t *testing.T) {
 }
 
 func TestVerifyPeerCertificate_ROX_OPENSHIFT_API_AND_ROX_SLIM_MODE(t *testing.T) {
-	envIsolator := envisolator.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
-	envIsolator.Setenv(env.OpenshiftAPI.EnvVar(), "true")
-	envIsolator.Setenv(env.SlimMode.EnvVar(), "true")
+	t.Setenv(env.OpenshiftAPI.EnvVar(), "true")
+	t.Setenv(env.SlimMode.EnvVar(), "true")
 
 	assert.NoError(t, VerifyPeerCertificate(centralTLSState))
 	assert.NoError(t, VerifyPeerCertificate(sensorTLSState))
@@ -73,10 +66,7 @@ func TestVerifyPeerCertificate_ROX_OPENSHIFT_API_AND_ROX_SLIM_MODE(t *testing.T)
 }
 
 func TestVerifyPeerCertificate_ROX_SLIM_MODE(t *testing.T) {
-	envIsolator := envisolator.NewEnvIsolator(t)
-	defer envIsolator.RestoreAll()
-
-	envIsolator.Setenv(env.SlimMode.EnvVar(), "true")
+	t.Setenv(env.SlimMode.EnvVar(), "true")
 
 	assert.Error(t, VerifyPeerCertificate(centralTLSState))
 	assert.NoError(t, VerifyPeerCertificate(sensorTLSState))
