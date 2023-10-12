@@ -4225,7 +4225,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						},
 					},
 				},
-				FixedBy: "1.51.0-r1",
+				FixedBy: "1.51.0-r2",
 				AddedBy: "sha256:4aacde79cec42c8d0c5886185e70a16b107ae8c6b1a67d63d6efdb6d6978ed97",
 			},
 		},
