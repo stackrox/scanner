@@ -54,9 +54,12 @@ require (
 
 require (
 	github.com/containers/storage v1.45.3 // indirect
+	github.com/google/s2a-go v0.1.4 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
+	golang.org/x/sync v0.3.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20230711160842-782d3b101e98 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
 )
 
