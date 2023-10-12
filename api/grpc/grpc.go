@@ -60,7 +60,10 @@ func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
 }
 
 func (a *apiImpl) Start() {
-	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(a.config.UnaryInterceptors...))
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(a.config.UnaryInterceptors...),
+		grpc.MaxConcurrentStreams(100),
+	)
 	for _, serv := range a.apiServices {
 		serv.RegisterServiceServer(grpcServer)
 	}
