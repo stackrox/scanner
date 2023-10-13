@@ -20,24 +20,19 @@ import (
 )
 
 const (
-	localEndpoint                   = "127.0.0.1:8444"
-	defaultGrpcMaxConcurrentStreams = 100 // HTTP/2 spec recommendation for minimum value
+	localEndpoint = "127.0.0.1:8444"
 )
 
 func init() {
 	grpcprometheus.EnableHandlingTimeHistogram()
 }
 
-var (
-	maxGrpcConcurrentStreamsSetting = env.RegisterIntegerSetting("ROX_GRPC_MAX_CONCURRENT_STREAMS", defaultGrpcMaxConcurrentStreams)
-)
-
 func maxGrpcConcurrentStreams() uint32 {
-	if maxGrpcConcurrentStreamsSetting.Int() < 0 {
-		return defaultGrpcMaxConcurrentStreams
+	if env.MaxGrpcConcurrentStreams.Int() <= 0 {
+		return env.DefaultMaxGrpcConcurrentStreams
 	}
 
-	return uint32(maxGrpcConcurrentStreamsSetting.Int())
+	return uint32(env.MaxGrpcConcurrentStreams.Int())
 }
 
 // NewAPI creates a new gRPC API instantiation
