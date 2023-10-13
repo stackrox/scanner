@@ -2,6 +2,11 @@ package env
 
 import "time"
 
+const (
+	// DefaultMaxGrpcConcurrentStreams is the minimum value for concurrent streams recommended by the HTTP/2 spec
+	DefaultMaxGrpcConcurrentStreams = 100
+)
+
 var (
 	// LanguageVulns enables language vulnerabilities.
 	LanguageVulns = RegisterBooleanSetting("ROX_LANGUAGE_VULNS", true, AllowWithoutRox())
@@ -34,4 +39,7 @@ var (
 
 	// NodeScanningMaxBackoff is the upper boundary of backoff. Defaults to 5m in seconds, being 50% of Kubernetes restart policy stability timer.
 	NodeScanningMaxBackoff = registerDurationSetting("ROX_NODE_SCANNING_MAX_BACKOFF", 300*time.Second)
+
+	// MaxGrpcConcurrentStreams configures the maximum number of HTTP/2 streams to use with gRPC
+	MaxGrpcConcurrentStreams = RegisterIntegerSetting("ROX_GRPC_MAX_CONCURRENT_STREAMS", DefaultMaxGrpcConcurrentStreams)
 )
