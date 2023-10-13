@@ -2,6 +2,11 @@ package env
 
 import "time"
 
+const (
+	// DefaultMaxGrpcConcurrentStreams is the minimum value for concurrent streams recommended by the HTTP/2 spec
+	DefaultMaxGrpcConcurrentStreams = 100
+)
+
 var (
 	// LanguageVulns enables language vulnerabilities.
 	LanguageVulns = RegisterBooleanSetting("ROX_LANGUAGE_VULNS", true, AllowWithoutRox())
@@ -38,4 +43,7 @@ var (
 	// ActiveVulnMgmt is the same flag in Central that determines if active vulnerability management should be
 	// enabled and executables should be pulled from the database
 	ActiveVulnMgmt = RegisterBooleanSetting("ROX_ACTIVE_VULN_MGMT", false)
+
+	// MaxGrpcConcurrentStreams configures the maximum number of HTTP/2 streams to use with gRPC
+	MaxGrpcConcurrentStreams = RegisterIntegerSetting("ROX_GRPC_MAX_CONCURRENT_STREAMS", DefaultMaxGrpcConcurrentStreams)
 )
