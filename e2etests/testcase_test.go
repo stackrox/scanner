@@ -543,6 +543,7 @@ var testCases = []testCase{
 		// This image is older than June 2020, so we need to explicitly request for an uncertified scan.
 		uncertifiedRHEL:          true,
 		checkProvidedExecutables: true,
+		onlyCheckSpecifiedVulns:  true,
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "procps-ng",
@@ -2816,7 +2817,7 @@ var testCases = []testCase{
 					},
 				},
 				AddedBy: "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
-				FixedBy: "1.1.1q-r0",
+				FixedBy: "1.1.1v-r0",
 			},
 		},
 	},
@@ -3510,7 +3511,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-6.el9_2",
+				FixedBy:       "1:3.0.7-16.el9_2",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3552,7 +3553,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-6.el9_2",
+				FixedBy:       "1:3.0.7-16.el9_2",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3686,7 +3687,7 @@ Bug Fix(es) and Enhancement(s):
 						FixedBy: "0:6.0.7-1.el8_6",
 					},
 				},
-				FixedBy: "6.0.13-1.el8_7",
+				FixedBy: "6.0.22-1.el8_8",
 				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 			{
@@ -3725,7 +3726,7 @@ Bug Fix(es) and Enhancement(s):
 						FixedBy: "0:6.0.7-1.el8_6",
 					},
 				},
-				FixedBy: "6.0.13-1.el8_7",
+				FixedBy: "6.0.22-1.el8_8",
 				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 		},
@@ -3807,9 +3808,9 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 								},
 								"CVSSv3": map[string]interface{}{
 									"ExploitabilityScore": 3.9,
-									"ImpactScore":         5.9,
-									"Score":               9.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
 								},
 							},
 						},
@@ -3818,7 +3819,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 					{
 						Name:          "CVE-2022-3786",
 						NamespaceName: "ubuntu:22.04",
-						Description:   "A buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed a malicious certificate or for an application to continue certificate verification despite failure to construct a path to a trusted issuer. An attacker can craft a malicious email address in a certificate to overflow an arbitrary number of bytes containing the `.' character (decimal 46) on the stack. This buffer overflow could result in a crash (causing a denial of service). In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects. Fixed in OpenSSL 3.0.7 (Affected 3.0.0,3.0.1,3.0.2,3.0.3,3.0.4,3.0.5,3.0.6).",
+						Description:   "A buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed a malicious certificate or for an application to continue certificate verification despite failure to construct a path to a trusted issuer. An attacker can craft a malicious email address in a certificate to overflow an arbitrary number of bytes containing the `.' character (decimal 46) on the stack. This buffer overflow could result in a crash (causing a denial of service). In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects.",
 						Link:          "https://ubuntu.com/security/CVE-2022-3786",
 						Severity:      "Important",
 						Metadata: map[string]interface{}{
@@ -3840,7 +3841,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 				},
-				FixedBy: "3.0.2-0ubuntu1.7",
+				FixedBy: "3.0.2-0ubuntu1.10",
 				// This image installs the openssl pacakge in the second layer;
 				// however, the first layer already installed libssl3 whose source package is openssl.
 				// Therefore, we claim openssl was installed in the first layer.
@@ -3863,6 +3864,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				NamespaceName: "ubuntu:22.10",
 				VersionFormat: "dpkg",
 				Version:       "3.0.5-2ubuntu2",
+				FixedBy:       "3.0.5-2ubuntu2.3",
 				AddedBy:       "sha256:2b441754735ea7decb684ef19d54115fc309c270fe7b87ed36aa3773ce50b78b",
 			},
 		},
@@ -3882,7 +3884,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				VersionFormat: "rpm",
 				Version:       "4.10.1650890594-1.el8.noarch",
 				AddedBy:       "sha256:3fa3f612bdcb92746bf76be1b9c9e1c1c80de777aedaf48b7068f4a129ded3c2",
-				FixedBy:       "4.10.1684982411-1.el8",
+				FixedBy:       "4.10.1685679861-1.el8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-26291",
