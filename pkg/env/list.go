@@ -1,5 +1,10 @@
 package env
 
+const (
+	// DefaultMaxGrpcConcurrentStreams is the minimum value for concurrent streams recommended by the HTTP/2 spec
+	DefaultMaxGrpcConcurrentStreams = 100
+)
+
 var (
 	// LanguageVulns enables language vulnerabilities.
 	LanguageVulns = RegisterBooleanSetting("ROX_LANGUAGE_VULNS", true, AllowWithoutRox())
@@ -19,4 +24,7 @@ var (
 	// This is ignored if SkipPeerValidation is enabled.
 	// This variable was copied over from the stackrox repo.
 	OpenshiftAPI = RegisterBooleanSetting("ROX_OPENSHIFT_API", false)
+
+	// MaxGrpcConcurrentStreams configures the maximum number of HTTP/2 streams to use with gRPC
+	MaxGrpcConcurrentStreams = RegisterIntegerSetting("ROX_GRPC_MAX_CONCURRENT_STREAMS", DefaultMaxGrpcConcurrentStreams)
 )

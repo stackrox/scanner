@@ -14,6 +14,7 @@ import (
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/mtls"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -25,6 +26,14 @@ const (
 
 func init() {
 	grpcprometheus.EnableHandlingTimeHistogram()
+}
+
+func maxGrpcConcurrentStreams() uint32 {
+	if env.MaxGrpcConcurrentStreams.Int() <= 0 {
+		return env.DefaultMaxGrpcConcurrentStreams
+	}
+
+	return uint32(env.MaxGrpcConcurrentStreams.Int())
 }
 
 // NewAPI creates a new gRPC API instantiation
@@ -56,7 +65,11 @@ func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
 }
 
 func (a *apiImpl) Start() {
-	grpcServer := grpc.NewServer(grpcmiddleware.WithUnaryServerChain(a.unaryInterceptors()...))
+	grpcServer := grpc.NewServer(
+		grpcmiddleware.WithUnaryServerChain(a.unaryInterceptors()...),
+		grpc.MaxConcurrentStreams(maxGrpcConcurrentStreams()),
+	)
+
 	for _, serv := range a.apiServices {
 		serv.RegisterServiceServer(grpcServer)
 	}
