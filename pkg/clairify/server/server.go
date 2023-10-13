@@ -302,6 +302,7 @@ func (s *Server) Start() error {
 	if err != nil {
 		return err
 	}
+	// This explicitly disables automatic HTTP/2 support.
 	tlsConfig.NextProtos = nil
 
 	listener, err = tls.Listen("tcp", s.endpoint, tlsConfig)

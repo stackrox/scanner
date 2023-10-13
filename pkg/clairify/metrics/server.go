@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 
@@ -37,6 +38,8 @@ func NewHTTPServer(config *api.Config) *HTTPServer {
 		server: &http.Server{
 			Addr:    addr,
 			Handler: mux,
+			// Setting TLSNextProto to a non-nil empty map disables automatic HTTP/2 support.
+			TLSNextProto: map[string]func(*http.Server, *tls.Conn, http.Handler){},
 		},
 	}
 }
