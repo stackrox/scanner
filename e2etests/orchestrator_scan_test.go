@@ -99,9 +99,9 @@ func TestGRPCGetOpenShiftVulnerabilities(t *testing.T) {
 		},
 		{
 			addressFamily: "4.7",
-			maxPatch:      12,
+			maxPatch:      32,
 			step:          1,
-			knownFixed:    3,
+			knownFixed:    4,
 		},
 	}
 

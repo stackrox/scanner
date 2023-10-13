@@ -543,6 +543,7 @@ var testCases = []testCase{
 		// This image is older than June 2020, so we need to explicitly request for an uncertified scan.
 		uncertifiedRHEL:          true,
 		checkProvidedExecutables: true,
+		onlyCheckSpecifiedVulns:  true,
 		expectedFeatures: []apiV1.Feature{
 			{
 				Name:          "procps-ng",
@@ -1139,7 +1140,7 @@ var testCases = []testCase{
 				VersionFormat: component.DotNetCoreRuntimeSourceType.String(),
 				Location:      "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.2/",
 				AddedBy:       "sha256:b48f8e1b0b06887c382543e23275911a388c1010e3436dc9b708ef29885bb594",
-				FixedBy:       "3.1.23",
+				FixedBy:       "3.1.32",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:        "CVE-2020-1108",
@@ -1720,7 +1721,7 @@ var testCases = []testCase{
 				},
 				AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
 				Location: "usr/share/dotnet/shared/Microsoft.NETCore.App/3.1.0/",
-				FixedBy:  "3.1.23",
+				FixedBy:  "3.1.32",
 			},
 		},
 	},
@@ -3501,7 +3502,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.1-43.el9_0",
+				FixedBy:       "1:3.0.7-16.el9_2",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3543,7 +3544,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.1-43.el9_0",
+				FixedBy:       "1:3.0.7-16.el9_2",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3588,7 +3589,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 			},
 			{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
-				FixedBy:       "2:8.2.2637-16.el9_0.3",
+				FixedBy:       "2:8.2.2637-20.el9_1",
 				Name:          "vim-minimal",
 				NamespaceName: "rhel:9",
 				Version:       "2:8.2.2637-16.el9_0.2.x86_64",
@@ -3677,7 +3678,7 @@ Bug Fix(es) and Enhancement(s):
 						FixedBy: "0:6.0.7-1.el8_6",
 					},
 				},
-				FixedBy: "6.0.13-1.el8_7",
+				FixedBy: "6.0.22-1.el8_8",
 				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 			{
@@ -3716,7 +3717,7 @@ Bug Fix(es) and Enhancement(s):
 						FixedBy: "0:6.0.7-1.el8_6",
 					},
 				},
-				FixedBy: "6.0.13-1.el8_7",
+				FixedBy: "6.0.22-1.el8_8",
 				AddedBy: "sha256:16e1dc59de605089610e3be2c77f3cde5eed99b523a0d7a3e3a2f65fa7c60723",
 			},
 		},
@@ -3873,7 +3874,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				VersionFormat: "rpm",
 				Version:       "4.10.1650890594-1.el8.noarch",
 				AddedBy:       "sha256:3fa3f612bdcb92746bf76be1b9c9e1c1c80de777aedaf48b7068f4a129ded3c2",
-				FixedBy:       "4.10.1670851835-1.el8",
+				FixedBy:       "4.10.1685679861-1.el8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2021-26291",

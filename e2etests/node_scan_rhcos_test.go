@@ -22,9 +22,9 @@ var vulnLibksba = &v1.Vulnerability{
 		LastModifiedDateTime: "",
 		CvssV2:               nil,
 		CvssV3: &v1.CVSSMetadata{
-			Score:               8.1,
-			Vector:              "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-			ExploitabilityScore: 2.2,
+			Score:               9.8,
+			Vector:              "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+			ExploitabilityScore: 3.9,
 			ImpactScore:         5.9,
 		},
 	},
@@ -188,11 +188,15 @@ func assertEquals(t *testing.T, name, version string, expected, got []*v1.Vulner
 // assertExists asserts that all 'needles' exist in 'haystack'
 func assertExists(t *testing.T, name, version string, needles, haystack []*v1.Vulnerability) {
 	assert.GreaterOrEqual(t, len(haystack), len(needles), "Expected to find at least %d vulnerabilities for feature '%s:%s'", len(needles), name, version)
-	// Prune last modified time
+	// Create a map to check haystack, and prune last modified time.
+	haystackByName := make(map[string]*v1.Vulnerability)
 	for _, v := range haystack {
 		v.MetadataV2.LastModifiedDateTime = ""
+		haystackByName[v.Name] = v
 	}
 	for _, v := range needles {
-		assert.Contains(t, haystack, v)
+		h, ok := haystackByName[v.Name]
+		assert.True(t, ok, "vulnerabilities for %s-%s does not contain %s", name, version, v.Name)
+		assert.Exactly(t, v, h, "vulnerability %s for %s-%s is different from expected", v.Name, name, version)
 	}
 }
