@@ -27,7 +27,7 @@ func (s *integerSetting) Int() int {
 // RegisterIntegerSetting globally registers and returns a new integer setting.
 func RegisterIntegerSetting(envVar string, defaultValue int, opts ...SettingOption) IntegerSetting {
 	return &integerSetting{
-		Setting:      RegisterSetting(envVar, append(opts, WithDefault(strconv.Itoa(defaultValue)))...),
+		Setting:      registerSetting(envVar, append(opts, WithDefault(strconv.Itoa(defaultValue)))...),
 		defaultValue: defaultValue,
 	}
 }
