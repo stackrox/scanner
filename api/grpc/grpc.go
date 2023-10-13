@@ -13,17 +13,31 @@ import (
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/mtls"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
-	localEndpoint = "127.0.0.1:8444"
+	localEndpoint                   = "127.0.0.1:8444"
+	defaultGrpcMaxConcurrentStreams = 100 // HTTP/2 spec recommendation for minimum value
 )
 
 func init() {
 	grpcprometheus.EnableHandlingTimeHistogram()
+}
+
+var (
+	maxGrpcConcurrentStreamsSetting = env.RegisterIntegerSetting("ROX_GRPC_MAX_CONCURRENT_STREAMS", defaultGrpcMaxConcurrentStreams)
+)
+
+func maxGrpcConcurrentStreams() uint32 {
+	if maxGrpcConcurrentStreamsSetting.Int() < 0 {
+		return defaultGrpcMaxConcurrentStreams
+	}
+
+	return uint32(maxGrpcConcurrentStreamsSetting.Int())
 }
 
 // NewAPI creates a new gRPC API instantiation
@@ -62,7 +76,7 @@ func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
 func (a *apiImpl) Start() {
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(a.config.UnaryInterceptors...),
-		grpc.MaxConcurrentStreams(100),
+		grpc.MaxConcurrentStreams(maxGrpcConcurrentStreams()),
 	)
 	for _, serv := range a.apiServices {
 		serv.RegisterServiceServer(grpcServer)
