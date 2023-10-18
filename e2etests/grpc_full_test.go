@@ -93,7 +93,7 @@ func verifyImage(t *testing.T, imgScan *v1.Image, test testCase) {
 						foundMatch = true
 						checkGRPCMatch(t, expectedVuln, matchingVuln)
 					}
-					assert.Truef(t, foundMatch, "Expected to find %s in scan results", expectedVuln.Name)
+					assert.Truef(t, foundMatch, "Expected to find %s in scan results\nFound the following: %s", expectedVuln.Name, matching.Vulnerabilities)
 				}
 			}
 			// Check feature FixedBy, and provide the related vulnerability if they differ.
