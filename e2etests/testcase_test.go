@@ -3656,7 +3656,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.22-1.el8_8",
+				FixedBy:       "6.0.23-1.el8_8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -3695,7 +3695,7 @@ Bug Fix(es) and Enhancement(s):
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.22-1.el8_8",
+				FixedBy:       "6.0.23-1.el8_8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -4031,6 +4031,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				Name:          "tomcat",
 				VersionFormat: component.JavaSourceType.String(),
 				Version:       "9.0.59",
+				FixedBy:       "9.0.81",
 				Location:      "tomcat-embed-core-9.0.59.jar",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
@@ -4080,7 +4081,6 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						},
 					},
 				},
-				FixedBy: "9.0.72",
 				AddedBy: "sha256:97444f2bde8fa4fdfb6ec630b24fbdf95017c6813f4b5e68e64a4280b276eff2",
 			},
 		},
