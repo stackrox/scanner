@@ -93,12 +93,12 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 			feature.Executables = nil
 			matching.Executables = nil
 
+			matchingBytes, _ := json.MarshalIndent(matching.Vulnerabilities, "", "  ")
 			if !test.onlyCheckSpecifiedVulns {
 				if len(matching.Vulnerabilities) != len(feature.Vulnerabilities) {
-					matchingBytes, _ := json.MarshalIndent(matching.Vulnerabilities, "", "  ")
 					featureVulnsBytes, _ := json.MarshalIndent(feature.Vulnerabilities, "", "  ")
-					fmt.Printf("Matching: %s\n", matchingBytes)
-					fmt.Printf("Expected Feature: %s\n", featureVulnsBytes)
+					fmt.Printf("Matching: %s\n", string(matchingBytes))
+					fmt.Printf("Expected Feature: %s\n", string(featureVulnsBytes))
 				}
 
 				require.Equal(t, len(feature.Vulnerabilities), len(matching.Vulnerabilities))
@@ -116,7 +116,7 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 						foundMatch = true
 						checkMatch(t, test.source, expectedVuln, matchingVuln)
 					}
-					assert.Truef(t, foundMatch, "Expected to find %s in scan results", expectedVuln.Name)
+					assert.Truef(t, foundMatch, "Expected to find %s in scan results\nFound the following: %s", expectedVuln.Name, string(matchingBytes))
 				}
 			}
 			feature.Vulnerabilities = nil
