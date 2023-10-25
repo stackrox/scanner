@@ -3790,7 +3790,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				Name:          "openssl",
 				NamespaceName: "ubuntu:22.04",
 				VersionFormat: "dpkg",
-				Version:       "3.0.2-0ubuntu1.12",
+				Version:       "3.0.2-0ubuntu1.10",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2022-3602",
@@ -3841,7 +3841,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 				},
-				FixedBy: "3.0.2-0ubuntu1.10",
+				FixedBy: "3.0.2-0ubuntu1.12",
 				// This image installs the openssl pacakge in the second layer;
 				// however, the first layer already installed libssl3 whose source package is openssl.
 				// Therefore, we claim openssl was installed in the first layer.
