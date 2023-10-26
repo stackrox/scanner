@@ -11,6 +11,8 @@ echo "Starting database..."
 POSTGRES_PASSWORD=postgres /usr/local/bin/docker-entrypoint.sh postgres -c config_file=/tmp/postgres.conf
 
 echo "Waiting for database to stop..."
-pg_ctl -D /var/lib/postgresql/data/pgdata -w stop
+while [ -f /var/lib/postgresql/data/pgdata/postmaster.pid ]; do
+  sleep 1
+done
 
 rm /tmp/postgres.conf
