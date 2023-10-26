@@ -6,6 +6,10 @@
 ###
 ### [1]: https://github.com/docker-library/postgres/blob/master/12/bullseye/docker-entrypoint.sh
 
+if [ -n "$ROX_SCANNER_DB_INIT" ]; then
+  exit 0
+fi
+
 set -Eeo pipefail
 # TODO swap to -Eeuo pipefail above (after handling all potentially-unset variables)
 

@@ -59,7 +59,16 @@ USER 70:70
 
 COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+COPY scripts/custom-entrypoint.sh /usr/local/bin/
+COPY scripts/start-db.sh /usr/local/bin/
+
+RUN /usr/local/bin/start-db.sh
+USER root
+RUN rm -rf /usr/local/bin/start-db.sh && \
+    rm -rf /docker-entrypoint-initdb.d/definitions.sql
+USER 70:70
+ENV DATABASE_ALREADY_EXISTS=true
+ENTRYPOINT ["custom-entrypoint.sh"]
 
 EXPOSE 5432
 CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
