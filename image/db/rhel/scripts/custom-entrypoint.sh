@@ -8,17 +8,25 @@ set -e
 
 if [ ! -d "/var/lib/postgresql/data/pgdata" ]; then
 
+  #  This uses the "archival" methoc
+  #  echo "Creating /var/lib/postgresql/data/pgdata..."
+  #  mkdir -p /var/lib/postgresql/data/pgdata
+  #
+  #  echo "Moving archive to target directory..."
+  #  mv /tmp/data.tar.gz /var/lib/postgresql/data/pgdata/data.tar.gz
+  #
+  #  echo "Uncompressing into /var/lib/pgsql/data/pgdata..."
+  #  tar -xzf /var/lib/postgresql/data/pgdata/data.tar.gz -C /var/lib/postgresql/data/pgdata
+  #
+  #  echo "Removing archive..."
+  #  rm /var/lib/postgresql/data/pgdata/data.tar.gz
+
+  # SYMLINK METHOD
   echo "Creating /var/lib/postgresql/data/pgdata..."
-  mkdir -p /var/lib/postgresql/data/pgdata
+  mkdir -p /var/lib/postgresql/data
 
-  echo "Moving archive to target directory..."
-  mv /tmp/data.tar.gz /var/lib/postgresql/data/pgdata/data.tar.gz
-
-  echo "Uncompressing into /var/lib/pgsql/data/pgdata..."
-  tar -xzf /var/lib/postgresql/data/pgdata/data.tar.gz -C /var/lib/postgresql/data/pgdata
-
-  echo "Removing archive..."
-  rm /var/lib/postgresql/data/pgdata/data.tar.gz
+  echo "Create a symbolic link from /var/lib/postgresql/data/pgdata to /tmp/data"
+  ln -s /tmp/data /var/lib/postgresql/data/pgdata
 
   echo "Starting database..."
   POSTGRES_PASSWORD_FILE="" POSTGRES_PASSWORD=postgres /usr/local/bin/docker-entrypoint.sh postgres -c config_file=/etc/postgresql.conf &
