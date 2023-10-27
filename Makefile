@@ -38,6 +38,12 @@ ifeq ($(shell uname -ms),Darwin arm64)
 	# BUILD_IMAGE = quay.io/rhacs-eng/sandbox:apollo-ci-stackrox-build-0.3.49-arm64
 	ARCH := aarch64
 	GOARCH := arm64
+else ifeq ($(shell uname -m),s390x)
+	ARCH := s390x
+	GOARCH := s390x
+else ifeq ($(shell uname -m),ppc64le)
+	ARCH := ppc64le
+	GOARCH := ppc64le
 else
 	ARCH := x86_64
 	GOARCH := amd64

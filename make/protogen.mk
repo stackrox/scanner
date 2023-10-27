@@ -29,15 +29,25 @@ GENERATED_API_SWAGGER_SPECS = $(API_SERVICE_PROTOS:%.proto=$(GENERATED_BASE_PATH
 PROTOC_VERSION := 21.4
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-PROTOC_ARCH = linux
+PROTOC_OS = linux
 endif
 ifeq ($(UNAME_S),Darwin)
-PROTOC_ARCH = osx
+PROTOC_OS = osx
+endif
+UNAME_M := $(shell uname -m)
+ifeq ($(UNAME_M),x86_64)
+PROTOC_ARCH = x86_64
+endif
+ifeq ($(UNAME_M),s390x)
+PROTOC_ARCH = s390_64
+endif
+ifeq ($(UNAME_M),ppc64le)
+PROTOC_ARCH = ppcle_64
 endif
 
 PROTO_PRIVATE_DIR := $(BASE_PATH)/.proto
 
-PROTOC_DIR := $(PROTO_PRIVATE_DIR)/protoc-$(PROTOC_ARCH)-$(PROTOC_VERSION)
+PROTOC_DIR := $(PROTO_PRIVATE_DIR)/protoc-$(PROTOC_OS)-$(PROTOC_VERSION)
 
 PROTOC := $(PROTOC_DIR)/bin/protoc
 
@@ -53,7 +63,7 @@ $(PROTO_GOBIN):
 	@echo "+ $@"
 	$(SILENT)mkdir -p "$@"
 
-PROTOC_ZIP := protoc-$(PROTOC_VERSION)-$(PROTOC_ARCH)-x86_64.zip
+PROTOC_ZIP := protoc-$(PROTOC_VERSION)-$(PROTOC_OS)-$(PROTOC_ARCH).zip
 PROTOC_FILE := $(PROTOC_DOWNLOADS_DIR)/$(PROTOC_ZIP)
 
 $(PROTOC_FILE): $(PROTOC_DOWNLOADS_DIR)
