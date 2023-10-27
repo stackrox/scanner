@@ -38,7 +38,11 @@ if [ ! -d "/var/lib/postgresql/data/pgdata" ]; then
   echo "Renaming postgres user if necessary..."
   if [ -n "$POSTGRES_USER" ]; then
     if [ "$POSTGRES_USER" != "postgres" ]; then
-      PGPASSWORD="$POSTGRES_PASSWORD" psql -c "ALTER USER postgres RENAME TO $POSTGRES_USER;"
+      if [ -n "$POSTGRES_PASSWORD" ]; then
+        PGPASSWORD="$POSTGRES_PASSWORD" psql -c "ALTER USER postgres RENAME TO $POSTGRES_USER;"
+      elif [ -n "$POSTGRES_PASSWORD_FILE" ]; then
+        PGPASSWORD="$(cat "$POSTGRES_PASSWORD_FILE")" psql -c "ALTER USER postgres RENAME TO $POSTGRES_USER;"
+      fi
     fi
   fi
 
