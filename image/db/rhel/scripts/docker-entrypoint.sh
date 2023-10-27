@@ -6,10 +6,6 @@
 ###
 ### [1]: https://github.com/docker-library/postgres/blob/master/12/bullseye/docker-entrypoint.sh
 
-if [ -n "$ROX_SCANNER_DB_INIT" ]; then
-  exit 0
-fi
-
 set -Eeo pipefail
 # TODO swap to -Eeuo pipefail above (after handling all potentially-unset variables)
 
@@ -310,18 +306,6 @@ _main() {
 	fi
 
 	if [ "$1" = 'postgres' ] && ! _pg_want_help "$@"; then
-		### STACKROX MODIFIED - If we are initializing, then ensure we start from scratch.
-		if [ -n "$ROX_SCANNER_DB_INIT" ]; then
-			echo
-			echo 'Initializing... Clearing any previous data from directories'
-			echo
-
-			rm -rf "$PGDATA"
-			if [ -n "${POSTGRES_INITDB_WALDIR:-}" ]; then
-				rm -rf "$POSTGRES_INITDB_WALDIR"
-			fi
-		fi
-
 		docker_setup_env
 		# setup data directories and permissions (when run as root)
 		docker_create_db_directories
@@ -331,16 +315,6 @@ _main() {
 			### will not be reached.
 			# then restart script as postgres user
 			exec gosu postgres "$BASH_SOURCE" "$@"
-		fi
-
-		### STACKROX MODIFIED - Sanity check the database does not exist
-		### upon initialization.
-		if [ -n "$ROX_SCANNER_DB_INIT" ] && [ -n "$DATABASE_ALREADY_EXISTS" ]; then
-			echo
-			echo 'PostgreSQL Database appears to already exist upon initialization; Exiting with error...'
-			echo
-
-			exit 1
 		fi
 
 		# only run initialization on an empty data directory
