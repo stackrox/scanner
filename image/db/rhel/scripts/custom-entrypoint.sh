@@ -8,7 +8,7 @@ set -e
 
 if [ ! -d "/var/lib/postgresql/data/pgdata" ]; then
 
-  #  This uses the "archival" methoc
+  #  ARCHIVAL METHOD
   #  echo "Creating /var/lib/postgresql/data/pgdata..."
   #  mkdir -p /var/lib/postgresql/data/pgdata
   #
@@ -20,13 +20,14 @@ if [ ! -d "/var/lib/postgresql/data/pgdata" ]; then
   #
   #  echo "Removing archive..."
   #  rm /var/lib/postgresql/data/pgdata/data.tar.gz
+  # END ARCHIVAL METHOD
 
   # SYMLINK METHOD
   echo "Creating /var/lib/postgresql/data/pgdata..."
   mkdir -p /var/lib/postgresql/data
-
   echo "Create a symbolic link from /var/lib/postgresql/data/pgdata to /tmp/data"
   ln -s /tmp/data /var/lib/postgresql/data/pgdata
+  # END SYMLINK METHOD
 
   echo "Starting database..."
   POSTGRES_PASSWORD_FILE="" POSTGRES_PASSWORD=postgres /usr/local/bin/docker-entrypoint.sh postgres -c config_file=/etc/postgresql.conf &
@@ -36,11 +37,14 @@ if [ ! -d "/var/lib/postgresql/data/pgdata" ]; then
     sleep 1
   done
 
-  echo "Changing password if POSTGRES_PASSWORD is set..."
   if [ -n "$POSTGRES_PASSWORD" ]; then
+    echo "Changing password via POSTGRES_PASSWORD environment variable..."
     PGPASSWORD=postgres psql -c "ALTER USER postgres WITH PASSWORD '$POSTGRES_PASSWORD';"
   elif [ -n "$POSTGRES_PASSWORD_FILE" ]; then
+    echo "Changing password via POSTGRES_PASSWORD_FILE environment variable..."
     PGPASSWORD=postgres psql -c "ALTER USER postgres WITH PASSWORD '$(cat "$POSTGRES_PASSWORD_FILE")';"
+  else
+    echo "No password set. Skipping password change..."
   fi
 
   echo "Renaming postgres user if necessary..."
