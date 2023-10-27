@@ -36,7 +36,7 @@ RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-${
     groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
     microdnf install \
-        ca-certificates libicu systemd-sysv glibc-locale-source glibc-langpack-en \
+        ca-certificates tar libicu systemd-sysv glibc-locale-source glibc-langpack-en \
         postgresql12-server && \
     # The removal of /usr/share/zoneinfo from UBI minimal images is intentional.
     # After building the image, the image is reduced in size as much as possible,
@@ -65,7 +65,7 @@ COPY scripts/start-db.sh /usr/local/bin/
 RUN /usr/local/bin/start-db.sh
 USER root
 RUN rm -rf /usr/local/bin/start-db.sh && \
-    rm -rf /docker-entrypoint-initdb.d/definitions.sql
+    rm -rf /docker-entrypoint-initdb.d/*
 USER 70:70
 ENV DATABASE_ALREADY_EXISTS=true
 ENTRYPOINT ["custom-entrypoint.sh"]

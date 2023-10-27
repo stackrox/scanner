@@ -6,6 +6,12 @@
 
 set -e
 
+echo "Creating /var/lib/postgresql/data/pgdata..."
+mkdir -p /var/lib/postgresql/data/pgdata
+
+echo "Uncompressing into /var/lib/pgsql/data/pgdata..."
+tar -xzf /tmp/data.tar.gz -C /var/lib/postgresql/data/pgdata
+
 echo "Starting database..."
 POSTGRES_PASSWORD=postgres /usr/local/bin/docker-entrypoint.sh postgres -c config_file=/etc/postgresql.conf &
 
@@ -25,7 +31,7 @@ if [ "$POSTGRES_USER" != "postgres" ]; then
 fi
 
 echo "Stopping database..."
-pg_ctl -D /var/lib/postgresql/data/pgdata -w stop
+pg_ctl -w stop
 
 # Now we can start the database for real. But we will
 # forward any arguments to the actual entrypoint script
