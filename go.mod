@@ -14,7 +14,7 @@ require (
 	github.com/facebookincubator/nvdtools v0.1.5
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.5.0
-	github.com/go-git/go-git/v5 v5.9.0
+	github.com/go-git/go-git/v5 v5.10.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.3
 	github.com/google/go-cmp v0.6.0
