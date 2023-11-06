@@ -3656,7 +3656,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.23-1.el8_8",
+				FixedBy:       "6.0.24-1.el8_8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -3695,7 +3695,7 @@ Bug Fix(es) and Enhancement(s):
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.23-1.el8_8",
+				FixedBy:       "6.0.24-1.el8_8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -4191,7 +4191,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						},
 					},
 				},
-				FixedBy: "1.8.4-r1",
+				FixedBy: "1.8.7-r0",
 				AddedBy: "sha256:4aacde79cec42c8d0c5886185e70a16b107ae8c6b1a67d63d6efdb6d6978ed97",
 			},
 			{
