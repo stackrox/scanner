@@ -6,43 +6,16 @@ FROM quay.io/stackrox-io/apollo-ci:scanner-build-0.3.61-4-g955b639000 as extract
 
 COPY . /src
 WORKDIR /src
-# COPY api ./api
-# COPY benchmarks ./benchmarks
-# COPY chart ./chart
-# COPY cmd ./cmd
-# COPY cpe ./cpe
-# COPY database ./database
-# COPY e2etests ./e2etests
-# COPY ext ./ext
-# COPY generated ./generated
-# COPY genesis-dump ./genesis-dump
-# COPY image ./image
-# COPY img ./img
-# COPY istio ./istio
-# COPY k8s ./k8s
-# COPY localdev ./localdev
-# COPY make ./make
-# COPY pkg ./pkg
-# COPY proto ./proto
-# COPY rendered-chart ./rendered-chart
-# COPY scale ./scale
-# COPY singletons ./singletons
-# COPY testdata ./testdata
-# COPY testimages ./testimages
-# COPY tools ./tools
-# COPY .git ./.git
 
-# COPY BUILD_IMAGE_VERSION CODE_OF_CONDUCT.md deps go.mod go.sum LICENSE Makefile proto-generated-srcs README.md worker.go worker_test.go .
-
-RUN dnf install -y jq
-RUN make build-updater
-RUN ./bin/updater generate-dump
-RUN go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair
-RUN mkdir image/scanner/rhel/dump
-RUN unzip -o dump.zip -d image/scanner/rhel/dump
-RUN image/scanner/rhel/create-bundle.sh image/scanner image/scanner/rhel
-RUN mkdir /bundle
-RUN tar -C /bundle -xzf /src/image/scanner/rhel/bundle.tar.gz
+RUN dnf install -y jq && \
+    make build-updater && \
+    ./bin/updater generate-dump && \
+    go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair && \
+    mkdir image/scanner/rhel/dump && \
+    unzip -o dump.zip -d image/scanner/rhel/dump && \
+    image/scanner/rhel/create-bundle.sh image/scanner image/scanner/rhel && \
+    mkdir /bundle && \
+    tar -C /bundle -xzf /src/image/scanner/rhel/bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
