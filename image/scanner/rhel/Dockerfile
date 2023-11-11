@@ -11,8 +11,8 @@ RUN dnf install -y jq && \
     make build-updater && \
     ./bin/updater generate-dump && \
     go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair && \
-    mkdir image/scanner/rhel/dump && \
-    unzip -o dump.zip -d image/scanner/rhel/dump && \
+    mkdir image/scanner/dump && \
+    unzip -o dump.zip -d image/scanner/dump && \
     image/scanner/rhel/create-bundle.sh image/scanner image/scanner/rhel && \
     mkdir /bundle && \
     tar -C /bundle -xzf /src/image/scanner/rhel/bundle.tar.gz
