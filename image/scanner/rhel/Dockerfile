@@ -2,7 +2,11 @@ ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8-minimal
 ARG BASE_TAG=latest
 
-FROM quay.io/stackrox-io/apollo-ci:scanner-build-0.3.61-4-g955b639000 as extracted_bundle
+FROM registry-proxy.engineering.redhat.com/rh-osbs/openshift-golang-builder:v1.20.10-202310161945.el8.gdc4b478 AS builder
+
+ENV CGO_ENABLED=1
+ENV GOFLAGS=""
+ENV CI=1
 
 COPY . /src
 WORKDIR /src
