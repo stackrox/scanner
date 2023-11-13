@@ -17,6 +17,7 @@ RUN dnf install -y jq && \
     go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair && \
     mkdir -p image/scanner/dump && \
     unzip -o dump.zip -d image/scanner/dump && \
+    make ossls-notice && \
     cp -r image/scanner/rhel/THIRD_PARTY_NOTICES images/canner/THIRD_PARTY_NOTICES && \
     image/scanner/rhel/create-bundle.sh image/scanner image/scanner/rhel && \
     mkdir /bundle && \
