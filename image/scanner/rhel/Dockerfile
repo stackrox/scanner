@@ -18,7 +18,7 @@ RUN dnf install -y jq && \
     mkdir -p image/scanner/dump && \
     unzip -o dump.zip -d image/scanner/dump && \
     make ossls-notice && \
-    cp -r image/scanner/rhel/THIRD_PARTY_NOTICES images/canner/THIRD_PARTY_NOTICES && \
+    cp -r image/scanner/rhel/THIRD_PARTY_NOTICES images/scanner/THIRD_PARTY_NOTICES && \
     image/scanner/rhel/create-bundle.sh image/scanner image/scanner/rhel && \
     mkdir /bundle && \
     tar -C /bundle -xzf /src/image/scanner/rhel/bundle.tar.gz
