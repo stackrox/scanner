@@ -205,6 +205,28 @@ spec:
       workspaces:
       - name: source
         workspace: workspace
+    - name: fetch-vuln-feed-data
+      taskSpec:
+        steps:
+          - name: fetch-vuln-feed-data
+            image: registry.access.redhat.com/ubi8/ubi
+            script: |
+              #!/usr/bin/env bash
+              echo "Good Morning!"
+              blobs=(
+                nvd-definitions.zip
+                k8s-definitions.zip
+                repo2cpe.zip
+                genesis_manifests.json
+              )
+              for blob in "${blobs[@]}"; do
+                curl --fail --silent --show-error \
+                  --output "$(workspaces.source.path)/blob-${blob}" \
+                  "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
+              done
+      workspaces:
+      - name: source
+        workspace: workspace
     - name: build-container
       params:
       - name: IMAGE
