@@ -206,6 +206,8 @@ spec:
       - name: source
         workspace: workspace
     - name: fetch-vuln-feed-data
+      runAfter:
+      - init
       taskSpec:
         steps:
           - name: fetch-vuln-feed-data
@@ -221,7 +223,7 @@ spec:
               )
               for blob in "${blobs[@]}"; do
                 curl --fail --show-error \
-                  --output "$(workspaces.source.path)/blob-${blob}" \
+                  --output "$(workspaces.source.path)/source/blob-${blob}" \
                   "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
               done
       workspaces:
@@ -245,6 +247,7 @@ spec:
         value: $(tasks.clone-repository.results.commit)
       runAfter:
       - prefetch-dependencies
+      - fetch-vuln-feed-data
       taskRef:
         params:
         - name: name
