@@ -12,8 +12,7 @@ COPY . /src
 WORKDIR /src
 
 # source $REMOTE_SOURCES_DIR/scanner/cachito.env && I\
-RUN go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair && \
-     make ossls-notice
+RUN go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair
 
 # COPY ./blob-*.zip /tmp/blobs/
 
