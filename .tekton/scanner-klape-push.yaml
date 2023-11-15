@@ -220,7 +220,7 @@ spec:
                 genesis_manifests.json
               )
               for blob in "${blobs[@]}"; do
-                curl --fail --silent --show-error \
+                curl --fail --show-error \
                   --output "$(workspaces.source.path)/blob-${blob}" \
                   "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
               done
