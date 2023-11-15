@@ -38,13 +38,13 @@ ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV ISTIO_DEFINITIONS_DIR="/istio_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
-COPY --from=builder image/scanner/scripts /
-COPY --from=builder /bundle/scanner ./
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${ISTIO_DEFINITIONS_DIR}/" ".${ISTIO_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle /bundle/genesis_manifests.json ./
+COPY --from=builder /src/image/scanner/scripts /
+COPY --from=builder /src/image/scanner/bin/scanner ./
+COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${ISTIO_DEFINITIONS_DIR}/" ".${ISTIO_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
+COPY --chown=65534:65534 --from=builder /src/image/scanner/dump/genesis_manifests.json ./
 
 RUN microdnf upgrade --nobest && \
     microdnf install xz && \
