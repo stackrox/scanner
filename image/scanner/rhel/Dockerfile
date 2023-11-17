@@ -2,30 +2,13 @@ ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8-minimal
 ARG BASE_TAG=latest
 
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.20 as builder
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 
-ENV CGO_ENABLED=1
-ENV GOFLAGS=""
-ENV CI=1
+COPY bundle.tar.gz /
+WORKDIR /bundle
+RUN microdnf install tar gzip && tar -zxf /bundle.tar.gz
 
-COPY . /src
-WORKDIR /src
-
-RUN ls -l && unzip -j blob-repo2cpe.zip -d image/scanner/dump/repo2cpe && \
-    unzip -j blob-k8s-definitions.zip -d image/scanner/dump/k8s_definitions && \
-    unzip -j blob-nvd-definitions.zip -d image/scanner/dump/nvd_definitions
-
-# source $REMOTE_SOURCES_DIR/scanner/cachito.env && I\
-RUN go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair
-
-# COPY ./blob-*.zip /tmp/blobs/
-
-# Replace genesis manifests file in the source code with the one generated at
-# the point when the dump was taken.  This is to avoid discrepancy between other
-# files of the dump and the manifest.
-COPY ./blob-genesis_manifests.json image/scanner/dump/genesis_manifests.json
-
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
 LABEL name="scanner" \
       vendor="StackRox" \
@@ -33,16 +16,13 @@ LABEL name="scanner" \
       summary="Image scanner for the StackRox Kubernetes Security Platform" \
       description="This image supports image scanning in the StackRox Kubernetes Security Platform."
 
-ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
-ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
-ENV REPO_TO_CPE_DIR="/repo2cpe"
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-COPY --from=builder /src/image/scanner/scripts /
-COPY --from=builder /src/image/scanner/bin/scanner ./
-COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
-COPY --chown=65534:65534 --from=builder /src/image/scanner/dump/genesis_manifests.json ./
+COPY scripts /
+
+COPY --from=extracted_bundle /bundle/scanner ./
+
+COPY --from=extracted_bundle /bundle/THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
 RUN microdnf upgrade --nobest && \
     microdnf install xz && \
@@ -58,6 +38,17 @@ RUN microdnf upgrade --nobest && \
     # during the container start.
     chown -R 65534:65534 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl && \
     chmod +rx /scanner
+
+ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
+ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
+ENV ISTIO_DEFINITIONS_DIR="/istio_definitions"
+ENV REPO_TO_CPE_DIR="/repo2cpe"
+
+COPY --chown=65534:65534 --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 --from=extracted_bundle "/bundle${ISTIO_DEFINITIONS_DIR}/" ".${ISTIO_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
+COPY --chown=65534:65534 --from=extracted_bundle /bundle/genesis_manifests.json ./
 
 # This is equivalent to nobody:nobody.
 USER 65534:65534
