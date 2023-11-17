@@ -92,8 +92,8 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 
 		// Rudimentary rate-limiting.
 		// NVD limits users without an API key to roughly one call every 6 seconds.
-		// As of writing there are ~216,000 vulnerabilities, so this whole process should take ~18 minutes.
-		time.Sleep(10 * time.Second)
+		// As of writing there are ~216,000 vulnerabilities, so this whole process should take ~11 minutes.
+		time.Sleep(6 * time.Second)
 
 		startIdx += apiResp.ResultsPerPage
 		apiResp, err = query(fmt.Sprintf(urlFmt, startIdx))
