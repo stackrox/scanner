@@ -92,8 +92,10 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 
 		// Rudimentary rate-limiting.
 		// NVD limits users without an API key to roughly one call every 6 seconds.
-		// As of writing there are ~216,000 vulnerabilities, so this whole process should take ~11 minutes.
-		time.Sleep(6 * time.Second)
+		// With an API key, it is roughly one call every 0.6 seconds.
+		// We'll play it safe and do one call every 3 seconds.
+		// As of writing there are ~216,000 vulnerabilities, so this whole process should take ~5.4 minutes.
+		time.Sleep(3 * time.Second)
 
 		startIdx += apiResp.ResultsPerPage
 		apiResp, err = query(fmt.Sprintf(urlFmt, startIdx))
@@ -122,16 +124,17 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 
 func query(url string) (*apischema.CVEAPIJSON20, error) {
 	log.Debugf("Querying %s", url)
-	resp, err := client.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("fetching NVD API results: %w", err)
+		return nil, fmt.Errorf("creating HTTP request: %w", err)
+	}
+	req.Header.Set("apiKey", os.Getenv("NVD_API_KEY"))
+
+	resp, err := queryWithBackoff(req)
+	if err != nil {
+		return nil, err
 	}
 	defer utils.IgnoreError(resp.Body.Close)
-
-	log.Debugf("Queried %s with status code %d", url, resp.StatusCode)
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("unexpected status code when querying %s: %d", url, resp.StatusCode)
-	}
 
 	apiResp := new(apischema.CVEAPIJSON20)
 	if err := json.NewDecoder(resp.Body).Decode(apiResp); err != nil {
@@ -139,6 +142,39 @@ func query(url string) (*apischema.CVEAPIJSON20, error) {
 	}
 
 	return apiResp, nil
+}
+
+func queryWithBackoff(req *http.Request) (*http.Response, error) {
+	var (
+		resp *http.Response
+		err  error
+	)
+	for i := 1; i <= 3; i++ {
+		resp, err = tryQuery(req)
+		if err == nil {
+			break
+		}
+		log.Warnf("Failed query attempt %d for %s: %v", i, req.URL.String(), err)
+		// Wait some multiple of 3 seconds before next attempt.
+		time.Sleep(time.Duration(3*i) * time.Second)
+	}
+
+	return resp, err
+}
+
+func tryQuery(req *http.Request) (*http.Response, error) {
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("fetching NVD API results: %w", err)
+	}
+
+	log.Debugf("Queried %s with status code %d", req.URL.String(), resp.StatusCode)
+	if resp.StatusCode != 200 {
+		utils.IgnoreError(resp.Body.Close)
+		return nil, fmt.Errorf("unexpected status code when querying %s: %d", req.URL.String(), resp.StatusCode)
+	}
+
+	return resp, nil
 }
 
 func enrichCVEItems(cveItems *[]*jsonschema.NVDCVEFeedJSON10DefCVEItem, enrichments map[string]*FileFormatWrapper) {
