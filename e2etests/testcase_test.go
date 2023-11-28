@@ -2817,7 +2817,7 @@ var testCases = []testCase{
 					},
 				},
 				AddedBy: "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
-				FixedBy: "1.1.1v-r0",
+				FixedBy: "1.1.1w-r1",
 			},
 		},
 	},
@@ -3656,7 +3656,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.24-1.el8_8",
+				FixedBy:       "6.0.25-1.el8_9",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -3695,7 +3695,7 @@ Bug Fix(es) and Enhancement(s):
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.24-1.el8_8",
+				FixedBy:       "6.0.25-1.el8_9",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
