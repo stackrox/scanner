@@ -11,7 +11,7 @@ ENV CI=1
 COPY . /src
 WORKDIR /src
 
-RUN ls -l; unzip -j blob-repo2cpe.zip -d image/scanner/dump/repo2cpe && \
+RUN ls -la; git log --oneline | wc -l; unzip -j blob-repo2cpe.zip -d image/scanner/dump/repo2cpe && \
     unzip -j blob-k8s-definitions.zip -d image/scanner/dump/k8s_definitions && \
     unzip -j blob-nvd-definitions.zip -d image/scanner/dump/nvd_definitions
 
