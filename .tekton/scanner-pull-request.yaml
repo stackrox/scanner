@@ -232,7 +232,7 @@ spec:
                   --output "$(workspaces.source.path)/source/blob-${blob}" \
                   "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
               done
-              ls -la "$(workspaces.source.path/source"
+              ls -la "$(workspaces.source.path)/source"
       workspaces:
       - name: source
         workspace: workspace
