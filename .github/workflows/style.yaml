@@ -1,0 +1,33 @@
+name: Style
+on:
+  push:
+    tags:
+    - '*'
+    branches:
+    - master
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+jobs:
+  check-generated-files:
+    env:
+      ARTIFACT_DIR: junit-reports/
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - uses: ./.github/actions/job-preamble
+
+    - name: Create artifacts dir
+      run: mkdir -p "$ARTIFACT_DIR"
+
+    - name: Check Generated
+      run: scripts/ci/jobs/check-generated.sh
