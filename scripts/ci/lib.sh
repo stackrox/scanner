@@ -4,6 +4,7 @@
 # Adapted from https://github.com/stackrox/stackrox/blob/master/scripts/ci/lib.sh
 
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+# shellcheck source=../../scripts/lib.sh
 source "$SCRIPTS_ROOT/scripts/lib.sh"
 
 set -euo pipefail

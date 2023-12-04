@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
 
 set -euo pipefail
 
@@ -7,6 +6,7 @@ set -euo pipefail
 # Adapted from https://github.com/stackrox/stackrox/blob/master/tests/e2e/lib.sh
 
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+# shellcheck source=../../lib.sh
 source "$SCRIPTS_ROOT/lib.sh"
 
 check_stackrox_logs() {

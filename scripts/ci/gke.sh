@@ -4,7 +4,9 @@
 # Copied from https://github.com/stackrox/stackrox/blob/master/scripts/ci/gke.sh
 
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+# shellcheck source=../../scripts/ci/lib.sh
 source "$SCRIPTS_ROOT/scripts/ci/lib.sh"
+# shellcheck source=../../scripts/ci/gcp.sh
 source "$SCRIPTS_ROOT/scripts/ci/gcp.sh"
 
 set -euo pipefail

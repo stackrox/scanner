@@ -5,7 +5,9 @@
 # Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/build/build-main-and-bundle.sh
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+# shellcheck source=../../scripts/ci/gcp.sh
 source "$ROOT/scripts/ci/gcp.sh"
+# shellcheck source=../../scripts/ci/lib.sh
 source "$ROOT/scripts/ci/lib.sh"
 
 set -euo pipefail

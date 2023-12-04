@@ -8,6 +8,7 @@
 # Adapted from https://github.com/stackrox/stackrox/blob/nightlies/.openshift-ci/nightlies.sh
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
+# shellcheck source=../scripts/ci/lib.sh
 source "$ROOT/scripts/ci/lib.sh"
 
 set -euo pipefail
