@@ -166,7 +166,7 @@ spec:
       - name: fetchTags
         value: true
       - name: depth
-        value: 1000
+        value: 0
       runAfter:
       - init
       taskRef:
@@ -232,7 +232,6 @@ spec:
                   --output "$(workspaces.source.path)/source/blob-${blob}" \
                   "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
               done
-              ls -la "$(workspaces.source.path)/source"
       workspaces:
       - name: source
         workspace: workspace

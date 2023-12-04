@@ -160,6 +160,10 @@ spec:
         value: $(params.git-url)
       - name: revision
         value: $(params.revision)
+      - name: fetchTags
+        value: true
+      - name: depth
+        value: 0
       runAfter:
       - init
       taskRef:
@@ -221,7 +225,7 @@ spec:
                 genesis_manifests.json
               )
               for blob in "${blobs[@]}"; do
-                curl --fail --show-error --retry 4 --retry-max-time 30 --retry-connrefused -s \
+                curl --fail --show-error --retry 4 --retry-max-time 30 --retry-connrefused \
                   --output "$(workspaces.source.path)/source/blob-${blob}" \
                   "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
               done
