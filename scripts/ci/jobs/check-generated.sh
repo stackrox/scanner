@@ -14,7 +14,7 @@ function check-containerignore-is-in-sync() {
         --unified \
         --ignore-blank-lines \
         <(grep -v -e '^#' .containerignore) \
-        <(grep -vF -e '/.git/' -e '/image/' -e '/qa-tests-backend/' .dockerignore) \
+        <(grep -vF -e '/.git/' -e '/image/' -e '/bin/' .dockerignore) \
     > diff.txt
 }
 check-containerignore-is-in-sync || {
