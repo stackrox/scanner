@@ -221,6 +221,8 @@ spec:
             script: |
               #!/usr/bin/env bash
               ROOT="$(workspaces.source.path)/source"
+              ls -lh $(workspaces.source.path)
+              ls -lh $(workspaces.source.path)/source
               source "$ROOT/scripts/ci/lib.sh"
 
               set -euo pipefail
