@@ -211,27 +211,37 @@ spec:
       workspaces:
       - name: source
         workspace: workspace
-    - name: fetch-vuln-feed-data
+    - name: gen-vuln-feed-data
       runAfter:
       - init
       taskSpec:
         steps:
-          - name: fetch-vuln-feed-data
-            image: registry.access.redhat.com/ubi8/ubi
+          - name: gen-vuln-feed-data
+            image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
             script: |
               #!/usr/bin/env bash
-              mkdir -p "$(workspaces.source.path)/source"
-              blobs=(
-                nvd-definitions.zip
-                k8s-definitions.zip
-                repo2cpe.zip
-                genesis_manifests.json
-              )
-              for blob in "${blobs[@]}"; do
-                curl --fail --show-error --retry 4 --retry-max-time 30 --retry-connrefused \
-                  --output "$(workspaces.source.path)/source/blob-${blob}" \
-                  "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
-              done
+              ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+              source "$ROOT/scripts/ci/lib.sh"
+
+              set -euo pipefail
+              info "Building updater"
+              make build-updater
+
+              info "Generating genesis dump"
+              DUMP_DIR="$(workspaces.source.path)/source"
+              mkdir -p $DUMP_DIR
+              "$ROOT/bin/updater" generate-dump --out-file $DUMP_DIR/genesis-dump.zip
+              ls -lrt $DUMP_DIR
+
+              info "Printing some stats"
+              "$ROOT/bin/updater" print-stats $DUMP_DIR/genesis-dump.zip
+
+              info "Extracting dumps"
+              mkdir -p /tmp/vuln-dump
+              zip $DUMP_DIR/genesis-dump.zip 'nvd/*' --copy --out $DUMP_DIR/nvd-definitions.zip
+              zip $DUMP_DIR/genesis-dump.zip 'k8s/*' --copy --out $DUMP_DIR/k8s-definitions.zip
+              zip $DUMP_DIR/genesis-dump.zip 'istio/*' --copy --out $DUMP_DIR/istio-definitions.zip
+              zip $DUMP_DIR/genesis-dump.zip 'rhelv2/repository-to-cpe.json' --copy --out $DUMP_DIR/repo2cpe.zip
       workspaces:
       - name: source
         workspace: workspace
@@ -253,7 +263,7 @@ spec:
         value: $(tasks.clone-repository.results.commit)
       runAfter:
       - prefetch-dependencies
-      - fetch-vuln-feed-data
+      - gen-vuln-feed-data
       taskRef:
         params:
         - name: name
