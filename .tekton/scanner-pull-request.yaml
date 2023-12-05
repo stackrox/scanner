@@ -228,6 +228,7 @@ spec:
 
               set -euo pipefail
               info "Building updater"
+              cd $ROOT
               make build-updater
 
               info "Generating genesis dump"
