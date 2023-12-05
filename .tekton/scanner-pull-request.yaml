@@ -220,7 +220,7 @@ spec:
             image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
             script: |
               #!/usr/bin/env bash
-              ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+              ROOT="$(workspaces.source.path)/source"
               source "$ROOT/scripts/ci/lib.sh"
 
               set -euo pipefail
@@ -228,20 +228,19 @@ spec:
               make build-updater
 
               info "Generating genesis dump"
-              DUMP_DIR="$(workspaces.source.path)/source"
-              mkdir -p $DUMP_DIR
-              "$ROOT/bin/updater" generate-dump --out-file $DUMP_DIR/genesis-dump.zip
-              ls -lrt $DUMP_DIR
+              mkdir -p $ROOT
+              "$ROOT/bin/updater" generate-dump --out-file $ROOT/genesis-dump.zip
+              ls -lrt $ROOT
 
               info "Printing some stats"
-              "$ROOT/bin/updater" print-stats $DUMP_DIR/genesis-dump.zip
+              "$ROOT/bin/updater" print-stats $ROOT/genesis-dump.zip
 
               info "Extracting dumps"
               mkdir -p /tmp/vuln-dump
-              zip $DUMP_DIR/genesis-dump.zip 'nvd/*' --copy --out $DUMP_DIR/nvd-definitions.zip
-              zip $DUMP_DIR/genesis-dump.zip 'k8s/*' --copy --out $DUMP_DIR/k8s-definitions.zip
-              zip $DUMP_DIR/genesis-dump.zip 'istio/*' --copy --out $DUMP_DIR/istio-definitions.zip
-              zip $DUMP_DIR/genesis-dump.zip 'rhelv2/repository-to-cpe.json' --copy --out $DUMP_DIR/repo2cpe.zip
+              zip $ROOT/genesis-dump.zip 'nvd/*' --copy --out $ROOT/nvd-definitions.zip
+              zip $ROOT/genesis-dump.zip 'k8s/*' --copy --out $ROOT/k8s-definitions.zip
+              zip $ROOT/genesis-dump.zip 'istio/*' --copy --out $ROOT/istio-definitions.zip
+              zip $ROOT/genesis-dump.zip 'rhelv2/repository-to-cpe.json' --copy --out $ROOT/repo2cpe.zip
       workspaces:
       - name: source
         workspace: workspace
