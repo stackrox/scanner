@@ -223,8 +223,7 @@ spec:
                 memory: 6Gi
               limits:
                 memory: 6Gi
-            # image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
-            image: brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.20
+            image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
             script: |
               #!/usr/bin/env bash
               ROOT="$(workspaces.source.path)/source"
@@ -265,7 +264,7 @@ spec:
                 memory: 6Gi
               limits:
                 memory: 6Gi
-            image: brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.20
+            image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
             script: |
               #!/usr/bin/env bash
               ROOT="$(workspaces.source.path)/source"
