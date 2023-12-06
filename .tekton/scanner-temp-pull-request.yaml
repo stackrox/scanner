@@ -7,8 +7,7 @@ metadata:
     build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: "3"
-    pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch
-      == "klape/rhtap-scanner-onboarding-2"
+    pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && source_branch.contains("rhtap")
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: acs
@@ -17,6 +16,13 @@ metadata:
   name: scanner-temp-on-pull-request
   namespace: rh-acs-tenant
 spec:
+  workspaces:
+  - name: workspace
+    volumeClaimTemplate:
+      spec:
+        resources:
+          requests:
+            storage: 10Gi
   params:
   - name: dockerfile
     value: image/scanner/rhtap/Dockerfile
@@ -113,6 +119,7 @@ spec:
       description: Image tag expiration time, time values could be something like
         1h, 2d, 3w for hours, days, and weeks, respectively.
       name: image-expires-after
+      type: string
     - default: "false"
       description: Build a source image.
       name: build-source-image
@@ -163,6 +170,10 @@ spec:
         value: $(params.git-url)
       - name: revision
         value: $(params.revision)
+      - name: fetchTags
+        value: true
+      - name: depth
+        value: 0
       runAfter:
       - init
       taskRef:
@@ -207,6 +218,80 @@ spec:
       workspaces:
       - name: source
         workspace: workspace
+    - name: gen-vuln-feed-data
+      runAfter:
+      - init
+      - clone-repository
+      taskSpec:
+        steps:
+          - name: gen-vuln-feed-data
+            computeResources:
+              requests:
+                memory: 6Gi
+              limits:
+                memory: 6Gi
+            image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
+            script: |
+              #!/usr/bin/env bash
+              ROOT="$(workspaces.source.path)/source"
+              ls -lh $(workspaces.source.path)
+              ls -lh $(workspaces.source.path)/source
+              source "$ROOT/scripts/ci/lib.sh"
+
+              set -euo pipefail
+              info "Building updater"
+              cd $ROOT
+              make build-updater
+
+              info "Generating genesis dump"
+              "$ROOT/bin/updater" generate-dump --out-file $ROOT/genesis-dump.zip
+
+              info "Printing some stats"
+              "$ROOT/bin/updater" print-stats $ROOT/genesis-dump.zip
+
+              info "Extracting dumps"
+              unzip -j $ROOT/genesis-dump.zip 'nvd/*' -d $ROOT/nvd_definitions
+              unzip -j $ROOT/genesis-dump.zip 'k8s/*' -d $ROOT/k8s_definitions
+              unzip -j $ROOT/genesis-dump.zip 'istio/*' -d $ROOT/istio_definitions
+              unzip -j $ROOT/genesis-dump.zip 'rhelv2/repository-to-cpe.json' -d $ROOT/repo2cpe
+              unzip -j $ROOT/genesis-dump.zip 'manifest.json'
+              mv manifest.json genesis_manifests.json
+      workspaces:
+      - name: source
+        workspace: workspace
+    - name: build-scanner-binary
+      runAfter:
+      - init
+      - clone-repository
+      taskSpec:
+        steps:
+          - name: build-scanner-binary
+            computeResources:
+              requests:
+                memory: 6Gi
+              limits:
+                memory: 6Gi
+            image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
+            script: |
+              #!/usr/bin/env bash
+              ROOT="$(workspaces.source.path)/source"
+
+              set -euo pipefail
+              info "Building scanner"
+              cd $ROOT
+
+              export CGO_ENABLED=1 GOFLAGS="" CI=1
+              export VERSION=$(git describe --tags --abbrev=10 --dirty --long)
+
+              if [ "$VERSION" == "" ]; then
+                  echo "Failed to build verison string"
+                  exit 1
+              fi
+
+              go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$VERSION" -o scanner ./cmd/clair
+      workspaces:
+      - name: source
+        workspace: workspace
     - name: build-container
       params:
       - name: IMAGE
@@ -225,12 +310,14 @@ spec:
         value: $(tasks.clone-repository.results.commit)
       runAfter:
       - prefetch-dependencies
+      - gen-vuln-feed-data
+      - build-scanner-binary
       taskRef:
         params:
         - name: name
           value: buildah
         - name: bundle
-          value: quay.io/redhat-appstudio-tekton-catalog/task-buildah:0.1@sha256:8607f9b9d7696e156f186f3fc379ab2e4472c865431ef423e19a26f8707a2961
+          value: quay.io/redhat-appstudio-tekton-catalog/task-buildah:0.1
         - name: kind
           value: task
         resolver: bundles
@@ -255,7 +342,7 @@ spec:
         - name: name
           value: source-build
         - name: bundle
-          value: quay.io/redhat-appstudio-tekton-catalog/task-source-build:0.1@sha256:d8ef64abadd6c7763769ef20e40a418f89f44f657a11d6fac40d9c4dc984715a
+          value: quay.io/redhat-appstudio-tekton-catalog/task-source-build:0.1@sha256:48323bb050abc02e1634752b1bd8782f938e0397db8bd7d9016419ff4017bcef
         - name: kind
           value: task
         resolver: bundles
@@ -346,7 +433,7 @@ spec:
         - name: name
           value: clamav-scan
         - name: bundle
-          value: quay.io/redhat-appstudio-tekton-catalog/task-clamav-scan:0.1@sha256:034b65ed165951f526d38d290a49ff124d38257beda7a625b98244159fadd00e
+          value: quay.io/redhat-appstudio-tekton-catalog/task-clamav-scan:0.1@sha256:1779f85108dcc55837ecb103b6524242872056a04ccdd726bbf1e718dcb8dc30
         - name: kind
           value: task
         resolver: bundles
