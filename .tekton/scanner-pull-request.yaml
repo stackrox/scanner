@@ -223,8 +223,7 @@ spec:
                 memory: 6Gi
               limits:
                 memory: 6Gi
-            # image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
-            image: brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.20
+            image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
             script: |
               #!/usr/bin/env bash
               ROOT="$(workspaces.source.path)/source"
@@ -238,51 +237,21 @@ spec:
               make build-updater
 
               info "Generating genesis dump"
+              mkdir -p $ROOT
               "$ROOT/bin/updater" generate-dump --out-file $ROOT/genesis-dump.zip
+              ls -lrt $ROOT
 
               info "Printing some stats"
               "$ROOT/bin/updater" print-stats $ROOT/genesis-dump.zip
 
               info "Extracting dumps"
-              unzip -j $ROOT/genesis-dump.zip 'nvd/*' -d $ROOT/nvd_definitions
-              unzip -j $ROOT/genesis-dump.zip 'k8s/*' -d $ROOT/k8s_definitions
-              unzip -j $ROOT/genesis-dump.zip 'istio/*' -d $ROOT/istio_definitions
-              unzip -j $ROOT/genesis-dump.zip 'rhelv2/repository-to-cpe.json' -d $ROOT/repo2cpe
-              unzip -j $ROOT/genesis-dump.zip 'manifest.json'
+              mkdir -p /tmp/vuln-dump
+              zip $ROOT/genesis-dump.zip 'nvd/*' --copy --out $ROOT/nvd-definitions.zip
+              zip $ROOT/genesis-dump.zip 'k8s/*' --copy --out $ROOT/k8s-definitions.zip
+              zip $ROOT/genesis-dump.zip 'istio/*' --copy --out $ROOT/istio-definitions.zip
+              zip $ROOT/genesis-dump.zip 'rhelv2/repository-to-cpe.json' --copy --out $ROOT/repo2cpe.zip
+              unzip $ROOT/genesis-dump.zip 'manifest.json'
               mv manifest.json genesis_manifests.json
-      workspaces:
-      - name: source
-        workspace: workspace
-    - name: build-scanner-binary
-      runAfter:
-      - init
-      - clone-repository
-      taskSpec:
-        steps:
-          - name: build-scanner-binary
-            computeResources:
-              requests:
-                memory: 6Gi
-              limits:
-                memory: 6Gi
-            image: brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.20
-            script: |
-              #!/usr/bin/env bash
-              ROOT="$(workspaces.source.path)/source"
-
-              set -euo pipefail
-              info "Building scanner"
-              cd $ROOT
-
-              export CGO_ENABLED=1 GOFLAGS="" CI=1
-              export VERSION=$(git describe --tags --abbrev=10 --dirty --long)
-
-              if [ "$VERSION" == "" ]; then
-                  echo "Failed to build verison string"
-                  exit 1
-              fi
-
-              go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$VERSION" -o scanner ./cmd/clair
       workspaces:
       - name: source
         workspace: workspace
@@ -305,13 +274,12 @@ spec:
       runAfter:
       - prefetch-dependencies
       - gen-vuln-feed-data
-      - build-scanner-binary
       taskRef:
         params:
         - name: name
-          value: buildah
+          value: buildah-6gb
         - name: bundle
-          value: quay.io/redhat-appstudio-tekton-catalog/task-buildah:0.1
+          value: quay.io/redhat-appstudio-tekton-catalog/task-buildah-6gb:0.1
         - name: kind
           value: task
         resolver: bundles
