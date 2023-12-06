@@ -208,27 +208,47 @@ spec:
       workspaces:
       - name: source
         workspace: workspace
-    - name: fetch-vuln-feed-data
+    - name: gen-vuln-feed-data
       runAfter:
       - init
+      - clone-repository
       taskSpec:
         steps:
-          - name: fetch-vuln-feed-data
-            image: registry.access.redhat.com/ubi8/ubi
+          - name: gen-vuln-feed-data
+            computeResources:
+              requests:
+                memory: 6Gi
+              limits:
+                memory: 6Gi
+            image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
             script: |
               #!/usr/bin/env bash
-              mkdir -p "$(workspaces.source.path)/source"
-              blobs=(
-                nvd-definitions.zip
-                k8s-definitions.zip
-                repo2cpe.zip
-                genesis_manifests.json
-              )
-              for blob in "${blobs[@]}"; do
-                curl --fail --show-error --retry 4 --retry-max-time 30 --retry-connrefused \
-                  --output "$(workspaces.source.path)/source/blob-${blob}" \
-                  "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
-              done
+              ROOT="$(workspaces.source.path)/source"
+              ls -lh $(workspaces.source.path)
+              ls -lh $(workspaces.source.path)/source
+              source "$ROOT/scripts/ci/lib.sh"
+
+              set -euo pipefail
+              info "Building updater"
+              cd $ROOT
+              make build-updater
+
+              info "Generating genesis dump"
+              mkdir -p $ROOT
+              "$ROOT/bin/updater" generate-dump --out-file $ROOT/genesis-dump.zip
+              ls -lrt $ROOT
+
+              info "Printing some stats"
+              "$ROOT/bin/updater" print-stats $ROOT/genesis-dump.zip
+
+              info "Extracting dumps"
+              mkdir -p /tmp/vuln-dump
+              zip $ROOT/genesis-dump.zip 'nvd/*' --copy --out $ROOT/nvd-definitions.zip
+              zip $ROOT/genesis-dump.zip 'k8s/*' --copy --out $ROOT/k8s-definitions.zip
+              zip $ROOT/genesis-dump.zip 'istio/*' --copy --out $ROOT/istio-definitions.zip
+              zip $ROOT/genesis-dump.zip 'rhelv2/repository-to-cpe.json' --copy --out $ROOT/repo2cpe.zip
+              unzip $ROOT/genesis-dump.zip 'manifest.json'
+              mv manifest.json genesis_manifests.json
       workspaces:
       - name: source
         workspace: workspace
@@ -250,7 +270,7 @@ spec:
         value: $(tasks.clone-repository.results.commit)
       runAfter:
       - prefetch-dependencies
-      - fetch-vuln-feed-data
+      - gen-vuln-feed-data
       taskRef:
         params:
         - name: name
