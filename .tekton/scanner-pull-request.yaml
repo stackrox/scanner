@@ -218,6 +218,11 @@ spec:
       taskSpec:
         steps:
           - name: gen-vuln-feed-data
+            computeResources:
+              requests:
+                memory: 2Gi
+              limits:
+                memory: 4Gi
             image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
             script: |
               #!/usr/bin/env bash
