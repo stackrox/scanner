@@ -250,6 +250,8 @@ spec:
               zip $ROOT/genesis-dump.zip 'k8s/*' --copy --out $ROOT/k8s-definitions.zip
               zip $ROOT/genesis-dump.zip 'istio/*' --copy --out $ROOT/istio-definitions.zip
               zip $ROOT/genesis-dump.zip 'rhelv2/repository-to-cpe.json' --copy --out $ROOT/repo2cpe.zip
+              unzip $ROOT/genesis-dump.zip 'manifest.json'
+              mv manifest.json genesis_manifests.json
       workspaces:
       - name: source
         workspace: workspace

@@ -11,16 +11,16 @@ ENV CI=1
 COPY . /src
 WORKDIR /src
 
-RUN ls -la; git log --oneline | wc -l; unzip -j blob-repo2cpe.zip -d image/scanner/dump/repo2cpe && \
-    unzip -j blob-k8s-definitions.zip -d image/scanner/dump/k8s_definitions && \
-    unzip -j blob-nvd-definitions.zip -d image/scanner/dump/nvd_definitions
+RUN ls -la; git log --oneline | wc -l; unzip -j repo2cpe.zip -d image/scanner/dump/repo2cpe && \
+    unzip -j k8s-definitions.zip -d image/scanner/dump/k8s_definitions && \
+    unzip -j nvd-definitions.zip -d image/scanner/dump/nvd_definitions
 
 RUN echo "version: $(git describe --tags --abbrev=10 --dirty --long)"; git status; go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair
 
 # Replace genesis manifests file in the source code with the one generated at
 # the point when the dump was taken.  This is to avoid discrepancy between other
 # files of the dump and the manifest.
-COPY ./blob-genesis_manifests.json image/scanner/dump/genesis_manifests.json
+COPY ./genesis_manifests.json image/scanner/dump/genesis_manifests.json
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
