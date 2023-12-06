@@ -16,6 +16,13 @@ metadata:
   name: scanner-on-pull-request
   namespace: rh-acs-tenant
 spec:
+  workspaces:
+  - name: workspace
+    volumeClaimTemplate:
+      spec:
+        resources:
+          requests:
+            storage: 10Gi
   params:
   - name: dockerfile
     value: image/scanner/rhtap/Dockerfile
