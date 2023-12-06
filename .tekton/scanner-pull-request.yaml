@@ -220,9 +220,9 @@ spec:
           - name: gen-vuln-feed-data
             computeResources:
               requests:
-                memory: 8Gi
+                memory: 6Gi
               limits:
-                memory: 8Gi
+                memory: 6Gi
             image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
             script: |
               #!/usr/bin/env bash
