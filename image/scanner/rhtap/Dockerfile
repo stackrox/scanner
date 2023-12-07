@@ -11,11 +11,11 @@ ENV CI=1
 COPY . /src
 WORKDIR /src
 
-RUN ls -la; git log --oneline | wc -l; unzip -j repo2cpe.zip -d image/scanner/dump/repo2cpe && \
+RUN unzip -j repo2cpe.zip -d image/scanner/dump/repo2cpe && \
     unzip -j k8s-definitions.zip -d image/scanner/dump/k8s_definitions && \
     unzip -j nvd-definitions.zip -d image/scanner/dump/nvd_definitions
 
-RUN echo "version: $(git describe --tags --abbrev=10 --dirty --long)"; git status; go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair
+RUN go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair
 
 # Replace genesis manifests file in the source code with the one generated at
 # the point when the dump was taken.  This is to avoid discrepancy between other
