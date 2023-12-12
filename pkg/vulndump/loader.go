@@ -117,6 +117,15 @@ func LoadOSVulnsFromDump(zipR *zip.Reader) ([]database.Vulnerability, error) {
 	return vulns, nil
 }
 
+func getOSLoader(zipR *zip.Reader) (*osLoader, error) {
+	osVulnsFile, err := ziputil.OpenFile(zipR, OSVulnsFileName)
+	if err != nil {
+		return nil, errors.Wrap(err, "opening OS vulns file")
+	}
+
+	return newOSLoader(osVulnsFile)
+}
+
 func renew(sig *concurrency.Signal, db database.Datastore, interval time.Duration, expiration time.Time, instanceName string) {
 	// Give a buffer for this instance to renew the lock
 	expirationDuration := time.Until(expiration) - 10*time.Second
@@ -188,16 +197,27 @@ func startVulnLoad(manifest *Manifest, db database.Datastore, updateInterval tim
 
 func loadOSVulns(zipR *zip.Reader, db database.Datastore) error {
 	log.Info("Loading OS vulns...")
-	osVulns, err := LoadOSVulnsFromDump(zipR)
+	loader, err := getOSLoader(zipR)
 	if err != nil {
 		return err
 	}
-	log.Infof("Done loading OS vulns. There are %d vulns to insert into the DB", len(osVulns))
+	defer utils.IgnoreError(loader.Close)
 
-	if err := db.InsertVulnerabilities(osVulns); err != nil {
-		return errors.Wrap(err, "inserting vulns into the DB")
+	var n int
+	for loader.Next() {
+		osVulns := loader.Vulns()
+
+		n += len(osVulns)
+		log.Infof("Loaded %d OS-level vulns. Total OS-level vulns: %d", len(osVulns), n)
+
+		if err := db.InsertVulnerabilities(osVulns); err != nil {
+			return errors.Wrap(err, "inserting vulns into the DB")
+		}
 	}
-	log.Info("Done inserting OS vulns into the DB")
+	if loader.Err() != nil {
+		return loader.Err()
+	}
+
 	return nil
 }
 
@@ -275,12 +295,12 @@ func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval ti
 	}
 	defer utils.IgnoreError(zipR.Close)
 
-	log.Info("Loading manifest...")
+	log.Info("Loading vulnerability manifest")
 	manifest, err := LoadManifestFromDump(&zipR.Reader)
 	if err != nil {
 		return err
 	}
-	log.Info("Loaded manifest")
+	log.Info("Successfully loaded vulnerability manifest")
 
 	if db != nil {
 		performUpdate, finishFn, err := startVulnLoad(manifest, db, updateInterval, instanceName)
@@ -288,6 +308,8 @@ func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval ti
 			return errors.Wrap(err, "error beginning vuln loading")
 		}
 		if performUpdate {
+			log.Info("Loading OS-level vulnerabilities")
+
 			if err := loadRHELv2Vulns(db, &zipR.Reader, repoToCPE); err != nil {
 				_ = finishFn(err)
 				return errors.Wrap(err, "error loading RHEL vulns")
@@ -301,15 +323,23 @@ func UpdateFromVulnDump(zipPath string, db database.Datastore, updateInterval ti
 			if err := finishFn(nil); err != nil {
 				return errors.Wrap(err, "error ending vuln loading")
 			}
+
+			log.Info("Loaded OS-level vulnerabilities successfully")
 		}
 	}
 
+	log.Info("Loading application-level vulnerabilities")
 	errorList := errorhelpers.NewErrorList("loading application-level caches")
 	for _, appCache := range caches {
 		if err := loadApplicationUpdater(appCache, manifest, &zipR.Reader); err != nil {
 			errorList.AddError(errors.Wrapf(err, "error loading into in-mem cache %q", appCache.Dir()))
 		}
 	}
+	if err := errorList.ToError(); err != nil {
+		return err
+	}
 
-	return errorList.ToError()
+	log.Info("Successfully loaded application-level vulnerabilities")
+
+	return nil
 }
