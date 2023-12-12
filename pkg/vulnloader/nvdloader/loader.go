@@ -129,36 +129,34 @@ func query(url string) (*apischema.CVEAPIJSON20, error) {
 		return nil, fmt.Errorf("creating HTTP request: %w", err)
 	}
 
-	resp, err := queryWithBackoff(req)
+	apiResp, err := queryWithBackoff(req)
 	if err != nil {
 		return nil, err
-	}
-	defer utils.IgnoreError(resp.Body.Close)
-
-	apiResp := new(apischema.CVEAPIJSON20)
-	if err := json.NewDecoder(resp.Body).Decode(apiResp); err != nil {
-		return nil, fmt.Errorf("decoding API response: %w", err)
 	}
 
 	return apiResp, nil
 }
 
-func queryWithBackoff(req *http.Request) (*http.Response, error) {
+func queryWithBackoff(req *http.Request) (*apischema.CVEAPIJSON20, error) {
 	var (
-		resp *http.Response
-		err  error
+		apiResp *apischema.CVEAPIJSON20
+		err     error
 	)
-	for i := 1; i <= 3; i++ {
+	for i := 1; i <= 5; i++ {
+		var resp *http.Response
 		resp, err = tryQuery(req)
 		if err == nil {
-			break
+			apiResp, err = parseResponse(resp)
+			if err == nil {
+				break
+			}
 		}
 		log.Warnf("Failed query attempt %d for %s: %v", i, req.URL.String(), err)
 		// Wait some multiple of 10 seconds before next attempt.
 		time.Sleep(time.Duration(10*i) * time.Second)
 	}
 
-	return resp, err
+	return apiResp, err
 }
 
 func tryQuery(req *http.Request) (*http.Response, error) {
@@ -174,6 +172,17 @@ func tryQuery(req *http.Request) (*http.Response, error) {
 	}
 
 	return resp, nil
+}
+
+func parseResponse(resp *http.Response) (*apischema.CVEAPIJSON20, error) {
+	defer utils.IgnoreError(resp.Body.Close)
+
+	apiResp := new(apischema.CVEAPIJSON20)
+	if err := json.NewDecoder(resp.Body).Decode(apiResp); err != nil {
+		return nil, fmt.Errorf("decoding API response: %w", err)
+	}
+
+	return apiResp, nil
 }
 
 func enrichCVEItems(cveItems *[]*jsonschema.NVDCVEFeedJSON10DefCVEItem, enrichments map[string]*FileFormatWrapper) {
