@@ -21,7 +21,7 @@ import (
 const urlFmt = `https://services.nvd.nist.gov/rest/json/cves/2.0?noRejected&startIndex=%d`
 
 var client = http.Client{
-	Timeout:   5 * time.Minute,
+	Timeout:   2 * time.Minute,
 	Transport: proxy.RoundTripper(),
 }
 
@@ -93,9 +93,9 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 		// Rudimentary rate-limiting.
 		// NVD limits users without an API key to roughly one call every 6 seconds.
 		// With an API key, it is roughly one call every 0.6 seconds.
-		// At this time, the API key is inaccessible in CI, so we opt to play it safe and make a call every 10 seconds.
-		// As of writing there are ~216,000 vulnerabilities, so this whole process should take ~18 minutes.
-		time.Sleep(10 * time.Second)
+		// We'll play it safe and do one call every 3 seconds.
+		// As of writing there are ~216,000 vulnerabilities, so this whole process should take ~5.4 minutes.
+		time.Sleep(3 * time.Second)
 
 		startIdx += apiResp.ResultsPerPage
 		apiResp, err = query(fmt.Sprintf(urlFmt, startIdx))
@@ -128,6 +128,7 @@ func query(url string) (*apischema.CVEAPIJSON20, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating HTTP request: %w", err)
 	}
+	req.Header.Set("apiKey", os.Getenv("NVD_API_KEY"))
 
 	apiResp, err := queryWithBackoff(req)
 	if err != nil {
@@ -152,8 +153,8 @@ func queryWithBackoff(req *http.Request) (*apischema.CVEAPIJSON20, error) {
 			}
 		}
 		log.Warnf("Failed query attempt %d for %s: %v", i, req.URL.String(), err)
-		// Wait some multiple of 10 seconds before next attempt.
-		time.Sleep(time.Duration(10*i) * time.Second)
+		// Wait some multiple of 3 seconds before next attempt.
+		time.Sleep(time.Duration(3*i) * time.Second)
 	}
 
 	return apiResp, err
