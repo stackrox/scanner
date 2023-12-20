@@ -29,7 +29,7 @@ jobs:
       - name: Build updater
         run: make build-updater
 
-      - name: Bundle the build to preserve permissions
+      - name: Archive the build to preserve permissions
         run: tar -cvzf updater-build.tgz bin/updater
 
       - uses: actions/upload-artifact@v3
@@ -56,7 +56,7 @@ jobs:
       - name: Build Scanner
         run: make scanner-build-nodeps
 
-      - name: Bundle the build to preserve permissions
+      - name: Archive the build to preserve permissions
         run: tar -cvzf scanner-build.tgz image/scanner/bin/scanner
 
       - uses: actions/upload-artifact@v3
@@ -274,7 +274,7 @@ jobs:
       - name: Make bundle
         run: image/scanner/rhel/create-bundle.sh image/scanner image/scanner/rhel
 
-      - name: Bundle the bundle to preserve permissions # TODO(DO NOT MERGE): word this better?
+      - name: Archive the bundle to preserve permissions
         run: tar -cvzf bundle.tgz image/scanner/rhel
 
       - uses: actions/upload-artifact@v3
@@ -367,7 +367,6 @@ jobs:
         run: |
           docker build -t scanner-db-slim:"$(make --quiet tag)" -f image/db/rhel/Dockerfile.slim image/db/rhel
 
-        # needed for docs ensure_image.sh initial pull with RHACS_BRANDING
       - name: Docker login
         # Skip for external contributions.
         if: |
