@@ -1,0 +1,23 @@
+name: Vulnerability updates sanity check
+on:
+  schedule:
+    - cron: '5 0,4,8,12,16,20 * * *'
+
+jobs:
+  sanity-check-vuln-updates:
+    env:
+      SLACK_WEBHOOK_ONCALL: ${{ secrets.SLACK_ONCALL_SCANNER_WEBHOOK }}
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: ./.github/actions/job-preamble
+
+      - name: sanity-check-vuln-updates
+        run: ./scripts/ci/jobs/sanity-check-vuln-updates.sh
