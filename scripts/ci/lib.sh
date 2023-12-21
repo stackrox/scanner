@@ -772,7 +772,7 @@ send_slack_notice_for_failures_on_merge() {
 }
 
 send_slack_notice_for_vuln_check_failure() {
-    if ! is_OPENSHIFT_CI && ! ! is_GITHUB_ACTIONS; then
+    if ! is_OPENSHIFT_CI && ! is_GITHUB_ACTIONS; then
         return 0
     fi
 
