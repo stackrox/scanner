@@ -679,7 +679,7 @@ store_test_results() {
         die "missing args. usage: store_test_results <from> <to>"
     fi
 
-    if ! is_OPENSHIFT_CI && ! is_GITHUB_ACTIONS; then
+    if ! is_OPENSHIFT_CI; then
         return
     fi
 

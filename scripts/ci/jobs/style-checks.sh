@@ -11,10 +11,12 @@ style_checks() {
 
     make style || touch FAIL
 
-    info "Saving junit XML report"
-    mkdir -p junit-reports
-    cp -a report.xml "junit-reports/" || true
-    store_test_results junit-reports reports
+    if is_OPENSHIFT_CI; then
+        info "Saving junit XML report"
+        mkdir -p junit-reports
+        cp -a report.xml "junit-reports/" || true
+        store_test_results junit-reports reports
+    fi
 
     [[ ! -f FAIL ]] || die "Style checks failed"
 }
