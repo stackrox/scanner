@@ -228,6 +228,7 @@ spec:
                 genesis_manifests.json
               )
               for blob in "${blobs[@]}"; do
+                echo "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob} > $(workspaces.source.path)/source/blob-${blob}"
                 curl --fail --show-error --retry 4 --retry-max-time 30 --retry-connrefused \
                   --output "$(workspaces.source.path)/source/blob-${blob}" \
                   "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
