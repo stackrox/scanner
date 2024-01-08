@@ -30,6 +30,7 @@ import (
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
+	"github.com/stackrox/rox/pkg/memlimit"
 	"github.com/stackrox/rox/pkg/sync"
 	"github.com/stackrox/scanner/api"
 	"github.com/stackrox/scanner/api/grpc"
@@ -81,6 +82,8 @@ const (
 
 func init() {
 	proxy.UseWithDefaultTransport()
+
+	memlimit.SetMemoryLimit()
 }
 
 var debugRoutes = map[string]http.Handler{
