@@ -332,6 +332,7 @@ jobs:
     needs:
         - generate-scanner-bundle
         - generate-scanner-db-bundle
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
     steps:
