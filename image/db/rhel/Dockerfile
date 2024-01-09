@@ -25,7 +25,7 @@ COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf
 
 ARG POSTGRESQL_ARCH=x86_64
 
-RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-${PG_MAJOR} -o /tmp/pg_repo.key && \
+RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL -o /tmp/pg_repo.key && \
     rpm --import /tmp/pg_repo.key && \
     curl -sSLf https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-${POSTGRESQL_ARCH}/pgdg-redhat-repo-latest.noarch.rpm -o /tmp/pg_repo.rpm && \
     rpm -i /tmp/pg_repo.rpm && \
