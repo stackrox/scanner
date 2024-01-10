@@ -359,19 +359,19 @@ jobs:
 
       - name: Build scanner image
         run: |
-          docker build -t scanner:"$(make --quiet tag)" -f image/scanner/rhel/Dockerfile image/scanner/rhel
+          docker build -t scanner:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
       - name: Build scanner-slim image
         run: |
-            docker build -t scanner-slim:"$(make --quiet tag)" -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
+            docker build -t scanner-slim:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
 
       - name: Build scanner-db image
         run: |
-          docker build -t scanner-db:"$(make --quiet tag)" -f image/db/rhel/Dockerfile image/db/rhel
+          docker build -t scanner-db:"$(make --no-print-directory --quiet tag)" -f image/db/rhel/Dockerfile image/db/rhel
 
       - name: Build scanner-db-slim image
         run: |
-          docker build -t scanner-db-slim:"$(make --quiet tag)" -f image/db/rhel/Dockerfile.slim image/db/rhel
+          docker build -t scanner-db-slim:"$(make --no-print-directory --quiet tag)" -f image/db/rhel/Dockerfile.slim image/db/rhel
 
       - name: Docker login
         # Skip for external contributions.
