@@ -363,7 +363,7 @@ jobs:
 
       - name: Build scanner-slim image
         run: |
-            docker build -t scanner-slim:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
+          docker build -t scanner-slim:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
 
       - name: Build scanner-db image
         run: |
