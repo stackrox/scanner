@@ -1244,7 +1244,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:        "CVE-2021-24112",
-						Description: ".NET Core Remote Code Execution Vulnerability This CVE ID is unique from CVE-2021-26701.",
+						Description: ".NET Core Remote Code Execution Vulnerability",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-24112",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -1255,21 +1255,21 @@ var testCases = []testCase{
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
+									"ExploitabilityScore": 2.2,
 									"ImpactScore":         5.9,
-									"Score":               9.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									"Score":               8.1,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 								},
-								"LastModifiedDateTime": "2021-03-01T16:34Z",
+								"LastModifiedDateTime": "2023-12-29T17:15Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
 						},
 						FixedBy:  "3.1.12",
-						Severity: "Critical",
+						Severity: "Important",
 					},
 					{
 						Name:        "CVE-2021-26701",
-						Description: ".NET Core Remote Code Execution Vulnerability This CVE ID is unique from CVE-2021-24112.",
+						Description: ".NET Core Remote Code Execution Vulnerability",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-26701",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -1280,17 +1280,17 @@ var testCases = []testCase{
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
+									"ExploitabilityScore": 2.2,
 									"ImpactScore":         5.9,
-									"Score":               9.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									"Score":               8.1,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 								},
-								"LastModifiedDateTime": "2021-03-12T13:25Z",
+								"LastModifiedDateTime": "2023-12-29T17:16Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
 						},
 						FixedBy:  "3.1.13",
-						Severity: "Critical",
+						Severity: "Important",
 					},
 					{
 						Name:        "CVE-2021-31204",
@@ -1305,12 +1305,12 @@ var testCases = []testCase{
 									"Vectors":             "AV:L/AC:L/Au:N/C:P/I:P/A:P",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.8,
+									"ExploitabilityScore": 1.3,
 									"ImpactScore":         5.9,
-									"Score":               7.8,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+									"Score":               7.3,
+									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
 								},
-								"LastModifiedDateTime": "2021-05-20T12:48Z",
+								"LastModifiedDateTime": "2023-12-29T00:15Z",
 								"PublishedDateTime":    "2021-05-11T19:15Z",
 							},
 						},
@@ -1385,7 +1385,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:        "CVE-2020-1045",
-						Description: "A security feature bypass vulnerability exists in the way Microsoft ASP.NET Core parses encoded cookie names.The ASP.NET Core cookie parser decodes entire cookie strings which could allow a malicious attacker to set a second cookie with the name being percent encoded.The security update addresses the vulnerability by fixing the way the ASP.NET Core cookie parser handles encoded names., aka 'Microsoft ASP.NET Core Security Feature Bypass Vulnerability'.",
+						Description: "<p>A security feature bypass vulnerability exists in the way Microsoft ASP.NET Core parses encoded cookie names.</p>\n<p>The ASP.NET Core cookie parser decodes entire cookie strings which could allow a malicious attacker to set a second cookie with the name being percent encoded.</p>\n<p>The security update addresses the vulnerability by fixing the way the ASP.NET Core cookie parser handles encoded names.</p>\n",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1045",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -1435,7 +1435,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:        "CVE-2020-1597",
-						Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests, aka 'ASP.NET Core Denial of Service Vulnerability'.",
+						Description: "<p>A denial of service vulnerability exists when ASP.NET Core improperly handles web requests. An attacker who successfully exploited this vulnerability could cause a denial of service against an ASP.NET Core web application. The vulnerability can be exploited remotely, without authentication.</p>\n<p>A remote unauthenticated attacker could exploit this vulnerability by issuing specially crafted requests to the ASP.NET Core application.</p>\n<p>The update addresses the vulnerability by correcting how the ASP.NET Core web application handles web requests.</p>\n",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1597",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -1645,7 +1645,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:        "CVE-2021-24112",
-						Description: ".NET Core Remote Code Execution Vulnerability This CVE ID is unique from CVE-2021-26701.",
+						Description: ".NET Core Remote Code Execution Vulnerability",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-24112",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -1656,21 +1656,21 @@ var testCases = []testCase{
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
+									"ExploitabilityScore": 2.2,
 									"ImpactScore":         5.9,
-									"Score":               9.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									"Score":               8.1,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 								},
-								"LastModifiedDateTime": "2021-03-01T16:34Z",
+								"LastModifiedDateTime": "2023-12-29T17:15Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
 						},
 						FixedBy:  "3.1.12",
-						Severity: "Critical",
+						Severity: "Important",
 					},
 					{
 						Name:        "CVE-2021-26701",
-						Description: ".NET Core Remote Code Execution Vulnerability This CVE ID is unique from CVE-2021-24112.",
+						Description: ".NET Core Remote Code Execution Vulnerability",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2021-26701",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -1681,17 +1681,17 @@ var testCases = []testCase{
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
+									"ExploitabilityScore": 2.2,
 									"ImpactScore":         5.9,
-									"Score":               9.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+									"Score":               8.1,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 								},
-								"LastModifiedDateTime": "2021-03-12T13:25Z",
+								"LastModifiedDateTime": "2023-12-29T17:15Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
 						},
 						FixedBy:  "3.1.13",
-						Severity: "Critical",
+						Severity: "Important",
 					},
 					{
 						Name:        "CVE-2021-31204",
@@ -1706,12 +1706,12 @@ var testCases = []testCase{
 									"Vectors":             "AV:L/AC:L/Au:N/C:P/I:P/A:P",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.8,
+									"ExploitabilityScore": 1.3,
 									"ImpactScore":         5.9,
-									"Score":               7.8,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+									"Score":               7.3,
+									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
 								},
-								"LastModifiedDateTime": "2021-05-20T12:48Z",
+								"LastModifiedDateTime": "2023-12-29T00:15Z",
 								"PublishedDateTime":    "2021-05-11T19:15Z",
 							},
 						},
