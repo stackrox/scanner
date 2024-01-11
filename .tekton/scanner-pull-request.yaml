@@ -369,6 +369,9 @@ spec:
       - name: workspace
         workspace: workspace
     - name: clamav-scan
+      computeResources:
+        requests:
+          cpu: 1
       params:
       - name: image-digest
         value: $(tasks.build-container.results.IMAGE_DIGEST)
@@ -417,11 +420,6 @@ spec:
     - name: git-auth
       optional: true
   taskRunTemplate: {}
-  taskRunSpecs:
-    - pipelineTaskName: clamav-scan
-      computeResources:
-        requests:
-          cpu: 1
   workspaces:
   - name: workspace
     volumeClaimTemplate:
