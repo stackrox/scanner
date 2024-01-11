@@ -225,11 +225,11 @@ is_nightly_run() {
 }
 
 is_in_PR_context() {
-    if ! is_OPENSHIFT_CI; then
-        return 1
-    elif [[ -n "${PULL_NUMBER:-}" ]]; then
+    if is_GITHUB_ACTIONS && [[ -n "${GITHUB_BASE_REF:-}" ]]; then
         return 0
-    elif [[ -n "${CLONEREFS_OPTIONS:-}" ]]; then
+    elif is_OPENSHIFT_CI && [[ -n "${PULL_NUMBER:-}" ]]; then
+        return 0
+    elif is_OPENSHIFT_CI && [[ -n "${CLONEREFS_OPTIONS:-}" ]]; then
         # bin, test-bin, images
         local pull_request
         pull_request=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].pulls[0].number' 2>&1) || return 1
@@ -772,7 +772,7 @@ send_slack_notice_for_failures_on_merge() {
 }
 
 send_slack_notice_for_vuln_check_failure() {
-    if ! is_OPENSHIFT_CI; then
+    if ! is_OPENSHIFT_CI && ! is_GITHUB_ACTIONS; then
         return 0
     fi
 
@@ -817,6 +817,74 @@ send_slack_notice_for_vuln_check_failure() {
     jq --null-input --arg job_name "$job_name" --arg repo "$repo" \
        --arg log_url "$log_url" --arg mentions "$mentions" "$body" | \
     curl -XPOST -d @- -H 'Content-Type: application/json' "$webhook_url"
+}
+
+generate_genesis_dump() {
+    info "Generating genesis dump"
+    mkdir -p /tmp/genesis-dump
+    bin/updater generate-dump --out-file /tmp/genesis-dump/genesis-dump.zip
+    ls -lrt /tmp/genesis-dump
+
+    info "Printing some stats"
+    bin/updater print-stats /tmp/genesis-dump/genesis-dump.zip
+
+    info "Extracting dumps"
+    mkdir -p /tmp/vuln-dump
+    zip /tmp/genesis-dump/genesis-dump.zip 'nvd/*' --copy --out /tmp/vuln-dump/nvd-definitions.zip
+    zip /tmp/genesis-dump/genesis-dump.zip 'k8s/*' --copy --out /tmp/vuln-dump/k8s-definitions.zip
+    zip /tmp/genesis-dump/genesis-dump.zip 'istio/*' --copy --out /tmp/vuln-dump/istio-definitions.zip
+    zip /tmp/genesis-dump/genesis-dump.zip 'rhelv2/repository-to-cpe.json' --copy --out /tmp/vuln-dump/repo2cpe.zip
+}
+
+get_genesis_dump() {
+    info "Retrieving Genesis dump"
+
+    ls -lrt /tmp/vuln-dump || info "No local genesis dump"
+
+    if is_in_PR_context && ! pr_has_label "generate-dumps-on-pr"; then
+        info "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
+        mkdir -p /tmp/vuln-dump
+        gsutil cp gs://stackrox-scanner-ci-vuln-dump/nvd-definitions.zip /tmp/vuln-dump/nvd-definitions.zip
+        gsutil cp gs://stackrox-scanner-ci-vuln-dump/k8s-definitions.zip /tmp/vuln-dump/k8s-definitions.zip
+        gsutil cp gs://stackrox-scanner-ci-vuln-dump/istio-definitions.zip /tmp/vuln-dump/istio-definitions.zip
+        gsutil cp gs://stackrox-scanner-ci-vuln-dump/repo2cpe.zip /tmp/vuln-dump/repo2cpe.zip
+    fi
+
+    unzip -d image/scanner/dump /tmp/vuln-dump/nvd-definitions.zip
+    unzip -d image/scanner/dump /tmp/vuln-dump/k8s-definitions.zip
+    unzip -d image/scanner/dump /tmp/vuln-dump/istio-definitions.zip
+    unzip -d image/scanner/dump /tmp/vuln-dump/repo2cpe.zip
+}
+
+generate_db_dump() {
+    info "Generating DB dump"
+
+    groupadd -g 1001 pg
+    adduser pg -u 1001 -g 1001 -d /var/lib/postgresql -s /bin/sh
+
+    # The PATH is not completely preserved, so set the PATH here to ensure postgres-related commands can be found.
+    runuser -l pg -c "PATH=$PATH $SCRIPTS_ROOT/scripts/ci/postgres.sh start_postgres"
+
+    bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file /tmp/genesis-dump/genesis-dump.zip
+
+    mkdir /tmp/postgres
+    pg_dump -U postgres postgres://127.0.0.1:5432 > /tmp/postgres/pg-definitions.sql
+    ls -lrt /tmp/postgres
+    gzip --best /tmp/postgres/pg-definitions.sql
+    ls -lrt /tmp/postgres
+}
+
+get_db_dump() {
+    info "Retrieving DB dump"
+
+    ls -lrt /tmp/postgres || info "No local DB dump"
+
+    if is_in_PR_context && ! pr_has_label "generate-dumps-on-pr"; then
+        info "Label generate-dumps-on-pr not set. Pulling dumps from GCS bucket"
+        gsutil cp gs://stackrox-scanner-ci-vuln-dump/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
+    else
+        cp /tmp/postgres/pg-definitions.sql.gz image/db/dump/definitions.sql.gz
+    fi
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then

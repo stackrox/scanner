@@ -13,9 +13,11 @@ unit_tests() {
 
     make unit-tests || touch FAIL
 
-    info "Saving junit XML report"
-    make generate-junit-reports || touch FAIL
-    store_test_results junit-reports junit-reports
+    if is_OPENSHIFT_CI; then
+        info "Saving junit XML report"
+        make generate-junit-reports || touch FAIL
+        store_test_results junit-reports junit-reports
+    fi
 
     [[ ! -f FAIL ]] || die "Unit tests failed"
 }

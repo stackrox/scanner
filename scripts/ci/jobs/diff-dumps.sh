@@ -100,7 +100,7 @@ diff_dumps() {
 
     # These are not needed until later, but no reason to continue if these do not exist.
     require_environment "GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER"
-    require_environment "GCP_SERVICE_ACCOUNT_CREDS"
+    require_environment "SCANNER_GCP_SERVICE_ACCOUNT_CREDS"
 
     # Create diff dumps
     setup_gcp
@@ -112,7 +112,7 @@ diff_dumps() {
     # Create offline dump
     create_offline_dump
     # Upload offline dump
-    setup_gcp "${GCP_SERVICE_ACCOUNT_CREDS}"
+    setup_gcp "${SCANNER_GCP_SERVICE_ACCOUNT_CREDS}"
     upload_offline_dump
 }
 
