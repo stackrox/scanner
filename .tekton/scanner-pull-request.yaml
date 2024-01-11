@@ -237,6 +237,8 @@ spec:
                     echo "Failed to download"
                     exit 1
                 fi
+
+                ls -lh $(workspaces.source.path)/source
               done
       workspaces:
       - name: source
