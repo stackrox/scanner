@@ -417,6 +417,11 @@ spec:
     - name: git-auth
       optional: true
   taskRunTemplate: {}
+  taskRunSpecs:
+    - pipelineTaskName: clamav-scan
+      computeResources:
+        requests:
+          cpu: 1
   workspaces:
   - name: workspace
     volumeClaimTemplate:
