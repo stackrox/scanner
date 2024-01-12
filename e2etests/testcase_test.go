@@ -3889,8 +3889,8 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 					{
 						Name:          "CVE-2021-26291",
 						NamespaceName: "rhel:8",
-						Description: `DOCUMENTATION: A flaw was found in maven. Repositories that are defined in a dependency’s Project Object Model (pom), which may be unknown to users, are used by default resulting in potential risk if a malicious actor takes over that repository or is able to insert themselves into a position to pretend to be that repository. The highest threat from this vulnerability is to data confidentiality and integrity.
-
+						Description: `DOCUMENTATION: A flaw was found in maven. Repositories that are defined in a dependency’s Project Object Model (pom), which may be unknown to users, are used by default resulting in potential risk if a malicious actor takes over that repository or is able to insert themselves into a position to pretend to be that repository. The highest threat from this vulnerability is to data confidentiality and integrity. 
+            
             MITIGATION: To avoid possible man-in-the-middle related attacks with this flaw, ensure any linked repositories in maven POMs use https and not http.`,
 						Link:     "https://access.redhat.com/security/cve/CVE-2021-26291",
 						Severity: "Moderate",
