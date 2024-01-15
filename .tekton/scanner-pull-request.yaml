@@ -424,9 +424,9 @@ spec:
       optional: true
   taskRunTemplate: {}
   timeouts:
-    pipeline: "2h0m0s"
+    pipeline: "3h0m0s"
     tasks: "2h0m0s"
-    finally: "2h0m0s"
+    finally: "1h0m0s"
   workspaces:
   - name: workspace
     volumeClaimTemplate:
