@@ -6,6 +6,7 @@ on:
 jobs:
   sanity-check-vuln-updates:
     env:
+      GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER: ${{ secrets.GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER }}
       SLACK_WEBHOOK_ONCALL: ${{ secrets.SLACK_ONCALL_SCANNER_WEBHOOK }}
     runs-on: ubuntu-latest
     container:
@@ -15,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: master
 
       - uses: ./.github/actions/job-preamble
 
