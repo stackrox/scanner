@@ -382,6 +382,7 @@ spec:
         value: $(tasks.build-container.results.IMAGE_URL)
       runAfter:
       - build-container
+      timeout: 2h
       taskRef:
         params:
         - name: name
