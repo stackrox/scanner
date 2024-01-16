@@ -382,7 +382,7 @@ spec:
         value: $(tasks.build-container.results.IMAGE_URL)
       runAfter:
       - build-container
-      timeout: 2h
+      timeout: 3h
       taskRef:
         params:
         - name: name
@@ -425,8 +425,8 @@ spec:
       optional: true
   taskRunTemplate: {}
   timeouts:
-    pipeline: "3h0m0s"
-    tasks: "2h0m0s"
+    pipeline: "4h0m0s"
+    tasks: "3h0m0s"
     finally: "1h0m0s"
   workspaces:
   - name: workspace
