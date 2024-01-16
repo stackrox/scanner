@@ -282,6 +282,13 @@ get_base_ref() {
         else
             die "Expect PULL_BASE_REF or CLONEREFS_OPTIONS"
         fi
+    elif is_GITHUB_ACTIONS; then
+        # GITHUB_BASE_REF is only set for PRs. Use GITHUB_REF_NAME for Prow's PULL_BASE_REF equivalent.
+        if [[ -n "${GITHUB_REF_NAME:-}" ]]; then
+            echo "${GITHUB_REF_NAME}"
+        else
+            die "Expect GITHUB_REF_NAME"
+        fi
     else
         die "unsupported"
     fi
