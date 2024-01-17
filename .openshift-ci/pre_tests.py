@@ -41,7 +41,7 @@ class PreSystemTests:
     PreSystemTests - System tests need images.
     """
 
-    POLL_TIMEOUT = 30 * 60
+    POLL_TIMEOUT = 60 * 60
 
     def run(self):
         self.poll_for_images()
