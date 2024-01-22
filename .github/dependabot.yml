@@ -13,6 +13,10 @@ updates:
     open-pull-requests-limit: 3
     reviewers:
       - 'stackrox/scanner'
+    groups:
+      actions:
+        patterns:
+          - "actions/*"
 
   - package-ecosystem: 'gomod'
     directory: '/'
