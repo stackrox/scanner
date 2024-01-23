@@ -1435,7 +1435,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:        "CVE-2020-1597",
-						Description: "<p>A denial of service vulnerability exists when ASP.NET Core improperly handles web requests. An attacker who successfully exploited this vulnerability could cause a denial of service against an ASP.NET Core web application. The vulnerability can be exploited remotely, without authentication.</p>\n<p>A remote unauthenticated attacker could exploit this vulnerability by issuing specially crafted requests to the ASP.NET Core application.</p>\n<p>The update addresses the vulnerability by correcting how the ASP.NET Core web application handles web requests.</p>\n",
+						Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests. An attacker who successfully exploited this vulnerability could cause a denial of service against an ASP.NET Core web application. The vulnerability can be exploited remotely, without authentication.\\nA remote unauthenticated attacker could exploit this vulnerability by issuing specially crafted requests to the ASP.NET Core application.\\nThe update addresses the vulnerability by correcting how the ASP.NET Core web application handles web requests.\\n",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1597",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -3511,7 +3511,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-16.el9_3",
+				FixedBy:       "1:3.0.7-25.el9_3",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3553,7 +3553,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-16.el9_3",
+				FixedBy:       "1:3.0.7-25.el9_3",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
