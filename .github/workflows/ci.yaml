@@ -34,7 +34,7 @@ jobs:
       - name: Archive the build to preserve permissions
         run: tar -cvzf updater-build.tgz bin/updater
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: updater-build
           path: updater-build.tgz
@@ -61,7 +61,7 @@ jobs:
       - name: Archive the build to preserve permissions
         run: tar -cvzf scanner-build.tgz image/scanner/bin/scanner
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: scanner-build
           path: scanner-build.tgz
@@ -103,7 +103,7 @@ jobs:
       - name: Cache Go dependencies
         uses: ./.github/actions/cache-go-dependencies
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: scanner-build
 
@@ -132,7 +132,7 @@ jobs:
       - name: Cache Go dependencies
         uses: ./.github/actions/cache-go-dependencies
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: scanner-build
 
@@ -163,7 +163,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: updater-build
 
@@ -176,12 +176,12 @@ jobs:
           source ./scripts/ci/lib.sh
           generate_genesis_dump
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: genesis-dump
           path: /tmp/genesis-dump/genesis-dump.zip
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: vuln-dump
           path: /tmp/vuln-dump
@@ -204,7 +204,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: updater-build
 
@@ -212,7 +212,7 @@ jobs:
         run: |
           tar xvzf updater-build.tgz
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: genesis-dump
           path: /tmp/genesis-dump
@@ -222,7 +222,7 @@ jobs:
           source ./scripts/ci/lib.sh
           generate_db_dump
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: db-dump
           path: /tmp/postgres/pg-definitions.sql.gz
@@ -246,7 +246,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: scanner-build
 
@@ -254,7 +254,7 @@ jobs:
         run: |
           tar xvzf scanner-build.tgz
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         if: |
           github.event_name != 'pull_request' ||
           contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr')
@@ -276,7 +276,7 @@ jobs:
       - name: Archive the bundle to preserve permissions
         run: tar -cvzf bundle.tgz image/scanner/rhel
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: scanner-bundle
           path: bundle.tgz
@@ -299,7 +299,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         if: |
           github.event_name != 'pull_request' ||
           contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr')
@@ -315,7 +315,7 @@ jobs:
       - name: Make db bundle
         run: image/db/rhel/create-bundle.sh image/db image/db/rhel
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: scanner-db-bundle
           path: image/db/rhel
@@ -344,7 +344,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: scanner-bundle
 
@@ -352,7 +352,7 @@ jobs:
         run: |
           tar xvzf bundle.tgz
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: scanner-db-bundle
           path: image/db/rhel
@@ -410,7 +410,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: updater-build
 
@@ -418,7 +418,7 @@ jobs:
         run: |
           tar xvzf updater-build.tgz
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
           name: genesis-dump
@@ -446,7 +446,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: db-dump
           path: /tmp/postgres
@@ -473,12 +473,12 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: vuln-dump
           path: /tmp/vuln-dump
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: db-dump
           path: /tmp/postgres
@@ -505,7 +505,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: vuln-dump
           path: /tmp/vuln-dump
