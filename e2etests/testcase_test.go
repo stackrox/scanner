@@ -1435,7 +1435,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:        "CVE-2020-1597",
-						Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests. An attacker who successfully exploited this vulnerability could cause a denial of service against an ASP.NET Core web application. The vulnerability can be exploited remotely, without authentication.\\nA remote unauthenticated attacker could exploit this vulnerability by issuing specially crafted requests to the ASP.NET Core application.\\nThe update addresses the vulnerability by correcting how the ASP.NET Core web application handles web requests.\\n",
+						Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests. An attacker who successfully exploited this vulnerability could cause a denial of service against an ASP.NET Core web application. The vulnerability can be exploited remotely, without authentication.\nA remote unauthenticated attacker could exploit this vulnerability by issuing specially crafted requests to the ASP.NET Core application.\nThe update addresses the vulnerability by correcting how the ASP.NET Core web application handles web requests.\n",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1597",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
