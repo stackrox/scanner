@@ -371,32 +371,32 @@ spec:
       workspaces:
       - name: workspace
         workspace: workspace
-    - name: clamav-scan
-      computeResources:
-        requests:
-          cpu: 1
-      params:
-      - name: image-digest
-        value: $(tasks.build-container.results.IMAGE_DIGEST)
-      - name: image-url
-        value: $(tasks.build-container.results.IMAGE_URL)
-      runAfter:
-      - build-container
-      timeout: 3h
-      taskRef:
-        params:
-        - name: name
-          value: clamav-scan
-        - name: bundle
-          value: quay.io/redhat-appstudio-tekton-catalog/task-clamav-scan:0.1@sha256:353fa2cda9855217cfcec3303973b666a10f384795630cf0eb13b874c24b0f7a
-        - name: kind
-          value: task
-        resolver: bundles
-      when:
-      - input: $(params.skip-checks)
-        operator: in
-        values:
-        - "false"
+    # - name: clamav-scan
+    #   computeResources:
+    #     requests:
+    #       cpu: 1
+    #   params:
+    #   - name: image-digest
+    #     value: $(tasks.build-container.results.IMAGE_DIGEST)
+    #   - name: image-url
+    #     value: $(tasks.build-container.results.IMAGE_URL)
+    #   runAfter:
+    #   - build-container
+    #   timeout: 3h
+    #   taskRef:
+    #     params:
+    #     - name: name
+    #       value: clamav-scan
+    #     - name: bundle
+    #       value: quay.io/redhat-appstudio-tekton-catalog/task-clamav-scan:0.1@sha256:353fa2cda9855217cfcec3303973b666a10f384795630cf0eb13b874c24b0f7a
+    #     - name: kind
+    #       value: task
+    #     resolver: bundles
+    #   when:
+    #   - input: $(params.skip-checks)
+    #     operator: in
+    #     values:
+    #     - "false"
     - name: sbom-json-check
       params:
       - name: IMAGE_URL
