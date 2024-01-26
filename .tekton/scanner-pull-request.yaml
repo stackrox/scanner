@@ -18,7 +18,7 @@ metadata:
 spec:
   params:
   - name: dockerfile
-    value: image/scanner/rhtap/Dockerfile
+    value: image/scanner/konflux/Dockerfile
   - name: git-url
     value: '{{repo_url}}'
   - name: image-expires-after
