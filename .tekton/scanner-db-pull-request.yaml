@@ -244,7 +244,7 @@ spec:
         value: $(tasks.clone-repository.results.commit)
       runAfter:
       - prefetch-dependencies
-      - fetch-sql-definitons
+      - fetch-sql-definitions
       taskRef:
         params:
         - name: name
