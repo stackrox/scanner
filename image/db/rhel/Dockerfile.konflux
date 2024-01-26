@@ -25,7 +25,7 @@ RUN dnf upgrade -y --nobest && \
     chown -R postgres:postgres /var/lib/postgresql && \
     chown -R postgres:postgres /var/run/postgresql && \
     dnf clean all && \
-    rm -rf /var/cache/dnf /var/cache/yum
+    rm -rf /var/cache/dnf /var/cache/yum && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
     mkdir /docker-entrypoint-initdb.d && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
