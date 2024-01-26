@@ -1,9 +1,3 @@
-FROM registry.access.redhat.com/ubi8-minimal:latest AS extracted_bundle
-
-COPY bundle.tar.gz /
-WORKDIR /bundle
-RUN microdnf install tar gzip && tar -zxf /bundle.tar.gz
-
 FROM registry.redhat.io/rhel8/postgresql-12:1-150.1698060555
 
 LABEL name="scanner-db" \
@@ -11,6 +5,8 @@ LABEL name="scanner-db" \
       maintainer="support@stackrox.com" \
       summary="Image scanner database for the StackRox Kubernetes Security Platform" \
       description="This image supports image scanning in the StackRox Kubernetes Security Platform."
+
+USER root
 
 ENV PG_MAJOR=12
 ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
