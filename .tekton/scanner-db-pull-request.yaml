@@ -7,8 +7,7 @@ metadata:
     build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: "3"
-    pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch
-      == "klape/konflux-scanner-db-onboarding"
+    pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && source_branch.contains("konflux")
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: acs
@@ -19,7 +18,7 @@ metadata:
 spec:
   params:
   - name: dockerfile
-    value: https://raw.githubusercontent.com/devfile-samples/devfile-sample-go-basic/main/docker/Dockerfile
+    value: image/db/rhel/Dockerfile.konflux
   - name: git-url
     value: '{{source_url}}'
   - name: image-expires-after
@@ -197,6 +196,36 @@ spec:
       workspaces:
       - name: source
         workspace: workspace
+    - name: fetch-sql-definitions
+      runAfter:
+      - init
+      - clone-repository
+      taskSpec:
+        steps:
+          - name: fetch-sql-definitions
+            image: registry.access.redhat.com/ubi8/ubi
+            script: |
+              #!/usr/bin/env bash
+              mkdir -p "$(workspaces.source.path)/source"
+              blobs=(
+                pg-definitions.sql.gz
+              )
+              for blob in "${blobs[@]}"; do
+                echo "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob} > $(workspaces.source.path)/source/blob-${blob}"
+                curl --fail -s --show-error --retry 4 --retry-max-time 30 --retry-connrefused \
+                  --output "$(workspaces.source.path)/source/${blob}" \
+                  "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
+
+                if [ "$?" != "0" ]; then
+                    echo "Failed to download"
+                    exit 1
+                fi
+
+                ls -lh $(workspaces.source.path)/source
+              done
+      workspaces:
+      - name: source
+        workspace: workspace
     - name: build-container
       params:
       - name: IMAGE
@@ -215,6 +244,7 @@ spec:
         value: $(tasks.clone-repository.results.commit)
       runAfter:
       - prefetch-dependencies
+      - fetch-sql-definitons
       taskRef:
         params:
         - name: name
