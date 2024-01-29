@@ -11,11 +11,15 @@ ENV CI=1
 COPY . /src
 WORKDIR /src
 
+RUN scripts/konflux/fail-build-if-git-is-dirty.sh
+
 RUN unzip -j blob-repo2cpe.zip -d image/scanner/dump/repo2cpe && \
     unzip -j blob-k8s-definitions.zip -d image/scanner/dump/k8s_definitions && \
     unzip -j blob-nvd-definitions.zip -d image/scanner/dump/nvd_definitions
 
-RUN echo "version: $(git describe --tags --abbrev=10 --dirty --long)"; git status; go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair
+RUN echo "version: $(git describe --tags --abbrev=10 --dirty --long)" && \
+    git status && \
+    go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair
 
 # Replace genesis manifests file in the source code with the one generated at
 # the point when the dump was taken.  This is to avoid discrepancy between other
