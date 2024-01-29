@@ -1,9 +1,9 @@
-# This file is derived of the .dockerignore
-# It is required to pass `.git` to the builder containers on RHTAP so we can bake build information into the binary.
-# It is required to pass the `.gitignore` files in `image/bin/` and `bin` to avoid a dirty version.
-# RHTAP uses Buildah which first looks up for `.containerignore`, then, if absent, `.dockerignore`.
-# Having this file enables us to have different exclusion list for RHTAP builds than in GHA/OSCI.
-# To regenerate, replace the below contents with the output of the following command (please keep these comments).
-#  grep -vF -e '/.git/' -e '/bin/' -e '/image/bin/' .dockerignore
+# Konflux uses buildah which first looks up `.containerignore` then, if absent, `.dockerignore`.
+# Having this file enables us to have different exclusion list for Konflux builds than in GHA/OSCI.
 
-# currently empty!
+# This file is empty because all the items that are ignored in GHA/OSCI need to be present for Konflux builds:
+# * `.git` is needed so we can bake build information into the binary.
+# * `.gitignore`, `image/bin/` and `bin` are required to avoid a dirty version.
+
+# If content ever needs to be added here, be sure to borrow the check-generated.sh template from the
+# stackrox/stackrox repo to ensure .dockerfile and .containerignore stay in sync.
