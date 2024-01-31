@@ -1,4 +1,4 @@
-FROM registry.redhat.io/rhel8/postgresql-12:1-150.1698060555
+FROM registry.redhat.io/rhel8/postgresql-12:latest
 
 LABEL name="scanner-db" \
       vendor="StackRox" \
