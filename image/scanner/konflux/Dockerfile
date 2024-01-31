@@ -19,7 +19,7 @@ RUN unzip -j blob-repo2cpe.zip -d image/scanner/dump/repo2cpe && \
 
 RUN echo "version: $(git describe --tags --abbrev=10 --dirty --long)" && \
     git status && \
-    go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(git describe --tags --abbrev=10 --dirty --long)" -o image/scanner/bin/scanner ./cmd/clair
+    go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(scripts/konflux/version.sh)" -o image/scanner/bin/scanner ./cmd/clair
 
 # Replace genesis manifests file in the source code with the one generated at
 # the point when the dump was taken.  This is to avoid discrepancy between other
