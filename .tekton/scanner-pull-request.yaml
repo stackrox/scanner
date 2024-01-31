@@ -185,9 +185,9 @@ spec:
       - name: revision
         value: $(params.revision)
       - name: depth
-        value: 0
+        value: "0"
       - name: fetchTags
-        value: true
+        value: "true"
       runAfter:
       - init
       taskRef:
@@ -225,11 +225,6 @@ spec:
         - name: kind
           value: task
         resolver: bundles
-      when:
-      - input: $(params.hermetic)
-        operator: in
-        values:
-        - "true"
       workspaces:
       - name: source
         workspace: workspace
@@ -243,26 +238,7 @@ spec:
             image: registry.access.redhat.com/ubi8-minimal:latest
             script: |
               #!/usr/bin/env bash
-              mkdir -p "$(workspaces.source.path)/source"
-              blobs=(
-                nvd-definitions.zip
-                k8s-definitions.zip
-                repo2cpe.zip
-                genesis_manifests.json
-              )
-              for blob in "${blobs[@]}"; do
-                echo "Downloading https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob} > $(workspaces.source.path)/source/blob-${blob}"
-                curl --fail -s --show-error --retry 4 --retry-max-time 30 --retry-connrefused \
-                  --output "$(workspaces.source.path)/source/blob-${blob}" \
-                  "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
-
-                if [ "$?" != "0" ]; then
-                    echo "Failed to download"
-                    exit 1
-                fi
-
-                ls -lh $(workspaces.source.path)/source
-              done
+              $(workspaces.source.path)/source/scanner/scripts/konflux/fetch-vuln-feed-data.sh "$(workspaces.source.path)/source"
       workspaces:
       - name: source
         workspace: workspace
