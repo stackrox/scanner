@@ -238,7 +238,7 @@ spec:
             image: registry.access.redhat.com/ubi8-minimal:latest
             script: |
               #!/usr/bin/env bash
-              $(workspaces.source.path)/source/scanner/scripts/konflux/fetch-vuln-feed-data.sh "$(workspaces.source.path)/source"
+              $(workspaces.source.path)/source/scripts/konflux/fetch-vuln-feed-data.sh "$(workspaces.source.path)/source"
       workspaces:
       - name: source
         workspace: workspace
