@@ -44,6 +44,8 @@ LABEL \
     # TODO(ROX-20236): configure injection of dynamic version value when it becomes possible.
     version="0.0.1-todo"
 
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
@@ -67,7 +69,8 @@ RUN microdnf upgrade --nobest && \
     # by the script `save-dir-contents` during the image build. The directory
     # contents are then restored by the script `restore-all-dir-contents`
     # during the container start.
-    chown -R 65534:65534 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl
+    chown -R 65534:65534 /etc/pki /etc/ssl && \
+    /save-dir-contents /etc/pki/ca-trust /etc/ssl
 
 # This is equivalent to nobody:nobody.
 USER 65534:65534
