@@ -240,7 +240,7 @@ spec:
       taskSpec:
         steps:
           - name: fetch-vuln-feed-data
-            image: registry.access.redhat.com/ubi8/ubi
+            image: registry.access.redhat.com/ubi8-minimal:latest
             script: |
               #!/usr/bin/env bash
               mkdir -p "$(workspaces.source.path)/source"
