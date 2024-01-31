@@ -31,6 +31,8 @@ spec:
     value: .
   - name: revision
     value: '{{revision}}'
+  - name: rebuild
+    value: 'true'
 
   workspaces:
   - name: workspace
