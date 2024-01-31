@@ -33,6 +33,10 @@ spec:
     value: '{{revision}}'
   - name: rebuild
     value: 'true'
+  - name: prefetch-input
+    value: '{"type": "gomod", "path": "."}'
+  - name: build-source-image
+    value: 'true'
 
   workspaces:
   - name: workspace
