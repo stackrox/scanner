@@ -15,6 +15,7 @@ metadata:
   name: scanner-on-push
   namespace: rh-acs-tenant
 spec:
+
   params:
   - name: dockerfile
     value: image/scanner/konflux/Dockerfile
