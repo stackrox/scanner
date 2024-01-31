@@ -17,8 +17,7 @@ RUN unzip -j blob-repo2cpe.zip -d image/scanner/dump/repo2cpe && \
     unzip -j blob-k8s-definitions.zip -d image/scanner/dump/k8s_definitions && \
     unzip -j blob-nvd-definitions.zip -d image/scanner/dump/nvd_definitions
 
-RUN echo "version: $(git describe --tags --abbrev=10 --dirty --long)" && \
-    git status && \
+RUN echo "version: $(scripts/konflux/version.sh)" && \
     go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(scripts/konflux/version.sh)" -o image/scanner/bin/scanner ./cmd/clair
 
 # Replace genesis manifests file in the source code with the one generated at
