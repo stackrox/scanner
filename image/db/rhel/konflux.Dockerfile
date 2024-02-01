@@ -18,8 +18,8 @@ LABEL \
 
 USER root
 
+COPY image/db/pg_hba.conf image/db/postgresql.conf /etc/
 COPY --chown=postgres:postgres image/db/rhel/scripts/docker-entrypoint.sh /usr/local/bin/
-COPY image/db/postgresql.conf image/db/pg_hba.conf /etc/
 
 ARG POSTGRESQL_ARCH=x86_64
 
@@ -33,8 +33,6 @@ RUN dnf upgrade -y --nobest && \
     dnf clean all && \
     rpm --verbose -e --nodeps $(rpm -qa curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     rm -rf /var/cache/dnf /var/cache/yum && \
-    chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
-    mkdir /docker-entrypoint-initdb.d && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
 COPY blob-pg-definitions.sql.gz /docker-entrypoint-initdb.d/definitions.sql.gz
