@@ -17,7 +17,7 @@ metadata:
 spec:
   params:
   - name: dockerfile
-    value: https://raw.githubusercontent.com/devfile-samples/devfile-sample-go-basic/main/docker/Dockerfile
+    value: image/db/rhel/konflux.Dockerfile
   - name: git-url
     value: '{{source_url}}'
   - name: output-image
