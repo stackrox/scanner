@@ -30,7 +30,31 @@ spec:
     value: .
   - name: revision
     value: '{{revision}}'
+  - name: rebuild
+    value: 'true'
+  - name: prefetch-input
+    value: '{"type": "gomod", "path": "."}'
+  - name: build-source-image
+    value: 'true'
+
+  workspaces:
+  - name: workspace
+    volumeClaimTemplate:
+      metadata:
+        creationTimestamp: null
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+      status: {}
+  - name: git-auth
+    secret:
+      secretName: '{{ git_auth_secret }}'
+
   pipelineSpec:
+
     finally:
     - name: show-sbom
       params:
@@ -64,6 +88,7 @@ spec:
         - name: kind
           value: task
         resolver: bundles
+
     params:
     - description: Source Repository URL
       name: git-url
@@ -93,10 +118,6 @@ spec:
       description: Skip checks against built image
       name: skip-checks
       type: string
-    - default: "true"
-      description: Skip optional checks, set false if you want to run optional checks
-      name: skip-optional
-      type: string
     - default: "false"
       description: Execute the build with network isolation
       name: hermetic
@@ -118,6 +139,7 @@ spec:
       description: Build a source image.
       name: build-source-image
       type: string
+
     results:
     - description: ""
       name: IMAGE_URL
@@ -134,7 +156,13 @@ spec:
     - description: ""
       name: JAVA_COMMUNITY_DEPENDENCIES
       value: $(tasks.build-container.results.JAVA_COMMUNITY_DEPENDENCIES)
+
+    workspaces:
+    - name: workspace
+    - name: git-auth
+
     tasks:
+
     - name: init
       params:
       - name: image-url
@@ -143,12 +171,6 @@ spec:
         value: $(params.rebuild)
       - name: skip-checks
         value: $(params.skip-checks)
-      - name: skip-optional
-        value: $(params.skip-optional)
-      - name: pipelinerun-name
-        value: $(context.pipelineRun.name)
-      - name: pipelinerun-uid
-        value: $(context.pipelineRun.uid)
       taskRef:
         params:
         - name: name
@@ -158,16 +180,17 @@ spec:
         - name: kind
           value: task
         resolver: bundles
+
     - name: clone-repository
       params:
       - name: url
         value: $(params.git-url)
       - name: revision
         value: $(params.revision)
-      - name: fetchTags
-        value: true
       - name: depth
-        value: 0
+        value: "0"
+      - name: fetchTags
+        value: "true"
       runAfter:
       - init
       taskRef:
@@ -189,6 +212,7 @@ spec:
         workspace: workspace
       - name: basic-auth
         workspace: git-auth
+
     - name: prefetch-dependencies
       params:
       - name: input
@@ -204,44 +228,24 @@ spec:
         - name: kind
           value: task
         resolver: bundles
-      when:
-      - input: $(params.hermetic)
-        operator: in
-        values:
-        - "true"
       workspaces:
       - name: source
         workspace: workspace
     - name: fetch-vuln-feed-data
       runAfter:
       - init
+      - clone-repository
       taskSpec:
         steps:
           - name: fetch-vuln-feed-data
-            image: registry.access.redhat.com/ubi8/ubi
+            image: registry.access.redhat.com/ubi8-minimal:latest
             script: |
               #!/usr/bin/env bash
-              mkdir -p "$(workspaces.source.path)/source"
-              blobs=(
-                nvd-definitions.zip
-                k8s-definitions.zip
-                repo2cpe.zip
-                genesis_manifests.json
-              )
-              for blob in "${blobs[@]}"; do
-                echo "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob} > $(workspaces.source.path)/source/blob-${blob}"
-                curl --fail -s --show-error --retry 4 --retry-max-time 30 --retry-connrefused \
-                  --output "$(workspaces.source.path)/source/blob-${blob}" \
-                  "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
-
-                if [ "$?" != "0" ]; then
-                    echo "Failed to download"
-                    exit 1
-                fi
-              done
+              $(workspaces.source.path)/source/scripts/konflux/fetch-vuln-feed-data.sh "$(workspaces.source.path)/source"
       workspaces:
       - name: source
         workspace: workspace
+
     - name: build-container
       params:
       - name: IMAGE
@@ -264,9 +268,9 @@ spec:
       taskRef:
         params:
         - name: name
-          value: buildah-6gb
+          value: buildah
         - name: bundle
-          value: quay.io/redhat-appstudio-tekton-catalog/task-buildah-6gb:0.1
+          value: quay.io/redhat-appstudio-tekton-catalog/task-buildah:0.1@sha256:e45cf454d90b81d0e23107856c009083c279cbe07f9bc48538b1977d69713f35
         - name: kind
           value: task
         resolver: bundles
@@ -278,6 +282,7 @@ spec:
       workspaces:
       - name: source
         workspace: workspace
+
     - name: build-source-image
       params:
       - name: BINARY_IMAGE
@@ -307,6 +312,7 @@ spec:
       workspaces:
       - name: workspace
         workspace: workspace
+
     - name: deprecated-base-image-check
       params:
       - name: BASE_IMAGES_DIGESTS
@@ -327,6 +333,7 @@ spec:
         operator: in
         values:
         - "false"
+
     - name: clair-scan
       params:
       - name: image-digest
@@ -349,6 +356,7 @@ spec:
         operator: in
         values:
         - "false"
+
     - name: sast-snyk-check
       runAfter:
       - clone-repository
@@ -369,6 +377,7 @@ spec:
       workspaces:
       - name: workspace
         workspace: workspace
+
     # - name: clamav-scan
     #   params:
     #   - name: image-digest
@@ -377,6 +386,7 @@ spec:
     #     value: $(tasks.build-container.results.IMAGE_URL)
     #   runAfter:
     #   - build-container
+    #   timeout: 3h
     #   taskRef:
     #     params:
     #     - name: name
@@ -391,6 +401,7 @@ spec:
     #     operator: in
     #     values:
     #     - "false"
+
     - name: sbom-json-check
       params:
       - name: IMAGE_URL
@@ -413,24 +424,10 @@ spec:
         operator: in
         values:
         - "false"
-    workspaces:
-    - name: workspace
-    - name: git-auth
-      optional: true
-  taskRunTemplate: {}
-  workspaces:
-  - name: workspace
-    volumeClaimTemplate:
-      metadata:
-        creationTimestamp: null
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
-      status: {}
-  - name: git-auth
-    secret:
-      secretName: '{{ git_auth_secret }}'
-status: {}
+  timeouts:
+    pipeline: "4h0m0s"
+    tasks: "3h0m0s"
+    finally: "1h0m0s"
+
+status: { }
+taskRunTemplate: { }
