@@ -37,7 +37,7 @@ RUN dnf upgrade -y --nobest && \
     mkdir /docker-entrypoint-initdb.d && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
-COPY pg-definitions.sql.gz /docker-entrypoint-initdb.d/definitions.sql.gz
+COPY blob-pg-definitions.sql.gz /docker-entrypoint-initdb.d/definitions.sql.gz
 
 ENV PG_MAJOR=12 \
     PGDATA="/var/lib/postgresql/data/pgdata"
