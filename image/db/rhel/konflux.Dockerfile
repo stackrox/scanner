@@ -18,10 +18,6 @@ LABEL \
 
 USER root
 
-ENV PG_MAJOR=12
-ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
-    PGDATA="/var/lib/postgresql/data/pgdata"
-
 COPY --chown=postgres:postgres image/db/rhel/scripts/docker-entrypoint.sh /usr/local/bin/
 COPY image/db/postgresql.conf image/db/pg_hba.conf /etc/
 
@@ -35,17 +31,20 @@ RUN dnf upgrade -y --nobest && \
     chown -R postgres:postgres /var/lib/postgresql && \
     chown -R postgres:postgres /var/run/postgresql && \
     dnf clean all && \
+    rpm --verbose -e --nodeps $(rpm -qa curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     rm -rf /var/cache/dnf /var/cache/yum && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
     mkdir /docker-entrypoint-initdb.d && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# This is equivalent to postgres:postgres.
-USER 70:70
-
 COPY pg-definitions.sql.gz /docker-entrypoint-initdb.d/definitions.sql.gz
+
+ENV PG_MAJOR=12 \
+    PGDATA="/var/lib/postgresql/data/pgdata"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
 CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
+
+USER 70:70
