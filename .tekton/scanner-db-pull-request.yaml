@@ -236,7 +236,6 @@ spec:
 
       - name: fetch-sql-definitions
         runAfter:
-          - init
           - clone-repository
         taskSpec:
           steps:
