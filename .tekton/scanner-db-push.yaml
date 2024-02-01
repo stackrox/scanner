@@ -58,6 +58,16 @@ spec:
       secret:
         secretName: '{{ git_auth_secret }}'
 
+  taskRunSpecs:
+    # This overrides clamav scan requested resources to make the task run faster.
+    - pipelineTaskName: clamav-scan
+      stepSpecs:
+        - name: extract-and-scan-image
+          computeResources:
+            requests:
+              cpu: 1
+              memory: 3Gi
+
   pipelineSpec:
 
     finally:
