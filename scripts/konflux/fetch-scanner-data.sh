@@ -26,3 +26,5 @@ for blob in "${blobs[@]}"; do
     "${url}"
 
 done
+
+echo "Done"
