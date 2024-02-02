@@ -65,7 +65,7 @@ spec:
     - pipelineTaskName: clamav-scan
       stepOverrides:
         - name: extract-and-scan-image
-          computeResources:
+          resources:
             requests:
               cpu: 1
               memory: 3Gi
