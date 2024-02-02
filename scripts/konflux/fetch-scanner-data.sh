@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# This script is for downloading Scanner/Scanner-DB blobs that should be included in the container image.
+
 set -euo pipefail
 
 if [[ "$#" < 2 ]]; then
