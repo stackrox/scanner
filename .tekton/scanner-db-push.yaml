@@ -61,7 +61,7 @@ spec:
   taskRunSpecs:
     # This overrides clamav scan requested resources to make the task run faster.
     - pipelineTaskName: clamav-scan
-      stepSpecs:
+      stepOverrides:
         - name: extract-and-scan-image
           computeResources:
             requests:
