@@ -35,8 +35,7 @@ RUN dnf upgrade -y --nobest && \
     rm -rf /var/cache/dnf /var/cache/yum && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# TODO(ROX-20751): re-enable copying this blob when ClamAV does not error out and time out scanning it.
-# COPY blob-pg-definitions.sql.gz /docker-entrypoint-initdb.d/definitions.sql.gz
+COPY blob-pg-definitions.sql.gz /docker-entrypoint-initdb.d/definitions.sql.gz
 
 ENV PG_MAJOR=12 \
     PGDATA="/var/lib/postgresql/data/pgdata"
