@@ -21,8 +21,6 @@ USER root
 COPY image/db/pg_hba.conf image/db/postgresql.conf /etc/
 COPY --chown=postgres:postgres image/db/rhel/scripts/docker-entrypoint.sh /usr/local/bin/
 
-ARG POSTGRESQL_ARCH=x86_64
-
 RUN dnf upgrade -y --nobest && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     mkdir -p /var/lib/postgresql && \
