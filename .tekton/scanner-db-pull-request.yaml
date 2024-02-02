@@ -194,6 +194,11 @@ spec:
             value: $(params.git-url)
           - name: revision
             value: $(params.revision)
+          # A shallow repo clone is sufficient for scanner-db build.
+          - name: depth
+            value: "1"
+          - name: fetchTags
+            value: "false"
         runAfter:
           - init
         taskRef:
