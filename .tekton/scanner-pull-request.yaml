@@ -388,7 +388,6 @@ spec:
         value: $(tasks.build-container.results.IMAGE_URL)
       runAfter:
       - build-container
-      timeout: 3h
       taskRef:
         params:
         - name: name
@@ -426,10 +425,7 @@ spec:
         operator: in
         values:
         - "false"
-  timeouts:
-    pipeline: "4h0m0s"
-    tasks: "3h0m0s"
-    finally: "1h0m0s"
 
 status: { }
+
 taskRunTemplate: { }
