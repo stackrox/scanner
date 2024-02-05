@@ -18,8 +18,13 @@ LABEL \
 
 USER root
 
-COPY image/db/pg_hba.conf image/db/postgresql.conf /etc/
-COPY --chown=postgres:postgres image/db/rhel/scripts/docker-entrypoint.sh /usr/local/bin/
+COPY image/db/pg_hba.conf \
+     image/db/postgresql.conf \
+     /etc/
+
+COPY --chown=postgres:postgres \
+     image/db/rhel/scripts/docker-entrypoint.sh \
+     /usr/local/bin/
 
 RUN dnf upgrade -y --nobest && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
@@ -33,7 +38,8 @@ RUN dnf upgrade -y --nobest && \
     rm -rf /var/cache/dnf /var/cache/yum && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
-COPY blob-pg-definitions.sql.gz /docker-entrypoint-initdb.d/definitions.sql.gz
+COPY blob-pg-definitions.sql.gz \
+     /docker-entrypoint-initdb.d/definitions.sql.gz
 
 ENV PG_MAJOR=12 \
     PGDATA="/var/lib/postgresql/data/pgdata"
