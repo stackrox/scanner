@@ -26,8 +26,7 @@ COPY --chown=postgres:postgres \
      image/db/rhel/scripts/docker-entrypoint.sh \
      /usr/local/bin/
 
-RUN dnf upgrade -y --nobest && \
-    localedef -f UTF-8 -i en_US en_US.UTF-8 && \
+RUN localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     mkdir -p /var/lib/postgresql && \
     groupmod -g 70 postgres && \
     usermod -u 70 postgres -d /var/lib/postgresql && \
@@ -47,6 +46,6 @@ ENV PG_MAJOR=12 \
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
-CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
+CMD ["postgres"]
 
 USER 70:70
