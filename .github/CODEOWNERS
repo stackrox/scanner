@@ -1,0 +1,7 @@
+# For further documentation on CODEOWNERS, visit
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners#about-code-owners
+# This will automatically assign a team / people as reviewers for PRs based on the files changed within the PR.
+
+# The RHTAP maintainers for ACS review all changes related to the Konflux/RHTAP pipelines, such as new pipelines,
+# parameter changes or automated task updates.
+/.tekton/   @stackrox/rhtap-maintainers
