@@ -1,0 +1,9 @@
+# Konflux uses buildah which first looks up `.containerignore` then, if absent, `.dockerignore`.
+# Having this file enables us to have different exclusion list for Konflux builds than in GHA/OSCI.
+
+# This file is empty because all the items that are ignored in GHA/OSCI need to be present for Konflux builds:
+# * `.git` is needed so we can bake build information into the binary.
+# * `.gitignore`, `image/bin/` and `bin` are required to avoid a dirty version.
+
+# If content ever needs to be added here, be sure to borrow the check-generated.sh template from the
+# stackrox/stackrox repo to ensure .dockerfile and .containerignore stay in sync.

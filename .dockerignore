@@ -1,3 +1,6 @@
+# NOTE: if adding items here, please implement the check-generated.sh script
+# from stackrox/stackrox to keep this file and .containeringore in sync
+
 /.git/
 /bin/
 /image/bin/
