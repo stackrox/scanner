@@ -245,7 +245,9 @@ spec:
             - name: fetch-sql-definitions
               image: registry.access.redhat.com/ubi8/ubi-minimal:latest
               script: |
-                "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" "$(workspaces.source.path)/source" pg-definitions.sql.gz
+                "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" \
+                    "$(workspaces.source.path)/source" \
+                    pg-definitions.sql.gz
               timeout: '10m'
         workspaces:
           - name: source
