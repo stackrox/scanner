@@ -92,6 +92,22 @@ upload_offline_dump() {
     if is_in_PR_context; then
         cmd+=(echo "Would do")
     fi
+    curl --silent --show-error --max-time 60 --retry 3 --create-dirs -o out/RELEASE_VERSION.txt https://raw.githubusercontent.com/stackrox/stackrox/master/scanner/updater/version/RELEASE_VERSION
+    version_file="out/RELEASE_VERSION.txt"
+    # Use grep to extract X.Y versions, sort them, and get the last one as the latest
+    latest_version=$(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -V | tail -n 1)
+
+    curl --silent --show-error --max-time 60 --retry 3 https://storage.googleapis.com/scanner-v4-test/offline-bundles/scanner-v4-defs-${latest_version}.zip
+
+    file_to_check="scanner-v4-defs-${latest_version}.zip"
+
+    if [ -f "$file_to_check" ]; then
+        # If the file exists, add it to scanner-vuln-updates.zip
+        zip scanner-vuln-updates.zip "$file_to_check"
+        echo "$file_to_check added to scanner-vuln-updates.zip"
+    else
+        echo "$file_to_check does not exist."
+    fi
     "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
 }
 
