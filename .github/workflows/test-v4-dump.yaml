@@ -9,7 +9,80 @@ on:
       - yli3/*
 
 jobs:
-  diff-dumps:
+  pre-build-updater:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: ./.github/actions/job-preamble
+
+      - name: Cache Go dependencies
+        uses: ./.github/actions/cache-go-dependencies
+
+      - name: Build updater
+        run: make build-updater
+
+      - name: Archive the build to preserve permissions
+        run: tar -cvzf updater-build.tgz bin/updater
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: updater-build
+          path: updater-build.tgz
+
+    pre-build-scanner:
+      runs-on: ubuntu-latest
+      container:
+        image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+            ref: ${{ github.event.pull_request.head.sha }}
+
+        - uses: ./.github/actions/job-preamble
+
+        - name: Cache Go dependencies
+          uses: ./.github/actions/cache-go-dependencies
+
+        - name: Build Scanner
+          run: make scanner-build-nodeps
+
+        - name: Archive the build to preserve permissions
+          run: tar -cvzf scanner-build.tgz image/scanner/bin/scanner
+
+        - uses: actions/upload-artifact@v4
+          with:
+            name: scanner-build
+            path: scanner-build.tgz
+
+    style-check:
+      runs-on: ubuntu-latest
+      container:
+        image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+            ref: ${{ github.event.pull_request.head.sha }}
+
+        - uses: ./.github/actions/job-preamble
+
+        - name: Cache Go dependencies
+          uses: ./.github/actions/cache-go-dependencies
+
+        - name: Run style checks
+          run: ./scripts/ci/jobs/style-checks.sh
+          
+  generate-v4-dumps:
     runs-on: ubuntu-latest
     env:
       GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER: ${{ secrets.GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER }}
@@ -42,5 +115,5 @@ jobs:
           name: genesis-dump
           path: /tmp/genesis-dump
 
-      - name: Execute Diff Dumps Script
+      - name: Execute Offline V4 Dump Script
         run: ./scripts/ci/jobs/offline-v4-vuln.sh
