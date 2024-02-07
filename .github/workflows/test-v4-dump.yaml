@@ -1,0 +1,46 @@
+name: Test Scanner V4 Dump
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  push:
+    branches:
+      - master
+      - yli3/*
+
+jobs:
+  diff-dumps:
+    runs-on: ubuntu-latest
+    env:
+      GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER: ${{ secrets.GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER }}
+      SCANNER_GCP_SERVICE_ACCOUNT_CREDS: ${{ secrets.SCANNER_GCP_SERVICE_ACCOUNT_CREDS }}
+      GOOGLE_SA_CIRCLECI_SCANNER: ${{ secrets.GOOGLE_SA_CIRCLECI_SCANNER }}
+    container:
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Job Environment
+        uses: ./.github/actions/job-preamble
+
+      - name: Download Updater Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: updater-build
+
+      - name: Unpack Updater Build
+        run: tar xvzf updater-build.tgz
+
+      - name: Download Genesis Dump Artifact
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/download-artifact@v4
+        with:
+          name: genesis-dump
+          path: /tmp/genesis-dump
+
+      - name: Execute Diff Dumps Script
+        run: ./scripts/ci/jobs/offline-v4-vuln.sh
