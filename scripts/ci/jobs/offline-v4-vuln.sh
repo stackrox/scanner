@@ -45,15 +45,7 @@ create_offline_dump() {
     offline_diff_location="/tmp/diff-dumps/dump$(echo "${offline_dumps}" | jq -r '.[0]')/diff.zip"
     cp "${offline_diff_location}" /tmp/offline-dump/scanner-defs.zip
 
-    # Prepare k8s and istio dump
-    mkdir -p /tmp/scratch
-    gsutil cp -r gs://definitions.stackrox.io/cve2/* /tmp/scratch/
-    cd /tmp/scratch
-    zip -r /tmp/offline-dump/k8s-istio.zip *
-
-    cd /tmp/offline-dump
-    zip scanner-vuln-updates.zip scanner-defs.zip k8s-istio.zip
-    du -h "scanner-vuln-updates.zip" | cut -f1
+    du -h "scanner-defs.zip" | cut -f1
 }
 
 create_v4_dump() {
