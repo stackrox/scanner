@@ -97,8 +97,8 @@ upload_offline_dump() {
     # Use grep to extract X.Y versions, sort them, and get the last one as the latest
     latest_version=$(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -V | tail -n 1)
 
-    curl --silent --show-error --max-time 60 --retry 3 https://storage.googleapis.com/scanner-v4-test/offline-bundles/scanner-v4-defs-${latest_version}.zip
-
+    curl --silent --show-error --max-time 60 --retry 3 -o scanner-v4-defs-${latest_version}.zip https://storage.googleapis.com/scanner-v4-test/offline-bundles/scanner-v4-defs-${latest_version}.zip
+    
     file_to_check="scanner-v4-defs-${latest_version}.zip"
 
     if [ -f "$file_to_check" ]; then
