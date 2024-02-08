@@ -85,11 +85,11 @@ spec:
     - pipelineTaskName: clamav-scan
       computeResources:
         limits:
-          cpu: 1
+          cpu: 2
           memory: 4Gi
-        requests:
-          cpu: 1
-          memory: 4Gi
+#        requests:
+#          cpu: 1
+#          memory: 4Gi
 #      stepSpecs: # v1 style
 #        - name: extract-and-scan-image
 #          computeResources:
