@@ -112,6 +112,11 @@ upload_offline_dump() {
 }
 
 upload_v4_versioned_vuln() {
+    info "Uploading offline dump"
+    cmd=()
+    if is_in_PR_context; then
+        cmd+=(echo "Would do")
+    fi
     cd /tmp/offline-dump
     version_file="out/RELEASE_VERSION.txt"
     versions=$(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -V)
@@ -121,7 +126,6 @@ upload_v4_versioned_vuln() {
         zip scanner-vuln-${version}.zip scanner-defs.zip k8s-istio.zip scanner-v4-defs-${version}.zip
         "${cmd[@]}" gsutil cp scanner-vuln-${version}.zip gs://scanner-support-public/offline/v1/${version}/scanner-vuln-${version}.zip
     done <<< "$versions"
-
 }
 
 diff_dumps() {
