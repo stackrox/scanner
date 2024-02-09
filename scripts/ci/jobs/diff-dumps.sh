@@ -123,8 +123,8 @@ upload_v4_versioned_vuln() {
     while IFS= read -r version; do
         echo "$version"
         curl --silent --show-error --max-time 60 --retry 3 -o "scanner-v4-defs-${version}.zip" "https://storage.googleapis.com/scanner-v4-test/offline-bundles/scanner-v4-defs-${version}.zip"
-        zip scanner-vuln-${version}.zip scanner-defs.zip k8s-istio.zip scanner-v4-defs-${version}.zip
-        "${cmd[@]}" gsutil cp scanner-vuln-${version}.zip gs://scanner-support-public/offline/v1/${version}/scanner-vuln-${version}.zip
+        zip scanner-vulns-${version}.zip scanner-defs.zip k8s-istio.zip scanner-v4-defs-${version}.zip
+        "${cmd[@]}" gsutil cp scanner-vulns-${version}.zip gs://scanner-support-public/offline/v1/${version}/scanner-vulns-${version}.zip
     done <<< "$versions"
 }
 
