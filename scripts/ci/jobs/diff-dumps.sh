@@ -111,6 +111,19 @@ upload_offline_dump() {
     "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
 }
 
+upload_v4_versioned_vuln() {
+    cd /tmp/offline-dump
+    version_file="out/RELEASE_VERSION.txt"
+    versions=$(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -V)
+    while IFS= read -r version; do
+        echo "$version"
+        curl --silent --show-error --max-time 60 --retry 3 -o "scanner-v4-defs-${version}.zip" "https://storage.googleapis.com/scanner-v4-test/offline-bundles/scanner-v4-defs-${version}.zip"
+        zip scanner-vuln-${version}.zip scanner-defs.zip k8s-istio.zip scanner-v4-defs-${version}.zip
+        "${cmd[@]}" gsutil cp scanner-vuln-${version}.zip gs://scanner-support-public/offline/v1/${version}/scanner-vuln-${version}.zip
+    done <<< "$versions"
+
+}
+
 diff_dumps() {
     info "Starting diff dumps"
 
@@ -130,6 +143,8 @@ diff_dumps() {
     # Upload offline dump
     setup_gcp "${SCANNER_GCP_SERVICE_ACCOUNT_CREDS}"
     upload_offline_dump
+
+    upload_v4_versioned_vuln
 }
 
 diff_dumps "$*"
