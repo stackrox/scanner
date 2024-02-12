@@ -112,14 +112,14 @@ upload_offline_dump() {
 }
 
 upload_v4_versioned_vuln() {
-    info "Uploading offline dump"
+    info "Uploading v4 offline dump"
     cmd=()
     if is_in_PR_context; then
         cmd+=(echo "Would do")
     fi
     cd /tmp/offline-dump
     version_file="out/RELEASE_VERSION.txt"
-    versions=$(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -V)
+    versions=$(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -V | uniq)
     while IFS= read -r version; do
         echo "$version"
         if curl --silent --show-error --max-time 60 --retry 3 -o "scanner-v4-defs-${version}.zip" "https://storage.googleapis.com/scanner-v4-test/offline-bundles/scanner-v4-defs-${version}.zip"; then
