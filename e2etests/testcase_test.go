@@ -3657,7 +3657,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.26-1.el8_9",
+				FixedBy:       "6.0.27-1.el8_9",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -3696,7 +3696,7 @@ Bug Fix(es) and Enhancement(s):
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.26-1.el8_9",
+				FixedBy:       "6.0.27-1.el8_9",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
