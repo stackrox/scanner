@@ -107,6 +107,7 @@ upload_offline_dump() {
         echo "$file_to_check added to scanner-vuln-updates.zip"
     else
         echo "$file_to_check does not exist."
+        exit 1
     fi
     "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
 }
