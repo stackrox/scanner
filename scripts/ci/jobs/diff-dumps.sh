@@ -92,7 +92,45 @@ upload_offline_dump() {
     if is_in_PR_context; then
         cmd+=(echo "Would do")
     fi
+    curl --silent --show-error --max-time 60 --retry 3 --create-dirs -o out/RELEASE_VERSION.txt https://raw.githubusercontent.com/stackrox/stackrox/master/scanner/updater/version/RELEASE_VERSION
+    version_file="out/RELEASE_VERSION.txt"
+    # Use grep to extract X.Y versions, sort them, and get the last one as the latest
+    latest_version=$(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -V | tail -n 1)
+
+    file_to_check="scanner-v4-defs-${latest_version}.zip"
+
+    if curl --silent --show-error --max-time 60 --retry 3 -o $file_to_check https://storage.googleapis.com/scanner-v4-test/offline-bundles/$file_to_check; then
+        # If the file exists, add it to scanner-vuln-updates.zip
+        zip scanner-vuln-updates.zip "$file_to_check"
+        echo "$file_to_check added to scanner-vuln-updates.zip"
+    else
+        echo "$file_to_check does not exist."
+        exit 1
+    fi
     "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
+}
+
+upload_v4_versioned_vuln() {
+    info "Uploading v4 offline dump"
+    cmd=()
+    if is_in_PR_context; then
+        cmd+=(echo "Would do")
+    fi
+    cd /tmp/offline-dump
+
+    cat out/RELEASE_VERSION.txt |
+        grep -oE '^[0-9]+\.[0-9]+' |
+        sort -V |
+        uniq |
+    while read -r version; do
+        echo "$version"
+        if curl --silent --show-error --max-time 60 --retry 3 -o "scanner-v4-defs-${version}.zip" "https://storage.googleapis.com/scanner-v4-test/offline-bundles/scanner-v4-defs-${version}.zip"; then
+            zip scanner-vulns-${version}.zip scanner-defs.zip k8s-istio.zip scanner-v4-defs-${version}.zip
+            "${cmd[@]}" gsutil cp scanner-vulns-${version}.zip gs://scanner-support-public/offline/v1/${version}/scanner-vulns-${version}.zip
+        else
+            echo "Failed to download scanner-v4-defs-${version}.zip, skipping..."
+        fi
+    done
 }
 
 diff_dumps() {
@@ -114,6 +152,8 @@ diff_dumps() {
     # Upload offline dump
     setup_gcp "${SCANNER_GCP_SERVICE_ACCOUNT_CREDS}"
     upload_offline_dump
+
+    upload_v4_versioned_vuln
 }
 
 diff_dumps "$*"
