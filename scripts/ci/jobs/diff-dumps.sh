@@ -98,10 +98,8 @@ upload_offline_dump() {
     latest_version=$(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -V | tail -n 1)
 
     file_to_check="scanner-v4-defs-${latest_version}.zip"
-    
-    curl --silent --show-error --max-time 60 --retry 3 -o $file_to_check https://storage.googleapis.com/scanner-v4-test/offline-bundles/$file_to_check
 
-    if [ -f "$file_to_check" ]; then
+    if curl --silent --show-error --max-time 60 --retry 3 -o $file_to_check https://storage.googleapis.com/scanner-v4-test/offline-bundles/$file_to_check; then
         # If the file exists, add it to scanner-vuln-updates.zip
         zip scanner-vuln-updates.zip "$file_to_check"
         echo "$file_to_check added to scanner-vuln-updates.zip"
@@ -119,9 +117,12 @@ upload_v4_versioned_vuln() {
         cmd+=(echo "Would do")
     fi
     cd /tmp/offline-dump
-    version_file="out/RELEASE_VERSION.txt"
-    versions=$(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -V | uniq)
-    while IFS= read -r version; do
+
+    cat out/RELEASE_VERSION.txt |
+        grep -oE '^[0-9]+\.[0-9]+' |
+        sort -V |
+        uniq |
+    while read -r version; do
         echo "$version"
         if curl --silent --show-error --max-time 60 --retry 3 -o "scanner-v4-defs-${version}.zip" "https://storage.googleapis.com/scanner-v4-test/offline-bundles/scanner-v4-defs-${version}.zip"; then
             zip scanner-vulns-${version}.zip scanner-defs.zip k8s-istio.zip scanner-v4-defs-${version}.zip
@@ -129,7 +130,7 @@ upload_v4_versioned_vuln() {
         else
             echo "Failed to download scanner-v4-defs-${version}.zip, skipping..."
         fi
-    done <<< "$versions"
+    done
 }
 
 diff_dumps() {
