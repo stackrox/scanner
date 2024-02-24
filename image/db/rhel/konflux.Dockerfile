@@ -1,4 +1,4 @@
-FROM registry.redhat.io/rhel8/postgresql-12:latest AS scanner-db-common
+FROM registry.redhat.io/rhel8/postgresql-15:latest AS scanner-db-common
 
 LABEL \
     com.redhat.license_terms="https://www.redhat.com/agreements" \
@@ -35,7 +35,7 @@ RUN dnf upgrade -y --nobest && \
     rm -rf /var/cache/dnf /var/cache/yum && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
-ENV PG_MAJOR=12 \
+ENV PG_MAJOR=15 \
     PGDATA="/var/lib/postgresql/data/pgdata"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
