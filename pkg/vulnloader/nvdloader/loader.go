@@ -95,7 +95,7 @@ func (l *loader) DownloadFeedsToPath(outputDir string) error {
 		// With an API key, it is roughly one call every 0.6 seconds.
 		// We'll play it safe and do one call every 3 seconds.
 		// As of writing there are ~216,000 vulnerabilities, so this whole process should take ~5.4 minutes.
-		time.Sleep(3 * time.Second)
+		time.Sleep(10 * time.Second)
 
 		startIdx += apiResp.ResultsPerPage
 		apiResp, err = query(fmt.Sprintf(urlFmt, startIdx))
