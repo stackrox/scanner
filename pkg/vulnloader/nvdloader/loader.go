@@ -128,7 +128,9 @@ func query(url string) (*apischema.CVEAPIJSON20, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating HTTP request: %w", err)
 	}
-	req.Header.Set("apiKey", os.Getenv("NVD_API_KEY"))
+	if apiKey := os.Getenv("NVD_API_KEY"); apiKey != "" {
+		req.Header.Set("apiKey", os.Getenv("NVD_API_KEY"))
+	}
 
 	apiResp, err := queryWithBackoff(req)
 	if err != nil {
@@ -153,8 +155,8 @@ func queryWithBackoff(req *http.Request) (*apischema.CVEAPIJSON20, error) {
 			}
 		}
 		log.Warnf("Failed query attempt %d for %s: %v", i, req.URL.String(), err)
-		// Wait some multiple of 3 seconds before next attempt.
-		time.Sleep(time.Duration(3*i) * time.Second)
+		// Wait some multiple of 6 seconds before next attempt.
+		time.Sleep(time.Duration(6*i) * time.Second)
 	}
 
 	return apiResp, err
