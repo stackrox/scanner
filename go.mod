@@ -49,7 +49,7 @@ require (
 	golang.org/x/exp v0.0.0-20231108232855-2478ac86f678
 	golang.org/x/sys v0.17.0
 	google.golang.org/api v0.165.0
-	google.golang.org/grpc v1.61.1
+	google.golang.org/grpc v1.62.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
