@@ -27,6 +27,19 @@ COPY ./blob-genesis_manifests.json image/scanner/dump/genesis_manifests.json
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} as scanner-base
 
+LABEL \
+    com.redhat.license_terms="https://www.redhat.com/agreements" \
+    description="This image supports image scanning for RHACS" \
+    io.k8s.description="This image supports image scanning for RHACS" \
+    io.openshift.tags="rhacs,scanner,stackrox" \
+    maintainer="Red Hat, Inc." \
+    source-location="https://github.com/stackrox/scanner" \
+    summary="The image scanner for RHACS" \
+    url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
+    # We must set version label to prevent inheriting value set in the base stage.
+    # TODO(ROX-20236): configure injection of dynamic version value when it becomes possible.
+    version="0.0.1-todo"
+
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV REPO_TO_CPE_DIR="/repo2cpe"
@@ -56,23 +69,12 @@ USER 65534:65534
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} as scanner-slim
+FROM scanner-base as scanner-slim
 
 LABEL \
     com.redhat.component="rhacs-scanner-slim-container" \
-    com.redhat.license_terms="https://www.redhat.com/agreements" \
-    description="This image supports image scanning for RHACS" \
-    io.k8s.description="This image supports image scanning for RHACS" \
     io.k8s.display-name="scanner-slim" \
-    io.openshift.tags="rhacs,scanner,stackrox" \
-    maintainer="Red Hat, Inc." \
-    name="rhacs-scanner-slim-rhel8" \
-    source-location="https://github.com/stackrox/scanner" \
-    summary="The image scanner for RHACS" \
-    url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
-    # We must set version label to prevent inheriting value set in the base stage.
-    # TODO(ROX-20236): configure injection of dynamic version value when it becomes possible.
-    version="0.0.1-todo"
+    name="rhacs-scanner-slim-rhel8"
 
 ENV ROX_SLIM_MODE="true"
 
@@ -80,19 +82,8 @@ FROM scanner-base as scanner
 
 LABEL \
     com.redhat.component="rhacs-scanner-container" \
-    com.redhat.license_terms="https://www.redhat.com/agreements" \
-    description="This image supports image scanning for RHACS" \
-    io.k8s.description="This image supports image scanning for RHACS" \
     io.k8s.display-name="scanner" \
-    io.openshift.tags="rhacs,scanner,stackrox" \
-    maintainer="Red Hat, Inc." \
-    name="rhacs-scanner-rhel8" \
-    source-location="https://github.com/stackrox/scanner" \
-    summary="The image scanner for RHACS" \
-    url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
-    # We must set version label to prevent inheriting value set in the base stage.
-    # TODO(ROX-20236): configure injection of dynamic version value when it becomes possible.
-    version="0.0.1-todo"
+    name="rhacs-scanner-rhel8"
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
