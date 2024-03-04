@@ -25,34 +25,14 @@ RUN echo -n "version: " && scripts/konflux/version.sh && \
 # files of the dump and the manifest.
 COPY ./blob-genesis_manifests.json image/scanner/dump/genesis_manifests.json
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
-
-LABEL \
-    com.redhat.component="rhacs-scanner-container" \
-    com.redhat.license_terms="https://www.redhat.com/agreements" \
-    description="This image supports image scanning for RHACS" \
-    io.k8s.description="This image supports image scanning for RHACS" \
-    io.k8s.display-name="scanner" \
-    io.openshift.tags="rhacs,scanner,stackrox" \
-    maintainer="Red Hat, Inc." \
-    name="rhacs-scanner-rhel8" \
-    source-location="https://github.com/stackrox/scanner" \
-    summary="The image scanner for RHACS" \
-    url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
-    # We must set version label to prevent inheriting value set in the base stage.
-    # TODO(ROX-20236): configure injection of dynamic version value when it becomes possible.
-    version="0.0.1-todo"
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} as scanner-base
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
-ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
 COPY --from=builder /src/image/scanner/scripts /
 COPY --from=builder /src/image/scanner/bin/scanner ./
-COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
 COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 COPY --chown=65534:65534 --from=builder /src/image/scanner/dump/genesis_manifests.json ./
 
@@ -75,3 +55,47 @@ RUN microdnf upgrade --nobest && \
 USER 65534:65534
 
 ENTRYPOINT ["/entrypoint.sh"]
+
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} as scanner-slim
+
+LABEL \
+    com.redhat.component="rhacs-scanner-slim-container" \
+    com.redhat.license_terms="https://www.redhat.com/agreements" \
+    description="This image supports image scanning for RHACS" \
+    io.k8s.description="This image supports image scanning for RHACS" \
+    io.k8s.display-name="scanner-slim" \
+    io.openshift.tags="rhacs,scanner,stackrox" \
+    maintainer="Red Hat, Inc." \
+    name="rhacs-scanner-slim-rhel8" \
+    source-location="https://github.com/stackrox/scanner" \
+    summary="The image scanner for RHACS" \
+    url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
+    # We must set version label to prevent inheriting value set in the base stage.
+    # TODO(ROX-20236): configure injection of dynamic version value when it becomes possible.
+    version="0.0.1-todo"
+
+ENV ROX_SLIM_MODE="true"
+
+FROM scanner-base as scanner
+
+LABEL \
+    com.redhat.component="rhacs-scanner-container" \
+    com.redhat.license_terms="https://www.redhat.com/agreements" \
+    description="This image supports image scanning for RHACS" \
+    io.k8s.description="This image supports image scanning for RHACS" \
+    io.k8s.display-name="scanner" \
+    io.openshift.tags="rhacs,scanner,stackrox" \
+    maintainer="Red Hat, Inc." \
+    name="rhacs-scanner-rhel8" \
+    source-location="https://github.com/stackrox/scanner" \
+    summary="The image scanner for RHACS" \
+    url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
+    # We must set version label to prevent inheriting value set in the base stage.
+    # TODO(ROX-20236): configure injection of dynamic version value when it becomes possible.
+    version="0.0.1-todo"
+
+ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
+ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
+
+COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
