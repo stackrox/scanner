@@ -271,6 +271,8 @@ spec:
             value: $(params.image-expires-after)
           - name: COMMIT_SHA
             value: $(tasks.clone-repository.results.commit)
+          - name: TARGET_STAGE
+            value: scanner-db
         runAfter:
           - prefetch-dependencies
           - fetch-sql-definitions

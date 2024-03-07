@@ -1,14 +1,11 @@
-FROM registry.redhat.io/rhel8/postgresql-12:latest
+FROM registry.redhat.io/rhel8/postgresql-12:latest as scanner-db-common
 
 LABEL \
-    com.redhat.component="rhacs-scanner-db-container" \
     com.redhat.license_terms="https://www.redhat.com/agreements" \
     description="Scanner Database Image for Red Hat Advanced Cluster Security for Kubernetes" \
     io.k8s.description="Scanner Database Image for Red Hat Advanced Cluster Security for Kubernetes" \
-    io.k8s.display-name="scanner-db" \
     io.openshift.tags="rhacs,scanner-db,stackrox" \
     maintainer="Red Hat, Inc." \
-    name="rhacs-scanner-db-rhel8" \
     source-location="https://github.com/stackrox/scanner" \
     summary="Scanner DB for RHACS" \
     url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
@@ -38,9 +35,6 @@ RUN dnf upgrade -y --nobest && \
     rm -rf /var/cache/dnf /var/cache/yum && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
-COPY blob-pg-definitions.sql.gz \
-     /docker-entrypoint-initdb.d/definitions.sql.gz
-
 ENV PG_MAJOR=12 \
     PGDATA="/var/lib/postgresql/data/pgdata"
 
@@ -50,3 +44,20 @@ EXPOSE 5432
 CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
 
 USER 70:70
+
+FROM scanner-db-common as scanner-db-slim
+
+LABEL \
+    com.redhat.component="rhacs-scanner-db-slim-container" \
+    io.k8s.display-name="scanner-db-slim" \
+    name="rhacs-scanner-db-slim-rhel8"
+
+FROM scanner-db-common as scanner-db
+
+LABEL \
+    com.redhat.component="rhacs-scanner-db-container" \
+    io.k8s.display-name="scanner-db" \
+    name="rhacs-scanner-db-rhel8"
+
+COPY blob-pg-definitions.sql.gz \
+     /docker-entrypoint-initdb.d/definitions.sql.gz
