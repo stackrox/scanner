@@ -52,6 +52,8 @@ LABEL \
     io.k8s.display-name="scanner-db-slim" \
     name="rhacs-scanner-db-slim-rhel8"
 
+ENV ROX_SLIM_MODE="true"
+
 FROM scanner-db-common as scanner-db
 
 LABEL \
