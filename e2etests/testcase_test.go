@@ -1009,10 +1009,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:     "us.gcr.io/stackrox-ci/qa/apache/server:latest",
-		registry:  "https://us.gcr.io",
-		username:  "_json_key",
-		password:  os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER"),
+		image:     "quay.io/rhacs-eng/qa:apache-server-scannerci",
+		registry:  "https://quay.io",
+		username:  os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:  os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:    "NVD",
 		namespace: "ubuntu:14.04",
 		expectedFeatures: []apiV1.Feature{
