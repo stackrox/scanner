@@ -375,19 +375,19 @@ jobs:
 
       - name: Build scanner image
         run: |
-          docker buildx build -t scanner:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile image/scanner/rhel --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS
+          docker buildx build -t scanner:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/scanner/rhel
 
       - name: Build scanner-slim image
         run: |
-          docker buildx build -t scanner-slim:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS
+          docker buildx build -t scanner-slim:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile.slim --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/scanner/rhel
 
       - name: Build scanner-db image
         run: |
-          docker buildx build -t scanner-db:"$(make --no-print-directory --quiet tag)" -f image/db/rhel/Dockerfile image/db/rhel  --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS
+          docker buildx build -t scanner-db:"$(make --no-print-directory --quiet tag)" -f image/db/rhel/Dockerfile --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/db/rhel
 
       - name: Build scanner-db-slim image
         run: |
-          docker buildx build -t scanner-db-slim:"$(make --no-print-directory --quiet tag)" -f image/db/rhel/Dockerfile.slim image/db/rhel  --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS
+          docker buildx build -t scanner-db-slim:"$(make --no-print-directory --quiet tag)" -f image/db/rhel/Dockerfile.slim --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/db/rhel
 
   diff-dumps:
     if: |
