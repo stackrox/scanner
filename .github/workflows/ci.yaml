@@ -328,6 +328,7 @@ jobs:
       QUAY_RHACS_ENG_RW_PASSWORD: ${{ secrets.QUAY_RHACS_ENG_RW_PASSWORD }}
       QUAY_STACKROX_IO_RW_USERNAME: ${{ secrets.QUAY_STACKROX_IO_RW_USERNAME }}
       QUAY_STACKROX_IO_RW_PASSWORD: ${{ secrets.QUAY_STACKROX_IO_RW_PASSWORD }}
+      PLATFORMS: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
     runs-on: ubuntu-latest
     needs:
       - generate-scanner-bundle
@@ -373,21 +374,25 @@ jobs:
         run: |
           echo "DOCKER_BUILDX_ARGS=--push" >> $GITHUB_ENV          
 
+      - name: Setup
+        run: |
+          echo "TAG=$(make --no-print-directory --quiet tag)" >> $GITHUB_ENV
+
       - name: Build scanner image (rhacs-eng)
         run: |
-          docker buildx build --provenance=false -t quay.io/rhacs-eng/scanner:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/scanner/rhel
+          docker buildx build --provenance=false -t quay.io/rhacs-eng/scanner:${TAG} -f image/scanner/rhel/Dockerfile --platform ${PLATFORMS} $DOCKER_BUILDX_ARGS image/scanner/rhel
 
       - name: Build scanner-slim image (rhacs-eng)
         run: |
-          docker buildx build --provenance=false -t quay.io/rhacs-eng/scanner-slim:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile.slim --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/scanner/rhel
+          docker buildx build --provenance=false -t quay.io/rhacs-eng/scanner-slim:${TAG} -f image/scanner/rhel/Dockerfile.slim --platform ${PLATFORMS} $DOCKER_BUILDX_ARGS image/scanner/rhel
 
       - name: Build scanner-db image (rhacs-eng)
         run: |
-          docker buildx build --provenance=false -t quay.io/rhacs-eng/scanner-db:"$(make --no-print-directory --quiet tag)" -f image/db/rhel/Dockerfile --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/db/rhel
+          docker buildx build --provenance=false -t quay.io/rhacs-eng/scanner-db:${TAG} -f image/db/rhel/Dockerfile --platform ${PLATFORMS} $DOCKER_BUILDX_ARGS image/db/rhel
 
       - name: Build scanner-db-slim image (rhacs-eng)
         run: |
-          docker buildx build --provenance=false -t quay.io/rhacs-eng/scanner-db-slim:"$(make --no-print-directory --quiet tag)" quay.io/stackrox-io/scanner-db-slim:"$(make --no-print-directory --quiet tag)" -f image/db/rhel/Dockerfile.slim --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/db/rhel
+          docker buildx build --provenance=false -t quay.io/rhacs-eng/scanner-db-slim:${TAG} -f image/db/rhel/Dockerfile.slim --platform ${PLATFORMS} $DOCKER_BUILDX_ARGS image/db/rhel
 
       - name: Docker login (stackrox-io)
         # Skip for external contributions.
@@ -398,19 +403,19 @@ jobs:
 
       - name: Build scanner image (stackrox-io)
         run: |
-          docker buildx build --provenance=false -t quay.io/stackrox-io/scanner:"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/scanner/rhel
+          docker buildx build --provenance=false -t quay.io/stackrox-io/scanner:${TAG} -f image/scanner/rhel/Dockerfile --platform ${PLATFORMS} $DOCKER_BUILDX_ARGS image/scanner/rhel
 
       - name: Build scanner-slim image (stackrox-io)
         run: |
-          docker buildx build --provenance=false -t quay.io/stackrox-io/scanner-slim"$(make --no-print-directory --quiet tag)" -f image/scanner/rhel/Dockerfile.slim --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/scanner/rhel
+          docker buildx build --provenance=false -t quay.io/stackrox-io/scanner-slim:${TAG} -f image/scanner/rhel/Dockerfile.slim --platform ${PLATFORMS} $DOCKER_BUILDX_ARGS image/scanner/rhel
 
       - name: Build scanner-db image (stackrox-io)
         run: |
-          docker buildx build --provenance=false -t quay.io/stackrox-io/scanner-db:"$(make --no-print-directory --quiet tag)" -f image/db/rhel/Dockerfile --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/db/rhel
+          docker buildx build --provenance=false -t quay.io/stackrox-io/scanner-db:${TAG} -f image/db/rhel/Dockerfile --platform ${PLATFORMS} $DOCKER_BUILDX_ARGS image/db/rhel
 
       - name: Build scanner-db-slim image (stackrox-io)
         run: |
-          docker buildx build --provenance=false -t quay.io/stackrox-io/scanner-db-slim:"$(make --no-print-directory --quiet tag)" -f image/db/rhel/Dockerfile.slim --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x $DOCKER_BUILDX_ARGS image/db/rhel
+          docker buildx build --provenance=false -t quay.io/stackrox-io/scanner-db-slim:${TAG} -f image/db/rhel/Dockerfile.slim --platform ${PLATFORMS} $DOCKER_BUILDX_ARGS image/db/rhel
 
   diff-dumps:
     if: |
