@@ -366,6 +366,7 @@ jobs:
           github.event_name == 'push' || !github.event.pull_request.head.repo.fork
         run: |
           docker login -u "${QUAY_RHACS_ENG_RO_USERNAME}" --password-stdin quay.io <<<"${QUAY_RHACS_ENG_RO_PASSWORD}"
+          docker login -u "$QUAY_STACKROX_IO_RW_USERNAME" --password-stdin quay.io <<<"$QUAY_STACKROX_IO_RW_PASSWORD"
 
       - name: Conditional push
         if: |
