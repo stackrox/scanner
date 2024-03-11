@@ -64,18 +64,18 @@ spec:
 
   taskRunSpecs:
     - pipelineTaskName: build-container
-      computeResources:
-        limits:
-          cpu: 3
-          memory: 4Gi
-        requests:
-          cpu: 3
-          memory: 4Gi
-#      stepSpecs: # v1 style
-#        - name: build
-#          computeResources:
-#            requests:
-#              cpu: 1
+#      computeResources:
+#        limits:
+#          cpu: 3
+#          memory: 4Gi
+#        requests:
+#          cpu: 3
+#          memory: 4Gi
+      stepSpecs: # v1 style
+        - name: build
+          computeResources:
+            requests:
+              cpu: 1
 #      stepOverrides: # v1beta1 style
 #        - name: build
 #          resources:
@@ -83,19 +83,19 @@ spec:
 #              cpu: 1
     # This overrides clamav scan requested resources to make the task run faster.
     - pipelineTaskName: clamav-scan
-      computeResources:
-        limits:
-          cpu: 2
-          memory: 4Gi
+#      computeResources:
+#        limits:
+#          cpu: 2
+#          memory: 4Gi
 #        requests:
 #          cpu: 1
 #          memory: 4Gi
-#      stepSpecs: # v1 style
-#        - name: extract-and-scan-image
-#          computeResources:
-#            requests:
-#              cpu: 1
-#              memory: 3Gi
+      stepSpecs: # v1 style
+        - name: extract-and-scan-image
+          computeResources:
+            requests:
+              cpu: 1
+              memory: 3Gi
 #      stepOverrides: # v1beta1 style
 #        - name: extract-and-scan-image
 #          resources:
