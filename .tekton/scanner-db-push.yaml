@@ -62,30 +62,21 @@ spec:
 
   taskRunSpecs:
     - pipelineTaskName: build-container
-      stepSpecs: # v1 style
+      stepSpecs:
+        # Provision more CPU to speed up build compared to the defaults.
+        # https://github.com/redhat-appstudio/build-definitions/blob/main/task/buildah/0.1/buildah.yaml#L126
         - name: build
           computeResources:
             requests:
               cpu: 1
-      stepOverrides: # v1beta1 style
-        - name: build
-          resources:
-            requests:
-              cpu: 1
-    # This overrides clamav scan requested resources to make the task run faster.
     - pipelineTaskName: clamav-scan
-      stepSpecs: # v1 style
+      stepSpecs:
+        # Provision more CPU to speed up ClamAV scan compared to the defaults.
+        # https://github.com/redhat-appstudio/build-definitions/blob/main/task/clamav-scan/0.1/clamav-scan.yaml#L48
         - name: extract-and-scan-image
           computeResources:
             requests:
               cpu: 1
-              memory: 3Gi
-      stepOverrides: # v1beta1 style
-        - name: extract-and-scan-image
-          resources:
-            requests:
-              cpu: 1
-              memory: 3Gi
 
   pipelineSpec:
 
