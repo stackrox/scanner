@@ -1,4 +1,4 @@
-FROM registry.redhat.io/rhel8/postgresql-12:latest as scanner-db-common
+FROM registry.redhat.io/rhel8/postgresql-12:latest AS scanner-db-common
 
 LABEL \
     com.redhat.license_terms="https://www.redhat.com/agreements" \
@@ -45,7 +45,7 @@ CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
 
 USER 70:70
 
-FROM scanner-db-common as scanner-db-slim
+FROM scanner-db-common AS scanner-db-slim
 
 LABEL \
     com.redhat.component="rhacs-scanner-db-slim-container" \
@@ -54,7 +54,7 @@ LABEL \
 
 ENV ROX_SLIM_MODE="true"
 
-FROM scanner-db-common as scanner-db
+FROM scanner-db-common AS scanner-db
 
 LABEL \
     com.redhat.component="rhacs-scanner-db-container" \
