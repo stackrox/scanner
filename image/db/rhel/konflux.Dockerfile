@@ -61,5 +61,5 @@ LABEL \
     io.k8s.display-name="scanner-db" \
     name="rhacs-scanner-db-rhel8"
 
-COPY blob-pg-definitions.sql.gz \
+COPY --chown=0:0 blob-pg-definitions.sql.gz \
      /docker-entrypoint-initdb.d/definitions.sql.gz
