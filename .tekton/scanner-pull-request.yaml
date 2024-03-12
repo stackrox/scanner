@@ -64,7 +64,7 @@ spec:
         - name: build
           computeResources:
             requests:
-              cpu: 1
+              cpu: 2
     - pipelineTaskName: clamav-scan
       stepSpecs:
         # Provision more CPU to speed up ClamAV scan compared to the defaults.
