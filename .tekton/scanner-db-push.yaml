@@ -41,6 +41,8 @@ spec:
       value: ''
     - name: build-source-image
       value: 'true'
+    - name: build-target-stage
+      value: scanner-db
 
   workspaces:
     - name: workspace
@@ -269,6 +271,8 @@ spec:
             value: $(params.image-expires-after)
           - name: COMMIT_SHA
             value: $(tasks.clone-repository.results.commit)
+          - name: TARGET_STAGE
+            value: $(params.build-target-stage)
         runAfter:
           - prefetch-dependencies
           - fetch-sql-definitions

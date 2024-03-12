@@ -1,6 +1,5 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
-
 metadata:
   annotations:
     build.appstudio.openshift.io/repo: https://github.com/stackrox/scanner?rev={{revision}}
@@ -13,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: acs
-    appstudio.openshift.io/component: scanner-db
+    appstudio.openshift.io/component: scanner-db-slim
     pipelines.appstudio.openshift.io/type: build
-  name: scanner-db-on-pull-request
+  name: scanner-db-slim-on-pull-request
   namespace: rh-acs-tenant
 
 spec:
@@ -28,7 +27,7 @@ spec:
     - name: image-expires-after
       value: '13w'
     - name: output-image
-      value: quay.io/redhat-user-workloads/rh-acs-tenant/acs/scanner-db:on-pr-{{revision}}
+      value: quay.io/redhat-user-workloads/rh-acs-tenant/acs/scanner-db-slim:on-pr-{{revision}}
     - name: path-context
       value: .
     - name: revision
@@ -38,13 +37,13 @@ spec:
     # TODO(ROX-20234): Enable hermetic builds
     # - name: hermetic
     #   value: "true"
-    # No language dependencies are required for scanner-db image.
+    # No language dependencies are required for scanner-db-slim image.
     - name: prefetch-input
       value: ''
     - name: build-source-image
       value: 'true'
     - name: build-target-stage
-      value: scanner-db
+      value: scanner-db-slim
 
   workspaces:
     - name: workspace
@@ -196,7 +195,7 @@ spec:
             value: $(params.git-url)
           - name: revision
             value: $(params.revision)
-          # A shallow repo clone is sufficient for scanner-db build.
+          # A shallow repo clone is sufficient for scanner-db-slim build.
           - name: depth
             value: "1"
           - name: fetchTags
@@ -241,22 +240,6 @@ spec:
           - name: source
             workspace: workspace
 
-      - name: fetch-sql-definitions
-        runAfter:
-          - clone-repository
-        taskSpec:
-          steps:
-            - name: fetch-sql-definitions
-              image: registry.access.redhat.com/ubi8/ubi-minimal:latest
-              script: |
-                "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" \
-                    "$(workspaces.source.path)/source" \
-                    pg-definitions.sql.gz
-              timeout: '10m'
-        workspaces:
-          - name: source
-            workspace: workspace
-
       - name: build-container
         params:
           - name: IMAGE
@@ -274,10 +257,9 @@ spec:
           - name: COMMIT_SHA
             value: $(tasks.clone-repository.results.commit)
           - name: TARGET_STAGE
-            value: scanner-db
+            value: $(params.build-target-stage)
         runAfter:
           - prefetch-dependencies
-          - fetch-sql-definitions
         taskRef:
           params:
             - name: name
