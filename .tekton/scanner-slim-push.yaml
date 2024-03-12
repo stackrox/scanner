@@ -4,29 +4,27 @@ metadata:
   annotations:
     build.appstudio.openshift.io/repo: https://github.com/stackrox/scanner?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
-    build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: "500"
-    # TODO(ROX-21073): re-enable for all PR branches
-    pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && (source_branch.contains("rhtap") || source_branch.contains("konflux"))
+    pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch == "master"
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: acs
-    appstudio.openshift.io/component: scanner
+    appstudio.openshift.io/component: scanner-slim
     pipelines.appstudio.openshift.io/type: build
-  name: scanner-on-pull-request
+  name: scanner-slim-on-push
   namespace: rh-acs-tenant
 spec:
-
   params:
   - name: dockerfile
     value: image/scanner/rhel/konflux.Dockerfile
   - name: git-url
     value: '{{repo_url}}'
   - name: image-expires-after
+    # TODO(ROX-20230): make release images not expire.
     value: '13w'
   - name: output-image
-    value: quay.io/redhat-user-workloads/rh-acs-tenant/acs/scanner:on-pr-{{revision}}
+    value: quay.io/redhat-user-workloads/rh-acs-tenant/acs/scanner-slim:{{revision}}
   - name: path-context
     value: .
   - name: revision
@@ -38,7 +36,7 @@ spec:
   - name: build-source-image
     value: 'true'
   - name: build-target-stage
-    value: scanner
+    value: scanner-slim
 
   workspaces:
   - name: workspace
@@ -146,7 +144,6 @@ spec:
       description: Build stage to target in container build
       name: build-target-stage
       type: string
-
     results:
     - description: ""
       name: IMAGE_URL
@@ -187,7 +184,6 @@ spec:
         - name: kind
           value: task
         resolver: bundles
-
     - name: clone-repository
       params:
       - name: url
@@ -219,7 +215,6 @@ spec:
         workspace: workspace
       - name: basic-auth
         workspace: git-auth
-
     - name: prefetch-dependencies
       params:
       - name: input
@@ -297,7 +292,6 @@ spec:
       workspaces:
       - name: source
         workspace: workspace
-
     - name: build-source-image
       params:
       - name: BINARY_IMAGE
@@ -327,7 +321,6 @@ spec:
       workspaces:
       - name: workspace
         workspace: workspace
-
     - name: deprecated-base-image-check
       params:
       - name: BASE_IMAGES_DIGESTS
@@ -348,7 +341,6 @@ spec:
         operator: in
         values:
         - "false"
-
     - name: clair-scan
       params:
       - name: image-digest
@@ -371,7 +363,6 @@ spec:
         operator: in
         values:
         - "false"
-
     - name: sast-snyk-check
       runAfter:
       - clone-repository
@@ -392,7 +383,6 @@ spec:
       workspaces:
       - name: workspace
         workspace: workspace
-
     - name: clamav-scan
       params:
       - name: image-digest
@@ -415,7 +405,6 @@ spec:
         operator: in
         values:
         - "false"
-
     - name: sbom-json-check
       params:
       - name: IMAGE_URL

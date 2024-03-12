@@ -41,6 +41,8 @@ spec:
       value: ''
     - name: build-source-image
       value: 'true'
+    - name: build-target-stage
+      value: scanner-db
 
   workspaces:
     - name: workspace
@@ -143,6 +145,10 @@ spec:
       - default: "false"
         description: Build a source image.
         name: build-source-image
+        type: string
+      - default: ""
+        description: Build stage to target in container build
+        name: build-target-stage
         type: string
 
     results:
@@ -269,6 +275,8 @@ spec:
             value: $(params.image-expires-after)
           - name: COMMIT_SHA
             value: $(tasks.clone-repository.results.commit)
+          - name: TARGET_STAGE
+            value: $(params.build-target-stage)
         runAfter:
           - prefetch-dependencies
           - fetch-sql-definitions
