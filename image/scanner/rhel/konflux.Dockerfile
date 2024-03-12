@@ -3,7 +3,7 @@ ARG BASE_IMAGE=ubi8-minimal
 ARG BASE_TAG=latest
 
 # Compiling scanner binaries and staging repo2cpe and genesis manifests
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.20 as builder-common
+FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.20 AS builder-common
 
 ENV CGO_ENABLED=1
 ENV GOFLAGS=""
@@ -25,7 +25,7 @@ RUN echo -n "version: " && scripts/konflux/version.sh && \
 COPY ./blob-genesis_manifests.json image/scanner/dump/genesis_manifests.json
 
 # Common base for scanner slim and full
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} as scanner-common
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS scanner-common
 
 LABEL \
     com.redhat.license_terms="https://www.redhat.com/agreements" \
@@ -70,7 +70,7 @@ USER 65534:65534
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Scanner Slim
-FROM scanner-common as scanner-slim
+FROM scanner-common AS scanner-slim
 
 LABEL \
     com.redhat.component="rhacs-scanner-slim-container" \
@@ -86,7 +86,7 @@ RUN unzip -j blob-k8s-definitions.zip -d image/scanner/dump/k8s_definitions && \
     unzip -j blob-nvd-definitions.zip -d image/scanner/dump/nvd_definitions
 
 # Scanner (full)
-FROM scanner-common as scanner
+FROM scanner-common AS scanner
 
 LABEL \
     com.redhat.component="rhacs-scanner-container" \
