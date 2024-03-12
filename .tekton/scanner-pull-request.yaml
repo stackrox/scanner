@@ -142,6 +142,10 @@ spec:
       description: Build a source image.
       name: build-source-image
       type: string
+    - default: ""
+      description: Build stage to target in container build
+      name: build-target-stage
+      type: string
 
     results:
     - description: ""
