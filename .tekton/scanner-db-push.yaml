@@ -60,6 +60,16 @@ spec:
       secret:
         secretName: '{{ git_auth_secret }}'
 
+  taskRunSpecs:
+    - pipelineTaskName: clamav-scan
+      stepSpecs:
+        # Provision more CPU to speed up ClamAV scan compared to the defaults.
+        # https://github.com/redhat-appstudio/build-definitions/blob/main/task/clamav-scan/0.1/clamav-scan.yaml#L48
+        - name: extract-and-scan-image
+          computeResources:
+            requests:
+              cpu: 1
+
   pipelineSpec:
 
     finally:
