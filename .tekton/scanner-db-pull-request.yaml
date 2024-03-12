@@ -274,7 +274,7 @@ spec:
           - name: COMMIT_SHA
             value: $(tasks.clone-repository.results.commit)
           - name: TARGET_STAGE
-            value: scanner-db
+            value: $(params.build-target-stage)
         runAfter:
           - prefetch-dependencies
           - fetch-sql-definitions

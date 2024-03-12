@@ -36,6 +36,8 @@ spec:
     value: '{"type": "gomod", "path": "."}'
   - name: build-source-image
     value: 'true'
+  - name: build-target-stage
+    value: scanner-slim
 
   workspaces:
   - name: workspace
@@ -264,7 +266,7 @@ spec:
       - name: COMMIT_SHA
         value: $(tasks.clone-repository.results.commit)
       - name: TARGET_STAGE
-        value: scanner-slim
+        value: $(params.build-target-stage)
       runAfter:
       - prefetch-dependencies
       - fetch-vuln-feed-data
