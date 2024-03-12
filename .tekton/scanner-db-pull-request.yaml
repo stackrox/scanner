@@ -43,6 +43,8 @@ spec:
       value: ''
     - name: build-source-image
       value: 'true'
+    - name: build-target-stage
+      value: scanner-db
 
   workspaces:
     - name: workspace
