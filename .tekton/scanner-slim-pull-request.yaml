@@ -243,6 +243,8 @@ spec:
               #!/usr/bin/env bash
               "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" \
                   "$(workspaces.source.path)/source" \
+                  nvd-definitions.zip \
+                  k8s-definitions.zip \
                   repo2cpe.zip \
                   genesis_manifests.json
       workspaces:
