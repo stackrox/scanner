@@ -135,8 +135,6 @@ github.com/cncf/xds/go v0.0.0-20211001041855-01bcc9b48dfe/go.mod h1:eXthEFrGJvWH
 github.com/cncf/xds/go v0.0.0-20211011173535-cb28da3451f1/go.mod h1:eXthEFrGJvWHgFFCl3hGmgk+/aYT6PnTQLykKQRLhEs=
 github.com/cncf/xds/go v0.0.0-20211130200136-a8f946100490/go.mod h1:eXthEFrGJvWHgFFCl3hGmgk+/aYT6PnTQLykKQRLhEs=
 github.com/cncf/xds/go v0.0.0-20231128003011-0fa0005c9caa h1:jQCWAUqqlij9Pgj2i/PB79y4KOPYVyFYdROxgaCwdTQ=
-github.com/connorgorman/protobuf v1.2.2-0.20210115205927-b892c1b298f7 h1:YsgEuC8PhmdxkjGb3/l4inKcwVKuPXp1YELVPZkIByA=
-github.com/connorgorman/protobuf v1.2.2-0.20210115205927-b892c1b298f7/go.mod h1:4n/qquk+A505mqkK9+o7Xth9+UxUWFc4/5faDXkYyyU=
 github.com/containers/image/v5 v5.30.0 h1:CmHeSwI6W2kTRWnUsxATDFY5TEX4b58gPkaQcEyrLIA=
 github.com/containers/image/v5 v5.30.0/go.mod h1:gSD8MVOyqBspc0ynLsuiMR9qmt8UQ4jpVImjmK0uXfk=
 github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 h1:Qzk5C6cYglewc+UyGf6lc8Mj2UaPTHy/iF2De0/77CA=
@@ -586,6 +584,8 @@ github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d h1:88Iui7fSMKgXv
 github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d/go.mod h1:GJwFpFwCxiYhgpJWrAkM+v9Z9gpgtyWxkRdK4JjsOIg=
 github.com/stackrox/nvdtools v0.0.0-20231111002313-57e262e4797e h1:hLHHK1pGLpRvEbER2cJZekLeMnL+nMn3C37CVUhameM=
 github.com/stackrox/nvdtools v0.0.0-20231111002313-57e262e4797e/go.mod h1:Kh55SAWnjckS96TBSrXI99KrEKH4iB0OJby3N8GRJO4=
+github.com/stackrox/protobuf v1.2.2-0.20240207122816-e936d453291c h1:qEJYZA6jpEQ+xhUIhnsnTX56h09S28tIa7zOdB5GY90=
+github.com/stackrox/protobuf v1.2.2-0.20240207122816-e936d453291c/go.mod h1:4n/qquk+A505mqkK9+o7Xth9+UxUWFc4/5faDXkYyyU=
 github.com/stackrox/stackrox v0.0.0-20240109022907-9d33a3d8306e h1:LkkutxWvoN/Pn2AEf90enFPFmXkLE9GzIMw9FFO99CY=
 github.com/stackrox/stackrox v0.0.0-20240109022907-9d33a3d8306e/go.mod h1:ENA2mhWTsEdjQviBi3KRtx16+7Vm1sUvoH/lvJ2fC2A=
 github.com/stackrox/zap v1.15.1-0.20230918235618-2bd149903d0e h1:tufzLLs6t5cNlZbCaU5ftO8qNc4UkcSRfF1Oj1dlIzg=
