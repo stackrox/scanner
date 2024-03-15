@@ -16,7 +16,7 @@ LABEL name="scanner-db" \
       summary="Image scanner database for the StackRox Kubernetes Security Platform" \
       description="This image supports image scanning in the StackRox Kubernetes Security Platform."
 
-ENV PG_MAJOR=12
+ENV PG_MAJOR=15
 ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
     PGDATA="/var/lib/postgresql/data/pgdata"
 
@@ -37,7 +37,7 @@ RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-K
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
     microdnf install \
         ca-certificates libicu systemd-sysv glibc-locale-source glibc-langpack-en \
-        postgresql12-server && \
+        postgresql15-server && \
     # The removal of /usr/share/zoneinfo from UBI minimal images is intentional.
     # After building the image, the image is reduced in size as much as possible,
     # and the /usr/share/zoneinfo directory is purged as it saves space
