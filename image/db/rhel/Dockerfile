@@ -10,11 +10,18 @@ RUN microdnf install tar gzip && tar -zxf /bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
+ARG LABEL_VERSION
+ARG LABEL_RELEASE
+ARG QUAY_TAG_EXPIRATION
+
 LABEL name="scanner-db" \
       vendor="StackRox" \
       maintainer="support@stackrox.com" \
       summary="Image scanner database for the StackRox Kubernetes Security Platform" \
-      description="This image supports image scanning in the StackRox Kubernetes Security Platform."
+      description="This image supports image scanning in the StackRox Kubernetes Security Platform." \
+      version="${LABEL_VERSION}" \
+      release="${LABEL_RELEASE}" \
+      quay.expires-after="${QUAY_TAG_EXPIRATION}"
 
 ENV PG_MAJOR=15
 ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
