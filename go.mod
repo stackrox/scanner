@@ -5,7 +5,7 @@ go 1.18
 require (
 	cloud.google.com/go/storage v1.39.1
 	github.com/NYTimes/gziphandler v1.1.1
-	github.com/PuerkitoBio/goquery v1.9.0
+	github.com/PuerkitoBio/goquery v1.9.1
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
 	github.com/containers/image/v5 v5.30.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
