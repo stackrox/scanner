@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/facebookincubator/nvdtools/cvefeed"
-	"github.com/stackrox/rox/pkg/bolthelper"
+	"github.com/stackrox/scanner/pkg/bolthelper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
