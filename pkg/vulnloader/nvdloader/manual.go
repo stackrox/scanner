@@ -1331,7 +1331,7 @@ Subsequent use of the cloned handle that does not explicitly set a source to loa
 				ImpactScore:         5.9,
 			},
 		},
-		LastModifiedDate: "2023-05-31T18:10Z",
-		PublishedDate:    "2023-05-23T23:15Z",
+		LastModifiedDate: "2024-04-04T00:00Z",
+		PublishedDate:    "2024-04-04T00:00Z",
 	},
 }
