@@ -329,6 +329,7 @@ pr_has_label() {
 
 # get_pr_details() from GitHub and display the result. Exits 1 if not run in CI in a PR context.
 _PR_DETAILS=""
+_PR_DETAILS_CACHE_FILE="/tmp/PR_DETAILS_CACHE.json"
 get_pr_details() {
     local pull_request
     local org
@@ -336,10 +337,16 @@ get_pr_details() {
 
     if [[ -n "${_PR_DETAILS}" ]]; then
         echo "${_PR_DETAILS}"
-        return
+        return 0
+    fi
+    if [[ -e "${_PR_DETAILS_CACHE_FILE}" ]]; then
+        _PR_DETAILS="$(cat "${_PR_DETAILS_CACHE_FILE}")"
+        echo "${_PR_DETAILS}"
+        return 0
     fi
 
     _not_a_PR() {
+        echo "This does not appear to be a PR context" >&2
         echo '{ "msg": "this is not a PR" }'
         exit 1
     }
@@ -354,14 +361,21 @@ get_pr_details() {
             org=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].org')
             repo=$(jq -r <<<"$CLONEREFS_OPTIONS" '.refs[0].repo')
         else
-            echo "Expect a JOB_SPEC or CLONEREFS_OPTIONS"
+            echo "Expect a JOB_SPEC or CLONEREFS_OPTIONS" >&2
             exit 2
         fi
         [[ "${pull_request}" == "null" ]] && _not_a_PR
+    elif is_GITHUB_ACTIONS; then
+        pull_request="$(jq -r .pull_request.number "${GITHUB_EVENT_PATH}")" || _not_a_PR
+        [[ "${pull_request}" == "null" ]] && _not_a_PR
+        org="${GITHUB_REPOSITORY_OWNER}"
+        repo="${GITHUB_REPOSITORY#*/}"
     else
-        echo "Expect OpenShift CI"
+        echo "Unsupported CI" >&2
         exit 2
     fi
+
+    local headers url pr_details
 
     headers=()
     if [[ -n "${GITHUB_TOKEN:-}" ]]; then
@@ -369,14 +383,19 @@ get_pr_details() {
     fi
 
     url="https://api.github.com/repos/${org}/${repo}/pulls/${pull_request}"
-    pr_details=$(curl --retry 5 -sS "${headers[@]}" "${url}")
+
+    if ! pr_details=$(curl --retry 5 -sS "${headers[@]}" "${url}"); then
+        echo "Github API error: $pr_details, exit code: $?" >&2
+        exit 2
+    fi
+
     if [[ "$(jq .id <<<"$pr_details")" == "null" ]]; then
         # A valid PR response is expected at this point
-        echo "Invalid response from GitHub: $pr_details"
+        echo "Invalid response from GitHub: $pr_details" >&2
         exit 2
     fi
     _PR_DETAILS="$pr_details"
-    echo "$pr_details"
+    echo "$pr_details" | tee "${_PR_DETAILS_CACHE_FILE}"
 }
 
 GATE_JOBS_CONFIG="$SCRIPTS_ROOT/scripts/ci/gate-jobs-config.json"

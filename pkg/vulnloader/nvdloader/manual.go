@@ -1266,4 +1266,72 @@ Subsequent use of the cloned handle that does not explicitly set a source to loa
 	//////////////////////////////////
 	// End HTTP/2 Rapid Reset vulns //
 	//////////////////////////////////
+
+	// CVE-2023-32697 was not being detected for `org.xerial.sqlite-jdbc-3.41.2.1.jar`.
+	// This entry adds an additional CPE URI to enable matching.
+	"CVE-2023-32697": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ASSIGNER: "",
+				ID:       "CVE-2023-32697",
+			},
+			DataFormat:  "",
+			DataType:    "",
+			DataVersion: "",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: "SQLite JDBC is a library for accessing and creating SQLite database files in Java. Sqlite-jdbc addresses a remote code execution vulnerability via JDBC URL. This issue impacting versions 3.6.14.1 through 3.41.2.1 and has been fixed in version 3.41.2.2.\n",
+					},
+				},
+			},
+			Problemtype: nil,
+			References:  nil,
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:              `cpe:2.3:a:sqlite_jdbc_project:sqlite_jdbc:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "3.41.2.2",
+							VersionStartIncluding: "3.6.14.1",
+							Vulnerable:            true,
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:xerial:sqlite-jdbc:*:*:*:*:*:*:*:*`,
+							VersionEndExcluding:   "3.41.2.2",
+							VersionStartIncluding: "3.6.14.1",
+							Vulnerable:            true,
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             9.8,
+					BaseSeverity:          "CRITICAL",
+					ConfidentialityImpact: "HIGH",
+					IntegrityImpact:       "HIGH",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         5.9,
+			},
+		},
+		LastModifiedDate: "2024-04-04T00:00Z",
+		PublishedDate:    "2023-05-23T23:15Z",
+	},
 }
