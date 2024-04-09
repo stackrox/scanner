@@ -427,7 +427,7 @@ jobs:
       - name: diff-dumps
         run: ./scripts/ci/jobs/diff-dumps.sh
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: diff-dumps
           path: /tmp/diff-dumps
