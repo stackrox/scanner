@@ -427,6 +427,11 @@ jobs:
       - name: diff-dumps
         run: ./scripts/ci/jobs/diff-dumps.sh
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: diff-dumps
+          path: /tmp/diff-dumps
+
   upload-db-dump:
     # Only run on master branch
     if: github.ref == 'refs/heads/master'
