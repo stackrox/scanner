@@ -7,7 +7,7 @@ LABEL \
     io.openshift.tags="rhacs,scanner-db,stackrox" \
     maintainer="Red Hat, Inc." \
     source-location="https://github.com/stackrox/scanner" \
-    summary="Scanner DB for RHACS" \
+    summary="Scanner DB for Red Hat Advanced Cluster Security for Kubernetes" \
     url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
     # We must set version label to prevent inheriting value set in the base stage.
     # TODO(ROX-20236): configure injection of dynamic version value when it becomes possible.
