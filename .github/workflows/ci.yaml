@@ -429,8 +429,8 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: diff-dumps
-          path: /tmp/diff-dumps
+          name: diff-dumps-inspect
+          path: /tmp/diff-dumps-inspect
 
   upload-db-dump:
     # Only run on master branch
