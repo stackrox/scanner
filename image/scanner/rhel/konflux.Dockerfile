@@ -31,12 +31,12 @@ FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS scanner-common
 
 LABEL \
     com.redhat.license_terms="https://www.redhat.com/agreements" \
-    description="This image supports image scanning for RHACS" \
-    io.k8s.description="This image supports image scanning for RHACS" \
+    description="This image supports image scanning for Red Hat Advanced Cluster Security for Kubernetes" \
+    io.k8s.description="This image supports image scanning for Red Hat Advanced Cluster Security for Kubernetes" \
     io.openshift.tags="rhacs,scanner,stackrox" \
     maintainer="Red Hat, Inc." \
     source-location="https://github.com/stackrox/scanner" \
-    summary="The image scanner for RHACS" \
+    summary="The image scanner for Red Hat Advanced Cluster Security for Kubernetes" \
     url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
     # We must set version label to prevent inheriting value set in the base stage.
     # TODO(ROX-20236): configure injection of dynamic version value when it becomes possible.
