@@ -81,7 +81,6 @@ RUN microdnf upgrade -y --nobest && \
 USER 70:70
 
 ENV ROX_SLIM_MODE="true"
-COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

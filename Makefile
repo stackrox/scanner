@@ -39,24 +39,8 @@ DEFAULT_IMAGE_REGISTRY := quay.io/stackrox-io
 BUILD_IMAGE_VERSION=$(shell sed 's/\s*\#.*//' BUILD_IMAGE_VERSION)
 BUILD_IMAGE := $(DEFAULT_IMAGE_REGISTRY)/apollo-ci:$(BUILD_IMAGE_VERSION)
 
-GOINSTALL := GOARCH="" go install
-DOCKERBUILD := $(CURDIR)/scripts/docker-build.sh
-
-DB_DOCKERBUILD_ARGS =
-ifeq ($(GOARCH),s390x)
-        DB_DOCKERBUILD_ARGS = \
-                --build-arg="RPMS_REGISTRY=quay.io" \
-                --build-arg="RPMS_BASE_IMAGE=centos/centos" \
-                --build-arg="RPMS_BASE_TAG=stream9" \
-                --build-arg="BASE_IMAGE=ubi9-minimal"
-endif
-
-# Update the arch to arm64 but only for Macs running on Apple Silicon (M1)
 ifeq ($(GOARCH),)
 ifeq ($(shell uname -ms),Darwin arm64)
-	# TODO(ROX-12064) build these images in the CI pipeline
-	# Uncomment the line below to enable native arm64 builder images
-	# BUILD_IMAGE = quay.io/rhacs-eng/sandbox:apollo-ci-stackrox-build-0.3.49-arm64
         GOARCH := arm64
 else ifeq ($(shell uname -ms),Linux aarch64)
         GOARCH := arm64
@@ -67,6 +51,18 @@ else ifeq ($(shell uname -ms),Linux s390x)
 else
         GOARCH := amd64
 endif
+endif
+
+GOINSTALL := GOARCH="" go install
+DOCKERBUILD := $(CURDIR)/scripts/docker-build.sh
+
+DB_DOCKERBUILD_ARGS =
+ifeq ($(GOARCH),s390x)
+        DB_DOCKERBUILD_ARGS = \
+                --build-arg="RPMS_REGISTRY=quay.io" \
+                --build-arg="RPMS_BASE_IMAGE=centos/centos" \
+                --build-arg="RPMS_BASE_TAG=stream9" \
+                --build-arg="BASE_IMAGE=ubi9-minimal"
 endif
 
 LOCAL_VOLUME_ARGS   := -v$(CURDIR):/src:delegated -v $(GOPATH):/go:delegated
