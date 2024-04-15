@@ -21,12 +21,6 @@ var (
 	// If SkipPeerValidation or OpenshiftAPI is enabled, the ingress implications are ignored.
 	SlimMode = RegisterBooleanSetting("ROX_SLIM_MODE", false)
 
-	// OpenshiftAPI indicates Scanner is running in an OpenShift environment.
-	// When set to "true", ingress is allowed from both Central and Sensor.
-	// This is ignored if SkipPeerValidation is enabled.
-	// This variable was copied over from the stackrox repo.
-	OpenshiftAPI = RegisterBooleanSetting("ROX_OPENSHIFT_API", false)
-
 	// NodeName is used when running Scanner in Node Inventory mode. This should be set by
 	// Kubernetes in the Secured Cluster.
 	NodeName = RegisterSetting("ROX_NODE_NAME")
