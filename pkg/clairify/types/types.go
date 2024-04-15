@@ -12,8 +12,8 @@ import (
 	"github.com/distribution/reference"
 	"github.com/docker/distribution/manifest/manifestlist"
 	ociV1 "github.com/docker/distribution/manifest/ocischema"
-	manifestV1 "github.com/docker/distribution/manifest/schema1"
-	manifestV2 "github.com/docker/distribution/manifest/schema2"
+	"github.com/docker/distribution/manifest/schema1"
+	"github.com/docker/distribution/manifest/schema2"
 	"github.com/heroku/docker-registry-client/registry"
 	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
@@ -49,10 +49,10 @@ type ClairClient interface {
 
 // Registry is the Docker Registry Client interface.
 type Registry interface {
-	Manifest(repository, reference string) (*manifestV1.SignedManifest, error)
-	SignedManifest(repository, reference string) (*manifestV1.SignedManifest, error)
+	Manifest(repository, reference string) (*schema1.SignedManifest, error)
+	SignedManifest(repository, reference string) (*schema1.SignedManifest, error)
 	ManifestList(repository, reference string) (*manifestlist.DeserializedManifestList, error)
-	ManifestV2(repository, reference string) (*manifestV2.DeserializedManifest, error)
+	ManifestV2(repository, reference string) (*schema2.DeserializedManifest, error)
 	ImageIndex(repository, reference string) (*manifestlist.DeserializedManifestList, error)
 	ManifestOCI(repository, reference string) (*ociV1.DeserializedManifest, error)
 
