@@ -25,7 +25,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/hashicorp/go-version v1.6.0
-	github.com/heroku/docker-registry-client v0.0.0
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
 	github.com/knqyf263/go-rpm-version v0.0.0-20220614171824-631e686d1075
 	github.com/lib/pq v1.10.9
@@ -40,6 +39,7 @@ require (
 	github.com/remind101/migrate v0.0.0-20170729031349-52c1edff7319
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
+	github.com/stackrox/docker-registry-client v0.0.0-20240412172254-8b6242c1f137
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
 	github.com/stackrox/istio-cves v0.0.0-20221007013142-0bde9b541ec8
 	github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d
@@ -187,8 +187,6 @@ replace (
 	// - error on nil unmarshal instead of panic
 	// - trailing comments propagation to generated code
 	github.com/gogo/protobuf => github.com/stackrox/protobuf v1.2.2-0.20240207122816-e936d453291c
-
-	github.com/heroku/docker-registry-client => github.com/stackrox/docker-registry-client v0.0.0-20231011162931-bac16127162d
 
 	github.com/operator-framework/helm-operator-plugins => github.com/stackrox/helm-operator v0.0.12-0.20230825152000-1361e2f7db46
 	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20240402171531-15fa6d254174

@@ -9,12 +9,11 @@ import (
 	imageManifest "github.com/containers/image/v5/manifest"
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/manifestlist"
-	manifestV1 "github.com/docker/distribution/manifest/schema1"
-	manifestV2 "github.com/docker/distribution/manifest/schema2"
-	"github.com/heroku/docker-registry-client/registry"
-	"github.com/opencontainers/go-digest"
+	"github.com/docker/distribution/manifest/schema1"
+	"github.com/docker/distribution/manifest/schema2"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/stackrox/docker-registry-client/registry"
 	clair "github.com/stackrox/scanner"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/types"
@@ -27,11 +26,11 @@ const (
 
 var manifestTypes = []string{
 	manifestlist.MediaTypeManifestList,
-	manifestV2.MediaTypeManifest,
+	schema2.MediaTypeManifest,
 	registry.MediaTypeImageIndex,
 	registry.MediaTypeImageManifest,
-	manifestV1.MediaTypeSignedManifest,
-	manifestV1.MediaTypeManifest,
+	schema1.MediaTypeSignedManifest,
+	schema1.MediaTypeManifest,
 }
 
 // analyzeLayers processes all of the layers and returns the lineage for the last layer so that we can uniquely identify it
@@ -114,7 +113,7 @@ func isEmptyLayer(layer string) bool {
 	return layer == emptyLayer
 }
 
-func parseV1Layers(manifest *manifestV1.SignedManifest) []string {
+func parseV1Layers(manifest *schema1.SignedManifest) []string {
 	var layers []string
 	// FSLayers has the most recent layer first, append them so that parent layers are first in the slice
 	for i := len(manifest.FSLayers) - 1; i >= 0; i-- {
@@ -184,7 +183,7 @@ func handleManifestLists(reg types.Registry, remote, ref string, manifests []man
 
 func handleManifest(reg types.Registry, manifestType, remote, ref string) (digest.Digest, []string, error) {
 	switch manifestType {
-	case manifestV1.MediaTypeManifest:
+	case schema1.MediaTypeManifest:
 		manifest, err := reg.Manifest(remote, ref)
 		if err != nil {
 			return "", nil, err
@@ -195,7 +194,7 @@ func handleManifest(reg types.Registry, manifestType, remote, ref string) (diges
 		}
 		layers := parseV1Layers(manifest)
 		return dig, layers, nil
-	case manifestV1.MediaTypeSignedManifest:
+	case schema1.MediaTypeSignedManifest:
 		manifest, err := reg.SignedManifest(remote, ref)
 		if err != nil {
 			return "", nil, err
@@ -206,7 +205,7 @@ func handleManifest(reg types.Registry, manifestType, remote, ref string) (diges
 		}
 		layers := parseV1Layers(manifest)
 		return dig, layers, nil
-	case manifestV2.MediaTypeManifest:
+	case schema2.MediaTypeManifest:
 		manifest, err := reg.ManifestV2(remote, ref)
 		if err != nil {
 			return "", nil, err

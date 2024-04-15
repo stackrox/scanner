@@ -14,9 +14,8 @@ import (
 	ociV1 "github.com/docker/distribution/manifest/ocischema"
 	manifestV1 "github.com/docker/distribution/manifest/schema1"
 	manifestV2 "github.com/docker/distribution/manifest/schema2"
-	"github.com/heroku/docker-registry-client/registry"
-	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
+	"github.com/stackrox/docker-registry-client/registry"
 	v1 "github.com/stackrox/scanner/api/v1"
 )
 
