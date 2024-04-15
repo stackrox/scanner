@@ -275,8 +275,8 @@ db-image-slim: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	$(DOCKERBUILD) \
 	-t scanner-db-slim:$(TAG) \
 	$(IMAGE_BUILD_ARGS) \
-       $(DB_DOCKERBUILD_ARGS) \
-       -f image/db/rhel/Dockerfile.slim image/db/rhel
+	$(DB_DOCKERBUILD_ARGS) \
+	-f image/db/rhel/Dockerfile.slim image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered
