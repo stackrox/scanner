@@ -2,6 +2,8 @@ BASE_PATH ?= $(CURDIR)
 # Set to empty string to echo some command lines which are hidden by default.
 SILENT ?= @
 
+GOINSTALL := GOARCH="" go install
+
 # GENERATED_API_XXX and PROTO_API_XXX variables contain standard paths used to
 # generate gRPC proto messages, services, and gateways for the API.
 PROTO_BASE_PATH = $(CURDIR)/proto
@@ -84,12 +86,12 @@ $(MODFILE_DIR)/%/UPDATE_CHECK: go.sum
 
 $(PROTOC_GEN_GO_BIN): $(MODFILE_DIR)/github.com/gogo/protobuf/UPDATE_CHECK $(PROTO_GOBIN)
 	@echo "+ $@"
-	$(SILENT)GOBIN=$(PROTO_GOBIN) go install github.com/gogo/protobuf/$(notdir $@)
+	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/gogo/protobuf/$(notdir $@)
 
 PROTOC_GEN_LINT := $(PROTO_GOBIN)/protoc-gen-lint
 $(PROTOC_GEN_LINT): $(MODFILE_DIR)/github.com/ckaznocha/protoc-gen-lint/UPDATE_CHECK $(PROTO_GOBIN)
 	@echo "+ $@"
-	$(SILENT)GOBIN=$(PROTO_GOBIN) go install github.com/ckaznocha/protoc-gen-lint
+	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/ckaznocha/protoc-gen-lint
 
 GOGO_M_STR := Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types
 
@@ -170,13 +172,13 @@ PROTOC_GEN_GRPC_GATEWAY := $(PROTO_GOBIN)/protoc-gen-grpc-gateway
 
 $(PROTOC_GEN_GRPC_GATEWAY): $(MODFILE_DIR)/github.com/grpc-ecosystem/grpc-gateway/UPDATE_CHECK $(PROTO_GOBIN)
 	@echo "+ $@"
-	$(SILENT)GOBIN=$(PROTO_GOBIN) go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
 
 PROTOC_GEN_SWAGGER := $(PROTO_GOBIN)/protoc-gen-swagger
 
 $(PROTOC_GEN_SWAGGER): $(MODFILE_DIR)/github.com/grpc-ecosystem/grpc-gateway/UPDATE_CHECK $(PROTO_GOBIN)
 	@echo "+ $@"
-	$(SILENT)GOBIN=$(PROTO_GOBIN) go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 
 $(GENERATED_DOC_PATH):
 	@echo "+ $@"

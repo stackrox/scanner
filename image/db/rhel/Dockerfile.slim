@@ -1,3 +1,7 @@
+ARG RPMS_REGISTRY=registry.access.redhat.com
+ARG RPMS_BASE_IMAGE=ubi8
+ARG RPMS_BASE_TAG=latest
+
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8-minimal
 ARG BASE_TAG=latest
@@ -6,7 +10,12 @@ FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 COPY bundle.tar.gz /
 
 WORKDIR /bundle
-RUN microdnf install tar gzip && tar -zxf /bundle.tar.gz
+RUN microdnf install -y tar gzip && tar -zxf /bundle.tar.gz
+
+FROM ${RPMS_REGISTRY}/${RPMS_BASE_IMAGE}:${RPMS_BASE_TAG} AS postgres_rpms
+
+COPY scripts/download.sh /download.sh
+RUN /download.sh
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
@@ -27,35 +36,42 @@ ENV PG_MAJOR=15
 ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
     PGDATA="/var/lib/postgresql/data/pgdata"
 
+COPY signatures/PGDG-RPM-GPG-KEY-RHEL /
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
+COPY --from=postgres_rpms /rpms/postgres.rpm /rpms/postgres-libs.rpm /rpms/postgres-server.rpm /rpms/postgres-contrib.rpm /tmp/
 
-ARG POSTGRESQL_ARCH=x86_64
-
-RUN curl -sSLf https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL -o /tmp/pg_repo.key && \
-    rpm --import /tmp/pg_repo.key && \
-    curl -sSLf https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-${POSTGRESQL_ARCH}/pgdg-redhat-repo-latest.noarch.rpm -o /tmp/pg_repo.rpm && \
-    rpm -i /tmp/pg_repo.rpm && \
-    # Skip repo check for ARM as it's used only for development purposes and package has wrong signature.
-    if [[ "$POSTGRESQL_ARCH" == "aarch64" ]]; then sed -i 's/repo_gpgcheck = 1/repo_gpgcheck = 0/g' /etc/yum.repos.d/pgdg-redhat-all.repo; fi && \
-    microdnf upgrade --nobest && \
-    microdnf install shadow-utils && \
+RUN microdnf upgrade -y --nobest && \
+    microdnf install -y shadow-utils && \
     groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
-    microdnf install \
-        ca-certificates libicu systemd-sysv glibc-locale-source glibc-langpack-en \
-        postgresql15-server && \
+    rpm --import PGDG-RPM-GPG-KEY-RHEL && \
+    microdnf install -y \
+        ca-certificates \
+        glibc-langpack-en \
+        glibc-locale-source \
+        libicu \
+        libxslt \
+        lz4 \
+        perl-libs \
+        python3 \
+        systemd-sysv \
+        zstd \
+        && \
+    if [[ $(awk -F'=' '/VERSION_ID/{ gsub(/"/,""); print substr($2,1,1)}' /etc/os-release) -gt 8 ]]; then \
+        microdnf install -y uuid; \
+    fi && \
+    rpm -i /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
     # The removal of /usr/share/zoneinfo from UBI minimal images is intentional.
     # After building the image, the image is reduced in size as much as possible,
     # and the /usr/share/zoneinfo directory is purged as it saves space
     # in the final distribution of the image.
     # https://access.redhat.com/solutions/5616681
-    microdnf reinstall tzdata && \
+    microdnf reinstall -y tzdata && \
     microdnf clean all && \
-    rpm -e --nodeps $(rpm -qa 'pgdg-redhat-repo*') && \
     # (Optional) Remove line below to keep package management utilities
     rpm -e --nodeps $(rpm -qa shadow-utils curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/dnf /var/cache/yum  /tmp/pg_repo.rpm /tmp/pg_repo.key && \
+    rm -rf /var/cache/dnf /var/cache/yum /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     chown postgres:postgres /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh && \

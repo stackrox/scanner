@@ -39,15 +39,30 @@ DEFAULT_IMAGE_REGISTRY := quay.io/stackrox-io
 BUILD_IMAGE_VERSION=$(shell sed 's/\s*\#.*//' BUILD_IMAGE_VERSION)
 BUILD_IMAGE := $(DEFAULT_IMAGE_REGISTRY)/apollo-ci:$(BUILD_IMAGE_VERSION)
 
+ifeq ($(GOARCH),)
 ifeq ($(shell uname -ms),Darwin arm64)
-	# TODO(ROX-12064) build these images in the CI pipeline
-	# Uncomment the line below to enable native arm64 builder images
-	# BUILD_IMAGE = quay.io/rhacs-eng/sandbox:apollo-ci-stackrox-build-0.3.49-arm64
-	ARCH := aarch64
-	GOARCH := arm64
+        GOARCH := arm64
+else ifeq ($(shell uname -ms),Linux aarch64)
+        GOARCH := arm64
+else ifeq ($(shell uname -ms),Linux ppc64le)
+        GOARCH := ppc64le
+else ifeq ($(shell uname -ms),Linux s390x)
+        GOARCH := s390x
 else
-	ARCH := x86_64
-	GOARCH := amd64
+        GOARCH := amd64
+endif
+endif
+
+GOINSTALL := GOARCH="" go install
+DOCKERBUILD := $(CURDIR)/scripts/docker-build.sh
+
+DB_DOCKERBUILD_ARGS =
+ifeq ($(GOARCH),s390x)
+        DB_DOCKERBUILD_ARGS = \
+                --build-arg="RPMS_REGISTRY=quay.io" \
+                --build-arg="RPMS_BASE_IMAGE=centos/centos" \
+                --build-arg="RPMS_BASE_TAG=stream9" \
+                --build-arg="BASE_IMAGE=ubi9-minimal"
 endif
 
 LOCAL_VOLUME_ARGS   := -v$(CURDIR):/src:delegated -v $(GOPATH):/go:delegated
@@ -65,27 +80,27 @@ NODESCAN_BUILD_CMD  := go build -trimpath -o tools/bin/local-nodescanner ./tools
 STATICCHECK_BIN := $(GOPATH)/bin/staticcheck
 $(STATICCHECK_BIN): deps
 	@echo "+ $@"
-	@cd tools/linters/ && go install honnef.co/go/tools/cmd/staticcheck
+	@cd tools/linters/ && $(GOINSTALL) honnef.co/go/tools/cmd/staticcheck
 
 EASYJSON_BIN := $(GOPATH)/bin/easyjson
 $(EASYJSON_BIN): deps
 	@echo "+ $@"
-	go install github.com/mailru/easyjson/easyjson
+	$(GOINSTALL) github.com/mailru/easyjson/easyjson
 
 GOLANGCILINT_BIN := $(GOBIN)/golangci-lint
 $(GOLANGCILINT_BIN): deps
 	@echo "+ $@"
-	@cd tools/linters/ && go install github.com/golangci/golangci-lint/cmd/golangci-lint
+	@cd tools/linters/ && $(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint
 
 OSSLS_BIN := $(GOBIN)/ossls
 $(OSSLS_BIN): deps
 	@echo "+ $@"
-	go install github.com/stackrox/ossls@0.10.1
+	@$(GOINSTALL) github.com/stackrox/ossls@0.10.1
 
 GO_JUNIT_REPORT_BIN := $(GOBIN)/go-junit-report
 $(GO_JUNIT_REPORT_BIN):
 	@echo "+ $@"
-	@cd tools/test/ && go install github.com/jstemmer/go-junit-report/v2
+	@cd tools/test/ && $(GOINSTALL) github.com/jstemmer/go-junit-report/v2
 
 #############
 ##  Tag  ##
@@ -230,24 +245,38 @@ $(CURDIR)/image/db/rhel/bundle.tar.gz:
 .PHONY: scanner-image
 scanner-image: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build -t scanner:$(TAG) $(IMAGE_BUILD_ARGS) -f image/scanner/rhel/Dockerfile image/scanner/rhel
+	$(DOCKERBUILD) \
+	-t scanner:$(TAG) \
+	$(IMAGE_BUILD_ARGS) \
+	-f image/scanner/rhel/Dockerfile image/scanner/rhel
 
 .PHONY: scanner-image-slim
 scanner-image-slim: scanner-build-dockerized ossls-notice $(CURDIR)/image/scanner/rhel/bundle.tar.gz
 	@echo "+ $@"
-	@docker build -t scanner-slim:$(TAG) $(IMAGE_BUILD_ARGS) -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
+	$(DOCKERBUILD) \
+	-t scanner-slim:$(TAG) \
+	$(IMAGE_BUILD_ARGS) \
+	-f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
 
 .PHONY: db-image
 db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t scanner-db:$(TAG) $(IMAGE_BUILD_ARGS) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile image/db/rhel
+	$(DOCKERBUILD) \
+	-t scanner-db:$(TAG) \
+	$(IMAGE_BUILD_ARGS) \
+	$(DB_DOCKERBUILD_ARGS) \
+	-f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: db-image-slim
 db-image-slim: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	@echo "+ $@"
 	@test -f image/db/dump/definitions.sql.gz || { echo "FATAL: No definitions dump found in image/dump/definitions.sql.gz. Exiting..."; exit 1; }
-	@docker build -t scanner-db-slim:$(TAG) $(IMAGE_BUILD_ARGS) --build-arg POSTGRESQL_ARCH=${ARCH} -f image/db/rhel/Dockerfile.slim image/db/rhel
+	$(DOCKERBUILD) \
+	-t scanner-db-slim:$(TAG) \
+	$(IMAGE_BUILD_ARGS) \
+	$(DB_DOCKERBUILD_ARGS) \
+	-f image/db/rhel/Dockerfile.slim image/db/rhel
 
 .PHONY: deploy
 deploy: clean-helm-rendered
