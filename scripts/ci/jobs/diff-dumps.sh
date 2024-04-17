@@ -35,6 +35,7 @@ upload_diff_dumps() {
     info "Uploading diff dumps"
 
     local idx
+    local expected_zip_file_loc
 
     idx=-1
     while IFS=$'\t' read -r diffUUID; do
@@ -52,6 +53,28 @@ upload_diff_dumps() {
         fi
         "${cmd[@]}" gsutil cp "${expected_zip_file_loc}" gs://definitions.stackrox.io/"${diffUUID}"/diff.zip
     done < <(jq -r '.knownGenesisDumps | .[]| [.uuid] | @tsv' < image/scanner/dump/genesis_manifests.json)
+
+    # If we're in a PR context, let's save the diff built on top of the latest genesis dump (as opposed to all the
+    # diffs), to make it easier for developers to inspect the artifacts when looking through CI logs
+    if is_in_PR_context; then
+      if [[ -f "${expected_zip_file_loc}" ]]; then
+          # $inspect_dir should correspond to the artifact directory in CI
+          local inspect_dir
+          inspect_dir="/tmp/diff-dumps-inspect"
+          mkdir -p "${inspect_dir}"
+          # GitHub Actions zips everything during upload, and it's slightly inconvenient to unzip this twice.
+          # If it becomes a problem (e.g., the job is takes too long due to this unzipping and rezipping), we can remove
+          # this conditional and just `cp` instead
+          if is_GITHUB_ACTIONS; then
+            unzip "${expected_zip_file_loc}" -d "${inspect_dir}"
+          else
+            cp "${expected_zip_file_loc}" "${inspect_dir}"
+          fi
+      else
+        error "Couldn't copy ${expected_zip_file_loc} to ${inspect_dir}: ${expected_zip_file_loc} does not exist"
+        return 1
+      fi
+    fi
 }
 
 create_offline_dump() {
