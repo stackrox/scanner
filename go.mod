@@ -188,7 +188,7 @@ replace (
 	// - trailing comments propagation to generated code
 	github.com/gogo/protobuf => github.com/stackrox/protobuf v1.2.2-0.20240207122816-e936d453291c
 
-	github.com/heroku/docker-registry-client => github.com/stackrox/docker-registry-client v0.0.0-20231011162931-bac16127162d
+	github.com/heroku/docker-registry-client => github.com/stackrox/docker-registry-client v0.1.0
 
 	github.com/operator-framework/helm-operator-plugins => github.com/stackrox/helm-operator v0.0.12-0.20230825152000-1361e2f7db46
 	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20240402171531-15fa6d254174
