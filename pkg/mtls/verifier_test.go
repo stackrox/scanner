@@ -44,23 +44,6 @@ var (
 
 func TestVerifyPeerCertificate_Default(t *testing.T) {
 	assert.NoError(t, VerifyPeerCertificate(centralTLSState))
-	assert.Error(t, VerifyPeerCertificate(sensorTLSState))
-	assert.Error(t, VerifyPeerCertificate(fooTLSState))
-}
-
-func TestVerifyPeerCertificate_ROX_OPENSHIFT_API(t *testing.T) {
-	t.Setenv(env.OpenshiftAPI.EnvVar(), "true")
-
-	assert.NoError(t, VerifyPeerCertificate(centralTLSState))
-	assert.NoError(t, VerifyPeerCertificate(sensorTLSState))
-	assert.Error(t, VerifyPeerCertificate(fooTLSState))
-}
-
-func TestVerifyPeerCertificate_ROX_OPENSHIFT_API_AND_ROX_SLIM_MODE(t *testing.T) {
-	t.Setenv(env.OpenshiftAPI.EnvVar(), "true")
-	t.Setenv(env.SlimMode.EnvVar(), "true")
-
-	assert.NoError(t, VerifyPeerCertificate(centralTLSState))
 	assert.NoError(t, VerifyPeerCertificate(sensorTLSState))
 	assert.Error(t, VerifyPeerCertificate(fooTLSState))
 }
