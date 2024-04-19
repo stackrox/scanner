@@ -130,7 +130,11 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     needs:
+      - define-scanner-job-matrix
       - pre-build-scanner
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.66
     steps:
@@ -147,11 +151,11 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: scanner-build
+          name: scanner-build-${{ matrix.goarch }}
 
       - name: Unpack scanner build
         run: |
-          tar xvzf scanner-build.tgz
+          tar xvzf scanner-build-${{ matrix.goarch }}.tgz
 
       - name: Run unit tests
         run: ./scripts/ci/jobs/unit-tests.sh
@@ -159,7 +163,11 @@ jobs:
   db-integration-tests:
     runs-on: ubuntu-latest
     needs:
+      - define-scanner-job-matrix
       - pre-build-scanner
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.66
     steps:
@@ -176,11 +184,11 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: scanner-build
+          name: scanner-build-${{ matrix.goarch }}
 
       - name: Unpack scanner build
         run: |
-          tar xvzf scanner-build.tgz
+          tar xvzf scanner-build-${{ matrix.goarch }}.tgz
 
       - name: Run db integration tests
         run: ./scripts/ci/jobs/db-integration-tests.sh
@@ -421,19 +429,19 @@ jobs:
 
       - name: Build scanner image
         run: |
-          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner:"$(make --no-print-directory --quiet tag)" $(make image-build-args) -f image/scanner/rhel/Dockerfile image/scanner/rhel
+          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make image-build-args) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
       - name: Build scanner-slim image
         run: |
-          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-slim:"$(make --no-print-directory --quiet tag)" $(make image-build-args) -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
+          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-slim:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make image-build-args) -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
 
       - name: Build scanner-db image
         run: |
-          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-db:"$(make --no-print-directory --quiet tag)" $(make image-build-args) -f image/db/rhel/Dockerfile image/db/rhel
+          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-db:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make image-build-args) -f image/db/rhel/Dockerfile image/db/rhel
 
       - name: Build scanner-db-slim image
         run: |
-          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-db-slim:"$(make --no-print-directory --quiet tag)" $(make image-build-args) -f image/db/rhel/Dockerfile.slim image/db/rhel
+          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-db-slim:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make image-build-args) -f image/db/rhel/Dockerfile.slim image/db/rhel
 
       - name: Docker login
         # Skip for external contributions.
