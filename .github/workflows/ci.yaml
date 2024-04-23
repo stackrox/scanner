@@ -28,17 +28,8 @@ jobs:
         source './scripts/ci/lib.sh'
 
         # If goarch is updated, be sure to update architectures in push-manifests below.
-        matrix='{ "build_and_push": { "name":["default"], "goos":["linux"], "goarch":["amd64", "arm64", "ppc64le", "s390x"] }, "push_manifests": { "name":["default"] } }'
+        matrix='{ "build_and_push": { "goos":["linux"], "goarch":["amd64", "arm64", "ppc64le", "s390x"] }, "push_manifests": { "name":["default"] } }'
 
-        # Conditionally add a prerelease build (binaries built with GOTAGS=release)
-        if ! is_tagged; then
-          if ! is_in_PR_context || pr_has_label ci-build-prerelease; then
-            matrix="$(jq '.build_and_push.name += ["prerelease"]' <<< "$matrix")"
-            matrix="$(jq '.push_manifests.name += ["prerelease"]' <<< "$matrix")"
-          fi
-        fi
-
-        echo "Job matrix after conditionals:"
         jq <<< "$matrix"
 
         condensed="$(jq -c <<< "$matrix")"
@@ -87,12 +78,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: ./.github/actions/job-preamble
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       - name: Cache Go dependencies
         uses: ./.github/actions/cache-go-dependencies
@@ -300,12 +285,6 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - uses: actions/download-artifact@v4
         with:
           name: scanner-build-${{ matrix.goarch }}
@@ -496,6 +475,11 @@ jobs:
 
       - name: diff-dumps
         run: ./scripts/ci/jobs/diff-dumps.sh
+
+      - uses: actions/upload-artifact@v4
+         with:
+           name: diff-dumps-inspect
+           path: /tmp/diff-dumps-inspect
 
   upload-db-dump:
     # Only run on master branch
