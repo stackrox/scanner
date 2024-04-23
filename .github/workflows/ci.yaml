@@ -429,19 +429,19 @@ jobs:
 
       - name: Build scanner image
         run: |
-          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make image-build-args) -f image/scanner/rhel/Dockerfile image/scanner/rhel
+          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make GOARCH=${{ matrix.goarch }} image-build-args) -f image/scanner/rhel/Dockerfile image/scanner/rhel
 
       - name: Build scanner-slim image
         run: |
-          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-slim:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make image-build-args) -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
+          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-slim:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make GOARCH=${{ matrix.goarch }} image-build-args) -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
 
       - name: Build scanner-db image
         run: |
-          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-db:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make image-build-args) -f image/db/rhel/Dockerfile image/db/rhel
+          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-db:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make GOARCH=${{ matrix.goarch }} image-build-args) -f image/db/rhel/Dockerfile image/db/rhel
 
       - name: Build scanner-db-slim image
         run: |
-          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-db-slim:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make image-build-args) -f image/db/rhel/Dockerfile.slim image/db/rhel
+          docker buildx build --platform "linux/${{ matrix.goarch }}" --load -t scanner-db-slim:"$(make --no-print-directory --quiet tag)-${{ matrix.goarch }}" $(make GOARCH=${{ matrix.goarch }} image-build-args) -f image/db/rhel/Dockerfile.slim image/db/rhel
 
       - name: Docker login
         # Skip for external contributions.
