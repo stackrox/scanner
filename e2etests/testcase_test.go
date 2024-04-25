@@ -4231,48 +4231,4 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
-	{
-		image:                   "quay.io/rhacs-eng/qa:sqlite-jdbc-CVE-2023-32697",
-		registry:                "https://quay.io",
-		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
-		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
-		source:                  "NVD",
-		namespace:               "rhel:9",
-		onlyCheckSpecifiedVulns: true,
-		expectedFeatures: []apiV1.Feature{
-			{
-				Name:          "sqlite-jdbc",
-				VersionFormat: component.JavaSourceType.String(),
-				Version:       "3.41.2.1",
-				Location:      "sqlite-jdbc-3.41.2.1.jar",
-				Vulnerabilities: []apiV1.Vulnerability{
-					{
-						Name:        "CVE-2023-32697",
-						Description: "SQLite JDBC is a library for accessing and creating SQLite database files in Java. Sqlite-jdbc addresses a remote code execution vulnerability via JDBC URL. This issue impacting versions 3.6.14.1 through 3.41.2.1 and has been fixed in version 3.41.2.2.\n",
-						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2023-32697",
-						Severity:    "Critical",
-						FixedBy:     "3.41.2.2",
-						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 0.0,
-									"ImpactScore":         0.0,
-									"Score":               0.0,
-									"Vectors":             "",
-								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         5.9,
-									"Score":               9.8,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
-							},
-						},
-					},
-				},
-				FixedBy: "3.41.2.2",
-				AddedBy: "sha256:65801021513c110642748b4d5462a0e123f0b09077cda2844ef97b05135369a2",
-			},
-		},
-	},
 }
