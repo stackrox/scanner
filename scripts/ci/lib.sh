@@ -97,6 +97,11 @@ create_exit_trap() {
 push_image_set() {
     info "Pushing images"
 
+    if [[ "$#" -ne 1 ]]; then
+        die "missing arg. usage: push_image_set <arch>"
+    fi
+    local arch="$1"
+
     require_environment "QUAY_RHACS_ENG_RW_USERNAME"
     require_environment "QUAY_RHACS_ENG_RW_PASSWORD"
     require_environment "QUAY_STACKROX_IO_RW_USERNAME"
@@ -148,8 +153,8 @@ push_image_set() {
         if is_OPENSHIFT_CI; then
             _mirror_image_set "$registry" "$tag"
         else
-            _tag_image_set "$registry" "$tag"
-            _push_image_set "$registry" "$tag"
+            _tag_image_set "$registry" "$tag-$arch"
+            _push_image_set "$registry" "$tag-$arch"
         fi
     done
 }

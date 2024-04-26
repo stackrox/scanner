@@ -12,6 +12,29 @@ on:
       - synchronize
 
 jobs:
+  define-scanner-job-matrix:
+    outputs:
+      matrix: ${{ steps.define-scanner-job-matrix.outputs.matrix }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Define the matrix for build jobs
+      id: define-scanner-job-matrix
+      run: |
+        source './scripts/ci/lib.sh'
+
+        # If goarch is updated, be sure to update architectures in push-manifests below.
+        matrix='{ "build_and_push": { "goos":["linux"], "goarch":["amd64", "arm64", "ppc64le", "s390x"] }, "push_manifests": { "name":["default"] } }'
+
+        jq <<< "$matrix"
+
+        condensed="$(jq -c <<< "$matrix")"
+        echo "matrix=$condensed" >> "$GITHUB_OUTPUT"
+
   pre-build-updater:
     runs-on: ubuntu-latest
     container:
@@ -40,7 +63,11 @@ jobs:
           path: updater-build.tgz
 
   pre-build-scanner:
+    needs: define-scanner-job-matrix
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.69
     steps:
@@ -56,15 +83,15 @@ jobs:
         uses: ./.github/actions/cache-go-dependencies
 
       - name: Build Scanner
-        run: make scanner-build-nodeps
+        run: make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} scanner-build-nodeps
 
       - name: Archive the build to preserve permissions
-        run: tar -cvzf scanner-build.tgz image/scanner/bin/scanner
+        run: tar -cvzf scanner-build-${{ matrix.goarch }}.tgz image/scanner/bin/scanner
 
       - uses: actions/upload-artifact@v4
         with:
-          name: scanner-build
-          path: scanner-build.tgz
+          name: scanner-build-${{ matrix.goarch }}
+          path: scanner-build-${{ matrix.goarch }}.tgz
 
   style-check:
     runs-on: ubuntu-latest
