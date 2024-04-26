@@ -1009,10 +1009,10 @@ var testCases = []testCase{
 		},
 	},
 	{
-		image:     "us.gcr.io/stackrox-ci/qa/apache/server:latest",
-		registry:  "https://us.gcr.io",
-		username:  "_json_key",
-		password:  os.Getenv("GOOGLE_SA_CIRCLECI_SCANNER"),
+		image:     "quay.io/rhacs-eng/qa:apache-server-scannerci",
+		registry:  "https://quay.io",
+		username:  os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:  os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		source:    "NVD",
 		namespace: "ubuntu:14.04",
 		expectedFeatures: []apiV1.Feature{
@@ -1435,7 +1435,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:        "CVE-2020-1597",
-						Description: "<p>A denial of service vulnerability exists when ASP.NET Core improperly handles web requests. An attacker who successfully exploited this vulnerability could cause a denial of service against an ASP.NET Core web application. The vulnerability can be exploited remotely, without authentication.</p>\n<p>A remote unauthenticated attacker could exploit this vulnerability by issuing specially crafted requests to the ASP.NET Core application.</p>\n<p>The update addresses the vulnerability by correcting how the ASP.NET Core web application handles web requests.</p>\n",
+						Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests. An attacker who successfully exploited this vulnerability could cause a denial of service against an ASP.NET Core web application. The vulnerability can be exploited remotely, without authentication.\nA remote unauthenticated attacker could exploit this vulnerability by issuing specially crafted requests to the ASP.NET Core application.\nThe update addresses the vulnerability by correcting how the ASP.NET Core web application handles web requests.\n",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1597",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -3511,7 +3511,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-16.el9_2",
+				FixedBy:       "1:3.0.7-25.el9_3",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3553,7 +3553,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-16.el9_2",
+				FixedBy:       "1:3.0.7-25.el9_3",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3595,6 +3595,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1.26.5-3.el9.noarch",
 				VersionFormat: "rpm",
+				FixedBy:       "1.26.5-3.el9_3.1",
 			},
 			{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
@@ -3656,7 +3657,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.26-1.el8_9",
+				FixedBy:       "6.0.27-1.el8_9",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -3695,7 +3696,7 @@ Bug Fix(es) and Enhancement(s):
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.26-1.el8_9",
+				FixedBy:       "6.0.27-1.el8_9",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -3841,7 +3842,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 				},
-				FixedBy: "3.0.2-0ubuntu1.12",
+				FixedBy: "3.0.2-0ubuntu1.14",
 				// This image installs the openssl pacakge in the second layer;
 				// however, the first layer already installed libssl3 whose source package is openssl.
 				// Therefore, we claim openssl was installed in the first layer.
