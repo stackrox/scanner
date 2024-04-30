@@ -246,13 +246,13 @@ spec:
 
       - name: determine-image-tag
         runAfter:
-        # This task must run on a freshly cloned repository to prevent seeing any changes from other tasks.
-        - clone-repository
+          # This task must run on a freshly cloned repository to prevent seeing any changes from other tasks.
+          - clone-repository
         taskRef:
           name: determine-image-tag
         workspaces:
-        - name: source
-          workspace: workspace
+          - name: source
+            workspace: workspace
 
       - name: prefetch-dependencies
         params:
