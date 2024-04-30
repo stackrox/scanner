@@ -1,5 +1,6 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
+
 metadata:
   annotations:
     build.appstudio.openshift.io/repo: https://github.com/stackrox/scanner?rev={{revision}}
@@ -14,7 +15,9 @@ metadata:
     pipelines.appstudio.openshift.io/type: build
   name: scanner-on-push
   namespace: rh-acs-tenant
+
 spec:
+
   params:
     - name: dockerfile
       value: image/scanner/rhel/konflux.Dockerfile
@@ -31,6 +34,9 @@ spec:
       value: '{{revision}}'
     - name: rebuild
       value: 'true'
+    # TODO(ROX-20234): Enable hermetic builds
+    # - name: hermetic
+    #   value: "true"
     - name: prefetch-input
       value: '{"type": "gomod", "path": "."}'
     - name: build-source-image
@@ -238,8 +244,7 @@ spec:
         when:
           - input: $(tasks.init.results.build)
             operator: in
-            values:
-              - "true"
+            values: [ "true" ]
         workspaces:
           - name: output
             workspace: workspace
@@ -275,21 +280,22 @@ spec:
           - name: source
             workspace: workspace
 
-      - name: fetch-vuln-feed-data
+      - name: fetch-scanner-data
         runAfter:
           - determine-image-tag
         taskSpec:
           steps:
-            - name: fetch-vuln-feed-data
-              image: registry.access.redhat.com/ubi8-minimal:latest
+            - name: fetch-scanner-data
+              image: registry.access.redhat.com/ubi8/ubi-minimal:latest
               script: |
                 #!/usr/bin/env bash
-                "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" \
+                exec "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" \
                     "$(workspaces.source.path)/source" \
                     nvd-definitions.zip \
                     k8s-definitions.zip \
                     repo2cpe.zip \
                     genesis_manifests.json
+              timeout: '10m'
         workspaces:
           - name: source
             workspace: workspace
@@ -314,7 +320,7 @@ spec:
             value: $(params.build-target-stage)
         runAfter:
           - prefetch-dependencies
-          - fetch-vuln-feed-data
+          - fetch-scanner-data
         taskRef:
           params:
             - name: name
@@ -327,8 +333,7 @@ spec:
         when:
           - input: $(tasks.init.results.build)
             operator: in
-            values:
-              - "true"
+            values: [ "true" ]
         workspaces:
           - name: source
             workspace: workspace
@@ -353,12 +358,10 @@ spec:
         when:
           - input: $(tasks.init.results.build)
             operator: in
-            values:
-              - "true"
+            values: [ "true" ]
           - input: $(params.build-source-image)
             operator: in
-            values:
-              - "true"
+            values: [ "true" ]
         workspaces:
           - name: workspace
             workspace: workspace
@@ -385,8 +388,7 @@ spec:
         when:
           - input: $(params.skip-checks)
             operator: in
-            values:
-              - "false"
+            values: [ "false" ]
 
       - name: clair-scan
         params:
@@ -408,8 +410,7 @@ spec:
         when:
           - input: $(params.skip-checks)
             operator: in
-            values:
-              - "false"
+            values: [ "false" ]
 
       - name: sast-snyk-check
         runAfter:
@@ -426,8 +427,7 @@ spec:
         when:
           - input: $(params.skip-checks)
             operator: in
-            values:
-              - "false"
+            values: [ "false" ]
         workspaces:
           - name: workspace
             workspace: workspace
@@ -452,8 +452,7 @@ spec:
         when:
           - input: $(params.skip-checks)
             operator: in
-            values:
-              - "false"
+            values: [ "false" ]
 
       - name: sbom-json-check
         params:
@@ -475,5 +474,4 @@ spec:
         when:
           - input: $(params.skip-checks)
             operator: in
-            values:
-              - "false"
+            values: [ "false" ]

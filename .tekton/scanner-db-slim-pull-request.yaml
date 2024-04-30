@@ -1,5 +1,6 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
+
 metadata:
   annotations:
     build.appstudio.openshift.io/repo: https://github.com/stackrox/scanner?rev={{revision}}
@@ -18,6 +19,7 @@ metadata:
   namespace: rh-acs-tenant
 
 spec:
+
   params:
     - name: dockerfile
       value: image/db/rhel/konflux.Dockerfile
