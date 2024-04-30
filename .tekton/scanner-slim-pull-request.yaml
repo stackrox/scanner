@@ -477,7 +477,3 @@ spec:
             operator: in
             values:
               - "false"
-
-status: { }
-
-taskRunTemplate: { }
