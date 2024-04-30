@@ -65,4 +65,5 @@ var UbuntuReleasesMapping = map[string]string{
 	"kinetic": "22.10",
 	"lunar":   "23.04",
 	"mantic":  "23.10",
+	"noble":   "24.04",
 }
