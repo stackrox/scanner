@@ -94,68 +94,68 @@ create_exit_trap() {
     trap ci_exit_trap EXIT
 }
 
-push_image_set() {
-    info "Pushing images"
+push_scanner_image_manifest_lists() {
+    info "Pushing scanner and scanner-db images as manifest lists"
 
     if [[ "$#" -ne 1 ]]; then
-        die "missing arg. usage: push_image_set <arch>"
-    fi
-    local arch="$1"
-
-    require_environment "QUAY_RHACS_ENG_RW_USERNAME"
-    require_environment "QUAY_RHACS_ENG_RW_PASSWORD"
-    require_environment "QUAY_STACKROX_IO_RW_USERNAME"
-    require_environment "QUAY_STACKROX_IO_RW_PASSWORD"
-
-    local image_set=("scanner" "scanner-db" "scanner-slim" "scanner-db-slim")
-    if is_OPENSHIFT_CI; then
-        local image_srcs=("$SCANNER_IMAGE" "$SCANNER_DB_IMAGE" "$SCANNER_SLIM_IMAGE" "$SCANNER_DB_SLIM_IMAGE")
-        oc registry login
+        die "missing arg. usage: push_scanner_image_manifest_lists <architectures (CSV)>"
     fi
 
-    _push_image_set() {
-        local registry="$1"
-        local tag="$2"
-
-        for image in "${image_set[@]}"; do
-            "$SCRIPTS_ROOT/scripts/push-as-manifest-list.sh" "${registry}/${image}:${tag}" | cat
-        done
-    }
-
-    _tag_image_set() {
-        local registry="$1"
-        local tag="$2"
-
-        for image in "${image_set[@]}"; do
-            docker tag "${image}:${tag}" "${registry}/${image}:${tag}"
-        done
-    }
-
-    _mirror_image_set() {
-        local registry="$1"
-        local tag="$2"
-
-        local idx=0
-        for image in "${image_set[@]}"; do
-            oc_image_mirror "${image_srcs[$idx]}" "${registry}/${image}:${tag}"
-            (( idx++ )) || true
-        done
-    }
-
-    local destination_registries=("quay.io/rhacs-eng" "quay.io/stackrox-io")
+    local architectures="$1"
+    local scanner_image_set=("scanner" "scanner-db" "scanner-slim" "scanner-db-slim")
+    local registries=("quay.io/rhacs-eng" "quay.io/stackrox-io")
 
     local tag
     tag="$(make --quiet --no-print-directory tag)"
-    info "PUSHING IMAGES WITH TAG: ${tag}"
-    for registry in "${destination_registries[@]}"; do
+    for registry in "${registries[@]}"; do
+        registry_rw_login "$registry"
+        for image in "${scanner_image_set[@]}"; do
+            retry 5 true \
+              "$SCRIPTS_ROOT/scripts/ci/push-as-multiarch-manifest-list.sh" "${registry}/${image}:${tag}" "$architectures" | cat
+        done
+    done
+}
+
+push_scanner_image_set() {
+    info "Pushing scanner and scanner-db images"
+
+    if [[ "$#" -ne 1 ]]; then
+        die "missing arg. usage: push_scanner_image_set <arch>"
+    fi
+
+    local arch="$1"
+
+    local scanner_image_set=("scanner" "scanner-db" "scanner-slim" "scanner-db-slim")
+
+    _push_scanner_image_set() {
+        local registry="$1"
+        local tag="$2"
+
+        for image in "${scanner_image_set[@]}"; do
+            retry 5 true \
+              docker push "${registry}/${image}:${tag}" | cat
+        done
+    }
+
+    _tag_scanner_image_set() {
+        local local_tag="$1"
+        local registry="$2"
+        local remote_tag="$3"
+
+        for image in "${scanner_image_set[@]}"; do
+            docker tag "stackrox/${image}:${local_tag}" "${registry}/${image}:${remote_tag}"
+        done
+    }
+
+    local registries=("quay.io/rhacs-eng" "quay.io/stackrox-io")
+
+    local tag
+    tag="$(make --quiet --no-print-directory tag)"
+    for registry in "${registries[@]}"; do
         registry_rw_login "$registry"
 
-        if is_OPENSHIFT_CI; then
-            _mirror_image_set "$registry" "$tag"
-        else
-            _tag_image_set "$registry" "$tag-$arch"
-            _push_image_set "$registry" "$tag-$arch"
-        fi
+        _tag_scanner_image_set "$tag" "$registry" "$tag-$arch"
+        _push_scanner_image_set "$registry" "$tag-$arch"
     done
 }
 
