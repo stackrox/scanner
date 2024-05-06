@@ -160,13 +160,9 @@ func writeWalk(zipW *zip.Writer, source, destination string) error {
 		if err != nil {
 			return err
 		}
-		finfo := fileInfo{
-			FileInfo:   info,
-			customName: nameInArchive,
-		}
 
 		var file io.ReadCloser
-		if finfo.Mode().IsRegular() {
+		if info.Mode().IsRegular() {
 			file, err = os.Open(fpath)
 			if err != nil {
 				return errors.Wrapf(err, "%s: opening", fpath)
@@ -174,6 +170,10 @@ func writeWalk(zipW *zip.Writer, source, destination string) error {
 			defer utils.IgnoreError(file.Close)
 		}
 
+		finfo := fileInfo{
+			FileInfo:   info,
+			customName: nameInArchive,
+		}
 		header, err := zip.FileInfoHeader(finfo)
 		if err != nil {
 			return errors.Wrapf(err, "%s: getting header", finfo.Name())
