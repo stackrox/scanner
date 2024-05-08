@@ -439,12 +439,8 @@ jobs:
 
   push-manifests:
     needs:
-      - define-scanner-job-matrix
       - build-images
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).push_manifests }}
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.66
     env:
