@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/stringutils"

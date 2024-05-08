@@ -11,7 +11,7 @@ import (
 
 	"github.com/NYTimes/gziphandler"
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/mtls"
@@ -190,7 +190,7 @@ func (a *apiImpl) muxer(localConn *grpc.ClientConn) http.Handler {
 		mux.Handle(route, handler)
 	}
 
-	gwMux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{EmitDefaults: true}))
+	gwMux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{}))
 	for _, service := range a.apiServices {
 		if err := service.RegisterServiceHandler(context.Background(), gwMux, localConn); err != nil {
 			log.Panicf("failed to register API service: %v", err)
