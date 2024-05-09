@@ -344,6 +344,7 @@ jobs:
       - define-scanner-job-matrix
       - generate-scanner-bundle
       - generate-scanner-db-bundle
+    # This is here as we want to build images even when steps are skipped.
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     strategy:
       fail-fast: false
@@ -416,6 +417,8 @@ jobs:
       - generate-scanner-db-bundle
       - build-images
     runs-on: ubuntu-latest
+    # This is here as we want to push image manifests even when steps are skipped.
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     strategy:
       fail-fast: false
       # Supports one image build:
