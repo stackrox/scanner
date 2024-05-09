@@ -3511,7 +3511,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-25.el9_3",
+				FixedBy:       "1:3.0.7-27.el9_3",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3553,7 +3553,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-25.el9_3",
+				FixedBy:       "1:3.0.7-27.el9_3",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -4291,12 +4291,12 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				Version:       "3.1.4-r2",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:        "CVE-2023-6129",
+						Name:          "CVE-2023-6129",
 						NamespaceName: "alpine:v3.19",
-						Description: "Issue summary: The POLY1305 MAC (message authentication code) implementation\ncontains a bug that might corrupt the internal state of applications running\non PowerPC CPU based platforms if the CPU provides vector instructions.\n\nImpact summary: If an attacker can influence whether the POLY1305 MAC\nalgorithm is used, the application state might be corrupted with various\napplication dependent consequences.\n\nThe POLY1305 MAC (message authentication code) implementation in OpenSSL for\nPowerPC CPUs restores the contents of vector registers in a different order\nthan they are saved. Thus the contents of some of these vector registers\nare corrupted when returning to the caller. The vulnerable code is used only\non newer PowerPC processors supporting the PowerISA 2.07 instructions.\n\nThe consequences of this kind of internal application state corruption can\nbe various - from no consequences, if the calling application does not\ndepend on the contents of non-volatile XMM registers at all, to the worst\nconsequences, where the attacker could get complete control of the application\nprocess. However unless the compiler uses the vector registers for storing\npointers, the most likely consequence, if any, would be an incorrect result\nof some application dependent calculations or a crash leading to a denial of\nservice.\n\nThe POLY1305 MAC algorithm is most frequently used as part of the\nCHACHA20-POLY1305 AEAD (authenticated encryption with associated data)\nalgorithm. The most common usage of this AEAD cipher is with TLS protocol\nversions 1.2 and 1.3. If this cipher is enabled on the server a malicious\nclient can influence whether this AEAD cipher is used. This implies that\nTLS server applications using OpenSSL can be potentially impacted. However\nwe are currently not aware of any concrete application that would be affected\nby this issue therefore we consider this a Low severity security issue.",
-						Link:        "https://www.cve.org/CVERecord?id=CVE-2023-6129",
-						Severity:    "Moderate",
-						FixedBy:     "3.1.4-r3",
+						Description:   "Issue summary: The POLY1305 MAC (message authentication code) implementation\ncontains a bug that might corrupt the internal state of applications running\non PowerPC CPU based platforms if the CPU provides vector instructions.\n\nImpact summary: If an attacker can influence whether the POLY1305 MAC\nalgorithm is used, the application state might be corrupted with various\napplication dependent consequences.\n\nThe POLY1305 MAC (message authentication code) implementation in OpenSSL for\nPowerPC CPUs restores the contents of vector registers in a different order\nthan they are saved. Thus the contents of some of these vector registers\nare corrupted when returning to the caller. The vulnerable code is used only\non newer PowerPC processors supporting the PowerISA 2.07 instructions.\n\nThe consequences of this kind of internal application state corruption can\nbe various - from no consequences, if the calling application does not\ndepend on the contents of non-volatile XMM registers at all, to the worst\nconsequences, where the attacker could get complete control of the application\nprocess. However unless the compiler uses the vector registers for storing\npointers, the most likely consequence, if any, would be an incorrect result\nof some application dependent calculations or a crash leading to a denial of\nservice.\n\nThe POLY1305 MAC algorithm is most frequently used as part of the\nCHACHA20-POLY1305 AEAD (authenticated encryption with associated data)\nalgorithm. The most common usage of this AEAD cipher is with TLS protocol\nversions 1.2 and 1.3. If this cipher is enabled on the server a malicious\nclient can influence whether this AEAD cipher is used. This implies that\nTLS server applications using OpenSSL can be potentially impacted. However\nwe are currently not aware of any concrete application that would be affected\nby this issue therefore we consider this a Low severity security issue.",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2023-6129",
+						Severity:      "Moderate",
+						FixedBy:       "3.1.4-r3",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
