@@ -28,7 +28,7 @@ jobs:
         source './scripts/ci/lib.sh'
 
         # If goarch is updated, be sure to update architectures in push-manifests below.
-        matrix='{ "build_and_push": { "goos":["linux"], "goarch":["amd64", "arm64", "ppc64le", "s390x"] }, "push_manifests": { "name":["default"] } }'
+        matrix='{ "build_and_push": { "goos":["linux"], "goarch":["amd64", "arm64", "ppc64le", "s390x"] } }'
 
         jq <<< "$matrix"
 
@@ -419,11 +419,6 @@ jobs:
     runs-on: ubuntu-latest
     # This is here as we want to push image manifests even when steps are skipped.
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
-    strategy:
-      fail-fast: false
-      # Supports one image build:
-      # default
-      matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).push_manifests }}
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.69
     env:
