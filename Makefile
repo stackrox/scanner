@@ -68,7 +68,7 @@ endif
 LOCAL_VOLUME_ARGS   := -v$(CURDIR):/src:delegated -v $(GOPATH):/go:delegated
 GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
 IMAGE_BUILD_FLAGS   := -e CGO_ENABLED=0 -e GOOS=linux -e GOARCH=${GOARCH}
-IMAGE_BUILD_ARGS     = --build-arg LABEL_VERSION=$(TAG) --build-arg LABEL_RELEASE=$(TAG) --build-arg QUAY_TAG_EXPIRATION=$(QUAY_TAG_EXPIRATION) $(DB_DOCKERBUILD_ARGS)
+IMAGE_BUILD_ARGS     = --build-arg LABEL_VERSION=$(TAG) --build-arg LABEL_RELEASE=$(TAG) --build-arg QUAY_TAG_EXPIRATION=$(QUAY_TAG_EXPIRATION)
 BUILD_FLAGS         := CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH}
 BUILD_CMD           := go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -o image/scanner/bin/scanner ./cmd/clair
 NODESCAN_BUILD_CMD  := go build -trimpath -o tools/bin/local-nodescanner ./tools/local-nodescanner
@@ -121,6 +121,11 @@ build-updater: deps
 .PHONY: image-build-args
 image-build-args:
 	@echo $(IMAGE_BUILD_ARGS)
+
+.PHONY: db-image-build-args
+db-image-build-args:
+	@echo $(IMAGE_BUILD_ARGS) $(DB_DOCKERBUILD_ARGS)
+
 ###########
 ## Style ##
 ###########
@@ -265,6 +270,7 @@ db-image: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	$(DOCKERBUILD) \
 	-t scanner-db:$(TAG) \
 	$(IMAGE_BUILD_ARGS) \
+	$(DB_DOCKERBUILD_ARGS) \
 	-f image/db/rhel/Dockerfile image/db/rhel
 
 .PHONY: db-image-slim
@@ -274,6 +280,7 @@ db-image-slim: $(CURDIR)/image/db/rhel/bundle.tar.gz
 	$(DOCKERBUILD) \
 	-t scanner-db-slim:$(TAG) \
 	$(IMAGE_BUILD_ARGS) \
+	$(DB_DOCKERBUILD_ARGS) \
 	-f image/db/rhel/Dockerfile.slim image/db/rhel
 
 .PHONY: deploy

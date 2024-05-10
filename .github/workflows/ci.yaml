@@ -389,11 +389,11 @@ jobs:
 
       - name: Build scanner-db image
         run: |
-          docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner-db:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} image-build-args) -f image/db/rhel/Dockerfile image/db/rhel
+          docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner-db:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} db-image-build-args) -f image/db/rhel/Dockerfile image/db/rhel
 
       - name: Build scanner-db-slim image
         run: |
-          docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner-db-slim:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} image-build-args) -f image/db/rhel/Dockerfile.slim image/db/rhel
+          docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner-db-slim:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} db-image-build-args) -f image/db/rhel/Dockerfile.slim image/db/rhel
 
       - name: Docker login
         # Skip for external contributions.
