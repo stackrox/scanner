@@ -121,6 +121,11 @@ build-updater: deps
 .PHONY: image-build-args
 image-build-args:
 	@echo $(IMAGE_BUILD_ARGS)
+
+.PHONY: db-image-build-args
+db-image-build-args:
+	@echo $(IMAGE_BUILD_ARGS) $(DB_DOCKERBUILD_ARGS)
+
 ###########
 ## Style ##
 ###########

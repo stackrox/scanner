@@ -6,7 +6,7 @@ FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 
 COPY bundle.tar.gz /
 WORKDIR /bundle
-RUN microdnf install tar gzip && tar -zxf /bundle.tar.gz
+RUN microdnf install -y tar gzip && tar -zxf /bundle.tar.gz
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
@@ -31,9 +31,9 @@ COPY --from=extracted_bundle /bundle/scanner ./
 
 COPY --from=extracted_bundle /bundle/THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
-RUN microdnf upgrade --nobest && \
-    microdnf install xz && \
-    microdnf clean all && \
+RUN microdnf upgrade -y --nobest && \
+    microdnf install -y xz && \
+    microdnf clean -y all && \
     # (Optional) Remove line below to keep package management utilities
     # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
     rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
