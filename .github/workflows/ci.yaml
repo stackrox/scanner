@@ -12,6 +12,27 @@ on:
       - synchronize
 
 jobs:
+  define-scanner-job-matrix:
+    outputs:
+      matrix: ${{ steps.define-scanner-job-matrix.outputs.matrix }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Define the matrix for build jobs
+      id: define-scanner-job-matrix
+      run: |
+        # If goarch is updated, be sure to update architectures in push-manifests below.
+        matrix='{ "build_and_push": { "goos":["linux"], "goarch":["amd64", "arm64", "ppc64le", "s390x"] } }'
+
+        jq <<< "$matrix"
+
+        condensed="$(jq -c <<< "$matrix")"
+        echo "matrix=$condensed" >> "$GITHUB_OUTPUT"
+
   pre-build-updater:
     runs-on: ubuntu-latest
     container:
@@ -28,7 +49,7 @@ jobs:
       - name: Cache Go dependencies
         uses: ./.github/actions/cache-go-dependencies
 
-      - name: Build updater
+      - name: Build updater (amd64)
         run: make build-updater
 
       - name: Archive the build to preserve permissions
@@ -40,7 +61,11 @@ jobs:
           path: updater-build.tgz
 
   pre-build-scanner:
+    needs: define-scanner-job-matrix
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
     steps:
@@ -56,15 +81,15 @@ jobs:
         uses: ./.github/actions/cache-go-dependencies
 
       - name: Build Scanner
-        run: make scanner-build-nodeps
+        run: make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} scanner-build-nodeps
 
       - name: Archive the build to preserve permissions
-        run: tar -cvzf scanner-build.tgz image/scanner/bin/scanner
+        run: tar -cvzf scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}.tgz image/scanner/bin/scanner
 
       - uses: actions/upload-artifact@v4
         with:
-          name: scanner-build
-          path: scanner-build.tgz
+          name: scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
 
   style-check:
     runs-on: ubuntu-latest
@@ -82,13 +107,11 @@ jobs:
       - name: Cache Go dependencies
         uses: ./.github/actions/cache-go-dependencies
 
-      - name: Run style checks
+      - name: Run style checks (amd64)
         run: ./scripts/ci/jobs/style-checks.sh
 
   unit-tests:
     runs-on: ubuntu-latest
-    needs:
-      - pre-build-scanner
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
     steps:
@@ -103,21 +126,11 @@ jobs:
       - name: Cache Go dependencies
         uses: ./.github/actions/cache-go-dependencies
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: scanner-build
-
-      - name: Unpack scanner build
-        run: |
-          tar xvzf scanner-build.tgz
-
-      - name: Run unit tests
+      - name: Run unit tests (amd64)
         run: ./scripts/ci/jobs/unit-tests.sh
 
   db-integration-tests:
     runs-on: ubuntu-latest
-    needs:
-      - pre-build-scanner
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
     steps:
@@ -132,15 +145,7 @@ jobs:
       - name: Cache Go dependencies
         uses: ./.github/actions/cache-go-dependencies
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: scanner-build
-
-      - name: Unpack scanner build
-        run: |
-          tar xvzf scanner-build.tgz
-
-      - name: Run db integration tests
+      - name: Run db integration tests (amd64)
         run: ./scripts/ci/jobs/db-integration-tests.sh
 
   generate-genesis-dump:
@@ -230,11 +235,15 @@ jobs:
   generate-scanner-bundle:
     runs-on: ubuntu-latest
     needs:
+      - define-scanner-job-matrix
       - pre-build-scanner
       - generate-genesis-dump
     if: |
       always() &&
       (needs.generate-genesis-dump.result == 'success' || needs.generate-genesis-dump.result == 'skipped')
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
     steps:
@@ -248,11 +257,11 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: scanner-build
+          name: scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}
 
       - name: Unpack scanner build
         run: |
-          tar xvzf scanner-build.tgz
+          tar xvzf scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
 
       - uses: actions/download-artifact@v4
         if: |
@@ -274,12 +283,12 @@ jobs:
         run: image/scanner/rhel/create-bundle.sh image/scanner image/scanner/rhel
 
       - name: Archive the bundle to preserve permissions
-        run: tar -cvzf bundle.tgz image/scanner/rhel
+        run: tar -cvzf scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}.tgz image/scanner/rhel
 
       - uses: actions/upload-artifact@v4
         with:
-          name: scanner-bundle
-          path: bundle.tgz
+          name: scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
 
   generate-scanner-db-bundle:
     runs-on: ubuntu-latest
@@ -330,9 +339,14 @@ jobs:
       QUAY_STACKROX_IO_RW_PASSWORD: ${{ secrets.QUAY_STACKROX_IO_RW_PASSWORD }}
     runs-on: ubuntu-latest
     needs:
+      - define-scanner-job-matrix
       - generate-scanner-bundle
       - generate-scanner-db-bundle
+    # This is here as we want to build images even when steps are skipped.
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.61
     steps:
@@ -344,13 +358,19 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - uses: actions/download-artifact@v4
         with:
-          name: scanner-bundle
+          name: scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}
 
       - name: Unpack bundle
         run: |
-          tar xvzf bundle.tgz
+          tar xvzf scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
 
       - uses: actions/download-artifact@v4
         with:
@@ -386,7 +406,44 @@ jobs:
           github.event_name == 'push' || !github.event.pull_request.head.repo.fork
         run: |
           source ./scripts/ci/lib.sh
-          push_image_set
+          push_scanner_image_set ${{ matrix.goarch }}
+
+  push-manifests:
+    needs:
+      - define-scanner-job-matrix
+      - generate-scanner-bundle
+      - generate-scanner-db-bundle
+      - build-images
+    runs-on: ubuntu-latest
+    # This is here as we want to push image manifests even when steps are skipped.
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    container:
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.69
+    env:
+      QUAY_RHACS_ENG_RW_USERNAME: ${{ secrets.QUAY_RHACS_ENG_RW_USERNAME }}
+      QUAY_RHACS_ENG_RW_PASSWORD: ${{ secrets.QUAY_RHACS_ENG_RW_PASSWORD }}
+      QUAY_STACKROX_IO_RW_USERNAME: ${{ secrets.QUAY_STACKROX_IO_RW_USERNAME }}
+      QUAY_STACKROX_IO_RW_PASSWORD: ${{ secrets.QUAY_STACKROX_IO_RW_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: ./.github/actions/job-preamble
+
+      - name: Push Scanner and ScannerDB image manifests
+        # Skip for external contributions.
+        if: |
+          github.event_name == 'push' || !github.event.pull_request.head.repo.fork
+        run: |
+          source ./scripts/ci/lib.sh
+
+          # If this is updated, be sure to update goarch in define-scanner-job-matrix above.
+          architectures="amd64,arm64,ppc64le,s390x"
+
+          push_scanner_image_manifest_lists "$architectures"
 
   diff-dumps:
     if: |
