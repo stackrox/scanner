@@ -25,8 +25,6 @@ jobs:
     - name: Define the matrix for build jobs
       id: define-scanner-job-matrix
       run: |
-        source './scripts/ci/lib.sh'
-
         # If goarch is updated, be sure to update architectures in push-manifests below.
         matrix='{ "build_and_push": { "goos":["linux"], "goarch":["amd64", "arm64", "ppc64le", "s390x"] } }'
 
