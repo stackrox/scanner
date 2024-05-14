@@ -278,8 +278,7 @@ spec:
 
     - name: fetch-vuln-feed-data
       runAfter:
-      - init
-      - clone-repository
+      - determine-image-tag
       taskSpec:
         steps:
           - name: fetch-vuln-feed-data

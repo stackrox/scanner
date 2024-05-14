@@ -276,7 +276,7 @@ spec:
 
       - name: fetch-sql-definitions
         runAfter:
-          - clone-repository
+          - determine-image-tag
         taskSpec:
           steps:
             - name: fetch-sql-definitions
