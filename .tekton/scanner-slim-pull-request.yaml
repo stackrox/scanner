@@ -214,6 +214,7 @@ spec:
         - name: kind
           value: task
         resolver: bundles
+
     - name: clone-repository
       params:
       - name: url
@@ -245,6 +246,7 @@ spec:
         workspace: workspace
       - name: basic-auth
         workspace: git-auth
+
     - name: determine-image-tag
       runAfter:
       # This task must run on a freshly cloned repository to prevent seeing any changes from other tasks.
@@ -330,6 +332,7 @@ spec:
       workspaces:
       - name: source
         workspace: workspace
+
     - name: build-source-image
       params:
       - name: BINARY_IMAGE
@@ -359,6 +362,7 @@ spec:
       workspaces:
       - name: workspace
         workspace: workspace
+
     - name: deprecated-base-image-check
       params:
         - name: BASE_IMAGES_DIGESTS
@@ -383,6 +387,7 @@ spec:
         operator: in
         values:
         - "false"
+
     - name: clair-scan
       params:
       - name: image-digest
@@ -405,6 +410,7 @@ spec:
         operator: in
         values:
         - "false"
+
     - name: sast-snyk-check
       runAfter:
       - clone-repository
@@ -425,6 +431,7 @@ spec:
       workspaces:
       - name: workspace
         workspace: workspace
+
     - name: clamav-scan
       params:
       - name: image-digest
@@ -447,6 +454,7 @@ spec:
         operator: in
         values:
         - "false"
+
     - name: sbom-json-check
       params:
       - name: IMAGE_URL
