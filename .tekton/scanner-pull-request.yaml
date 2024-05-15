@@ -25,7 +25,7 @@ spec:
   - name: image-expires-after
     value: '13w'
   - name: output-image-repo
-    value: quay.io/redhat-user-workloads/rh-acs-tenant/acs/scanner
+    value: quay.io/rhacs-eng/scanner
   - name: path-context
     value: .
   - name: revision
