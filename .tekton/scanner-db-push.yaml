@@ -47,6 +47,8 @@ spec:
       value: '0'
     - name: clone-fetch-tags
       value: 'true'
+    - name: blobs-to-fetch
+      value: ['pg-definitions.sql.gz']
 
   workspaces:
     - name: workspace
@@ -174,6 +176,10 @@ spec:
         description: Build stage to target in container build
         name: build-target-stage
         type: string
+      - default: []
+        description: List of scanner-data file names to fetch to include in the container build.
+        name: blobs-to-fetch
+        type: array
 
     results:
       - description: ""
