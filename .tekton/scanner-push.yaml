@@ -235,9 +235,9 @@ spec:
           - name: revision
             value: $(params.revision)
           - name: depth
-            value: "$(params.clone-depth)"
+            value: $(params.clone-depth)
           - name: fetchTags
-            value: "$(params.clone-fetch-tags)"
+            value: $(params.clone-fetch-tags)
         runAfter:
           - init
         taskRef:
