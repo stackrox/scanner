@@ -218,8 +218,6 @@ spec:
       params:
         - name: blobs-to-fetch
           value: [ "$(params.blobs-to-fetch[*])" ]
-        - name: target-dir
-          value: "$(workspaces.source.path)/source"
       runAfter:
         - determine-image-tag
       taskRef:

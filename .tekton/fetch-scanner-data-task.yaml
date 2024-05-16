@@ -13,8 +13,9 @@ spec:
         An empty list is allowed which results in no-op.
       type: array
     - name: target-dir
-      description: Target directory where to save downloaded blobs.
+      description: Target directory relative to workspace where to save downloaded blobs.
       type: string
+      default: "source"
   results:
   steps:
     - name: fetch-scanner-data
@@ -27,7 +28,7 @@ spec:
         #!/usr/bin/env bash
         set -euo pipefail
         exec "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" \
-                    "$(params.target-dir)" \
+                    "$(workspaces.source.path)/$(params.target-dir)" \
                     "$@"
       # It should not take long to download blobs otherwise there's something odd going on.
       timeout: 10m
