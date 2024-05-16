@@ -123,6 +123,7 @@ upload_offline_dump() {
     file_to_check="scanner-v4-defs-${latest_version}.zip"
 
     curl --silent --show-error --fail --max-time 60 --retry 3 -o $file_to_check https://definitions.stackrox.io/v4/offline-bundles/$file_to_check
+    unzip -l "$file_to_check"
     zip scanner-vuln-updates.zip "$file_to_check"
     echo "$file_to_check added to scanner-vuln-updates.zip"
 
