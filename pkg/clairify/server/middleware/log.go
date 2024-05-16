@@ -6,6 +6,7 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -13,10 +14,18 @@ import (
 	"github.com/stackrox/rox/pkg/httputil"
 )
 
+const pingSuffix = `/ping`
+
 // Log returns middleware which logs basic information about the incoming HTTP request.
 func Log() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasSuffix(r.URL.String(), pingSuffix) {
+				// Don't bother logging pings.
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			logrus.WithFields(map[string]interface{}{
 				"Method": r.Method,
 				"URI":    r.URL.String(),
