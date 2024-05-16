@@ -48,7 +48,7 @@ spec:
     - name: clone-fetch-tags
       value: 'true'
     - name: blobs-to-fetch
-      value: []
+      value: [ ]
 
   workspaces:
     - name: workspace
@@ -176,7 +176,7 @@ spec:
         description: Build stage to target in container build
         name: build-target-stage
         type: string
-      - default: []
+      - default: [ ]
         description: List of scanner-data file names to fetch to include in the container build.
         name: blobs-to-fetch
         type: array
@@ -286,6 +286,20 @@ spec:
           - name: source
             workspace: workspace
 
+      - name: fetch-scanner-data
+        params:
+          - name: blobs-to-fetch
+            value: [ "$(params.blobs-to-fetch[*])" ]
+          - name: target-dir
+            value: "$(workspaces.source.path)/source"
+        runAfter:
+          - determine-image-tag
+        taskRef:
+          name: fetch-scanner-data
+        workspaces:
+          - name: source
+            workspace: workspace
+
       - name: build-container
         params:
           - name: IMAGE
@@ -306,6 +320,7 @@ spec:
             value: $(params.build-target-stage)
         runAfter:
           - prefetch-dependencies
+          - fetch-scanner-data
         taskRef:
           params:
             - name: name

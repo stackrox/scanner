@@ -49,7 +49,7 @@ spec:
     - name: clone-fetch-tags
       value: 'true'
     - name: blobs-to-fetch
-      value: ['nvd-definitions.zip', 'k8s-definitions.zip', 'repo2cpe.zip', 'genesis_manifests.json']
+      value: [ 'nvd-definitions.zip', 'k8s-definitions.zip', 'repo2cpe.zip', 'genesis_manifests.json' ]
 
   workspaces:
     - name: workspace
@@ -185,7 +185,7 @@ spec:
         description: Build stage to target in container build
         name: build-target-stage
         type: string
-      - default: []
+      - default: [ ]
         description: List of scanner-data file names to fetch to include in the container build.
         name: blobs-to-fetch
         type: array
@@ -296,21 +296,15 @@ spec:
             workspace: workspace
 
       - name: fetch-scanner-data
+        params:
+          - name: blobs-to-fetch
+            value: [ "$(params.blobs-to-fetch[*])" ]
+          - name: target-dir
+            value: "$(workspaces.source.path)/source"
         runAfter:
           - determine-image-tag
-        taskSpec:
-          steps:
-            - name: fetch-scanner-data
-              image: registry.access.redhat.com/ubi8/ubi-minimal:latest
-              script: |
-                #!/usr/bin/env bash
-                exec "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" \
-                    "$(workspaces.source.path)/source" \
-                    nvd-definitions.zip \
-                    k8s-definitions.zip \
-                    repo2cpe.zip \
-                    genesis_manifests.json
-              timeout: '10m'
+        taskRef:
+          name: fetch-scanner-data
         workspaces:
           - name: source
             workspace: workspace
