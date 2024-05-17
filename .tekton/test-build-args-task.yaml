@@ -30,20 +30,16 @@ spec:
       script: |
         #!/usr/bin/env bash
 
-        # This step converts BUILD_ARGS_LIST, if present, to a file that can be later passed to buildah.
+        # This step converts BUILD_ARGS_LIST, if present, to a file that can be later more conveniently read and passed to buildah.
 
         set -euo pipefail
         
         BUILD_ARGS_LIST=( "$@" )
         
-        if [[ -n "${BUILD_ARGS_FILE}" && "${#BUILD_ARGS_LIST[@]}" -gt 0 ]]; then
-          >&2 echo "Either BUILD_ARGS_FILE or BUILD_ARGS_LIST parameter can be provided but not both at the same time."
-          exit 1
-        fi
-        
         if [[ "${#BUILD_ARGS_LIST[@]}" -gt 0 ]]; then
           echo "BUILD_ARGS_LIST provided, saving it to ${BUILD_ARGS_LIST_FILE}..."
-          printf '%s\n' "${BUILD_ARGS_LIST[@]}" | tee "${BUILD_ARGS_LIST_FILE}"
+          printf -- '--build-arg\n%s\n' "${BUILD_ARGS_LIST[@]}" >> "${BUILD_ARGS_LIST_FILE}"
+          cat "${BUILD_ARGS_LIST_FILE}"
           echo "Done."
         fi
       volumeMounts:
@@ -62,8 +58,10 @@ spec:
 
         if [ -n "${BUILD_ARGS_FILE}" ]; then
           BUILDAH_ARGS+=("--build-arg-file=$(pwd)/$SOURCE_CODE_DIR/${BUILD_ARGS_FILE}")
-        elif [ -f "${BUILD_ARGS_LIST_FILE}" ]; then
-          BUILDAH_ARGS+=("--build-arg-file=${BUILD_ARGS_LIST_FILE}")
+        fi
+        if [ -f "${BUILD_ARGS_LIST_FILE}" ]; then
+          readarray -t BUILDAH_BUILD_ARGS_LIST < "${BUILD_ARGS_LIST_FILE}"
+          BUILDAH_ARGS+=("${BUILDAH_BUILD_ARGS_LIST[@]}")
         fi
         
         echo "Debugging, buildah args are: ${BUILDAH_ARGS[@]}"

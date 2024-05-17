@@ -194,7 +194,7 @@ spec:
 
     tasks:
 
-    # Here we see how using both fails
+    # Here we see how using both works
     - name: test-build-args
       params:
         - name: BUILD_ARGS_FILE
@@ -202,6 +202,8 @@ spec:
         - name: BUILD_ARGS_LIST
           value:
             - blah
+            - foo=bar
+            - foo=mrs barbara
       taskRef:
         name: test-build-args
 
