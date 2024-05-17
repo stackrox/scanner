@@ -203,6 +203,9 @@ spec:
               - this is just a demo so I can write anything
         taskRef:
           name: test-build-args
+        workspaces:
+          - name: source
+            workspace: workspace
 
       - name: init
         runAfter:

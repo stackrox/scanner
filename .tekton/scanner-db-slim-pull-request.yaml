@@ -193,15 +193,18 @@ spec:
 
       # Here we see how file works
       - name: test-build-args
+        runAfter:
+          - clone-repository
         params:
           - name: BUILD_ARGS_FILE
-            value: some_file_path.blah
+            value: .gitattributes
         taskRef:
           name: test-build-args
+        workspaces:
+          - name: source
+            workspace: workspace
 
       - name: init
-        runAfter:
-          - test-build-args
         params:
           - name: image-url
             # We can't provide a real tag because it is not known at this time.

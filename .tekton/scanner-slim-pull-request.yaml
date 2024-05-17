@@ -197,6 +197,9 @@ spec:
       params:
       taskRef:
         name: test-build-args
+      workspaces:
+        - name: source
+          workspace: workspace
 
     - name: init
       runAfter:

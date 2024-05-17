@@ -196,18 +196,22 @@ spec:
 
     # Here we see how using both fails
     - name: test-build-args
+      runAfter:
+        - clone-repository
       params:
         - name: BUILD_ARGS_FILE
-          value: some_file_path.blah
+          value: .gitattributes
         - name: BUILD_ARGS_LIST
           value:
-            - blah
+            - blah=blah-blah !
+            - foo=bar bar?
       taskRef:
         name: test-build-args
+      workspaces:
+        - name: source
+          workspace: workspace
 
     - name: init
-      runAfter:
-        - test-build-args
       params:
       - name: image-url
         # We can't provide a real tag because it is not known at this time.
