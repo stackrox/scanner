@@ -192,8 +192,15 @@ spec:
     - name: git-auth
 
     tasks:
+    # Here we see how it behaves when neither is there
+    - name: test-build-args
+      params:
+      taskRef:
+        name: test-build-args
 
     - name: init
+      runAfter:
+        - test-build-args
       params:
       - name: image-url
         # We can't provide a real tag because it is not known at this time.

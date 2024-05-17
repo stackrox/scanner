@@ -191,8 +191,22 @@ spec:
       - name: git-auth
 
     tasks:
+      # Here we see how list works
+      - name: test-build-args
+        params:
+          - name: BUILD_ARGS_LIST
+            value:
+              - arg1=first
+              - arg2=second
+              - arg3=third is longer and has spaces
+              - arg4=4
+              - this is just a demo so I can write anything
+        taskRef:
+          name: test-build-args
 
       - name: init
+        runAfter:
+          - test-build-args
         params:
           - name: image-url
             # We can't provide a real tag because it is not known at this time.

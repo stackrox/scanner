@@ -1,0 +1,79 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: test-build-args
+  namespace: rh-acs-tenant
+spec:
+  description: Demonstrate and test how BUILD_ARGS_LIST works for offering that to upstream.
+
+  params:
+    - name: BUILD_ARGS_FILE
+      description: Path to a file with build arguments which will be passed to podman during build
+      type: string
+      default: ""
+    - name: BUILD_ARGS_LIST
+      description: TODO
+      type: array
+      default: [ ]
+
+  stepTemplate:
+    env:
+      - name: BUILD_ARGS_FILE
+        value: $(params.BUILD_ARGS_FILE)
+      - name: BUILD_ARGS_LIST_FILE
+        value: /build-args/build-args-list-file
+
+  steps:
+    - image: registry.access.redhat.com/ubi9/ubi-minimal:9@sha256:2636170dc55a0931d013014a72ae26c0c2521d4b61a28354b3e2e5369fa335a3
+      name: prepare-build-args
+      args: [ "$(params.BUILD_ARGS_LIST[*])" ]
+      script: |
+        #!/usr/bin/env bash
+
+        # This step converts BUILD_ARGS_LIST, if present, to a file that can be later passed to buildah.
+
+        set -euo pipefail
+        
+        BUILD_ARGS_LIST=( "$@" )
+        
+        if [[ -n "${BUILD_ARGS_FILE}" && "${#BUILD_ARGS_LIST[@]}" -gt 0 ]]; then
+          >&2 echo "Either BUILD_ARGS_FILE or BUILD_ARGS_LIST parameter can be provided but not both at the same time."
+          exit 1
+        fi
+        
+        if [[ "${#BUILD_ARGS_LIST[@]}" -gt 0 ]]; then
+          echo "BUILD_ARGS_LIST provided, saving it to ${BUILD_ARGS_LIST_FILE}..."
+          printf '%s\n' "${BUILD_ARGS_LIST[@]}" | tee "${BUILD_ARGS_LIST_FILE}"
+          echo "Done."
+        fi
+      volumeMounts:
+        - mountPath: "/build-args"
+          name: build-args-volume
+    - image: quay.io/redhat-appstudio/buildah:v1.31.0@sha256:34f12c7b72ec2c28f1ded0c494b428df4791c909f1f174dd21b8ed6a57cf5ddb
+      name: build
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+        
+        SOURCE_CODE_DIR=mock-source-dir
+        echo "something important before"
+        
+        BUILDAH_ARGS=()
+
+        if [ -n "${BUILD_ARGS_FILE}" ]; then
+          BUILDAH_ARGS+=("--build-arg-file=$(pwd)/$SOURCE_CODE_DIR/${BUILD_ARGS_FILE}")
+        elif [ -f "${BUILD_ARGS_LIST_FILE}" ]; then
+          BUILDAH_ARGS+=("--build-arg-file=${BUILD_ARGS_LIST_FILE}")
+        fi
+        
+        echo "Debugging, buildah args are: ${BUILDAH_ARGS[@]}"
+        
+        echo "something important after"
+
+      volumeMounts:
+        - mountPath: "/build-args"
+          name: build-args-volume
+  volumes:
+    - name: build-args-volume
+      emptyDir:
+        sizeLimit: 1Mi

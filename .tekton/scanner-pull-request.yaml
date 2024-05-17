@@ -194,7 +194,20 @@ spec:
 
     tasks:
 
+    # Here we see how using both fails
+    - name: test-build-args
+      params:
+        - name: BUILD_ARGS_FILE
+          value: some_file_path.blah
+        - name: BUILD_ARGS_LIST
+          value:
+            - blah
+      taskRef:
+        name: test-build-args
+
     - name: init
+      runAfter:
+        - test-build-args
       params:
       - name: image-url
         # We can't provide a real tag because it is not known at this time.
