@@ -8,11 +8,15 @@ spec:
 
   params:
     - name: BUILD_ARGS_FILE
-      description: Path to a file with build arguments which will be passed to podman during build
+      description: |
+        Path to a file with build arguments which will be passed to buildah during build.
+        The path is relative to the repository root.
       type: string
       default: ""
     - name: BUILD_ARGS_LIST
-      description: TODO
+      description: |
+        List of arguments that will be passed to buildah during build. Each item in the list should be in the format
+        expected for `--build-arg` command-line option: `name=value`, e.g. `foo=bar`, `some_name=here is some value`.
       type: array
       default: [ ]
 
@@ -21,7 +25,7 @@ spec:
       - name: BUILD_ARGS_FILE
         value: $(params.BUILD_ARGS_FILE)
       - name: BUILD_ARGS_UNIFIED_FILE
-        value: /build-args/build-args-unified-file
+        value: /build-args/build-args-unified
 
   steps:
     - image: registry.access.redhat.com/ubi9/ubi-minimal:9@sha256:2636170dc55a0931d013014a72ae26c0c2521d4b61a28354b3e2e5369fa335a3
@@ -30,7 +34,8 @@ spec:
       script: |
         #!/usr/bin/env bash
 
-        # TODO This step converts BUILD_ARGS_LIST, if present, to a file that can be later passed to buildah.
+        # This step merges BUILD_ARGS_FILE with BUILD_ARGS_LIST to BUILD_ARGS_UNIFIED_FILE file that can be later
+        # passed to buildah.
 
         set -euo pipefail
         
@@ -51,7 +56,7 @@ spec:
         if [[ -s "${BUILD_ARGS_UNIFIED_FILE}" ]]; then
           echo "Debug:"
           cat "${BUILD_ARGS_UNIFIED_FILE}"
-          echo -n "Line count in ${BUILD_ARGS_UNIFIED_FILE}:"
+          echo -n "Arguments (lines) count: "
           wc -l "${BUILD_ARGS_UNIFIED_FILE}"
         fi
 
