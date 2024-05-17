@@ -6,10 +6,10 @@ package e2etests
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
 
-	"github.com/stackrox/rox/pkg/sliceutils"
 	v1 "github.com/stackrox/scanner/generated/scanner/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -72,14 +72,14 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	}()
 	for _, expectedFeat := range testCase.expectedFeatures {
 		t.Run(fmt.Sprintf("%s/%s", expectedFeat.name, expectedFeat.version), func(t *testing.T) {
-			matchingIdx := sliceutils.FindMatching(scan.GetImage().GetFeatures(), func(feature *v1.Feature) bool {
+			matchingIdx := slices.IndexFunc(scan.GetImage().GetFeatures(), func(feature *v1.Feature) bool {
 				return feature.GetName() == expectedFeat.name && feature.GetVersion() == expectedFeat.version
 			})
 			require.NotEqual(t, -1, matchingIdx, "Did not find expected feature %s:%s", expectedFeat.name, expectedFeat.version)
 			matchingFeature := scan.GetImage().GetFeatures()[matchingIdx]
 
 			for _, expectedVuln := range expectedFeat.vulns {
-				matchingIdx := sliceutils.FindMatching(matchingFeature.GetVulnerabilities(), func(v *v1.Vulnerability) bool {
+				matchingIdx := slices.IndexFunc(matchingFeature.GetVulnerabilities(), func(v *v1.Vulnerability) bool {
 					if expectedVuln.fixedBy == "" {
 						return v.GetName() == expectedVuln.name
 					}
@@ -91,13 +91,13 @@ func testSingleVulnImage(testCase singleTestCase, t *testing.T) {
 	}
 	for _, unexpectedFeature := range testCase.unexpectedVulns {
 		t.Run(fmt.Sprintf("unexpected/%s/%s", unexpectedFeature.name, unexpectedFeature.version), func(t *testing.T) {
-			matchingIdx := sliceutils.FindMatching(scan.GetImage().GetFeatures(), func(feature *v1.Feature) bool {
+			matchingIdx := slices.IndexFunc(scan.GetImage().GetFeatures(), func(feature *v1.Feature) bool {
 				return feature.GetName() == unexpectedFeature.name && feature.GetVersion() == unexpectedFeature.version
 			})
 			if matchingIdx != -1 {
 				matchingFeature := scan.GetImage().GetFeatures()[matchingIdx]
 				for _, unexpectedVuln := range unexpectedFeature.vulns {
-					matchingIdx := sliceutils.FindMatching(matchingFeature.GetVulnerabilities(), func(v *v1.Vulnerability) bool {
+					matchingIdx := slices.IndexFunc(matchingFeature.GetVulnerabilities(), func(v *v1.Vulnerability) bool {
 						return v.GetName() == unexpectedVuln.name
 					})
 					assert.Equal(t, -1, matchingIdx, "Vuln %s not found", unexpectedVuln)
