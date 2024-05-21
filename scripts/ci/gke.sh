@@ -66,23 +66,31 @@ create_cluster() {
     if is_OPENSHIFT_CI; then
         require_environment "JOB_NAME"
         require_environment "BUILD_ID"
-        tags="${tags},stackrox-ci-${JOB_NAME:0:50}"
-        tags="${tags/%-/x}"
-        labels="${labels},stackrox-ci-job=${JOB_NAME:0:63}"
-        labels="${labels/%-/x}"
-        labels="${labels},stackrox-ci-build-id=${BUILD_ID:0:63}"
-        labels="${labels/%-/x}"
+        build_num="${BUILD_ID}"
+        job_name="${JOB_NAME}"
     else
         die "Support is missing for this CI environment"
     fi
+
+    # Refresher on bash shell parameter expansion:
+    # https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion
+    # ${VAR//./-} : Replaces all "." with a "-"
+    # ${VAR/%-/}  : Deletes the last "-"
+    # ${VAR,,}    : Converts all alphabetic to their lowercase form
+    tags="${tags},stackrox-ci-${job_name:0:50}"
+    tags="${tags//./-}"
+    tags="${tags/%-/}"
+    labels="${labels},stackrox-ci-job=${job_name:0:63}"
+    labels="${labels//./-}"
+    labels="${labels/%-/}"
+    labels="${labels},stackrox-ci-build-id=${build_num:0:63}"
+    labels="${labels//./-}"
+    labels="${labels/%-/}"
 
     if is_in_PR_context; then
         labels="${labels},pr=$(get_PR_number)"
     fi
 
-    # remove . from branch names
-    tags="${tags//./-}"
-    labels="${labels//./-}"
     # lowercase
     tags="${tags,,}"
     labels="${labels,,}"
