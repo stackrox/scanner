@@ -19,69 +19,69 @@ metadata:
 spec:
 
   params:
-    - name: dockerfile
-      value: image/scanner/rhel/konflux.Dockerfile
-    - name: git-url
-      value: '{{repo_url}}'
-    - name: image-expires-after
-      # TODO(ROX-20230): make release images not expire.
-      value: '13w'
-    - name: output-image-repo
-      value: quay.io/rhacs-eng/scanner
-    - name: path-context
-      value: .
-    - name: revision
-      value: '{{revision}}'
-    - name: rebuild
-      value: 'true'
-    # TODO(ROX-20234): Enable hermetic builds
-    # - name: hermetic
-    #   value: "true"
-    - name: prefetch-input
-      value: '{"type": "gomod", "path": "."}'
-    - name: build-source-image
-      value: 'true'
-    - name: build-target-stage
-      value: scanner
-    - name: clone-depth
-      value: '0'
-    - name: clone-fetch-tags
-      value: 'true'
-    - name: blobs-to-fetch
-      value: [ 'nvd-definitions.zip', 'k8s-definitions.zip', 'repo2cpe.zip', 'genesis_manifests.json' ]
+  - name: dockerfile
+    value: image/scanner/rhel/konflux.Dockerfile
+  - name: git-url
+    value: '{{repo_url}}'
+  - name: image-expires-after
+    # TODO(ROX-20230): make release images not expire.
+    value: '13w'
+  - name: output-image-repo
+    value: quay.io/rhacs-eng/scanner
+  - name: path-context
+    value: .
+  - name: revision
+    value: '{{revision}}'
+  - name: rebuild
+    value: 'true'
+  # TODO(ROX-20234): Enable hermetic builds
+  # - name: hermetic
+  #   value: "true"
+  - name: prefetch-input
+    value: '{"type": "gomod", "path": "."}'
+  - name: build-source-image
+    value: 'true'
+  - name: build-target-stage
+    value: scanner
+  - name: clone-depth
+    value: '0'
+  - name: clone-fetch-tags
+    value: 'true'
+  - name: blobs-to-fetch
+    value: [ 'nvd-definitions.zip', 'k8s-definitions.zip', 'repo2cpe.zip', 'genesis_manifests.json' ]
 
   workspaces:
-    - name: workspace
-      volumeClaimTemplate:
-        metadata:
-          creationTimestamp: null
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 1Gi
-    - name: git-auth
-      secret:
-        secretName: '{{ git_auth_secret }}'
+  - name: workspace
+    volumeClaimTemplate:
+      metadata:
+        creationTimestamp: null
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - name: git-auth
+    secret:
+      secretName: '{{ git_auth_secret }}'
 
   taskRunSpecs:
-    - pipelineTaskName: build-container
-      stepSpecs:
-        # Provision more CPU to speed up build compared to the defaults.
-        # https://github.com/redhat-appstudio/build-definitions/blob/main/task/buildah/0.1/buildah.yaml#L126
-        - name: build
-          computeResources:
-            requests:
-              cpu: 2
-    - pipelineTaskName: clamav-scan
-      stepSpecs:
-        # Provision more CPU to speed up ClamAV scan compared to the defaults.
-        # https://github.com/redhat-appstudio/build-definitions/blob/main/task/clamav-scan/0.1/clamav-scan.yaml#L48
-        - name: extract-and-scan-image
-          computeResources:
-            requests:
-              cpu: 1
+  - pipelineTaskName: build-container
+    stepSpecs:
+    # Provision more CPU to speed up build compared to the defaults.
+    # https://github.com/redhat-appstudio/build-definitions/blob/main/task/buildah/0.1/buildah.yaml#L126
+    - name: build
+      computeResources:
+        requests:
+          cpu: 2
+  - pipelineTaskName: clamav-scan
+    stepSpecs:
+    # Provision more CPU to speed up ClamAV scan compared to the defaults.
+    # https://github.com/redhat-appstudio/build-definitions/blob/main/task/clamav-scan/0.1/clamav-scan.yaml#L48
+    - name: extract-and-scan-image
+      computeResources:
+        requests:
+          cpu: 1
 
   pipelineRef:
     name: scanner-component-pipeline

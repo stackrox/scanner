@@ -7,31 +7,31 @@ metadata:
 spec:
   description: Downloads blobs from definitions.stackrox.io GCloud bucket to be included in Scanner container builds.
   params:
-    - name: blobs-to-fetch
-      description: |
-        List of scanner-data file names to fetch to include in the container build.
-        An empty list is allowed which results in no-op.
-      type: array
-    - name: target-dir
-      description: Target directory relative to workspace where to save downloaded blobs.
-      type: string
-      default: "source"
+  - name: blobs-to-fetch
+    description: |
+      List of scanner-data file names to fetch to include in the container build.
+      An empty list is allowed which results in no-op.
+    type: array
+  - name: target-dir
+    description: Target directory relative to workspace where to save downloaded blobs.
+    type: string
+    default: "source"
   results:
   steps:
-    - name: fetch-scanner-data
-      image: registry.access.redhat.com/ubi8/ubi-minimal:latest
-      # The only functioning way to pass array parameter that I found is through args array.
-      # Array params have weird limitations, see https://github.com/tektoncd/pipeline/blob/main/docs/tasks.md#substituting-array-parameters
-      # Attempts to pass this in other places result in webhook errors and pipeline not starting.
-      args: [ "$(params.blobs-to-fetch[*])" ]
-      script: |
-        #!/usr/bin/env bash
-        set -euo pipefail
-        exec "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" \
-                    "$(workspaces.source.path)/$(params.target-dir)" \
-                    "$@"
-      # It should not take long to download blobs otherwise there's something odd going on.
-      timeout: 10m
+  - name: fetch-scanner-data
+    image: registry.access.redhat.com/ubi8/ubi-minimal:latest
+    # The only functioning way to pass array parameter that I found is through args array.
+    # Array params have weird limitations, see https://github.com/tektoncd/pipeline/blob/main/docs/tasks.md#substituting-array-parameters
+    # Attempts to pass this in other places result in webhook errors and pipeline not starting.
+    args: [ "$(params.blobs-to-fetch[*])" ]
+    script: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      exec "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" \
+                  "$(workspaces.source.path)/$(params.target-dir)" \
+                  "$@"
+    # It should not take long to download blobs otherwise there's something odd going on.
+    timeout: 10m
   workspaces:
-    - name: source
-      description: Workspace with the source code.
+  - name: source
+    description: Workspace with the source code.
