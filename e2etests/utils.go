@@ -37,7 +37,7 @@ func connectToScanner(t *testing.T) *grpc.ClientConn {
 	clientTLSConfig := &tls.Config{
 		InsecureSkipVerify: true,
 	}
-	conn, err := grpc.DialContext(context.Background(), gRPCEndpoint, grpc.WithTransportCredentials(credentials.NewTLS(clientTLSConfig)))
+	conn, err := grpc.NewClient(gRPCEndpoint, grpc.WithTransportCredentials(credentials.NewTLS(clientTLSConfig)))
 	require.NoError(t, err)
 	return conn
 }
