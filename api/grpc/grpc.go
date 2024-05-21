@@ -65,7 +65,7 @@ func (a *apiImpl) listenOnLocalEndpoint(server *grpc.Server) error {
 }
 
 func (a *apiImpl) connectToLocalEndpoint() (*grpc.ClientConn, error) {
-	return grpc.Dial(localEndpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	return grpc.NewClient(localEndpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 }
 
 func (a *apiImpl) Start() {
