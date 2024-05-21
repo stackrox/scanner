@@ -2783,7 +2783,7 @@ var testCases = []testCase{
 					},
 				},
 				AddedBy: "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
-				FixedBy: "1.35.0-r15",
+				FixedBy: "1.35.0-r18",
 			},
 			{
 				Name:          "openssl",
