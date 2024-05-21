@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-if [[ "$#" -lt "2" ]]; then
+if [[ "$#" -lt "1" ]]; then
   >&2 echo "Error: please pass target directory and blob filename(s) as command line arguments."
   >&2 echo "For example:"
   >&2 echo "    $(basename "${BASH_SOURCE[0]}") $(pwd) nvd-definitions.zip k8s-definitions.zip repo2cpe.zip genesis_manifests.json"
@@ -28,5 +28,9 @@ for blob in "${blobs[@]}"; do
     "${url}"
 
 done
+
+if [[ "${#blobs[@]}" == "0" ]]; then
+  echo "No blobs specified in arguments. Will not download anything."
+fi
 
 echo "Done"
