@@ -21,61 +21,61 @@ metadata:
 spec:
 
   params:
-    - name: dockerfile
-      value: image/db/rhel/konflux.Dockerfile
-    - name: git-url
-      value: '{{source_url}}'
-    - name: image-expires-after
-      value: '13w'
-    - name: output-image-repo
-      value: quay.io/rhacs-eng/scanner-db
-    - name: path-context
-      value: .
-    - name: revision
-      value: '{{revision}}'
-    - name: rebuild
-      value: 'true'
-    # TODO(ROX-20234): Enable hermetic builds
-    # - name: hermetic
-    #   value: "true"
-    # No language dependencies are required for scanner-db image.
-    - name: prefetch-input
-      value: ''
-    - name: build-source-image
-      value: 'true'
-    - name: build-target-stage
-      value: scanner-db
-    - name: clone-depth
-      value: '0'
-    - name: clone-fetch-tags
-      value: 'true'
-    - name: blobs-to-fetch
-      value: [ 'pg-definitions.sql.gz' ]
+  - name: dockerfile
+    value: image/db/rhel/konflux.Dockerfile
+  - name: git-url
+    value: '{{source_url}}'
+  - name: image-expires-after
+    value: '13w'
+  - name: output-image-repo
+    value: quay.io/rhacs-eng/scanner-db
+  - name: path-context
+    value: .
+  - name: revision
+    value: '{{revision}}'
+  - name: rebuild
+    value: 'true'
+  # TODO(ROX-20234): Enable hermetic builds
+  # - name: hermetic
+  #   value: "true"
+  # No language dependencies are required for scanner-db image.
+  - name: prefetch-input
+    value: ''
+  - name: build-source-image
+    value: 'true'
+  - name: build-target-stage
+    value: scanner-db
+  - name: clone-depth
+    value: '0'
+  - name: clone-fetch-tags
+    value: 'true'
+  - name: blobs-to-fetch
+    value: [ 'pg-definitions.sql.gz' ]
 
   workspaces:
-    - name: workspace
-      volumeClaimTemplate:
-        metadata:
-          creationTimestamp: null
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 1Gi
-    - name: git-auth
-      secret:
-        secretName: '{{ git_auth_secret }}'
+  - name: workspace
+    volumeClaimTemplate:
+      metadata:
+        creationTimestamp: null
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - name: git-auth
+    secret:
+      secretName: '{{ git_auth_secret }}'
 
   taskRunSpecs:
-    - pipelineTaskName: clamav-scan
-      stepSpecs:
-        # Provision more CPU to speed up ClamAV scan compared to the defaults.
-        # https://github.com/redhat-appstudio/build-definitions/blob/main/task/clamav-scan/0.1/clamav-scan.yaml#L48
-        - name: extract-and-scan-image
-          computeResources:
-            requests:
-              cpu: 1
+  - pipelineTaskName: clamav-scan
+    stepSpecs:
+    # Provision more CPU to speed up ClamAV scan compared to the defaults.
+    # https://github.com/redhat-appstudio/build-definitions/blob/main/task/clamav-scan/0.1/clamav-scan.yaml#L48
+    - name: extract-and-scan-image
+      computeResources:
+        requests:
+          cpu: 1
 
   pipelineRef:
     name: scanner-component-pipeline
