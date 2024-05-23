@@ -15,7 +15,7 @@ metadata:
     appstudio.openshift.io/application: acs
     appstudio.openshift.io/component: scanner-slim
     pipelines.appstudio.openshift.io/type: build
-  name: scanner-slim-pipeline
+  name: scanner-slim-build
   namespace: rh-acs-tenant
 
 spec:
