@@ -5,15 +5,17 @@ metadata:
   annotations:
     build.appstudio.openshift.io/repo: https://github.com/stackrox/scanner?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
+    build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: "500"
-    pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch == "master"
+    # TODO(ROX-21073): re-enable for all PR branches
+    pipelinesascode.tekton.dev/on-cel-expression: (event == "push" && target_branch == "master") || (event == "pull_request" && (source_branch.contains("konflux") || source_branch.contains("rhtap")))
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: acs
     appstudio.openshift.io/component: scanner-db-slim
     pipelines.appstudio.openshift.io/type: build
-  name: scanner-db-slim-on-push
+  name: scanner-db-slim-pipeline
   namespace: rh-acs-tenant
 
 spec:
@@ -24,6 +26,7 @@ spec:
   - name: git-url
     value: '{{source_url}}'
   - name: image-expires-after
+    # TODO(ROX-20230): make release images not expire.
     value: '13w'
   - name: output-image-repo
     value: quay.io/rhacs-eng/scanner-db-slim
