@@ -5,7 +5,6 @@ ARG BASE_TAG=latest
 # Compiling scanner binaries and staging repo2cpe and genesis manifests
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.21 AS builder
 
-ENV CGO_ENABLED=1
 ENV GOFLAGS=""
 ENV CI=1
 
@@ -19,7 +18,7 @@ RUN unzip -j blob-repo2cpe.zip -d image/scanner/dump/repo2cpe && \
     unzip -j blob-nvd-definitions.zip -d image/scanner/dump/nvd_definitions
 
 RUN echo -n "version: " && scripts/konflux/version.sh && \
-    go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(scripts/konflux/version.sh)" -o image/scanner/bin/scanner ./cmd/clair
+    make CGO_ENABLED=1 scanner-build-nodeps
 
 # Replace genesis manifests file in the source code with the one generated at
 # the point when the dump was taken.  This is to avoid discrepancy between other
