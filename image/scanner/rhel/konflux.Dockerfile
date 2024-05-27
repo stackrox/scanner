@@ -17,7 +17,7 @@ RUN unzip -j blob-repo2cpe.zip -d image/scanner/dump/repo2cpe && \
     unzip -j blob-k8s-definitions.zip -d image/scanner/dump/k8s_definitions && \
     unzip -j blob-nvd-definitions.zip -d image/scanner/dump/nvd_definitions
 
-RUN echo -n "version: " && scripts/konflux/version.sh && \
+RUN echo -n "version: " && make --quiet --no-print-directory tag && \
     make CGO_ENABLED=1 scanner-build-nodeps
 
 # Replace genesis manifests file in the source code with the one generated at
