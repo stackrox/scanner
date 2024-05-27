@@ -5,28 +5,31 @@ metadata:
   annotations:
     build.appstudio.openshift.io/repo: https://github.com/stackrox/scanner?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
+    build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: "500"
-    pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch == "master"
+    # TODO(ROX-21073): re-enable for all PR branches
+    pipelinesascode.tekton.dev/on-cel-expression: (event == "push" && target_branch == "master") || (event == "pull_request" && (source_branch.contains("konflux") || source_branch.contains("rhtap")))
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: acs
-    appstudio.openshift.io/component: scanner-db
+    appstudio.openshift.io/component: scanner
     pipelines.appstudio.openshift.io/type: build
-  name: scanner-db-on-push
+  name: scanner-build
   namespace: rh-acs-tenant
 
 spec:
 
   params:
   - name: dockerfile
-    value: image/db/rhel/konflux.Dockerfile
+    value: image/scanner/rhel/konflux.Dockerfile
   - name: git-url
-    value: '{{source_url}}'
+    value: '{{repo_url}}'
   - name: image-expires-after
+    # TODO(ROX-20230): make release images not expire.
     value: '13w'
   - name: output-image-repo
-    value: quay.io/rhacs-eng/scanner-db
+    value: quay.io/rhacs-eng/scanner
   - name: path-context
     value: .
   - name: revision
@@ -36,19 +39,18 @@ spec:
   # TODO(ROX-20234): Enable hermetic builds
   # - name: hermetic
   #   value: "true"
-  # No language dependencies are required for scanner-db image.
   - name: prefetch-input
-    value: ''
+    value: '{"type": "gomod", "path": "."}'
   - name: build-source-image
     value: 'true'
   - name: build-target-stage
-    value: scanner-db
+    value: scanner
   - name: clone-depth
     value: '0'
   - name: clone-fetch-tags
     value: 'true'
   - name: blobs-to-fetch
-    value: [ 'pg-definitions.sql.gz' ]
+    value: [ 'nvd-definitions.zip', 'k8s-definitions.zip', 'repo2cpe.zip', 'genesis_manifests.json' ]
 
   workspaces:
   - name: workspace
@@ -66,6 +68,14 @@ spec:
       secretName: '{{ git_auth_secret }}'
 
   taskRunSpecs:
+  - pipelineTaskName: build-container
+    stepSpecs:
+    # Provision more CPU to speed up build compared to the defaults.
+    # https://github.com/redhat-appstudio/build-definitions/blob/main/task/buildah/0.1/buildah.yaml#L126
+    - name: build
+      computeResources:
+        requests:
+          cpu: 2
   - pipelineTaskName: clamav-scan
     stepSpecs:
     # Provision more CPU to speed up ClamAV scan compared to the defaults.
