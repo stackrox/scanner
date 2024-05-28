@@ -140,8 +140,8 @@ spec:
     params:
     - name: image-url
       # We can't provide a StackRox-style tag because it is not known at this time (requires cloning source, etc.)
-      # As a workaround, we still provide a unique tag that's based on a revision to this task to comply with its
-      # expected input. We later actually add this tag on a built image with ADDITIONAL_TAGS build argument.
+      # As a workaround, we still provide a unique tag that's based on a revision in order for this task to comply with
+      # its expected input. We later actually add this tag on a built image with the apply-tags task.
       value: $(params.output-image-repo):konflux-$(params.revision)
     - name: rebuild
       value: $(params.rebuild)
@@ -252,8 +252,7 @@ spec:
       value: $(params.build-target-stage)
     - name: BUILD_ARGS
       value:
-        - TAG_SUFFIX=$(params.output-tag-suffix)
-        - ADDITIONAL_TAGS=konflux-$(params.revision)
+      - TAG_SUFFIX=$(params.output-tag-suffix)
     runAfter:
     - prefetch-dependencies
     - fetch-scanner-data
@@ -273,6 +272,25 @@ spec:
     workspaces:
     - name: source
       workspace: workspace
+
+  - name: apply-tags
+    params:
+    - name: IMAGE
+      value: $(tasks.build-container.results.IMAGE_URL)
+    - name: ADDITIONAL_TAGS
+      value:
+      - konflux-$(params.revision)
+    runAfter:
+    - build-container
+    taskRef:
+      params:
+      - name: name
+        value: apply-tags
+      - name: bundle
+        value: quay.io/redhat-appstudio-tekton-catalog/task-apply-tags:0.1@sha256:29add9a49a2281a3755a9b580d2b9c5cb110231b14cccf8ade2fd7895a9b4b4a
+      - name: kind
+        value: task
+      resolver: bundles
 
   - name: build-source-image
     params:
