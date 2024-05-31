@@ -252,7 +252,7 @@ spec:
       value: $(params.build-target-stage)
     - name: BUILD_ARGS
       value:
-      - TAG_SUFFIX=$(params.output-tag-suffix)
+      - SCANNER_TAG=$(tasks.determine-image-tag.results.image-tag)
     runAfter:
     - prefetch-dependencies
     - fetch-scanner-data
