@@ -2783,7 +2783,7 @@ var testCases = []testCase{
 					},
 				},
 				AddedBy: "sha256:2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8",
-				FixedBy: "1.35.0-r15",
+				FixedBy: "1.35.0-r18",
 			},
 			{
 				Name:          "openssl",
@@ -3511,7 +3511,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-25.el9_3",
+				FixedBy:       "1:3.0.7-27.el9",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3553,7 +3553,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-25.el9_3",
+				FixedBy:       "1:3.0.7-27.el9",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
