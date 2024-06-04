@@ -33,7 +33,8 @@ RUN dnf upgrade -y --nobest && \
     dnf clean all && \
     rpm --verbose -e --nodeps $(rpm -qa curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     rm -rf /var/cache/dnf /var/cache/yum && \
-    chmod +x /usr/local/bin/docker-entrypoint.sh
+    chmod +x /usr/local/bin/docker-entrypoint.sh && \
+    mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR=15 \
     PGDATA="/var/lib/postgresql/data/pgdata"
