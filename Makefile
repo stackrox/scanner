@@ -21,7 +21,7 @@ endif
 endif
 
 ifeq ($(TAG),)
-TAG=$(shell git describe --tags --abbrev=10 --dirty --long)$(TAG_SUFFIX)
+TAG=$(shell git describe --tags --abbrev=10 --dirty --long)
 endif
 
 # Set expiration on Quay.io for non-release tags.
