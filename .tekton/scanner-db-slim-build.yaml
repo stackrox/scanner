@@ -26,8 +26,7 @@ spec:
   - name: git-url
     value: '{{source_url}}'
   - name: image-expires-after
-    # TODO(ROX-20230): make release images not expire.
-    value: '13w'
+    value: '52w'
   - name: output-image-repo
     value: quay.io/rhacs-eng/scanner-db-slim
   - name: path-context
