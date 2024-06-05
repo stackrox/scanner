@@ -11,7 +11,7 @@ LABEL \
     source-location="https://github.com/stackrox/scanner" \
     summary="Scanner DB for Red Hat Advanced Cluster Security for Kubernetes" \
     url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
-    version="$SCANNER_TAG"
+    version="${SCANNER_TAG}"
 
 USER root
 
