@@ -2,6 +2,7 @@ ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi8-minimal
 ARG BASE_TAG=latest
 
+
 # Compiling scanner binaries and staging repo2cpe and genesis manifests
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.21 AS builder
 
@@ -28,6 +29,7 @@ RUN echo -n "version: " && make --quiet --no-print-directory tag && \
 # files of the dump and the manifest.
 COPY ./blob-genesis_manifests.json image/scanner/dump/genesis_manifests.json
 
+
 # Common base for scanner slim and full
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS scanner-common
 
@@ -42,7 +44,11 @@ LABEL \
     source-location="https://github.com/stackrox/scanner" \
     summary="The image scanner for Red Hat Advanced Cluster Security for Kubernetes" \
     url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
-    version="${SCANNER_TAG}"
+    # We must set version label to prevent inheriting value set in the base stage.
+    version="${SCANNER_TAG}" \
+    # Release label is required by EC although has no practical semantics.
+    # We also set it to not inherit one from a base stage in case it's RHEL or UBI.
+    release="1"
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -73,6 +79,7 @@ USER 65534:65534
 
 ENTRYPOINT ["/entrypoint.sh"]
 
+
 # Scanner Slim
 FROM scanner-common AS scanner-slim
 
@@ -82,6 +89,7 @@ LABEL \
     name="rhacs-scanner-slim-rhel8"
 
 ENV ROX_SLIM_MODE="true"
+
 
 # Scanner (full)
 FROM scanner-common AS scanner
