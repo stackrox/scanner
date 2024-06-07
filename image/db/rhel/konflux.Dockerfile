@@ -19,8 +19,7 @@ COPY image/db/pg_hba.conf \
      image/db/postgresql.conf \
      /etc/
 
-COPY --chown=postgres:postgres \
-     image/db/rhel/scripts/docker-entrypoint.sh \
+COPY image/db/rhel/scripts/docker-entrypoint.sh \
      /usr/local/bin/
 
 RUN dnf upgrade -y --nobest && \
@@ -33,7 +32,6 @@ RUN dnf upgrade -y --nobest && \
     dnf clean all && \
     rpm --verbose -e --nodeps $(rpm -qa curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     rm -rf /var/cache/dnf /var/cache/yum && \
-    chmod +x /usr/local/bin/docker-entrypoint.sh && \
     mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR=15 \
