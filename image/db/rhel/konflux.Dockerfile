@@ -11,7 +11,11 @@ LABEL \
     source-location="https://github.com/stackrox/scanner" \
     summary="Scanner DB for Red Hat Advanced Cluster Security for Kubernetes" \
     url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
-    version="${SCANNER_TAG}"
+    # We must set version label to prevent inheriting value set in the base stage.
+    version="${SCANNER_TAG}" \
+    # Release label is required by EC although has no practical semantics.
+    # We also set it to not inherit one from a base stage in case it's RHEL or UBI.
+    release="1"
 
 USER root
 
@@ -44,6 +48,7 @@ CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
 
 USER 70:70
 
+
 FROM scanner-db-common AS scanner-db-slim
 
 LABEL \
@@ -52,6 +57,7 @@ LABEL \
     name="rhacs-scanner-db-slim-rhel8"
 
 ENV ROX_SLIM_MODE="true"
+
 
 FROM scanner-db-common AS scanner-db
 
