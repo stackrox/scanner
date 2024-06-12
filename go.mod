@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.9
 
 require (
-	cloud.google.com/go/storage v1.41.0
+	cloud.google.com/go/storage v1.42.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.9.2
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
@@ -156,7 +156,7 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	golang.stackrox.io/grpc-http1 v0.3.9 // indirect
 	google.golang.org/genproto v0.0.0-20240528184218-531527333157 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240521202816-d264139d666e // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240604185151-ef581f913117 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
