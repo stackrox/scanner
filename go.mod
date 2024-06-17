@@ -188,6 +188,19 @@ replace (
 
 	github.com/heroku/docker-registry-client => github.com/stackrox/docker-registry-client v0.1.0
 
+	// The current latest version of github.com/mholt/archiver/v3 (v3.5.1) suffers from CVE-2024-0406.
+	// There is currently a PR in place to resolve it (https://github.com/mholt/archiver/pull/396),
+	// but it has not had much attention recently.
+	// Just replace our usage of github.com/mholt/archiver/v3 with github.com/anchore/archiver/v3 (v3.5.2)
+	// so static vulnerability scanners will be happy.
+	// This version (probably) fixes CVE-2024-0406, but we are also unaffected by that vulnerability anyway,
+	// as we do not use [(*archiver.Tar).Unarchive()], so it doesn't really matter.
+	// What is important, though, is the code changes between github.com/mholt/archiver/v3 v3.5.1
+	// and github.com/anchore/archiver/v3 v3.5.2 only touch the [(*archiver.Tar).Unarchive()] path,
+	// and nothing we use. See https://github.com/mholt/archiver/compare/v3.5.1...anchore:archiver:v3.5.2
+	// for more details of the exact difference.
+	github.com/mholt/archiver/v3 => github.com/anchore/archiver/v3 v3.5.2
+
 	github.com/operator-framework/helm-operator-plugins => github.com/stackrox/helm-operator v0.0.12-0.20230825152000-1361e2f7db46
 	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20240402171531-15fa6d254174
 
