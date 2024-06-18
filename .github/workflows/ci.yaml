@@ -544,7 +544,7 @@ jobs:
             "--build-arg" "LABEL_RELEASE=${TAG}"
             "--build-arg" "QUAY_TAG_EXPIRATION=${QUAY_TAG_EXPIRATION}"
           )
-          BASE_IMAGE_TAG="quay.io/stackrox-io/vulnerabilities:${TAG}"
+          BASE_IMAGE_TAG="quay.io/stackrox-io/vulnerabilities:latest"
           
           architectures=("amd64" "arm64" "ppc64le" "s390x")
           image_list=()

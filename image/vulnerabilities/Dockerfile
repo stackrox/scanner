@@ -12,12 +12,12 @@ LABEL name="definitions" \
       vendor="StackRox" \
       maintainer="https://stackrox.io/" \
       summary="Vulnerability definitions for the StackRox Security Platform" \
-      description="This image contains vulnerability definitions used by StackRox Scanner V4." \
+      description="This image contains vulnerability definitions used by StackRox scanners." \
       version="${LABEL_VERSION}" \
       release="${LABEL_RELEASE}" \
       quay.expires-after="${QUAY_TAG_EXPIRATION}"
 
-COPY scanner-vuln-updates.zip /app/scanner-vuln-updates.zip
+COPY scanner-vuln-updates.zip /srv/scanner-vuln-updates.zip
 
 # This is equivalent to nobody:nobody.
 USER 65534:65534
