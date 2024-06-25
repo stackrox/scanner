@@ -50,6 +50,7 @@ var (
 		"alpine:v3.17",
 		"alpine:v3.18",
 		"alpine:v3.19",
+		"alpine:v3.20",
 		"alpine:edge",
 		"amzn:2018.03",
 		"amzn:2",

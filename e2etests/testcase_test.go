@@ -4338,4 +4338,22 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:alpine-v3.20.0",
+		registry:                "https://quay.io",
+		source:                  "NVD",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "alpine:v3.20",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "openssl",
+				NamespaceName: "alpine:v3.20",
+				VersionFormat: "apk",
+				Version:       "3.3.0-r2",
+				AddedBy:       "sha256:d25f557d7f31bf7acfac935859b5153da41d13c41f2b468d16f729a5b883634f",
+			},
+		},
+	},
 }
