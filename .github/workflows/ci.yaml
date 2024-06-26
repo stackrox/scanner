@@ -489,6 +489,84 @@ jobs:
           name: diff-dumps-inspect
           path: /tmp/diff-dumps-inspect
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: offline-dump
+          path: /tmp/offline-dump/scanner-vuln-updates.zip
+
+  # TODO(blugo): This job is for a very particular use case. If we want to officially support this image, we should
+  # bake it into the rest of the build process instead of having it be its own bespoke job.
+  # This job downloads the vulnerability data we push to the GCS bucket in a previous job and adds it into a container
+  # image.
+  build-and-push-vulnerabilities-image:
+    env:
+      QUAY_STACKROX_IO_RW_USERNAME: ${{ secrets.QUAY_STACKROX_IO_RW_USERNAME }}
+      QUAY_STACKROX_IO_RW_PASSWORD: ${{ secrets.QUAY_STACKROX_IO_RW_PASSWORD }}
+    runs-on: ubuntu-latest
+    # Only run on master branch
+    if: github.ref == 'refs/heads/master'
+    needs:
+      - diff-dumps
+    steps:
+      # Required for making the tag
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: offline-dump
+          path: scanner-vuln-updates.zip
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker login
+        # Skip for external contributions.
+        if: |
+          github.event_name == 'push' || !github.event.pull_request.head.repo.fork
+        run: |
+          docker login -u "${QUAY_STACKROX_IO_RW_USERNAME}" --password-stdin quay.io <<<"${QUAY_STACKROX_IO_RW_PASSWORD}"
+
+      - name: Build and save definitions images
+        run: |
+          set -e
+          
+          TAG="$(make tag)"
+          QUAY_TAG_EXPIRATION=never
+          DOCKER_ARGS=(
+            "--build-arg" "LABEL_VERSION=${TAG}"
+            "--build-arg" "LABEL_RELEASE=${TAG}"
+            "--build-arg" "QUAY_TAG_EXPIRATION=${QUAY_TAG_EXPIRATION}"
+          )
+          BASE_IMAGE_TAG="quay.io/stackrox-io/vulnerabilities:latest"
+          
+          architectures=("amd64" "arm64" "ppc64le" "s390x")
+          image_list=()
+          for arch in "${architectures[@]}"; do
+            arch_image_tag="${BASE_IMAGE_TAG}-${arch}"
+          
+            docker buildx build \
+              --platform "linux/${arch}" \
+              --load \
+              --tag "${arch_image_tag}" \
+              "${DOCKER_ARGS[@]}" \
+              -f image/vulnerabilities/Dockerfile .
+          
+            image_list+=("${arch_image_tag}")
+          done
+          
+          for image in "${image_list[@]}"; do
+            docker push "${image}"
+          done 
+          docker manifest create "${BASE_IMAGE_TAG}" "${image_list[@]}"
+          docker manifest push "${BASE_IMAGE_TAG}"
+
   upload-db-dump:
     # Only run on master branch
     if: github.ref == 'refs/heads/master'
