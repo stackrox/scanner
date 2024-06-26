@@ -454,7 +454,6 @@ jobs:
           source ./scripts/ci/lib.sh
 
           # If this is updated, be sure to update goarch in define-scanner-job-matrix above.
-          # If this is updated, be sure to update goarch in define-scanner-job-matrix above.
           architectures="amd64,arm64,ppc64le,s390x"
 
           push_scanner_image_manifest_lists "$architectures"
