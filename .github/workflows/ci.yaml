@@ -535,7 +535,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: offline-dump
-          path: scanner-vuln-updates.zip
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
