@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - master
+      - 'release-*'
+    tags:
+      - '**'
   pull_request:
     types:
       - opened
@@ -149,6 +152,7 @@ jobs:
         run: ./scripts/ci/jobs/db-integration-tests.sh
 
   generate-genesis-dump:
+    # Run this job if it's not a PR or the PR contains the `generate-dumps-on-pr` label
     if: |
       github.event_name != 'pull_request' ||
       contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr')
@@ -192,6 +196,7 @@ jobs:
           path: /tmp/vuln-dump
 
   generate-db-dump:
+    # Run this job if it's not a PR or the PR contains the `generate-dumps-on-pr` label
     if: |
       github.event_name != 'pull_request' ||
       contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr')
@@ -233,14 +238,16 @@ jobs:
           path: /tmp/postgres/pg-definitions.sql.gz
 
   generate-scanner-bundle:
+    # Run this job even if the generate-genesis-dump job was skipped, i.e., only skip this job if
+    # generate-genesis-dump failed
+    if: |
+      always() &&
+      (needs.generate-genesis-dump.result == 'success' || needs.generate-genesis-dump.result == 'skipped')
     runs-on: ubuntu-latest
     needs:
       - define-scanner-job-matrix
       - pre-build-scanner
       - generate-genesis-dump
-    if: |
-      always() &&
-      (needs.generate-genesis-dump.result == 'success' || needs.generate-genesis-dump.result == 'skipped')
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
@@ -264,6 +271,8 @@ jobs:
           tar xvzf scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
 
       - uses: actions/download-artifact@v4
+        # Run this step if it's not a PR or the PR contains the `generate-dumps-on-pr` label
+        # When this step is skipped `get_genesis_dump` will pull the vulnerability data from our GCS bucket
         if: |
           github.event_name != 'pull_request' ||
           contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr')
@@ -291,12 +300,14 @@ jobs:
           path: scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
 
   generate-scanner-db-bundle:
-    runs-on: ubuntu-latest
-    needs:
-      - generate-db-dump
+    # Run this job even if the generate-db-dump job was skipped, i.e., only skip this job if
+    # generate-db-dump failed
     if: |
       always() &&
       (needs.generate-db-dump.result == 'success' || needs.generate-db-dump.result == 'skipped')
+    runs-on: ubuntu-latest
+    needs:
+      - generate-db-dump
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.69
     steps:
@@ -330,6 +341,9 @@ jobs:
           path: image/db/rhel
 
   build-images:
+    # Run this job even if previous jobs were skipped, i.e., only skip this job if one of the previous jobs failed
+    # or was cancelled
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     env:
       QUAY_RHACS_ENG_RO_USERNAME: ${{ secrets.QUAY_RHACS_ENG_RO_USERNAME }}
       QUAY_RHACS_ENG_RO_PASSWORD: ${{ secrets.QUAY_RHACS_ENG_RO_PASSWORD }}
@@ -342,8 +356,6 @@ jobs:
       - define-scanner-job-matrix
       - generate-scanner-bundle
       - generate-scanner-db-bundle
-    # This is here as we want to build images even when steps are skipped.
-    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
@@ -409,14 +421,15 @@ jobs:
           push_scanner_image_set ${{ matrix.goarch }}
 
   push-manifests:
+    # Run this job even if previous jobs were skipped, i.e., only skip this job if one of the previous jobs failed
+    # or was cancelled
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     needs:
       - define-scanner-job-matrix
       - generate-scanner-bundle
       - generate-scanner-db-bundle
       - build-images
     runs-on: ubuntu-latest
-    # This is here as we want to push image manifests even when steps are skipped.
-    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.3.69
     env:
@@ -446,9 +459,14 @@ jobs:
           push_scanner_image_manifest_lists "$architectures"
 
   diff-dumps:
+    # Run this job if:
+    #   - it's running on the master branch OR
+    #   - it's in a PR context and the PR contains the `generate-dumps-on-pr` label
+    # Note that this doesn't run on tags
     if: |
-      github.event_name != 'pull_request' ||
-      contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr')
+      github.ref == 'refs/heads/master' ||
+      (github.event_name == 'pull_request' &&
+      contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr'))
     env:
       GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER: ${{ secrets.GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER }}
       SCANNER_GCP_SERVICE_ACCOUNT_CREDS: ${{ secrets.SCANNER_GCP_SERVICE_ACCOUNT_CREDS }}
@@ -476,7 +494,6 @@ jobs:
           tar xvzf updater-build.tgz
 
       - uses: actions/download-artifact@v4
-        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
           name: genesis-dump
           path: /tmp/genesis-dump
@@ -568,7 +585,8 @@ jobs:
           docker manifest push "${BASE_IMAGE_TAG}"
 
   upload-db-dump:
-    # Only run on master branch
+    # Only run this step on the master branch
+    # Note that our scheduled jobs run on the master branch
     if: github.ref == 'refs/heads/master'
     env:
       GOOGLE_SA_CIRCLECI_SCANNER: ${{ secrets.GOOGLE_SA_CIRCLECI_SCANNER }}
@@ -582,7 +600,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: master
 
       - uses: ./.github/actions/job-preamble
 
@@ -595,8 +613,9 @@ jobs:
         run: ./scripts/ci/jobs/upload-db-dump.sh
 
   upload-dumps-for-downstream:
-    # Only run on master branch
-    if: github.ref == 'refs/heads/master'
+    # Only run this step on the master branch or any tags
+    # Note that our scheduled jobs run on the master branch
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
     env:
       GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER: ${{ secrets.GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER }}
     runs-on: ubuntu-latest
@@ -609,7 +628,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: ./.github/actions/job-preamble
 
@@ -627,7 +645,8 @@ jobs:
         run: ./scripts/ci/jobs/upload-dumps-for-downstream.sh
 
   upload-dumps-for-embedding:
-    # Only run on master branch
+    # Only run this step on the master branch
+    # Note that our scheduled jobs run on the master branch
     if: github.ref == 'refs/heads/master'
     env:
       GOOGLE_SA_CIRCLECI_SCANNER: ${{ secrets.GOOGLE_SA_CIRCLECI_SCANNER }}
@@ -641,7 +660,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: ./.github/actions/job-preamble
 
