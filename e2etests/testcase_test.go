@@ -3842,7 +3842,7 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 				},
-				FixedBy: "3.0.2-0ubuntu1.14",
+				FixedBy: "3.0.2-0ubuntu1.16",
 				// This image installs the openssl pacakge in the second layer;
 				// however, the first layer already installed libssl3 whose source package is openssl.
 				// Therefore, we claim openssl was installed in the first layer.
