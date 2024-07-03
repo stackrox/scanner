@@ -40,4 +40,8 @@ var (
 
 	// MaxGrpcConcurrentStreams configures the maximum number of HTTP/2 streams to use with gRPC
 	MaxGrpcConcurrentStreams = RegisterIntegerSetting("ROX_GRPC_MAX_CONCURRENT_STREAMS", DefaultMaxGrpcConcurrentStreams)
+
+	// LegacyNVDLoader when true will cause the loader to pull NVD data using
+	// the NVD Legacy Data Feeds, if false will pull from the NVD 2.0 API.
+	LegacyNVDLoader = RegisterBooleanSetting("ROX_LEGACY_NVD_LOADER", false)
 )
