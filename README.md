@@ -133,3 +133,18 @@ simple add the `generate-dumps-on-pr` label to your PR.
 DB integration tests also run in CI upon every commit.
 However, to test these locally, be sure to [install PostgreSQL 12](https://postgresapp.com/downloads.html)
 and run it prior to running the tests.
+
+## Updating the StackRox feed
+
+Currently, the StackRox GCS bucket contains vulnerabilities for old Debian releases.
+To add to this:
+
+* Find the latest genesis dump which contains vulnerabilities for the Debian version in question.
+  * For example: https://github.com/stackrox/scanner/actions/runs/9730826138
+* Download the `genesis-dump`
+* Unzip it then run the following (change the version, as needed):
+  * `cat os_vulns.json | jq '[ .[] | select(.Namespace != null) | select(.Namespace.Name == "debian:10") ]' > debian10.json`
+* Sanity check the number of vulns via (change the version, as needed):
+  * `cat debian10.json | jq length`
+  * This should be a single, large number (tens of thousands)
+* Upload to the `stackrox-scanner-feed` bucket
