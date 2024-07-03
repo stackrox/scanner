@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
-	"github.com/facebookincubator/nvdtools/wfn"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/utils"
@@ -46,30 +45,6 @@ func (l *legacyLoader) DownloadFeedsToPath(outputDir string) error {
 	return nil
 }
 
-func (l *legacyLoader) removeInvalidCPEs(item *schema.NVDCVEFeedJSON10DefNode) {
-	cpeMatches := item.CPEMatch[:0]
-	for _, cpeMatch := range item.CPEMatch {
-		if cpeMatch.Cpe23Uri == "" {
-			cpeMatches = append(cpeMatches, cpeMatch)
-			continue
-		}
-		attr, err := wfn.UnbindFmtString(cpeMatch.Cpe23Uri)
-		if err != nil {
-			log.Errorf("error parsing %+v", item)
-			continue
-		}
-		if attr.Product == wfn.Any {
-			log.Warnf("Filtering out CPE: %+v", attr)
-			continue
-		}
-		cpeMatches = append(cpeMatches, cpeMatch)
-	}
-	item.CPEMatch = cpeMatches
-	for _, child := range item.Children {
-		l.removeInvalidCPEs(child)
-	}
-}
-
 func (l *legacyLoader) downloadFeedForYear(enrichmentMap map[string]*FileFormatWrapper, outputDir string, year int) error {
 	url := l.jsonFeedURLForYear(year)
 	resp, err := client.Get(url)
@@ -96,7 +71,7 @@ func (l *legacyLoader) downloadFeedForYear(enrichmentMap map[string]*FileFormatW
 			continue
 		}
 		for _, node := range item.Configurations.Nodes {
-			l.removeInvalidCPEs(node)
+			removeInvalidCPEs(node)
 		}
 		if enrichedEntry, ok := enrichmentMap[item.CVE.CVEDataMeta.ID]; ok {
 			// Add the CPE matches instead of removing for backwards compatibility purposes
