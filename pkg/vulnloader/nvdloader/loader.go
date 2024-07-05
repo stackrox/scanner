@@ -14,6 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/httputil/proxy"
 	"github.com/stackrox/rox/pkg/utils"
+	"github.com/stackrox/scanner/pkg/env"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
 )
@@ -26,7 +27,11 @@ var client = http.Client{
 }
 
 func init() {
-	vulnloader.RegisterLoader(vulndump.NVDDirName, &loader{})
+	if env.LegacyNVDLoader.Enabled() {
+		vulnloader.RegisterLoader(vulndump.NVDDirName, &legacyLoader{})
+	} else {
+		vulnloader.RegisterLoader(vulndump.NVDDirName, &loader{})
+	}
 }
 
 var _ vulnloader.Loader = (*loader)(nil)
@@ -37,6 +42,8 @@ type loader struct{}
 // If this function is successful, it will fill the directory with
 // one json file for each year of NVD data.
 func (l *loader) DownloadFeedsToPath(outputDir string) error {
+	log.Info("Downloading NVD data using NVD 2.0 API")
+
 	// Fetch NVD enrichment data from curated repos
 	enrichments, err := Fetch()
 	if err != nil {
