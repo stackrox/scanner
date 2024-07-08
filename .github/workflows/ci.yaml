@@ -453,6 +453,8 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
+      - uses: ./.github/actions/handle-tagged-build
+
       - name: Push Scanner and ScannerDB image manifests
         # Skip for external contributions.
         if: |
