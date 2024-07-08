@@ -705,6 +705,21 @@ handle_release_runs() {
     fi
 }
 
+handle_gha_tagged_build() {
+  if [[ -z "${GITHUB_REF:-}" ]]; then
+        echo "No GITHUB_REF in env"
+        exit 0
+    fi
+    echo "GITHUB_REF: ${GITHUB_REF}"
+    if [[ "${GITHUB_REF:-}" =~ ^refs/tags/ ]]; then
+        tag="${GITHUB_REF#refs/tags/*}"
+        echo "This is a tagged build: $tag"
+        echo "RELEASE_TAG=$tag" >> "$GITHUB_ENV"
+    else
+        echo "This is not a tagged build"
+    fi
+}
+
 store_test_results() {
     if [[ "$#" -ne 2 ]]; then
         die "missing args. usage: store_test_results <from> <to>"
