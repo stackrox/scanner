@@ -52,6 +52,8 @@ jobs:
       - name: Cache Go dependencies
         uses: ./.github/actions/cache-go-dependencies
 
+      - uses: ./.github/actions/handle-tagged-build
+
       - name: Build updater (amd64)
         run: make build-updater
 
@@ -82,6 +84,8 @@ jobs:
 
       - name: Cache Go dependencies
         uses: ./.github/actions/cache-go-dependencies
+
+      - uses: ./.github/actions/handle-tagged-build
 
       - name: Build Scanner
         run: make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} scanner-build-nodeps
@@ -370,6 +374,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: ./.github/actions/job-preamble
+
+      - uses: ./.github/actions/handle-tagged-build
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
