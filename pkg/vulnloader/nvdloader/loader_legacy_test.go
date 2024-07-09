@@ -18,8 +18,6 @@ func TestRejected(t *testing.T) {
 		want bool
 		cve  *schema.CVEJSON40
 	}{
-		//{ "nil", nil, false, }, // is assumed that item.CVE exists per current logic
-		//{"no desc", false, &c{CVE: nil}}, // is assumed that item.CVE exists per current logic
 		{"nil desc", false, &c{
 			Description: nil,
 		}},
