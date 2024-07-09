@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
@@ -14,6 +15,10 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
+)
+
+const (
+	rejectedReason = "rejected reason:"
 )
 
 var _ vulnloader.Loader = (*legacyLoader)(nil)
@@ -70,6 +75,10 @@ func (l *legacyLoader) downloadFeedForYear(enrichmentMap map[string]*FileFormatW
 			log.Warnf("Skipping vuln %s because it is being manually enriched", item.CVE.CVEDataMeta.ID)
 			continue
 		}
+		if l.rejected(item) {
+			log.Warnf("Skipping rejected vuln %q", item.CVE.CVEDataMeta.ID)
+			continue
+		}
 		for _, node := range item.Configurations.Nodes {
 			removeInvalidCPEs(node)
 		}
@@ -98,6 +107,17 @@ func (l *legacyLoader) downloadFeedForYear(enrichmentMap map[string]*FileFormatW
 		return errors.Wrapf(err, "could not encode json map for year %d", year)
 	}
 	return nil
+}
+
+func (l *legacyLoader) rejected(item *schema.NVDCVEFeedJSON10DefCVEItem) bool {
+	if item.CVE.Description != nil {
+		for _, desc := range item.CVE.Description.DescriptionData {
+			if strings.HasPrefix(strings.ToLower(desc.Value), rejectedReason) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (l *legacyLoader) jsonFeedURLForYear(year int) string {
