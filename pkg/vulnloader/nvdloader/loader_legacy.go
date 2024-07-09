@@ -110,13 +110,16 @@ func (l *legacyLoader) downloadFeedForYear(enrichmentMap map[string]*FileFormatW
 }
 
 func (l *legacyLoader) rejected(item *schema.NVDCVEFeedJSON10DefCVEItem) bool {
-	if item.CVE.Description != nil {
-		for _, desc := range item.CVE.Description.DescriptionData {
-			if strings.HasPrefix(strings.ToLower(desc.Value), rejectedReason) {
-				return true
-			}
+	if item.CVE.Description == nil {
+		return false
+	}
+
+	for _, desc := range item.CVE.Description.DescriptionData {
+		if strings.HasPrefix(strings.ToLower(desc.Value), rejectedReason) {
+			return true
 		}
 	}
+
 	return false
 }
 
