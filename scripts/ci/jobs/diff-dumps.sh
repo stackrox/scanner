@@ -131,7 +131,7 @@ upload_offline_dump() {
             >&2 echo "received status code $status_code when fetching StackRox releases"
             exit 1
         fi
-    done < <(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -ruV)
+    done < <(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort --reverse --unique --version-sort)
     if [[ -z "$latest_version" ]]; then
       >&2 echo "programmer error: latest_version unset..."
       exit 1
