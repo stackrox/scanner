@@ -111,22 +111,43 @@ upload_offline_dump() {
     info "Uploading offline dump"
 
     cd /tmp/offline-dump
-    cmd=()
-    if is_in_PR_context; then
-        cmd+=(echo "Would do")
-    fi
+
     curl --silent --show-error --max-time 60 --retry 3 --create-dirs -o out/RELEASE_VERSION.txt https://raw.githubusercontent.com/stackrox/stackrox/master/scanner/updater/version/RELEASE_VERSION
     version_file="out/RELEASE_VERSION.txt"
-    # Use grep to extract X.Y versions, sort them, and get the last one as the latest
-    latest_version=$(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort -V | tail -n 1)
+
+    latest_version=""
+    # Get the latest X.Y version which has been released.
+    while read -r version; do
+        status_code=$(curl --silent --max-time 60 --retry 3 --write-out "%{http_code}" -o /dev/null "https://github.com/stackrox/stackrox/releases/tag/$version.0")
+        if [[ "$status_code" == "404" ]]; then
+            # Release was not cut, so try a previous release.
+            continue
+        elif [[ "$status_code" == "200" ]]; then
+            # Release was cut, so use this one.
+            latest_version="$version"
+            break
+        else
+            # Some other error occurred.
+            >&2 echo "received status code $status_code when fetching StackRox releases"
+            exit 1
+        fi
+    done < <(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort --reverse --unique --version-sort)
+    if [[ -z "$latest_version" ]]; then
+      >&2 echo "programmer error: latest_version unset..."
+      exit 1
+    fi
 
     file_to_check="scanner-v4-defs-${latest_version}.zip"
 
-    curl --silent --show-error --fail --max-time 60 --retry 3 -o $file_to_check https://definitions.stackrox.io/v4/offline-bundles/$file_to_check
+    curl --silent --show-error --fail --max-time 60 --retry 3 -o "$file_to_check" "https://definitions.stackrox.io/v4/offline-bundles/$file_to_check"
     unzip -l "$file_to_check"
     zip scanner-vuln-updates.zip "$file_to_check"
     echo "$file_to_check added to scanner-vuln-updates.zip"
 
+    cmd=()
+    if is_in_PR_context; then
+        cmd+=(echo "Would do")
+    fi
     "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
 }
 
