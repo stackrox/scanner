@@ -639,6 +639,8 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
+      - uses: ./.github/actions/handle-tagged-build
+
       - uses: actions/download-artifact@v4
         with:
           name: vuln-dump

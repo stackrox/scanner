@@ -37,6 +37,8 @@ upload_dumps_for_downstream() {
         die "Unsupported"
     fi
 
+    info "Using scanner_version: $scanner_version"
+
     destination="gs://definitions.stackrox.io/scanner-data/${scanner_version}/"
 
     info "Uploading dumps"
