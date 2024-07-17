@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.9
 
 require (
-	cloud.google.com/go/storage v1.42.0
+	cloud.google.com/go/storage v1.43.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.9.2
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
