@@ -541,6 +541,8 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - uses: ./.github/actions/handle-tagged-build
+
       - uses: actions/download-artifact@v4
         with:
           name: offline-dump
@@ -638,6 +640,8 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/job-preamble
+
+      - uses: ./.github/actions/handle-tagged-build
 
       - uses: actions/download-artifact@v4
         with:
