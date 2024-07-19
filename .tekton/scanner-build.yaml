@@ -53,16 +53,6 @@ spec:
     value: [ 'nvd-definitions.zip', 'k8s-definitions.zip', 'repo2cpe.zip', 'genesis_manifests.json' ]
 
   workspaces:
-  - name: workspace
-    volumeClaimTemplate:
-      metadata:
-        creationTimestamp: null
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
   - name: git-auth
     secret:
       secretName: '{{ git_auth_secret }}'
