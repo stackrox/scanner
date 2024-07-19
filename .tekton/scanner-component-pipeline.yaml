@@ -275,12 +275,16 @@ spec:
       value: $(tasks.build-container.results.IMAGE_URL)
     - name: BASE_IMAGES
       value: $(tasks.build-container.results.BASE_IMAGES_DIGESTS)
+    - name: SOURCE_ARTIFACT
+      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
+    - name: CACHI2_ARTIFACT
+      value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     taskRef:
       params:
       - name: name
-        value: source-build
+        value: source-build-oci-ta
       - name: bundle
-        value: quay.io/redhat-appstudio-tekton-catalog/task-source-build:0.1@sha256:1a976a35adee9163e455d0c5aee5d9bf9cb3c6a770656ae347558f8c54977709
+        value: quay.io/redhat-appstudio-tekton-catalog/task-source-build-oci-ta:0.1@sha256:eae2e52027120286bcd3c1e3a48bf3f1281d9718549b9cd4098dcf11b06b71b8
       - name: kind
         value: task
       resolver: bundles
@@ -291,9 +295,6 @@ spec:
     - input: $(params.build-source-image)
       operator: in
       values: [ "true" ]
-    workspaces:
-    - name: workspace
-      workspace: workspace
 
   - name: deprecated-base-image-check
     params:
