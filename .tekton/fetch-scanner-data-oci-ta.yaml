@@ -55,7 +55,7 @@ spec:
     script: |
       #!/usr/bin/env bash
       set -euo pipefail
-      exec "scripts/konflux/fetch-scanner-data.sh" "$(params.target-dir)" "$@"
+      scripts/konflux/fetch-scanner-data.sh "$(params.target-dir)" "$@"
     # It should not take long to download blobs otherwise there's something odd going on.
     timeout: 10m
   - name: create-trusted-artifact
