@@ -9,7 +9,7 @@ spec:
   - name: show-sbom
     params:
     - name: IMAGE_URL
-      value: $(tasks.build-container.results.IMAGE_URL)
+      value: $(tasks.build-image-manifest.results.IMAGE_URL)
     taskRef:
       params:
       - name: name
@@ -98,10 +98,10 @@ spec:
   results:
   - description: ""
     name: IMAGE_URL
-    value: $(tasks.build-container.results.IMAGE_URL)
+    value: $(tasks.build-image-manifest.results.IMAGE_URL)
   - description: ""
     name: IMAGE_DIGEST
-    value: $(tasks.build-container.results.IMAGE_DIGEST)
+    value: $(tasks.build-image-manifest.results.IMAGE_DIGEST)
   - description: ""
     name: CHAINS-GIT_URL
     value: $(tasks.clone-repository.results.url)
@@ -259,8 +259,6 @@ spec:
     - name: ADDITIONAL_TAGS
       value:
       - konflux-$(params.revision)-amd64
-    runAfter:
-    - build-container
     taskRef:
       params:
       - name: name
@@ -303,7 +301,7 @@ spec:
       - name: name
         value: buildah-remote-oci-ta
       - name: bundle
-        value: quay.io/redhat-appstudio-tekton-catalog/task-buildah-remote-oci-ta:0.1
+        value: quay.io/redhat-appstudio-tekton-catalog/task-buildah-remote-oci-ta:0.1@sha256:68b25410073c59bb7f21d8e72bd257262a7371a3c174a5c83d276533c781f1d1
       - name: kind
         value: task
       resolver: bundles
@@ -319,8 +317,6 @@ spec:
     - name: ADDITIONAL_TAGS
       value:
       - konflux-$(params.revision)-s390x
-    runAfter:
-    - build-container
     taskRef:
       params:
       - name: name
@@ -363,7 +359,7 @@ spec:
       - name: name
         value: buildah-remote-oci-ta
       - name: bundle
-        value: quay.io/redhat-appstudio-tekton-catalog/task-buildah-remote-oci-ta:0.1
+        value: quay.io/redhat-appstudio-tekton-catalog/task-buildah-remote-oci-ta:0.1@sha256:68b25410073c59bb7f21d8e72bd257262a7371a3c174a5c83d276533c781f1d1
       - name: kind
         value: task
       resolver: bundles
@@ -379,8 +375,6 @@ spec:
     - name: ADDITIONAL_TAGS
       value:
       - konflux-$(params.revision)-ppc64le
-    runAfter:
-    - build-container
     taskRef:
       params:
       - name: name
@@ -423,7 +417,7 @@ spec:
       - name: name
         value: buildah-remote-oci-ta
       - name: bundle
-        value: quay.io/redhat-appstudio-tekton-catalog/task-buildah-remote-oci-ta:0.1
+        value: quay.io/redhat-appstudio-tekton-catalog/task-buildah-remote-oci-ta:0.1@sha256:68b25410073c59bb7f21d8e72bd257262a7371a3c174a5c83d276533c781f1d1
       - name: kind
         value: task
       resolver: bundles
@@ -439,8 +433,6 @@ spec:
     - name: ADDITIONAL_TAGS
       value:
       - konflux-$(params.revision)-arm64
-    runAfter:
-    - build-container
     taskRef:
       params:
       - name: name
@@ -451,7 +443,7 @@ spec:
         value: task
       resolver: bundles
 
-  - name: build-container
+  - name: build-image-manifest
     params:
     - name: IMAGE
       value: $(params.output-image-repo):$(tasks.determine-image-tag.results.IMAGE_TAG)
@@ -463,11 +455,6 @@ spec:
         - $(tasks.build-container-s390x.results.IMAGE_URL)@$(tasks.build-container-s390x.results.IMAGE_DIGEST)
         - $(tasks.build-container-ppc64le.results.IMAGE_URL)@$(tasks.build-container-ppc64le.results.IMAGE_DIGEST)
         - $(tasks.build-container-arm64.results.IMAGE_URL)@$(tasks.build-container-arm64.results.IMAGE_DIGEST)
-    runAfter:
-      - build-container-amd64
-      - build-container-s390x
-      - build-container-ppc64le
-      - build-container-arm64
     taskRef:
       params:
         - name: name
@@ -483,7 +470,7 @@ spec:
         values:
           - "true"
 
-  - name: build-container-konflux
+  - name: build-image-manifest-konflux
     params:
     - name: IMAGE
       value: $(params.output-image-repo):konflux-$(params.revision)
@@ -518,7 +505,7 @@ spec:
   - name: build-source-image
     params:
     - name: BINARY_IMAGE
-      value: $(tasks.build-container.results.IMAGE_URL)
+      value: $(tasks.build-image-manifest.results.IMAGE_URL)
     - name: BASE_IMAGES
       value: $(tasks.build-container-amd64.results.BASE_IMAGES_DIGESTS)
     - name: SOURCE_ARTIFACT
@@ -567,9 +554,9 @@ spec:
   - name: clair-scan
     params:
     - name: image-digest
-      value: $(tasks.build-container.results.IMAGE_DIGEST)
+      value: $(tasks.build-image-manifest.results.IMAGE_DIGEST)
     - name: image-url
-      value: $(tasks.build-container.results.IMAGE_URL)
+      value: $(tasks.build-image-manifest.results.IMAGE_URL)
     taskRef:
       params:
       - name: name
@@ -605,9 +592,9 @@ spec:
   - name: clamav-scan
     params:
     - name: image-digest
-      value: $(tasks.build-container.results.IMAGE_DIGEST)
+      value: $(tasks.build-image-manifest.results.IMAGE_DIGEST)
     - name: image-url
-      value: $(tasks.build-container.results.IMAGE_URL)
+      value: $(tasks.image-manifest-container.results.IMAGE_URL)
     taskRef:
       params:
       - name: name
@@ -625,9 +612,9 @@ spec:
   - name: sbom-json-check
     params:
     - name: IMAGE_URL
-      value: $(tasks.build-container.results.IMAGE_URL)
+      value: $(tasks.build-image-manifest.results.IMAGE_URL)
     - name: IMAGE_DIGEST
-      value: $(tasks.build-container.results.IMAGE_DIGEST)
+      value: $(tasks.build-image-manifest.results.IMAGE_DIGEST)
     taskRef:
       params:
       - name: name
