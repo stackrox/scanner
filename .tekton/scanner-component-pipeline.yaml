@@ -594,7 +594,7 @@ spec:
     - name: image-digest
       value: $(tasks.build-image-manifest.results.IMAGE_DIGEST)
     - name: image-url
-      value: $(tasks.image-manifest-container.results.IMAGE_URL)
+      value: $(tasks.build-image-manifest.results.IMAGE_URL)
     taskRef:
       params:
       - name: name
