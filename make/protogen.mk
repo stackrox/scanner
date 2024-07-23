@@ -14,13 +14,14 @@ ALL_PROTOS_REL = $(ALL_PROTOS:$(PROTO_BASE_PATH)/%=%)
 SERVICE_PROTOS_REL = $(SERVICE_PROTOS:$(PROTO_BASE_PATH)/%=%)
 
 API_SERVICE_PROTOS = $(filter api/v1/%, $(SERVICE_PROTOS_REL))
-STORAGE_PROTOS = $(filter storage/%, $(ALL_PROTOS_REL))
 
 GENERATED_BASE_PATH = $(BASE_PATH)/generated
 GENERATED_DOC_PATH = image/docs
 MERGED_API_SWAGGER_SPEC = $(GENERATED_DOC_PATH)/api/v1/swagger.json
 GENERATED_API_DOCS = $(GENERATED_DOC_PATH)/api/v1/reference
 GENERATED_PB_SRCS = $(ALL_PROTOS_REL:%.proto=$(GENERATED_BASE_PATH)/%.pb.go)
+GENERATED_VT_SRCS = $(ALL_PROTOS_REL:%.proto=$(GENERATED_BASE_PATH)/%_vtproto.pb.go)
+GENERATED_API_SRCS = $(SERVICE_PROTOS_REL:%.proto=$(GENERATED_BASE_PATH)/%_grpc.pb.go)
 GENERATED_API_GW_SRCS = $(SERVICE_PROTOS_REL:%.proto=$(GENERATED_BASE_PATH)/%.pb.gw.go)
 GENERATED_API_SWAGGER_SPECS = $(API_SERVICE_PROTOS:%.proto=$(GENERATED_BASE_PATH)/%.swagger.json)
 
@@ -73,8 +74,9 @@ $(PROTOC):
 
 
 PROTOC_INCLUDES := $(PROTOC_DIR)/include/google
+GOOGLE_API_INCLUDES := $(CURDIR)/third_party/googleapis
 
-PROTOC_GEN_GO_BIN := $(PROTO_GOBIN)/protoc-gen-gofast
+PROTOC_GEN_GO_BIN := $(PROTO_GOBIN)/protoc-gen-go
 
 MODFILE_DIR := $(PROTO_PRIVATE_DIR)/modules
 
@@ -84,25 +86,19 @@ $(MODFILE_DIR)/%/UPDATE_CHECK: go.sum
 	$(SILENT)go list -m -json $* | jq '.Dir' >"$@.tmp"
 	$(SILENT)(cmp -s "$@.tmp" "$@" && rm "$@.tmp") || mv "$@.tmp" "$@"
 
-$(PROTOC_GEN_GO_BIN): $(MODFILE_DIR)/github.com/gogo/protobuf/UPDATE_CHECK $(PROTO_GOBIN)
+$(PROTOC_GEN_GO_BIN): $(MODFILE_DIR)/google.golang.org/protobuf/UPDATE_CHECK $(PROTO_GOBIN)
 	@echo "+ $@"
-	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/gogo/protobuf/$(notdir $@)
+	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) google.golang.org/protobuf/cmd/protoc-gen-go
 
 PROTOC_GEN_LINT := $(PROTO_GOBIN)/protoc-gen-lint
 $(PROTOC_GEN_LINT): $(MODFILE_DIR)/github.com/ckaznocha/protoc-gen-lint/UPDATE_CHECK $(PROTO_GOBIN)
 	@echo "+ $@"
 	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/ckaznocha/protoc-gen-lint
 
-GOGO_M_STR := Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types
-
 # The --go_out=M... argument specifies the go package to use for an imported proto file.
 # Here, we instruct protoc-gen-go to import the go source for proto file $(BASE_PATH)/<path>/*.proto to
 # "github.com/stackrox/scanner/generated/<path>".
 M_ARGS = $(foreach proto,$(ALL_PROTOS_REL),M$(proto)=github.com/stackrox/scanner/generated/$(patsubst %/,%,$(dir $(proto))))
-# This is the M_ARGS used for the grpc-gateway invocation. We only map the storage protos, because
-# - the gateway code produces no output (possibly because of a bug) if we pass M_ARGS_STR to it.
-# - the gateway code doesn't need access to anything outside api/v1 except storage. In particular, it should NOT import internalapi protos.
-GATEWAY_M_ARGS = $(foreach proto,$(STORAGE_PROTOS),M$(proto)=github.com/stackrox/scanner/generated/$(patsubst %/,%,$(dir $(proto))))
 
 # Hack: there's no straightforward way to escape a comma in a $(subst ...) command, so we have to resort to this little
 # trick.
@@ -111,21 +107,16 @@ space := $(null) $(null)
 comma := ,
 
 M_ARGS_STR := $(subst $(space),$(comma),$(strip $(M_ARGS)))
-GATEWAY_M_ARGS_STR := $(subst $(space),$(comma),$(strip $(GATEWAY_M_ARGS)))
 
 
 $(PROTOC_INCLUDES): $(PROTOC)
-
-GOGO_DIR = $(shell go list -f '{{.Dir}}' -m github.com/gogo/protobuf)
-GRPC_GATEWAY_DIR = $(shell go list -f '{{.Dir}}' -m github.com/grpc-ecosystem/grpc-gateway)
 
 .PHONY: proto-fmt
 proto-fmt: $(PROTOC_GEN_LINT)
 	@echo "Checking for proto style errors"
 	$(SILENT)PATH=$(PROTO_GOBIN) $(PROTOC) \
 		-I$(PROTOC_INCLUDES) \
-		-I$(GOGO_DIR)/protobuf \
-		-I$(GRPC_GATEWAY_DIR)/third_party/googleapis \
+		-I$(GOOGLE_API_INCLUDES) \
 		--lint_out=. \
 		--proto_path=$(PROTO_BASE_PATH) \
 		$(ALL_PROTOS)
@@ -168,61 +159,93 @@ printprotos:
 ## Generate gRPC proto messages, services, and gateways for the API. ##
 #######################################################################
 
+PROTOC_GEN_GO_VTPROTO_BIN := $(PROTO_GOBIN)/protoc-gen-go-vtproto
+$(PROTOC_GEN_GO_VTPROTO_BIN): $(MODFILE_DIR)/github.com/planetscale/vtprotobuf/UPDATE_CHECK $(PROTO_GOBIN)
+	@echo "+ $@"
+	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/planetscale/vtprotobuf/cmd/protoc-gen-go-vtproto
+
+PROTOC_GEN_GO_GRPC := $(PROTO_GOBIN)/protoc-gen-go-grpc
+$(PROTOC_GEN_GO_GRPC): $(MODFILE_DIR)/google.golang.org/grpc/cmd/protoc-gen-go-grpc/UPDATE_CHECK $(PROTO_GOBIN)
+	@echo "+ $@"
+	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) google.golang.org/grpc/cmd/protoc-gen-go-grpc
+
 PROTOC_GEN_GRPC_GATEWAY := $(PROTO_GOBIN)/protoc-gen-grpc-gateway
-
-$(PROTOC_GEN_GRPC_GATEWAY): $(MODFILE_DIR)/github.com/grpc-ecosystem/grpc-gateway/UPDATE_CHECK $(PROTO_GOBIN)
+$(PROTOC_GEN_GRPC_GATEWAY): $(MODFILE_DIR)/github.com/grpc-ecosystem/grpc-gateway/v2/UPDATE_CHECK $(PROTO_GOBIN)
 	@echo "+ $@"
-	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
 
-PROTOC_GEN_SWAGGER := $(PROTO_GOBIN)/protoc-gen-swagger
-
-$(PROTOC_GEN_SWAGGER): $(MODFILE_DIR)/github.com/grpc-ecosystem/grpc-gateway/UPDATE_CHECK $(PROTO_GOBIN)
+PROTOC_GEN_OPENAPIV2 := $(PROTO_GOBIN)/protoc-gen-openapiv2
+$(PROTOC_GEN_OPENAPIV2): $(MODFILE_DIR)/github.com/grpc-ecosystem/grpc-gateway/v2/UPDATE_CHECK $(PROTO_GOBIN)
 	@echo "+ $@"
-	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+	$(SILENT)GOBIN=$(PROTO_GOBIN) $(GOINSTALL) github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
 $(GENERATED_DOC_PATH):
 	@echo "+ $@"
 	$(SILENT)mkdir -p $(GENERATED_DOC_PATH)
 
-# Generate all of the proto messages and gRPC services with one invocation of
-# protoc when any of the .pb.go sources don't exist or when any of the .proto
-# files change.
-$(GENERATED_BASE_PATH)/%.pb.go: $(PROTO_BASE_PATH)/%.proto $(PROTO_DEPS) $(PROTOC_GEN_GRPC_GATEWAY) $(PROTOC_GEN_GO_BIN) $(ALL_PROTOS)
+# Generate all of the proto messages with one invocation of protoc when
+# any of the .pb.go sources don't exist or when any of the .proto files change.
+$(GENERATED_BASE_PATH)/%.pb.go: $(PROTO_BASE_PATH)/%.proto $(PROTO_DEPS) $(PROTOC_GEN_GO_BIN) $(ALL_PROTOS)
 	@echo "+ $@"
 	$(SILENT)mkdir -p $(dir $@)
 	$(SILENT)PATH=$(PROTO_GOBIN) $(PROTOC) \
-		-I$(GOGO_DIR) \
 		-I$(PROTOC_INCLUDES) \
-		-I$(GRPC_GATEWAY_DIR)/third_party/googleapis \
+		-I$(GOOGLE_API_INCLUDES) \
 		--proto_path=$(PROTO_BASE_PATH) \
-		--gofast_out=$(GOGO_M_STR:%=%,)$(M_ARGS_STR:%=%,)plugins=grpc:$(GENERATED_BASE_PATH) \
+		--plugin protoc-gen-go="${PROTOC_GEN_GO_BIN}" \
+		--go_out=$(M_ARGS_STR:%=%,)module=github.com/stackrox/scanner/generated:$(GENERATED_BASE_PATH) \
+		$(dir $<)/*.proto
+
+# Generate all of the vtproto extensions with one invocation of protoc when
+# any of the *_vtproto.pb.go sources don't exist or when any of the .proto files change.
+$(GENERATED_BASE_PATH)/%_vtproto.pb.go: $(PROTO_BASE_PATH)/%.proto $(PROTO_DEPS) $(PROTOC_GEN_GO_VTPROTO_BIN) $(ALL_PROTOS)
+	@echo "+ $@"
+	$(SILENT)mkdir -p $(dir $@)
+	$(SILENT)PATH=$(PROTO_GOBIN) $(PROTOC) \
+		-I$(PROTOC_INCLUDES) \
+		-I$(GOOGLE_API_INCLUDES) \
+		--proto_path=$(PROTO_BASE_PATH) \
+		--plugin protoc-gen-go-vtproto="${PROTOC_GEN_GO_VTPROTO_BIN}" \
+		--go-vtproto_opt=features=marshal+unmarshal+size+equal+clone+pool \
+		--go-vtproto_out=$(M_ARGS_STR:%=%,)module=github.com/stackrox/scanner/generated:$(GENERATED_BASE_PATH) \
+		$(dir $<)/*.proto
+
+# Generate all of the gRPC bindings with one invocation of protoc when
+# any of the *_grpc.pb.go sources don't exist or when any of the .proto files change.
+$(GENERATED_BASE_PATH)/%_grpc.pb.go: $(PROTO_BASE_PATH)/%.proto $(PROTO_DEPS) $(PROTOC_GEN_GO_GRPC) $(ALL_PROTOS)
+	@echo "+ $@"
+	$(SILENT)mkdir -p $(dir $@)
+	$(SILENT)PATH=$(PROTO_GOBIN) $(PROTOC) \
+		-I$(PROTOC_INCLUDES) \
+		-I$(GOOGLE_API_INCLUDES) \
+		--proto_path=$(PROTO_BASE_PATH) \
+		--plugin protoc-gen-go-grpc="${PROTOC_GEN_GO_GRPC}" \
+		--go-grpc_out=$(M_ARGS_STR:%=%,)module=github.com/stackrox/scanner/generated,require_unimplemented_servers=false:$(GENERATED_BASE_PATH) \
 		$(dir $<)/*.proto
 
 # Generate all of the reverse-proxies (gRPC-Gateways) with one invocation of
 # protoc when any of the .pb.gw.go sources don't exist or when any of the
 # .proto files change.
-$(GENERATED_BASE_PATH)/%_service.pb.gw.go: $(PROTO_BASE_PATH)/%_service.proto $(GENERATED_BASE_PATH)/%_service.pb.go $(ALL_PROTOS)
+$(GENERATED_BASE_PATH)/%_service.pb.gw.go: $(PROTO_BASE_PATH)/%_service.proto $(GENERATED_BASE_PATH)/%_service.pb.go $(PROTO_DEPS) $(PROTOC_GEN_GRPC_GATEWAY) $(ALL_PROTOS)
 	@echo "+ $@"
 	$(SILENT)mkdir -p $(dir $@)
 	$(SILENT)PATH=$(PROTO_GOBIN) $(PROTOC) \
 		-I$(PROTOC_INCLUDES) \
-		-I$(GOGO_DIR) \
-		-I$(GRPC_GATEWAY_DIR)/third_party/googleapis \
+		-I$(GOOGLE_API_INCLUDES) \
 		--proto_path=$(PROTO_BASE_PATH) \
-		--grpc-gateway_out=$(GATEWAY_M_ARGS_STR:%=%,)allow_colon_final_segments=true,logtostderr=true:$(GENERATED_BASE_PATH) \
+		--grpc-gateway_out=$(M_ARGS_STR:%=%,)module=github.com/stackrox/scanner/generated,generate_unbound_methods=true:$(GENERATED_BASE_PATH) \
 		$(dir $<)/*.proto
 
 # Generate all of the swagger specifications with one invocation of protoc
 # when any of the .swagger.json sources don't exist or when any of the
 # .proto files change.
-$(GENERATED_BASE_PATH)/%.swagger.json: $(PROTO_BASE_PATH)/%.proto $(PROTO_DEPS) $(PROTOC_GEN_GRPC_GATEWAY) $(PROTOC_GEN_SWAGGER) $(ALL_PROTOS)
+$(GENERATED_BASE_PATH)/%.swagger.json: $(PROTO_BASE_PATH)/%.proto $(PROTO_DEPS) $(PROTOC_GEN_OPENAPIV2) $(ALL_PROTOS)
 	@echo "+ $@"
 	$(SILENT)PATH=$(PROTO_GOBIN) $(PROTOC) \
-		-I$(GOGO_DIR) \
 		-I$(PROTOC_INCLUDES) \
-		-I$(GRPC_GATEWAY_DIR)/third_party/googleapis \
+		-I$(GOOGLE_API_INCLUDES) \
 		--proto_path=$(PROTO_BASE_PATH) \
-		--swagger_out=logtostderr=true,json_names_for_fields=true:$(GENERATED_BASE_PATH) \
+		--openapiv2_out=$(M_ARGS_STR:%=%,)module=github.com/stackrox/scanner/generated,json_names_for_fields=true:$(GENERATED_BASE_PATH) \
 		$(dir $<)/*.proto
 
 # Generate the docs from the merged swagger specs.
@@ -244,4 +267,4 @@ clean-proto-deps:
 	@echo "+ $@"
 	rm -f $(PROTOC_FILE)
 	rm -rf $(PROTOC_DIR)
-	rm -f $(PROTO_GOBIN)
+	rm -rf $(PROTO_GOBIN)

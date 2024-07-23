@@ -383,7 +383,7 @@ generate-junit-reports: $(GO_JUNIT_REPORT_BIN)
 ## Generated Srcs ##
 ####################
 
-PROTO_GENERATED_SRCS = $(GENERATED_PB_SRCS) $(GENERATED_API_GW_SRCS)
+PROTO_GENERATED_SRCS = $(GENERATED_PB_SRCS) $(GENERATED_VT_SRCS) $(GENERATED_API_SRCS) $(GENERATED_API_GW_SRCS)
 
 include make/protogen.mk
 
@@ -525,7 +525,7 @@ local-nodescanner:
 	$(BUILD_FLAGS) $(NODESCAN_BUILD_CMD)
 
 .PHONY: local-nodescanner-build-dockerized
-local-nodescanner-build-dockerized: 
+local-nodescanner-build-dockerized:
 	@echo "+ $@"
 ifdef CI
 	docker container create --name builder $(BUILD_IMAGE) $(NODESCAN_BUILD_CMD)

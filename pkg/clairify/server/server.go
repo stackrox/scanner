@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	protoTypes "github.com/gogo/protobuf/types"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -28,6 +27,7 @@ import (
 	server "github.com/stackrox/scanner/pkg/scan"
 	"github.com/stackrox/scanner/pkg/updater"
 	"github.com/stackrox/scanner/pkg/version"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Server is the HTTP server for Clairify.
@@ -257,8 +257,8 @@ func (s *Server) GetVulnDefsMetadata(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	ts, err := protoTypes.TimestampProto(t)
-	if err != nil {
+	ts := timestamppb.New(t)
+	if err = ts.CheckValid(); err != nil {
 		clairErrorString(w, http.StatusInternalServerError, "failed to obtain vulnerability definitions update timestamp: %v", err)
 		return
 	}
