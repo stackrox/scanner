@@ -199,7 +199,7 @@ replace (
 	github.com/mholt/archiver/v3 => github.com/anchore/archiver/v3 v3.5.2
 
 	github.com/operator-framework/helm-operator-plugins => github.com/stackrox/helm-operator v0.0.12-0.20230825152000-1361e2f7db46
-	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20240711164643-43f1b56f2130
+	github.com/stackrox/rox => github.com/stackrox/stackrox v0.0.0-20240723082904-cdfb007fd7e9
 
 	go.uber.org/zap => github.com/stackrox/zap v1.18.2-0.20240314134248-5f932edd0404
 )
