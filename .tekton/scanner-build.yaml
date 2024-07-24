@@ -67,24 +67,6 @@ spec:
       computeResources:
         requests:
           cpu: 2
-  - pipelineTaskName: build-container-s390x
-    stepSpecs:
-    - name: build
-      computeResources:
-        requests:
-          cpu: 2
-  - pipelineTaskName: build-container-ppc64le
-    stepSpecs:
-    - name: build
-      computeResources:
-        requests:
-          cpu: 2
-  - pipelineTaskName: build-container-arm64
-    stepSpecs:
-    - name: build
-      computeResources:
-        requests:
-          cpu: 2
   - pipelineTaskName: clamav-scan
     stepSpecs:
     # Provision more CPU to speed up ClamAV scan compared to the defaults.

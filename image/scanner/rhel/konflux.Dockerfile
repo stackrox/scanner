@@ -7,7 +7,7 @@ ARG BASE_TAG=latest
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.21 AS builder
 
 ARG SCANNER_TAG
-ENV RELEASE_TAG="${SCANNER_TAG}"
+ENV RELEASE_TAG="${SCANNER_TAG}-${TARGETARCH}"
 
 ENV GOFLAGS=""
 ENV CI=1
@@ -45,7 +45,7 @@ LABEL \
     summary="The image scanner for Red Hat Advanced Cluster Security for Kubernetes" \
     url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
     # We must set version label to prevent inheriting value set in the base stage.
-    version="${SCANNER_TAG}" \
+    version="${SCANNER_TAG}-${TARGETARCH}" \
     # Release label is required by EC although has no practical semantics.
     # We also set it to not inherit one from a base stage in case it's RHEL or UBI.
     release="1"
