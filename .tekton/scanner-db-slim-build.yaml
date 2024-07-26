@@ -68,9 +68,5 @@ spec:
         requests:
           cpu: 1
 
-  # With multi-arch the pipeline regularly takes >1h to finish
-  timeouts:
-    pipeline: 2h30m0s
-
   pipelineRef:
     name: scanner-component-pipeline

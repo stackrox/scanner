@@ -236,8 +236,6 @@ spec:
       value: $(tasks.fetch-scanner-data.results.SOURCE_ARTIFACT)
     - name: CACHI2_ARTIFACT
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
-    - name: PLATFORM
-      value: linux/amd64
     taskRef:
       params:
       - name: name
