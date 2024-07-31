@@ -9,7 +9,7 @@ require (
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.9.2
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
-	github.com/containers/image/v5 v5.31.1
+	github.com/containers/image/v5 v5.32.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/distribution/reference v0.6.0
 	github.com/docker/distribution v2.8.3+incompatible
@@ -48,7 +48,7 @@ require (
 	go.etcd.io/bbolt v1.3.10
 	go.uber.org/goleak v1.3.0
 	go.uber.org/ratelimit v0.3.1
-	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842
+	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8
 	golang.org/x/sys v0.22.0
 	google.golang.org/api v0.189.0
 	google.golang.org/grpc v1.65.0
@@ -74,10 +74,10 @@ require (
 	github.com/cloudflare/cfssl v1.6.5 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 // indirect
-	github.com/containers/ocicrypt v1.1.10 // indirect
-	github.com/containers/storage v1.54.0 // indirect
-	github.com/cyphar/filepath-securejoin v0.2.5 // indirect
-	github.com/docker/docker v26.1.3+incompatible // indirect
+	github.com/containers/ocicrypt v1.2.0 // indirect
+	github.com/containers/storage v1.55.0 // indirect
+	github.com/cyphar/filepath-securejoin v0.3.1 // indirect
+	github.com/docker/docker v27.1.1+incompatible // indirect
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
