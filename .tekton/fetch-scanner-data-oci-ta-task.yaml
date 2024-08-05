@@ -34,18 +34,18 @@ spec:
       and additional smuggled activation key.
     type: string
   volumes:
-    - name: workdir
-      emptyDir: {}
+  - name: workdir
+    emptyDir: { }
   stepTemplate:
     volumeMounts:
-      - mountPath: /var/workdir
-        name: workdir
+    - mountPath: /var/workdir
+      name: workdir
   steps:
   - name: use-trusted-artifact
     image: quay.io/redhat-appstudio/build-trusted-artifacts:latest@sha256:601e0999ae062e5ee666538d651af7893a75e415b7952c85caa8a4452501029a
     args:
-      - use
-      - $(params.SOURCE_ARTIFACT)=/var/workdir/source
+    - use
+    - $(params.SOURCE_ARTIFACT)=/var/workdir/source
   - name: fetch-scanner-data
     image: registry.access.redhat.com/ubi8/ubi-minimal:latest
     # The only functioning way to pass array parameter that I found is through args array.
@@ -62,10 +62,10 @@ spec:
   - name: create-trusted-artifact
     image: quay.io/redhat-appstudio/build-trusted-artifacts:latest@sha256:601e0999ae062e5ee666538d651af7893a75e415b7952c85caa8a4452501029a
     args:
-      - create
-      - --store
-      - $(params.ociStorage)
-      - $(results.SOURCE_ARTIFACT.path)=/var/workdir/source
+    - create
+    - --store
+    - $(params.ociStorage)
+    - $(results.SOURCE_ARTIFACT.path)=/var/workdir/source
     env:
-      - name: IMAGE_EXPIRES_AFTER
-        value: $(params.ociArtifactExpiresAfter)
+    - name: IMAGE_EXPIRES_AFTER
+      value: $(params.ociArtifactExpiresAfter)
