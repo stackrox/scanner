@@ -176,14 +176,27 @@ spec:
     - name: SOURCE_ARTIFACT
       value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
     taskRef:
-      name: determine-image-tag-oci-ta
+      name: determine-image-tag
+
+  - name: fetch-scanner-data
+    params:
+    - name: blobs-to-fetch
+      value: [ "$(params.blobs-to-fetch[*])" ]
+    - name: SOURCE_ARTIFACT
+      value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
+    - name: ociStorage
+      value: $(params.output-image-repo):konflux-$(params.revision).prefetch
+    - name: ociArtifactExpiresAfter
+      value: $(params.oci-artifact-expires-after)
+    taskRef:
+      name: fetch-scanner-data
 
   - name: prefetch-dependencies
     params:
     - name: input
       value: $(params.prefetch-input)
     - name: SOURCE_ARTIFACT
-      value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
+      value: $(tasks.fetch-scanner-data.results.SOURCE_ARTIFACT)
     - name: ociStorage
       value: $(params.output-image-repo):konflux-$(params.revision).prefetch
     - name: ociArtifactExpiresAfter
@@ -197,19 +210,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-
-  - name: fetch-scanner-data
-    params:
-    - name: blobs-to-fetch
-      value: [ "$(params.blobs-to-fetch[*])" ]
-    - name: SOURCE_ARTIFACT
-      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
-    - name: ociStorage
-      value: $(params.output-image-repo):konflux-$(params.revision).prefetch
-    - name: ociArtifactExpiresAfter
-      value: $(params.oci-artifact-expires-after)
-    taskRef:
-      name: fetch-scanner-data-oci-ta
 
   - name: build-container-amd64
     params:
@@ -233,7 +233,7 @@ spec:
       value:
       - SCANNER_TAG=$(tasks.determine-image-tag.results.IMAGE_TAG)
     - name: SOURCE_ARTIFACT
-      value: $(tasks.fetch-scanner-data.results.SOURCE_ARTIFACT)
+      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
     - name: CACHI2_ARTIFACT
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     taskRef:
@@ -272,7 +272,7 @@ spec:
       value:
       - SCANNER_TAG=$(tasks.determine-image-tag.results.IMAGE_TAG)
     - name: SOURCE_ARTIFACT
-      value: $(tasks.fetch-scanner-data.results.SOURCE_ARTIFACT)
+      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
     - name: CACHI2_ARTIFACT
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     - name: PLATFORM
@@ -313,7 +313,7 @@ spec:
       value:
       - SCANNER_TAG=$(tasks.determine-image-tag.results.IMAGE_TAG)
     - name: SOURCE_ARTIFACT
-      value: $(tasks.fetch-scanner-data.results.SOURCE_ARTIFACT)
+      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
     - name: CACHI2_ARTIFACT
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     - name: PLATFORM
@@ -354,7 +354,7 @@ spec:
       value:
       - SCANNER_TAG=$(tasks.determine-image-tag.results.IMAGE_TAG)
     - name: SOURCE_ARTIFACT
-      value: $(tasks.fetch-scanner-data.results.SOURCE_ARTIFACT)
+      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
     - name: CACHI2_ARTIFACT
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     - name: PLATFORM
@@ -381,25 +381,25 @@ spec:
       value: $(tasks.clone-repository.results.commit)
     - name: IMAGES
       value:
-        - $(tasks.build-container-amd64.results.IMAGE_REF)
-        - $(tasks.build-container-s390x.results.IMAGE_REF)
-        - $(tasks.build-container-ppc64le.results.IMAGE_REF)
-        - $(tasks.build-container-arm64.results.IMAGE_REF)
+      - $(tasks.build-container-amd64.results.IMAGE_REF)
+      - $(tasks.build-container-s390x.results.IMAGE_REF)
+      - $(tasks.build-container-ppc64le.results.IMAGE_REF)
+      - $(tasks.build-container-arm64.results.IMAGE_REF)
     - name: IMAGE_EXPIRES_AFTER
       value: $(params.image-expires-after)
     taskRef:
       params:
-        - name: name
-          value: build-image-manifest
-        - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-build-image-manifest:0.1@sha256:fd0a0cf019621d6b577f1b9ab774bb1832f7cba61b4ceee2fd1bffc96895abf9
-        - name: kind
-          value: task
+      - name: name
+        value: build-image-manifest
+      - name: bundle
+        value: quay.io/konflux-ci/tekton-catalog/task-build-image-manifest:0.1@sha256:fd0a0cf019621d6b577f1b9ab774bb1832f7cba61b4ceee2fd1bffc96895abf9
+      - name: kind
+        value: task
       resolver: bundles
     when:
-      - input: $(tasks.init.results.build)
-        operator: in
-        values: [ "true" ]
+    - input: $(tasks.init.results.build)
+      operator: in
+      values: [ "true" ]
 
   - name: build-image-manifest-konflux
     params:
@@ -409,32 +409,32 @@ spec:
       value: $(tasks.clone-repository.results.commit)
     - name: IMAGES
       value:
-        - $(tasks.build-container-amd64.results.IMAGE_REF)
-        - $(tasks.build-container-s390x.results.IMAGE_REF)
-        - $(tasks.build-container-ppc64le.results.IMAGE_REF)
-        - $(tasks.build-container-arm64.results.IMAGE_REF)
+      - $(tasks.build-container-amd64.results.IMAGE_REF)
+      - $(tasks.build-container-s390x.results.IMAGE_REF)
+      - $(tasks.build-container-ppc64le.results.IMAGE_REF)
+      - $(tasks.build-container-arm64.results.IMAGE_REF)
     - name: IMAGE_EXPIRES_AFTER
       value: $(params.image-expires-after)
     taskRef:
       params:
-        - name: name
-          value: build-image-manifest
-        - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-build-image-manifest:0.1@sha256:fd0a0cf019621d6b577f1b9ab774bb1832f7cba61b4ceee2fd1bffc96895abf9
-        - name: kind
-          value: task
+      - name: name
+        value: build-image-manifest
+      - name: bundle
+        value: quay.io/konflux-ci/tekton-catalog/task-build-image-manifest:0.1@sha256:fd0a0cf019621d6b577f1b9ab774bb1832f7cba61b4ceee2fd1bffc96895abf9
+      - name: kind
+        value: task
       resolver: bundles
     when:
-      - input: $(tasks.init.results.build)
-        operator: in
-        values: [ "true" ]
+    - input: $(tasks.init.results.build)
+      operator: in
+      values: [ "true" ]
 
   - name: build-source-image
     params:
     - name: BINARY_IMAGE
       value: $(tasks.build-container-amd64.results.IMAGE_URL)
     - name: SOURCE_ARTIFACT
-      value: $(tasks.fetch-scanner-data.results.SOURCE_ARTIFACT)
+      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
     - name: CACHI2_ARTIFACT
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     taskRef:
@@ -556,8 +556,8 @@ spec:
 
   - name: sast-snyk-check
     params:
-      - name: SOURCE_ARTIFACT
-        value: $(tasks.fetch-scanner-data.results.SOURCE_ARTIFACT)
+    - name: SOURCE_ARTIFACT
+      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
     taskRef:
       params:
       - name: name

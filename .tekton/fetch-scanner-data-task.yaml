@@ -15,23 +15,57 @@ spec:
   - name: target-dir
     description: Target directory relative to workspace where to save downloaded blobs.
     type: string
-    default: "source"
+    default: "."
+  - name: SOURCE_ARTIFACT
+    description: The Trusted Artifact URI pointing to the artifact with
+      the application source code. This should be the result of the git-clone task,
+      results from other tasks might fail as dirty.
+    type: string
+  - name: ociStorage
+    description: The OCI repository where the Trusted Artifacts are stored.
+    type: string
+  - name: ociArtifactExpiresAfter
+    description: Expiration date for the trusted artifacts created in the
+      OCI repository.
+    type: string
   results:
+  - name: SOURCE_ARTIFACT
+    description: The Trusted Artifact URI pointing to the artifact with the application source code
+      and additional smuggled activation key.
+    type: string
+  volumes:
+  - name: workdir
+    emptyDir: { }
+  stepTemplate:
+    volumeMounts:
+    - mountPath: /var/workdir
+      name: workdir
   steps:
+  - name: use-trusted-artifact
+    image: quay.io/redhat-appstudio/build-trusted-artifacts:latest@sha256:601e0999ae062e5ee666538d651af7893a75e415b7952c85caa8a4452501029a
+    args:
+    - use
+    - $(params.SOURCE_ARTIFACT)=/var/workdir/source
   - name: fetch-scanner-data
     image: registry.access.redhat.com/ubi8/ubi-minimal:latest
     # The only functioning way to pass array parameter that I found is through args array.
     # Array params have weird limitations, see https://github.com/tektoncd/pipeline/blob/main/docs/tasks.md#substituting-array-parameters
     # Attempts to pass this in other places result in webhook errors and pipeline not starting.
     args: [ "$(params.blobs-to-fetch[*])" ]
+    workingDir: /var/workdir/source
     script: |
       #!/usr/bin/env bash
       set -euo pipefail
-      exec "$(workspaces.source.path)/source/scripts/konflux/fetch-scanner-data.sh" \
-                  "$(workspaces.source.path)/$(params.target-dir)" \
-                  "$@"
+      scripts/konflux/fetch-scanner-data.sh "$(params.target-dir)" "$@"
     # It should not take long to download blobs otherwise there's something odd going on.
     timeout: 10m
-  workspaces:
-  - name: source
-    description: Workspace with the source code.
+  - name: create-trusted-artifact
+    image: quay.io/redhat-appstudio/build-trusted-artifacts:latest@sha256:601e0999ae062e5ee666538d651af7893a75e415b7952c85caa8a4452501029a
+    args:
+    - create
+    - --store
+    - $(params.ociStorage)
+    - $(results.SOURCE_ARTIFACT.path)=/var/workdir/source
+    env:
+    - name: IMAGE_EXPIRES_AFTER
+      value: $(params.ociArtifactExpiresAfter)
