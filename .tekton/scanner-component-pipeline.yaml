@@ -124,8 +124,8 @@ spec:
         image: registry.access.redhat.com/ubi8/ubi-minimal:latest
         script: |
           echo "pull_request is the following:"
+          echo "{{ body.pull_request }}"
           echo "labels are the following:"
-          echo "{{ body.pull_request.labels }}"
           echo "end of the thing"
           exit 6
 
