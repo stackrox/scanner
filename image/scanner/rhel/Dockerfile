@@ -43,7 +43,7 @@ RUN microdnf upgrade -y --nobest && \
     # by the script `save-dir-contents` during the image build. The directory
     # contents are then restored by the script `restore-all-dir-contents`
     # during the container start.
-    chown -R 65534:65534 /etc/pki /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl && \
+    chown -R 65534:65534 /etc/pki/ca-trust /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl && \
     chmod +rx /scanner
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
