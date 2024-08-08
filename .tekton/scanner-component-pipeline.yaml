@@ -123,13 +123,13 @@ spec:
       - name: echo-json
         image: registry.access.redhat.com/ubi8/ubi-minimal:latest
         script: |
-          echo "body is the following:"
-          echo "{{ body }}"
           echo "pull_request is the following:"
           echo "{{ body.pull_request }}"
           echo "labels are the following:"
           echo "{{ body.pull_request.labels }}"
-          echo "end of labels"
+          echo "body is the following:"
+          echo "{{ body }}"
+          echo "end of the thing"
 
   - name: init
     params:
