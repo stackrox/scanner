@@ -121,7 +121,7 @@ spec:
     taskSpec:
       steps:
       - name: echo-json
-        image: registry.access.redhat.com/ubi8/ubi-minimal:latest
+        image: registry.access.redhat.com/ubi9/ubi:latest
         script: |
           #!/usr/bin/env python3
           import json
