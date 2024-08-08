@@ -128,6 +128,7 @@ spec:
           echo "labels are the following:"
           echo "{{ body.pull_request.labels }}"
           echo "end of the thing"
+          exit 6
 
   - name: init
     params:
