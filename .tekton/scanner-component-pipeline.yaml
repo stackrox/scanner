@@ -123,11 +123,11 @@ spec:
       - name: echo-json
         image: registry.access.redhat.com/ubi8/ubi-minimal:latest
         script: |
-          echo "pull_request is the following:"
-          echo "{{ body.pull_request }}"
-          echo "labels are the following:"
-          echo "end of the thing"
-          exit 6
+          #!/usr/bin/env python3
+          import json
+          body=json.loads("""{{ body }}""")
+          print(json.dumps(body, indent="  "))
+          exit(6)
 
   - name: init
     params:
