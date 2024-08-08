@@ -117,6 +117,18 @@ spec:
 
   tasks:
 
+  - name: echo-json
+    taskSpec:
+      steps:
+      - name: echo-json
+        image: registry.access.redhat.com/ubi8/ubi-minimal:latest
+        script: |
+          echo "json is the following:"
+          echo "{{ body.pull_request }}"
+          echo "end of json"
+          echo "{{ body.pull_request.labels }}"
+          echo "end of labels"
+
   - name: init
     params:
     - name: image-url
