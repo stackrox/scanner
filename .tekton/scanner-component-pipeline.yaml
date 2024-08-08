@@ -127,8 +127,6 @@ spec:
           echo "{{ body.pull_request }}"
           echo "labels are the following:"
           echo "{{ body.pull_request.labels }}"
-          echo "body is the following:"
-          echo "{{ body }}"
           echo "end of the thing"
 
   - name: init
