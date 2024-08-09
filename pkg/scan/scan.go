@@ -44,7 +44,11 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	for _, layer := range layers {
 		layerReadCloser := &LayerDownloadReadCloser{
 			Downloader: func() (io.ReadCloser, error) {
-				return registry.DownloadLayer(image.Remote, digest.Digest(layer))
+				dig, err := digest.Parse(layer)
+				if err != nil {
+					return nil, errors.Wrapf(err, "invalid layer digest %q", layer)
+				}
+				return registry.DownloadLayer(image.Remote, dig)
 			},
 		}
 
