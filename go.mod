@@ -183,7 +183,7 @@ require (
 replace (
 	github.com/facebookincubator/nvdtools => github.com/stackrox/nvdtools v0.0.0-20231111002313-57e262e4797e
 
-	github.com/heroku/docker-registry-client => github.com/stackrox/docker-registry-client v0.1.0
+	github.com/heroku/docker-registry-client => github.com/stackrox/docker-registry-client v0.2.1-0.20240809225852-a122013c5989
 
 	// The current latest version of github.com/mholt/archiver/v3 (v3.5.1) suffers from CVE-2024-0406.
 	// There is currently a PR in place to resolve it (https://github.com/mholt/archiver/pull/396),
