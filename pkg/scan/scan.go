@@ -46,8 +46,11 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	for _, layer := range layers {
 		layerReadCloser := &LayerDownloadReadCloser{
 			Downloader: func() (io.ReadCloser, error) {
-				// It is assumed layer is a valid digest.Digest, so no need to parse and validate here.
-				return registry.DownloadLayer(image.Remote, digest.Digest(layer))
+				dig, err := digest.Parse(layer)
+				if err != nil {
+					return nil, errors.Wrapf(err, "invalid layer digest %q", layer)
+				}
+				return registry.DownloadLayer(image.Remote, dig)
 			},
 		}
 
@@ -98,7 +101,7 @@ func process(storage database.Datastore, image *types.Image, reg types.Registry,
 	logrus.Debugf("Processing image %s", image)
 	dig, layers, err := FetchLayers(reg, image)
 	if err != nil {
-		return dig, "", "", errors.Errorf("fetching layers for %s: %v", image.String(), err)
+		return dig, "", "", errors.Wrapf(err, "fetching layers for image %s", image.String())
 	}
 	if len(layers) == 0 {
 		return dig, "", "", fmt.Errorf("no layers to process for image %s", image.String())
@@ -163,7 +166,7 @@ func handleManifestLists(reg types.Registry, remote, ref string, manifests []man
 	}
 	if len(manifests) == 1 {
 		if err := manifests[0].Digest.Validate(); err != nil {
-			return "", nil, errors.Errorf("chosen manifest in list has invalid digest %v: %v", manifests[0].Digest, err)
+			return "", nil, errors.Wrapf(err, "chosen manifest in list has invalid digest %s", manifests[0].Digest.String())
 		}
 		return handleManifest(reg, manifests[0].MediaType, remote, manifests[0].Digest.String())
 	}
@@ -176,7 +179,7 @@ func handleManifestLists(reg types.Registry, remote, ref string, manifests []man
 		// Matching platform for GOARCH takes priority so return immediately
 		if m.Platform.Architecture == runtime.GOARCH {
 			if err := m.Digest.Validate(); err != nil {
-				return "", nil, errors.Errorf("chosen manifest in list has invalid digest %v: %v", m.Digest, err)
+				return "", nil, errors.Wrapf(err, "chosen manifest in list has invalid digest %s", m.Digest.String())
 			}
 			return handleManifest(reg, m.MediaType, remote, m.Digest.String())
 		}
@@ -187,7 +190,7 @@ func handleManifestLists(reg types.Registry, remote, ref string, manifests []man
 	}
 	if foundAMD {
 		if err := amdManifest.Digest.Validate(); err != nil {
-			return "", nil, errors.Errorf("chosen manifest in list has invalid digest %v: %v", amdManifest.Digest, err)
+			return "", nil, errors.Wrapf(err, "chosen manifest in list has invalid digest %s", amdManifest.Digest.String())
 		}
 		return handleManifest(reg, amdManifest.MediaType, remote, amdManifest.Digest.String())
 	}
@@ -258,7 +261,7 @@ func handleManifest(reg types.Registry, manifestType, remote, ref string) (dig d
 
 	for _, layer := range layers {
 		if _, err := digest.Parse(layer); err != nil {
-			return "", nil, errors.Errorf("invalid layer %s: %v", layer, err)
+			return "", nil, errors.Wrapf(err, "invalid layer %q", layer)
 		}
 	}
 
