@@ -35,8 +35,6 @@ var manifestTypes = []string{
 }
 
 // analyzeLayers processes all the layers and returns the lineage for the last layer so that we can uniquely identify it.
-//
-// It is the caller's responsibility to ensure the layers are valid digests.
 func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string, uncertifiedRHEL bool) (string, error) {
 	var prevLayer string
 
