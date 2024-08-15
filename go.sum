@@ -612,8 +612,8 @@ github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An
 github.com/spf13/pflag v1.0.6-0.20210604193023-d5e0c0615ace h1:9PNP1jnUjRhfmGMlkXHjYPishpcw4jpSt/V/xYY3FMA=
 github.com/spf13/pflag v1.0.6-0.20210604193023-d5e0c0615ace/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 github.com/spf13/viper v1.10.0/go.mod h1:SoyBPwAtKDzypXNDFKN5kzH7ppppbGZtls1UpIy5AsM=
-github.com/stackrox/docker-registry-client v0.1.0 h1:TbNgSP3dhNbLAqlwyTIYNXbNvl9TDTAbh+cfzVyJ6II=
-github.com/stackrox/docker-registry-client v0.1.0/go.mod h1:4TU+pA11iczIvhtL0own2OJcJXc1o26tBHDivaXhlZU=
+github.com/stackrox/docker-registry-client v0.2.1 h1:0SxojNYZXV2tXo1BxtxfQpiPZavAmw+B1aWT8CSSqYE=
+github.com/stackrox/docker-registry-client v0.2.1/go.mod h1:4TU+pA11iczIvhtL0own2OJcJXc1o26tBHDivaXhlZU=
 github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd h1:vEjp7Q66zd4W72//Uk3uyVN50Mh/nFLbN9pb7CVK7mE=
 github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd/go.mod h1:HILeV3i/EyJz844GcrC3+oU7oZONhjfujaIYBMJ/bZE=
 github.com/stackrox/istio-cves v0.0.0-20221007013142-0bde9b541ec8 h1:rUIvoAHokPcd92aJT2gJwVeyE8tMuaqS5l5s3cEgXFY=
