@@ -69,5 +69,10 @@ spec:
         requests:
           cpu: 1
 
+  timeouts:
+    tasks: 1h
+    finally: 10m
+    pipeline: 1h10m
+
   pipelineRef:
     name: scanner-component-pipeline
