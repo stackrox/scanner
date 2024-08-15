@@ -34,7 +34,7 @@ var manifestTypes = []string{
 	manifestV1.MediaTypeManifest,
 }
 
-// analyzeLayers processes all of the layers and returns the lineage for the last layer so that we can uniquely identify it
+// analyzeLayers processes all the layers and returns the lineage for the last layer so that we can uniquely identify it.
 func analyzeLayers(storage database.Datastore, registry types.Registry, image *types.Image, layers []string, uncertifiedRHEL bool) (string, error) {
 	var prevLayer string
 
@@ -44,7 +44,11 @@ func analyzeLayers(storage database.Datastore, registry types.Registry, image *t
 	for _, layer := range layers {
 		layerReadCloser := &LayerDownloadReadCloser{
 			Downloader: func() (io.ReadCloser, error) {
-				return registry.DownloadLayer(image.Remote, digest.Digest(layer))
+				dig, err := digest.Parse(layer)
+				if err != nil {
+					return nil, errors.Wrapf(err, "invalid layer digest %q", layer)
+				}
+				return registry.DownloadLayer(image.Remote, dig)
 			},
 		}
 
@@ -78,14 +82,14 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 	if err != nil {
 		return "", err
 	}
-	digest, lineage, layer, err := process(storage, image, reg, uncertifiedRHEL)
+	dig, lineage, layer, err := process(storage, image, reg, uncertifiedRHEL)
 	if err != nil {
-		return digest, err
+		return dig, err
 	}
 	if image.SHA == "" {
-		image.SHA = digest
+		image.SHA = dig
 	}
-	return digest, storage.AddImage(layer, image.SHA, lineage, image.TaggedName(), &database.DatastoreOptions{
+	return dig, storage.AddImage(layer, image.SHA, lineage, image.TaggedName(), &database.DatastoreOptions{
 		UncertifiedRHEL: uncertifiedRHEL,
 	})
 }
@@ -93,21 +97,21 @@ func ProcessImage(storage database.Datastore, image *types.Image, registry, user
 // process fetches and analyzes the layers for the requested image returning the image digest, the lineage of the last layer and the last layer digest
 func process(storage database.Datastore, image *types.Image, reg types.Registry, uncertifiedRHEL bool) (string, string, string, error) {
 	logrus.Debugf("Processing image %s", image)
-	digest, layers, err := FetchLayers(reg, image)
+	dig, layers, err := FetchLayers(reg, image)
 	if err != nil {
-		return digest, "", "", err
+		return dig, "", "", errors.Wrapf(err, "fetching layers for image %s", image.String())
 	}
 	if len(layers) == 0 {
-		return digest, "", "", fmt.Errorf("No layers to process for image %s", image.String())
+		return dig, "", "", fmt.Errorf("no layers to process for image %s", image.String())
 	}
 
 	logrus.Infof("Found %v layers for image %v", len(layers), image)
 	lineage, err := analyzeLayers(storage, reg, image, layers, uncertifiedRHEL)
 	if err != nil {
 		logrus.Errorf("Failed to analyze image %q: %v", image.String(), err)
-		return digest, "", "", err
+		return dig, "", "", err
 	}
-	return digest, lineage, layers[len(layers)-1], err
+	return dig, lineage, layers[len(layers)-1], err
 }
 
 func isEmptyLayer(layer string) bool {
@@ -159,6 +163,9 @@ func handleManifestLists(reg types.Registry, remote, ref string, manifests []man
 		return "", nil, errors.Errorf("no valid manifests found for %s:%s", remote, ref)
 	}
 	if len(manifests) == 1 {
+		if err := manifests[0].Digest.Validate(); err != nil {
+			return "", nil, errors.Wrapf(err, "chosen manifest in list has invalid digest %s", manifests[0].Digest.String())
+		}
 		return handleManifest(reg, manifests[0].MediaType, remote, manifests[0].Digest.String())
 	}
 	var amdManifest manifestlist.ManifestDescriptor
@@ -169,6 +176,9 @@ func handleManifestLists(reg types.Registry, remote, ref string, manifests []man
 		}
 		// Matching platform for GOARCH takes priority so return immediately
 		if m.Platform.Architecture == runtime.GOARCH {
+			if err := m.Digest.Validate(); err != nil {
+				return "", nil, errors.Wrapf(err, "chosen manifest in list has invalid digest %s", m.Digest.String())
+			}
 			return handleManifest(reg, m.MediaType, remote, m.Digest.String())
 		}
 		if m.Platform.Architecture == "amd64" {
@@ -177,56 +187,60 @@ func handleManifestLists(reg types.Registry, remote, ref string, manifests []man
 		}
 	}
 	if foundAMD {
+		if err := amdManifest.Digest.Validate(); err != nil {
+			return "", nil, errors.Wrapf(err, "chosen manifest in list has invalid digest %s", amdManifest.Digest.String())
+		}
 		return handleManifest(reg, amdManifest.MediaType, remote, amdManifest.Digest.String())
 	}
 	return "", nil, errors.Errorf("no manifest in list matched linux and amd64 or %s architectures: %s:%s", runtime.GOARCH, remote, ref)
 }
 
-func handleManifest(reg types.Registry, manifestType, remote, ref string) (digest.Digest, []string, error) {
+// handleManifest returns the image digest and layers from the given image and manifest type.
+// The returned image digest and layers are valid unless the function returns a non-nil error.
+//
+// The caller is responsible for ensuring ref is a valid digest.
+func handleManifest(reg types.Registry, manifestType, remote, ref string) (dig digest.Digest, layers []string, err error) {
 	switch manifestType {
 	case manifestV1.MediaTypeManifest:
 		manifest, err := reg.Manifest(remote, ref)
 		if err != nil {
 			return "", nil, err
 		}
-		dig, err := renderDigest(manifest)
+		dig, err = renderDigest(manifest)
 		if err != nil {
 			return "", nil, err
 		}
-		layers := parseV1Layers(manifest)
-		return dig, layers, nil
+		layers = parseV1Layers(manifest)
 	case manifestV1.MediaTypeSignedManifest:
 		manifest, err := reg.SignedManifest(remote, ref)
 		if err != nil {
 			return "", nil, err
 		}
-		dig, err := renderDigest(manifest)
+		dig, err = renderDigest(manifest)
 		if err != nil {
 			return "", nil, err
 		}
-		layers := parseV1Layers(manifest)
-		return dig, layers, nil
+		layers = parseV1Layers(manifest)
 	case manifestV2.MediaTypeManifest:
 		manifest, err := reg.ManifestV2(remote, ref)
 		if err != nil {
 			return "", nil, err
 		}
-		dig, err := renderDigest(manifest)
+		dig, err = renderDigest(manifest)
 		if err != nil {
 			return "", nil, err
 		}
-		layers := parseLayers(manifest.Layers)
-		return dig, layers, nil
+		layers = parseLayers(manifest.Layers)
 	case registry.MediaTypeImageManifest:
 		manifest, err := reg.ManifestOCI(remote, ref)
 		if err != nil {
 			return "", nil, err
 		}
-		dig, err := renderDigest(manifest)
+		dig, err = renderDigest(manifest)
 		if err != nil {
 			return "", nil, err
 		}
-		return dig, parseLayers(manifest.Layers), nil
+		layers = parseLayers(manifest.Layers)
 	case manifestlist.MediaTypeManifestList:
 		manifestList, err := reg.ManifestList(remote, ref)
 		if err != nil {
@@ -240,8 +254,16 @@ func handleManifest(reg types.Registry, manifestType, remote, ref string) (diges
 		}
 		return handleManifestLists(reg, remote, ref, imageIndex.Manifests)
 	default:
-		return "", nil, fmt.Errorf("Could not parse manifest type %q", manifestType)
+		return "", nil, fmt.Errorf("could not parse manifest type %q", manifestType)
 	}
+
+	for _, layer := range layers {
+		if _, err := digest.Parse(layer); err != nil {
+			return "", nil, errors.Wrapf(err, "invalid layer %q", layer)
+		}
+	}
+
+	return dig, layers, nil
 }
 
 // FetchLayers downloads the layers for the given image.

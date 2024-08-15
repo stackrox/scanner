@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/opencontainers/go-digest"
+	"github.com/pkg/errors"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	server "github.com/stackrox/scanner/pkg/scan"
 	"github.com/stretchr/testify/require"
@@ -41,7 +42,11 @@ func MustGetLayerReadClosers(b *testing.B, imageName string) []*layerReadCloser 
 func getLayerDownloadReadCloser(reg types.Registry, image *types.Image, layerName string) *server.LayerDownloadReadCloser {
 	return &server.LayerDownloadReadCloser{
 		Downloader: func() (io.ReadCloser, error) {
-			return reg.DownloadLayer(image.Remote, digest.Digest(layerName))
+			dig, err := digest.Parse(layerName)
+			if err != nil {
+				return nil, errors.Wrapf(err, "invalid layer digest %q", layerName)
+			}
+			return reg.DownloadLayer(image.Remote, dig)
 		},
 	}
 }
