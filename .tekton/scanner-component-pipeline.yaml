@@ -2,9 +2,7 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: scanner-component-pipeline
-
 spec:
-
   finally:
   - name: slack-notification
     params:
@@ -26,7 +24,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-
   - name: show-sbom
     params:
     - name: IMAGE_URL
@@ -40,7 +37,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-
   params:
   - description: Source Repository URL
     name: git-url
@@ -65,13 +61,11 @@ spec:
     name: output-tag-suffix
     type: string
   - default: .
-    description: Path to the source code of an application's component from where
-      to build image.
+    description: Path to the source code of an application's component from where to build image.
     name: path-context
     type: string
   - default: Dockerfile
-    description: Path to the Dockerfile inside the context specified by parameter
-      path-context
+    description: Path to the Dockerfile inside the context specified by parameter path-context
     name: dockerfile
     type: string
   - default: "false"
@@ -95,8 +89,7 @@ spec:
     name: java
     type: string
   - default: ""
-    description: Image tag expiration time, time values could be something like
-      1h, 2d, 3w for hours, days, and weeks, respectively.
+    description: Image tag expiration time, time values could be something like 1h, 2d, 3w for hours, days, and weeks, respectively.
     name: image-expires-after
     type: string
   - default: "true"
@@ -107,7 +100,7 @@ spec:
     description: Build stage to target in container build
     name: build-target-stage
     type: string
-  - default: [ ]
+  - default: []
     description: List of scanner-data file names to fetch to include in the container build.
     name: blobs-to-fetch
     type: array
@@ -115,7 +108,6 @@ spec:
     description: This sets the expiration time for intermediate OCI artifacts produced and used during builds after which they can be garbage collected.
     name: oci-artifact-expires-after
     type: string
-
   results:
   - description: ""
     name: IMAGE_URL
@@ -132,12 +124,9 @@ spec:
   - description: ""
     name: JAVA_COMMUNITY_DEPENDENCIES
     value: $(tasks.build-container-amd64.results.JAVA_COMMUNITY_DEPENDENCIES)
-
   workspaces:
   - name: git-auth
-
   tasks:
-
   - name: init
     params:
     - name: image-url
@@ -158,7 +147,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-
   - name: clone-repository
     params:
     - name: url
@@ -185,11 +173,10 @@ spec:
     when:
     - input: $(tasks.init.results.build)
       operator: in
-      values: [ "true" ]
+      values: ["true"]
     workspaces:
     - name: basic-auth
       workspace: git-auth
-
   - name: determine-image-tag
     params:
     - name: TAG_SUFFIX
@@ -198,11 +185,10 @@ spec:
       value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
     taskRef:
       name: determine-image-tag
-
   - name: fetch-scanner-data
     params:
     - name: blobs-to-fetch
-      value: [ "$(params.blobs-to-fetch[*])" ]
+      value: ["$(params.blobs-to-fetch[*])"]
     - name: SOURCE_ARTIFACT
       value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
     - name: ociStorage
@@ -211,7 +197,6 @@ spec:
       value: $(params.oci-artifact-expires-after)
     taskRef:
       name: fetch-scanner-data
-
   - name: prefetch-dependencies
     params:
     - name: input
@@ -231,7 +216,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-
   - name: build-container-amd64
     params:
     - name: IMAGE
@@ -269,8 +253,7 @@ spec:
     when:
     - input: $(tasks.init.results.build)
       operator: in
-      values: [ "true" ]
-
+      values: ["true"]
   - name: build-container-s390x
     params:
     - name: IMAGE
@@ -310,8 +293,7 @@ spec:
     when:
     - input: $(tasks.init.results.build)
       operator: in
-      values: [ "true" ]
-
+      values: ["true"]
   - name: build-container-ppc64le
     params:
     - name: IMAGE
@@ -351,8 +333,7 @@ spec:
     when:
     - input: $(tasks.init.results.build)
       operator: in
-      values: [ "true" ]
-
+      values: ["true"]
   - name: build-container-arm64
     params:
     - name: IMAGE
@@ -392,8 +373,7 @@ spec:
     when:
     - input: $(tasks.init.results.build)
       operator: in
-      values: [ "true" ]
-
+      values: ["true"]
   - name: build-image-manifest
     params:
     - name: IMAGE
@@ -420,8 +400,7 @@ spec:
     when:
     - input: $(tasks.init.results.build)
       operator: in
-      values: [ "true" ]
-
+      values: ["true"]
   - name: build-image-manifest-konflux
     params:
     - name: IMAGE
@@ -448,8 +427,7 @@ spec:
     when:
     - input: $(tasks.init.results.build)
       operator: in
-      values: [ "true" ]
-
+      values: ["true"]
   - name: build-source-image
     params:
     - name: BINARY_IMAGE
@@ -470,11 +448,10 @@ spec:
     when:
     - input: $(tasks.init.results.build)
       operator: in
-      values: [ "true" ]
+      values: ["true"]
     - input: $(params.build-source-image)
       operator: in
-      values: [ "true" ]
-
+      values: ["true"]
   - name: deprecated-base-image-check
     params:
     - name: IMAGE_URL
@@ -493,8 +470,7 @@ spec:
     when:
     - input: $(params.skip-checks)
       operator: in
-      values: [ "false" ]
-
+      values: ["false"]
   - name: clair-scan
     params:
     - name: image-digest
@@ -513,8 +489,7 @@ spec:
     when:
     - input: $(params.skip-checks)
       operator: in
-      values: [ "false" ]
-
+      values: ["false"]
   - name: sast-snyk-check
     params:
     - name: SOURCE_ARTIFACT
@@ -531,8 +506,7 @@ spec:
     when:
     - input: $(params.skip-checks)
       operator: in
-      values: [ "false" ]
-
+      values: ["false"]
   - name: clamav-scan
     params:
     - name: image-digest
@@ -551,8 +525,7 @@ spec:
     when:
     - input: $(params.skip-checks)
       operator: in
-      values: [ "false" ]
-
+      values: ["false"]
   - name: sbom-json-check
     params:
     - name: IMAGE_URL
@@ -571,4 +544,4 @@ spec:
     when:
     - input: $(params.skip-checks)
       operator: in
-      values: [ "false" ]
+      values: ["false"]
