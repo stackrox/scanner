@@ -25,10 +25,10 @@ import (
 
 const (
 	// PulpManifest is the url for the Red Hat OVAL pulp repository.
-	PulpManifest = `https://www.redhat.com/security/data/oval/v2/PULP_MANIFEST`
+	PulpManifest = `https://security.access.redhat.com/data/oval/v2/PULP_MANIFEST`
 
 	// Repo2CPEMappingURL is the URL with a mapping file provided by Red Hat.
-	Repo2CPEMappingURL = `https://www.redhat.com/security/data/metrics/repository-to-cpe.json`
+	Repo2CPEMappingURL = `https://security.access.redhat.com/data/metrics/repository-to-cpe.json`
 )
 
 var (
