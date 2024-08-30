@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
-	"github.com/stackrox/rox/pkg/mathutil"
 	"github.com/stackrox/rox/pkg/utils"
 )
 
@@ -115,7 +114,7 @@ func (r *diskBackedLazyReaderAt) readAt(p []byte, off int64) (n int, err error) 
 	defer r.mutex.RUnlock()
 
 	if off < r.maxBufferSize {
-		n, err = r.lzReader.ReadAt(p[:mathutil.MinInt64(int64(len(p)), r.maxBufferSize-off)], off)
+		n, err = r.lzReader.ReadAt(p[:min(int64(len(p)), r.maxBufferSize-off)], off)
 		if err != nil || n == len(p) {
 			return n, err
 		}
@@ -190,7 +189,7 @@ func (r *diskBackedLazyReaderAt) ensureOverflowToDisk(till int64) {
 
 	// Copy up to the next block, aligned with size overflowBlockSize.
 	// This is maxed to the size of the reader.
-	to := mathutil.MinInt64(((till-1)/overflowBlockSize+1)*overflowBlockSize, r.size)
+	to := min(((till-1)/overflowBlockSize+1)*overflowBlockSize, r.size)
 	// If the entire reader size is required, then copy an extra byte to ensure EOF is recorded.
 	if to == r.size {
 		to++
