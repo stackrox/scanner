@@ -40,7 +40,7 @@ import (
 )
 
 const (
-	ovalURI     = "https://www.redhat.com/security/data/oval/"
+	ovalURI     = "https://security.access.redhat.com/data/oval/"
 	bulkOVALURI = ovalURI + "v2/"
 
 	rhelMustBeInstalled = "Red Hat Enterprise Linux must be installed"
