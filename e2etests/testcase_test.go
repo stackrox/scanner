@@ -3595,7 +3595,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1.26.5-3.el9.noarch",
 				VersionFormat: "rpm",
-				FixedBy:       "1.26.5-3.el9_3.1",
+				FixedBy:       "1.26.5-5.el9_4.1",
 			},
 			{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
