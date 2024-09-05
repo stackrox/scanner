@@ -26,6 +26,8 @@ COPY image/db/pg_hba.conf \
 COPY image/db/rhel/scripts/docker-entrypoint.sh \
      /usr/local/bin/
 
+COPY LICENSE /licenses/LICENSE
+
 RUN dnf upgrade -y --nobest && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     mkdir -p /var/lib/postgresql && \

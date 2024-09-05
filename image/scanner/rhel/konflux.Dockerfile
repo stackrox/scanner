@@ -59,6 +59,8 @@ COPY --from=builder /src/image/scanner/bin/scanner ./
 COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
 COPY --chown=65534:65534 --from=builder /src/image/scanner/dump/genesis_manifests.json ./
 
+COPY LICENSE /licenses/LICENSE
+
 RUN microdnf upgrade --nobest && \
     microdnf install xz && \
     microdnf clean all && \
