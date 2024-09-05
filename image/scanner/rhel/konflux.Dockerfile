@@ -4,7 +4,7 @@ ARG BASE_TAG=latest
 
 
 # Compiling scanner binaries and staging repo2cpe and genesis manifests
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.21 AS builder
+FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.22 AS builder
 
 ARG SCANNER_TAG
 ENV RELEASE_TAG="${SCANNER_TAG}"
