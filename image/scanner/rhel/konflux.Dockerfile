@@ -7,6 +7,7 @@ ARG BASE_TAG=latest
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.22 AS builder
 
 ARG SCANNER_TAG
+RUN if [[ "$SCANNER_TAG" == "" ]]; then >&2 echo "error: required SCANNER_TAG arg is unset"; exit 6; fi
 ENV RELEASE_TAG="${SCANNER_TAG}"
 
 ENV GOFLAGS=""
