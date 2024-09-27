@@ -4356,4 +4356,290 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:ubi8-cups-vulns",
+		registry:                "https://quay.io",
+		source:                  "NVD",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:8",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "cups-filters",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "1.20.0-34.el8.x86_64",
+				AddedBy:       "sha256:7a6d2526dba4ead4120381a83ce344db5959e947aab63fa3d1a3fae4f7986d62",
+				FixedBy:       "",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2024-47076",
+						NamespaceName: "rhel:8",
+						Description:   `DOCUMENTATION: A flaw was found in OpenPrinting CUPS. In certain conditions, a remote attacker can add a malicious printer or directly hijack an existing printer by replacing the valid IPP URL with a malicious one. Also, it is possible that due to a lack of validation of IPP attributes returned by the server, this issue allows attacker-controlled data to be used on the rest of the CUPS system.`,
+						Link:          "https://access.redhat.com/security/cve/CVE-2024-47076",
+						Severity:      "Important",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         4.2,
+									"Score":               8.2,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:H/A:N",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2024-47175",
+						NamespaceName: "rhel:8",
+						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nThe ppdCreatePPDFromIPP2 function in libppd doesn't properly check or clean IPP attributes before writing them to a temporary PPD file. This means that a remote attacker, who has control of or has hijacked an exposed printer (through UPD or mDNS), could send a harmful IPP attribute and potentially insert malicious commands into the PPD file. \n            STATEMENT: RHCOS and RHEL include libs-cups as a build-time dependency. However, the vulnerability is not exploitable with just the client libraries unless a print server based on OpenPrinting is actively running.\n\nRHEL and RHCOS does not have cups-browsed enabled by default so the impact for those are set to 'Low'",
+						Link:          "https://access.redhat.com/security/cve/CVE-2024-47175",
+						Severity:      "Important",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         5.5,
+									"Score":               7.7,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:L",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2024-47176",
+						NamespaceName: "rhel:8",
+						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nA security issue was discovered in OpenPrinting CUPS. The `cups-browsed` component is responsible for discovering printers on a network and adding them to the system. In order to do so, the service uses two distinct protocols. For the first one, the service binds on all interfaces on UDP port 631 and accepts a custom packet from any untrusted source. This is exploitable from outside the LAN if the computer is exposed on the public internet. The service also listens for DNS-SD / mDNS advertisements trough AVAHI. In both cases, when a printer is discovered by either the UDP packet or mDNS, its IPP or IPPS url is automatically contacted by cups-browsed and a `Get-Printer-Attributes` request is sent to it which can leak potentially sensitive system information to an attacker via the User-Agent header. \n            STATEMENT: The cups-browsed service is disabled by default on all versions of RHEL.\n            MITIGATION: The cups-browsed service can be disabled without any impact to printer functionality provided by cups.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2024-47176",
+						Severity:      "Important",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2024-47177",
+						NamespaceName: "rhel:8",
+						Description:   "DOCUMENTATION: A security flaw was found in OpenPrinting CUPS. A remote attacker may be able to exploit cups-filters via the `FoomaticRIPCommandLine` entry in the PPD file, which would trigger the CUPS system to execute any arbitrary commands injected into that file when a print job is sent to the affected device.",
+						Link:          "https://access.redhat.com/security/cve/CVE-2024-47177",
+						Severity:      "Important",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 1.3,
+									"ImpactScore":         4.7,
+									"Score":               6.1,
+									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:L/I:H/A:L",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Name:          "cups",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "1:2.2.6-60.el8_10.x86_64",
+				AddedBy:       "sha256:7a6d2526dba4ead4120381a83ce344db5959e947aab63fa3d1a3fae4f7986d62",
+				FixedBy:       "",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2024-47175",
+						NamespaceName: "rhel:8",
+						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nThe ppdCreatePPDFromIPP2 function in libppd doesn't properly check or clean IPP attributes before writing them to a temporary PPD file. This means that a remote attacker, who has control of or has hijacked an exposed printer (through UPD or mDNS), could send a harmful IPP attribute and potentially insert malicious commands into the PPD file. \n            STATEMENT: RHCOS and RHEL include libs-cups as a build-time dependency. However, the vulnerability is not exploitable with just the client libraries unless a print server based on OpenPrinting is actively running.\n\nRHEL and RHCOS does not have cups-browsed enabled by default so the impact for those are set to 'Low'",
+						Link:          "https://access.redhat.com/security/cve/CVE-2024-47175",
+						Severity:      "Low",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         5.5,
+									"Score":               7.7,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:L",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:debian12-cups-vulns",
+		registry:                "https://quay.io",
+		source:                  "NVD",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "debian:12",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "cups-filters",
+				NamespaceName: "debian:12",
+				VersionFormat: "dpkg",
+				Version:       "1.28.17-3",
+				AddedBy:       "sha256:8144b98fa7b4e7cfd356b0be733a31c453f04de4369fd76237d839db8215ed1c",
+				FixedBy:       "",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2024-47076",
+						NamespaceName: "debian:12",
+						Description:   "CUPS is a standards-based, open-source printing system, and `libcupsfilters` contains the code of the filters of the former `cups-filters` package as library functions to be used for the data format conversion tasks needed in Printer Applications. The `cfGetPrinterAttributes5` function in `libcupsfilters` does not sanitize IPP attributes returned from an IPP server. When these IPP attributes are used, for instance, to generate a PPD file, this can lead to attacker controlled data to be provided to the rest of the CUPS system.",
+						Link:          "https://security-tracker.debian.org/tracker/CVE-2024-47076",
+						Severity:      "Important",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"PublishedDateTime":    "2024-09-26T16:00Z",
+								"LastModifiedDateTime": "2024-09-27T16:00Z",
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         4.0,
+									"Score":               8.6,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:N",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2024-47176",
+						NamespaceName: "debian:12",
+						Description:   "CUPS is a standards-based, open-source printing system, and `cups-browsed` contains network printing functionality including, but not limited to, auto-discovering print services and shared printers. `cups-browsed` binds to `INADDR_ANY:631`, causing it to trust any packet from any source, and can cause the `Get-Printer-Attributes` IPP request to an attacker controlled URL.  Due to the service binding to `*:631 ( INADDR_ANY )`, multiple bugs in `cups-browsed` can be exploited in sequence to introduce a malicious printer to the system. This chain of exploits ultimately enables an attacker to execute arbitrary commands remotely on the target machine without authentication when a print job is started. This poses a significant security risk over the network. Notably, this vulnerability is particularly concerning as it can be exploited from the public internet, potentially exposing a vast number of systems to remote attacks if their CUPS services are enabled.",
+						Link:          "https://security-tracker.debian.org/tracker/CVE-2024-47176",
+						Severity:      "Important",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"PublishedDateTime":    "2024-09-26T16:00Z",
+								"LastModifiedDateTime": "2024-09-27T16:00Z",
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 1.6,
+									"ImpactScore":         6.0,
+									"Score":               8.3,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2024-47177",
+						NamespaceName: "debian:12",
+						Description:   "CUPS is a standards-based, open-source printing system, and cups-filters provides backends, filters, and other software for CUPS 2.x to use on non-Mac OS systems. Any value passed to `FoomaticRIPCommandLine` via a PPD file will be executed as a user controlled command. When combined with other logic bugs as described in CVE_2024-47176, this can lead to remote command execution.",
+						Link:          "https://security-tracker.debian.org/tracker/CVE-2024-47177",
+						Severity:      "Important",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"PublishedDateTime":    "2024-09-26T16:00Z",
+								"LastModifiedDateTime": "2024-09-27T16:00Z",
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         6.0,
+									"Score":               9.0,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Name:          "cups",
+				NamespaceName: "debian:12",
+				VersionFormat: "dpkg",
+				Version:       "2.4.2-3+deb12u7",
+				AddedBy:       "sha256:8144b98fa7b4e7cfd356b0be733a31c453f04de4369fd76237d839db8215ed1c",
+				FixedBy:       "",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2024-47175",
+						NamespaceName: "debian:12",
+						Description:   "CUPS is a standards-based, open-source printing system, and `libppd` can be used for legacy PPD file support. The `libppd` function `ppdCreatePPDFromIPP2` does not sanitize IPP attributes when creating the PPD buffer. When used in combination with other functions such as `cfGetPrinterAttributes5`, can result in user controlled input and ultimately code execution via Foomatic. This vulnerability can be part of an exploit chain leading to remote code execution (RCE), as described in CVE-2024-47176.",
+						Link:          "https://security-tracker.debian.org/tracker/CVE-2024-47175",
+						Severity:      "Important",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"PublishedDateTime":    "2024-09-26T16:00Z",
+								"LastModifiedDateTime": "2024-09-27T16:00Z",
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         4.0,
+									"Score":               8.6,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:N",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
 }
