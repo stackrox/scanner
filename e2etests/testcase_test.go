@@ -4522,7 +4522,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				VersionFormat: "dpkg",
 				Version:       "1.28.17-3",
 				AddedBy:       "sha256:8144b98fa7b4e7cfd356b0be733a31c453f04de4369fd76237d839db8215ed1c",
-				FixedBy:       "",
+				FixedBy:       "1.28.17-3+deb12u1",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2024-47076",
@@ -4530,7 +4530,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						Description:   "CUPS is a standards-based, open-source printing system, and `libcupsfilters` contains the code of the filters of the former `cups-filters` package as library functions to be used for the data format conversion tasks needed in Printer Applications. The `cfGetPrinterAttributes5` function in `libcupsfilters` does not sanitize IPP attributes returned from an IPP server. When these IPP attributes are used, for instance, to generate a PPD file, this can lead to attacker controlled data to be provided to the rest of the CUPS system.",
 						Link:          "https://security-tracker.debian.org/tracker/CVE-2024-47076",
 						Severity:      "Important",
-						FixedBy:       "",
+						FixedBy:       "1.28.17-3+deb12u1",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"PublishedDateTime":    "2024-09-26T16:00Z",
@@ -4556,7 +4556,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						Description:   "CUPS is a standards-based, open-source printing system, and `cups-browsed` contains network printing functionality including, but not limited to, auto-discovering print services and shared printers. `cups-browsed` binds to `INADDR_ANY:631`, causing it to trust any packet from any source, and can cause the `Get-Printer-Attributes` IPP request to an attacker controlled URL.  Due to the service binding to `*:631 ( INADDR_ANY )`, multiple bugs in `cups-browsed` can be exploited in sequence to introduce a malicious printer to the system. This chain of exploits ultimately enables an attacker to execute arbitrary commands remotely on the target machine without authentication when a print job is started. This poses a significant security risk over the network. Notably, this vulnerability is particularly concerning as it can be exploited from the public internet, potentially exposing a vast number of systems to remote attacks if their CUPS services are enabled.",
 						Link:          "https://security-tracker.debian.org/tracker/CVE-2024-47176",
 						Severity:      "Important",
-						FixedBy:       "",
+						FixedBy:       "1.28.17-3+deb12u1",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"PublishedDateTime":    "2024-09-26T16:00Z",
@@ -4610,7 +4610,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				VersionFormat: "dpkg",
 				Version:       "2.4.2-3+deb12u7",
 				AddedBy:       "sha256:8144b98fa7b4e7cfd356b0be733a31c453f04de4369fd76237d839db8215ed1c",
-				FixedBy:       "",
+				FixedBy:       "2.4.2-3+deb12u8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "CVE-2024-47175",
@@ -4618,7 +4618,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						Description:   "CUPS is a standards-based, open-source printing system, and `libppd` can be used for legacy PPD file support. The `libppd` function `ppdCreatePPDFromIPP2` does not sanitize IPP attributes when creating the PPD buffer. When used in combination with other functions such as `cfGetPrinterAttributes5`, can result in user controlled input and ultimately code execution via Foomatic. This vulnerability can be part of an exploit chain leading to remote code execution (RCE), as described in CVE-2024-47176.",
 						Link:          "https://security-tracker.debian.org/tracker/CVE-2024-47175",
 						Severity:      "Important",
-						FixedBy:       "",
+						FixedBy:       "2.4.2-3+deb12u8",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"PublishedDateTime":    "2024-09-26T16:00Z",

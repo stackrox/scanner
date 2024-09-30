@@ -42,7 +42,7 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "1.28.7-1+deb11u3",
 			},
 		},
 		Metadata: map[string]interface{}{
@@ -83,7 +83,7 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "1.28.17-3+deb12u1",
 			},
 		},
 		Metadata: map[string]interface{}{
@@ -124,7 +124,7 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "1.28.17-5",
 			},
 			{
 				Feature: database.Feature{
@@ -134,7 +134,7 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "2.0.0-3",
 			},
 		},
 		Metadata: map[string]interface{}{
@@ -428,7 +428,7 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "2.3.3op2-3+deb11u9",
 			},
 			{
 				Feature: database.Feature{
@@ -438,7 +438,8 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				// Unaffected.
+				Version: versionfmt.MinVersion,
 			},
 		},
 		Metadata: map[string]interface{}{
@@ -479,7 +480,7 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "2.4.2-3+deb12u8",
 			},
 			{
 				Feature: database.Feature{
@@ -489,7 +490,8 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				// Unaffected.
+				Version: versionfmt.MinVersion,
 			},
 		},
 		Metadata: map[string]interface{}{
@@ -530,7 +532,7 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "2.4.10-2",
 			},
 		},
 		Metadata: map[string]interface{}{
@@ -835,7 +837,7 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "1.28.7-1+deb11u3",
 			},
 		},
 		Metadata: map[string]interface{}{
@@ -876,7 +878,7 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "1.28.17-3+deb12u1",
 			},
 		},
 		Metadata: map[string]interface{}{
@@ -917,7 +919,7 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "1.28.17-5",
 			},
 		},
 		Metadata: map[string]interface{}{
