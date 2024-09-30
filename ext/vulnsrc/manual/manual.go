@@ -32,7 +32,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and `libcupsfilters` contains the code of the filters of the former `cups-filters` package as library functions to be used for the data format conversion tasks needed in Printer Applications. The `cfGetPrinterAttributes5` function in `libcupsfilters` does not sanitize IPP attributes returned from an IPP server. When these IPP attributes are used, for instance, to generate a PPD file, this can lead to attacker controlled data to be provided to the rest of the CUPS system.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47076",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -73,7 +74,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and `libcupsfilters` contains the code of the filters of the former `cups-filters` package as library functions to be used for the data format conversion tasks needed in Printer Applications. The `cfGetPrinterAttributes5` function in `libcupsfilters` does not sanitize IPP attributes returned from an IPP server. When these IPP attributes are used, for instance, to generate a PPD file, this can lead to attacker controlled data to be provided to the rest of the CUPS system.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47076",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -114,7 +116,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and `libcupsfilters` contains the code of the filters of the former `cups-filters` package as library functions to be used for the data format conversion tasks needed in Printer Applications. The `cfGetPrinterAttributes5` function in `libcupsfilters` does not sanitize IPP attributes returned from an IPP server. When these IPP attributes are used, for instance, to generate a PPD file, this can lead to attacker controlled data to be provided to the rest of the CUPS system.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47076",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -166,7 +169,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "cfGetPrinterAttributes5 does not validate IPP attributes returned from an IPP server",
 		Link:        "https://ubuntu.com/security/CVE-2024-47076",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -207,7 +211,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "cfGetPrinterAttributes5 does not validate IPP attributes returned from an IPP server",
 		Link:        "https://ubuntu.com/security/CVE-2024-47076",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -248,7 +253,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "cfGetPrinterAttributes5 does not validate IPP attributes returned from an IPP server",
 		Link:        "https://ubuntu.com/security/CVE-2024-47076",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -418,7 +424,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and `libppd` can be used for legacy PPD file support. The `libppd` function `ppdCreatePPDFromIPP2` does not sanitize IPP attributes when creating the PPD buffer. When used in combination with other functions such as `cfGetPrinterAttributes5`, can result in user controlled input and ultimately code execution via Foomatic. This vulnerability can be part of an exploit chain leading to remote code execution (RCE), as described in CVE-2024-47176.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47175",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -470,7 +477,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and `libppd` can be used for legacy PPD file support. The `libppd` function `ppdCreatePPDFromIPP2` does not sanitize IPP attributes when creating the PPD buffer. When used in combination with other functions such as `cfGetPrinterAttributes5`, can result in user controlled input and ultimately code execution via Foomatic. This vulnerability can be part of an exploit chain leading to remote code execution (RCE), as described in CVE-2024-47176.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47175",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -522,7 +530,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and `libppd` can be used for legacy PPD file support. The `libppd` function `ppdCreatePPDFromIPP2` does not sanitize IPP attributes when creating the PPD buffer. When used in combination with other functions such as `cfGetPrinterAttributes5`, can result in user controlled input and ultimately code execution via Foomatic. This vulnerability can be part of an exploit chain leading to remote code execution (RCE), as described in CVE-2024-47176.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47175",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -564,7 +573,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "ppdCreatePPDFromIPP2 does not sanitize IPP attributes when creating the PPD buffer",
 		Link:        "https://ubuntu.com/security/CVE-2024-47175",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -605,7 +615,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "ppdCreatePPDFromIPP2 does not sanitize IPP attributes when creating the PPD buffer",
 		Link:        "https://ubuntu.com/security/CVE-2024-47175",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -646,7 +657,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "ppdCreatePPDFromIPP2 does not sanitize IPP attributes when creating the PPD buffer",
 		Link:        "https://ubuntu.com/security/CVE-2024-47175",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -687,7 +699,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "ppdCreatePPDFromIPP2 does not sanitize IPP attributes when creating the PPD buffer",
 		Link:        "https://ubuntu.com/security/CVE-2024-47175",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -728,7 +741,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "ppdCreatePPDFromIPP2 does not sanitize IPP attributes when creating the PPD buffer",
 		Link:        "https://ubuntu.com/security/CVE-2024-47175",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -785,7 +799,7 @@ var Vulnerabilities = []database.Vulnerability{
 		Description: "CUPS is a standards-based, open-source printing system, and `cups-browsed` contains network printing functionality including, but not limited to, auto-discovering print services and shared printers. `cups-browsed` binds to `INADDR_ANY:631`, causing it to trust any packet from any source, and can cause the `Get-Printer-Attributes` IPP request to an attacker controlled URL.",
 		// Amazon currently does not have an ALAS link, so just the source of this data.
 		Link:     "https://explore.alas.aws.amazon.com/CVE-2024-47176.html",
-		Severity: database.HighSeverity,
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -808,6 +822,7 @@ var Vulnerabilities = []database.Vulnerability{
 					"Score":               0.0,
 					"Vectors":             "",
 				},
+				// Amazon used Red Hat's lower score.
 				"CVSSv3": map[string]interface{}{
 					"ExploitabilityScore": 2.8,
 					"ImpactScore":         3.6,
@@ -827,7 +842,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and `cups-browsed` contains network printing functionality including, but not limited to, auto-discovering print services and shared printers. `cups-browsed` binds to `INADDR_ANY:631`, causing it to trust any packet from any source, and can cause the `Get-Printer-Attributes` IPP request to an attacker controlled URL.  Due to the service binding to `*:631 ( INADDR_ANY )`, multiple bugs in `cups-browsed` can be exploited in sequence to introduce a malicious printer to the system. This chain of exploits ultimately enables an attacker to execute arbitrary commands remotely on the target machine without authentication when a print job is started. This poses a significant security risk over the network. Notably, this vulnerability is particularly concerning as it can be exploited from the public internet, potentially exposing a vast number of systems to remote attacks if their CUPS services are enabled.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47176",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -868,7 +884,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and `cups-browsed` contains network printing functionality including, but not limited to, auto-discovering print services and shared printers. `cups-browsed` binds to `INADDR_ANY:631`, causing it to trust any packet from any source, and can cause the `Get-Printer-Attributes` IPP request to an attacker controlled URL.  Due to the service binding to `*:631 ( INADDR_ANY )`, multiple bugs in `cups-browsed` can be exploited in sequence to introduce a malicious printer to the system. This chain of exploits ultimately enables an attacker to execute arbitrary commands remotely on the target machine without authentication when a print job is started. This poses a significant security risk over the network. Notably, this vulnerability is particularly concerning as it can be exploited from the public internet, potentially exposing a vast number of systems to remote attacks if their CUPS services are enabled.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47176",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -909,7 +926,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and `cups-browsed` contains network printing functionality including, but not limited to, auto-discovering print services and shared printers. `cups-browsed` binds to `INADDR_ANY:631`, causing it to trust any packet from any source, and can cause the `Get-Printer-Attributes` IPP request to an attacker controlled URL.  Due to the service binding to `*:631 ( INADDR_ANY )`, multiple bugs in `cups-browsed` can be exploited in sequence to introduce a malicious printer to the system. This chain of exploits ultimately enables an attacker to execute arbitrary commands remotely on the target machine without authentication when a print job is started. This poses a significant security risk over the network. Notably, this vulnerability is particularly concerning as it can be exploited from the public internet, potentially exposing a vast number of systems to remote attacks if their CUPS services are enabled.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47176",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -951,7 +969,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "Multiple bugs leading to info leak and remote code execution",
 		Link:        "https://ubuntu.com/security/CVE-2024-47176",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -992,7 +1011,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "Multiple bugs leading to info leak and remote code execution",
 		Link:        "https://ubuntu.com/security/CVE-2024-47176",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1033,7 +1053,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "Multiple bugs leading to info leak and remote code execution",
 		Link:        "https://ubuntu.com/security/CVE-2024-47176",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1074,7 +1095,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "Multiple bugs leading to info leak and remote code execution",
 		Link:        "https://ubuntu.com/security/CVE-2024-47176",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1115,7 +1137,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "Multiple bugs leading to info leak and remote code execution",
 		Link:        "https://ubuntu.com/security/CVE-2024-47176",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1163,7 +1186,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and cups-filters provides backends, filters, and other software for CUPS 2.x to use on non-Mac OS systems. Any value passed to `FoomaticRIPCommandLine` via a PPD file will be executed as a user controlled command. When combined with other logic bugs as described in CVE_2024-47176, this can lead to remote command execution.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47177",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1204,7 +1228,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and cups-filters provides backends, filters, and other software for CUPS 2.x to use on non-Mac OS systems. Any value passed to `FoomaticRIPCommandLine` via a PPD file will be executed as a user controlled command. When combined with other logic bugs as described in CVE_2024-47176, this can lead to remote command execution.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47177",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1245,7 +1270,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "CUPS is a standards-based, open-source printing system, and cups-filters provides backends, filters, and other software for CUPS 2.x to use on non-Mac OS systems. Any value passed to `FoomaticRIPCommandLine` via a PPD file will be executed as a user controlled command. When combined with other logic bugs as described in CVE_2024-47176, this can lead to remote command execution.",
 		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47177",
-		Severity:    database.HighSeverity,
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1287,7 +1313,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "Command injection via FoomaticRIPCommandLine",
 		Link:        "https://ubuntu.com/security/CVE-2024-47177",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1328,7 +1355,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "Command injection via FoomaticRIPCommandLine",
 		Link:        "https://ubuntu.com/security/CVE-2024-47177",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1369,7 +1397,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "Command injection via FoomaticRIPCommandLine",
 		Link:        "https://ubuntu.com/security/CVE-2024-47177",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1410,7 +1439,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "Command injection via FoomaticRIPCommandLine",
 		Link:        "https://ubuntu.com/security/CVE-2024-47177",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
@@ -1451,7 +1481,8 @@ var Vulnerabilities = []database.Vulnerability{
 		},
 		Description: "Command injection via FoomaticRIPCommandLine",
 		Link:        "https://ubuntu.com/security/CVE-2024-47177",
-		Severity:    database.MediumSeverity,
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
 		FixedIn: []database.FeatureVersion{
 			{
 				Feature: database.Feature{
