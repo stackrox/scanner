@@ -1,5 +1,6 @@
 e2etests/testcase_test.go
 ext/featurefmt/rpm/testdata/Packages
+ext/vulnsrc/manual/manual.go
 generated/**/*.pb.go
 go.sum
 pkg/rhelv2/ovalutil/testdata/oval.xml
