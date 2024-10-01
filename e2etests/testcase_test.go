@@ -4359,7 +4359,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 	{
 		image:                   "quay.io/rhacs-eng/qa:ubi8-cups-vulns",
 		registry:                "https://quay.io",
-		source:                  "NVD",
+		source:                  "Red Hat",
 		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
 		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
 		onlyCheckSpecifiedVulns: true,
@@ -4376,12 +4376,12 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					{
 						Name:          "CVE-2024-47076",
 						NamespaceName: "rhel:8",
-						Description:   `DOCUMENTATION: A flaw was found in OpenPrinting CUPS. In certain conditions, a remote attacker can add a malicious printer or directly hijack an existing printer by replacing the valid IPP URL with a malicious one. Also, it is possible that due to a lack of validation of IPP attributes returned by the server, this issue allows attacker-controlled data to be used on the rest of the CUPS system.`,
+						Description:   "DOCUMENTATION: A flaw was found in OpenPrinting CUPS. In certain conditions, a remote attacker can add a malicious printer or directly hijack an existing printer by replacing the valid IPP URL with a malicious one. Also, it is possible that due to a lack of validation of IPP attributes returned by the server, this issue allows attacker-controlled data to be used on the rest of the CUPS system. \n            \n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2024-47076",
 						Severity:      "Important",
 						FixedBy:       "",
 						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
+							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
@@ -4400,12 +4400,12 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					{
 						Name:          "CVE-2024-47175",
 						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nThe ppdCreatePPDFromIPP2 function in libppd doesn't properly check or clean IPP attributes before writing them to a temporary PPD file. This means that a remote attacker, who has control of or has hijacked an exposed printer (through UPD or mDNS), could send a harmful IPP attribute and potentially insert malicious commands into the PPD file. \n            STATEMENT: RHCOS and RHEL include libs-cups as a build-time dependency. However, the vulnerability is not exploitable with just the client libraries unless a print server based on OpenPrinting is actively running.\n\nRHEL and RHCOS does not have cups-browsed enabled by default so the impact for those are set to 'Low'",
+						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nThe ppdCreatePPDFromIPP2 function in libppd doesn't properly check or clean IPP attributes before writing them to a temporary PPD file. This means that a remote attacker, who has control of or has hijacked an exposed printer (through UPD or mDNS), could send a harmful IPP attribute and potentially insert malicious commands into the PPD file. \n            STATEMENT: RHCOS and RHEL include libs-cups as a build-time dependency. However, the vulnerability is not exploitable with just the client libraries unless a print server based on OpenPrinting is actively running.\n\nRHEL and RHCOS does not have cups-browsed enabled by default so the impact for those are set to 'Low'\n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2024-47175",
 						Severity:      "Important",
 						FixedBy:       "",
 						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
+							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
@@ -4424,12 +4424,12 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					{
 						Name:          "CVE-2024-47176",
 						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nA security issue was discovered in OpenPrinting CUPS. The `cups-browsed` component is responsible for discovering printers on a network and adding them to the system. In order to do so, the service uses two distinct protocols. For the first one, the service binds on all interfaces on UDP port 631 and accepts a custom packet from any untrusted source. This is exploitable from outside the LAN if the computer is exposed on the public internet. The service also listens for DNS-SD / mDNS advertisements trough AVAHI. In both cases, when a printer is discovered by either the UDP packet or mDNS, its IPP or IPPS url is automatically contacted by cups-browsed and a `Get-Printer-Attributes` request is sent to it which can leak potentially sensitive system information to an attacker via the User-Agent header. \n            STATEMENT: The cups-browsed service is disabled by default on all versions of RHEL.\n            MITIGATION: The cups-browsed service can be disabled without any impact to printer functionality provided by cups.",
+						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nA security issue was discovered in OpenPrinting CUPS. The `cups-browsed` component is responsible for discovering printers on a network and adding them to the system. In order to do so, the service uses two distinct protocols. For the first one, the service binds on all interfaces on UDP port 631 and accepts a custom packet from any untrusted source. This is exploitable from outside the LAN if the computer is exposed on the public internet. The service also listens for DNS-SD / mDNS advertisements trough AVAHI. In both cases, when a printer is discovered by either the UDP packet or mDNS, its IPP or IPPS url is automatically contacted by cups-browsed and a `Get-Printer-Attributes` request is sent to it which can leak potentially sensitive system information to an attacker via the User-Agent header. \n            STATEMENT: The cups-browsed service is disabled by default on all versions of RHEL.\n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2024-47176",
 						Severity:      "Important",
 						FixedBy:       "",
 						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
+							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
@@ -4448,12 +4448,12 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					{
 						Name:          "CVE-2024-47177",
 						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: A security flaw was found in OpenPrinting CUPS. A remote attacker may be able to exploit cups-filters via the `FoomaticRIPCommandLine` entry in the PPD file, which would trigger the CUPS system to execute any arbitrary commands injected into that file when a print job is sent to the affected device.",
+						Description:   "DOCUMENTATION: A security flaw was found in OpenPrinting CUPS. A remote attacker may be able to exploit cups-filters via the `FoomaticRIPCommandLine` entry in the PPD file, which would trigger the CUPS system to execute any arbitrary commands injected into that file when a print job is sent to the affected device. \n            \n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2024-47177",
 						Severity:      "Important",
 						FixedBy:       "",
 						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
+							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
@@ -4482,12 +4482,12 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					{
 						Name:          "CVE-2024-47175",
 						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nThe ppdCreatePPDFromIPP2 function in libppd doesn't properly check or clean IPP attributes before writing them to a temporary PPD file. This means that a remote attacker, who has control of or has hijacked an exposed printer (through UPD or mDNS), could send a harmful IPP attribute and potentially insert malicious commands into the PPD file. \n            STATEMENT: RHCOS and RHEL include libs-cups as a build-time dependency. However, the vulnerability is not exploitable with just the client libraries unless a print server based on OpenPrinting is actively running.\n\nRHEL and RHCOS does not have cups-browsed enabled by default so the impact for those are set to 'Low'",
+						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nThe ppdCreatePPDFromIPP2 function in libppd doesn't properly check or clean IPP attributes before writing them to a temporary PPD file. This means that a remote attacker, who has control of or has hijacked an exposed printer (through UPD or mDNS), could send a harmful IPP attribute and potentially insert malicious commands into the PPD file. \n            STATEMENT: RHCOS and RHEL include libs-cups as a build-time dependency. However, the vulnerability is not exploitable with just the client libraries unless a print server based on OpenPrinting is actively running.\n\nRHEL and RHCOS does not have cups-browsed enabled by default so the impact for those are set to 'Low'\n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2024-47175",
 						Severity:      "Low",
 						FixedBy:       "",
 						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
+							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
 									"ExploitabilityScore": 0.0,
 									"ImpactScore":         0.0,
