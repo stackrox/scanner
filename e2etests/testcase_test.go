@@ -4371,7 +4371,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				VersionFormat: "rpm",
 				Version:       "1.20.0-34.el8.x86_64",
 				AddedBy:       "sha256:7a6d2526dba4ead4120381a83ce344db5959e947aab63fa3d1a3fae4f7986d62",
-				FixedBy:       "0:1.20.0-35.el8_10",
+				FixedBy:       "1.20.0-35.el8_10",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2024:7463",
@@ -4379,7 +4379,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						Description:   "The cups-filters package contains back ends, filters, and other software that was once part of the core Common UNIX Printing System (CUPS) distribution but is now maintained independently. \n\nSecurity Fix(es):\n\n* cups-browsed: cups-browsed binds on UDP INADDR_ANY:631 trusting any packet from any source ()\n\n* cups-filters: libcupsfilters: `cfGetPrinterAttributes` API does not perform sanitization on returned IPP attributes (CVE-2024-47076)\n\n* cups: libppd: remote command injection via attacker controlled data in PPD file ()\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
 						Link:          "https://access.redhat.com/errata/RHSA-2024:7463",
 						Severity:      "Important",
-						FixedBy:       "",
+						FixedBy:       "0:1.20.0-35.el8_10",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -4589,6 +4589,115 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 									"ImpactScore":         4.0,
 									"Score":               8.6,
 									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:N",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:ubuntu18.04-cups-vulns",
+		registry:                "https://quay.io",
+		source:                  "NVD",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:18.04",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "cups",
+				NamespaceName: "ubuntu:18.04",
+				VersionFormat: "dpkg",
+				Version:       "2.2.7-1ubuntu2.10",
+				AddedBy:       "sha256:deb4f515230cd51956c71ab9bb67732b471bbe5905e96b9a76b934d4d2cceeb3",
+				FixedBy:       "2.2.7-1ubuntu2.10+esm6",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2024-47175",
+						NamespaceName: "ubuntu:18.04",
+						Description:   "ppdCreatePPDFromIPP2 does not sanitize IPP attributes when creating the PPD buffer",
+						Link:          "https://ubuntu.com/security/CVE-2024-47175",
+						Severity:      "Moderate",
+						FixedBy:       "2.2.7-1ubuntu2.10+esm6",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"PublishedDateTime":    "2024-09-26T16:00Z",
+								"LastModifiedDateTime": "2024-10-02T16:00Z",
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         4.0,
+									"Score":               8.6,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:N",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Name:          "cups-filters",
+				NamespaceName: "ubuntu:18.04",
+				VersionFormat: "dpkg",
+				Version:       "1.20.2-0ubuntu3.3",
+				AddedBy:       "sha256:deb4f515230cd51956c71ab9bb67732b471bbe5905e96b9a76b934d4d2cceeb3",
+				FixedBy:       "1.20.2-0ubuntu3.3+esm1",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2024-47176",
+						NamespaceName: "ubuntu:18.04",
+						Description:   "Multiple bugs leading to info leak and remote code execution",
+						Link:          "https://ubuntu.com/security/CVE-2024-47176",
+						Severity:      "Moderate",
+						FixedBy:       "1.20.2-0ubuntu3.3+esm1",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"PublishedDateTime":    "2024-09-26T16:00Z",
+								"LastModifiedDateTime": "2024-09-27T16:00Z",
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 1.6,
+									"ImpactScore":         6.0,
+									"Score":               8.3,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2024-47177",
+						NamespaceName: "ubuntu:18.04",
+						Description:   "Command injection via FoomaticRIPCommandLine",
+						Link:          "https://ubuntu.com/security/CVE-2024-47177",
+						Severity:      "Moderate",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"PublishedDateTime":    "2024-09-26T16:00Z",
+								"LastModifiedDateTime": "2024-09-27T16:00Z",
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         6.0,
+									"Score":               9.0,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H",
 								},
 							},
 						},
