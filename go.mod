@@ -50,7 +50,7 @@ require (
 	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8
 	golang.org/x/sys v0.25.0
 	google.golang.org/api v0.199.0
-	google.golang.org/grpc v1.67.0
+	google.golang.org/grpc v1.67.1
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v2 v2.4.0
