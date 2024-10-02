@@ -1,13 +1,12 @@
 module github.com/stackrox/scanner
 
 go 1.22
-
-toolchain go1.22.5
+toolchain go1.23.2
 
 require (
 	cloud.google.com/go/storage v1.43.0
 	github.com/NYTimes/gziphandler v1.1.1
-	github.com/PuerkitoBio/goquery v1.9.2
+	github.com/PuerkitoBio/goquery v1.10.0
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
 	github.com/containers/image/v5 v5.32.2
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
