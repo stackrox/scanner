@@ -626,13 +626,13 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "2.2.7-1ubuntu2.10+esm6",
 			},
 		},
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
 				"PublishedDateTime":    "2024-09-26T16:00Z",
-				"LastModifiedDateTime": "2024-09-27T16:00Z",
+				"LastModifiedDateTime": "2024-10-02T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
@@ -1022,13 +1022,13 @@ var Vulnerabilities = []database.Vulnerability{
 						VersionFormat: dpkg.ParserName,
 					},
 				},
-				Version: versionfmt.MaxVersion,
+				Version: "1.20.2-0ubuntu3.3+esm1",
 			},
 		},
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
 				"PublishedDateTime":    "2024-09-26T16:00Z",
-				"LastModifiedDateTime": "2024-09-27T16:00Z",
+				"LastModifiedDateTime": "2024-10-02T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
