@@ -156,7 +156,8 @@ func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.V
 		return nil, errors.Wrap(err, "adding metadata to vulns")
 	}
 
-	// Add manual vulnerabilities ONLY if they do not already exist due to some other source.
+	// Add manual vulnerabilities ONLY if they do not already exist due to some other source
+	// and are already full qualified.
 	manualVulns := make(map[vulnkey.Key]database.Vulnerability, len(manual.Vulnerabilities))
 	for _, vuln := range manual.Vulnerabilities {
 		// Prevent aliasing.
@@ -167,8 +168,11 @@ func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.V
 		// Prevent aliasing.
 		vuln := vuln
 		key := vulnkey.FromVuln(&vuln)
-		// Delete the vulnerability from the manual entries if it is already populated from another source.
-		delete(manualVulns, key)
+		if _, exists := manualVulns[key]; exists {
+			// Delete the vulnerability from the manual entries if it is already populated from another source.
+			log.Infof("Ignoring manual vulnerability %s for %s with metadata %+#v", vuln.Name, vuln.Namespace.Name, vuln.Metadata)
+			delete(manualVulns, key)
+		}
 	}
 	for _, vuln := range manualVulns {
 		vulnsWithMetadata = append(vulnsWithMetadata, vuln)
