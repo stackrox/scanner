@@ -77,7 +77,7 @@ upload_diff_dumps() {
     fi
 }
 
-create_offline_dump() {
+scanner_v2_create_and_upload_bundle() {
     info "Creating offline dump"
 
     mkdir -p /tmp/offline-dump
@@ -107,70 +107,89 @@ create_offline_dump() {
     "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://sr-roxc/scanner/scanner-vuln-updates.zip
 }
 
-upload_offline_dump() {
+# scanner_v4_create_and_add_bundles() creates versioned offline bundles for V4
+# and add V4 definitions to the latest offline bundle.  It determines the
+# version to use for each release based on the contents of the
+# VULNERABILITY_VERSION file present in each release tag.
+#
+scanner_v4_create_and_add_bundles() {
+    local latest_bundle="${1:-scanner-vuln-updates.zip}"
+
+    local curl="curl --silent --show-error --max-time 60 --retry 3"
+    local release_version_url="https://raw.githubusercontent.com/stackrox/stackrox/master/scanner/updater/version/RELEASE_VERSION"
+    local vuln_version_pattern="https://raw.githubusercontent.com/stackrox/stackrox/%s/scanner/VULNERABILITY_VERSION"
+
+    [ -f scanner-defs.zip ] || die "missing required bundle inclusion: scanner-defs.zip"
+    [ -f k8s-istio.zip ]    || die "missing required bundle inclusion: k8s-istio.zip"
+    [ -f "$latest_bundle" ] || die "missing latest bundle: $latest_bundle"
+
+    info "existing latest bundle:"
+    unzip -l "$latest_bundle"
+
+    info "fetching release versions at $release_version_url"
+
+    # Read the supported releases file, filter lines with release versions,
+    # parse 4.4.* and 4.5.* to print only the X.Y, otherwise print the whole
+    # X.Y.Z, finally merge everything together, and pipe one release per line.
+
+    $curl --fail "$release_version_url" \
+        | grep '^[0-9]\+\.[0-9]\+\.[0-9]\+$' \
+        | sed 's/^\(4\.4\|4\.5\)\..*/\1/' \
+        | sort -V \
+        | uniq \
+        | while read -r release _; do
+              v4_prefix=v4-definitions-
+              case "$release" in
+                  4.4)
+                      # We don't support 4.4 offline bundles.
+                      continue
+                      ;;
+                  4.5)
+                      # Backward compatibility, the "schema version" is the release itself.
+                      version="$release"
+                      v4_prefix="scanner-v4-defs-"
+                      ;;
+                  *)
+                      info "fetching schema version for release $release"
+                      tmp=$(mktemp)
+                      vuln_version_url=$(printf "$vuln_version_pattern" "$release")
+                      case $($curl --write-out "%{http_code}" -o "$tmp" "$vuln_version_url") in
+                          200)
+                              version=$(cat $tmp)
+                              ;;
+                          404)
+                              info "release tag not found, assuming the release was not cut, skipping..."
+                              continue
+                              ;;
+                          *)
+                              die "failed to fetch the v4 offline bundle version for $release: status $status"
+                              ;;
+                      esac
+                      ;;
+              esac
+
+              local v4_bundle="$v4_prefix$version.zip"
+              info "building $release using schema version $version: filename: $v4_bundle"
+
+              $curl \
+                  --fail \
+                  -o "$v4_bundle" \
+                  "https://definitions.stackrox.io/v4/offline-bundles/$v4_bundle"
+              zip "$latest_bundle" "$v4_bundle"
+              zip "scanner-vulns-$release.zip" scanner-defs.zip k8s-istio.zip "$v4_bundle"
+          done
+}
+
+upload_bundles() {
     info "Uploading offline dump"
-
-    cd /tmp/offline-dump
-
-    curl --silent --show-error --max-time 60 --retry 3 --create-dirs -o out/RELEASE_VERSION.txt https://raw.githubusercontent.com/stackrox/stackrox/master/scanner/updater/version/RELEASE_VERSION
-    version_file="out/RELEASE_VERSION.txt"
-
-    latest_version=""
-    # Get the latest X.Y version which has been released.
-    while read -r version; do
-        status_code=$(curl --silent --max-time 60 --retry 3 --write-out "%{http_code}" -o /dev/null "https://github.com/stackrox/stackrox/releases/tag/$version.0")
-        if [[ "$status_code" == "404" ]]; then
-            # Release was not cut, so try a previous release.
-            continue
-        elif [[ "$status_code" == "200" ]]; then
-            # Release was cut, so use this one.
-            latest_version="$version"
-            break
-        else
-            # Some other error occurred.
-            >&2 echo "received status code $status_code when fetching StackRox releases"
-            exit 1
-        fi
-    done < <(grep -oE '^[0-9]+\.[0-9]+' "$version_file" | sort --reverse --unique --version-sort)
-    if [[ -z "$latest_version" ]]; then
-      >&2 echo "programmer error: latest_version unset..."
-      exit 1
-    fi
-
-    file_to_check="scanner-v4-defs-${latest_version}.zip"
-
-    curl --silent --show-error --fail --max-time 60 --retry 3 -o "$file_to_check" "https://definitions.stackrox.io/v4/offline-bundles/$file_to_check"
-    unzip -l "$file_to_check"
-    zip scanner-vuln-updates.zip "$file_to_check"
-    echo "$file_to_check added to scanner-vuln-updates.zip"
-
     cmd=()
     if is_in_PR_context; then
         cmd+=(echo "Would do")
     fi
     "${cmd[@]}" gsutil cp scanner-vuln-updates.zip gs://scanner-support-public/offline/v1/scanner-vuln-updates.zip
-}
-
-upload_v4_versioned_vuln() {
-    info "Uploading v4 offline dump"
-    cmd=()
-    if is_in_PR_context; then
-        cmd+=(echo "Would do")
-    fi
-    cd /tmp/offline-dump
-
-    cat out/RELEASE_VERSION.txt |
-        grep -oE '^[0-9]+\.[0-9]+' |
-        sort -V |
-        uniq |
-    while read -r version; do
-        echo "$version"
-        if curl --silent --show-error --max-time 60 --retry 3 -o "scanner-v4-defs-${version}.zip" "https://definitions.stackrox.io/v4/offline-bundles/scanner-v4-defs-${version}.zip"; then
-            zip scanner-vulns-${version}.zip scanner-defs.zip k8s-istio.zip scanner-v4-defs-${version}.zip
-            "${cmd[@]}" gsutil cp scanner-vulns-${version}.zip gs://scanner-support-public/offline/v1/${version}/scanner-vulns-${version}.zip
-        else
-            echo "Failed to download scanner-v4-defs-${version}.zip, skipping..."
-        fi
+    for f in scanner-vulns-*.zip; do
+        version=$(echo "$f" | sed 's/scanner-vulns-\(.*\)\.zip/\1/')
+        "${cmd[@]}" gsutil cp "$f" gs://scanner-support-public/offline/v1/${version}/scanner-vulns-${version}.zip
     done
 }
 
@@ -184,17 +203,20 @@ diff_dumps() {
     # Create diff dumps
     setup_gcp
     create_diff_dumps
+
     # Upload diff dumps
     setup_gcp "${GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER}"
     upload_diff_dumps
 
     # Create offline dump
-    create_offline_dump
+    scanner_v2_create_and_upload_bundle
+    scanner_v4_create_and_add_bundles
+
     # Upload offline dump
     setup_gcp "${SCANNER_GCP_SERVICE_ACCOUNT_CREDS}"
-    upload_offline_dump
-
-    upload_v4_versioned_vuln
+    upload_bundles
 }
 
-diff_dumps "$*"
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+    diff_dumps "$*"
+fi
