@@ -1514,6 +1514,388 @@ var Vulnerabilities = []database.Vulnerability{
 			},
 		},
 	},
+
+	/********** CVE-2024-47850 **********/
+
+	// Alpine has not made it clear it is affected: https://security.alpinelinux.org/vuln/CVE-2024-47850
+
+	// Amazon Linux 2
+	{
+		Name: "CVE-2024-47850",
+		Namespace: database.Namespace{
+			Name:          "amzn:2",
+			VersionFormat: rpm.ParserName,
+		},
+		Description: "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+		// Amazon currently does not have an ALAS link, so just the source of this data.
+		Link:     "https://explore.alas.aws.amazon.com/CVE-2024-47850.html",
+		Severity: database.MediumSeverity,
+		FixedIn: []database.FeatureVersion{
+			{
+				Feature: database.Feature{
+					Name: "cups-filters",
+					Namespace: database.Namespace{
+						Name:          "amzn:2",
+						VersionFormat: rpm.ParserName,
+					},
+				},
+				Version: versionfmt.MaxVersion,
+			},
+		},
+		Metadata: map[string]interface{}{
+			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2024-10-04T16:00Z",
+				"LastModifiedDateTime": "2024-10-07T16:00Z",
+				"CVSSv2": map[string]interface{}{
+					"ExploitabilityScore": 0.0,
+					"ImpactScore":         0.0,
+					"Score":               0.0,
+					"Vectors":             "",
+				},
+				"CVSSv3": map[string]interface{}{
+					"ExploitabilityScore": 2.8,
+					"ImpactScore":         3.6,
+					"Score":               6.5,
+					"Vectors":             "CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+				},
+			},
+		},
+	},
+	// Debian 11
+	{
+		Name: "CVE-2024-47850",
+		Namespace: database.Namespace{
+			Name:          "debian:11",
+			VersionFormat: dpkg.ParserName,
+		},
+		Description: "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47850",
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
+		FixedIn: []database.FeatureVersion{
+			{
+				Feature: database.Feature{
+					Name: "cups-filters",
+					Namespace: database.Namespace{
+						Name:          "debian:11",
+						VersionFormat: dpkg.ParserName,
+					},
+				},
+				Version: versionfmt.MaxVersion,
+			},
+		},
+		Metadata: map[string]interface{}{
+			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2024-10-04T16:00Z",
+				"LastModifiedDateTime": "2024-10-07T16:00Z",
+				"CVSSv2": map[string]interface{}{
+					"ExploitabilityScore": 0.0,
+					"ImpactScore":         0.0,
+					"Score":               0.0,
+					"Vectors":             "",
+				},
+				"CVSSv3": map[string]interface{}{
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         3.6,
+					"Score":               7.5,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+				},
+			},
+		},
+	},
+	// Debian 12
+	{
+		Name: "CVE-2024-47850",
+		Namespace: database.Namespace{
+			Name:          "debian:12",
+			VersionFormat: dpkg.ParserName,
+		},
+		Description: "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47850",
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
+		FixedIn: []database.FeatureVersion{
+			{
+				Feature: database.Feature{
+					Name: "cups-filters",
+					Namespace: database.Namespace{
+						Name:          "debian:12",
+						VersionFormat: dpkg.ParserName,
+					},
+				},
+				Version: versionfmt.MaxVersion,
+			},
+		},
+		Metadata: map[string]interface{}{
+			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2024-10-04T16:00Z",
+				"LastModifiedDateTime": "2024-10-07T16:00Z",
+				"CVSSv2": map[string]interface{}{
+					"ExploitabilityScore": 0.0,
+					"ImpactScore":         0.0,
+					"Score":               0.0,
+					"Vectors":             "",
+				},
+				"CVSSv3": map[string]interface{}{
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         3.6,
+					"Score":               7.5,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+				},
+			},
+		},
+	},
+	// Debian unstable
+	{
+		Name: "CVE-2024-47850",
+		Namespace: database.Namespace{
+			Name:          "debian:unstable",
+			VersionFormat: dpkg.ParserName,
+		},
+		Description: "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+		Link:        "https://security-tracker.debian.org/tracker/CVE-2024-47850",
+		// Debian did not assign a severity, so basing this on the score.
+		Severity: database.HighSeverity,
+		FixedIn: []database.FeatureVersion{
+			{
+				Feature: database.Feature{
+					Name: "cups-filters",
+					Namespace: database.Namespace{
+						Name:          "debian:unstable",
+						VersionFormat: dpkg.ParserName,
+					},
+				},
+				Version: versionfmt.MaxVersion,
+			},
+		},
+		Metadata: map[string]interface{}{
+			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2024-10-04T16:00Z",
+				"LastModifiedDateTime": "2024-10-07T16:00Z",
+				"CVSSv2": map[string]interface{}{
+					"ExploitabilityScore": 0.0,
+					"ImpactScore":         0.0,
+					"Score":               0.0,
+					"Vectors":             "",
+				},
+				"CVSSv3": map[string]interface{}{
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         3.6,
+					"Score":               7.5,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+				},
+			},
+		},
+	},
+	// Ubuntu 16.04
+	{
+		Name: "CVE-2024-47850",
+		Namespace: database.Namespace{
+			Name:          "ubuntu:16.04",
+			VersionFormat: dpkg.ParserName,
+		},
+		Description: "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+		Link:        "https://ubuntu.com/security/CVE-2024-47850",
+		Severity:    database.MediumSeverity,
+		FixedIn: []database.FeatureVersion{
+			{
+				Feature: database.Feature{
+					Name: "cups-filters",
+					Namespace: database.Namespace{
+						Name:          "ubuntu:16.04",
+						VersionFormat: dpkg.ParserName,
+					},
+				},
+				Version: "1.8.3-2ubuntu3.5+esm2",
+			},
+		},
+		Metadata: map[string]interface{}{
+			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2024-10-04T16:00Z",
+				"LastModifiedDateTime": "2024-10-09T16:00Z",
+				"CVSSv2": map[string]interface{}{
+					"ExploitabilityScore": 0.0,
+					"ImpactScore":         0.0,
+					"Score":               0.0,
+					"Vectors":             "",
+				},
+				"CVSSv3": map[string]interface{}{
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         3.6,
+					"Score":               7.5,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+				},
+			},
+		},
+	},
+	// Ubuntu 18.04
+	{
+		Name: "CVE-2024-47850",
+		Namespace: database.Namespace{
+			Name:          "ubuntu:18.04",
+			VersionFormat: dpkg.ParserName,
+		},
+		Description: "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+		Link:        "https://ubuntu.com/security/CVE-2024-47850",
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
+		FixedIn: []database.FeatureVersion{
+			{
+				Feature: database.Feature{
+					Name: "cups-filters",
+					Namespace: database.Namespace{
+						Name:          "ubuntu:18.04",
+						VersionFormat: dpkg.ParserName,
+					},
+				},
+				Version: "1.20.2-0ubuntu3.3+esm1",
+			},
+		},
+		Metadata: map[string]interface{}{
+			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2024-10-04T16:00Z",
+				"LastModifiedDateTime": "2024-10-09T16:00Z",
+				"CVSSv2": map[string]interface{}{
+					"ExploitabilityScore": 0.0,
+					"ImpactScore":         0.0,
+					"Score":               0.0,
+					"Vectors":             "",
+				},
+				"CVSSv3": map[string]interface{}{
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         3.6,
+					"Score":               7.5,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+				},
+			},
+		},
+	},
+	// Ubuntu 20.04
+	{
+		Name: "CVE-2024-47850",
+		Namespace: database.Namespace{
+			Name:          "ubuntu:20.04",
+			VersionFormat: dpkg.ParserName,
+		},
+		Description: "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+		Link:        "https://ubuntu.com/security/CVE-2024-47850",
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
+		FixedIn: []database.FeatureVersion{
+			{
+				Feature: database.Feature{
+					Name: "cups-filters",
+					Namespace: database.Namespace{
+						Name:          "ubuntu:20.04",
+						VersionFormat: dpkg.ParserName,
+					},
+				},
+				Version: "1.27.4-1ubuntu0.3",
+			},
+		},
+		Metadata: map[string]interface{}{
+			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2024-10-04T16:00Z",
+				"LastModifiedDateTime": "2024-10-09T16:00Z",
+				"CVSSv2": map[string]interface{}{
+					"ExploitabilityScore": 0.0,
+					"ImpactScore":         0.0,
+					"Score":               0.0,
+					"Vectors":             "",
+				},
+				"CVSSv3": map[string]interface{}{
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         3.6,
+					"Score":               7.5,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+				},
+			},
+		},
+	},
+	// Ubuntu 22.04
+	{
+		Name: "CVE-2024-47850",
+		Namespace: database.Namespace{
+			Name:          "ubuntu:22.04",
+			VersionFormat: dpkg.ParserName,
+		},
+		Description: "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+		Link:        "https://ubuntu.com/security/CVE-2024-47850",
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
+		FixedIn: []database.FeatureVersion{
+			{
+				Feature: database.Feature{
+					Name: "cups-filters",
+					Namespace: database.Namespace{
+						Name:          "ubuntu:22.04",
+						VersionFormat: dpkg.ParserName,
+					},
+				},
+				Version: "1.28.15-0ubuntu1.3",
+			},
+		},
+		Metadata: map[string]interface{}{
+			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2024-10-04T16:00Z",
+				"LastModifiedDateTime": "2024-10-09T16:00Z",
+				"CVSSv2": map[string]interface{}{
+					"ExploitabilityScore": 0.0,
+					"ImpactScore":         0.0,
+					"Score":               0.0,
+					"Vectors":             "",
+				},
+				"CVSSv3": map[string]interface{}{
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         3.6,
+					"Score":               7.5,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+				},
+			},
+		},
+	},
+	// Ubuntu 24.04
+	{
+		Name: "CVE-2024-47850",
+		Namespace: database.Namespace{
+			Name:          "ubuntu:24.04",
+			VersionFormat: dpkg.ParserName,
+		},
+		Description: "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+		Link:        "https://ubuntu.com/security/CVE-2024-47850",
+		// Ubuntu gave this a severity lower than the severity derived from the CVSS score.
+		Severity: database.MediumSeverity,
+		FixedIn: []database.FeatureVersion{
+			{
+				Feature: database.Feature{
+					Name: "cups-browsed",
+					Namespace: database.Namespace{
+						Name:          "ubuntu:24.04",
+						VersionFormat: dpkg.ParserName,
+					},
+				},
+				Version: "2.0.0-0ubuntu10.1",
+			},
+		},
+		Metadata: map[string]interface{}{
+			"NVD": map[string]interface{}{
+				"PublishedDateTime":    "2024-10-04T16:00Z",
+				"LastModifiedDateTime": "2024-10-09T16:00Z",
+				"CVSSv2": map[string]interface{}{
+					"ExploitabilityScore": 0.0,
+					"ImpactScore":         0.0,
+					"Score":               0.0,
+					"Vectors":             "",
+				},
+				"CVSSv3": map[string]interface{}{
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         3.6,
+					"Score":               7.5,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+				},
+			},
+		},
+	},
 }
 
 func (u updater) Update(_ vulnsrc.DataStore) (resp vulnsrc.UpdateResponse, _ error) {
