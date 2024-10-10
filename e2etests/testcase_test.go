@@ -3696,7 +3696,7 @@ Bug Fix(es) and Enhancement(s):
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.32-1.el8_10",
+				FixedBy:       "6.0.35-1.el8_10",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
