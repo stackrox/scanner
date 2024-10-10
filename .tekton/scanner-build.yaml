@@ -69,14 +69,6 @@ spec:
       computeResources:
         requests:
           cpu: 2
-  - pipelineTaskName: clamav-scan
-    stepSpecs:
-    # Provision more CPU to speed up ClamAV scan compared to the defaults.
-    # https://github.com/redhat-appstudio/build-definitions/blob/main/task/clamav-scan/0.1/clamav-scan.yaml#L48
-    - name: extract-and-scan-image
-      computeResources:
-        requests:
-          cpu: 1
 
   # Multiarch builds sometimes make the pipeline timeout after 1h.
   timeouts:
