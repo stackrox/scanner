@@ -3657,7 +3657,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.32-1.el8_10",
+				FixedBy:       "6.0.35-1.el8_10",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -3696,7 +3696,7 @@ Bug Fix(es) and Enhancement(s):
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "6.0.6-1.el8_6.x86_64",
-				FixedBy:       "6.0.32-1.el8_10",
+				FixedBy:       "6.0.35-1.el8_10",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHBA-2022:5747",
@@ -4439,8 +4439,8 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						// Note: This SHOULD be Low; however, OVAL data does not say that, at this time.
 						// The CVE page and VEX do, though...
 						// See https://issues.redhat.com/browse/SECDATA-739.
-						Severity:      "Important",
-						FixedBy:       "",
+						Severity: "Important",
+						FixedBy:  "",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -4557,6 +4557,32 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 							},
 						},
 					},
+					{
+						Name:          "CVE-2024-47850",
+						NamespaceName: "debian:12",
+						Description:   "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+						Link:          "https://security-tracker.debian.org/tracker/CVE-2024-47850",
+						Severity:      "Important",
+						FixedBy:       "",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"PublishedDateTime":    "2024-10-04T16:00Z",
+								"LastModifiedDateTime": "2024-10-07T16:00Z",
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								},
+							},
+						},
+					},
 				},
 			},
 			{
@@ -4668,10 +4694,10 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 									"Vectors":             "",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.6,
-									"ImpactScore":         6.0,
-									"Score":               8.3,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H",
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
 								},
 							},
 						},
@@ -4698,6 +4724,32 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 									"ImpactScore":         6.0,
 									"Score":               9.0,
 									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H",
+								},
+							},
+						},
+					},
+					{
+						Name:          "CVE-2024-47850",
+						NamespaceName: "ubuntu:18.04",
+						Description:   "CUPS cups-browsed before 2.5b1 will send an HTTP POST request to an arbitrary destination and port in response to a single IPP UDP packet requesting a printer to be added, a different vulnerability than CVE-2024-47176. (The request is meant to probe the new printer but can be used to create DDoS amplification attacks.)",
+						Link:          "https://ubuntu.com/security/CVE-2024-47850",
+						Severity:      "Moderate",
+						FixedBy:       "1.20.2-0ubuntu3.3+esm1",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"PublishedDateTime":    "2024-10-04T16:00Z",
+								"LastModifiedDateTime": "2024-10-09T16:00Z",
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
 								},
 							},
 						},
