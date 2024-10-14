@@ -859,7 +859,7 @@ var Vulnerabilities = []database.Vulnerability{
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
 				"PublishedDateTime":    "2024-09-26T16:00Z",
-				"LastModifiedDateTime": "2024-09-30T16:00Z",
+				"LastModifiedDateTime": "2024-10-11T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
@@ -867,10 +867,10 @@ var Vulnerabilities = []database.Vulnerability{
 					"Vectors":             "",
 				},
 				"CVSSv3": map[string]interface{}{
-					"ExploitabilityScore": 1.6,
-					"ImpactScore":         6.0,
-					"Score":               8.3,
-					"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H",
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         1.4,
+					"Score":               5.3,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
 				},
 			},
 		},
@@ -901,7 +901,7 @@ var Vulnerabilities = []database.Vulnerability{
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
 				"PublishedDateTime":    "2024-09-26T16:00Z",
-				"LastModifiedDateTime": "2024-09-30T16:00Z",
+				"LastModifiedDateTime": "2024-10-11T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
@@ -909,10 +909,10 @@ var Vulnerabilities = []database.Vulnerability{
 					"Vectors":             "",
 				},
 				"CVSSv3": map[string]interface{}{
-					"ExploitabilityScore": 1.6,
-					"ImpactScore":         6.0,
-					"Score":               8.3,
-					"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H",
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         1.4,
+					"Score":               5.3,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
 				},
 			},
 		},
@@ -943,7 +943,7 @@ var Vulnerabilities = []database.Vulnerability{
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
 				"PublishedDateTime":    "2024-09-26T16:00Z",
-				"LastModifiedDateTime": "2024-09-30T16:00Z",
+				"LastModifiedDateTime": "2024-10-11T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
@@ -951,10 +951,10 @@ var Vulnerabilities = []database.Vulnerability{
 					"Vectors":             "",
 				},
 				"CVSSv3": map[string]interface{}{
-					"ExploitabilityScore": 1.6,
-					"ImpactScore":         6.0,
-					"Score":               8.3,
-					"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H",
+					"ExploitabilityScore": 3.9,
+					"ImpactScore":         1.4,
+					"Score":               5.3,
+					"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
 				},
 			},
 		},
@@ -986,7 +986,7 @@ var Vulnerabilities = []database.Vulnerability{
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
 				"PublishedDateTime":    "2024-09-26T16:00Z",
-				"LastModifiedDateTime": "2024-09-27T16:00Z",
+				"LastModifiedDateTime": "2024-10-09T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
@@ -1028,7 +1028,7 @@ var Vulnerabilities = []database.Vulnerability{
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
 				"PublishedDateTime":    "2024-09-26T16:00Z",
-				"LastModifiedDateTime": "2024-10-02T16:00Z",
+				"LastModifiedDateTime": "2024-10-09T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
@@ -1070,7 +1070,7 @@ var Vulnerabilities = []database.Vulnerability{
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
 				"PublishedDateTime":    "2024-09-26T16:00Z",
-				"LastModifiedDateTime": "2024-09-27T16:00Z",
+				"LastModifiedDateTime": "2024-10-09T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
@@ -1112,7 +1112,7 @@ var Vulnerabilities = []database.Vulnerability{
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
 				"PublishedDateTime":    "2024-09-26T16:00Z",
-				"LastModifiedDateTime": "2024-09-27T16:00Z",
+				"LastModifiedDateTime": "2024-10-09T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
@@ -1154,7 +1154,7 @@ var Vulnerabilities = []database.Vulnerability{
 		Metadata: map[string]interface{}{
 			"NVD": map[string]interface{}{
 				"PublishedDateTime":    "2024-09-26T16:00Z",
-				"LastModifiedDateTime": "2024-09-27T16:00Z",
+				"LastModifiedDateTime": "2024-10-09T16:00Z",
 				"CVSSv2": map[string]interface{}{
 					"ExploitabilityScore": 0.0,
 					"ImpactScore":         0.0,
