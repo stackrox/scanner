@@ -4758,4 +4758,22 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:ubuntu-24.10",
+		registry:                "https://quay.io",
+		source:                  "NVD",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "ubuntu:24.10",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "base-files",
+				NamespaceName: "ubuntu:24.10",
+				VersionFormat: "dpkg",
+				Version:       "13.3ubuntu6",
+				AddedBy:       "sha256:9343428dd50e3bee43f9e7a0a2ecc8361a2db69756d40b20c42360457a1083af",
+			},
+		},
+	},
 }
