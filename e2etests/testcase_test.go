@@ -4413,10 +4413,10 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 									"Vectors":             "",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.3,
-									"ImpactScore":         4.7,
+									"ExploitabilityScore": 0.6,
+									"ImpactScore":         5.5,
 									"Score":               6.1,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:L/I:H/A:L",
+									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:H/UI:R/S:U/C:H/I:H/A:L",
 								},
 							},
 						},
