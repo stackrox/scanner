@@ -4400,9 +4400,9 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					{
 						Name:          "CVE-2024-47177",
 						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: A security flaw was found in OpenPrinting CUPS. A remote attacker may be able to exploit cups-filters via the `FoomaticRIPCommandLine` entry in the PPD file, which would trigger the CUPS system to execute any arbitrary commands injected into that file when a print job is sent to the affected device. \n            \n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
+						Description:   "DOCUMENTATION: A security flaw was found in OpenPrinting CUPS. The `FoomaticRIPCommandLine` directive in a PPD file will allow arbitrary commands to be executed when a print job is sent to the affected printing device. An attacker who could provide a malicious PPD file for a new print device or modify a PPD file of an existing device could execute arbitrary commands. \n            STATEMENT: Red Hat rates the severity of this CVE as Moderate due to the restrictions of the unprivileged ‘lp’ user which the resulting commands would be run as. Additionally, creating and modifying printer definitions is restricted to the privileged user groups sys, root, and wheel by default.\n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2024-47177",
-						Severity:      "Important",
+						Severity:      "Moderate",
 						FixedBy:       "",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
@@ -4413,10 +4413,10 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 									"Vectors":             "",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.3,
-									"ImpactScore":         4.7,
+									"ExploitabilityScore": 0.6,
+									"ImpactScore":         5.5,
 									"Score":               6.1,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:L/I:H/A:L",
+									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:H/UI:R/S:U/C:H/I:H/A:L",
 								},
 							},
 						},
@@ -4436,10 +4436,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						NamespaceName: "rhel:8",
 						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nThe ppdCreatePPDFromIPP2 function in libppd doesn't properly check or clean IPP attributes before writing them to a temporary PPD file. This means that a remote attacker, who has control of or has hijacked an exposed printer (through UPD or mDNS), could send a harmful IPP attribute and potentially insert malicious commands into the PPD file. \n            STATEMENT: RHCOS and RHEL include libs-cups as a build-time dependency. However, the vulnerability is not exploitable with just the client libraries unless a print server based on OpenPrinting is actively running.\n\nRHEL and RHCOS does not have cups-browsed enabled by default so the impact for those are set to 'Low'\n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2024-47175",
-						// Note: This SHOULD be Low; however, OVAL data does not say that, at this time.
-						// The CVE page and VEX do, though...
-						// See https://issues.redhat.com/browse/SECDATA-739.
-						Severity: "Important",
+						Severity: "Low",
 						FixedBy:  "",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
