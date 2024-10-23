@@ -4,22 +4,26 @@
 
 set -euo pipefail
 
-if [[ "$#" -lt "1" ]]; then
-  >&2 echo "Error: please pass target directory and blob filename(s) as command line arguments."
+if [[ "$#" -lt "2" ]]; then
+  >&2 echo "Error: please pass scanner tag, target directory and blob filename(s) as command line arguments."
   >&2 echo "For example:"
-  >&2 echo "    $(basename "${BASH_SOURCE[0]}") $(pwd) nvd-definitions.zip k8s-definitions.zip repo2cpe.zip genesis_manifests.json"
+  >&2 echo "    $(basename "${BASH_SOURCE[0]}") 2.32.4 $(pwd) nvd-definitions.zip k8s-definitions.zip repo2cpe.zip genesis_manifests.json"
   exit 1
 fi
 
-TARGET_DIR="$1"
+SCANNER_TAG="$1"
+# SCANNER_DATA_VERSION="latest"
+SCANNER_DATA_VERSION="${SCANNER_TAG}"
+# TODO: check if we are on master / not-tagged build
+
+TARGET_DIR="$2"
 shift
 
 blobs=( "$@" )
 
 for blob in "${blobs[@]}"; do
 
-  # TODO(ROX-22130): Assign proper suffix for tagged commits instead of /latest/.
-  url="https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
+  url="https://storage.googleapis.com/definitions.stackrox.io/scanner-data/${SCANNER_DATA_VERSION}/${blob}"
   dest="${TARGET_DIR}/blob-${blob}"
 
   echo "Downloading ${url} > ${dest}"
