@@ -2,7 +2,7 @@
 
 # This script is for downloading Scanner/Scanner-DB blobs that should be included in the container image.
 
-set -euo pipefail
+set -exuo pipefail
 
 if [[ "$#" -lt "2" ]]; then
   >&2 echo "Error: please pass scanner tag, target directory and blob filename(s) as command line arguments."
@@ -17,7 +17,7 @@ SCANNER_DATA_VERSION="${SCANNER_TAG}"
 # TODO: check if we are on master / not-tagged build
 
 TARGET_DIR="$2"
-shift
+shift 2
 
 blobs=( "$@" )
 
