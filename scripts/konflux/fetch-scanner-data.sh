@@ -16,10 +16,9 @@ TARGET_DIR="$2"
 shift 2
 blobs=( "$@" )
 
-SCANNER_DATA_VERSION="latest"
-
 # Ensure that we download scanner data for a release if this is a tagged build.
 # fatal: no tag exactly matches '<commit hash>' is expected if it is an untagged commit.
+SCANNER_DATA_VERSION="latest"
 if git describe --tags --exact-match HEAD | grep -q "${SCANNER_TAG}"; then
     SCANNER_DATA_VERSION="${SCANNER_TAG}"
 fi
