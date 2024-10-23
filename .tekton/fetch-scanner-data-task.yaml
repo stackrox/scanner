@@ -59,8 +59,8 @@ spec:
     script: |
       #!/usr/bin/env bash
       set -euo pipefail
-      dnf -y upgrade --nobest
-      dnf -y install git
+      microdnf -y upgrade --nobest
+      microdnf -y install git
       scripts/konflux/fetch-scanner-data.sh "$(params.scanner-tag)" "$(params.target-dir)" "$@"
     # It should not take long to download blobs otherwise there's something odd going on.
     timeout: 10m
