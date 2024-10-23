@@ -60,9 +60,7 @@ spec:
   - description: Output Image Repository
     name: output-image-repo
     type: string
-    # TODO: stable stream releases must override this param
-  # - default: "-fast"
-  - default: ""
+  - default: "-fast"
     description: Suffix that will be appended to the output image tag.
     name: output-tag-suffix
     type: string
@@ -200,11 +198,19 @@ spec:
     taskRef:
       name: determine-image-tag
 
+  - name: determine-image-tag-unsuffixed
+    params:
+    - name: TAG_SUFFIX
+      value: ''
+    - name: SOURCE_ARTIFACT
+      value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
+    taskRef:
+      name: determine-image-tag
+
   - name: fetch-scanner-data
     params:
     - name: scanner-tag
-      value: "2.32.4"
-      # value: $(tasks.determine-image-tag.results.IMAGE_TAG)
+      value: $(tasks.determine-image-tag-unsuffixed.results.IMAGE_TAG)
     - name: blobs-to-fetch
       value: [ "$(params.blobs-to-fetch[*])" ]
     - name: SOURCE_ARTIFACT
