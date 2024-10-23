@@ -200,7 +200,7 @@ spec:
 
   - name: fetch-scanner-data
     params:
-    - name: SCANNER_TAG
+    - name: scanner-tag
       value: "2.32.4"
       # value: $(tasks.determine-image-tag.results.IMAGE_TAG)
     - name: blobs-to-fetch
