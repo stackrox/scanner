@@ -12,14 +12,17 @@ if [[ "$#" -lt "2" ]]; then
 fi
 
 SCANNER_TAG="$1"
-# SCANNER_DATA_VERSION="latest"
-SCANNER_DATA_VERSION="${SCANNER_TAG}"
-# TODO: check if we are on master / not-tagged build
-
 TARGET_DIR="$2"
 shift 2
-
 blobs=( "$@" )
+
+SCANNER_DATA_VERSION="latest"
+
+# Ensure that we download scanner data for a release if this is a tagged build.
+# fatal: no tag exactly matches '<commit hash>' is expected if it is an untagged commit.
+if git describe --tags --exact-match HEAD | grep -q "${SCANNER_TAG}"; then
+    SCANNER_DATA_VERSION="${SCANNER_TAG}"
+fi
 
 for blob in "${blobs[@]}"; do
 

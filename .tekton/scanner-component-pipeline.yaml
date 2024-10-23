@@ -60,7 +60,9 @@ spec:
   - description: Output Image Repository
     name: output-image-repo
     type: string
-  - default: "-fast"
+    # TODO: stable stream releases must override this param
+  # - default: "-fast"
+  - default: ""
     description: Suffix that will be appended to the output image tag.
     name: output-tag-suffix
     type: string
