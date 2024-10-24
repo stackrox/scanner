@@ -2,24 +2,30 @@
 
 # This script is for downloading Scanner/Scanner-DB blobs that should be included in the container image.
 
-set -euo pipefail
+set -exuo pipefail
 
-if [[ "$#" -lt "1" ]]; then
-  >&2 echo "Error: please pass target directory and blob filename(s) as command line arguments."
+if [[ "$#" -lt "2" ]]; then
+  >&2 echo "Error: please pass scanner tag, target directory and blob filename(s) as command line arguments."
   >&2 echo "For example:"
-  >&2 echo "    $(basename "${BASH_SOURCE[0]}") $(pwd) nvd-definitions.zip k8s-definitions.zip repo2cpe.zip genesis_manifests.json"
+  >&2 echo "    $(basename "${BASH_SOURCE[0]}") 2.32.4 $(pwd) nvd-definitions.zip k8s-definitions.zip repo2cpe.zip genesis_manifests.json"
   exit 1
 fi
 
-TARGET_DIR="$1"
-shift
-
+SCANNER_TAG="$1"
+TARGET_DIR="$2"
+shift 2
 blobs=( "$@" )
+
+# Ensure that we download scanner data for a release if this is a tagged build.
+# fatal: no tag exactly matches '<commit hash>' is expected if it is an untagged commit.
+SCANNER_DATA_VERSION="latest"
+if git describe --tags --exact-match HEAD | grep -q "${SCANNER_TAG}"; then
+    SCANNER_DATA_VERSION="${SCANNER_TAG}"
+fi
 
 for blob in "${blobs[@]}"; do
 
-  # TODO(ROX-22130): Assign proper suffix for tagged commits instead of /latest/.
-  url="https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
+  url="https://storage.googleapis.com/definitions.stackrox.io/scanner-data/${SCANNER_DATA_VERSION}/${blob}"
   dest="${TARGET_DIR}/blob-${blob}"
 
   echo "Downloading ${url} > ${dest}"
