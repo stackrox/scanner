@@ -198,19 +198,10 @@ spec:
     taskRef:
       name: determine-image-tag
 
-  - name: determine-image-tag-unsuffixed
-    params:
-    - name: TAG_SUFFIX
-      value: ''
-    - name: SOURCE_ARTIFACT
-      value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
-    taskRef:
-      name: determine-image-tag
-
   - name: fetch-scanner-data
     params:
     - name: scanner-tag
-      value: $(tasks.determine-image-tag-unsuffixed.results.IMAGE_TAG)
+      value: $(tasks.determine-image-tag.results.IMAGE_TAG)
     - name: blobs-to-fetch
       value: [ "$(params.blobs-to-fetch[*])" ]
     - name: SOURCE_ARTIFACT
