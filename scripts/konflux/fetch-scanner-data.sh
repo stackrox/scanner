@@ -38,7 +38,7 @@ for blob in "${blobs[@]}"; do
   dest="${TARGET_DIR}/blob-${blob}"
 
   echo "Downloading ${url} > ${dest}, retrying for 90 minutes..."
-  curl --fail -s --show-error --retry 540  --max-time 30 --retry-delay 10 --retry-all-errors \
+  curl --fail -s --show-error --retry 540  --max-time 30 --retry-delay 10 --retry-connrefused \
     --output "${dest}" \
     "${url}"
 
