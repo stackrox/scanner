@@ -37,8 +37,8 @@ for blob in "${blobs[@]}"; do
   url="https://storage.googleapis.com/definitions.stackrox.io/scanner-data/${SCANNER_DATA_VERSION}/${blob}"
   dest="${TARGET_DIR}/blob-${blob}"
 
-  echo "Downloading ${url} > ${dest}, retrying for 90 minutes..."
-  curl --fail -s --show-error --retry 540  --max-time 30 --retry-delay 10 --retry-connrefused \
+  echo "Downloading ${url} > ${dest}, retrying 1000 times or until killed..."
+  curl --fail -s --show-error --retry 1000 --retry-delay 10 --retry-connrefused \
     --output "${dest}" \
     "${url}"
 
