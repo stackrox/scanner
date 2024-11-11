@@ -16,11 +16,20 @@ TARGET_DIR="$2"
 shift 2
 blobs=( "$@" )
 
-# Ensure that we download scanner data for a release if this is a tagged build.
-# fatal: no tag exactly matches '<commit hash>' is expected if it is an untagged commit.
-SCANNER_DATA_VERSION="latest"
-if git describe --tags --exact-match HEAD | grep -q "${SCANNER_TAG}"; then
-    SCANNER_DATA_VERSION="${SCANNER_TAG}"
+# Ensure that we download scanner data for a release if this is a tagged build
+# and that it is tagged with the exact SCANNER_TAG.
+
+# First, try take git tag if it's a tagged commit.
+tag="$(git tag --points-at)"
+if [[ -z "$tag" ]]; then
+  # If not, use latest.
+  SCANNER_DATA_VERSION="latest"
+elif [ "$tag" == "${SCANNER_TAG}" ]; then
+  # Otherwise, ensure that the tags match.
+  SCANNER_DATA_VERSION="${SCANNER_TAG}"
+else
+  >&2 echo -e "Error: the tag on the HEAD commit ($tag) does not match SCANNER_TAG ($SCANNER_TAG)"
+  exit 5
 fi
 
 for blob in "${blobs[@]}"; do
@@ -28,8 +37,8 @@ for blob in "${blobs[@]}"; do
   url="https://storage.googleapis.com/definitions.stackrox.io/scanner-data/${SCANNER_DATA_VERSION}/${blob}"
   dest="${TARGET_DIR}/blob-${blob}"
 
-  echo "Downloading ${url} > ${dest}"
-  curl --fail -s --show-error --retry 4 --retry-max-time 30 --retry-connrefused \
+  echo "Downloading ${url} > ${dest}, retrying for 90 minutes..."
+  curl --fail -s --show-error --retry 540  --max-time 30 --retry-delay 10 --retry-all-errors \
     --output "${dest}" \
     "${url}"
 
