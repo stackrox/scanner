@@ -7,9 +7,6 @@ metadata:
 spec:
   description: Downloads blobs from definitions.stackrox.io GCloud bucket to be included in Scanner container builds.
   params:
-  - name: scanner-tag
-    description: Image Tag determined by custom logic.
-    type: string
   - name: blobs-to-fetch
     description: |
       List of scanner-data file names to fetch to include in the container build.
@@ -61,7 +58,7 @@ spec:
       set -euo pipefail
       dnf -y upgrade --nobest
       dnf -y install git
-      scripts/konflux/fetch-scanner-data.sh "$(params.scanner-tag)" "$(params.target-dir)" "$@"
+      scripts/konflux/fetch-scanner-data.sh "$(params.target-dir)" "$@"
     # It should not take too long to download blobs otherwise there's something odd going on.
     timeout: 1h30m
   - name: create-trusted-artifact

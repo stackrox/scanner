@@ -4,16 +4,15 @@
 
 set -exuo pipefail
 
-if [[ "$#" -lt "2" ]]; then
-  >&2 echo "Error: please pass scanner tag, target directory and blob filename(s) as command line arguments."
+if [[ "$#" -lt "1" ]]; then
+  >&2 echo "Error: please pass target directory and blob filename(s) as command line arguments."
   >&2 echo "For example:"
-  >&2 echo "    $(basename "${BASH_SOURCE[0]}") 2.32.4 $(pwd) nvd-definitions.zip k8s-definitions.zip repo2cpe.zip genesis_manifests.json"
+  >&2 echo "    $(basename "${BASH_SOURCE[0]}") $(pwd) nvd-definitions.zip k8s-definitions.zip repo2cpe.zip genesis_manifests.json"
   exit 1
 fi
 
-SCANNER_TAG="$1"
-TARGET_DIR="$2"
-shift 2
+TARGET_DIR="$1"
+shift 1
 blobs=( "$@" )
 
 # Ensure that we download scanner data for a release if this is a tagged build.
