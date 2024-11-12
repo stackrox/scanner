@@ -8,10 +8,7 @@ spec:
   description: Downloads blobs from definitions.stackrox.io GCloud bucket to be included in Scanner container builds.
   params:
   - name: scanner-tag
-    description: Image Tag determined by custom logic
-    type: string
-  - name: tag-suffix
-    description: Suffix appended to the generated image tag
+    description: Image Tag determined by custom logic.
     type: string
   - name: blobs-to-fetch
     description: |
