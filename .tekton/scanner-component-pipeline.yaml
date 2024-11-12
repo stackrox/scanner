@@ -212,7 +212,6 @@ spec:
       value: $(params.oci-artifact-expires-after)
     taskRef:
       name: fetch-scanner-data
-    timeout: 1h30m
 
   - name: prefetch-dependencies
     params:

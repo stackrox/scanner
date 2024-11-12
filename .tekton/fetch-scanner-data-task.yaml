@@ -62,8 +62,8 @@ spec:
       dnf -y upgrade --nobest
       dnf -y install git
       scripts/konflux/fetch-scanner-data.sh "$(params.scanner-tag)" "$(params.target-dir)" "$@"
-    # It should not take long to download blobs otherwise there's something odd going on.
-    timeout: 10m
+    # It should not take too long to download blobs otherwise there's something odd going on.
+    timeout: 1h30m
   - name: create-trusted-artifact
     image: quay.io/redhat-appstudio/build-trusted-artifacts:latest@sha256:81c4864dae6bb11595f657be887e205262e70086a05ed16ada827fd6391926ac
     args:
