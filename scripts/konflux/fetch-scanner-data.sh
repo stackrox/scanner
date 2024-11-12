@@ -4,31 +4,31 @@
 
 set -exuo pipefail
 
-if [[ "$#" -lt "2" ]]; then
-  >&2 echo "Error: please pass scanner tag, target directory and blob filename(s) as command line arguments."
+if [[ "$#" -lt "3" ]]; then
+  >&2 echo "Error: please pass scanner tag, output tag suffix, target directory and blob filename(s) as command line arguments."
   >&2 echo "For example:"
-  >&2 echo "    $(basename "${BASH_SOURCE[0]}") 2.32.4 $(pwd) nvd-definitions.zip k8s-definitions.zip repo2cpe.zip genesis_manifests.json"
+  >&2 echo "    $(basename "${BASH_SOURCE[0]}") 2.32.4 -fast $(pwd) nvd-definitions.zip k8s-definitions.zip repo2cpe.zip genesis_manifests.json"
   exit 1
 fi
 
 SCANNER_TAG="$1"
-TARGET_DIR="$2"
-shift 2
+TAG_SUFFIX="$2"
+TARGET_DIR="$3"
+shift 3
 blobs=( "$@" )
 
-# Ensure that we download scanner data for a release if this is a tagged build
-# and that it is tagged with the exact SCANNER_TAG.
+# Ensure that we download scanner data for a release if this is a tagged build.
 
 # First, try take git tag if it's a tagged commit.
 tag="$(git tag --points-at)"
-if [[ -z "$tag" ]]; then
+if [[ -z "${tag}" ]]; then
   # If not, use latest.
   SCANNER_DATA_VERSION="latest"
-elif [ "$tag" == "${SCANNER_TAG}" ]; then
-  # Otherwise, ensure that the tags match.
-  SCANNER_DATA_VERSION="${SCANNER_TAG}"
+elif [[ "$(wc -l <<< "${tag}")" -eq 1 ]]; then
+  # If there is exactly one tag on the commit, use that.
+  SCANNER_DATA_VERSION="${tag}"
 else
-  >&2 echo -e "Error: the tag on the HEAD commit ($tag) does not match SCANNER_TAG ($SCANNER_TAG)"
+  >&2 echo -e "Error: the HEAD commit has multiple tags, don't know which one to choose:\n${tag}"
   exit 5
 fi
 

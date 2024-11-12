@@ -10,6 +10,9 @@ spec:
   - name: scanner-tag
     description: Image Tag determined by custom logic
     type: string
+  - name: tag-suffix
+    description: Suffix appended to the generated image tag
+    type: string
   - name: blobs-to-fetch
     description: |
       List of scanner-data file names to fetch to include in the container build.
