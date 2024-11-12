@@ -2,7 +2,7 @@
 
 # This script is for downloading Scanner/Scanner-DB blobs that should be included in the container image.
 
-set -exuo pipefail
+set -euo pipefail
 
 if [[ "$#" -lt "1" ]]; then
   >&2 echo "Error: please pass target directory and blob filename(s) as command line arguments."
