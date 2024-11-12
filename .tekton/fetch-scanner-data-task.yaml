@@ -50,7 +50,7 @@ spec:
     - use
     - $(params.SOURCE_ARTIFACT)=/var/workdir/source
   - name: fetch-scanner-data
-    image: registry.access.redhat.com/ubi8:latest
+    image: registry.access.redhat.com/ubi9:latest
     # The only functioning way to pass array parameter that I found is through args array.
     # Array params have weird limitations, see https://github.com/tektoncd/pipeline/blob/main/docs/tasks.md#substituting-array-parameters
     # Attempts to pass this in other places result in webhook errors and pipeline not starting.
