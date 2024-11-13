@@ -12,7 +12,8 @@ if [[ "$#" -lt "1" ]]; then
 fi
 
 TARGET_DIR="$1"
-shift 1
+shift
+
 blobs=( "$@" )
 
 # Ensure that we download scanner data for a release if this is a tagged build.
