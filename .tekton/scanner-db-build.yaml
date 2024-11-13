@@ -59,6 +59,7 @@ spec:
     secret:
       secretName: '{{ git_auth_secret }}'
 
+  # Tagged builds wait for blobs to be published which takes about 1h.
   timeouts:
     tasks: 2h30m
     finally: 10m
