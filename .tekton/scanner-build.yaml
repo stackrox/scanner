@@ -71,10 +71,11 @@ spec:
           cpu: 2
 
   # Multiarch builds sometimes make the pipeline timeout after 1h.
+  # Tagged builds wait for blobs to be published which takes about 1h.
   timeouts:
-    tasks: 1h30m
+    tasks: 3h0m
     finally: 10m
-    pipeline: 1h40m
+    pipeline: 3h10m
 
   pipelineRef:
     name: scanner-component-pipeline
