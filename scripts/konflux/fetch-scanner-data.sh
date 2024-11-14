@@ -44,7 +44,7 @@ If the download times out for a tagged build, it is likely because the blobs wer
 This usually takes about 1 hour after the tag is pushed.
 Go to https://github.com/stackrox/scanner/actions to debug.
   """
-  curl --fail -s --show-error --retry "${RETRY_TIMES}" --retry-delay 10 --retry-all-errors \
+  curl --fail --no-progress-bar --show-error --retry "${RETRY_TIMES}" --retry-delay 10 --retry-all-errors \
     --output "${dest}" \
     "${url}"
 
