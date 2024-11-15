@@ -11,6 +11,7 @@ RUN if [[ "$SCANNER_TAG" == "" ]]; then >&2 echo "error: required SCANNER_TAG ar
 ENV RELEASE_TAG="${SCANNER_TAG}"
 
 ENV GOFLAGS=""
+ENV GOTAGS=release
 ENV CI=1
 
 COPY . /src
