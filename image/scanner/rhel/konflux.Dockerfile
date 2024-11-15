@@ -10,6 +10,8 @@ ARG SCANNER_TAG
 RUN if [[ "$SCANNER_TAG" == "" ]]; then >&2 echo "error: required SCANNER_TAG arg is unset"; exit 6; fi
 ENV RELEASE_TAG="${SCANNER_TAG}"
 
+ENV GOEXPERIMENT=strictfipsruntime
+ENV GOTAGS=strictfipsruntime
 ENV GOFLAGS=""
 ENV CI=1
 
