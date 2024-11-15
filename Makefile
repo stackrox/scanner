@@ -71,8 +71,7 @@ GOPATH_WD_OVERRIDES := -w /src -e GOPATH=/go
 IMAGE_BUILD_FLAGS   := -e CGO_ENABLED=$(CGO_ENABLED) -e GOOS=linux -e GOARCH=$(GOARCH)
 IMAGE_BUILD_ARGS     = --build-arg LABEL_VERSION=$(TAG) --build-arg LABEL_RELEASE=$(TAG) --build-arg QUAY_TAG_EXPIRATION=$(QUAY_TAG_EXPIRATION)
 BUILD_FLAGS         := CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=$(GOARCH)
-GOTAGS              ?=
-BUILD_CMD           := go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" $(if $(GOTAGS),-tags=$(GOTAGS)) -o image/scanner/bin/scanner ./cmd/clair
+BUILD_CMD           := go build -trimpath -ldflags="-X github.com/stackrox/scanner/pkg/version.Version=$(TAG)" -tags=$(GOTAGS) -o image/scanner/bin/scanner ./cmd/clair
 NODESCAN_BUILD_CMD  := go build -trimpath -o tools/bin/local-nodescanner ./tools/local-nodescanner
 
 #####################################################################
