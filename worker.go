@@ -123,11 +123,13 @@ func ProcessLayerFromReader(datastore database.Datastore, imageFormat, name, lin
 			parentHash = layer.Parent.Name
 		}
 		rhelv2Layer := &database.RHELv2Layer{
-			Hash:       layer.Name,
-			Dist:       rhelv2Components.Dist,
-			Pkgs:       rhelv2Components.Packages,
-			CPEs:       rhelv2Components.CPEs,
-			ParentHash: parentHash,
+			Hash:          layer.Name,
+			Dist:          rhelv2Components.Dist,
+			Pkgs:          rhelv2Components.Packages,
+			CPEs:          rhelv2Components.CPEs,
+			ParentHash:    parentHash,
+			Lineage:       lineage,
+			ParentLineage: parentLineage,
 		}
 
 		if err := datastore.InsertRHELv2Layer(rhelv2Layer); err != nil {
