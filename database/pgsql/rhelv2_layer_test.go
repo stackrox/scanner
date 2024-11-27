@@ -123,7 +123,7 @@ func TestGetRHELv2Layers(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get parent layer.
-	layers, err := datastore.GetRHELv2Layers("sha256:howdy")
+	layers, err := datastore.GetRHELv2Layers("sha256:howdy", "")
 	assert.NoError(t, err)
 	assert.Len(t, layers, 1)
 	layer = layers[0]
@@ -132,7 +132,7 @@ func TestGetRHELv2Layers(t *testing.T) {
 	assert.Empty(t, layer.CPEs)
 
 	// Get 2 layered-image.
-	layers, err = datastore.GetRHELv2Layers("sha256:howdyhowdy")
+	layers, err = datastore.GetRHELv2Layers("sha256:howdyhowdy", "")
 	assert.NoError(t, err)
 	assert.Len(t, layers, 2)
 	layer = layers[1]
@@ -176,7 +176,7 @@ func TestGetRHELv2Layers(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get 3 layered-image.
-	layers, err = datastore.GetRHELv2Layers("sha256:howdyhowdyhowdy")
+	layers, err = datastore.GetRHELv2Layers("sha256:howdyhowdyhowdy", "")
 	assert.NoError(t, err)
 	assert.Len(t, layers, 3)
 	layer = layers[2]
