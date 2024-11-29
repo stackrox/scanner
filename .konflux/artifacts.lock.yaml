@@ -1,0 +1,25 @@
+---
+metadata:
+  version: "1.0"
+artifacts:
+
+- download_url: "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/pg-definitions.sql.gz"
+  # correct
+  checksum: "sha256:e72c2c75f7afc2ed9067956ab85b12c1a2806edba6539b4374a25b53b2598c3d"
+  filename: "pg-definitions.sql.gz"  # optional
+
+- download_url: "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/nvd-definitions.zip"
+  # not matching
+  checksum: "sha256:c91b496427a81decd31e1b900c68e9abf4ebb353cdaebf2f2557b413b1c2f908"
+  filename: "nvd-definitions.zip"  # optional
+
+- download_url: "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/k8s-definitions.zip"
+  # empty
+  checksum: ""
+  filename: "k8s-definitions.zip"  # optional
+
+- download_url: "https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/repo2cpe.zip"
+  # absent
+  filename: "repo2cpe.zip"  # optional
+
+# https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/genesis_manifests.json

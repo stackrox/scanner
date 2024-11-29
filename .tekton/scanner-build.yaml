@@ -49,7 +49,11 @@ spec:
   # - name: hermetic
   #   value: "true"
   - name: prefetch-input
-    value: '{"type": "gomod", "path": "."}'
+    value: >-
+      [
+        {"type": "gomod", "path": "."},
+        {"type": "generic", "path": ".konflux"}
+      ]
   - name: build-source-image
     value: 'true'
   - name: build-target-stage

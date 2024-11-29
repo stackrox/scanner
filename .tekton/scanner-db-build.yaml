@@ -50,7 +50,10 @@ spec:
   #   value: "true"
   # No language dependencies are required for scanner-db image.
   - name: prefetch-input
-    value: ''
+    value: >-
+      [
+        {"type": "generic", "path": ".konflux"}
+      ]
   - name: build-source-image
     value: 'true'
   - name: build-target-stage
