@@ -3900,31 +3900,6 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				FixedBy:       "4.10.1685679861-1.el8",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2021-26291",
-						NamespaceName: "rhel:8",
-						Description: `DOCUMENTATION: A flaw was found in maven. Repositories that are defined in a dependency’s Project Object Model (pom), which may be unknown to users, are used by default resulting in potential risk if a malicious actor takes over that repository or is able to insert themselves into a position to pretend to be that repository. The highest threat from this vulnerability is to data confidentiality and integrity. 
-            
-            MITIGATION: To avoid possible man-in-the-middle related attacks with this flaw, ensure any linked repositories in maven POMs use https and not http.`,
-						Link:     "https://access.redhat.com/security/cve/CVE-2021-26291",
-						Severity: "Moderate",
-						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 0.0,
-									"ImpactScore":         0.0,
-									"Score":               0.0,
-									"Vectors":             "",
-								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.2,
-									"Score":               7.4,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
-								},
-							},
-						},
-					},
-					{
 						Name:          "RHSA-2022:6531",
 						NamespaceName: "rhel:8",
 						Description: `Red Hat OpenShift Container Platform is Red Hat's cloud computing
