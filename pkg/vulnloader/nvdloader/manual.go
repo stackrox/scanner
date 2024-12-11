@@ -824,6 +824,337 @@ var manuallyEnrichedVulns = map[string]*schema.NVDCVEFeedJSON10DefCVEItem{
 		LastModifiedDate: "2021-02-24T12:15Z",
 		PublishedDate:    "2017-03-11T02:59Z",
 	},
+	// CVE-2020-1045 has an entry in NVD https://nvd.nist.gov/vuln/detail/CVE-2020-1045,
+	// but it had changed 11/21/2024.
+	// The NVD JSON feed no longer have a CVSS v3 entry for it, and the API
+	// now shows NVD's score as a "Secondary" source.
+	// Adding an entry here to ensure we have consistent results.
+	"CVE-2020-1045": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ASSIGNER: "secure@microsoft.com",
+				ID:       "CVE-2020-1045",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: "<p>A security feature bypass vulnerability exists in the way Microsoft ASP.NET Core parses encoded cookie names.</p>\n<p>The ASP.NET Core cookie parser decodes entire cookie strings which could allow a malicious attacker to set a second cookie with the name being percent encoded.</p>\n<p>The security update addresses the vulnerability by fixing the way the ASP.NET Core cookie parser handles encoded names.</p>\n",
+					},
+				},
+			},
+			Problemtype: &schema.CVEJSON40Problemtype{
+				ProblemtypeData: []*schema.CVEJSON40ProblemtypeProblemtypeData{
+					{
+						Description: []*schema.CVEJSON40LangString{
+							{
+								Lang:  "en",
+								Value: "NVD-CWE-noinfo",
+							},
+						},
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name: "https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2020-1045",
+						URL:  "https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2020-1045",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:              `cpe:2.3:a:microsoft:asp.net_core:*:*:*:*:*:*:*:*`,
+							VersionStartIncluding: "2.1",
+							VersionEndIncluding:   "2.1.21",
+							Vulnerable:            true,
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:microsoft:asp.net_core:*:*:*:*:*:*:*:*`,
+							VersionStartIncluding: "3.1",
+							VersionEndIncluding:   "3.1.8",
+							Vulnerable:            true,
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV2: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV2{
+				CVSSV2: &schema.CVSSV20{
+					AccessComplexity:      "LOW",
+					AccessVector:          "NETWORK",
+					Authentication:        "NONE",
+					AvailabilityImpact:    "NONE",
+					BaseScore:             5.0,
+					ConfidentialityImpact: "NONE",
+					IntegrityImpact:       "PARTIAL",
+					VectorString:          "AV:N/AC:L/Au:N/C:N/I:P/A:N",
+					Version:               "2.0",
+				},
+				ExploitabilityScore: 10,
+				ImpactScore:         2.9,
+				Severity:            "MEDIUM",
+			},
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "NONE",
+					BaseScore:             7.5,
+					BaseSeverity:          "HIGH",
+					ConfidentialityImpact: "NONE",
+					IntegrityImpact:       "HIGH",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         3.6,
+			},
+		},
+		LastModifiedDate: "2024-11-21T05:09Z",
+		PublishedDate:    "2020-09-11T17:15Z",
+	},
+	// CVE-2021-1723 has an entry in NVD https://nvd.nist.gov/vuln/detail/cve-2021-1723,
+	// but it had changed 11/21/2024.
+	// The NVD JSON feed no longer have a CVSS v3 entry for it, and the API
+	// now shows NVD's score as a "Secondary" source.
+	// Adding an entry here to ensure we have consistent results.
+	"CVE-2021-1723": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ASSIGNER: "secure@microsoft.com",
+				ID:       "CVE-2021-1723",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: "ASP.NET Core and Visual Studio Denial of Service Vulnerability",
+					},
+				},
+			},
+			Problemtype: &schema.CVEJSON40Problemtype{
+				ProblemtypeData: []*schema.CVEJSON40ProblemtypeProblemtypeData{
+					{
+						Description: []*schema.CVEJSON40LangString{
+							{
+								Lang:  "en",
+								Value: "NVD-CWE-noinfo",
+							},
+						},
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name: "ASP.NET Core and Visual Studio Denial of Service Vulnerability",
+						URL:  "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-1723",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:              `cpe:2.3:a:microsoft:visual_studio_2019:*:*:*:*:*:*:*:*`,
+							VersionStartIncluding: "16.0",
+							VersionEndIncluding:   "16.8",
+							Vulnerable:            true,
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:microsoft:asp.net_core:*:*:*:*:*:*:*:*`,
+							VersionStartIncluding: "3.1",
+							VersionEndIncluding:   "3.1.10",
+							Vulnerable:            true,
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:microsoft:asp.net_core:*:*:*:*:*:*:*:*`,
+							VersionStartIncluding: "5.0",
+							VersionEndIncluding:   "5.0.1",
+							Vulnerable:            true,
+						},
+					},
+					Operator: "OR",
+				},
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:   `cpe:2.3:o:fedoraproject:fedora:32:*:*:*:*:*:*:*`,
+							Vulnerable: true,
+						},
+						{
+							Cpe23Uri:   `cpe:2.3:o:fedoraproject:fedora:33:*:*:*:*:*:*:*`,
+							Vulnerable: true,
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV2: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV2{
+				CVSSV2: &schema.CVSSV20{
+					AccessComplexity:      "LOW",
+					AccessVector:          "NETWORK",
+					Authentication:        "NONE",
+					AvailabilityImpact:    "PARTIAL",
+					BaseScore:             5.0,
+					ConfidentialityImpact: "NONE",
+					IntegrityImpact:       "NONE",
+					VectorString:          "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+					Version:               "2.0",
+				},
+				ExploitabilityScore: 10,
+				ImpactScore:         2.9,
+				Severity:            "MEDIUM",
+			},
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "NETWORK",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             7.5,
+					BaseSeverity:          "HIGH",
+					ConfidentialityImpact: "NONE",
+					IntegrityImpact:       "NONE",
+					PrivilegesRequired:    "NONE",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         3.6,
+			},
+		},
+		LastModifiedDate: "2024-11-21T05:44Z",
+		PublishedDate:    "2021-01-12T20:15Z",
+	},
+	// CVE-2021-31204 has an entry in NVD https://nvd.nist.gov/vuln/detail/CVE-2021-31204,
+	// but it had changed 11/21/2024.
+	// The NVD JSON feed no longer have a CVSS v3 entry for it, and the API
+	// now shows NVD's score as a "Secondary" source.
+	// Adding an entry here to ensure we have consistent results.
+	"CVE-2021-31204": {
+		CVE: &schema.CVEJSON40{
+			CVEDataMeta: &schema.CVEJSON40CVEDataMeta{
+				ASSIGNER: "secure@microsoft.com",
+				ID:       "CVE-2021-1723",
+			},
+			DataFormat:  "MITRE",
+			DataType:    "CVE",
+			DataVersion: "4.0",
+			Description: &schema.CVEJSON40Description{
+				DescriptionData: []*schema.CVEJSON40LangString{
+					{
+						Lang:  "en",
+						Value: ".NET and Visual Studio Elevation of Privilege Vulnerability",
+					},
+				},
+			},
+			Problemtype: &schema.CVEJSON40Problemtype{
+				ProblemtypeData: []*schema.CVEJSON40ProblemtypeProblemtypeData{
+					{
+						Description: []*schema.CVEJSON40LangString{
+							{
+								Lang:  "en",
+								Value: "NVD-CWE-noinfo",
+							},
+						},
+					},
+				},
+			},
+			References: &schema.CVEJSON40References{
+				ReferenceData: []*schema.CVEJSON40Reference{
+					{
+						Name: "https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2021-31204",
+						URL:  "https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2021-31204",
+					},
+				},
+			},
+		},
+		Configurations: &schema.NVDCVEFeedJSON10DefConfigurations{
+			CVEDataVersion: "4.0",
+			Nodes: []*schema.NVDCVEFeedJSON10DefNode{
+				{
+					CPEMatch: []*schema.NVDCVEFeedJSON10DefCPEMatch{
+						{
+							Cpe23Uri:              `cpe:2.3:a:microsoft:.net_core:*:*:*:*:*:*:*:*`,
+							VersionStartIncluding: "3.1",
+							VersionEndIncluding:   "3.1.14",
+							Vulnerable:            true,
+						},
+						{
+							Cpe23Uri:              `cpe:2.3:a:microsoft:.net:*:*:*:*:*:*:*:*`,
+							VersionStartIncluding: "5.0",
+							VersionEndIncluding:   "5.0.5",
+							Vulnerable:            true,
+						},
+					},
+					Operator: "OR",
+				},
+			},
+		},
+		Impact: &schema.NVDCVEFeedJSON10DefImpact{
+			BaseMetricV2: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV2{
+				CVSSV2: &schema.CVSSV20{
+					AccessComplexity:      "LOW",
+					AccessVector:          "LOCAL",
+					Authentication:        "NONE",
+					AvailabilityImpact:    "PARTIAL",
+					BaseScore:             5.0,
+					ConfidentialityImpact: "PARTIAL",
+					IntegrityImpact:       "PARTIAL",
+					VectorString:          "AV:L/AC:L/Au:N/C:P/I:P/A:P",
+					Version:               "2.0",
+				},
+				ExploitabilityScore: 3.9,
+				ImpactScore:         6.4,
+				Severity:            "MEDIUM",
+			},
+			BaseMetricV3: &schema.NVDCVEFeedJSON10DefImpactBaseMetricV3{
+				CVSSV3: &schema.CVSSV30{
+					AttackComplexity:      "LOW",
+					AttackVector:          "LOCAL",
+					AvailabilityImpact:    "HIGH",
+					BaseScore:             7.8,
+					BaseSeverity:          "HIGH",
+					ConfidentialityImpact: "HIGH",
+					IntegrityImpact:       "HIGH",
+					PrivilegesRequired:    "LOW",
+					Scope:                 "UNCHANGED",
+					UserInteraction:       "NONE",
+					VectorString:          "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+					Version:               "3.1",
+				},
+				ExploitabilityScore: 1.8,
+				ImpactScore:         5.9,
+			},
+		},
+		LastModifiedDate: "2024-11-21T06:05Z",
+		PublishedDate:    "2021-05-11T19:15Z",
+	},
 	// CVE-2021-41411 was not being detected for `org.drools.drools-core-6.4.0.Final.jar`.
 	// This entry adds an additional CPE URI (in addition to what exists in NVD) to
 	// enable matching.
