@@ -210,6 +210,8 @@ spec:
     params:
     - name: blobs-to-fetch
       value: [ "$(params.blobs-to-fetch[*])" ]
+    - name: target-dir
+      value: .konflux/scanner-data
     - name: SOURCE_ARTIFACT
       value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
     - name: ociStorage
