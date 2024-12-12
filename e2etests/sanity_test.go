@@ -20,18 +20,29 @@ func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulne
 	if expectedVuln.Metadata == nil {
 		assert.Nil(t, matchingVuln.Metadata, "Expected no metadata for %s but got some", expectedVuln.Name)
 	} else {
-		for _, keys := range [][]string{
+		keySets := [][]string{
 			{source, "CVSSv2", "ExploitabilityScore"},
 			{source, "CVSSv2", "Score"},
 			{source, "CVSSv2", "ImpactScore"},
 			{source, "CVSSv2", "Vectors"},
-			{source, "CVSSv3", "ExploitabilityScore"},
-			{source, "CVSSv3", "Score"},
-			{source, "CVSSv3", "ImpactScore"},
-			{source, "CVSSv3", "Vectors"},
-		} {
-			assert.NotNil(t, deepGet(expectedVuln.Metadata, keys...), "Value for nil for %+v", keys)
-			assert.Equal(t, deepGet(expectedVuln.Metadata, keys...), deepGet(matchingVuln.Metadata, keys...), "Failed for %+v", keys)
+		}
+
+		// When expected vuln has no CVSSv3 data, do not try to compare it.
+		// This was added when NVD stopped returning CVSSv3 data for some vulns which we had test cases for.
+		if deepGet(expectedVuln.Metadata, []string{source, "CVSSv3"}...) != nil {
+			keySets = append(keySets, [][]string{
+				{source, "CVSSv3", "ExploitabilityScore"},
+				{source, "CVSSv3", "Score"},
+				{source, "CVSSv3", "ImpactScore"},
+				{source, "CVSSv3", "Vectors"},
+			}...)
+		} else {
+			t.Logf("WARN: No CVSSv3 data provided for %q, skipping CVSSv3 field validation.", expectedVuln.Name)
+		}
+
+		for _, keys := range keySets {
+			assert.NotNil(t, deepGet(expectedVuln.Metadata, keys...), "Value for nil for %+v in vuln %q", keys, expectedVuln.Name)
+			assert.Equal(t, deepGet(expectedVuln.Metadata, keys...), deepGet(matchingVuln.Metadata, keys...), "Failed for %+v in vuln %q", keys, expectedVuln.Name)
 		}
 	}
 	expectedVuln.Metadata = nil

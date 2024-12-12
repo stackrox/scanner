@@ -1204,12 +1204,13 @@ var testCases = []testCase{
 									"Score":               4.3,
 									"Vectors":             "AV:N/AC:M/Au:N/C:N/I:N/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.8,
-									"ImpactScore":         3.6,
-									"Score":               6.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.8,
+								// 	"ImpactScore":         3.6,
+								// 	"Score":               6.5,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+								// },
 								"LastModifiedDateTime": "2021-03-01T16:34Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1230,17 +1231,18 @@ var testCases = []testCase{
 									"Score":               5.0,
 									"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         3.6,
-									"Score":               7.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 3.9,
+								// 	"ImpactScore":         3.6,
+								// 	"Score":               7.5,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								// },
 								"LastModifiedDateTime": "2021-01-25T19:54Z",
 								"PublishedDateTime":    "2021-01-12T20:15Z",
 							},
 						},
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 					{
 						Name:        "CVE-2021-24112",
@@ -1254,12 +1256,13 @@ var testCases = []testCase{
 									"Score":               7.5,
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.9,
-									"Score":               8.1,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.2,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               8.1,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T17:15Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1279,12 +1282,13 @@ var testCases = []testCase{
 									"Score":               7.5,
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.9,
-									"Score":               8.1,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.2,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               8.1,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T17:16Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1304,18 +1308,19 @@ var testCases = []testCase{
 									"Score":               4.6,
 									"Vectors":             "AV:L/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.3,
-									"ImpactScore":         5.9,
-									"Score":               7.3,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 1.3,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               7.3,
+								// 	"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T00:15Z",
 								"PublishedDateTime":    "2021-05-11T19:15Z",
 							},
 						},
 						FixedBy:  "3.1.15",
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 				},
 			},
@@ -1397,16 +1402,17 @@ var testCases = []testCase{
 									"ExploitabilityScore": 10.0,
 									"ImpactScore":         2.9,
 								},
-								"CVSSv3": map[string]interface{}{
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
-									"Score":               7.5,
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         3.6,
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								// 	"Score":               7.5,
+								// 	"ExploitabilityScore": 3.9,
+								// 	"ImpactScore":         3.6,
+								// },
 							},
 						},
 						FixedBy:  "3.1.8",
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 					{
 						Name:        "CVE-2020-1161",
@@ -1471,17 +1477,18 @@ var testCases = []testCase{
 									"Score":               5.0,
 									"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         3.6,
-									"Score":               7.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 3.9,
+								// 	"ImpactScore":         3.6,
+								// 	"Score":               7.5,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								// },
 								"LastModifiedDateTime": "2021-01-25T19:54Z",
 								"PublishedDateTime":    "2021-01-12T20:15Z",
 							},
 						},
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 				},
 				AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
@@ -1605,12 +1612,13 @@ var testCases = []testCase{
 									"Score":               4.3,
 									"Vectors":             "AV:N/AC:M/Au:N/C:N/I:N/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.8,
-									"ImpactScore":         3.6,
-									"Score":               6.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.8,
+								// 	"ImpactScore":         3.6,
+								// 	"Score":               6.5,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+								// },
 								"LastModifiedDateTime": "2021-03-01T16:34Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1631,17 +1639,18 @@ var testCases = []testCase{
 									"Score":               5.0,
 									"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         3.6,
-									"Score":               7.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 3.9,
+								// 	"ImpactScore":         3.6,
+								// 	"Score":               7.5,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								// },
 								"LastModifiedDateTime": "2021-01-25T19:54Z",
 								"PublishedDateTime":    "2021-01-12T20:15Z",
 							},
 						},
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 					{
 						Name:        "CVE-2021-24112",
@@ -1655,12 +1664,13 @@ var testCases = []testCase{
 									"Score":               7.5,
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.9,
-									"Score":               8.1,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.2,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               8.1,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T17:15Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1680,12 +1690,13 @@ var testCases = []testCase{
 									"Score":               7.5,
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.9,
-									"Score":               8.1,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.2,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               8.1,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T17:15Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1705,18 +1716,19 @@ var testCases = []testCase{
 									"Score":               4.6,
 									"Vectors":             "AV:L/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.3,
-									"ImpactScore":         5.9,
-									"Score":               7.3,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 1.3,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               7.3,
+								// 	"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T00:15Z",
 								"PublishedDateTime":    "2021-05-11T19:15Z",
 							},
 						},
 						FixedBy:  "3.1.15",
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 				},
 				AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
@@ -3887,31 +3899,6 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 				AddedBy:       "sha256:3fa3f612bdcb92746bf76be1b9c9e1c1c80de777aedaf48b7068f4a129ded3c2",
 				FixedBy:       "4.10.1685679861-1.el8",
 				Vulnerabilities: []apiV1.Vulnerability{
-					{
-						Name:          "CVE-2021-26291",
-						NamespaceName: "rhel:8",
-						Description: `DOCUMENTATION: A flaw was found in maven. Repositories that are defined in a dependency’s Project Object Model (pom), which may be unknown to users, are used by default resulting in potential risk if a malicious actor takes over that repository or is able to insert themselves into a position to pretend to be that repository. The highest threat from this vulnerability is to data confidentiality and integrity. 
-            
-            MITIGATION: To avoid possible man-in-the-middle related attacks with this flaw, ensure any linked repositories in maven POMs use https and not http.`,
-						Link:     "https://access.redhat.com/security/cve/CVE-2021-26291",
-						Severity: "Moderate",
-						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 0.0,
-									"ImpactScore":         0.0,
-									"Score":               0.0,
-									"Vectors":             "",
-								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.2,
-									"Score":               7.4,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
-								},
-							},
-						},
-					},
 					{
 						Name:          "RHSA-2022:6531",
 						NamespaceName: "rhel:8",
