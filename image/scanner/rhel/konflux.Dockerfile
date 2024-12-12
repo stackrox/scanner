@@ -16,7 +16,7 @@ ENV CI=1
 COPY . /src
 WORKDIR /src
 
-RUN scripts/konflux/fail-build-if-git-is-dirty.sh
+RUN .konflux/scripts/fail-build-if-git-is-dirty.sh
 
 RUN unzip -j blob-repo2cpe.zip -d image/scanner/dump/repo2cpe && \
     unzip -j blob-k8s-definitions.zip -d image/scanner/dump/k8s_definitions && \
