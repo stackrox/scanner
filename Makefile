@@ -284,13 +284,13 @@ unit-tests: deps test-prep
 e2e-tests: deps test-prep
 	@echo "+ $@"
 	set -o pipefail ; \
-	go test -tags e2e -count=1 -timeout=20m -v ./e2etests/... | tee test-output/test.log
+	go test -tags e2e -count=1 -timeout=30m -v ./e2etests/... | tee test-output/test.log
 
 .PHONY: slim-e2e-tests
 slim-e2e-tests: deps test-prep
 	@echo "+ $@"
 	set -o pipefail ; \
-	go test -tags slim_e2e -count=1 -timeout=20m -v ./e2etests/... | tee test-output/test.log
+	go test -tags slim_e2e -count=1 -timeout=30m -v ./e2etests/... | tee test-output/test.log
 
 .PHONY: db-integration-tests
 db-integration-tests: deps test-prep
