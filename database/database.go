@@ -145,7 +145,7 @@ type Datastore interface {
 	// GetRHELv2Layers retrieves the corresponding layers for the image
 	// represented by the given layer.
 	// The returned slice is sorted in order from base layer to top.
-	GetRHELv2Layers(layer string) ([]*RHELv2Layer, error)
+	GetRHELv2Layers(layer, lineage string) ([]*RHELv2Layer, error)
 
 	// GetRHELv2Vulnerabilities retrieves RHELv2 vulnerabilities based on the given records.
 	// The returned value maps package ID to the related vulnerabilities.
