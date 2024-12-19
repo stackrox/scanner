@@ -1,0 +1,3 @@
+# scanner-data is for blobs downloaded and included in Scanner V2 containers during build.
+*
+!.gitignore
