@@ -222,7 +222,8 @@ spec:
       - name: name
         value: fetch-scanner-v2-data
       - name: bundle
-        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:886e1482c717078d11ba7c5d6fc4e8013e3740b4d1282ebe5534db62c9f19428
+        # TODO(ROX-27480): switch to latest
+        value: quay.io/rhacs-eng/konflux-tasks:pr-12@sha256:c2b6f999ac3aa49c9dcee9fbc27ca2c0a311b475f886613347a4777ab35464d6
       - name: kind
         value: task
       resolver: bundles
