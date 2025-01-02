@@ -684,6 +684,10 @@ jobs:
   send-notification:
     needs:
       - diff-dumps
+      - upload-db-dump
+      - upload-dumps-for-downstream
+      - upload-dumps-for-embedding
+      - push-manifests
     runs-on: ubuntu-latest
     if: failure()
     steps:
