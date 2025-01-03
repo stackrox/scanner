@@ -205,11 +205,13 @@ func (p *RHELv2Package) GetPackageVersion() string {
 type RHELv2Layer struct {
 	Model
 
-	Hash       string
-	ParentHash string
-	Dist       string
-	Pkgs       []*RHELv2Package
-	CPEs       []string
+	Hash          string
+	ParentHash    string
+	Dist          string
+	Pkgs          []*RHELv2Package
+	CPEs          []string
+	Lineage       string
+	ParentLineage string
 }
 
 // RHELv2Components defines the RHELv2 components found in a layer.
