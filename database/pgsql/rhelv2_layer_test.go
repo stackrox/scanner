@@ -199,7 +199,6 @@ func TestGetRHELv2Layers(t *testing.T) {
 // TestRHELv2LayerLineage verifies that data for duplicate layers with different parent
 // layers (lineage) is pulled correctly.
 func TestRHELv2LayerLineage(t *testing.T) {
-
 	datastore, err := openDatabaseForTest("RHELv2LayerLineage", false)
 	if err != nil {
 		t.Error(err)
