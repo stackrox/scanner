@@ -29,7 +29,7 @@ func newMockRHELv2Datastore() *mockRHELv2Datastore {
 		layers: make(map[string][]*database.RHELv2Layer),
 		vulns:  make(map[int][]*database.RHELv2Vulnerability),
 	}
-	db.FctGetRHELv2Layers = func(layer string) ([]*database.RHELv2Layer, error) {
+	db.FctGetRHELv2Layers = func(layer, lineage string) ([]*database.RHELv2Layer, error) {
 		return db.layers[layer], nil
 	}
 	db.FctGetRHELv2Vulnerabilities = func(records []*database.RHELv2Record) (map[int][]*database.RHELv2Vulnerability, error) {
