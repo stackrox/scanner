@@ -44,4 +44,11 @@ var (
 	// LegacyNVDLoader when true will cause the loader to pull NVD data using
 	// the NVD Legacy Data Feeds, if false will pull from the NVD 2.0 API.
 	LegacyNVDLoader = RegisterBooleanSetting("ROX_LEGACY_NVD_LOADER", false)
+
+	// RHLineage when true will cause all parent layers (a.k.a lineage) to be considered when
+	// storing scan results for RHEL image layers.
+	//
+	// Setting this to false will cause known scan inaccuracies and should only be disabled as a
+	// temporary measure to address unforeseen stability issues.
+	RHLineage = RegisterBooleanSetting("ROX_RHEL_LINEAGE", true)
 )
