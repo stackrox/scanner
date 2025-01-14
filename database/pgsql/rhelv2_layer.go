@@ -15,6 +15,7 @@ import (
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/database/metrics"
+	"github.com/stackrox/scanner/pkg/env"
 )
 
 func (pgSQL *pgSQL) InsertRHELv2Layer(layer *database.RHELv2Layer) error {
@@ -46,11 +47,18 @@ func (pgSQL *pgSQL) InsertRHELv2Layer(layer *database.RHELv2Layer) error {
 func (pgSQL *pgSQL) insertRHELv2Layer(tx *sql.Tx, layer *database.RHELv2Layer) error {
 	defer metrics.ObserveQueryTime("insertRHELv2Layer", "layer", time.Now())
 
-	_, err := tx.Exec(insertRHELv2Layer, layer.Hash, layer.ParentHash, layer.Dist, pq.Array(layer.CPEs), layer.Lineage, layer.ParentLineage)
+	var lineage string
+	var parentLineage string
+	if env.RHLineage.Enabled() {
+		lineage = layer.Lineage
+		parentLineage = layer.ParentLineage
+	}
+
+	_, err := tx.Exec(insertRHELv2Layer, layer.Hash, layer.ParentHash, layer.Dist, pq.Array(layer.CPEs), lineage, parentLineage)
 	return err
 }
 
-func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*database.RHELv2Package, lineage string) error {
+func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*database.RHELv2Package, layerLineage string) error {
 	// Sort packages to avoid potential deadlock.
 	// Sort by the unique index (name, version, module, arch).
 	sort.SliceStable(pkgs, func(i, j int) bool {
@@ -78,6 +86,11 @@ func (pgSQL *pgSQL) insertRHELv2Packages(tx *sql.Tx, layer string, pkgs []*datab
 		if err != nil {
 			return err
 		}
+	}
+
+	var lineage string
+	if env.RHLineage.Enabled() {
+		lineage = layerLineage
 	}
 
 	for _, pkg := range pkgs {
@@ -112,7 +125,12 @@ func (pgSQL *pgSQL) GetRHELv2Layers(layerHash, layerLineage string) ([]*database
 		return nil, handleError("GetRHELv2Layers.Begin()", err)
 	}
 
-	rows, err := tx.Query(searchRHELv2Layers, layerHash, layerLineage)
+	var lineage string
+	if env.RHLineage.Enabled() {
+		lineage = layerLineage
+	}
+
+	rows, err := tx.Query(searchRHELv2Layers, layerHash, lineage)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +195,12 @@ func (pgSQL *pgSQL) populatePackages(tx *sql.Tx, layers []*database.RHELv2Layer)
 func (pgSQL *pgSQL) getPackagesByLayer(tx *sql.Tx, layer *database.RHELv2Layer) error {
 	defer metrics.ObserveQueryTime("getRHELv2Layers", "packagesByLayer", time.Now())
 
-	rows, err := tx.Query(searchRHELv2Package, layer.Hash, layer.Lineage)
+	var lineage string
+	if env.RHLineage.Enabled() {
+		lineage = layer.Lineage
+	}
+
+	rows, err := tx.Query(searchRHELv2Package, layer.Hash, lineage)
 	if err != nil {
 		return err
 	}
