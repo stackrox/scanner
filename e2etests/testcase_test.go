@@ -4738,4 +4738,47 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
+	// START: Lineage Tests
+	// The order of the next tests is important, the intent is to reproduce the conditions described in ROX-26604
+	// in which differing parent layers were not properly handled leading to inaccuracies. These images share top
+	// and bottom layers, middle layers differ.
+	// Dockerfiles at: github.com/stackrox/stackrox/qa-tests-backend/test-images/lineage
+	{
+		image:                   "quay.io/rhacs-eng/qa:lineage-jdk-17.0.11",
+		registry:                "https://quay.io",
+		source:                  "Red Hat",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:8",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "java-17-openjdk-headless",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "1:17.0.11.0.9-2.el8.x86_64",
+				FixedBy:       "1:17.0.13.0.11-3.el8",
+				AddedBy:       "sha256:06c7a3d491f551a56296ccb9bee8a68c83776991e73a9005e8b5ebb533002097",
+			},
+		},
+	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:lineage-jdk-17.0.13",
+		registry:                "https://quay.io",
+		source:                  "Red Hat",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:8",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "java-17-openjdk-headless",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "1:17.0.13.0.11-3.el8.x86_64",
+				AddedBy:       "sha256:2f7b9495af5ddc85b0be7ca9411fddb54f37999ea73b03cbf1115dd0c5bd4f95",
+			},
+		},
+	},
+	// END: Lineage Tests
 }

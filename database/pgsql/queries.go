@@ -264,9 +264,9 @@ const (
 	deleteStaleRHELv2Vulns = `DELETE FROM vuln_v2 WHERE name = ANY($1::text[]) and package_name = ANY($2::text[]) and cpe = ANY($3::text[]) and package_module = $4;`
 
 	insertRHELv2Layer = `
-		INSERT INTO rhelv2_layer (hash, parent_hash, dist, cpes)
-		VALUES ($1, $2, $3, $4)
-		ON CONFLICT (hash) DO NOTHING;`
+		INSERT INTO rhelv2_layer (hash, parent_hash, dist, cpes, lineage, parent_lineage)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (hash, lineage) DO NOTHING;`
 
 	// Inside the `WITH RECURSIVE`, the base case is the top query, and the
 	// recursive case is the bottom query.
@@ -276,15 +276,17 @@ const (
 	// This query looks for all the layers in the given layer's hierarchy.
 	searchRHELv2Layers = `
 		WITH RECURSIVE layers AS (
-			SELECT id, hash, parent_hash, dist, cpes
+			SELECT id, hash, parent_hash, dist, cpes, lineage, parent_lineage
 			FROM rhelv2_layer
-			WHERE hash = $1
-			UNION
-				SELECT l.id, l.hash, l.parent_hash, l.dist, l.cpes
+			WHERE hash = $1 
+			  AND lineage = $2
+			UNION 
+				SELECT l.id, l.hash, l.parent_hash, l.dist, l.cpes, l.lineage, l.parent_lineage
 				FROM layers ll, rhelv2_layer l
 				WHERE ll.parent_hash = l.hash
+				  AND ll.parent_lineage = l.lineage
 		)
-		SELECT id, hash, dist, cpes
+		SELECT id, hash, dist, cpes, lineage
 		FROM layers;`
 
 	insertRHELv2Package = `
@@ -304,7 +306,8 @@ const (
 		layer AS (
 			SELECT id AS layer_id
 			FROM rhelv2_layer
-			WHERE rhelv2_layer.hash = $5
+			WHERE rhelv2_layer.hash = $5 
+			  AND rhelv2_layer.lineage = $6
 		)
 		INSERT
 		INTO rhelv2_package_scanartifact (layer_id, package_id)
@@ -324,7 +327,8 @@ const (
 			rhelv2_package_scanartifact
 			LEFT JOIN rhelv2_package ON
 				rhelv2_package_scanartifact.package_id = rhelv2_package.id
-			JOIN rhelv2_layer ON rhelv2_layer.hash = $1
+			JOIN rhelv2_layer ON rhelv2_layer.hash = $1 
+				AND rhelv2_layer.lineage = $2
 		WHERE
 			rhelv2_package_scanartifact.layer_id = rhelv2_layer.id;`
 

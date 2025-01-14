@@ -29,8 +29,8 @@ const (
 // certified as part of Red Hat's Scanner Certification Program.
 // The returned bool indicates if full certified scanning was performed.
 // This is typically only `false` for images without proper CPE information.
-func addRHELv2Vulns(db database.Datastore, layer *Layer) (bool, error) {
-	pkgEnvs, cpesExist, err := getRHELv2PkgEnvs(db, layer.Name)
+func addRHELv2Vulns(db database.Datastore, layer *Layer, lineage string) (bool, error) {
+	pkgEnvs, cpesExist, err := getRHELv2PkgEnvs(db, layer.Name, lineage)
 	if err != nil {
 		return false, err
 	}
@@ -197,8 +197,8 @@ func shareCPEs(layers []*database.RHELv2Layer) bool {
 }
 
 // getRHELv2PkgEnvs returns a map from package ID to package environment and a bool to indicate CPEs exist in the image.
-func getRHELv2PkgEnvs(db database.Datastore, layerName string) (map[int]*database.RHELv2PackageEnv, bool, error) {
-	layers, err := db.GetRHELv2Layers(layerName)
+func getRHELv2PkgEnvs(db database.Datastore, layerName, layerLineage string) (map[int]*database.RHELv2PackageEnv, bool, error) {
+	layers, err := db.GetRHELv2Layers(layerName, layerLineage)
 	if err != nil {
 		return nil, false, err
 	}
