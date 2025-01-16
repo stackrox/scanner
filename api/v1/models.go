@@ -143,7 +143,7 @@ func LayerFromDatabaseModel(db database.Datastore, dbLayer database.Layer, linea
 			layer.Features = append(layer.Features, *feature)
 		}
 		if !uncertifiedRHEL && namespaces.IsRHELNamespace(layer.NamespaceName) {
-			certified, err := addRHELv2Vulns(db, &layer)
+			certified, err := addRHELv2Vulns(db, &layer, lineage)
 			if err != nil {
 				return layer, notes, err
 			}
@@ -212,7 +212,7 @@ func ComponentsFromDatabaseModel(db database.Datastore, dbLayer *database.Layer,
 	if !uncertifiedRHEL && namespaces.IsRHELNamespace(namespaceName) {
 		var certified bool
 		var err error
-		rhelv2PkgEnvs, certified, err = getRHELv2PkgEnvs(db, dbLayer.Name)
+		rhelv2PkgEnvs, certified, err = getRHELv2PkgEnvs(db, dbLayer.Name, lineage)
 		if err != nil {
 			return nil, err
 		}

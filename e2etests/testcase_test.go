@@ -1017,50 +1017,52 @@ var testCases = []testCase{
 		namespace: "ubuntu:14.04",
 		expectedFeatures: []apiV1.Feature{
 			{
-				Name:          "cron",
+				Name:          "pam",
 				NamespaceName: "ubuntu:14.04",
 				VersionFormat: "dpkg",
-				Version:       "3.0pl1-124ubuntu2",
+				Version:       "1.1.8-1ubuntu2.2",
 				AddedBy:       "sha256:bae382666908fd87a3a3646d7eb7176fa42226027d3256cac38ee0b79bdb0491",
+				FixedBy:       "1.1.8-1ubuntu2.2+esm4",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2017-9525",
+						Name:          "CVE-2022-28321",
 						NamespaceName: "ubuntu:14.04",
-						Description:   "In the cron package through 3.0pl1-128 on Debian, and through 3.0pl1-128ubuntu2 on Ubuntu, the postinst maintainer script allows for group-crontab-to-root privilege escalation via symlink attacks against unsafe usage of the chown and chmod programs.",
-						Link:          "https://ubuntu.com/security/CVE-2017-9525",
+						Description:   "The Linux-PAM package before 1.5.2-6.1 for openSUSE Tumbleweed allows authentication bypass for SSH logins. The pam_access.so module doesn't correctly restrict login if a user tries to connect from an IP address that is not resolvable via DNS. In such conditions, a user with denied access to a machine can still get access. NOTE: the relevance of this issue is largely limited to openSUSE Tumbleweed and openSUSE Factory; it does not affect Linux-PAM upstream.",
+						Link:          "https://ubuntu.com/security/CVE-2022-28321",
 						Severity:      "Low",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 3.4,
-									"ImpactScore":         10.0,
-									"Score":               6.9,
-									"Vectors":             "AV:L/AC:M/Au:N/C:C/I:C/A:C",
+									"ExploitabilityScore": float64(0),
+									"ImpactScore":         float64(0),
+									"Score":               float64(0),
+									"Vectors":             "",
 								},
 								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 0.8,
+									"ExploitabilityScore": 3.9,
 									"ImpactScore":         5.9,
-									"Score":               6.7,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+									"Score":               9.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 								},
-								"LastModifiedDateTime": "2019-03-21T23:29Z",
-								"PublishedDateTime":    "2017-06-09T16:29Z",
+								"LastModifiedDateTime": "2024-11-21T06:57:00Z",
+								"PublishedDateTime":    "2022-09-19T22:15:00Z",
 							},
 						},
+						FixedBy: "1.1.8-1ubuntu2.2+esm1",
 					},
 					{
-						Name:          "CVE-2019-9704",
+						Name:          "CVE-2024-22365",
 						NamespaceName: "ubuntu:14.04",
-						Description:   "Vixie Cron before the 3.0pl1-133 Debian package allows local users to cause a denial of service (daemon crash) via a large crontab file because the calloc return value is not checked.",
-						Link:          "https://ubuntu.com/security/CVE-2019-9704",
-						Severity:      "Low",
+						Description:   "linux-pam (aka Linux PAM) before 1.6.0 allows attackers to cause a denial of service (blocked login process) via mkfifo because the openat call (for protect_dir) lacks O_DIRECTORY.",
+						Link:          "https://ubuntu.com/security/CVE-2024-22365",
+						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         2.9,
-									"Score":               2.1,
-									"Vectors":             "AV:L/AC:L/Au:N/C:N/I:N/A:P",
+									"ExploitabilityScore": float64(0),
+									"ImpactScore":         float64(0),
+									"Score":               float64(0),
+									"Vectors":             "",
 								},
 								"CVSSv3": map[string]interface{}{
 									"ExploitabilityScore": 1.8,
@@ -1068,60 +1070,11 @@ var testCases = []testCase{
 									"Score":               5.5,
 									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
 								},
-								"LastModifiedDateTime": "2021-11-30T19:53Z",
-								"PublishedDateTime":    "2019-03-12T01:29Z",
+								"LastModifiedDateTime": "2024-11-21T08:56:00Z",
+								"PublishedDateTime":    "2024-02-06T08:15:00Z",
 							},
 						},
-					},
-					{
-						Name:          "CVE-2019-9705",
-						NamespaceName: "ubuntu:14.04",
-						Description:   "Vixie Cron before the 3.0pl1-133 Debian package allows local users to cause a denial of service (memory consumption) via a large crontab file because an unlimited number of lines is accepted.",
-						Link:          "https://ubuntu.com/security/CVE-2019-9705",
-						Severity:      "Low",
-						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         2.9,
-									"Score":               2.1,
-									"Vectors":             "AV:L/AC:L/Au:N/C:N/I:N/A:P",
-								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.8,
-									"ImpactScore":         3.6,
-									"Score":               5.5,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
-								},
-								"LastModifiedDateTime": "2021-11-30T18:50Z",
-								"PublishedDateTime":    "2019-03-12T01:29Z",
-							},
-						},
-					},
-					{
-						Name:          "CVE-2019-9706",
-						NamespaceName: "ubuntu:14.04",
-						Description:   "Vixie Cron before the 3.0pl1-133 Debian package allows local users to cause a denial of service (use-after-free and daemon crash) because of a force_rescan_user error.",
-						Link:          "https://ubuntu.com/security/CVE-2019-9706",
-						Severity:      "Low",
-						Metadata: map[string]interface{}{
-							"NVD": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         2.9,
-									"Score":               2.1,
-									"Vectors":             "AV:L/AC:L/Au:N/C:N/I:N/A:P",
-								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.8,
-									"ImpactScore":         3.6,
-									"Score":               5.5,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
-								},
-								"LastModifiedDateTime": "2021-11-30T18:50Z",
-								"PublishedDateTime":    "2019-03-12T01:29Z",
-							},
-						},
+						FixedBy: "1.1.8-1ubuntu2.2+esm4",
 					},
 				},
 			},
@@ -1204,12 +1157,13 @@ var testCases = []testCase{
 									"Score":               4.3,
 									"Vectors":             "AV:N/AC:M/Au:N/C:N/I:N/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.8,
-									"ImpactScore":         3.6,
-									"Score":               6.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.8,
+								// 	"ImpactScore":         3.6,
+								// 	"Score":               6.5,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+								// },
 								"LastModifiedDateTime": "2021-03-01T16:34Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1230,17 +1184,18 @@ var testCases = []testCase{
 									"Score":               5.0,
 									"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         3.6,
-									"Score":               7.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 3.9,
+								// 	"ImpactScore":         3.6,
+								// 	"Score":               7.5,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								// },
 								"LastModifiedDateTime": "2021-01-25T19:54Z",
 								"PublishedDateTime":    "2021-01-12T20:15Z",
 							},
 						},
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 					{
 						Name:        "CVE-2021-24112",
@@ -1254,12 +1209,13 @@ var testCases = []testCase{
 									"Score":               7.5,
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.9,
-									"Score":               8.1,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.2,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               8.1,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T17:15Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1279,12 +1235,13 @@ var testCases = []testCase{
 									"Score":               7.5,
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.9,
-									"Score":               8.1,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.2,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               8.1,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T17:16Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1304,18 +1261,19 @@ var testCases = []testCase{
 									"Score":               4.6,
 									"Vectors":             "AV:L/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.3,
-									"ImpactScore":         5.9,
-									"Score":               7.3,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 1.3,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               7.3,
+								// 	"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T00:15Z",
 								"PublishedDateTime":    "2021-05-11T19:15Z",
 							},
 						},
 						FixedBy:  "3.1.15",
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 				},
 			},
@@ -1397,16 +1355,17 @@ var testCases = []testCase{
 									"ExploitabilityScore": 10.0,
 									"ImpactScore":         2.9,
 								},
-								"CVSSv3": map[string]interface{}{
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
-									"Score":               7.5,
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         3.6,
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								// 	"Score":               7.5,
+								// 	"ExploitabilityScore": 3.9,
+								// 	"ImpactScore":         3.6,
+								// },
 							},
 						},
 						FixedBy:  "3.1.8",
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 					{
 						Name:        "CVE-2020-1161",
@@ -1471,17 +1430,18 @@ var testCases = []testCase{
 									"Score":               5.0,
 									"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         3.6,
-									"Score":               7.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 3.9,
+								// 	"ImpactScore":         3.6,
+								// 	"Score":               7.5,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								// },
 								"LastModifiedDateTime": "2021-01-25T19:54Z",
 								"PublishedDateTime":    "2021-01-12T20:15Z",
 							},
 						},
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 				},
 				AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
@@ -1605,12 +1565,13 @@ var testCases = []testCase{
 									"Score":               4.3,
 									"Vectors":             "AV:N/AC:M/Au:N/C:N/I:N/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.8,
-									"ImpactScore":         3.6,
-									"Score":               6.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.8,
+								// 	"ImpactScore":         3.6,
+								// 	"Score":               6.5,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+								// },
 								"LastModifiedDateTime": "2021-03-01T16:34Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1631,17 +1592,18 @@ var testCases = []testCase{
 									"Score":               5.0,
 									"Vectors":             "AV:N/AC:L/Au:N/C:N/I:N/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 3.9,
-									"ImpactScore":         3.6,
-									"Score":               7.5,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 3.9,
+								// 	"ImpactScore":         3.6,
+								// 	"Score":               7.5,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								// },
 								"LastModifiedDateTime": "2021-01-25T19:54Z",
 								"PublishedDateTime":    "2021-01-12T20:15Z",
 							},
 						},
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 					{
 						Name:        "CVE-2021-24112",
@@ -1655,12 +1617,13 @@ var testCases = []testCase{
 									"Score":               7.5,
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.9,
-									"Score":               8.1,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.2,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               8.1,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T17:15Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1680,12 +1643,13 @@ var testCases = []testCase{
 									"Score":               7.5,
 									"Vectors":             "AV:N/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 2.2,
-									"ImpactScore":         5.9,
-									"Score":               8.1,
-									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 2.2,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               8.1,
+								// 	"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T17:15Z",
 								"PublishedDateTime":    "2021-02-25T23:15Z",
 							},
@@ -1705,18 +1669,19 @@ var testCases = []testCase{
 									"Score":               4.6,
 									"Vectors":             "AV:L/AC:L/Au:N/C:P/I:P/A:P",
 								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 1.3,
-									"ImpactScore":         5.9,
-									"Score":               7.3,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
-								},
+								// NVD stopped returning this
+								// "CVSSv3": map[string]interface{}{
+								// 	"ExploitabilityScore": 1.3,
+								// 	"ImpactScore":         5.9,
+								// 	"Score":               7.3,
+								// 	"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+								// },
 								"LastModifiedDateTime": "2023-12-29T00:15Z",
 								"PublishedDateTime":    "2021-05-11T19:15Z",
 							},
 						},
 						FixedBy:  "3.1.15",
-						Severity: "Important",
+						Severity: "Moderate",
 					},
 				},
 				AddedBy:  "sha256:5bd47e7e8ad7786db14c79827b543615728f0e27567f5b05d4c13db29bb24c7a",
@@ -3511,7 +3476,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-28.el9_4",
+				FixedBy:       "1:3.2.2-6.el9_5",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3553,7 +3518,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.0.7-28.el9_4",
+				FixedBy:       "1:3.2.2-6.el9_5",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3599,7 +3564,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 			},
 			{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
-				FixedBy:       "2:8.2.2637-20.el9_1",
+				FixedBy:       "2:8.2.2637-21.el9",
 				Name:          "vim-minimal",
 				NamespaceName: "rhel:9",
 				Version:       "2:8.2.2637-16.el9_0.2.x86_64",
@@ -4436,8 +4401,8 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						NamespaceName: "rhel:8",
 						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nThe ppdCreatePPDFromIPP2 function in libppd doesn't properly check or clean IPP attributes before writing them to a temporary PPD file. This means that a remote attacker, who has control of or has hijacked an exposed printer (through UPD or mDNS), could send a harmful IPP attribute and potentially insert malicious commands into the PPD file. \n            STATEMENT: RHCOS and RHEL include libs-cups as a build-time dependency. However, the vulnerability is not exploitable with just the client libraries unless a print server based on OpenPrinting is actively running.\n\nRHEL and RHCOS does not have cups-browsed enabled by default so the impact for those are set to 'Low'\n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2024-47175",
-						Severity: "Low",
-						FixedBy:  "",
+						Severity:      "Low",
+						FixedBy:       "",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -4773,4 +4738,47 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 			},
 		},
 	},
+	// START: Lineage Tests
+	// The order of the next tests is important, the intent is to reproduce the conditions described in ROX-26604
+	// in which differing parent layers were not properly handled leading to inaccuracies. These images share top
+	// and bottom layers, middle layers differ.
+	// Dockerfiles at: github.com/stackrox/stackrox/qa-tests-backend/test-images/lineage
+	{
+		image:                   "quay.io/rhacs-eng/qa:lineage-jdk-17.0.11",
+		registry:                "https://quay.io",
+		source:                  "Red Hat",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:8",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "java-17-openjdk-headless",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "1:17.0.11.0.9-2.el8.x86_64",
+				FixedBy:       "1:17.0.13.0.11-3.el8",
+				AddedBy:       "sha256:06c7a3d491f551a56296ccb9bee8a68c83776991e73a9005e8b5ebb533002097",
+			},
+		},
+	},
+	{
+		image:                   "quay.io/rhacs-eng/qa:lineage-jdk-17.0.13",
+		registry:                "https://quay.io",
+		source:                  "Red Hat",
+		username:                os.Getenv("QUAY_RHACS_ENG_RO_USERNAME"),
+		password:                os.Getenv("QUAY_RHACS_ENG_RO_PASSWORD"),
+		onlyCheckSpecifiedVulns: true,
+		namespace:               "rhel:8",
+		expectedFeatures: []apiV1.Feature{
+			{
+				Name:          "java-17-openjdk-headless",
+				NamespaceName: "rhel:8",
+				VersionFormat: "rpm",
+				Version:       "1:17.0.13.0.11-3.el8.x86_64",
+				AddedBy:       "sha256:2f7b9495af5ddc85b0be7ca9411fddb54f37999ea73b03cbf1115dd0c5bd4f95",
+			},
+		},
+	},
+	// END: Lineage Tests
 }
