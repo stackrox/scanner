@@ -4441,15 +4441,15 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				VersionFormat: "rpm",
 				Version:       "1:2.2.6-60.el8_10.x86_64",
 				AddedBy:       "sha256:7a6d2526dba4ead4120381a83ce344db5959e947aab63fa3d1a3fae4f7986d62",
-				FixedBy:       "",
+				FixedBy:       "1:2.2.6-62.el8_10",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
-						Name:          "CVE-2024-47175",
+						Name:          "RHSA-2025:0083",
 						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: A security issue was found in OpenPrinting CUPS.\n\nThe function ppdCreatePPDFromIPP2 in the libppd library is responsible for generating a PostScript Printer Description (PPD) file based on attributes retrieved from an Internet Printing Protocol (IPP) response. Essentially, it takes printer information, usually obtained via IPP, and creates a corresponding PPD file that describes the printer's capabilities (such as supported media sizes, resolutions, color modes, etc.).\n\nPPD files are used by printing systems like CUPS (Common Unix Printing System) to communicate with and configure printers. They provide a standardized format that allows different printers to work with the printing system in a consistent way.\n\nThe ppdCreatePPDFromIPP2 function in libppd doesn't properly check or clean IPP attributes before writing them to a temporary PPD file. This means that a remote attacker, who has control of or has hijacked an exposed printer (through UPD or mDNS), could send a harmful IPP attribute and potentially insert malicious commands into the PPD file. \n            STATEMENT: RHCOS and RHEL include libs-cups as a build-time dependency. However, the vulnerability is not exploitable with just the client libraries unless a print server based on OpenPrinting is actively running.\n\nRHEL and RHCOS does not have cups-browsed enabled by default so the impact for those are set to 'Low'\n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
-						Link:          "https://access.redhat.com/security/cve/CVE-2024-47175",
+						Description:   "The Common UNIX Printing System (CUPS) provides a portable printing layer for Linux, UNIX, and similar operating systems.\n\nSecurity Fix(es):\n\n* cups: libppd: remote command injection via attacker controlled data in PPD file (CVE-2024-47175)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+						Link:          "https://access.redhat.com/errata/RHSA-2025:0083",
 						Severity:      "Low",
-						FixedBy:       "",
+						FixedBy:       "1:2.2.6-62.el8_10",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
