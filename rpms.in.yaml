@@ -1,0 +1,10 @@
+packages: [xz]
+contentOrigin:
+  repofiles: ["./ubi.repo"]
+context:
+    image: registry.access.redhat.com/ubi8-minimal:latest
+arches:
+  - aarch64
+  - ppc64le
+  - s390x
+  - x86_64

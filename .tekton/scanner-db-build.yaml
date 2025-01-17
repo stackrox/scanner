@@ -43,12 +43,10 @@ spec:
     value: '{{revision}}'
   - name: rebuild
     value: 'true'
-  # TODO(ROX-20234): Enable hermetic builds
-  # - name: hermetic
-  #   value: "true"
-  # No language dependencies are required for scanner-db image.
+  - name: hermetic
+    value: "true"
   - name: prefetch-input
-    value: ''
+    value: '{"type": "rpm", "path": "."}'
   - name: build-source-image
     value: 'true'
   - name: build-target-stage
