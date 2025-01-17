@@ -64,7 +64,6 @@ COPY --chown=65534:65534 --from=builder /src/image/scanner/dump/genesis_manifest
 
 COPY LICENSE /licenses/LICENSE
 
-# RUN microdnf upgrade --nobest && \
 RUN microdnf install xz && \
     microdnf clean all && \
     # (Optional) Remove line below to keep package management utilities
