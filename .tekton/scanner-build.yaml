@@ -47,7 +47,7 @@ spec:
   - name: hermetic
     value: "true"
   - name: prefetch-input
-    value: '[{"type": "gomod", "path": "."}, {"type": "rpm", "path": "."}]'
+    value: '[{"type": "gomod", "path": "."}, {"type": "rpm", "path": ".konflux/scripts/rpm-prefetching"}]'
   - name: build-source-image
     value: 'true'
   - name: build-target-stage
