@@ -29,10 +29,10 @@ build_rpm_lockfile_runner_image() {
 
 run_rpm_lockfile_runner() {
   local container_dir=/work
-  podman run --rm -v "$(pwd)/${LOCAL_DIR}:${container_dir}" \
+  podman run --rm -v "$(pwd):${container_dir}" \
     "${RPM_LOCKFILE_RUNNER_IMAGE}" \
-    --outfile=${container_dir}/rpms.lock.yaml \
-    ${container_dir}/rpms.in.yaml
+    --outfile="${container_dir}/${LOCAL_DIR}/rpms.lock.yaml" \
+    "${container_dir}/${LOCAL_DIR}/rpms.in.yaml"
 }
 
 fetch_ubi_repo_definitions
