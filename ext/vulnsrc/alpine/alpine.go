@@ -76,7 +76,7 @@ func (u *updater) processFile(filename string) {
 		return
 	}
 
-	file.WriteString(string(fileContents[:]))
+	file.WriteString(string(fileContents))
 }
 
 func (u *updater) processFiles(_ int, element *goquery.Selection) {
@@ -97,6 +97,7 @@ func (u *updater) processVersionDir(versionDir string) {
 
 	document, err := goquery.NewDocumentFromReader(response.Body)
 	if err != nil {
+		//nolint:gocritic
 		log.Fatal("Error loading HTTP response body. ", err)
 	}
 	document.Find("a").Each(u.processFiles)

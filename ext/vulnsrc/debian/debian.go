@@ -176,14 +176,15 @@ func parseDebianJSON(data *jsonData) (vulnerabilities []database.Vulnerability, 
 				// Determine the version of the package the vulnerability affects.
 				var version string
 				var err error
-				if releaseNode.FixedVersion == "0" {
+				switch {
+				case releaseNode.FixedVersion == "0":
 					// This means that the package is not affected by this vulnerability.
 					version = versionfmt.MinVersion
-				} else if releaseNode.Status == "open" {
+				case releaseNode.Status == "open":
 					// Open means that the package is currently vulnerable in the latest
 					// version of this Debian release.
 					version = versionfmt.MaxVersion
-				} else if releaseNode.Status == "resolved" {
+				case releaseNode.Status == "resolved":
 					// Resolved means that the vulnerability has been fixed in
 					// "fixed_version" (if affected).
 					err = versionfmt.Valid(dpkg.ParserName, releaseNode.FixedVersion)

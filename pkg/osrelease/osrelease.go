@@ -42,7 +42,7 @@ func GetOSReleaseMap(data []byte, fields ...string) map[string]string {
 		}
 		key := parts[0]
 		if len(fields) == 0 || fieldsSet.Contains(key) {
-			osReleaseMap[key] = strings.Replace(strings.ToLower(strings.TrimSpace(parts[1])), `"`, "", -1)
+			osReleaseMap[key] = strings.ReplaceAll(strings.ToLower(strings.TrimSpace(parts[1])), `"`, "")
 		}
 	}
 	return osReleaseMap

@@ -160,13 +160,9 @@ func fetchVulns(datastore vulnsrc.DataStore, dumpDir string) (vulns []database.V
 	// and are already full qualified.
 	manualVulns := make(map[vulnkey.Key]database.Vulnerability, len(manual.Vulnerabilities))
 	for _, vuln := range manual.Vulnerabilities {
-		// Prevent aliasing.
-		vuln := vuln
 		manualVulns[vulnkey.FromVuln(&vuln)] = vuln
 	}
 	for _, vuln := range vulnsWithMetadata {
-		// Prevent aliasing.
-		vuln := vuln
 		key := vulnkey.FromVuln(&vuln)
 		if _, exists := manualVulns[key]; exists {
 			// Delete the vulnerability from the manual entries if it is already populated from another source.

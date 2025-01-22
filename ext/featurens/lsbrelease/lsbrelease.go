@@ -56,12 +56,12 @@ func (d detector) Detect(files analyzer.Files, _ *featurens.DetectorOptions) *da
 
 		r := lsbReleaseOSRegexp.FindStringSubmatch(line)
 		if len(r) == 2 {
-			OS = strings.Replace(strings.ToLower(r[1]), "\"", "", -1)
+			OS = strings.ReplaceAll(strings.ToLower(r[1]), "\"", "")
 		}
 
 		r = lsbReleaseVersionRegexp.FindStringSubmatch(line)
 		if len(r) == 2 {
-			version = strings.Replace(strings.ToLower(r[1]), "\"", "", -1)
+			version = strings.ReplaceAll(strings.ToLower(r[1]), "\"", "")
 
 			// We care about the .04 for Ubuntu but not for Debian / CentOS
 			if OS == "centos" || OS == "debian" {

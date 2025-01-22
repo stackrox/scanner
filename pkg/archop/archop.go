@@ -6,7 +6,6 @@
 
 //lint:file-ignore ST1021 This file is copied over from github.com/quay/claircore
 
-//nolint:revive
 package archop
 
 import (

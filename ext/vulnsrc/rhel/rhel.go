@@ -391,6 +391,7 @@ func toFeatureVersions(criteria criteria, osVersion string) []database.FeatureVe
 				}
 			} else if strings.Contains(c.Comment, " is earlier than ") {
 				const prefixLen = len(" is earlier than ")
+				//nolint:gocritic
 				featureVersion.Feature.Name = strings.TrimSpace(c.Comment[:strings.Index(c.Comment, " is earlier than ")])
 				version := c.Comment[strings.Index(c.Comment, " is earlier than ")+prefixLen:]
 				err := versionfmt.Valid(rpm.ParserName, version)
@@ -426,14 +427,15 @@ func toFeatureVersions(criteria criteria, osVersion string) []database.FeatureVe
 }
 
 func description(def definition) (desc string) {
-	// It is much more faster to proceed like this than using a Replacer.
-	desc = strings.Replace(def.Description, "\n\n\n", " ", -1)
-	desc = strings.Replace(desc, "\n\n", " ", -1)
-	desc = strings.Replace(desc, "\n", " ", -1)
+	// It is much faster to proceed like this than using a Replacer.
+	desc = strings.ReplaceAll(def.Description, "\n\n\n", " ")
+	desc = strings.ReplaceAll(desc, "\n\n", " ")
+	desc = strings.ReplaceAll(desc, "\n", " ")
 	return
 }
 
 func name(def definition) string {
+	//nolint:gocritic
 	return strings.TrimSpace(def.Title[:strings.Index(def.Title, ": ")])
 }
 

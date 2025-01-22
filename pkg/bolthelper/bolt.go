@@ -45,5 +45,5 @@ func NewTemp(dbPath string) (*bolt.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return New(filepath.Join(tmpDir, strings.Replace(dbPath, "/", "_", -1)))
+	return New(filepath.Join(tmpDir, strings.ReplaceAll(dbPath, "/", "_")))
 }
