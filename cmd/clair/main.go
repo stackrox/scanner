@@ -18,7 +18,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -107,8 +106,6 @@ func waitForSignals(signals ...os.Signal) {
 
 // Boot starts a Clair instance with the provided config.
 func Boot(config *Config, slimMode bool) {
-	rand.Seed(time.Now().UnixNano())
-
 	// Open database and initialize vuln caches in parallel, prior to making the API available.
 	var wg sync.WaitGroup
 
