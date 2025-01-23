@@ -2,7 +2,6 @@ module github.com/stackrox/scanner
 
 go 1.21
 
-
 require (
 	cloud.google.com/go/storage v1.38.0
 	github.com/NYTimes/gziphandler v1.1.1
