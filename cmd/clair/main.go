@@ -62,7 +62,6 @@ import (
 	_ "github.com/stackrox/scanner/ext/featurefmt/dpkg"
 	_ "github.com/stackrox/scanner/ext/featurefmt/rpm"
 	_ "github.com/stackrox/scanner/ext/featurens/alpinerelease"
-	_ "github.com/stackrox/scanner/ext/featurens/aptsources"
 	_ "github.com/stackrox/scanner/ext/featurens/busybox"
 	_ "github.com/stackrox/scanner/ext/featurens/lsbrelease"
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"

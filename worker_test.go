@@ -30,7 +30,6 @@ import (
 
 	// Register the required detectors.
 	_ "github.com/stackrox/scanner/ext/featurefmt/dpkg"
-	_ "github.com/stackrox/scanner/ext/featurens/aptsources"
 	_ "github.com/stackrox/scanner/ext/featurens/osrelease"
 	_ "github.com/stackrox/scanner/ext/imagefmt/docker"
 )
