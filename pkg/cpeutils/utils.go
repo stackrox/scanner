@@ -10,7 +10,7 @@ import (
 )
 
 // Note: this must be updated with each new OpenShift release.
-const maxKnownOpenShift4MinorVersion = 17
+const maxKnownOpenShift4MinorVersion = 20
 
 // *** START Regex-related consts/vars. ***
 
@@ -71,16 +71,10 @@ func GetAllOpenShift4CPEs(cpe string) ([]string, error) {
 		return nil, errors.Errorf("CPE %s does not match an expected OpenShift 4 CPE format", cpe)
 	}
 
+	// We do *not* use the explicit given minor version due to issues with the OVAL data
+	// (see https://issues.redhat.com/browse/SECDATA-869 for more information).
+	// We just use an arbitrarily high version to ensure it works more consistently.
 	maxMinorVersion := maxKnownOpenShift4MinorVersion
-
-	// If an explicit minor version is given, assume it is the highest maximum version.
-	if match[minorVersionIdx] != "" {
-		var err error
-		maxMinorVersion, err = strconv.Atoi(match[minorVersionIdx])
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	openshiftVersion := match[openshiftVersionIdx]
 	cpes := make([]string, 0, maxMinorVersion)
