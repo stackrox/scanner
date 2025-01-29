@@ -61,7 +61,7 @@ func clairErrorString(w http.ResponseWriter, status int, template string, args .
 }
 
 func clairError(w http.ResponseWriter, status int, err error) {
-	clairErrorString(w, status, err.Error())
+	clairErrorString(w, status, "%s", err.Error())
 }
 
 func (s *Server) getClairLayer(w http.ResponseWriter, layerName, lineage string, uncertifiedRHEL bool) {
@@ -144,7 +144,7 @@ func parseImagePath(path string) (string, error) {
 func (s *Server) GetResultsByImage(w http.ResponseWriter, r *http.Request) {
 	image, err := parseImagePath(r.URL.Path)
 	if err != nil {
-		clairErrorString(w, http.StatusBadRequest, err.Error())
+		clairErrorString(w, http.StatusBadRequest, "%s", err.Error())
 		return
 	}
 	uncertifiedRHEL := getUncertifiedRHELResults(r.URL.Query())

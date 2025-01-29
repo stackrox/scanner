@@ -2,9 +2,14 @@
 
 run:
   timeout: 16m
+  modules-download-mode: readonly
+  go: "1.23"
 
 output:
-  format: "junit-xml:report.xml,colored-line-number"
+  formats:
+    - format: colored-line-number
+    - format: junit-xml
+      path: report.xml
 
 issues:
   exclude-use-default: false
@@ -31,13 +36,22 @@ issues:
     - linters:
         - revive
       text: "package-comments: should have a package comment"
+    - linters:
+        - gocritic
+      path: _test\.go
 
 linters-settings:
   gosec:
     includes:
       - G601 # Implicit memory aliasing of items from a range statement
   revive:
-    min-confidence: 0
+    rules:
+      - name: package-comments
+        disabled: true
+      - name: error-strings
+        disabled: true
+      - name: unexported-return
+        disabled: true
   govet:
     enable-all: true
     disable:
@@ -65,6 +79,8 @@ linters-settings:
     allow-unused: false # report any unused nolint directives
     require-explanation: false # don't require an explanation for nolint directives
     require-specific: true # require nolint directives to be specific about which linter is being skipped
+  staticcheck:
+    checks: [ all,-ST1000,-ST1001,-ST1003,-ST1005,-SA1019,-SA4001,-ST1016 ]
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
@@ -73,6 +89,7 @@ linters:
   enable:
     - asciicheck
     # - bodyclose
+    - copyloopvar
     # - deadcode
     # - depguard
     # - dogsled
@@ -84,7 +101,6 @@ linters:
     # - gochecknoinits
     # - gocognit
     # - goconst
-    - exportloopref
     - gocritic
     # - gocyclo
     # - godot

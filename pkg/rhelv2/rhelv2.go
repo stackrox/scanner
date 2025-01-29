@@ -119,7 +119,7 @@ func UpdateV2(outputDir string) (int, error) {
 		// Influenced by ClairCore under Apache 2.0 License
 		// https://github.com/quay/claircore
 		///////////////////////////////////////////////////
-		name := strings.TrimSuffix(strings.Replace(e.Path, "/", "-", -1), ".oval.xml.bz2")
+		name := strings.TrimSuffix(strings.ReplaceAll(e.Path, "/", "-"), ".oval.xml.bz2")
 		uri, err := u.Parse(e.Path)
 		if err != nil {
 			return 0, err

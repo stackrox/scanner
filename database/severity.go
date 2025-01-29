@@ -98,12 +98,12 @@ func NewSeverity(s string) (Severity, error) {
 func (s Severity) Compare(s2 Severity) int {
 	var i1, i2 int
 
-	for i1 = 0; i1 < len(Severities); i1 = i1 + 1 {
+	for i1 = 0; i1 < len(Severities); i1++ {
 		if s == Severities[i1] {
 			break
 		}
 	}
-	for i2 = 0; i2 < len(Severities); i2 = i2 + 1 {
+	for i2 = 0; i2 < len(Severities); i2++ {
 		if s2 == Severities[i2] {
 			break
 		}

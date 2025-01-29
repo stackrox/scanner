@@ -363,11 +363,12 @@ func (u *updater) alasToFeatureVersions(alas ALAS) []database.FeatureVersion {
 
 func compareTimestamp(date0 string, date1 string) int {
 	// format: YYYY-MM-DD hh:mm
-	if date0 < date1 {
+	switch {
+	case date0 < date1:
 		return -1
-	} else if date0 > date1 {
+	case date0 > date1:
 		return 1
-	} else {
+	default:
 		return 0
 	}
 }

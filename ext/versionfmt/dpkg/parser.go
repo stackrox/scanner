@@ -96,14 +96,14 @@ func newVersion(str string) (version, error) {
 		return version{}, errors.New("No version")
 	}
 
-	for i := 0; i < len(v.version); i = i + 1 {
+	for i := 0; i < len(v.version); i++ {
 		r := rune(v.version[i])
 		if !unicode.IsDigit(r) && !unicode.IsLetter(r) && !containsRune(versionAllowedSymbols, r) {
 			return version{}, errors.New("invalid character in version")
 		}
 	}
 
-	for i := 0; i < len(v.revision); i = i + 1 {
+	for i := 0; i < len(v.revision); i++ {
 		r := rune(v.revision[i])
 		if !unicode.IsDigit(r) && !unicode.IsLetter(r) && !containsRune(revisionAllowedSymbols, r) {
 			return version{}, errors.New("invalid character in revision")

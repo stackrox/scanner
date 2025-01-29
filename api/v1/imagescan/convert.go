@@ -24,7 +24,7 @@ var (
 
 		m := make(map[apiV1.Note]v1.Note, numNotes)
 		for name, val := range v1.Note_value {
-			normalizedName := strings.ToLower(strings.Replace(name, "_", "", -1))
+			normalizedName := strings.ToLower(strings.ReplaceAll(name, "_", ""))
 			for note := apiV1.OSCVEsUnavailable; note < apiV1.SentinelNote; note++ {
 				if strings.HasPrefix(strings.ToLower(note.String()), normalizedName) {
 					m[note] = v1.Note(val)

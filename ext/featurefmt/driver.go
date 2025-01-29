@@ -119,7 +119,7 @@ type TestData struct {
 // that is meant to be used for test data.
 func LoadFileForTest(name string) []byte {
 	_, filename, _, _ := runtime.Caller(0)
-	d, _ := os.ReadFile(filepath.Join(filepath.Dir(filename)) + "/" + name)
+	d, _ := os.ReadFile(filepath.Dir(filename) + "/" + name)
 	return d
 }
 

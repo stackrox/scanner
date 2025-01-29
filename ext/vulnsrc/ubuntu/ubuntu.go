@@ -299,6 +299,7 @@ func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability
 
 			// Handle syntax error: Priority: medium (heap-protector)
 			if strings.Contains(priority, " ") {
+				//nolint:gocritic
 				priority = priority[:strings.Index(priority, " ")]
 			}
 
@@ -344,7 +345,8 @@ func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability
 				}
 
 				var version string
-				if md["status"] == "released" {
+				switch {
+				case md["status"] == "released":
 					if md["note"] != "" {
 						err := versionfmt.Valid(dpkg.ParserName, md["note"])
 						if err != nil {
@@ -356,9 +358,9 @@ func parseUbuntuCVE(fileContent io.Reader) (vulnerability database.Vulnerability
 						}
 						version = md["note"]
 					}
-				} else if md["status"] == "not-affected" {
+				case md["status"] == "not-affected":
 					version = versionfmt.MinVersion
-				} else {
+				default:
 					version = versionfmt.MaxVersion
 				}
 				if version == "" {

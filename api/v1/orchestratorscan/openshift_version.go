@@ -91,7 +91,7 @@ func (o *openShiftVersion) GetFixedVersion(fixedIn string, title string) (string
 
 	// Extra patch, according to the release notes, version 4.5 is 4.5.1 and version 4.6 is 4.6.1
 	if version == "4.5" || version == "4.6" {
-		version = version + ".1"
+		version += ".1"
 	}
 	return version, nil
 }

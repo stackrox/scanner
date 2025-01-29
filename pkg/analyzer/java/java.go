@@ -81,11 +81,12 @@ func parseComponentsFromZipReader(locationSoFar string, zipReader *zip.Reader) [
 	var subArchives []*zip.File
 	var pomProperties []*zip.File
 	for _, f := range zipReader.File {
-		if f.Name == manifestFileName {
+		switch {
+		case f.Name == manifestFileName:
 			manifestFile = f
-		} else if javaRegexp.MatchString(f.Name) {
+		case javaRegexp.MatchString(f.Name):
 			subArchives = append(subArchives, f)
-		} else if strings.HasSuffix(f.Name, "/pom.properties") {
+		case strings.HasSuffix(f.Name, "/pom.properties"):
 			pomProperties = append(pomProperties, f)
 		}
 	}
