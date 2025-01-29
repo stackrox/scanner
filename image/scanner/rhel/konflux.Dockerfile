@@ -109,3 +109,7 @@
 FROM registry.redhat.io/ubi8/ubi@sha256:e3311058176628ad7f0f288f894ed2afef61be77ad01d53d5b69bca0f6b6cec1 as scanner-common
 
 RUN dnf upgrade -y krb5-libs
+
+FROM scanner-common AS scanner-slim
+
+FROM scanner-common AS scanner
