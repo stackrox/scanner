@@ -195,7 +195,7 @@ spec:
       - name: name
         value: determine-image-tag
       - name: bundle
-        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:433e2a1bacbbbdccb2fc7d935d8f801a8d876340567f9de3d57fd56e1856bcf0
+        value: quay.io/rhacs-eng/konflux-tasks:pr-33@sha256:d27622855cbf7eaeebbe975f23afe3557e3aad94dff24fbe60a57a674a5da4ac
       - name: kind
         value: task
       resolver: bundles
@@ -217,7 +217,7 @@ spec:
       - name: name
         value: fetch-scanner-v2-data
       - name: bundle
-        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:433e2a1bacbbbdccb2fc7d935d8f801a8d876340567f9de3d57fd56e1856bcf0
+        value: quay.io/rhacs-eng/konflux-tasks:pr-33@sha256:d27622855cbf7eaeebbe975f23afe3557e3aad94dff24fbe60a57a674a5da4ac
       - name: kind
         value: task
       resolver: bundles
