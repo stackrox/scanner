@@ -18,4 +18,3 @@ baseurl = https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/$basearch/co
 enabled = 1
 gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 gpgcheck = 1
-

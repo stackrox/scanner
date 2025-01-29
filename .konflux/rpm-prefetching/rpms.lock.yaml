@@ -4,6 +4,13 @@ lockfileVendor: redhat
 arches:
 - arch: aarch64
   packages:
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/baseos/os/Packages/k/krb5-libs-1.18.2-30.el8_10.aarch64.rpm
+    repoid: ubi-8-baseos-rpms
+    size: 840236
+    checksum: sha256:72446ade3ce73c634ec5f66344ab61706e383c1b86fcec4c88662bfd292ea9c4
+    name: krb5-libs
+    evr: 1.18.2-30.el8_10
+    sourcerpm: krb5-1.18.2-30.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/baseos/os/Packages/x/xz-5.2.4-4.el8_6.aarch64.rpm
     repoid: ubi-8-baseos-rpms
     size: 156276
@@ -15,6 +22,13 @@ arches:
   module_metadata: []
 - arch: ppc64le
   packages:
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/baseos/os/Packages/k/krb5-libs-1.18.2-30.el8_10.ppc64le.rpm
+    repoid: ubi-8-baseos-rpms
+    size: 931968
+    checksum: sha256:6ef5b146157f155d78d7b27e4bb52375ecd766cb9b75df707543bcfce968455a
+    name: krb5-libs
+    evr: 1.18.2-30.el8_10
+    sourcerpm: krb5-1.18.2-30.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/baseos/os/Packages/x/xz-5.2.4-4.el8_6.ppc64le.rpm
     repoid: ubi-8-baseos-rpms
     size: 162264
@@ -26,6 +40,13 @@ arches:
   module_metadata: []
 - arch: s390x
   packages:
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/baseos/os/Packages/k/krb5-libs-1.18.2-30.el8_10.s390x.rpm
+    repoid: ubi-8-baseos-rpms
+    size: 829364
+    checksum: sha256:d01db24f0b83ac844b902f50d63b98570b2503a0631309f6f081e53e5a1f3c8a
+    name: krb5-libs
+    evr: 1.18.2-30.el8_10
+    sourcerpm: krb5-1.18.2-30.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/baseos/os/Packages/x/xz-5.2.4-4.el8_6.s390x.rpm
     repoid: ubi-8-baseos-rpms
     size: 155012
@@ -37,6 +58,13 @@ arches:
   module_metadata: []
 - arch: x86_64
   packages:
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/baseos/os/Packages/k/krb5-libs-1.18.2-30.el8_10.x86_64.rpm
+    repoid: ubi-8-baseos-rpms
+    size: 865276
+    checksum: sha256:7da8bc32d2305607182730d46e91c3fca92362aa19dd9730a24eef774c8bb4fd
+    name: krb5-libs
+    evr: 1.18.2-30.el8_10
+    sourcerpm: krb5-1.18.2-30.el8_10.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/baseos/os/Packages/x/xz-5.2.4-4.el8_6.x86_64.rpm
     repoid: ubi-8-baseos-rpms
     size: 156884
