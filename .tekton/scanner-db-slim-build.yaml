@@ -34,7 +34,7 @@ spec:
   - name: git-url
     value: '{{source_url}}'
   - name: image-expires-after
-    value: '13w'
+    value: '{{ event == "pull_request" ? "10w": "15w" }}'
   - name: output-image-repo
     value: quay.io/rhacs-eng/scanner-db-slim
   - name: path-context
