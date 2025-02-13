@@ -3507,7 +3507,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.2.2-6.el9_5",
+				FixedBy:       "1:3.2.2-6.el9_5.1",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3549,7 +3549,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.2.2-6.el9_5",
+				FixedBy:       "1:3.2.2-6.el9_5.1",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -4028,7 +4028,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				Name:          "tomcat",
 				VersionFormat: component.JavaSourceType.String(),
 				Version:       "9.0.59",
-				FixedBy:       "9.0.83",
+				FixedBy:       "9.0.90",
 				Location:      "tomcat-embed-core-9.0.59.jar",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
