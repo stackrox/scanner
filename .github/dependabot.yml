@@ -59,3 +59,44 @@ updates:
     open-pull-requests-limit: 1
     reviewers:
       - 'stackrox/scanner'
+
+  # Below configuration is workaround for dependabot issue
+  # about local actions in .github/actions/ are not checked
+  # https://github.com/dependabot/dependabot-core/issues/6345
+
+  - package-ecosystem: github-actions
+    directory: /.github/actions/cache-go-dependencies
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    open-pull-requests-limit: 3
+    reviewers:
+      - 'stackrox/scanner'
+    groups:
+      actions:
+        patterns:
+          - "actions/*"
+  - package-ecosystem: github-actions
+    directory: /.github/actions/handle-tagged-build
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    open-pull-requests-limit: 3
+    reviewers:
+      - 'stackrox/scanner'
+    groups:
+      actions:
+        patterns:
+          - "actions/*"
+  - package-ecosystem: github-actions
+    directory: /.github/actions/job-preamble
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+    open-pull-requests-limit: 3
+    reviewers:
+      - 'stackrox/scanner'
+    groups:
+      actions:
+        patterns:
+          - "actions/*"
