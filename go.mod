@@ -38,7 +38,7 @@ require (
 	github.com/quay/goval-parser v0.8.8
 	github.com/remind101/migrate v0.0.0-20170729031349-52c1edff7319
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.8.1
+	github.com/spf13/cobra v1.9.1
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
 	github.com/stackrox/istio-cves v0.0.0-20221007013142-0bde9b541ec8
 	github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d
@@ -143,7 +143,7 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/skeema/knownhosts v1.3.0 // indirect
-	github.com/spf13/pflag v1.0.6-0.20210604193023-d5e0c0615ace // indirect
+	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/tkuchiki/go-timezone v0.2.3 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/weppos/publicsuffix-go v0.30.1-0.20230620154423-38c92ad2d5c6 // indirect
