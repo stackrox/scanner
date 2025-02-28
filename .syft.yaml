@@ -1,0 +1,8 @@
+# Konflux uses Syft to generate container SBOMs.
+# Syft config docs https://github.com/anchore/syft/wiki/configuration
+
+# Here we exclude files checked in this repo for testing purposes from being parsed and merged into SBOM.
+# This is in particular to prevent rpm packages from `./pkg/rhelv2/rpm/testdata/rpmdb.sqlite` and similar to be included
+# in the SBOMs of built containers.
+exclude:
+- ./**/testdata/**
