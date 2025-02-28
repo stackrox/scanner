@@ -26,7 +26,7 @@ check_testdata_files_are_ignored() {
     expected_excludes="$(git ls-files -- '**/testdata/**' | sed 's@/testdata/.*$@/testdata/**@' | sort | uniq | sed 's/^/- .\//')"
 
     echo
-    echo "➤ ${syft_config} // checking ${exclude_attribute}: all rpmdb files in the repo shall be mentioned."
+    echo "➤ ${syft_config} // checking ${exclude_attribute}: all testdata files in the repo shall be mentioned."
     if ! compare "${expected_excludes}" "${actual_excludes}"; then
         echo >&2 "How to resolve:
 1. Open ${syft_config} and replace ${exclude_attribute} contents with the following.
