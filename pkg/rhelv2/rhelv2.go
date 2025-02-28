@@ -35,7 +35,7 @@ var (
 	u *url.URL
 
 	client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   60 * time.Second,
 		Transport: proxy.RoundTripper(),
 	}
 
@@ -77,7 +77,7 @@ func UpdateV2(outputDir string) (int, error) {
 		cpes.AddAll(v.CPEs...)
 	}
 
-	// No context needed as the client has a 20 second timeout.
+	// No context needed as the client has a timeout.
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return 0, err
