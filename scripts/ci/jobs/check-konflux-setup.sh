@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# This script is to validate our Konflux setup. It is borrowed from the StackRox repo.
+# This script is to validate our Konflux setup.
+# The script was adapted from the one in the StackRox repo.
 # See https://github.com/stackrox/stackrox/blob/master/scripts/ci/jobs/check-konflux-setup.sh
 
 set -euo pipefail
@@ -8,12 +9,12 @@ set -euo pipefail
 FAIL_FLAG="$(mktemp)"
 trap 'rm -f $FAIL_FLAG' EXIT
 
-check_example_rpmdb_files_are_ignored() {
+check_testdata_files_are_ignored() {
     # At the time of this writing, Konflux uses syft to generate SBOMs for built containers.
     # If we happen to have test rpmdb databases in the repo, syft will union their contents with RPMs that it finds
     # installed in the container resulting in a misleading SBOM.
-    # This check is to make sure the exclusion list in Syft config enumerates all such rpmdbs.
-    # Ref https://github.com/anchore/syft/wiki/configuration
+    # An rpmdb located in ./pkg/rhelv2/rpm/testdata/rpmdb.sqlite and other files follow the similar pattern: they reside
+    # in directories called `testdata`. This check is to make sure all `testdata` directories are in syft's exlude list.
 
     local -r syft_config=".syft.yaml"
     local -r exclude_attribute=".exclude"
@@ -22,7 +23,7 @@ check_example_rpmdb_files_are_ignored() {
     actual_excludes="$(yq eval "${exclude_attribute}" "${syft_config}")"
 
     local expected_excludes
-    expected_excludes="$(git ls-files -- '**/rpmdb.sqlite' | sort | uniq | sed 's/^/- .\//')"
+    expected_excludes="$(git ls-files -- '**/testdata/**' | sed 's@/testdata/.*$@/testdata/**@' | sort | uniq | sed 's/^/- .\//')"
 
     echo
     echo "➤ ${syft_config} // checking ${exclude_attribute}: all rpmdb files in the repo shall be mentioned."
@@ -53,7 +54,7 @@ record_failure() {
 }
 
 echo "Checking our Konflux pipelines and builds setup."
-check_example_rpmdb_files_are_ignored
+check_testdata_files_are_ignored
 
 if [[ -s "$FAIL_FLAG" ]]; then
     echo >&2
