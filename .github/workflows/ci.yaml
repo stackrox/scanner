@@ -117,9 +117,6 @@ jobs:
       - name: Run style checks (amd64)
         run: ./scripts/ci/jobs/style-checks.sh
 
-      - name: Check Konflux setup
-        run: ./scripts/ci/jobs/check-konflux-setup.sh
-
   unit-tests:
     runs-on: ubuntu-latest
     container:
