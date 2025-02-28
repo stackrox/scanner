@@ -1,0 +1,31 @@
+# Konflux uses Syft to generate container SBOMs.
+# Syft config docs https://github.com/anchore/syft/wiki/configuration
+
+# Here we exclude files checked in this repo for testing purposes from being parsed and merged into SBOM.
+# Use scripts/ci/jobs/check-konflux-setup.sh to validate or update this exclusion list.
+exclude:
+- ./api/v1/testdata/**
+- ./cmd/clair/testdata/**
+- ./cpe/nvdtoolscache/testdata/**
+- ./database/pgsql/testdata/**
+- ./e2etests/testdata/**
+- ./ext/featurefmt/apk/testdata/**
+- ./ext/featurefmt/dpkg/testdata/**
+- ./ext/featurefmt/rpm/testdata/**
+- ./ext/vulnmdsrc/nvd/testdata/**
+- ./ext/vulnmdsrc/redhat/testdata/**
+- ./ext/vulnsrc/alpine/testdata/**
+- ./ext/vulnsrc/amzn/testdata/**
+- ./ext/vulnsrc/debian/testdata/**
+- ./ext/vulnsrc/rhel/testdata/**
+- ./ext/vulnsrc/ubuntu/testdata/**
+- ./istio/cache/testdata/**
+- ./k8s/cache/testdata/**
+- ./pkg/analyzer/dotnetcoreruntime/testdata/**
+- ./pkg/elf/testdata/**
+- ./pkg/repo2cpe/testdata/**
+- ./pkg/rhel/pulp/testdata/**
+- ./pkg/rhelv2/ovalutil/testdata/**
+- ./pkg/rhelv2/rpm/testdata/**
+- ./pkg/tarutil/testdata/**
+- ./pkg/ziputil/testdata/**
