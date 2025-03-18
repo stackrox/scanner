@@ -130,6 +130,14 @@ spec:
 
   tasks:
 
+  - name: pre-notify
+    taskSpec:
+      steps:
+      - name: try-gcp
+        image: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
+        script:
+          bq help
+
   - name: init
     params:
     - name: image-url
