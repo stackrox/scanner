@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	scannerHTTPEndpointEnv = "SCANNER_ENDPOINT"
-	scannerGRPCEndpointEnv = "SCANNER_GRPC_ENDPOINT"
+	scannerHTTPEndpointEnv    = "SCANNER_ENDPOINT"
+	scannerGRPCEndpointEnv    = "SCANNER_GRPC_ENDPOINT"
+	defaultMaxResponseMsgSize = 256 * 1024 * 1024 // 256MB
 )
 
 func mustGetEnv(t *testing.T, key string) string {
@@ -37,7 +38,11 @@ func connectToScanner(t *testing.T) *grpc.ClientConn {
 	clientTLSConfig := &tls.Config{
 		InsecureSkipVerify: true,
 	}
-	conn, err := grpc.NewClient(gRPCEndpoint, grpc.WithTransportCredentials(credentials.NewTLS(clientTLSConfig)))
+	conn, err := grpc.NewClient(
+		gRPCEndpoint,
+		grpc.WithTransportCredentials(credentials.NewTLS(clientTLSConfig)),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(defaultMaxResponseMsgSize)),
+	)
 	require.NoError(t, err)
 	return conn
 }
