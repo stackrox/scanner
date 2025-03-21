@@ -130,6 +130,19 @@ spec:
 
   tasks:
 
+  - name: notify-bigquery-start
+    params:
+    taskRef:
+      params:
+      - name: name
+        value: post-bigquery-metrics
+      - name: bundle
+        # TODO(ROX-27856): switch to latest
+        value: quay.io/rhacs-eng/konflux-tasks:pr-41@sha256:9de7593770c07c2c99202326d5b754286ec2671afc0909b1a94b6c549c3ae435
+      - name: kind
+        value: task
+      resolver: bundles
+
   - name: init
     params:
     - name: image-url
