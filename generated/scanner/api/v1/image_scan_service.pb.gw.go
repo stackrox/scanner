@@ -66,6 +66,7 @@ func request_ImageScanService_GetImageScan_0(ctx context.Context, marshaler runt
 		protoReq GetImageScanRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -146,6 +147,7 @@ func request_ImageScanService_GetLanguageLevelComponents_0(ctx context.Context, 
 		protoReq GetLanguageLevelComponentsRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}

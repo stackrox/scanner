@@ -40,6 +40,7 @@ func request_VulnDefsService_GetVulnDefsMetadata_0(ctx context.Context, marshale
 		protoReq Empty
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	msg, err := client.GetVulnDefsMetadata(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }

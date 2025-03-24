@@ -42,6 +42,7 @@ func request_OrchestratorScanService_GetKubeVulnerabilities_0(ctx context.Contex
 		protoReq GetKubeVulnerabilitiesRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -74,6 +75,7 @@ func request_OrchestratorScanService_GetOpenShiftVulnerabilities_0(ctx context.C
 		protoReq GetOpenShiftVulnerabilitiesRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -105,6 +107,7 @@ func request_OrchestratorScanService_GetIstioVulnerabilities_0(ctx context.Conte
 		metadata runtime.ServerMetadata
 		err      error
 	)
+	io.Copy(io.Discard, req.Body)
 	val, ok := pathParams["istio_version"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "istio_version")
