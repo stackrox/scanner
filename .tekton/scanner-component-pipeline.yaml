@@ -41,7 +41,7 @@ spec:
         value: task
       resolver: bundles
 
-  - name: notify-bigquery-end
+  - name: post-metric-end
     params:
     - name: AGGREGATE_TASKS_STATUS
       value: $(tasks.status)
@@ -51,7 +51,7 @@ spec:
         value: post-bigquery-metrics
       - name: bundle
         # TODO(ROX-27856): switch to latest
-        value: quay.io/rhacs-eng/konflux-tasks:pr-41@sha256:15d5219918d1fb3f0c0933eb7d96c95784ef5553f22e963664c1bedd4b347829
+        value: quay.io/rhacs-eng/konflux-tasks:pr-41@sha256:618997562b6bec61ead94d3adfa00482379b55d79bf597731288b5c0f075c11d
       - name: kind
         value: task
       resolver: bundles
@@ -145,7 +145,7 @@ spec:
 
   tasks:
 
-  - name: notify-bigquery-start
+  - name: post-metric-start
     taskRef: *post-bigquery-metrics-ref
 
   - name: init
