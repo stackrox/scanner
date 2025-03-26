@@ -41,6 +41,21 @@ spec:
         value: task
       resolver: bundles
 
+  - name: notify-bigquery-end
+    params:
+    - name: AGGREGATE_TASKS_STATUS
+      value: $(tasks.status)
+    taskRef: &post-bigquery-metrics-ref
+      params:
+      - name: name
+        value: post-bigquery-metrics
+      - name: bundle
+        # TODO(ROX-27856): switch to latest
+        value: quay.io/rhacs-eng/konflux-tasks:pr-41@sha256:15d5219918d1fb3f0c0933eb7d96c95784ef5553f22e963664c1bedd4b347829
+      - name: kind
+        value: task
+      resolver: bundles
+
   params:
   - description: Source Repository URL
     name: git-url
@@ -131,17 +146,7 @@ spec:
   tasks:
 
   - name: notify-bigquery-start
-    params:
-    taskRef:
-      params:
-      - name: name
-        value: post-bigquery-metrics
-      - name: bundle
-        # TODO(ROX-27856): switch to latest
-        value: quay.io/rhacs-eng/konflux-tasks:pr-41@sha256:3f5419b9ab44bc881fb7b42d31fb474037beea9fb234928aef4582c38def1bd1
-      - name: kind
-        value: task
-      resolver: bundles
+    taskRef: *post-bigquery-metrics-ref
 
   - name: init
     params:
