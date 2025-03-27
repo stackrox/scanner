@@ -67,7 +67,7 @@ spec:
 
   # Tagged builds wait for blobs to be published which takes about 1h.
   timeouts:
-    tasks: 2h30m
+    tasks: 5m
     finally: 10m
     pipeline: 2h40m
 

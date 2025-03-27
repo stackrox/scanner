@@ -66,9 +66,9 @@ spec:
       secretName: '{{ git_auth_secret }}'
 
   timeouts:
-    tasks: 1h
-    finally: 10m
-    pipeline: 1h10m
+    tasks: 5m
+    finally: 1m
+    pipeline: 6m
 
   pipelineRef:
     name: scanner-component-pipeline

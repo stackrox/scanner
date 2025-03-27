@@ -79,7 +79,7 @@ spec:
   # Multiarch builds sometimes make the pipeline timeout after 1h.
   # Tagged builds wait for blobs to be published which takes about 1h.
   timeouts:
-    tasks: 3h0m
+    tasks: 10m
     finally: 10m
     pipeline: 3h10m
 
