@@ -79,8 +79,8 @@ spec:
   # Multiarch builds sometimes make the pipeline timeout after 1h.
   timeouts:
     tasks: 5m
-    finally: 1m
-    pipeline: 6m
+    finally: 10s
+    pipeline: 5m
 
   pipelineRef:
     name: scanner-component-pipeline

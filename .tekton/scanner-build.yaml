@@ -80,7 +80,7 @@ spec:
   # Tagged builds wait for blobs to be published which takes about 1h.
   timeouts:
     tasks: 10m
-    finally: 10m
+    finally: 10s
     pipeline: 3h10m
 
   pipelineRef:
