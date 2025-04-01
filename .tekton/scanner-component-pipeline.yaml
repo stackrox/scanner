@@ -357,7 +357,7 @@ spec:
       values: [ "true" ]
     - input: "skip-pz-builds"
       operator: notin
-      values: [ "$(body.pull_request.labels[*])" ]
+      values: [ "$(body.pull_request.labels)" ]
 
   - name: build-container-ppc64le
     params:
@@ -401,7 +401,7 @@ spec:
       values: [ "true" ]
     - input: "skip-pz-builds"
       operator: notin
-      values: [ "$(body.pull_request.labels[*])" ]
+      values: [ "$(body.pull_request.labels)" ]
 
   - name: build-container-arm64
     params:
