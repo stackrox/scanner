@@ -355,6 +355,9 @@ spec:
     - input: $(tasks.init.results.build)
       operator: in
       values: [ "true" ]
+    - input: $(body.pull_request.labels)
+      operator: notin
+      values: [ "skip-pz-builds" ]
 
   - name: build-container-ppc64le
     params:
@@ -396,6 +399,9 @@ spec:
     - input: $(tasks.init.results.build)
       operator: in
       values: [ "true" ]
+    - input: $(body.pull_request.labels)
+      operator: notin
+      values: [ "skip-pz-builds" ]
 
   - name: build-container-arm64
     params:
