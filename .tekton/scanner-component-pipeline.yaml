@@ -51,7 +51,7 @@ spec:
         value: post-bigquery-metrics
       - name: bundle
         # TODO(ROX-27856): use latest
-        value: quay.io/rhacs-eng/konflux-tasks:pr-44@sha256:146a2ce40c76007af36c6012c3b0a49f2ab2887264cb04fc24ecb21ec3c04b5a
+        value: quay.io/rhacs-eng/konflux-tasks:pr-44@sha256:f11f1c9c48a70814bd0ab53f163a93c8a613fcf2b4f346b5e318dd03f5d22c50
       - name: kind
         value: task
       resolver: bundles
