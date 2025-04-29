@@ -1,9 +1,10 @@
-packages: [ xz ]
+packages:
+- xz
 contentOrigin:
   repofiles: [ "rpms.ubi.repo" ]
 context:
   containerfile:
-    file: ../../image/scanner/rhel/konflux.Dockerfile
+    file: image/scanner/rhel/konflux.Dockerfile
     stageName: scanner-common
 arches:
 - aarch64
