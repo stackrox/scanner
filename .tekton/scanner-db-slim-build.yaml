@@ -45,7 +45,7 @@ spec:
     value: 'true'
   - name: hermetic
     value: "true"
-  # No language dependencies are required for scanner-db-slim image.
+  # No dependencies are required for scanner-db-slim image.
   - name: prefetch-input
     value: ''
   - name: build-source-image
