@@ -11,7 +11,13 @@ arches:
     name: xz
     evr: 5.2.4-4.el8_6
     sourcerpm: xz-5.2.4-4.el8_6.src.rpm
-  source: []
+  source:
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/baseos/source/SRPMS/Packages/x/xz-5.2.4-4.el8_6.src.rpm
+    repoid: ubi-8-baseos-source
+    size: 1077113
+    checksum: sha256:7914b320eefa2db6dad68e5f01e99f8e661072a1f13acb3d19cba8c1295ae40a
+    name: xz
+    evr: 5.2.4-4.el8_6
   module_metadata: []
 - arch: ppc64le
   packages:
@@ -22,7 +28,13 @@ arches:
     name: xz
     evr: 5.2.4-4.el8_6
     sourcerpm: xz-5.2.4-4.el8_6.src.rpm
-  source: []
+  source:
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/baseos/source/SRPMS/Packages/x/xz-5.2.4-4.el8_6.src.rpm
+    repoid: ubi-8-baseos-source
+    size: 1077113
+    checksum: sha256:7914b320eefa2db6dad68e5f01e99f8e661072a1f13acb3d19cba8c1295ae40a
+    name: xz
+    evr: 5.2.4-4.el8_6
   module_metadata: []
 - arch: s390x
   packages:
@@ -33,7 +45,13 @@ arches:
     name: xz
     evr: 5.2.4-4.el8_6
     sourcerpm: xz-5.2.4-4.el8_6.src.rpm
-  source: []
+  source:
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/baseos/source/SRPMS/Packages/x/xz-5.2.4-4.el8_6.src.rpm
+    repoid: ubi-8-baseos-source
+    size: 1077113
+    checksum: sha256:7914b320eefa2db6dad68e5f01e99f8e661072a1f13acb3d19cba8c1295ae40a
+    name: xz
+    evr: 5.2.4-4.el8_6
   module_metadata: []
 - arch: x86_64
   packages:
@@ -44,5 +62,11 @@ arches:
     name: xz
     evr: 5.2.4-4.el8_6
     sourcerpm: xz-5.2.4-4.el8_6.src.rpm
-  source: []
+  source:
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/x86_64/baseos/source/SRPMS/Packages/x/xz-5.2.4-4.el8_6.src.rpm
+    repoid: ubi-8-baseos-source
+    size: 1077113
+    checksum: sha256:7914b320eefa2db6dad68e5f01e99f8e661072a1f13acb3d19cba8c1295ae40a
+    name: xz
+    evr: 5.2.4-4.el8_6
   module_metadata: []
