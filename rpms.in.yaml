@@ -1,6 +1,6 @@
 packages: [xz]
 contentOrigin:
-  repofiles: ["./ubi.repo"]
+  repofiles: ["rpms.ubi.repo"]
 context:
   containerfile:
     file: ../../image/scanner/rhel/konflux.Dockerfile
