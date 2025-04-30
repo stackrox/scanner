@@ -31,6 +31,15 @@
       // Override Konflux custom schedule for this manager to our intended one.
       "after 3am and before 7am",
     ],
+    "packageRules": [
+      // Note: the packageRules from the Konflux config (find URL in comments above) get merged with these.
+      {
+        "groupName": "StackRox custom Konflux Tasks",
+        "matchPackageNames": [
+          "/^quay.io/rhacs-eng/konflux-tasks/",
+        ],
+      },
+    ],
   },
   "dockerfile": {
     "includePaths": [
