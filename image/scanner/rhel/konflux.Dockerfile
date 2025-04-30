@@ -1,3 +1,8 @@
+ARG BASE_REGISTRY=registry.access.redhat.com
+ARG BASE_IMAGE=ubi8-minimal
+ARG BASE_TAG=latest
+
+
 # Compiling scanner binaries and staging repo2cpe and genesis manifests
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.23 AS builder
 
@@ -28,7 +33,7 @@ COPY .konflux/scanner-data/blob-genesis_manifests.json image/scanner/dump/genesi
 
 
 # Common base for scanner slim and full
-FROM registry.access.redhat.com/ubi8-minimal:latest AS scanner-common
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS scanner-common
 
 ARG SCANNER_TAG
 
