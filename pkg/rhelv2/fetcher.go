@@ -35,7 +35,7 @@ func fetch(uri string) (string, io.ReadCloser, error) {
 
 // doFetch performs the actual fetching.
 func doFetch(uri string) (string, io.ReadCloser, error) {
-	// No context needed as the client has a 20 second timeout.
+	// No context needed as the client has a timeout.
 	req, err := http.NewRequest(http.MethodGet, uri, nil)
 	if err != nil {
 		return "", nil, err
