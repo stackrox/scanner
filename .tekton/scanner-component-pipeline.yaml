@@ -263,6 +263,9 @@ spec:
       value: $(params.output-image-repo):konflux-$(params.revision).prefetch
     - name: ociArtifactExpiresAfter
       value: $(params.oci-artifact-expires-after)
+    # Required for RPM prefetching support
+    - name: dev-package-managers
+      value: "true"
     taskRef:
       params:
       - name: name
