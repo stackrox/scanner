@@ -52,9 +52,16 @@
       "after 3am and before 7am",
     ],
   },
+  "rpm": {
+    "schedule": [
+      // Override Konflux custom schedule for this manager to our intended one.
+      "after 3am and before 7am",
+    ],
+  },
   "enabledManagers": [
     // Restrict Renovate focus on Konflux things since we rely on GitHub's dependabot for everything else.
     "tekton",
     "dockerfile",
+    "rpm",
   ],
 }
