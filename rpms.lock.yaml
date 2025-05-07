@@ -4,69 +4,97 @@ lockfileVendor: redhat
 arches:
 - arch: aarch64
   packages:
-  - url: https://cdn.redhat.com/content/dist/rhel8/8/aarch64/baseos/os/Packages/x/xz-5.2.4-4.el8_6.aarch64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/aarch64/baseos/os/Packages/x/xz-5.2.4-3.el8.aarch64.rpm
     repoid: rhel-8-for-aarch64-baseos-rpms
-    size: 156276
-    checksum: sha256:342a2504cb34c9a5c1d43906f534cb1f3bf1de58ac517d575cff57053d04ab00
+    size: 156236
+    checksum: sha256:e426534c59b3a35068877d324dd34d643ad7c84d2c406b2e6502ac6c2a367d39
     name: xz
-    evr: 5.2.4-4.el8_6
-    sourcerpm: xz-5.2.4-4.el8_6.src.rpm
+    evr: 5.2.4-3.el8
+    sourcerpm: xz-5.2.4-3.el8.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/aarch64/baseos/os/Packages/x/xz-libs-5.2.4-3.el8.aarch64.rpm
+    repoid: rhel-8-for-aarch64-baseos-rpms
+    size: 92784
+    checksum: sha256:094eff70081085f87a7ac0dedafa851ad8ac8e03f9f328636df4a0f8301d0e87
+    name: xz-libs
+    evr: 5.2.4-3.el8
+    sourcerpm: xz-5.2.4-3.el8.src.rpm
   source:
-  - url: https://cdn.redhat.com/content/dist/rhel8/8/aarch64/baseos/source/SRPMS/Packages/x/xz-5.2.4-4.el8_6.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/aarch64/baseos/source/SRPMS/Packages/x/xz-5.2.4-3.el8.src.rpm
     repoid: rhel-8-for-aarch64-baseos-source-rpms
-    size: 1077113
-    checksum: sha256:7914b320eefa2db6dad68e5f01e99f8e661072a1f13acb3d19cba8c1295ae40a
+    size: 1074430
+    checksum: sha256:223e5a8b539f68bb02e37354a7f60c41c6598119bfd727973c780479d6099fa8
     name: xz
-    evr: 5.2.4-4.el8_6
+    evr: 5.2.4-3.el8
   module_metadata: []
 - arch: ppc64le
   packages:
-  - url: https://cdn.redhat.com/content/dist/rhel8/8/ppc64le/baseos/os/Packages/x/xz-5.2.4-4.el8_6.ppc64le.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/ppc64le/baseos/os/Packages/x/xz-5.2.4-3.el8.ppc64le.rpm
     repoid: rhel-8-for-ppc64le-baseos-rpms
-    size: 162264
-    checksum: sha256:80d2fc754452ae52b3b36504e5cceb5cd5435a97999351402ae7a28298592a01
+    size: 162976
+    checksum: sha256:2b2e0d9a397d27c7076f05ab309c71ebffdf2c33df95de51c700af181899c87e
     name: xz
-    evr: 5.2.4-4.el8_6
-    sourcerpm: xz-5.2.4-4.el8_6.src.rpm
+    evr: 5.2.4-3.el8
+    sourcerpm: xz-5.2.4-3.el8.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/ppc64le/baseos/os/Packages/x/xz-libs-5.2.4-3.el8.ppc64le.rpm
+    repoid: rhel-8-for-ppc64le-baseos-rpms
+    size: 114780
+    checksum: sha256:37e4f7e854765b98e8dd10986b758631c7ca00942bc53efb4003ee326e1cc834
+    name: xz-libs
+    evr: 5.2.4-3.el8
+    sourcerpm: xz-5.2.4-3.el8.src.rpm
   source:
-  - url: https://cdn.redhat.com/content/dist/rhel8/8/ppc64le/baseos/source/SRPMS/Packages/x/xz-5.2.4-4.el8_6.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/ppc64le/baseos/source/SRPMS/Packages/x/xz-5.2.4-3.el8.src.rpm
     repoid: rhel-8-for-ppc64le-baseos-source-rpms
-    size: 1077113
-    checksum: sha256:7914b320eefa2db6dad68e5f01e99f8e661072a1f13acb3d19cba8c1295ae40a
+    size: 1074430
+    checksum: sha256:223e5a8b539f68bb02e37354a7f60c41c6598119bfd727973c780479d6099fa8
     name: xz
-    evr: 5.2.4-4.el8_6
+    evr: 5.2.4-3.el8
   module_metadata: []
 - arch: s390x
   packages:
-  - url: https://cdn.redhat.com/content/dist/rhel8/8/s390x/baseos/os/Packages/x/xz-5.2.4-4.el8_6.s390x.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/s390x/baseos/os/Packages/x/xz-5.2.4-3.el8.s390x.rpm
     repoid: rhel-8-for-s390x-baseos-rpms
-    size: 155012
-    checksum: sha256:7fb678077d965dd6aeb09df28ce05cba9c22e4110d4b52f1ee43986beb87a5ff
+    size: 154952
+    checksum: sha256:d05b84d3b2126b91834bd388af680b10a73595363d138cd05920eb4ca8c0f03e
     name: xz
-    evr: 5.2.4-4.el8_6
-    sourcerpm: xz-5.2.4-4.el8_6.src.rpm
+    evr: 5.2.4-3.el8
+    sourcerpm: xz-5.2.4-3.el8.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/s390x/baseos/os/Packages/x/xz-libs-5.2.4-3.el8.s390x.rpm
+    repoid: rhel-8-for-s390x-baseos-rpms
+    size: 95996
+    checksum: sha256:2a45920a9540e5057920f7c987d3daf910240a6d1ee63d1fa80fcdf3cee4fd71
+    name: xz-libs
+    evr: 5.2.4-3.el8
+    sourcerpm: xz-5.2.4-3.el8.src.rpm
   source:
-  - url: https://cdn.redhat.com/content/dist/rhel8/8/s390x/baseos/source/SRPMS/Packages/x/xz-5.2.4-4.el8_6.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/s390x/baseos/source/SRPMS/Packages/x/xz-5.2.4-3.el8.src.rpm
     repoid: rhel-8-for-s390x-baseos-source-rpms
-    size: 1077113
-    checksum: sha256:7914b320eefa2db6dad68e5f01e99f8e661072a1f13acb3d19cba8c1295ae40a
+    size: 1074430
+    checksum: sha256:223e5a8b539f68bb02e37354a7f60c41c6598119bfd727973c780479d6099fa8
     name: xz
-    evr: 5.2.4-4.el8_6
+    evr: 5.2.4-3.el8
   module_metadata: []
 - arch: x86_64
   packages:
-  - url: https://cdn.redhat.com/content/dist/rhel8/8/x86_64/baseos/os/Packages/x/xz-5.2.4-4.el8_6.x86_64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/x86_64/baseos/os/Packages/x/xz-5.2.4-3.el8.x86_64.rpm
     repoid: rhel-8-for-x86_64-baseos-rpms
-    size: 156884
-    checksum: sha256:fa4ceb20dbf23e9408a6446fefc4b709bc85e0bc563ca423569bbe08ecee2c5e
+    size: 156848
+    checksum: sha256:1b6fe19e2856f752a2cd8f917db539dbe9fc1b1560fff3341864b13ffb0ccae0
     name: xz
-    evr: 5.2.4-4.el8_6
-    sourcerpm: xz-5.2.4-4.el8_6.src.rpm
+    evr: 5.2.4-3.el8
+    sourcerpm: xz-5.2.4-3.el8.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/x86_64/baseos/os/Packages/x/xz-libs-5.2.4-3.el8.x86_64.rpm
+    repoid: rhel-8-for-x86_64-baseos-rpms
+    size: 96192
+    checksum: sha256:d3813d081414edc480f5ffb428f6c9b005e33ebe8dd3a6ac8bf4d13e5aa4419b
+    name: xz-libs
+    evr: 5.2.4-3.el8
+    sourcerpm: xz-5.2.4-3.el8.src.rpm
   source:
-  - url: https://cdn.redhat.com/content/dist/rhel8/8/x86_64/baseos/source/SRPMS/Packages/x/xz-5.2.4-4.el8_6.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel8/8/x86_64/baseos/source/SRPMS/Packages/x/xz-5.2.4-3.el8.src.rpm
     repoid: rhel-8-for-x86_64-baseos-source-rpms
-    size: 1077113
-    checksum: sha256:7914b320eefa2db6dad68e5f01e99f8e661072a1f13acb3d19cba8c1295ae40a
+    size: 1074430
+    checksum: sha256:223e5a8b539f68bb02e37354a7f60c41c6598119bfd727973c780479d6099fa8
     name: xz
-    evr: 5.2.4-4.el8_6
+    evr: 5.2.4-3.el8
   module_metadata: []
