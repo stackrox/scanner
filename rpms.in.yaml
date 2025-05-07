@@ -2,7 +2,7 @@
 # See our docs here: https://spaces.redhat.com/display/StackRox/How+to+prefetch+RPMs+for+ACS+Konflux+builds
 
 packages:
-- xz
+- xz-5.2.4-3.el8
 contentOrigin:
   repofiles: [ "rpms.rhel.repo" ]
 context:
