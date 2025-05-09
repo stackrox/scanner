@@ -11,8 +11,6 @@ updates:
       interval: "weekly"
       day: 'wednesday'
     open-pull-requests-limit: 3
-    reviewers:
-      - 'stackrox/scanner'
     groups:
       actions:
         patterns:
@@ -24,24 +22,18 @@ updates:
       interval: 'weekly'
       day: 'wednesday'
     open-pull-requests-limit: 3
-    reviewers:
-      - 'stackrox/scanner'
   - package-ecosystem: 'gomod'
     directory: '/tools/linters/'
     schedule:
       interval: 'weekly'
       day: 'wednesday'
     open-pull-requests-limit: 3
-    reviewers:
-      - 'stackrox/scanner'
   - package-ecosystem: 'gomod'
     directory: '/tools/test/'
     schedule:
       interval: 'weekly'
       day: 'wednesday'
     open-pull-requests-limit: 3
-    reviewers:
-      - 'stackrox/scanner'
       
   - package-ecosystem: 'docker'
     directory: 'image/scanner/rhel'
@@ -49,16 +41,12 @@ updates:
       interval: 'weekly'
       day: 'wednesday'
     open-pull-requests-limit: 1
-    reviewers:
-      - 'stackrox/scanner'
   - package-ecosystem: 'docker'
     directory: 'image/db/rhel'
     schedule:
       interval: 'weekly'
       day: 'wednesday'
     open-pull-requests-limit: 1
-    reviewers:
-      - 'stackrox/scanner'
 
   # Below configuration is workaround for dependabot issue
   # about local actions in .github/actions/ are not checked
@@ -70,8 +58,6 @@ updates:
       interval: 'weekly'
       day: 'wednesday'
     open-pull-requests-limit: 3
-    reviewers:
-      - 'stackrox/scanner'
     groups:
       actions:
         patterns:
@@ -82,8 +68,6 @@ updates:
       interval: 'weekly'
       day: 'wednesday'
     open-pull-requests-limit: 3
-    reviewers:
-      - 'stackrox/scanner'
     groups:
       actions:
         patterns:
@@ -94,8 +78,6 @@ updates:
       interval: 'weekly'
       day: 'wednesday'
     open-pull-requests-limit: 3
-    reviewers:
-      - 'stackrox/scanner'
     groups:
       actions:
         patterns:
