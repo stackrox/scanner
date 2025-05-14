@@ -79,6 +79,9 @@ spec:
         requests:
           cpu: 2
 
+  taskRunTemplate:
+    serviceAccountName: build-pipeline-scanner-slim
+
   # Multiarch builds sometimes make the pipeline timeout after 1h.
   timeouts:
     tasks: 1h30m

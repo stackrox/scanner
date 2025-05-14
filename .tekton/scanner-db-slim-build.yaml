@@ -64,6 +64,9 @@ spec:
     secret:
       secretName: '{{ git_auth_secret }}'
 
+  taskRunTemplate:
+    serviceAccountName: build-pipeline-scanner-db-slim
+
   timeouts:
     tasks: 1h
     finally: 10m
