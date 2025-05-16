@@ -7,3 +7,4 @@
 **/konflux.*Dockerfile  @stackrox/rhtap-maintainers
 /.konflux/              @stackrox/rhtap-maintainers
 /.tekton/               @stackrox/rhtap-maintainers
+rpms.*                  @stackrox/rhtap-maintainers
