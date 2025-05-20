@@ -111,7 +111,7 @@ scanner_v2_create_and_upload_bundle() {
 # and add V4 definitions to the latest offline bundle.  It determines the
 # version to use for each release based on the contents of the
 # VULNERABILITY_VERSION file present in each release tag.
-#
+# shellcheck disable=SC2120
 scanner_v4_create_and_add_bundles() {
     local latest_bundle="${1:-scanner-vuln-updates.zip}"
 
@@ -152,17 +152,20 @@ scanner_v4_create_and_add_bundles() {
                   *)
                       info "fetching schema version for release $release"
                       tmp=$(mktemp)
+                      # shellcheck disable=SC2059
                       vuln_version_url=$(printf "$vuln_version_pattern" "$release")
-                      case $($curl --write-out "%{http_code}" -o "$tmp" "$vuln_version_url") in
+                      local http_status
+                      http_status=$($curl --write-out "%{http_code}" -o "$tmp" "$vuln_version_url")
+                      case $http_status in
                           200)
-                              version=$(cat $tmp)
+                              version=$(cat "$tmp")
                               ;;
                           404)
                               info "release tag not found, assuming the release was not cut, skipping..."
                               continue
                               ;;
                           *)
-                              die "failed to fetch the v4 offline bundle version for $release: status $status"
+                              die "failed to fetch the v4 offline bundle version for $release: status $http_status"
                               ;;
                       esac
                       ;;
