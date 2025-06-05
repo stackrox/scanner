@@ -47,7 +47,7 @@ func (n *Scanner) Scan(nodeName string) (*ScanResult, error) {
 		"/host/",
 		nodes.AnalyzeOpts{
 			UncertifiedRHEL: false,
-			IsRHCOSRequired: false},
+			IsRHCOSRequired: true},
 	)
 
 	scanDuration := time.Since(startTime)
