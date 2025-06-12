@@ -36,18 +36,21 @@ spec:
   - name: image-expires-after
     value: '13w'
   - name: output-image-repo
-    value: quay.io/rhacs-eng/scanner-slim
+    value: quay.io/rhacs-eng/release-scanner-slim
   - name: path-context
     value: .
   - name: revision
     value: '{{revision}}'
   - name: rebuild
     value: 'true'
-  # TODO(ROX-20234): Enable hermetic builds
-  # - name: hermetic
-  #   value: "true"
+  - name: hermetic
+    value: "true"
   - name: prefetch-input
-    value: '{"type": "gomod", "path": "."}'
+    value: |
+      [
+        { "type": "gomod", "path": "." },
+        { "type": "rpm", "path": "." }
+      ]
   - name: build-source-image
     value: 'true'
   - name: build-target-stage
@@ -75,6 +78,9 @@ spec:
       computeResources:
         requests:
           cpu: 2
+
+  taskRunTemplate:
+    serviceAccountName: build-pipeline-scanner-slim
 
   # Multiarch builds sometimes make the pipeline timeout after 1h.
   timeouts:
