@@ -90,10 +90,6 @@ spec:
     description: Build dependencies to be prefetched by Cachi2
     name: prefetch-input
     type: string
-  - default: "false"
-    description: Java build
-    name: java
-    type: string
   - description: Image tag expiration time, time values could be something like
       1h, 2d, 3w for hours, days, and weeks, respectively.
     name: image-expires-after
@@ -128,9 +124,6 @@ spec:
   - description: ""
     name: CHAINS-GIT_COMMIT
     value: $(tasks.clone-repository.results.commit)
-  - description: ""
-    name: JAVA_COMMUNITY_DEPENDENCIES
-    value: $(tasks.build-container-amd64.results.JAVA_COMMUNITY_DEPENDENCIES)
 
   workspaces:
   - name: git-auth
@@ -153,7 +146,7 @@ spec:
       - name: name
         value: init
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-init:0.2@sha256:0523b51c28375a3f222da91690e22eff11888ebc98a0c73c468af44762265c69
+        value: quay.io/konflux-ci/tekton-catalog/task-init:0.2@sha256:63eb4a4c0cfb491276bff86fdad1c96bf238506388848e79001058450a8e843a
       - name: kind
         value: task
       resolver: bundles
@@ -177,7 +170,7 @@ spec:
       - name: name
         value: git-clone-oci-ta
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-git-clone-oci-ta:0.1@sha256:4bf48d038ff12d25bdeb5ab3e98dc2271818056f454c83d7393ebbd413028147
+        value: quay.io/konflux-ci/tekton-catalog/task-git-clone-oci-ta:0.1@sha256:36d98ab04eaac2c964149060c773ac20df42f91527db6c40b7b250e6eeff5821
       - name: kind
         value: task
       resolver: bundles
@@ -195,13 +188,24 @@ spec:
       value: $(params.output-tag-suffix)
     - name: SOURCE_ARTIFACT
       value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
+    - name: SOURCE_BRANCH
+      value: '{{source_branch}}'
     taskRef:
-      name: determine-image-tag
+      params:
+      - name: name
+        value: determine-image-tag
+      - name: bundle
+        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:433e2a1bacbbbdccb2fc7d935d8f801a8d876340567f9de3d57fd56e1856bcf0
+      - name: kind
+        value: task
+      resolver: bundles
 
   - name: fetch-scanner-data
     params:
-    - name: blobs-to-fetch
+    - name: BLOBS_TO_FETCH
       value: [ "$(params.blobs-to-fetch[*])" ]
+    - name: TARGET_DIR
+      value: .konflux/scanner-data
     - name: SOURCE_ARTIFACT
       value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
     - name: ociStorage
@@ -209,7 +213,14 @@ spec:
     - name: ociArtifactExpiresAfter
       value: $(params.oci-artifact-expires-after)
     taskRef:
-      name: fetch-scanner-data
+      params:
+      - name: name
+        value: fetch-scanner-v2-data
+      - name: bundle
+        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:433e2a1bacbbbdccb2fc7d935d8f801a8d876340567f9de3d57fd56e1856bcf0
+      - name: kind
+        value: task
+      resolver: bundles
 
   - name: prefetch-dependencies
     params:
@@ -226,7 +237,7 @@ spec:
       - name: name
         value: prefetch-dependencies-oci-ta
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-prefetch-dependencies-oci-ta:0.1@sha256:0203960a9d15b184545d387296f9d47801feba1219083af5917c44d94329ef93
+        value: quay.io/konflux-ci/tekton-catalog/task-prefetch-dependencies-oci-ta:0.2@sha256:546e0a93f8bf6777a48082e07a43fd67a58474e1f922c2341e5a0f3bdb15187c
       - name: kind
         value: task
       resolver: bundles
@@ -264,7 +275,7 @@ spec:
       - name: name
         value: buildah-oci-ta
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-buildah-oci-ta:0.2@sha256:2d99cd4a5ecec47ba3b4c0a9ad071ca2aa01864906ebcdcfc9686cdc60323e0f
+        value: quay.io/konflux-ci/tekton-catalog/task-buildah-oci-ta:0.4@sha256:63e57ac67f892a0e2990fc18db5c18ef5ad9de1db8df82c25d5813e2f84f5977
       - name: kind
         value: task
       resolver: bundles
@@ -305,7 +316,7 @@ spec:
       - name: name
         value: buildah-remote-oci-ta
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.2@sha256:d582f95f21735f44947c62c2976972dc062cba20e6a3694990bafd5827665bb7
+        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.4@sha256:5b8e8253b6be14f555014b7055665e25ae138fa3e5b52a65e0ba3f2f6ff3d5bb
       - name: kind
         value: task
       resolver: bundles
@@ -346,7 +357,7 @@ spec:
       - name: name
         value: buildah-remote-oci-ta
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.2@sha256:d582f95f21735f44947c62c2976972dc062cba20e6a3694990bafd5827665bb7
+        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.4@sha256:5b8e8253b6be14f555014b7055665e25ae138fa3e5b52a65e0ba3f2f6ff3d5bb
       - name: kind
         value: task
       resolver: bundles
@@ -387,7 +398,7 @@ spec:
       - name: name
         value: buildah-remote-oci-ta
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.2@sha256:d582f95f21735f44947c62c2976972dc062cba20e6a3694990bafd5827665bb7
+        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.4@sha256:5b8e8253b6be14f555014b7055665e25ae138fa3e5b52a65e0ba3f2f6ff3d5bb
       - name: kind
         value: task
       resolver: bundles
@@ -415,7 +426,7 @@ spec:
       - name: name
         value: build-image-index
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-build-image-index:0.1@sha256:ebc17bb22481160eec6eb7277df1e48b90f599bebe563cd4f046807f4e32ced3
+        value: quay.io/konflux-ci/tekton-catalog/task-build-image-index:0.1@sha256:0c2270d1b24fcbaa6fe82b6d045b715a5f24f55d099a10f65297671e2ee421e6
       - name: kind
         value: task
       resolver: bundles
@@ -443,7 +454,7 @@ spec:
       - name: name
         value: build-image-index
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-build-image-index:0.1@sha256:ebc17bb22481160eec6eb7277df1e48b90f599bebe563cd4f046807f4e32ced3
+        value: quay.io/konflux-ci/tekton-catalog/task-build-image-index:0.1@sha256:0c2270d1b24fcbaa6fe82b6d045b715a5f24f55d099a10f65297671e2ee421e6
       - name: kind
         value: task
       resolver: bundles
@@ -465,7 +476,7 @@ spec:
       - name: name
         value: source-build-oci-ta
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-source-build-oci-ta:0.1@sha256:bd786bc1d33391bb169f98a1070d1a39e410b835f05fd0db0263754c65bd9bea
+        value: quay.io/konflux-ci/tekton-catalog/task-source-build-oci-ta:0.2@sha256:ac6c2141c21ef950dcb84dad5cd4d3a04fb758f82f9b5acc3612a584b4be5120
       - name: kind
         value: task
       resolver: bundles
@@ -488,7 +499,7 @@ spec:
       - name: name
         value: deprecated-image-check
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-deprecated-image-check:0.4@sha256:5a1a165fa02270f0a947d8a2131ee9d8be0b8e9d34123828c2bef589e504ee84
+        value: quay.io/konflux-ci/tekton-catalog/task-deprecated-image-check:0.5@sha256:ced089bd8d86f95ee70f6ee1a6941d677f1c66c3b8f02fa60f9309c6c32e1929
       - name: kind
         value: task
       resolver: bundles
@@ -508,7 +519,7 @@ spec:
       - name: name
         value: clair-scan
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-clair-scan:0.2@sha256:0a5421111e7092740398691d5bd7c125cc0896f29531d19414bb5724ae41692a
+        value: quay.io/konflux-ci/tekton-catalog/task-clair-scan:0.2@sha256:f636f2cbe91d9d4d9685a38c8bc680a36e17f568ec0e60a93da82d1284b488c5
       - name: kind
         value: task
       resolver: bundles
@@ -526,7 +537,7 @@ spec:
       - name: name
         value: ecosystem-cert-preflight-checks
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-ecosystem-cert-preflight-checks:0.1@sha256:a8d79484734817c01b1634153bdb5dc4090db6ef685dbf218dc2d509f9f50ec8
+        value: quay.io/konflux-ci/tekton-catalog/task-ecosystem-cert-preflight-checks:0.2@sha256:2ad615f9b8141ed2e0b060ebda366ce43cf55a9dd7c98e2d93970ff328dca8b2
       - name: kind
         value: task
       resolver: bundles
@@ -550,7 +561,7 @@ spec:
       - name: name
         value: sast-snyk-check-oci-ta
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-sast-snyk-check-oci-ta:0.3@sha256:65a213322ea7c64159e37071d369d74b6378b23403150e29537865cada90f022
+        value: quay.io/konflux-ci/tekton-catalog/task-sast-snyk-check-oci-ta:0.3@sha256:ed777841052e05c61abc9fc66f6aad65f113bad719eeb2e04ce490fc175aaebe
       - name: kind
         value: task
       resolver: bundles
@@ -570,7 +581,7 @@ spec:
       - name: name
         value: clamav-scan
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-clamav-scan:0.1@sha256:b4f450f1447b166da671f1d5819ab5a1485083e5c27ab91f7d8b7a2ff994c8c2
+        value: quay.io/konflux-ci/tekton-catalog/task-clamav-scan:0.2@sha256:0db068e8a59612472a2483f5113893d0c5c9102e9ad7647d9a4789360e5bc2dc
       - name: kind
         value: task
       resolver: bundles
@@ -590,7 +601,7 @@ spec:
       - name: name
         value: rpms-signature-scan
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-rpms-signature-scan:0.2@sha256:28aaf87d61078a0aeeeabcae455eda7d05c4f9b81d8995bdcf3dde95c1a7a77b
+        value: quay.io/konflux-ci/tekton-catalog/task-rpms-signature-scan:0.2@sha256:e603b3df510aeefeaa12e8778c4642b21743cb0ae68704359dc7ffd2814249d2
       - name: kind
         value: task
       resolver: bundles
@@ -616,7 +627,7 @@ spec:
       - name: name
         value: push-dockerfile-oci-ta
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-push-dockerfile-oci-ta:0.1@sha256:80d48a1b9d2707490309941ec9f79338533938f959ca9a207b481b0e8a5e7a93
+        value: quay.io/konflux-ci/tekton-catalog/task-push-dockerfile-oci-ta:0.1@sha256:77d691c17fae5e3e5301c230c2c41d363853f7bb2d6bb3870d0685811b6470d9
       - name: kind
         value: task
       resolver: bundles

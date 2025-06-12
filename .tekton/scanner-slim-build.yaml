@@ -9,13 +9,12 @@ metadata:
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: "500"
     # TODO(ROX-21073): re-enable for all PR branches
-    pipelinesascode.tekton.dev/on-cel-expression: (
-        event == "push" && (
-          source_branch == "master" ||
-          target_branch.startsWith("refs/tags/")
-        )
+    pipelinesascode.tekton.dev/on-cel-expression: |
+      (
+        event == "push" && target_branch.matches("^(master|release-.*|refs/tags/.*)$")
       ) || (
         event == "pull_request" && (
+          target_branch.startsWith("release-") ||
           source_branch.matches("(konflux|renovate|appstudio|rhtap)") ||
           body.pull_request.labels.exists(l, l.name == "konflux-build")
         )
@@ -35,8 +34,7 @@ spec:
   - name: git-url
     value: '{{source_url}}'
   - name: image-expires-after
-    # TODO(ROX-24530): return expiration for non-released images to 13w
-    value: '52w'
+    value: '13w'
   - name: output-image-repo
     value: quay.io/rhacs-eng/scanner-slim
   - name: path-context

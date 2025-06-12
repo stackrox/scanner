@@ -9,6 +9,7 @@ LABEL \
     io.k8s.description="Scanner Database Image for Red Hat Advanced Cluster Security for Kubernetes" \
     io.openshift.tags="rhacs,scanner-db,stackrox" \
     maintainer="Red Hat, Inc." \
+    # Custom Snapshot creation in `operator-bundle-pipeline` depends on source-location label to be set correctly.
     source-location="https://github.com/stackrox/scanner" \
     summary="Scanner DB for Red Hat Advanced Cluster Security for Kubernetes" \
     url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
@@ -69,5 +70,5 @@ LABEL \
     io.k8s.display-name="scanner-db" \
     name="rhacs-scanner-db-rhel8"
 
-COPY --chown=0:0 blob-pg-definitions.sql.gz \
+COPY --chown=0:0 .konflux/scanner-data/blob-pg-definitions.sql.gz \
      /docker-entrypoint-initdb.d/definitions.sql.gz
