@@ -47,7 +47,7 @@ spec:
     - use
     - $(params.SOURCE_ARTIFACT)=/var/workdir/source
   - name: fetch-scanner-data
-    image: registry.access.redhat.com/ubi8/ubi-minimal:latest
+    image: registry.access.redhat.com/ubi9:latest
     # The only functioning way to pass array parameter that I found is through args array.
     # Array params have weird limitations, see https://github.com/tektoncd/pipeline/blob/main/docs/tasks.md#substituting-array-parameters
     # Attempts to pass this in other places result in webhook errors and pipeline not starting.
@@ -56,9 +56,12 @@ spec:
     script: |
       #!/usr/bin/env bash
       set -euo pipefail
+      dnf -y upgrade --nobest
+      dnf -y install git
       scripts/konflux/fetch-scanner-data.sh "$(params.target-dir)" "$@"
-    # It should not take long to download blobs otherwise there's something odd going on.
-    timeout: 10m
+    # Blobs for tagged builds are built on GHA in https://github.com/stackrox/scanner.
+    # If the task times out, look there to debug.
+    timeout: 1h30m
   - name: create-trusted-artifact
     image: quay.io/redhat-appstudio/build-trusted-artifacts:latest@sha256:62bb85585c0ebb8b333ef716b87b70838fb27723657c95ffb62d446b0d28ab68
     args:

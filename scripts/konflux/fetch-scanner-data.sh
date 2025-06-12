@@ -16,14 +16,35 @@ shift
 
 blobs=( "$@" )
 
+# Ensure that we download scanner data for a release if this is a tagged build.
+
+# First, try take git tag if it's a tagged commit.
+tag="$(git tag --points-at)"
+if [[ -z "${tag}" ]]; then
+  # If not, use latest.
+  SCANNER_DATA_VERSION="latest"
+  RETRY_TIMES=4
+elif [[ "$(wc -l <<< "${tag}")" -eq 1 ]]; then
+  # If there is exactly one tag on the commit, use that.
+  SCANNER_DATA_VERSION="${tag}"
+  RETRY_TIMES=1000
+else
+  >&2 echo -e "Error: the HEAD commit has multiple tags, don't know which one to choose:\n${tag}"
+  exit 5
+fi
+
 for blob in "${blobs[@]}"; do
 
-  # TODO(ROX-22130): Assign proper suffix for tagged commits instead of /latest/.
-  url="https://storage.googleapis.com/definitions.stackrox.io/scanner-data/latest/${blob}"
+  url="https://storage.googleapis.com/definitions.stackrox.io/scanner-data/${SCANNER_DATA_VERSION}/${blob}"
   dest="${TARGET_DIR}/blob-${blob}"
 
-  echo "Downloading ${url} > ${dest}"
-  curl --fail -s --show-error --retry 4 --retry-max-time 30 --retry-connrefused \
+  echo """
+Downloading ${url} > ${dest}, retrying ${RETRY_TIMES} times or until aborted by task timeout...
+If the download times out for a tagged build, it is likely because the blobs were not published by the GitHub Workflow.
+This usually takes about 1 hour after the tag is pushed.
+Go to https://github.com/stackrox/scanner/actions to debug.
+  """
+  curl --fail --no-progress-bar --show-error --retry "${RETRY_TIMES}" --retry-delay 10 --retry-all-errors \
     --output "${dest}" \
     "${url}"
 
