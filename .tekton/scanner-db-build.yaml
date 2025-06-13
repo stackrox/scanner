@@ -36,17 +36,16 @@ spec:
   - name: image-expires-after
     value: '13w'
   - name: output-image-repo
-    value: quay.io/rhacs-eng/scanner-db
+    value: quay.io/rhacs-eng/release-scanner-db
   - name: path-context
     value: .
   - name: revision
     value: '{{revision}}'
   - name: rebuild
     value: 'true'
-  # TODO(ROX-20234): Enable hermetic builds
-  # - name: hermetic
-  #   value: "true"
-  # No language dependencies are required for scanner-db image.
+  - name: hermetic
+    value: "true"
+  # No dependencies are required for scanner-db image.
   - name: prefetch-input
     value: ''
   - name: build-source-image
@@ -64,6 +63,9 @@ spec:
   - name: git-auth
     secret:
       secretName: '{{ git_auth_secret }}'
+
+  taskRunTemplate:
+    serviceAccountName: build-pipeline-scanner-db
 
   # Tagged builds wait for blobs to be published which takes about 1h.
   timeouts:

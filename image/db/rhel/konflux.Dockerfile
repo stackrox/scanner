@@ -1,4 +1,4 @@
-FROM registry.redhat.io/rhel8/postgresql-15:latest AS scanner-db-common
+FROM registry.redhat.io/rhel8/postgresql-15:latest@sha256:80bd68410954cf504c020f0e285898172c2dfeeae228cc88f236d8a359389115 AS scanner-db-common
 
 ARG SCANNER_TAG
 RUN if [[ "$SCANNER_TAG" == "" ]]; then >&2 echo "error: required SCANNER_TAG arg is unset"; exit 6; fi
@@ -30,8 +30,7 @@ COPY image/db/rhel/scripts/docker-entrypoint.sh \
 
 COPY LICENSE /licenses/LICENSE
 
-RUN dnf upgrade -y --nobest && \
-    localedef -f UTF-8 -i en_US en_US.UTF-8 && \
+RUN localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     mkdir -p /var/lib/postgresql && \
     groupmod -g 70 postgres && \
     usermod -u 70 postgres -d /var/lib/postgresql && \

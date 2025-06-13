@@ -1,10 +1,5 @@
-ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8-minimal
-ARG BASE_TAG=latest
-
-
 # Compiling scanner binaries and staging repo2cpe and genesis manifests
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.23 AS builder
+FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.23@sha256:0a070e4a8f2698b6aba3630a49eb995ff1b0a182d0c5fa264888acf9d535f384 AS builder
 
 ARG SCANNER_TAG
 RUN if [[ "$SCANNER_TAG" == "" ]]; then >&2 echo "error: required SCANNER_TAG arg is unset"; exit 6; fi
@@ -33,7 +28,7 @@ COPY .konflux/scanner-data/blob-genesis_manifests.json image/scanner/dump/genesi
 
 
 # Common base for scanner slim and full
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS scanner-common
+FROM registry.access.redhat.com/ubi8-minimal:latest@sha256:73064ec359dcd71e56677f8173a134809c885484ba89e6a137d33521ad29dd4c AS scanner-common
 
 ARG SCANNER_TAG
 
@@ -64,8 +59,7 @@ COPY --chown=65534:65534 --from=builder /src/image/scanner/dump/genesis_manifest
 
 COPY LICENSE /licenses/LICENSE
 
-RUN microdnf upgrade --nobest && \
-    microdnf install xz && \
+RUN microdnf install xz && \
     microdnf clean all && \
     # (Optional) Remove line below to keep package management utilities
     # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
