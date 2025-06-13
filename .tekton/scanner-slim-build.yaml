@@ -20,8 +20,8 @@ metadata:
         )
       )
   labels:
-    appstudio.openshift.io/application: acs
-    appstudio.openshift.io/component: scanner-slim
+    appstudio.openshift.io/application: acs-4-6
+    appstudio.openshift.io/component: scanner-slim-4-6
     pipelines.appstudio.openshift.io/type: build
   name: scanner-slim-on-push
   namespace: rh-acs-tenant
@@ -80,7 +80,7 @@ spec:
           cpu: 2
 
   taskRunTemplate:
-    serviceAccountName: build-pipeline-scanner-slim
+    serviceAccountName: build-pipeline-scanner-slim-4-6
 
   # Multiarch builds sometimes make the pipeline timeout after 1h.
   timeouts:
