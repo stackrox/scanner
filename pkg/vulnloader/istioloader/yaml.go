@@ -3,9 +3,9 @@ package istioloader
 import (
 	"io"
 
-	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/stackrox/istio-cves/types"
+	"sigs.k8s.io/yaml"
 )
 
 // LoadYAMLFileFromReader loads the Istio CVE feed from the given io.Reader.

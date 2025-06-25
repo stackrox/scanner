@@ -31,7 +31,7 @@ import (
 	"github.com/stackrox/scanner/database/metrics"
 	"github.com/stackrox/scanner/database/pgsql/migrations"
 	"github.com/stackrox/scanner/pkg/commonerr"
-	"gopkg.in/yaml.v2"
+	"sigs.k8s.io/yaml"
 )
 
 const (
