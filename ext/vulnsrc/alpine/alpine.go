@@ -30,7 +30,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt/apk"
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"github.com/stackrox/scanner/pkg/fsutil"
-	"sigs.k8s.io/yaml"
+	yaml "sigs.k8s.io/yaml/goyaml.v3"
 )
 
 const (

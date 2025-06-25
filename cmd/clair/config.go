@@ -24,7 +24,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/analyzer"
 	"github.com/stackrox/scanner/pkg/updater"
-	"sigs.k8s.io/yaml"
+	yaml "sigs.k8s.io/yaml/goyaml.v3"
 )
 
 // File represents a YAML configuration file that namespaces all
