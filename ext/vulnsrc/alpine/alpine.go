@@ -30,7 +30,7 @@ import (
 	"github.com/stackrox/scanner/ext/versionfmt/apk"
 	"github.com/stackrox/scanner/ext/vulnsrc"
 	"github.com/stackrox/scanner/pkg/fsutil"
-	"gopkg.in/yaml.v2"
+	"go.yaml.in/yaml/v3"
 )
 
 const (
