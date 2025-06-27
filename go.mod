@@ -46,6 +46,7 @@ require (
 	go.etcd.io/bbolt v1.4.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/ratelimit v0.3.1
+	go.yaml.in/yaml/v3 v3.0.3
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
 	golang.org/x/sys v0.33.0
 	google.golang.org/api v0.238.0
@@ -53,7 +54,6 @@ require (
 	google.golang.org/grpc v1.73.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
 	google.golang.org/protobuf v1.36.6
-	sigs.k8s.io/yaml v1.4.0
 )
 
 require (
@@ -189,6 +189,7 @@ require (
 	nhooyr.io/websocket v1.8.11 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
+	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
 // @stackrox/scanner
