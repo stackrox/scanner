@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stackrox/k8s-cves/pkg/validation"
-	"go.yaml.in/yaml/v3"
+	"sigs.k8s.io/yaml"
 )
 
 // LoadYAMLFileFromReader loads the Kubernetes CVE feed from the given io.Reader.
