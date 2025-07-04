@@ -10,7 +10,7 @@ jobs:
       SLACK_WEBHOOK_ONCALL: ${{ secrets.SLACK_ONCALL_SCANNER_WEBHOOK }}
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.8
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
     steps:
       - name: Checkout
         uses: actions/checkout@v4
