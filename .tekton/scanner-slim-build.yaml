@@ -9,9 +9,8 @@ metadata:
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: "500"
     pipelinesascode.tekton.dev/on-cel-expression: |
-      (event == "pull_request" && body.action != "ready_for_review") || (
-        event == "push" && target_branch.matches("^(master|release-.*|refs/tags/.*)$")
-      )
+      (event == "pull_request" && body.action != "ready_for_review") ||
+      (event == "push" && target_branch.matches("^(master|release-.*|refs/tags/.*)$"))
   labels:
     appstudio.openshift.io/application: acs
     appstudio.openshift.io/component: scanner-slim
