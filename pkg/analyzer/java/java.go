@@ -36,7 +36,7 @@ var nameRegexp = regexp.MustCompile(`([[:graph:]]+)-([[:digit:]][\-.[:alnum:]]*(
 // checkName returns the extracted package name from the above regexp.
 func checkName(name string) string {
 	m := nameRegexp.FindStringSubmatch(name)
-	if m == nil || len(m) < 2 {
+	if len(m) < 2 {
 		return name
 	}
 	return m[1]
