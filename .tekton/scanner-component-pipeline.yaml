@@ -16,7 +16,7 @@ spec:
     # Run when any task has Failed
     - input: $(tasks.status)
       operator: in
-      values: ["Failed"]
+      values: [ "Failed" ]
     taskRef:
       params:
       - name: name
@@ -143,6 +143,7 @@ spec:
   - name: git-auth
 
   tasks:
+
   - name: post-metric-start
     taskRef: *post-bigquery-metrics-ref
 
