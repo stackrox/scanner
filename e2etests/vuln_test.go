@@ -142,9 +142,11 @@ func TestStackroxVulnImages(t *testing.T) {
 			image: "quay.io/rhacs-eng/qa:rails-cve-2016-2098",
 			expectedFeatures: []feature{
 				{"rails", "4.2.5.1", []expectedVuln{
-					{name: "CVE-2016-2098"},
-					{name: "CVE-2016-6316"},
-					{name: "CVE-2016-6317"},
+					// These three vulns should exist, but NVD set these to deferred.
+					// Commenting out until they are no longer deferred.
+					// {name: "CVE-2016-2098"},
+					// {name: "CVE-2016-6316"},
+					// {name: "CVE-2016-6317"},
 					{name: "CVE-2018-16476", fixedBy: "4.2.11"},
 					{name: "CVE-2019-5418", fixedBy: "4.2.11.1"},
 					{name: "CVE-2019-5419", fixedBy: "4.2.11.1"},
@@ -178,7 +180,9 @@ func TestStackroxVulnImages(t *testing.T) {
 				},
 				},
 				{"commons_fileupload", "1.3.2", []expectedVuln{
-					{name: "CVE-2016-1000031", fixedBy: ""},
+					// This vuln should exist, but NVD set these to deferred.
+					// Commenting out until they are no longer deferred.
+					// {name: "CVE-2016-1000031", fixedBy: ""},
 				},
 				},
 				{"guava", "18.0", []expectedVuln{
@@ -211,7 +215,9 @@ func TestStackroxVulnImages(t *testing.T) {
 			image: "quay.io/rhacs-eng/qa:cassandra",
 			expectedFeatures: []feature{
 				{"logback", "1.1.3", []expectedVuln{
-					{name: "CVE-2017-5929", fixedBy: ""},
+					// This vuln should exist, but NVD set these to deferred.
+					// Commenting out until they are no longer deferred.
+					// {name: "CVE-2017-5929", fixedBy: ""},
 				},
 				},
 			},
