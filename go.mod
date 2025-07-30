@@ -9,7 +9,7 @@ require (
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.9.3
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
-	github.com/containers/image/v5 v5.35.0
+	github.com/containers/image/v5 v5.36.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/distribution/reference v0.6.0
 	github.com/docker/distribution v2.8.3+incompatible
@@ -43,7 +43,7 @@ require (
 	github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d
 	github.com/stackrox/rox v0.0.0-20210914215712-9ac265932e28
 	github.com/stretchr/testify v1.10.0
-	go.etcd.io/bbolt v1.4.0
+	go.etcd.io/bbolt v1.4.2
 	go.uber.org/goleak v1.3.0
 	go.uber.org/ratelimit v0.3.1
 	go.yaml.in/yaml/v3 v3.0.4
@@ -65,7 +65,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	cloud.google.com/go/iam v1.5.2 // indirect
 	cloud.google.com/go/monitoring v1.24.2 // indirect
-	dario.cat/mergo v1.0.1 // indirect
+	dario.cat/mergo v1.0.2 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.27.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.51.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.51.0 // indirect
@@ -81,9 +81,9 @@ require (
 	github.com/cncf/xds/go v0.0.0-20250501225837-2ac532fd4443 // indirect
 	github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 // indirect
 	github.com/containers/ocicrypt v1.2.1 // indirect
-	github.com/containers/storage v1.58.0 // indirect
+	github.com/containers/storage v1.59.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
-	github.com/docker/docker v28.0.4+incompatible // indirect
+	github.com/docker/docker v28.3.2+incompatible // indirect
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
@@ -139,7 +139,7 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus/client_model v0.6.1 // indirect
+	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
