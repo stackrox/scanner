@@ -4028,7 +4028,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				Name:          "tomcat",
 				VersionFormat: component.JavaSourceType.String(),
 				Version:       "9.0.59",
-				FixedBy:       "9.0.104",
+				FixedBy:       "9.0.106",
 				Location:      "tomcat-embed-core-9.0.59.jar",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
@@ -4797,7 +4797,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "1:17.0.11.0.9-2.el8.x86_64",
-				FixedBy:       "1:17.0.15.0.6-2.el8",
+				FixedBy:       "1:17.0.16.0.8-2.el8",
 				AddedBy:       "sha256:06c7a3d491f551a56296ccb9bee8a68c83776991e73a9005e8b5ebb533002097",
 			},
 		},
@@ -4816,7 +4816,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "1:17.0.13.0.11-3.el8.x86_64",
-				FixedBy:       "1:17.0.15.0.6-2.el8",
+				FixedBy:       "1:17.0.16.0.8-2.el8",
 				AddedBy:       "sha256:2f7b9495af5ddc85b0be7ca9411fddb54f37999ea73b03cbf1115dd0c5bd4f95",
 			},
 		},
