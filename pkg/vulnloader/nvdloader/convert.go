@@ -14,7 +14,7 @@ const (
 	jsonTimeFormat = "2006-01-02T15:04Z"
 )
 
-func toJSON(vulns []*apischema.CVEAPIJSON20DefCVEItem) ([]*jsonschema.NVDCVEFeedJSON10DefCVEItem, error) {
+func toJSON10(vulns []*apischema.CVEAPIJSON20DefCVEItem) ([]*jsonschema.NVDCVEFeedJSON10DefCVEItem, error) {
 	if vulns == nil {
 		return nil, nil
 	}
@@ -152,14 +152,18 @@ func toBaseMetricV2(metrics []*apischema.CVEAPIJSON20CVSSV2) *jsonschema.NVDCVEF
 }
 
 func toBaseMetricV3(metrics30 []*apischema.CVEAPIJSON20CVSSV30, metrics31 []*apischema.CVEAPIJSON20CVSSV31) *jsonschema.NVDCVEFeedJSON10DefImpactBaseMetricV3 {
-	switch {
-	case len(metrics31) != 0:
-		return toBaseMetricV31(metrics31)
-	case len(metrics30) != 0:
-		return toBaseMetricV30(metrics30)
-	default:
-		return nil
+	// Prefer CVSS 3.1.
+	baseMetric := toBaseMetricV31(metrics31)
+	if baseMetric != nil {
+		return baseMetric
 	}
+
+	baseMetric = toBaseMetricV30(metrics30)
+	if baseMetric != nil {
+		return baseMetric
+	}
+
+	return nil
 }
 
 func toBaseMetricV31(metrics []*apischema.CVEAPIJSON20CVSSV31) *jsonschema.NVDCVEFeedJSON10DefImpactBaseMetricV3 {
