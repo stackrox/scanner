@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.4
 
 require (
-	cloud.google.com/go/storage v1.55.0
+	cloud.google.com/go/storage v1.56.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.9.3
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
@@ -50,7 +50,7 @@ require (
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
 	golang.org/x/sys v0.34.0
 	google.golang.org/api v0.244.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822
+	google.golang.org/genproto/googleapis/api v0.0.0-20250721164621-a45f3dfb1074
 	google.golang.org/grpc v1.74.2
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
 	google.golang.org/protobuf v1.36.6
@@ -59,7 +59,7 @@ require (
 
 require (
 	cel.dev/expr v0.24.0 // indirect
-	cloud.google.com/go v0.121.1 // indirect
+	cloud.google.com/go v0.121.4 // indirect
 	cloud.google.com/go/auth v0.16.3 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
@@ -67,8 +67,8 @@ require (
 	cloud.google.com/go/monitoring v1.24.2 // indirect
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.27.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.51.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.51.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.53.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.53.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
