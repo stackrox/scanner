@@ -31,6 +31,11 @@ func toJSON10(vulns []*apischema.CVEAPIJSON20DefCVEItem) ([]*jsonschema.NVDCVEFe
 			continue
 		}
 
+		// Ignore rejected vulnerabilities.
+		if strings.EqualFold(vuln.CVE.VulnStatus, "Rejected") {
+			continue
+		}
+
 		cve := vuln.CVE
 
 		modifiedTime, err := toTime(cve.LastModified)
