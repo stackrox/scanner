@@ -3,6 +3,7 @@ package nvdloader
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -176,12 +177,16 @@ func tryQuery(req *http.Request) (*http.Response, error) {
 func parseResponse(resp *http.Response) (*apischema.CVEAPIJSON20, error) {
 	defer utils.IgnoreError(resp.Body.Close)
 
-	apiResp := new(apischema.CVEAPIJSON20)
-	if err := json.NewDecoder(resp.Body).Decode(apiResp); err != nil {
+	return parseReader(resp.Body)
+}
+
+func parseReader(r io.Reader) (*apischema.CVEAPIJSON20, error) {
+	apiJSON := new(apischema.CVEAPIJSON20)
+	if err := json.NewDecoder(r).Decode(apiJSON); err != nil {
 		return nil, fmt.Errorf("decoding API response: %w", err)
 	}
 
-	return apiResp, nil
+	return apiJSON, nil
 }
 
 func enrichCVEItems(cveItems *[]*jsonschema.NVDCVEFeedJSON10DefCVEItem, enrichments map[string]*FileFormatWrapper) {
