@@ -41,9 +41,9 @@ var (
 	// MaxGrpcConcurrentStreams configures the maximum number of HTTP/2 streams to use with gRPC
 	MaxGrpcConcurrentStreams = RegisterIntegerSetting("ROX_GRPC_MAX_CONCURRENT_STREAMS", DefaultMaxGrpcConcurrentStreams)
 
-	// LegacyNVDLoader when true will cause the loader to pull NVD data using
-	// the NVD Legacy Data Feeds, if false will pull from the NVD 2.0 API.
-	LegacyNVDLoader = RegisterBooleanSetting("ROX_LEGACY_NVD_LOADER", false)
+	// NVDFeedLoader when true will cause the loader to pull NVD data using
+	// the NVD 2.0 Data Feeds. If false, the loader will pull from the NVD 2.0 API.
+	NVDFeedLoader = RegisterBooleanSetting("ROX_NVD_FEED_LOADER", false)
 
 	// RHLineage when true will cause all parent layers (a.k.a lineage) to be considered when
 	// storing scan results for RHEL image layers.
