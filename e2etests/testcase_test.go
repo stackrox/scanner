@@ -4056,7 +4056,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					},
 					{
 						Name:        "CVE-2023-28708",
-						Description: "\nWhen using the RemoteIpFilter with requests received from a    reverse proxy via HTTP that include the X-Forwarded-Proto    header set to https, session cookies created by Apache Tomcat 11.0.0-M1 to 11.0.0.-M2, 10.1.0-M1 to 10.1.5, 9.0.0-M1 to 9.0.71 and 8.5.0 to 8.5.85 did not\u00a0include the secure attribute. This could result in the user agent\u00a0transmitting the session cookie over an insecure channel.\n\n\n\n\n\n\n\n",
+						Description: "When using the RemoteIpFilter with requests received from a    reverse proxy via HTTP that include the X-Forwarded-Proto    header set to https, session cookies created by Apache Tomcat 11.0.0-M1 to 11.0.0.-M2, 10.1.0-M1 to 10.1.5, 9.0.0-M1 to 9.0.71 and 8.5.0 to 8.5.85 did not\u00a0include the secure attribute. This could result in the user agent\u00a0transmitting the session cookie over an insecure channel.\n\nOlder, EOL versions may also be affected.",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2023-28708",
 						Severity:    "Moderate",
 						FixedBy:     "9.0.72",
