@@ -142,20 +142,13 @@ func TestStackroxVulnImages(t *testing.T) {
 			image: "quay.io/rhacs-eng/qa:rails-cve-2016-2098",
 			expectedFeatures: []feature{
 				{"rails", "4.2.5.1", []expectedVuln{
+					{name: "CVE-2016-2098"},
+					{name: "CVE-2016-6316"},
+					{name: "CVE-2016-6317"},
 					{name: "CVE-2018-16476", fixedBy: "4.2.11"},
 					{name: "CVE-2019-5418", fixedBy: "4.2.11.1"},
 					{name: "CVE-2019-5419", fixedBy: "4.2.11.1"},
 					{name: "CVE-2019-5420", fixedBy: "5.2.2.1"},
-				},
-				},
-			},
-			unexpectedVulns: []feature{
-				{"rails", "4.2.5.1", []expectedVuln{
-					// These three vulns should exist, but NVD set these to deferred.
-					// Placing them here until they are no longer deferred.
-					{name: "CVE-2016-2098"},
-					{name: "CVE-2016-6316"},
-					{name: "CVE-2016-6317"},
 				},
 				},
 			},
@@ -184,6 +177,10 @@ func TestStackroxVulnImages(t *testing.T) {
 					{name: "CVE-2019-10086", fixedBy: ""},
 				},
 				},
+				{"commons_fileupload", "1.3.2", []expectedVuln{
+					{name: "CVE-2016-1000031", fixedBy: ""},
+				},
+				},
 				{"guava", "18.0", []expectedVuln{
 					{name: "CVE-2018-10237", fixedBy: "24.1.1"},
 				},
@@ -195,12 +192,6 @@ func TestStackroxVulnImages(t *testing.T) {
 					{name: "CVE-2011-0739"},
 					{name: "CVE-2015-9097"},
 					{name: "CVE-2015-2512"},
-				},
-				},
-				{"commons_fileupload", "1.3.2", []expectedVuln{
-					// This vuln should exist, but NVD set it to deferred.
-					// Placing it here until they are no longer deferred.
-					{name: "CVE-2016-1000031", fixedBy: ""},
 				},
 				},
 			},
@@ -218,15 +209,15 @@ func TestStackroxVulnImages(t *testing.T) {
 		{
 			// docker.io/library/cassandra:latest
 			image: "quay.io/rhacs-eng/qa:cassandra",
+			expectedFeatures: []feature{
+				{"logback", "1.1.3", []expectedVuln{
+					{name: "CVE-2017-5929", fixedBy: ""},
+				},
+				},
+			},
 			unexpectedVulns: []feature{
 				{"slingshot", "0.10.3", []expectedVuln{
 					{name: "CVE-2015-5711"},
-				},
-				},
-				{"logback", "1.1.3", []expectedVuln{
-					// This vuln should exist, but NVD set it to deferred.
-					// Placing it here until they are no longer deferred.
-					{name: "CVE-2017-5929", fixedBy: ""},
 				},
 				},
 			},
