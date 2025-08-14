@@ -3595,7 +3595,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 			},
 			{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
-				FixedBy:       "2:8.2.2637-21.el9",
+				FixedBy:       "2:8.2.2637-22.el9_6",
 				Name:          "vim-minimal",
 				NamespaceName: "rhel:9",
 				Version:       "2:8.2.2637-16.el9_0.2.x86_64",
@@ -3838,8 +3838,8 @@ Applications using RegexRequestMatcher with '.' in the regular expression are po
 						FixedBy: "3.0.2-0ubuntu1.7",
 					},
 				},
-				FixedBy: "3.0.2-0ubuntu1.16",
-				// This image installs the openssl pacakge in the second layer;
+				FixedBy: "3.0.2-0ubuntu1.18",
+				// This image installs the openssl package in the second layer;
 				// however, the first layer already installed libssl3 whose source package is openssl.
 				// Therefore, we claim openssl was installed in the first layer.
 				AddedBy: "sha256:301a8b74f71f85f3a31e9c7e7fedd5b001ead5bcf895bc2911c1d260e06bd987",
@@ -4028,7 +4028,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				Name:          "tomcat",
 				VersionFormat: component.JavaSourceType.String(),
 				Version:       "9.0.59",
-				FixedBy:       "9.0.99",
+				FixedBy:       "9.0.107",
 				Location:      "tomcat-embed-core-9.0.59.jar",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
@@ -4056,7 +4056,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					},
 					{
 						Name:        "CVE-2023-28708",
-						Description: "\nWhen using the RemoteIpFilter with requests received from a    reverse proxy via HTTP that include the X-Forwarded-Proto    header set to https, session cookies created by Apache Tomcat 11.0.0-M1 to 11.0.0.-M2, 10.1.0-M1 to 10.1.5, 9.0.0-M1 to 9.0.71 and 8.5.0 to 8.5.85 did not\u00a0include the secure attribute. This could result in the user agent\u00a0transmitting the session cookie over an insecure channel.\n\n\n\n\n\n\n\n",
+						Description: "When using the RemoteIpFilter with requests received from a    reverse proxy via HTTP that include the X-Forwarded-Proto    header set to https, session cookies created by Apache Tomcat 11.0.0-M1 to 11.0.0.-M2, 10.1.0-M1 to 10.1.5, 9.0.0-M1 to 9.0.71 and 8.5.0 to 8.5.85 did not\u00a0include the secure attribute. This could result in the user agent\u00a0transmitting the session cookie over an insecure channel.\n\nOlder, EOL versions may also be affected.",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2023-28708",
 						Severity:    "Moderate",
 						FixedBy:     "9.0.72",
@@ -4318,7 +4318,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					},
 				},
 				AddedBy: "sha256:661ff4d9561e3fd050929ee5097067c34bafc523ee60f5294a37fd08056a73ca",
-				FixedBy: "3.1.4-r5",
+				FixedBy: "3.1.7-r0",
 			},
 		},
 	},
@@ -4354,7 +4354,34 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				NamespaceName: "alpine:v3.20",
 				VersionFormat: "apk",
 				Version:       "3.3.0-r2",
-				AddedBy:       "sha256:d25f557d7f31bf7acfac935859b5153da41d13c41f2b468d16f729a5b883634f",
+				Vulnerabilities: []apiV1.Vulnerability{
+					{
+						Name:          "CVE-2024-6119",
+						NamespaceName: "alpine:v3.20",
+						Description:   "Issue summary: Applications performing certificate name checks (e.g., TLS\nclients checking server certificates) may attempt to read an invalid memory\naddress resulting in abnormal termination of the application process.\n\nImpact summary: Abnormal termination of an application can a cause a denial of\nservice.\n\nApplications performing certificate name checks (e.g., TLS clients checking\nserver certificates) may attempt to read an invalid memory address when\ncomparing the expected name with an `otherName` subject alternative name of an\nX.509 certificate. This may result in an exception that terminates the\napplication program.\n\nNote that basic certificate chain validation (signatures, dates, ...) is not\naffected, the denial of service can occur only when the application also\nspecifies an expected DNS name, Email address or IP address.\n\nTLS servers rarely solicit client certificates, and even when they do, they\ngenerally don't perform a name check against a reference identifier (expected\nidentity), but rather extract the presented identity after checking the\ncertificate chain.  So TLS servers are generally not affected and the severity\nof the issue is Moderate.\n\nThe FIPS modules in 3.3, 3.2, 3.1 and 3.0 are not affected by this issue.",
+						Link:          "https://www.cve.org/CVERecord?id=CVE-2024-6119",
+						Severity:      "Important",
+						FixedBy:       "3.3.2-r0",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+								},
+							},
+						},
+					},
+				},
+				AddedBy: "sha256:d25f557d7f31bf7acfac935859b5153da41d13c41f2b468d16f729a5b883634f",
+				FixedBy: "3.3.2-r0",
 			},
 		},
 	},
@@ -4395,30 +4422,6 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 									"ImpactScore":         4.2,
 									"Score":               8.2,
 									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:H/A:N",
-								},
-							},
-						},
-					},
-					{
-						Name:          "CVE-2024-47177",
-						NamespaceName: "rhel:8",
-						Description:   "DOCUMENTATION: A security flaw was found in OpenPrinting CUPS. The `FoomaticRIPCommandLine` directive in a PPD file will allow arbitrary commands to be executed when a print job is sent to the affected printing device. An attacker who could provide a malicious PPD file for a new print device or modify a PPD file of an existing device could execute arbitrary commands. \n            STATEMENT: Red Hat rates the severity of this CVE as Moderate due to the restrictions of the unprivileged ‘lp’ user which the resulting commands would be run as. Additionally, creating and modifying printer definitions is restricted to the privileged user groups sys, root, and wheel by default.\n            MITIGATION: See the security bulletin for a detailed mitigation procedure.",
-						Link:          "https://access.redhat.com/security/cve/CVE-2024-47177",
-						Severity:      "Moderate",
-						FixedBy:       "",
-						Metadata: map[string]interface{}{
-							"Red Hat": map[string]interface{}{
-								"CVSSv2": map[string]interface{}{
-									"ExploitabilityScore": 0.0,
-									"ImpactScore":         0.0,
-									"Score":               0.0,
-									"Vectors":             "",
-								},
-								"CVSSv3": map[string]interface{}{
-									"ExploitabilityScore": 0.6,
-									"ImpactScore":         5.5,
-									"Score":               6.1,
-									"Vectors":             "CVSS:3.1/AV:L/AC:L/PR:H/UI:R/S:U/C:H/I:H/A:L",
 								},
 							},
 						},
@@ -4794,7 +4797,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "1:17.0.11.0.9-2.el8.x86_64",
-				FixedBy:       "1:17.0.15.0.6-2.el8",
+				FixedBy:       "1:17.0.16.0.8-2.el8",
 				AddedBy:       "sha256:06c7a3d491f551a56296ccb9bee8a68c83776991e73a9005e8b5ebb533002097",
 			},
 		},
@@ -4813,7 +4816,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "1:17.0.13.0.11-3.el8.x86_64",
-				FixedBy:       "1:17.0.15.0.6-2.el8",
+				FixedBy:       "1:17.0.16.0.8-2.el8",
 				AddedBy:       "sha256:2f7b9495af5ddc85b0be7ca9411fddb54f37999ea73b03cbf1115dd0c5bd4f95",
 			},
 		},
