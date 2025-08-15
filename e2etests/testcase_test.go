@@ -4028,7 +4028,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				Name:          "tomcat",
 				VersionFormat: component.JavaSourceType.String(),
 				Version:       "9.0.59",
-				FixedBy:       "9.0.104",
+				FixedBy:       "9.0.107",
 				Location:      "tomcat-embed-core-9.0.59.jar",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
@@ -4056,7 +4056,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					},
 					{
 						Name:        "CVE-2023-28708",
-						Description: "\nWhen using the RemoteIpFilter with requests received from a    reverse proxy via HTTP that include the X-Forwarded-Proto    header set to https, session cookies created by Apache Tomcat 11.0.0-M1 to 11.0.0.-M2, 10.1.0-M1 to 10.1.5, 9.0.0-M1 to 9.0.71 and 8.5.0 to 8.5.85 did not\u00a0include the secure attribute. This could result in the user agent\u00a0transmitting the session cookie over an insecure channel.\n\n\n\n\n\n\n\n",
+						Description: "When using the RemoteIpFilter with requests received from a    reverse proxy via HTTP that include the X-Forwarded-Proto    header set to https, session cookies created by Apache Tomcat 11.0.0-M1 to 11.0.0.-M2, 10.1.0-M1 to 10.1.5, 9.0.0-M1 to 9.0.71 and 8.5.0 to 8.5.85 did not\u00a0include the secure attribute. This could result in the user agent\u00a0transmitting the session cookie over an insecure channel.\n\nOlder, EOL versions may also be affected.",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2023-28708",
 						Severity:    "Moderate",
 						FixedBy:     "9.0.72",
@@ -4797,7 +4797,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "1:17.0.11.0.9-2.el8.x86_64",
-				FixedBy:       "1:17.0.15.0.6-2.el8",
+				FixedBy:       "1:17.0.16.0.8-2.el8",
 				AddedBy:       "sha256:06c7a3d491f551a56296ccb9bee8a68c83776991e73a9005e8b5ebb533002097",
 			},
 		},
@@ -4816,7 +4816,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				NamespaceName: "rhel:8",
 				VersionFormat: "rpm",
 				Version:       "1:17.0.13.0.11-3.el8.x86_64",
-				FixedBy:       "1:17.0.15.0.6-2.el8",
+				FixedBy:       "1:17.0.16.0.8-2.el8",
 				AddedBy:       "sha256:2f7b9495af5ddc85b0be7ca9411fddb54f37999ea73b03cbf1115dd0c5bd4f95",
 			},
 		},
