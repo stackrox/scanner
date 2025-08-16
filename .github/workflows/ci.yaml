@@ -162,7 +162,7 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr')
     env:
       NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-      ROX_LEGACY_NVD_LOADER: true
+      ROX_NVD_FEED_LOADER: true
     runs-on: ubuntu-latest
     needs:
       - pre-build-updater
