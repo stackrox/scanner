@@ -183,6 +183,7 @@ func generateRHELv2VulnsDiff(cfg config, outputDir string, baseLastModifiedTime 
 
 	// Get RHEL Repo to CPE file
 	repoToCPEFile := filepath.Join(vulndump.RHELv2DirName, repo2cpe.RHELv2CPERepoName)
+	repoToCPEFileRoot := filepath.Join(outputDir, repo2cpe.RHELv2CPERepoName)
 	for _, headF := range headZipR.File {
 		name := headF.Name
 
@@ -196,6 +197,13 @@ func generateRHELv2VulnsDiff(cfg config, outputDir string, baseLastModifiedTime 
 		if name == repoToCPEFile {
 			if err := generateRHELv2RepoToCPE(filepath.Join(outputDir, repoToCPEFile), headF); err != nil {
 				return errors.Wrapf(err, "generating %s", repo2cpe.RHELv2CPERepoName)
+			}
+		}
+
+		// additional copy of repo to cpe JSON at bundle root (due to ROX-30576)
+		if name == repoToCPEFileRoot {
+			if err := generateRHELv2RepoToCPE(filepath.Join(outputDir, repoToCPEFileRoot), headF); err != nil {
+				return errors.Wrapf(err, "generating %s at bundle root", repo2cpe.RHELv2CPERepoName)
 			}
 		}
 

@@ -245,5 +245,16 @@ func updateRepoToCPE(outputDir string) (*repo2cpe.RHELv2MappingFile, error) {
 		return nil, errors.Wrapf(err, "encoding mapping")
 	}
 
+	// Also create copy at bundle root (due to ROX-30576)
+	outFRoot, err := os.Create(filepath.Join(outputDir, repo2cpe.RHELv2CPERepoName))
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to create file %q at bundle root", repo2cpe.RHELv2CPERepoName)
+	}
+	defer utils.IgnoreError(outFRoot.Close)
+
+	if err := json.NewEncoder(outFRoot).Encode(&mapping); err != nil {
+		return nil, errors.Wrapf(err, "encoding mapping at bundle root")
+	}
+
 	return &mapping, nil
 }
