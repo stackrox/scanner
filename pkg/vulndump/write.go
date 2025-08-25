@@ -9,6 +9,7 @@ import (
 	"github.com/mholt/archiver/v3"
 	"github.com/pkg/errors"
 	"github.com/stackrox/scanner/database"
+	"github.com/stackrox/scanner/pkg/repo2cpe"
 )
 
 // WriteZip takes the given files and creates the vuln dump zip.
@@ -25,6 +26,7 @@ func WriteZip(inputDir, outFile string, ignoreKubernetesVulns, ignoreRHELv2Vulns
 	}
 	if !ignoreRHELv2Vulns {
 		sources = append(sources, filepath.Join(inputDir, RHELv2DirName))
+		sources = append(sources, filepath.Join(inputDir, repo2cpe.RHELv2CPERepoName))
 	}
 	if !ignoreIstioVulns {
 		sources = append(sources, filepath.Join(inputDir, IstioDirName))
