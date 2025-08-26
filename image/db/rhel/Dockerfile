@@ -41,6 +41,9 @@ COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 COPY --from=postgres_rpms /rpms/postgres.rpm /rpms/postgres-libs.rpm /rpms/postgres-server.rpm /rpms/postgres-contrib.rpm /tmp/
 
+# set once; bump to 17 later without touching the logic
+ARG PG_MAJOR=16
+
 RUN microdnf upgrade -y --nobest && \
     microdnf install -y shadow-utils && \
     groupadd -g 70 postgres && \
@@ -56,27 +59,37 @@ RUN microdnf upgrade -y --nobest && \
         perl-libs \
         python3 \
         systemd-sysv \
-        zstd \
-        && \
+        zstd && \
     if [[ $(awk -F'=' '/VERSION_ID/{ gsub(/"/,""); print substr($2,1,1)}' /etc/os-release) -gt 8 ]]; then \
         microdnf install -y uuid; \
     fi && \
-    # Side-load EL9 (OpenSSL 3.0) RPMs in dependency-safe order
-    rpm -i /tmp/postgresql16-libs-*.el9.*.rpm \
-           /tmp/postgresql16-*.el9.*.rpm \
-           /tmp/postgresql16-server-*.el9.*.rpm \
-           /tmp/postgresql16-contrib-*.el9.*.rpm && \
+    # detect OS major & arch, then install side-loaded RPMs
+    RHEL_MAJOR="$(. /etc/os-release; echo ${VERSION_ID%%.*})" && \
+    ARCH="$(arch)" && \
+    if ls /tmp/postgresql${PG_MAJOR}-libs-*.el${RHEL_MAJOR}.*.${ARCH}.rpm >/dev/null 2>&1; then \
+      rpm -i \
+        /tmp/postgresql${PG_MAJOR}-libs-*.el${RHEL_MAJOR}.*.${ARCH}.rpm \
+        /tmp/postgresql${PG_MAJOR}-*.el${RHEL_MAJOR}.*.${ARCH}.rpm \
+        /tmp/postgresql${PG_MAJOR}-server-*.el${RHEL_MAJOR}.*.${ARCH}.rpm \
+        /tmp/postgresql${PG_MAJOR}-contrib-*.el${RHEL_MAJOR}.*.${ARCH}.rpm; \
+    else \
+      # fallback to your original filenames
+      rpm -i /tmp/postgres-libs.rpm \
+             /tmp/postgres.rpm \
+             /tmp/postgres-server.rpm \
+             /tmp/postgres-contrib.rpm; \
+    fi && \
     # Timezone note unchanged
     microdnf reinstall -y tzdata && \
     microdnf clean all && \
     rm -rf /var/cache/dnf /var/cache/yum \
-           /tmp/postgresql16-libs-*.rpm \
-           /tmp/postgresql16-*.rpm \
-           /tmp/postgresql16-server-*.rpm \
-           /tmp/postgresql16-contrib-*.rpm && \
+           /tmp/postgresql${PG_MAJOR}-libs-*.rpm \
+           /tmp/postgresql${PG_MAJOR}-*.rpm \
+           /tmp/postgresql${PG_MAJOR}-server-*.rpm \
+           /tmp/postgresql${PG_MAJOR}-contrib-*.rpm \
+           /tmp/postgres-*.rpm && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
-    mkdir /docker-entrypoint-initdb.d
-
+    mkdir -p /docker-entrypoint-initdb.d
 
 # This is equivalent to postgres:postgres.
 USER 70:70
