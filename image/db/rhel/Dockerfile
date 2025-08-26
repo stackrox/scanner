@@ -61,19 +61,22 @@ RUN microdnf upgrade -y --nobest && \
     if [[ $(awk -F'=' '/VERSION_ID/{ gsub(/"/,""); print substr($2,1,1)}' /etc/os-release) -gt 8 ]]; then \
         microdnf install -y uuid; \
     fi && \
-    rpm -i /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
-    # The removal of /usr/share/zoneinfo from UBI minimal images is intentional.
-    # After building the image, the image is reduced in size as much as possible,
-    # and the /usr/share/zoneinfo directory is purged as it saves space
-    # in the final distribution of the image.
-    # https://access.redhat.com/solutions/5616681
+    # Side-load EL9 (OpenSSL 3.0) RPMs in dependency-safe order
+    rpm -i /tmp/postgresql16-libs-*.el9.*.rpm \
+           /tmp/postgresql16-*.el9.*.rpm \
+           /tmp/postgresql16-server-*.el9.*.rpm \
+           /tmp/postgresql16-contrib-*.el9.*.rpm && \
+    # Timezone note unchanged
     microdnf reinstall -y tzdata && \
     microdnf clean all && \
-    # (Optional) Remove line below to keep package management utilities
-    rpm -e --nodeps $(rpm -qa shadow-utils curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/dnf /var/cache/yum /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
+    rm -rf /var/cache/dnf /var/cache/yum \
+           /tmp/postgresql16-libs-*.rpm \
+           /tmp/postgresql16-*.rpm \
+           /tmp/postgresql16-server-*.rpm \
+           /tmp/postgresql16-contrib-*.rpm && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     mkdir /docker-entrypoint-initdb.d
+
 
 # This is equivalent to postgres:postgres.
 USER 70:70
