@@ -45,7 +45,6 @@ RUN microdnf upgrade -y --nobest && \
     microdnf install -y shadow-utils && \
     groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
-    rpm --import PGDG-RPM-GPG-KEY-RHEL || true && \
     microdnf install -y \
         ca-certificates \
         glibc-langpack-en \
