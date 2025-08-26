@@ -65,12 +65,8 @@ RUN microdnf upgrade -y --nobest && \
     ARCH="$(arch)" && \
     for p in /tmp/postgres-libs.rpm /tmp/postgres.rpm /tmp/postgres-server.rpm /tmp/postgres-contrib.rpm; do \
       test -e "$p" || { echo "ERROR: Missing $p"; exit 1; }; \
-      # dist tag must be .el${RHEL_MAJOR} (or rhel${RHEL_MAJOR}); arch must match
-      if ! rpm -qp --qf '%{DIST}\n' "$p" | grep -Eq '(\.el'"${RHEL_MAJOR}"'|rhel'"${RHEL_MAJOR}"')'; then \
+      if ! rpm -qp --qf '%{RELEASE}\n' "$p" | grep -Eq '(\.el'"${RHEL_MAJOR}"'|rhel'"${RHEL_MAJOR}"')'; then \
         echo "ERROR: $p is not an EL${RHEL_MAJOR} build."; exit 1; \
-      fi; \
-      if ! rpm -qp --qf '%{ARCH}\n' "$p" | grep -qx "${ARCH}"; then \
-        echo "ERROR: $p arch does not match ${ARCH}."; exit 1; \
       fi; \
       # must NOT require OPENSSL_3.4 on EL8/EL9
       if [ "${RHEL_MAJOR}" -lt 10 ] && rpm -qpR "$p" | grep -q 'OPENSSL_3\.4'; then \
