@@ -67,13 +67,11 @@ RUN microdnf upgrade -y --nobest && \
     for p in /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm; do \
       echo "Verifying $p"; \
       test -f "$p" || { echo "ERROR: missing $p"; exit 1; }; \
-      rpm -qp --qf '%{NAME} %{VERSION} %{RELEASE} %{ARCH} %{DIST}\n' "$p"; \
+      rpm -qp --qf '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' "$p"; \
       rpm -qp --qf '%{ARCH}\n' "$p" | grep -qx "$ARCH" || { echo "ERROR: $p arch mismatch (want $ARCH)"; exit 1; }; \
-      rpm -qp --qf '%{DIST}\n' "$p" | grep -Eq "(\.el${RHEL_MAJOR}|rhel${RHEL_MAJOR})" || { echo "ERROR: $p not built for EL${RHEL_MAJOR}"; exit 1; }; \
+      rpm -qp --qf '%{RELEASE}\n' "$p" | grep -Eq "(\.el${RHEL_MAJOR}|rhel${RHEL_MAJOR})" || { echo "ERROR: $p not built for EL${RHEL_MAJOR}"; exit 1; }; \
       rpm -qpR "$p" | grep -q 'OPENSSL_3\.4' && { echo "ERROR: $p requires OPENSSL_3.4 (EL10/Fedora). Use EL${RHEL_MAJOR} build."; exit 1; }; \
     done && \
-    # ----------------------------------------------------------------------------------------------- \
-    \
     rpm -i /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
     # The removal of /usr/share/zoneinfo from UBI minimal images is intentional.
     # After building the image, the image is reduced in size as much as possible,
