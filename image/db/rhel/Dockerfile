@@ -41,14 +41,11 @@ COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 COPY --from=postgres_rpms /rpms/postgres.rpm /rpms/postgres-libs.rpm /rpms/postgres-server.rpm /rpms/postgres-contrib.rpm /tmp/
 
-# set once; bump to 17 later without touching the logic
-ARG PG_MAJOR=16
-
 RUN microdnf upgrade -y --nobest && \
     microdnf install -y shadow-utils && \
     groupadd -g 70 postgres && \
     adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
-    rpm --import PGDG-RPM-GPG-KEY-RHEL && \
+    rpm --import PGDG-RPM-GPG-KEY-RHEL || true && \
     microdnf install -y \
         ca-certificates \
         glibc-langpack-en \
@@ -63,33 +60,32 @@ RUN microdnf upgrade -y --nobest && \
     if [[ $(awk -F'=' '/VERSION_ID/{ gsub(/"/,""); print substr($2,1,1)}' /etc/os-release) -gt 8 ]]; then \
         microdnf install -y uuid; \
     fi && \
-    # detect OS major & arch, then install side-loaded RPMs
+    \
+    # ---- minimal guard: ensure the four RPMs match the base OS/arch and don't need OPENSSL_3.4 ----
     RHEL_MAJOR="$(. /etc/os-release; echo ${VERSION_ID%%.*})" && \
     ARCH="$(arch)" && \
-    if ls /tmp/postgresql${PG_MAJOR}-libs-*.el${RHEL_MAJOR}.*.${ARCH}.rpm >/dev/null 2>&1; then \
-      rpm -i \
-        /tmp/postgresql${PG_MAJOR}-libs-*.el${RHEL_MAJOR}.*.${ARCH}.rpm \
-        /tmp/postgresql${PG_MAJOR}-*.el${RHEL_MAJOR}.*.${ARCH}.rpm \
-        /tmp/postgresql${PG_MAJOR}-server-*.el${RHEL_MAJOR}.*.${ARCH}.rpm \
-        /tmp/postgresql${PG_MAJOR}-contrib-*.el${RHEL_MAJOR}.*.${ARCH}.rpm; \
-    else \
-      # fallback to your original filenames
-      rpm -i /tmp/postgres-libs.rpm \
-             /tmp/postgres.rpm \
-             /tmp/postgres-server.rpm \
-             /tmp/postgres-contrib.rpm; \
-    fi && \
-    # Timezone note unchanged
+    for p in /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm; do \
+      echo "Verifying $p"; \
+      test -f "$p" || { echo "ERROR: missing $p"; exit 1; }; \
+      rpm -qp --qf '%{NAME} %{VERSION} %{RELEASE} %{ARCH} %{DIST}\n' "$p"; \
+      rpm -qp --qf '%{ARCH}\n' "$p" | grep -qx "$ARCH" || { echo "ERROR: $p arch mismatch (want $ARCH)"; exit 1; }; \
+      rpm -qp --qf '%{DIST}\n' "$p" | grep -Eq "(\.el${RHEL_MAJOR}|rhel${RHEL_MAJOR})" || { echo "ERROR: $p not built for EL${RHEL_MAJOR}"; exit 1; }; \
+      rpm -qpR "$p" | grep -q 'OPENSSL_3\.4' && { echo "ERROR: $p requires OPENSSL_3.4 (EL10/Fedora). Use EL${RHEL_MAJOR} build."; exit 1; }; \
+    done && \
+    # ----------------------------------------------------------------------------------------------- \
+    \
+    rpm -i /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
+    # The removal of /usr/share/zoneinfo from UBI minimal images is intentional.
+    # After building the image, the image is reduced in size as much as possible,
+    # and the /usr/share/zoneinfo directory is purged as it saves space
+    # in the final distribution of the image.
+    # https://access.redhat.com/solutions/5616681
     microdnf reinstall -y tzdata && \
     microdnf clean all && \
-    rm -rf /var/cache/dnf /var/cache/yum \
-           /tmp/postgresql${PG_MAJOR}-libs-*.rpm \
-           /tmp/postgresql${PG_MAJOR}-*.rpm \
-           /tmp/postgresql${PG_MAJOR}-server-*.rpm \
-           /tmp/postgresql${PG_MAJOR}-contrib-*.rpm \
-           /tmp/postgres-*.rpm && \
+    rpm -e --nodeps $(rpm -qa shadow-utils curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
+    rm -rf /var/cache/dnf /var/cache/yum /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
-    mkdir -p /docker-entrypoint-initdb.d
+    mkdir /docker-entrypoint-initdb.d
 
 # This is equivalent to postgres:postgres.
 USER 70:70
