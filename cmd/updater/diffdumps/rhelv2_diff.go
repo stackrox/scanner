@@ -197,6 +197,11 @@ func generateRHELv2VulnsDiff(cfg config, outputDir string, baseLastModifiedTime 
 			if err := generateRHELv2RepoToCPE(filepath.Join(outputDir, repoToCPEFile), headF); err != nil {
 				return errors.Wrapf(err, "generating %s", repo2cpe.RHELv2CPERepoName)
 			}
+
+			// additional copy of repo to cpe JSON at bundle root (due to ROX-30576)
+			if err := generateRHELv2RepoToCPE(filepath.Join(outputDir, repo2cpe.RHELv2CPERepoName), headF); err != nil {
+				return errors.Wrapf(err, "generating %s at bundle root", repo2cpe.RHELv2CPERepoName)
+			}
 		}
 
 		// Only look at JSON files in the vulns/ folder.
