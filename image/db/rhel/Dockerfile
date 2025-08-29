@@ -56,24 +56,32 @@ RUN microdnf upgrade -y --nobest && \
         perl-libs \
         python3 \
         systemd-sysv \
-        zstd \
-        && \
+        zstd && \
     if [[ $(awk -F'=' '/VERSION_ID/{ gsub(/"/,""); print substr($2,1,1)}' /etc/os-release) -gt 8 ]]; then \
         microdnf install -y uuid; \
     fi && \
+    # ---- tiny prechecks: verify /tmp RPMs match OS + don’t require OPENSSL_3.4 ----
+    RHEL_MAJOR="$(. /etc/os-release; echo ${VERSION_ID%%.*})" && \
+    ARCH="$(arch)" && \
+    for p in /tmp/postgres-libs.rpm /tmp/postgres.rpm /tmp/postgres-server.rpm /tmp/postgres-contrib.rpm; do \
+      test -e "$p" || { echo "ERROR: Missing $p"; exit 1; }; \
+      if ! rpm -qp --qf '%{RELEASE}\n' "$p" | grep -Eq '(\.el'"${RHEL_MAJOR}"'|rhel'"${RHEL_MAJOR}"')'; then \
+        echo "ERROR: $p is not an EL${RHEL_MAJOR} build."; exit 1; \
+      fi; \
+      # must NOT require OPENSSL_3.4 on EL8/EL9
+      if [ "${RHEL_MAJOR}" -lt 10 ] && rpm -qpR "$p" | grep -q 'OPENSSL_3\.4'; then \
+        echo "ERROR: $p requires OPENSSL_3.4, incompatible with EL${RHEL_MAJOR} (OpenSSL 3.0)."; exit 1; \
+      fi; \
+    done && \
+    # ------------------------------------------------------------------------------- \
     rpm -i /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
-    # The removal of /usr/share/zoneinfo from UBI minimal images is intentional.
-    # After building the image, the image is reduced in size as much as possible,
-    # and the /usr/share/zoneinfo directory is purged as it saves space
-    # in the final distribution of the image.
-    # https://access.redhat.com/solutions/5616681
     microdnf reinstall -y tzdata && \
     microdnf clean all && \
-    # (Optional) Remove line below to keep package management utilities
     rpm -e --nodeps $(rpm -qa shadow-utils curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     rm -rf /var/cache/dnf /var/cache/yum /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     mkdir /docker-entrypoint-initdb.d
+
 
 # This is equivalent to postgres:postgres.
 USER 70:70
