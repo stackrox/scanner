@@ -12,7 +12,7 @@ class Deployer:
     Deployer - Deploys Scanner and ScannerDB resources and port-forwards the necessary endpoints.
     """
 
-    DEPLOY_TIMEOUT = 20 * 60
+    DEPLOY_TIMEOUT = 30 * 60
 
     def __init__(self, slim=False):
         self.slim = slim
