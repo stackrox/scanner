@@ -32,7 +32,7 @@ _wait_for_scanner() {
     kubectl -n stackrox get pod
     POD="$(kubectl -n stackrox get pod -o jsonpath='{.items[?(@.metadata.labels.app=="scanner")].metadata.name}')"
     [[ -n "${POD}" ]]
-    kubectl -n stackrox wait "--for=condition=Ready" "pod/${POD}" --timeout=10m
+    kubectl -n stackrox wait "--for=condition=Ready" "pod/${POD}" --timeout=30m
     kubectl -n stackrox get pod
 }
 
