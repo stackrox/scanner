@@ -134,26 +134,7 @@ spec:
   tasks:
   - name: post-metric-start
     taskRef: *post-bigquery-metrics-ref
-  - name: init
-    params:
-    - name: image-url
-          # We can't provide a StackRox-style tag because it is not known at this time (requires cloning source, etc.)
-          # As a workaround, we still provide a unique tag that's based on a revision in order for this task to comply with
-          # its expected input. We later actually add this tag on a built image with the build-image-index-konflux task.
-      value: $(params.output-image-repo):konflux-$(params.revision)
-    - name: rebuild
-      value: $(params.rebuild)
-    - name: skip-checks
-      value: $(params.skip-checks)
-    taskRef:
-      params:
-      - name: name
-        value: init
-      - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-init:0.2@sha256:ec962d0be18f36ca7d331c99bf243800f569fc0a2ea6f8c8c3d3a574b71c44dc
-      - name: kind
-        value: task
-      resolver: bundles
+
   - name: clone-repository
     params:
     - name: url
@@ -177,10 +158,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-    when:
-    - input: $(tasks.init.results.build)
-      operator: in
-      values: ["true"]
     workspaces:
     - name: basic-auth
       workspace: git-auth
@@ -296,10 +273,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-    when:
-    - input: $(tasks.init.results.build)
-      operator: in
-      values: ["true"]
   - name: build-container-s390x
     params:
     - name: IMAGE
@@ -336,10 +309,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-    when:
-    - input: $(tasks.init.results.build)
-      operator: in
-      values: ["true"]
   - name: build-container-ppc64le
     params:
     - name: IMAGE
@@ -376,10 +345,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-    when:
-    - input: $(tasks.init.results.build)
-      operator: in
-      values: ["true"]
   - name: build-container-arm64
     params:
     - name: IMAGE
@@ -416,10 +381,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-    when:
-    - input: $(tasks.init.results.build)
-      operator: in
-      values: ["true"]
   - name: build-image-index
     params:
     - name: IMAGE
@@ -443,10 +404,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-    when:
-    - input: $(tasks.init.results.build)
-      operator: in
-      values: ["true"]
   - name: build-image-index-konflux
     params:
     - name: IMAGE
@@ -470,10 +427,6 @@ spec:
       - name: kind
         value: task
       resolver: bundles
-    when:
-    - input: $(tasks.init.results.build)
-      operator: in
-      values: ["true"]
   - name: build-source-image
     params:
     - name: BINARY_IMAGE
@@ -494,9 +447,6 @@ spec:
         value: task
       resolver: bundles
     when:
-    - input: $(tasks.init.results.build)
-      operator: in
-      values: ["true"]
     - input: $(params.build-source-image)
       operator: in
       values: ["true"]
