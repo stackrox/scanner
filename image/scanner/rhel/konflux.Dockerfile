@@ -85,7 +85,8 @@ FROM scanner-common AS scanner-slim
 LABEL \
     com.redhat.component="rhacs-scanner-slim-container" \
     io.k8s.display-name="scanner-slim" \
-    name="rhacs-scanner-slim-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-slim-rhel8" \
+    cpe="cpe:/a:redhat:advanced_cluster_security:4.8::el8"
 
 ENV ROX_SLIM_MODE="true"
 
