@@ -1,6 +1,6 @@
 module github.com/stackrox/scanner
 
-go 1.24
+go 1.24.0
 
 toolchain go1.24.4
 
@@ -49,11 +49,11 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
 	golang.org/x/sys v0.35.0
-	google.golang.org/api v0.247.0
+	google.golang.org/api v0.249.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250818200422-3122310a409c
 	google.golang.org/grpc v1.75.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
-	google.golang.org/protobuf v1.36.7
+	google.golang.org/protobuf v1.36.8
 	sigs.k8s.io/yaml v1.6.0
 )
 
