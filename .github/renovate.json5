@@ -20,17 +20,22 @@
   "timezone": "Etc/UTC",
   "schedule": [
     // Allowed syntax: https://docs.renovatebot.com/configuration-options/#schedule
+    // This is a "general" schedule for managers that don't declare their own. Practically, each of our used managers
+    // overrides it either here or in the global config.
     // The time was selected (with the help of https://time.fyi/timezones) so that Renovate isn't active during business
-    // hours from Germany to US West Coast. This way, after we merge a PR, a new one does not pop up immediately after
-    // that.
-    "after 3am and before 7am",
+    // hours from Central Europe to US West Coast. This way, after we merge a PR, a new one does not pop up immediately
+    // after that.
+    // Between 3a.m. and 7a.m. every day.
+    "* 3-7 * * *",
   ],
-  // Tell Renovate not to update PRs when outside of schedule.
-  "updateNotScheduled": false,
+  // Allow Renovate updating PRs when outside schedule.
+  "updateNotScheduled": true,
   "tekton": {
     "schedule": [
-      // Override Konflux custom schedule for this manager to our intended one.
-      "after 3am and before 7am",
+      // Between 3a.m. and 7a.m. on weekends.
+      // Doing more frequently just creates more PR, commit and email traffic. We can afford to be slower here as
+      // Conforma allows 30 days to update tasks.
+      "* 3-7 * * 0,6",
     ],
     "packageRules": [
       // Note: the packageRules from the Konflux config (find URL in comments above) get merged with these.
@@ -49,8 +54,9 @@
       "**/*konflux*.Dockerfile",
     ],
     "schedule": [
-      // Override Konflux custom schedule for this manager to our intended one.
-      "after 3am and before 7am",
+      // Between 3a.m. and 7a.m. every day.
+      // It's important to keep dockerfiles fresh to avoid releasing with CVEs.
+      "* 3-7 * * *",
     ],
     "postUpgradeTasks": {
       "commands": [
@@ -61,9 +67,9 @@
   },
   "rpm-lockfile": {
     "schedule": [
-      // Override Konflux custom schedule for this manager to our intended one.
-      // Note that MintMaker will create security updates outside of schedule.
-      "after 3am and before 7am",
+      // Between 3a.m. and 7a.m. every day.
+      // Note that MintMaker will create security updates ignoring schedules.
+      "* 3-7 * * *",
     ],
   },
   "enabledManagers": [
