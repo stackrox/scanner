@@ -30,12 +30,14 @@
   ],
   // Allow Renovate updating PRs when outside schedule.
   "updateNotScheduled": true,
+  // Bump the default limit on the number of PRs that can be created per hour.
+  "prHourlyLimit": 4,
   "tekton": {
     "schedule": [
-      // Between 3a.m. and 7a.m. on weekends.
+      // Between 3a.m. and 7a.m. on weekends and Mondays.
       // Doing more frequently just creates more PR, commit and email traffic. We can afford to be slower here as
       // Conforma allows 30 days to update tasks.
-      "* 3-7 * * 0,6",
+      "* 3-7 * * 0,1,6",
     ],
     "packageRules": [
       // Note: the packageRules from the Konflux config (find URL in comments above) get merged with these.
