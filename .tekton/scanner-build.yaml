@@ -12,8 +12,8 @@ metadata:
       (event == "pull_request" && body.action != "ready_for_review") ||
       (event == "push" && target_branch.matches("^(master|release-.*|refs/tags/.*)$"))
   labels:
-    appstudio.openshift.io/application: acs
-    appstudio.openshift.io/component: scanner
+    appstudio.openshift.io/application: acs-4-9
+    appstudio.openshift.io/component: scanner-4-9
     pipelines.appstudio.openshift.io/type: build
   name: scanner-on-push
   namespace: rh-acs-tenant
@@ -74,7 +74,7 @@ spec:
           cpu: 2
 
   taskRunTemplate:
-    serviceAccountName: build-pipeline-scanner
+    serviceAccountName: build-pipeline-scanner-4-9
 
   # Multiarch builds sometimes make the pipeline timeout after 1h.
   # Tagged builds wait for blobs to be published which takes about 1h.
