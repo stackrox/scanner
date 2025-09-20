@@ -113,8 +113,8 @@ func Boot(config *Config, slimMode bool) {
 	go func() {
 		defer wg.Add(-1)
 		var err error
-		// Wait for the DB to be ready: 10 minutes.
-		db, err = database.OpenWithRetries(config.Database, true, 60, 10*time.Second)
+		// Wait for the DB to be ready: 15 minutes.
+		db, err = database.OpenWithRetries(config.Database, true, 90, 10*time.Second)
 		if err != nil {
 			log.WithError(err).Fatal("Failed to open database despite multiple retries...")
 		}
