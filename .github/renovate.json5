@@ -20,8 +20,7 @@
   "timezone": "Etc/UTC",
   "schedule": [
     // Allowed syntax: https://docs.renovatebot.com/configuration-options/#schedule
-    // This is a "general" schedule for managers that don't declare their own. Practically, each of our used managers
-    // overrides it either here or in the global config.
+    // This is a "general" schedule for managers that don't declare their own.
     // The time was selected (with the help of https://time.fyi/timezones) so that Renovate isn't active during business
     // hours from Central Europe to US West Coast. This way, after we merge a PR, a new one does not pop up immediately
     // after that.
@@ -55,24 +54,12 @@
       // to have less PR noise.
       "**/*konflux*.Dockerfile",
     ],
-    "schedule": [
-      // Between 3a.m. and 7a.m. every day.
-      // It's important to keep dockerfiles fresh to avoid releasing with CVEs.
-      "* 3-7 * * *",
-    ],
     "postUpgradeTasks": {
       "commands": [
         // Refresh the rpm lockfile after updating image references in the dockerfile.
         "rpm-lockfile-prototype rpms.in.yaml",
       ],
     },
-  },
-  "rpm-lockfile": {
-    "schedule": [
-      // Between 3a.m. and 7a.m. every day.
-      // Note that MintMaker will create security updates ignoring schedules.
-      "* 3-7 * * *",
-    ],
   },
   "enabledManagers": [
     // Restrict Renovate focus on Konflux things since we rely on GitHub's dependabot for everything else.
