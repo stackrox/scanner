@@ -33,8 +33,8 @@
     // Between 3a.m. and 7a.m. every day.
     "* 3-7 * * *",
   ],
-  // Allow Renovate updating PRs when outside schedule.
-  "updateNotScheduled": true,
+  // Tell Renovate not to update PRs when outside schedule.
+  "updateNotScheduled": false,
   "tekton": {
     "schedule": [
       // Between 3a.m. and 7a.m. on weekends and Mondays.
