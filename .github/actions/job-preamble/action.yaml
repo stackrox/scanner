@@ -3,12 +3,58 @@ description: Common steps for most jobs
 runs:
   using: composite
   steps:
-    - name: Recover docker image cache space
-      run: |
-        df --si /
-        docker system prune --force --all
-        df --si /
+    - name: Free disk space (delete unused tools)
+      id: delete-unused-tools
+      continue-on-error: true
       shell: bash
+      run: |
+        # delete preinstalled unused tools
+        cleanup=(
+        # non-container jobs are first priority (every second may be a high % of the total)
+        /usr/share/dotnet
+        /usr/share/miniconda
+        /usr/share/swift
+        /usr/share/kotlinc
+        /opt/ghc
+        /opt/hostedtoolcache/CodeQL
+        /opt/hostedtoolcache/Ruby
+        /opt/az
+        /usr/local/lib/android
+        # container jobs are lower priority: they are already slowed by container image pulls
+        /__t/CodeQL
+        /__t/Ruby
+        /__t/PyPy
+        /__t/Python
+        /__t/go
+        /__t/node
+        /__t/gcloud
+        )
+        for d in "${cleanup[@]}"; do
+        if [[ -d "$d" ]]; then
+          rm -rf -- "$d" && echo "deleted $d"
+        elif [[ -d "/mnt${d}" ]]; then
+          rm -rf -- "/mnt${d}" && echo "deleted /mnt${d}"
+        else
+          echo "$d not found"
+          continue
+        fi
+        free=$(df -BGB --output=avail / | tail -1)
+        done
+
+    - name: Free more disk space (docker system prune)
+      id: delete-docker-cache
+      continue-on-error: true
+      shell: bash
+      run: |
+        printf 'Docker prune: '
+        docker system prune --force --all
+
+    - name: Show free disk space
+      id: disk-check-cleaned
+      shell: bash
+      run: |
+        free=$(df -BGB --output=avail / | tail -1)
+        echo "free disk space=${free}" | tee -a "$GITHUB_OUTPUT"
 
     - name: Ignore dubious repository ownership
       run: |
