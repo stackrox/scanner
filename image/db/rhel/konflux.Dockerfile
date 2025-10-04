@@ -15,6 +15,7 @@ LABEL \
     url="https://catalog.redhat.com/software/container-stacks/detail/60eefc88ee05ae7c5b8f041c" \
     # We must set version label to prevent inheriting value set in the base stage.
     version="${SCANNER_TAG}" \
+    cpe="cpe:/a:redhat:advanced_cluster_security:4.8::el8" \
     # Release label is required by EC although has no practical semantics.
     # We also set it to not inherit one from a base stage in case it's RHEL or UBI.
     release="1"
@@ -57,7 +58,7 @@ FROM scanner-db-common AS scanner-db-slim
 LABEL \
     com.redhat.component="rhacs-scanner-db-slim-container" \
     io.k8s.display-name="scanner-db-slim" \
-    name="rhacs-scanner-db-slim-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-db-slim-rhel8"
 
 ENV ROX_SLIM_MODE="true"
 
@@ -67,7 +68,7 @@ FROM scanner-db-common AS scanner-db
 LABEL \
     com.redhat.component="rhacs-scanner-db-container" \
     io.k8s.display-name="scanner-db" \
-    name="rhacs-scanner-db-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-db-rhel8"
 
 COPY --chown=0:0 .konflux/scanner-data/blob-pg-definitions.sql.gz \
      /docker-entrypoint-initdb.d/definitions.sql.gz
