@@ -153,8 +153,10 @@ func Boot(config *Config, slimMode bool) {
 	}()
 
 	// Initialize the datastores prior to making the API available
+	log.Info("TEMP: Waiting for datasources")
 	wg.Wait()
 	defer db.Close()
+	log.Info("TEMP: Datasources loaded")
 
 	if slimMode {
 		u, err := updater.NewSlimUpdater(config.Updater, config.SensorEndpoint, repoToCPE)
@@ -164,14 +166,17 @@ func Boot(config *Config, slimMode bool) {
 		go u.RunForever()
 		defer u.Stop()
 	} else {
+		log.Info("TEMP: Initializing updater")
 		u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdVulnCache, k8sVulnCache)
 		if err != nil {
 			log.WithError(err).Fatal("Failed to initialize updater")
 		}
 
 		// Run the updater once to ensure the BoltDB is synced. One replica will ensure that the postgres DB is up-to-date
+		log.Info("TEMP: Running initial update")
 		u.UpdateApplicationCachesOnly()
 
+		log.Info("TEMP: Starting background update loop")
 		go u.RunForever()
 		defer u.Stop()
 	}
