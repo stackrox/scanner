@@ -108,6 +108,7 @@ func Boot(config *Config, slimMode bool) {
 	// Open database and initialize vuln caches in parallel, prior to making the API available.
 	var wg sync.WaitGroup
 
+	// TODO: This is a data race - using this in multiple go routines
 	var nvdVulnCache nvdtoolscache.Cache
 	var db database.Datastore
 	wg.Add(1)
@@ -115,10 +116,15 @@ func Boot(config *Config, slimMode bool) {
 		defer wg.Add(-1)
 		var err error
 		// Wait for the DB to be ready: 10 minutes.
-		db, err = database.OpenWithRetries(config.Database, true, 60, 10*time.Second)
+		db, err = database.OpenWithRetries(config.Database, true, 4, 10*time.Second)
 		if err != nil {
-			if closeErr := nvdVulnCache.Close(); closeErr != nil {
-				log.Warnf("Error closing nvd vuln cache: %v", closeErr)
+			if nvdVulnCache != nil {
+				log.Info("TEMP: nvdVulnCache NOT null")
+				if closeErr := nvdVulnCache.Close(); closeErr != nil {
+					log.Warnf("Error closing nvd vuln cache: %v", closeErr)
+				}
+			} else {
+				log.Info("TEMP: nvdVulnCache null")
 			}
 			log.WithError(err).Fatal("Failed to open database despite multiple retries...")
 		}

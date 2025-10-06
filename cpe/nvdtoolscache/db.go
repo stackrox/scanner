@@ -1,9 +1,12 @@
 package nvdtoolscache
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/facebookincubator/nvdtools/cvefeed"
@@ -50,6 +53,12 @@ func New() (Cache, error) {
 		Timeout:        10 * time.Second,
 		Logger:         log.StandardLogger(),
 	}
+
+	log.Info("TEMP: testing if can open bolt DB")
+	if err := canOpenBoltDB(BoltPath); err != nil {
+		log.Infof("TEMP: failure opening bolt DB: %v", err)
+	}
+	log.Info("TEMP: CAN open bolt DB NP")
 	log.Info("TEMP: opening bolt DB")
 	db, err := bbolt.Open(BoltPath, 0600, &opts)
 	log.Info("TEMP: done opening bolt DB")
@@ -79,10 +88,6 @@ func (c *cacheImpl) Dir() string {
 }
 
 func (c *cacheImpl) Close() error {
-	if c == nil {
-		return nil
-	}
-
 	if c.DB == nil {
 		return nil
 	}
@@ -243,4 +248,61 @@ func (c *cacheImpl) SetLastUpdate(t time.Time) {
 
 func (c *cacheImpl) sync() error {
 	return c.DB.Sync()
+}
+
+func canOpenBoltDB(path string) error {
+	// 1. Check if file exists or can be created
+	finfo, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		// Try to create the directory
+		dir := filepath.Dir(path)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("cannot create parent dir: %w", err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("cannot stat db file: %w", err)
+	} else if finfo.IsDir() {
+		return fmt.Errorf("db path is a directory, not a file")
+	}
+
+	// 2. Try to open the file in read-write mode (simulate lock file access)
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		return fmt.Errorf("cannot open db file for writing: %w", err)
+	}
+	defer f.Close()
+
+	// 3. Try to acquire a *non-blocking* flock — if it’s locked, we’ll know immediately
+	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+		if errors.Is(err, syscall.EWOULDBLOCK) {
+			return fmt.Errorf("database is already locked by another process")
+		}
+		return fmt.Errorf("cannot acquire lock on db file: %w", err)
+	}
+
+	// 4. Immediately unlock — we just wanted to check
+	syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+
+	// 5. Check if the filesystem is writable
+	testPath := path + ".writetest"
+	if err := os.WriteFile(testPath, []byte("test"), 0600); err != nil {
+		return fmt.Errorf("filesystem not writable: %w", err)
+	}
+	os.Remove(testPath)
+
+	// 6. Detect network or remote filesystems (NFS, SMB, etc.)
+	var statfs syscall.Statfs_t
+	if err := syscall.Statfs(path, &statfs); err == nil {
+		fsType := statfs.Type
+		switch fsType {
+		case 0x6969: // NFS_SUPER_MAGIC
+			return fmt.Errorf("filesystem is NFS (remote) – unsafe for bbolt")
+		case 0x517B: // SMB_SUPER_MAGIC
+			return fmt.Errorf("filesystem is SMB (remote) – unsafe for bbolt")
+		case 0x9fa0: // PROC_SUPER_MAGIC
+			return fmt.Errorf("filesystem is pseudo (procfs) – invalid for bbolt")
+		}
+	}
+
+	return nil
 }
