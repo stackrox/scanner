@@ -10,6 +10,7 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/attributes/common"
 	"github.com/stackrox/scanner/pkg/cpeutils"
@@ -41,18 +42,23 @@ func initializeDB(db *bbolt.DB) error {
 
 // New returns a new NVD vulnerability cache.
 func New() (Cache, error) {
+	log.Info("TEMP: New() nvdtoolscache")
 	opts := bbolt.Options{
 		NoFreelistSync: true,
 		FreelistType:   bbolt.FreelistMapType,
 		NoSync:         true,
 	}
+	log.Info("TEMP: opening bolt DB")
 	db, err := bbolt.Open(BoltPath, 0600, &opts)
+	log.Info("TEMP: done opening bolt DB")
 	if err != nil {
 		return nil, err
 	}
+	log.Info("TEMP: initializing bolt DB")
 	if err := initializeDB(db); err != nil {
 		return nil, err
 	}
+	log.Info("TEMP: done initializing bolt DB")
 	return newWithDB(db), nil
 }
 
