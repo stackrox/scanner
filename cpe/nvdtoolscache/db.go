@@ -47,6 +47,7 @@ func New() (Cache, error) {
 		NoFreelistSync: true,
 		FreelistType:   bbolt.FreelistMapType,
 		NoSync:         true,
+		Timeout:        10 * time.Second,
 	}
 	log.Info("TEMP: opening bolt DB")
 	db, err := bbolt.Open(BoltPath, 0600, &opts)
