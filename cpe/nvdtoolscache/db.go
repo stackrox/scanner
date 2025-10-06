@@ -77,6 +77,18 @@ func (c *cacheImpl) Dir() string {
 	return c.dir
 }
 
+func (c *cacheImpl) Close() error {
+	if c == nil {
+		return nil
+	}
+
+	if c.DB == nil {
+		return nil
+	}
+
+	return c.DB.Close()
+}
+
 func (c *cacheImpl) addProductToCVE(vuln cvefeed.Vuln, cve *schema.NVDCVEFeedJSON10DefCVEItem) error {
 	bytes, err := nvdloader.MarshalNVDFeedCVEItem(cve)
 	if err != nil {
