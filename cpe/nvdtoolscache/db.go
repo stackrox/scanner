@@ -68,6 +68,24 @@ type cacheImpl struct {
 	lastUpdatedTime time.Time
 }
 
+func (c *cacheImpl) Close() {
+	log.Info("Closing Bolt DB")
+	if c == nil {
+		log.Debug("NVD Cache is nil, nothing to close")
+		return
+	}
+
+	if c.DB == nil {
+		log.Debug("Bolt DB is nil, nothing to close")
+		return
+	}
+
+	err := c.DB.Close()
+	if err != nil {
+		log.WithError(err).Warn("Error closing Bolt DB")
+	}
+}
+
 func (c *cacheImpl) Dir() string {
 	return c.dir
 }

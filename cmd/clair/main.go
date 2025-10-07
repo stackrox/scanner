@@ -108,19 +108,21 @@ func Boot(config *Config, slimMode bool) {
 	// Open database and initialize vuln caches in parallel, prior to making the API available.
 	var wg sync.WaitGroup
 
+	nvdCache := &nvdCacheHolder{}
+
 	var db database.Datastore
 	wg.Add(1)
 	go func() {
 		defer wg.Add(-1)
 		var err error
 		// Wait for the DB to be ready: 30 minutes.
-		db, err = database.OpenWithRetries(config.Database, true, 180, 10*time.Second)
+		db, err = database.OpenWithRetries(config.Database, true, 8, 10*time.Second)
 		if err != nil {
+			nvdCache.Close()
 			log.WithError(err).Fatal("Failed to open database despite multiple retries...")
 		}
 	}()
 
-	var nvdVulnCache nvdtoolscache.Cache
 	var k8sVulnCache k8scache.Cache
 	var istioVulnCache istiocache.Cache
 
@@ -128,7 +130,7 @@ func Boot(config *Config, slimMode bool) {
 		wg.Add(1)
 		go func() {
 			defer wg.Add(-1)
-			nvdVulnCache = nvdtoolscache.Singleton()
+			nvdCache.SetCache(nvdtoolscache.Singleton())
 		}()
 
 		wg.Add(1)
@@ -164,7 +166,7 @@ func Boot(config *Config, slimMode bool) {
 		go u.RunForever()
 		defer u.Stop()
 	} else {
-		u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdVulnCache, k8sVulnCache)
+		u, err := updater.New(config.Updater, config.CentralEndpoint, db, repoToCPE, nvdCache.Cache(), k8sVulnCache)
 		if err != nil {
 			log.WithError(err).Fatal("Failed to initialize updater")
 		}
@@ -189,9 +191,9 @@ func Boot(config *Config, slimMode bool) {
 
 	grpcAPI.Register(
 		ping.NewService(),
-		imagescan.NewService(db, nvdVulnCache),
+		imagescan.NewService(db, nvdCache.Cache()),
 		orchestratorscan.NewService(db, k8sVulnCache, istioVulnCache),
-		nodescan.NewService(db, nvdVulnCache, k8sVulnCache, repoToCPE),
+		nodescan.NewService(db, nvdCache.Cache(), k8sVulnCache, repoToCPE),
 		vulndefs.NewService(db),
 	)
 	go grpcAPI.Start()
@@ -293,4 +295,45 @@ func main() {
 	log.Infof("Running %s version: %s", scannerName, version.Version)
 
 	Boot(config, slimMode)
+}
+
+// nvdCacheHolder is a wrapper to coordinate multiple goroutines interating with
+// an NVD cache.
+type nvdCacheHolder struct {
+	cache      nvdtoolscache.Cache
+	cacheMutex sync.Mutex
+}
+
+func (n *nvdCacheHolder) Cache() nvdtoolscache.Cache {
+	if n == nil {
+		return nil
+	}
+
+	n.cacheMutex.Lock()
+	defer n.cacheMutex.Unlock()
+	return n.cache
+}
+
+func (n *nvdCacheHolder) Close() {
+	if n == nil {
+		return
+	}
+
+	n.cacheMutex.Lock()
+	defer n.cacheMutex.Unlock()
+	if n.cache == nil {
+		return
+	}
+
+	n.cache.Close()
+}
+
+func (n *nvdCacheHolder) SetCache(cache nvdtoolscache.Cache) {
+	if n == nil {
+		return
+	}
+
+	n.cacheMutex.Lock()
+	defer n.cacheMutex.Unlock()
+	n.cache = cache
 }
