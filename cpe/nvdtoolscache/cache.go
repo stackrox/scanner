@@ -10,7 +10,6 @@ import (
 type Cache interface {
 	GetVulnsForProducts(products []string) ([]cvefeed.Vuln, error)
 	GetVulnsForComponent(vendor, product, version string) ([]*NVDCVEItemWithFixedIn, error)
-	Close() error
 
 	cache.Cache
 }

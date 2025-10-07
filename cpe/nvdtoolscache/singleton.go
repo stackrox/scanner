@@ -17,9 +17,7 @@ var (
 func Singleton() Cache {
 	once.Do(func() {
 		var err error
-		log.Info("TEMP: initializing nvdtooscache")
 		instance, err = New()
-		log.Info("TEMP: done initializing nvdtooscache")
 		utils.Must(err)
 
 		if definitionsDir := os.Getenv("NVD_DEFINITIONS_DIR"); definitionsDir != "" {
