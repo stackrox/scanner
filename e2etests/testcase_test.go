@@ -4434,7 +4434,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				VersionFormat: "rpm",
 				Version:       "1:2.2.6-60.el8_10.x86_64",
 				AddedBy:       "sha256:7a6d2526dba4ead4120381a83ce344db5959e947aab63fa3d1a3fae4f7986d62",
-				FixedBy:       "1:2.2.6-62.el8_10",
+				FixedBy:       "1:2.2.6-63.el8_10",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2025:0083",
@@ -4442,7 +4442,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						Description:   "The Common UNIX Printing System (CUPS) provides a portable printing layer for Linux, UNIX, and similar operating systems.\n\nSecurity Fix(es):\n\n* cups: libppd: remote command injection via attacker controlled data in PPD file (CVE-2024-47175)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
 						Link:          "https://access.redhat.com/errata/RHSA-2025:0083",
 						Severity:      "Low",
-						FixedBy:       "1:2.2.6-62.el8_10",
+						FixedBy:       "1:2.2.6-63.el8_10",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
@@ -4600,7 +4600,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						NamespaceName: "debian:12",
 						Description:   "CUPS is a standards-based, open-source printing system, and `libppd` can be used for legacy PPD file support. The `libppd` function `ppdCreatePPDFromIPP2` does not sanitize IPP attributes when creating the PPD buffer. When used in combination with other functions such as `cfGetPrinterAttributes5`, can result in user controlled input and ultimately code execution via Foomatic. This vulnerability can be part of an exploit chain leading to remote code execution (RCE), as described in CVE-2024-47176.",
 						Link:          "https://security-tracker.debian.org/tracker/CVE-2024-47175",
-						Severity:      "Important",
+						Severity:      "Low",
 						FixedBy:       "2.4.2-3+deb12u8",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -4614,9 +4614,9 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 								},
 								"CVSSv3": map[string]interface{}{
 									"ExploitabilityScore": 3.9,
-									"ImpactScore":         4.0,
-									"Score":               8.6,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:N",
+									"ImpactScore":         5.9,
+									"Score":               9.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 								},
 							},
 						},
@@ -4645,7 +4645,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 					{
 						Name:          "CVE-2024-47175",
 						NamespaceName: "ubuntu:18.04",
-						Description:   "ppdCreatePPDFromIPP2 does not sanitize IPP attributes when creating the PPD buffer",
+						Description:   "CUPS is a standards-based, open-source printing system, and `libppd` can be used for legacy PPD file support. The `libppd` function `ppdCreatePPDFromIPP2` does not sanitize IPP attributes when creating the PPD buffer. When used in combination with other functions such as `cfGetPrinterAttributes5`, can result in user controlled input and ultimately code execution via Foomatic. This vulnerability can be part of an exploit chain leading to remote code execution (RCE), as described in CVE-2024-47176.",
 						Link:          "https://ubuntu.com/security/CVE-2024-47175",
 						Severity:      "Moderate",
 						FixedBy:       "2.2.7-1ubuntu2.10+esm6",
@@ -4661,9 +4661,9 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 								},
 								"CVSSv3": map[string]interface{}{
 									"ExploitabilityScore": 3.9,
-									"ImpactScore":         4.0,
-									"Score":               8.6,
-									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:N",
+									"ImpactScore":         5.9,
+									"Score":               9.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 								},
 							},
 						},
