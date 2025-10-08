@@ -4442,7 +4442,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 						Description:   "The Common UNIX Printing System (CUPS) provides a portable printing layer for Linux, UNIX, and similar operating systems.\n\nSecurity Fix(es):\n\n* cups: libppd: remote command injection via attacker controlled data in PPD file (CVE-2024-47175)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
 						Link:          "https://access.redhat.com/errata/RHSA-2025:0083",
 						Severity:      "Low",
-						FixedBy:       "1:2.2.6-63.el8_10",
+						FixedBy:       "1:2.2.6-62.el8_10",
 						Metadata: map[string]interface{}{
 							"Red Hat": map[string]interface{}{
 								"CVSSv2": map[string]interface{}{
