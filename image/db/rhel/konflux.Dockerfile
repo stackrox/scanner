@@ -57,7 +57,8 @@ FROM scanner-db-common AS scanner-db-slim
 LABEL \
     com.redhat.component="rhacs-scanner-db-slim-container" \
     io.k8s.display-name="scanner-db-slim" \
-    name="rhacs-scanner-db-slim-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-db-slim-rhel8" \
+    cpe="cpe:/a:redhat:advanced_cluster_security:4.8::el8"
 
 ENV ROX_SLIM_MODE="true"
 
