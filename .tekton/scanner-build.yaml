@@ -68,6 +68,8 @@ spec:
     # This is not required for multi-arch builds, because they are performed off cluster
     - name: build
       computeResources:
+        limits:
+          cpu: 2
         requests:
           cpu: 2
 
