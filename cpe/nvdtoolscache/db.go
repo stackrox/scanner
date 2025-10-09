@@ -10,6 +10,7 @@ import (
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd"
 	"github.com/facebookincubator/nvdtools/cvefeed/nvd/schema"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/scanner/cpe/attributes/common"
 	"github.com/stackrox/scanner/pkg/cpeutils"
@@ -45,6 +46,7 @@ func New() (Cache, error) {
 		NoFreelistSync: true,
 		FreelistType:   bbolt.FreelistMapType,
 		NoSync:         true,
+		Logger:         log.StandardLogger(),
 	}
 	db, err := bbolt.Open(BoltPath, 0600, &opts)
 	if err != nil {
