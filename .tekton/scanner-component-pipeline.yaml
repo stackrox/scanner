@@ -120,6 +120,9 @@ spec:
     default: docker
     type: string
     description: The format for the resulting image's mediaType. Valid values are oci or docker.
+  - name: extra-labels
+    type: array
+    description: Additional labels to put on the built containers.
   results:
   - description: ""
     name: IMAGE_URL
@@ -293,6 +296,8 @@ spec:
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     - name: BUILDAH_FORMAT
       value: $(params.buildah-format)
+    - name: LABELS
+      value: ["$(params.extra-labels[*])"]
     taskRef:
       params:
       - name: name
@@ -333,6 +338,8 @@ spec:
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     - name: PLATFORM
       value: linux/s390x
+    - name: LABELS
+      value: ["$(params.extra-labels[*])"]
     taskRef:
       params:
       - name: name
@@ -373,6 +380,8 @@ spec:
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     - name: PLATFORM
       value: linux/ppc64le
+    - name: LABELS
+      value: ["$(params.extra-labels[*])"]
     taskRef:
       params:
       - name: name
@@ -413,6 +422,8 @@ spec:
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     - name: PLATFORM
       value: linux/arm64
+    - name: LABELS
+      value: ["$(params.extra-labels[*])"]
     taskRef:
       params:
       - name: name
