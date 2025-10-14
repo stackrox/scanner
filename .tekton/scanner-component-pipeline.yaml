@@ -340,6 +340,8 @@ spec:
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     - name: PLATFORM
       value: linux/s390x
+    - name: BUILDAH_FORMAT
+      value: $(params.buildah-format)
     - name: LABELS
       value: ["$(params.extra-labels[*])"]
     - name: BUILD_TIMESTAMP
@@ -384,6 +386,8 @@ spec:
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     - name: PLATFORM
       value: linux/ppc64le
+    - name: BUILDAH_FORMAT
+      value: $(params.buildah-format)
     - name: LABELS
       value: ["$(params.extra-labels[*])"]
     - name: BUILD_TIMESTAMP
@@ -428,6 +432,8 @@ spec:
       value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
     - name: PLATFORM
       value: linux/arm64
+    - name: BUILDAH_FORMAT
+      value: $(params.buildah-format)
     - name: LABELS
       value: ["$(params.extra-labels[*])"]
     - name: BUILD_TIMESTAMP
