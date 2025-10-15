@@ -85,7 +85,7 @@ FROM scanner-common AS scanner-slim
 LABEL \
     com.redhat.component="rhacs-scanner-slim-container" \
     io.k8s.display-name="scanner-slim" \
-    name="rhacs-scanner-slim-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-slim-rhel8"
 
 ENV ROX_SLIM_MODE="true"
 
@@ -96,7 +96,7 @@ FROM scanner-common AS scanner
 LABEL \
     com.redhat.component="rhacs-scanner-container" \
     io.k8s.display-name="scanner" \
-    name="rhacs-scanner-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-rhel8"
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
