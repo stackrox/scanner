@@ -57,7 +57,7 @@ FROM scanner-db-common AS scanner-db-slim
 LABEL \
     com.redhat.component="rhacs-scanner-db-slim-container" \
     io.k8s.display-name="scanner-db-slim" \
-    name="rhacs-scanner-db-slim-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-db-slim-rhel8"
 
 ENV ROX_SLIM_MODE="true"
 
@@ -67,7 +67,7 @@ FROM scanner-db-common AS scanner-db
 LABEL \
     com.redhat.component="rhacs-scanner-db-container" \
     io.k8s.display-name="scanner-db" \
-    name="rhacs-scanner-db-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-db-rhel8"
 
 COPY --chown=0:0 .konflux/scanner-data/blob-pg-definitions.sql.gz \
      /docker-entrypoint-initdb.d/definitions.sql.gz
