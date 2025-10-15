@@ -478,8 +478,8 @@
       "uuid": "5e26731f-a57e-454a-89af-12417096cd75"
     },
     {
-      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20251014121537.zip",
-      "timestamp": "2025-10-14T12:15:37.648997153Z",
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20251014155109.zip",
+      "timestamp": "2025-10-14T15:51:09.347208339Z",
       "uuid": "4d355b6d-bd7d-4bfc-85bf-0129a70cd9ba"
     }
   ]
