@@ -53,6 +53,10 @@ spec:
     value: 'true'
   - name: blobs-to-fetch
     value: [ 'nvd-definitions.zip', 'k8s-definitions.zip', 'repo2cpe.zip', 'genesis_manifests.json' ]
+  - name: extra-labels
+    value:
+    # X.Y in the cpe label must be adjusted for every version stream.
+    - "cpe=cpe:/a:redhat:advanced_cluster_security:4.8::el8"
 
   workspaces:
   - name: git-auth
@@ -68,6 +72,8 @@ spec:
     # This is not required for multi-arch builds, because they are performed off cluster
     - name: build
       computeResources:
+        limits:
+          cpu: 2
         requests:
           cpu: 2
 
