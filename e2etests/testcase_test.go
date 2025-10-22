@@ -3595,7 +3595,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 			},
 			{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
-				FixedBy:       "2:8.2.2637-22.el9_6",
+				FixedBy:       "2:8.2.2637-22.el9_6.1",
 				Name:          "vim-minimal",
 				NamespaceName: "rhel:9",
 				Version:       "2:8.2.2637-16.el9_0.2.x86_64",
