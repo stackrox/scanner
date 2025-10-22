@@ -88,7 +88,7 @@
     }
   ],
   "labels": [
-    // Add auto-approve label, which will approve the changes with rhacs-bot if they go to the default branch of the repository.
+    // Add auto-approve label which triggers the corresponding workflow.
     "auto-approve",
   ],
 }
