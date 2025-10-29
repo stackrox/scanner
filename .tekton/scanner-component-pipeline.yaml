@@ -344,8 +344,7 @@ spec:
       value: $(tasks.determine-image-expiration.results.IMAGE_EXPIRES_AFTER)
     - name: BUILDAH_FORMAT
       value: $(params.buildah-format)
-    runAfter:
-    - build-images
+    runAfter: [ build-images ]
     taskRef:
       params:
       - name: name
