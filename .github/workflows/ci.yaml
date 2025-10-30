@@ -60,7 +60,7 @@ jobs:
       - name: Archive the build to preserve permissions
         run: tar -cvzf updater-build.tgz bin/updater
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: updater-build
           path: updater-build.tgz
@@ -93,7 +93,7 @@ jobs:
       - name: Archive the build to preserve permissions
         run: tar -cvzf scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}.tgz image/scanner/bin/scanner
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}
           path: scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
@@ -177,7 +177,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: updater-build
 
@@ -190,12 +190,12 @@ jobs:
           source ./scripts/ci/lib.sh
           generate_genesis_dump
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: genesis-dump
           path: /tmp/genesis-dump/genesis-dump.zip
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: vuln-dump
           path: /tmp/vuln-dump
@@ -219,7 +219,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: updater-build
 
@@ -227,7 +227,7 @@ jobs:
         run: |
           tar xvzf updater-build.tgz
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: genesis-dump
           path: /tmp/genesis-dump
@@ -237,7 +237,7 @@ jobs:
           source ./scripts/ci/lib.sh
           generate_db_dump
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: db-dump
           path: /tmp/postgres/pg-definitions.sql.gz
@@ -267,7 +267,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}
 
@@ -275,7 +275,7 @@ jobs:
         run: |
           tar xvzf scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         # Run this step if it's not a PR or the PR contains the `generate-dumps-on-pr` label
         # When this step is skipped `get_genesis_dump` will pull the vulnerability data from our GCS bucket
         if: |
@@ -299,7 +299,7 @@ jobs:
       - name: Archive the bundle to preserve permissions
         run: tar -cvzf scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}.tgz image/scanner/rhel
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}
           path: scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
@@ -324,7 +324,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         if: |
           github.event_name != 'pull_request' ||
           contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr')
@@ -340,7 +340,7 @@ jobs:
       - name: Make db bundle
         run: image/db/rhel/create-bundle.sh image/db image/db/rhel
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: scanner-db-bundle
           path: image/db/rhel
@@ -383,7 +383,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}
 
@@ -391,7 +391,7 @@ jobs:
         run: |
           tar xvzf scanner-bundle-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: scanner-db-bundle
           path: image/db/rhel
@@ -494,7 +494,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: updater-build
 
@@ -502,7 +502,7 @@ jobs:
         run: |
           tar xvzf updater-build.tgz
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: genesis-dump
           path: /tmp/genesis-dump
@@ -510,12 +510,12 @@ jobs:
       - name: diff-dumps
         run: ./scripts/ci/jobs/diff-dumps.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: diff-dumps-inspect
           path: /tmp/diff-dumps-inspect
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: offline-dump
           path: /tmp/offline-dump/scanner-vuln-updates.zip
@@ -541,7 +541,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: offline-dump
 
@@ -612,7 +612,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: db-dump
           path: /tmp/postgres
@@ -641,12 +641,12 @@ jobs:
 
       - uses: ./.github/actions/handle-tagged-build
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: vuln-dump
           path: /tmp/vuln-dump
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: db-dump
           path: /tmp/postgres
@@ -673,7 +673,7 @@ jobs:
 
       - uses: ./.github/actions/job-preamble
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: vuln-dump
           path: /tmp/vuln-dump
