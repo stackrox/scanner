@@ -2,13 +2,14 @@
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners#about-code-owners
 # This will automatically assign a team / people as reviewers for PRs based on the files changed within the PR.
 
-* @stackrox/scanner
+* @stackrox/release-mgmt
 
+# Konflux related files
 # The RHTAP maintainers for ACS review all changes related to the Konflux pipelines, such as new
 # pipelines, parameter changes or automated task updates as well as Dockerfile updates.
 # rhacs-bot auto-approves MintMaker PRs for automated task and security updates.
-**/konflux.*Dockerfile  @stackrox/rhtap-maintainers @rhacs-bot
-/.konflux/              @stackrox/rhtap-maintainers @rhacs-bot
-/.tekton/               @stackrox/rhtap-maintainers @rhacs-bot
-rpms.*                  @stackrox/rhtap-maintainers @rhacs-bot
-.github/renovate.json5  @stackrox/rhtap-maintainers
+**/konflux.*Dockerfile  @stackrox/konflux-no-notifications @stackrox/release-mgmt-no-notifications
+/.konflux/              @stackrox/konflux-no-notifications @stackrox/release-mgmt-no-notifications
+/.tekton/               @stackrox/konflux-no-notifications @stackrox/release-mgmt-no-notifications
+rpms.*                  @stackrox/konflux-no-notifications @stackrox/release-mgmt-no-notifications
+.github/renovate.json5  @stackrox/konflux-no-notifications @stackrox/release-mgmt-no-notifications
