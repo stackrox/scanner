@@ -2,7 +2,7 @@
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners#about-code-owners
 # This will automatically assign a team / people as reviewers for PRs based on the files changed within the PR.
 
-* @stackrox/release-mgmt
+* @stackrox/scanner @stackrox/release-mgmt
 
 # Konflux related files
 # The RHTAP maintainers for ACS review all changes related to the Konflux pipelines, such as new
