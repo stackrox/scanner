@@ -2,13 +2,14 @@
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners#about-code-owners
 # This will automatically assign a team / people as reviewers for PRs based on the files changed within the PR.
 
-* @stackrox/scanner
+* @stackrox/scanner @stackrox/release-mgmt-no-email
 
-# The RHTAP maintainers for ACS review all changes related to the Konflux pipelines, such as new
+# The Konflux maintainers for ACS review all changes related to the Konflux pipelines, such as new
 # pipelines, parameter changes or automated task updates as well as Dockerfile updates.
-# rhacs-bot auto-approves MintMaker PRs for automated task and security updates.
-**/konflux.*Dockerfile  @stackrox/rhtap-maintainers @rhacs-bot
-/.konflux/              @stackrox/rhtap-maintainers @rhacs-bot
-/.tekton/               @stackrox/rhtap-maintainers @rhacs-bot
-rpms.*                  @stackrox/rhtap-maintainers @rhacs-bot
-.github/renovate.json5  @stackrox/rhtap-maintainers
+# Release engineers need to merge MintMaker PRs at the time of release.
+# rhacs-bot needs ability to auto-approve MintMaker PRs for automated task and security updates.
+**/konflux.*Dockerfile  @stackrox/konflux-maintainers-no-email @stackrox/release-mgmt-no-email @rhacs-bot
+/.konflux/              @stackrox/konflux-maintainers-no-email @stackrox/release-mgmt-no-email @rhacs-bot
+/.tekton/               @stackrox/konflux-maintainers-no-email @stackrox/release-mgmt-no-email @rhacs-bot
+rpms.*                  @stackrox/konflux-maintainers-no-email @stackrox/release-mgmt-no-email @rhacs-bot
+.github/renovate.json5  @stackrox/konflux-maintainers-no-email @stackrox/release-mgmt-no-email
