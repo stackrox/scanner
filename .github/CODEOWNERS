@@ -2,7 +2,7 @@
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners#about-code-owners
 # This will automatically assign a team / people as reviewers for PRs based on the files changed within the PR.
 
-* @stackrox/scanner @stackrox/release-mgmt-no-email
+* @stackrox/scanner
 
 # The Konflux maintainers for ACS review all changes related to the Konflux pipelines, such as new
 # pipelines, parameter changes or automated task updates as well as Dockerfile updates.
