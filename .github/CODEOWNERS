@@ -4,12 +4,11 @@
 
 * @stackrox/scanner
 
-# The Konflux maintainers for ACS review all changes related to the Konflux pipelines, such as new
-# pipelines, parameter changes or automated task updates as well as Dockerfile updates.
+# The Konflux maintainers for ACS review all changes related to the Konflux pipelines, Dockerfiles, etc.
 # Release engineers need to merge MintMaker PRs at the time of release.
 # rhacs-bot needs ability to auto-approve MintMaker PRs for automated task and security updates.
 **/konflux.*Dockerfile  @stackrox/konflux-maintainers-no-email @stackrox/release-mgmt-no-email @rhacs-bot
 /.konflux/              @stackrox/konflux-maintainers-no-email @stackrox/release-mgmt-no-email @rhacs-bot
 /.tekton/               @stackrox/konflux-maintainers-no-email @stackrox/release-mgmt-no-email @rhacs-bot
 rpms.*                  @stackrox/konflux-maintainers-no-email @stackrox/release-mgmt-no-email @rhacs-bot
-.github/renovate.json5  @stackrox/konflux-maintainers-no-email @stackrox/release-mgmt-no-email
+.github/renovate.json5  @stackrox/konflux-maintainers
