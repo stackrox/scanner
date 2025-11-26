@@ -1,20 +1,19 @@
 package nvdloader
 
 import (
+	"context"
 	"io"
-	"path/filepath"
 
 	"github.com/facebookincubator/nvdtools/vulndb"
-	"github.com/go-git/go-billy/v5/memfs"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/pkg/errors"
 	"github.com/stackrox/dotnet-scraper/types"
+	"github.com/stackrox/scanner/pkg/gitarchive"
 	"sigs.k8s.io/yaml"
 )
 
 const (
 	nvdEnricherRepo = "https://github.com/stackrox/dotnet-scraper.git"
+	nvdEnricherRef  = "main"
 )
 
 // FileFormatWrapper is a wrapper around .NET vulnerability file.
@@ -25,60 +24,56 @@ type FileFormatWrapper struct {
 
 // Fetch fetches .NET and ASP.NET vulnerabilities from their source.
 func Fetch() (map[string]*FileFormatWrapper, error) {
-	r, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
-		URL: nvdEnricherRepo,
+	ctx := context.Background()
+
+	result, err := gitarchive.Fetch(ctx, gitarchive.FetchOptions{
+		RepoURL: nvdEnricherRepo,
+		Ref:     nvdEnricherRef,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "running git clone")
+		return nil, errors.Wrap(err, "fetching dotnet-scraper archive")
 	}
+	defer result.Cleanup()
 
-	w, err := r.Worktree()
-	if err != nil {
-		return nil, errors.Wrap(err, "getting git worktree")
-	}
-
-	files, err := w.Filesystem.ReadDir("cves")
-	if err != nil {
-		return nil, errors.Wrap(err, "reading cve dir")
-	}
+	// GitHub ZIPs have root directory: dotnet-scraper-main/
 	resultMap := make(map[string]*FileFormatWrapper)
-	for _, file := range files {
-		if filepath.Ext(file.Name()) != ".yaml" {
+
+	for _, file := range result.ZipReader.File {
+		if !isInDir(file.Name, "dotnet-scraper-main/cves") || !hasExtension(file.Name, ".yaml") {
 			continue
 		}
-		path := filepath.Join("cves", file.Name())
 
-		iter, err := r.Log(&git.LogOptions{
-			FileName: &path,
-			Order:    git.LogOrderCommitterTime,
-		})
+		rc, err := file.Open()
 		if err != nil {
-			return nil, errors.Wrapf(err, "running git log for file: %v", path)
-		}
-		c, err := iter.Next()
-		if err != nil {
-			return nil, errors.Wrapf(err, "getting the latest commit for file: %v", path)
-		}
-		if c == nil || c.Committer.When.IsZero() {
-			return nil, errors.Errorf("latest found commit for %v is nil or does not have valid time", path)
+			return nil, errors.Wrapf(err, "opening file: %v", file.Name)
 		}
 
-		file, err := w.Filesystem.Open(path)
+		data, err := io.ReadAll(rc)
+		rc.Close()
 		if err != nil {
-			return nil, errors.Wrapf(err, "opening file: %v", path)
+			return nil, errors.Wrapf(err, "reading file: %v", file.Name)
 		}
-		data, err := io.ReadAll(file)
-		if err != nil {
-			return nil, errors.Wrapf(err, "reading file: %v", path)
-		}
+
 		var ff types.FileFormat
 		if err := yaml.Unmarshal(data, &ff); err != nil {
-			return nil, errors.Wrapf(err, "unmarshalling file: %v", path)
+			return nil, errors.Wrapf(err, "unmarshalling file: %v", file.Name)
 		}
+
 		resultMap[ff.ID] = &FileFormatWrapper{
-			LastUpdated: c.Committer.When.Format(vulndb.TimeLayout),
+			LastUpdated: file.Modified.Format(vulndb.TimeLayout),
 			FileFormat:  ff,
 		}
 	}
+
 	return resultMap, nil
+}
+
+// isInDir checks if a file path is within a directory
+func isInDir(path, dir string) bool {
+	return len(path) > len(dir) && path[:len(dir)] == dir && path[len(dir)] == '/'
+}
+
+// hasExtension checks if a file path has the given extension
+func hasExtension(path, ext string) bool {
+	return len(path) > len(ext) && path[len(path)-len(ext):] == ext
 }

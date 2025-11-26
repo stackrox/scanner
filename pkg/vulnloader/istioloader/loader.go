@@ -1,18 +1,18 @@
 package istioloader
 
 import (
-	"os"
+	"context"
 	"path/filepath"
 
-	"github.com/go-git/go-git/v5"
 	"github.com/pkg/errors"
+	"github.com/stackrox/scanner/pkg/gitarchive"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
 )
 
 const (
 	istioCVEsRepository = "https://github.com/stackrox/istio-cves.git"
-	istioCVEsRefName    = "refs/heads/main"
+	istioCVEsRef        = "main"
 )
 
 func init() {
@@ -22,19 +22,24 @@ func init() {
 type loader struct{}
 
 func (l loader) DownloadFeedsToPath(outputDir string) error {
-	tmpIstioDir := filepath.Join(outputDir, vulndump.IstioDirName+"-tmp")
-	if err := os.MkdirAll(tmpIstioDir, 0755); err != nil {
-		return errors.Wrapf(err, "creating subdir for %s", tmpIstioDir)
-	}
+	ctx := context.Background()
 
-	_, err := git.PlainClone(tmpIstioDir, false, &git.CloneOptions{
-		URL:           istioCVEsRepository,
-		ReferenceName: istioCVEsRefName,
-		SingleBranch:  true,
+	result, err := gitarchive.Fetch(ctx, gitarchive.FetchOptions{
+		RepoURL: istioCVEsRepository,
+		Ref:     istioCVEsRef,
 	})
 	if err != nil {
-		return err
+		return errors.Wrap(err, "fetching Istio CVEs archive")
+	}
+	defer result.Cleanup()
+
+	// GitHub ZIPs have root directory: istio-cves-main/
+	srcDir := "istio-cves-main/vulns"
+	destDir := filepath.Join(outputDir, vulndump.IstioDirName)
+
+	if err := gitarchive.ExtractDirectory(result.ZipReader, srcDir, destDir); err != nil {
+		return errors.Wrap(err, "extracting vulns directory")
 	}
 
-	return os.Rename(filepath.Join(tmpIstioDir, "vulns"), filepath.Join(outputDir, vulndump.IstioDirName))
+	return nil
 }

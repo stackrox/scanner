@@ -1,18 +1,18 @@
 package k8sloader
 
 import (
-	"os"
+	"context"
 	"path/filepath"
 
-	"github.com/go-git/go-git/v5"
 	"github.com/pkg/errors"
+	"github.com/stackrox/scanner/pkg/gitarchive"
 	"github.com/stackrox/scanner/pkg/vulndump"
 	"github.com/stackrox/scanner/pkg/vulnloader"
 )
 
 const (
 	k8sCVEsRepository = "https://github.com/stackrox/k8s-cves.git"
-	k8sCVEsRefName    = "refs/heads/main"
+	k8sCVEsRef        = "main"
 )
 
 func init() {
@@ -23,19 +23,24 @@ type loader struct{}
 
 // DownloadFeedsToPath downloads the Kubernetes feeds to the given path.
 func (l *loader) DownloadFeedsToPath(outputDir string) error {
-	tmpK8sDir := filepath.Join(outputDir, vulndump.K8sDirName+"-tmp")
-	if err := os.MkdirAll(tmpK8sDir, 0755); err != nil {
-		return errors.Wrapf(err, "creating subdir for %s", tmpK8sDir)
-	}
+	ctx := context.Background()
 
-	_, err := git.PlainClone(tmpK8sDir, false, &git.CloneOptions{
-		URL:           k8sCVEsRepository,
-		ReferenceName: k8sCVEsRefName,
-		SingleBranch:  true,
+	result, err := gitarchive.Fetch(ctx, gitarchive.FetchOptions{
+		RepoURL: k8sCVEsRepository,
+		Ref:     k8sCVEsRef,
 	})
 	if err != nil {
-		return err
+		return errors.Wrap(err, "fetching k8s CVEs archive")
+	}
+	defer result.Cleanup()
+
+	// GitHub ZIPs have root directory: k8s-cves-main/
+	srcDir := "k8s-cves-main/cves"
+	destDir := filepath.Join(outputDir, vulndump.K8sDirName)
+
+	if err := gitarchive.ExtractDirectory(result.ZipReader, srcDir, destDir); err != nil {
+		return errors.Wrap(err, "extracting cves directory")
 	}
 
-	return os.Rename(filepath.Join(tmpK8sDir, "cves"), filepath.Join(outputDir, vulndump.K8sDirName))
+	return nil
 }
