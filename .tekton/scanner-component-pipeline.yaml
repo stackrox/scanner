@@ -166,8 +166,8 @@ spec:
   - name: init
     params:
     - name: image-url
-        # We can't provide a StackRox-style tag because it is not known at this time (requires cloning source, etc.)
-        # As a workaround, we still provide a unique tag that's based on a revision in order for this task to comply with
+      # We can't provide a StackRox-style tag because it is not known at this time (requires cloning source, etc.)
+      # As a workaround, we still provide a unique tag that's based on a revision in order for this task to comply with
       # its expected input. We later actually add this tag on a built image with the apply-index-image-tag task.
       value: $(params.output-image-repo):konflux-$(params.revision)
     - name: rebuild
