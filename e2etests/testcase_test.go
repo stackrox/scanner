@@ -3507,7 +3507,7 @@ var testCases = []testCase{
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.2.2-6.el9_5.1",
+				FixedBy:       "1:3.5.1-4.el9_7",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3549,7 +3549,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 				NamespaceName: "rhel:9",
 				Version:       "1:3.0.1-23.el9_0.x86_64",
 				VersionFormat: "rpm",
-				FixedBy:       "1:3.2.2-6.el9_5.1",
+				FixedBy:       "1:3.5.1-4.el9_7",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2022:7288",
@@ -3595,7 +3595,7 @@ For more details about the security issue(s), including the impact, a CVSS score
 			},
 			{
 				AddedBy:       "sha256:2412e60e610160d090f7e974a208c6ffd26b2d530361b7c9aa8967e160ac7996",
-				FixedBy:       "2:8.2.2637-22.el9_6.1",
+				FixedBy:       "2:8.2.2637-23.el9_7",
 				Name:          "vim-minimal",
 				NamespaceName: "rhel:9",
 				Version:       "2:8.2.2637-16.el9_0.2.x86_64",
@@ -4028,7 +4028,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				Name:          "tomcat",
 				VersionFormat: component.JavaSourceType.String(),
 				Version:       "9.0.59",
-				FixedBy:       "9.0.108",
+				FixedBy:       "9.0.110",
 				Location:      "tomcat-embed-core-9.0.59.jar",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
@@ -4434,7 +4434,7 @@ All OpenShift Container Platform 4.10 users are advised to upgrade to these upda
 				VersionFormat: "rpm",
 				Version:       "1:2.2.6-60.el8_10.x86_64",
 				AddedBy:       "sha256:7a6d2526dba4ead4120381a83ce344db5959e947aab63fa3d1a3fae4f7986d62",
-				FixedBy:       "1:2.2.6-63.el8_10",
+				FixedBy:       "1:2.2.6-64.el8_10",
 				Vulnerabilities: []apiV1.Vulnerability{
 					{
 						Name:          "RHSA-2025:0083",
