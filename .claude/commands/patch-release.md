@@ -25,7 +25,7 @@ Execute each step in order, documenting progress.
 If PATCH_NUMBER ($2) was not provided, auto-detect the next patch number:
 ```bash
 git fetch origin --tags
-git tag --list '$1.*' | grep -E '^$1\.[0-9]+$' | sort -V | tail -1
+git tag --list "$1.*" | grep -E "^$1\.[0-9]+$" | sort -V | tail -1
 ```
 Extract the patch number from the latest tag and increment by 1. For example, if the latest tag is `2.36.6`, the next patch number is `7`.
 
