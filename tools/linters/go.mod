@@ -1,8 +1,8 @@
 module github.com/stackrox/scanner/tools/linters
 
-go 1.23
+go 1.24
 
-toolchain go1.23.6
+toolchain go1.24.4
 
 require (
 	github.com/golangci/golangci-lint v1.63.4
