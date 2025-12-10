@@ -144,6 +144,11 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 			feature.Vulnerabilities = nil
 			matching.Vulnerabilities = nil
 
+			// Clear FixedBy as it changes frequently when new advisories are published.
+			// The per-vulnerability FixedBy is still checked above via checkMatch().
+			feature.FixedBy = ""
+			matching.FixedBy = ""
+
 			// Ensure the parts of the feature aside from the provided executables and vulnerabilities are equal, too.
 			assert.Equal(t, feature, *matching)
 		})
