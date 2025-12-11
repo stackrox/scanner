@@ -129,4 +129,4 @@ Inform the user of remaining manual tasks:
 
 ## Documentation
 
-Update the release log at `/tmp/scanner-$1.$2-release.md` with the status of each step as you complete it.
+Update the release log at `/tmp/scanner-$1.${PATCH_NUMBER}-release.md` with the status of each step as you complete it.
