@@ -282,6 +282,16 @@ main() {
 
     local version="${release}.${patch_number}"
     local previous_tag="${latest_tag:-}"
+
+    # Check if the tag already exists
+    if git rev-parse "refs/tags/$version" >/dev/null 2>&1; then
+        if [[ "$DRY_RUN" == "true" ]]; then
+            log_warn "Tag '$version' already exists (dry-run mode, continuing)."
+        else
+            log_error "Tag '$version' already exists. Aborting release."
+            exit 1
+        fi
+    fi
     echo
 
     # Step 3: Verify branch state.
