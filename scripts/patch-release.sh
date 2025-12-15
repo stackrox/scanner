@@ -451,22 +451,19 @@ main() {
         gh_cmd="$gh_cmd $latest_flag"
     fi
 
+    # Build gh release create command as an array for safe argument handling
+    gh_args=(release create "${version}" --title "${version}" --generate-notes)
+    if [[ -n "$previous_tag" ]]; then
+        gh_args+=(--notes-start-tag "${previous_tag}")
+    fi
+    if [[ -n "$latest_flag" ]]; then
+        gh_args+=($latest_flag)
+    fi
+
     if [[ "$DRY_RUN" == "true" ]]; then
-        log_dry_run "$gh_cmd"
+        log_dry_run "gh ${gh_args[*]}"
     else
-        if [[ -n "$previous_tag" ]]; then
-            if [[ -n "$latest_flag" ]]; then
-                gh release create "${version}" --title "${version}" --generate-notes --notes-start-tag "${previous_tag}" --latest=false
-            else
-                gh release create "${version}" --title "${version}" --generate-notes --notes-start-tag "${previous_tag}"
-            fi
-        else
-            if [[ -n "$latest_flag" ]]; then
-                gh release create "${version}" --title "${version}" --generate-notes --latest=false
-            else
-                gh release create "${version}" --title "${version}" --generate-notes
-            fi
-        fi
+        gh "${gh_args[@]}"
     fi
     echo
 
