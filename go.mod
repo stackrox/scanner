@@ -21,7 +21,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.1-0.20210315223345-82c243799c99
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/guregu/null v4.0.0+incompatible
-	github.com/hashicorp/go-version v1.7.0
+	github.com/hashicorp/go-version v1.8.0
 	github.com/heroku/docker-registry-client v0.0.0
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
 	github.com/knqyf263/go-rpm-version v0.0.0-20220614171824-631e686d1075
