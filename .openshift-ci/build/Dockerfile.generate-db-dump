@@ -1,4 +1,4 @@
-FROM quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+FROM quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
 
 COPY . /go/src/github.com/stackrox/scanner
 WORKDIR /go/src/github.com/stackrox/scanner

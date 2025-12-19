@@ -39,7 +39,7 @@ jobs:
   pre-build-updater:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -72,7 +72,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -101,7 +101,7 @@ jobs:
   style-check:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -120,7 +120,7 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -139,7 +139,7 @@ jobs:
   db-integration-tests:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -167,7 +167,7 @@ jobs:
     needs:
       - pre-build-updater
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -209,7 +209,7 @@ jobs:
     needs:
       - generate-genesis-dump
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -257,7 +257,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -314,7 +314,7 @@ jobs:
     needs:
       - generate-db-dump
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -365,7 +365,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -438,7 +438,7 @@ jobs:
       - build-images
     runs-on: ubuntu-latest
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     env:
       QUAY_RHACS_ENG_RW_USERNAME: ${{ secrets.QUAY_RHACS_ENG_RW_USERNAME }}
       QUAY_RHACS_ENG_RW_PASSWORD: ${{ secrets.QUAY_RHACS_ENG_RW_PASSWORD }}
@@ -484,7 +484,7 @@ jobs:
     needs:
       - generate-genesis-dump
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -602,7 +602,7 @@ jobs:
     needs:
       - generate-db-dump
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -630,7 +630,7 @@ jobs:
     needs:
       - generate-db-dump
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -664,7 +664,7 @@ jobs:
     needs:
       - generate-db-dump
     container:
-      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.5.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
