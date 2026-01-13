@@ -6,9 +6,15 @@ SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./lib.sh
 source "$SCRIPTS_ROOT/lib.sh"
 
+# Store the original repo root (where we were invoked from).
+ORIGINAL_REPO_ROOT="$(git rev-parse --show-toplevel)"
+
 # Flags
 DRY_RUN=false
 YES=false
+
+# Temp worktree directory (set during execution).
+WORKTREE_DIR=""
 
 # Colors for output
 RED='\033[0;31m'
@@ -56,6 +62,15 @@ log_error() {
 
 log_dry_run() {
     echo -e "${YELLOW}[DRY-RUN]${NC} Would execute: $*"
+}
+
+# Cleanup function to remove the temporary worktree.
+cleanup_worktree() {
+    if [[ -n "$WORKTREE_DIR" && -d "$WORKTREE_DIR" ]]; then
+        log_info "Cleaning up temporary worktree..."
+        cd "$ORIGINAL_REPO_ROOT"
+        git worktree remove --force "$WORKTREE_DIR" 2>/dev/null || rm -rf "$WORKTREE_DIR"
+    fi
 }
 
 # Prompt user for confirmation. Returns 0 if confirmed, 1 if declined.
@@ -294,27 +309,37 @@ main() {
     fi
     echo
 
-    # Step 3: Verify branch state.
-    log_info "Checking out and updating release branch..."
+    # Step 3: Create temporary worktree for the release branch.
+    log_info "Creating temporary worktree for release branch..."
+    WORKTREE_DIR=$(mktemp -d "/tmp/scanner-release-${version}-XXXXXX")
+    trap cleanup_worktree EXIT
+
     if [[ "$DRY_RUN" == "true" ]]; then
-        log_dry_run "git checkout $release_branch"
+        log_dry_run "git worktree add $WORKTREE_DIR $release_branch"
+        log_dry_run "cd $WORKTREE_DIR"
         log_dry_run "git pull origin $release_branch"
-        log_warn "Skipping branch checkout in dry-run mode; remaining checks use current branch state"
+        log_warn "Skipping worktree creation in dry-run mode; remaining checks use current branch state"
     else
-        git checkout "$release_branch"
+        git worktree add "$WORKTREE_DIR" "$release_branch"
+        cd "$WORKTREE_DIR"
         git pull origin "$release_branch"
+        log_info "Working in temporary directory: $WORKTREE_DIR"
     fi
     echo
 
     # Step 4: Check if release is necessary.
-    local head_commit_msg
-    head_commit_msg=$(git log -1 --format='%s')
+    # In dry-run mode, use the remote branch ref since we didn't create the worktree.
+    local branch_ref="HEAD"
     if [[ "$DRY_RUN" == "true" ]]; then
-        log_info "(Note: HEAD commit is from current branch, not $release_branch)"
+        branch_ref="origin/${release_branch}"
+        log_info "(Using origin/${release_branch} for dry-run checks)"
     fi
 
+    local head_commit_msg
+    head_commit_msg=$(git log -1 --format='%s' "$branch_ref")
+
     if [[ "$head_commit_msg" =~ ^Release\ [0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        log_warn "HEAD is already a release commit: $head_commit_msg"
+        log_warn "Tip of $release_branch is already a release commit: $head_commit_msg"
         if ! confirm "Create another release commit on top?"; then
             log_info "Aborted by user."
             exit 0
@@ -357,7 +382,7 @@ main() {
     echo
     if [[ -n "$previous_tag" ]]; then
         local commits
-        commits=$(git log "${previous_tag}..HEAD" --oneline)
+        commits=$(git log "${previous_tag}..${branch_ref}" --oneline)
         if [[ -z "$commits" ]]; then
             log_warn "No commits since $previous_tag"
             if ! confirm "Create an empty release anyway?"; then
@@ -368,7 +393,7 @@ main() {
             echo "$commits"
         fi
     else
-        git log --oneline -10
+        git log "$branch_ref" --oneline -10
         log_info "(Showing last 10 commits; no previous tag to compare against)"
     fi
     echo
@@ -392,8 +417,19 @@ main() {
     # Step 7: Ask about cherry-picks.
     if ! [[ "$YES" == "true" ]]; then
         if confirm "Do you need to cherry-pick any commits before proceeding?" "n"; then
-            log_info "Pausing for cherry-picks. Run your cherry-pick commands, then re-run this script."
-            log_info "Example: git cherry-pick <commit-hash>"
+            log_info "Pausing for cherry-picks."
+            log_info "Run your cherry-pick commands in the worktree directory:"
+            log_info "  cd ${WORKTREE_DIR}"
+            log_info "  git cherry-pick <commit-hash>"
+            log_info ""
+            log_info "Then re-run this script to continue."
+            log_info ""
+            log_info "To clean up the worktree if you decide not to proceed:"
+            log_info "  cd ${ORIGINAL_REPO_ROOT}"
+            log_info "  git worktree remove ${WORKTREE_DIR}"
+            # Disable cleanup trap since user wants to cherry-pick manually.
+            trap - EXIT
+            WORKTREE_DIR=""
             exit 0
         fi
         echo
@@ -423,16 +459,26 @@ main() {
         log_info "Tag $version is on HEAD"
     fi
 
-    log_info "Recent commits:"
-    git log --oneline -5
-    echo
+    if [[ "$DRY_RUN" != "true" ]]; then
+        log_info "Recent commits:"
+        git log --oneline -5
+        echo
+    fi
 
     # Step 10: Push.
     if ! confirm "Push tag and commits to origin? (Requires bypass branch protection)" "y"; then
         log_info "Aborted by user."
-        log_info "To push manually:"
+        log_info "To push manually, run from the worktree directory:"
+        log_info "  cd ${WORKTREE_DIR}"
         log_info "  git push origin ${version}"
         log_info "  git push --set-upstream origin ${release_branch}"
+        log_info ""
+        log_info "To clean up the worktree afterwards:"
+        log_info "  cd ${ORIGINAL_REPO_ROOT}"
+        log_info "  git worktree remove ${WORKTREE_DIR}"
+        # Disable cleanup trap since user wants to push manually.
+        trap - EXIT
+        WORKTREE_DIR=""
         exit 0
     fi
 
