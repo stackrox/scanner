@@ -289,8 +289,8 @@ main() {
         log_info "Auto-detected patch number: $patch_number"
     else
         log_info "Using provided patch number: $patch_number"
-        if [[ ! "$patch_number" =~ ^[0-9]+$ ]]; then
-            log_error "Invalid patch number: '$patch_number'. Must be a non-negative integer."
+        if [[ ! "$patch_number" =~ ^[0-9]+$ || "$patch_number" -lt 1 ]]; then
+            log_error "Invalid patch number: '$patch_number'. Must be a positive integer (>= 1)."
             exit 1
         fi
     fi
