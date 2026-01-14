@@ -503,14 +503,6 @@ main() {
         fi
     fi
 
-    local gh_cmd="gh release create ${version} --title ${version} --generate-notes"
-    if [[ -n "$previous_tag" ]]; then
-        gh_cmd="$gh_cmd --notes-start-tag ${previous_tag}"
-    fi
-    if [[ -n "$latest_flag" ]]; then
-        gh_cmd="$gh_cmd $latest_flag"
-    fi
-
     # Build gh release create command as an array for safe argument handling
     gh_args=(release create "${version}" --title "${version}" --generate-notes)
     if [[ -n "$previous_tag" ]]; then
