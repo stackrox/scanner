@@ -509,7 +509,7 @@ main() {
         gh_args+=(--notes-start-tag "${previous_tag}")
     fi
     if [[ -n "$latest_flag" ]]; then
-        gh_args+=($latest_flag)
+        gh_args+=("$latest_flag")
     fi
 
     if [[ "$DRY_RUN" == "true" ]]; then
