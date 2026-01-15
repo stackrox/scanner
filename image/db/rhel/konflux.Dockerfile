@@ -1,4 +1,4 @@
-FROM registry.redhat.io/rhel8/postgresql-15:latest@sha256:0453954b3a4207407c3ebd0fd691d402f55c47842d9f80f2290c0127fff72729 AS scanner-db-common
+FROM registry.redhat.io/rhel9/postgresql-15:latest AS scanner-db-common
 
 ARG SCANNER_TAG
 RUN if [[ "$SCANNER_TAG" == "" ]]; then >&2 echo "error: required SCANNER_TAG arg is unset"; exit 6; fi
@@ -57,7 +57,7 @@ FROM scanner-db-common AS scanner-db-slim
 LABEL \
     com.redhat.component="rhacs-scanner-db-slim-container" \
     io.k8s.display-name="scanner-db-slim" \
-    name="advanced-cluster-security/rhacs-scanner-db-slim-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-db-slim-rhel9"
 
 ENV ROX_SLIM_MODE="true"
 
@@ -67,7 +67,7 @@ FROM scanner-db-common AS scanner-db
 LABEL \
     com.redhat.component="rhacs-scanner-db-container" \
     io.k8s.display-name="scanner-db" \
-    name="advanced-cluster-security/rhacs-scanner-db-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-db-rhel9"
 
 COPY --chown=0:0 .konflux/scanner-data/blob-pg-definitions.sql.gz \
      /docker-entrypoint-initdb.d/definitions.sql.gz
