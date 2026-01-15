@@ -59,7 +59,7 @@ COPY --chown=65534:65534 --from=builder /src/image/scanner/dump/genesis_manifest
 
 COPY LICENSE /licenses/LICENSE
 
-RUN microdnf install xz && \
+RUN microdnf install -y xz && \
     microdnf clean all && \
     # (Optional) Remove line below to keep package management utilities
     # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
