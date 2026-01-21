@@ -24,13 +24,14 @@ NC='\033[0m' # No Color
 
 usage() {
     cat <<EOF
-Usage: $(basename "$0") [OPTIONS] <RELEASE> [PATCH_NUMBER]
+Usage: $(basename "$0") [OPTIONS] <VERSION>
 
 Create a patch release for scanner.
 
 Arguments:
-  RELEASE       Release version (e.g., 2.36)
-  PATCH_NUMBER  Optional patch number (auto-detected if omitted)
+  VERSION       Release version in one of these formats:
+                  X.Y      - Auto-detect next patch number (e.g., 2.36)
+                  X.Y.Z    - Use specific patch number (e.g., 2.36.7)
 
 Options:
   --dry-run     Show what would happen without executing
@@ -39,7 +40,7 @@ Options:
 
 Examples:
   $(basename "$0") 2.36              # Auto-detect next patch number
-  $(basename "$0") 2.36 7            # Create 2.36.7 specifically
+  $(basename "$0") 2.36.7            # Create 2.36.7 specifically
   $(basename "$0") --dry-run 2.36    # Preview what would happen
 
 Prerequisites:
@@ -233,15 +234,22 @@ main() {
 
     if [[ ${#positional_args[@]} -lt 1 ]]; then
         usage
-        die "RELEASE argument is required"
+        die "VERSION argument is required"
     fi
 
-    release="${positional_args[0]}"
-    patch_number="${positional_args[1]:-}"
+    local version_arg="${positional_args[0]}"
 
-    # Validate release format.
-    if [[ ! "$release" =~ ^[0-9]+\.[0-9]+$ ]]; then
-        die "Invalid RELEASE format: $release (expected X.Y, e.g., 2.36)"
+    # Parse version argument: accept X.Y or X.Y.Z format.
+    if [[ "$version_arg" =~ ^([0-9]+\.[0-9]+)\.([0-9]+)$ ]]; then
+        # X.Y.Z format - extract release and patch number.
+        release="${BASH_REMATCH[1]}"
+        patch_number="${BASH_REMATCH[2]}"
+    elif [[ "$version_arg" =~ ^[0-9]+\.[0-9]+$ ]]; then
+        # X.Y format - patch number will be auto-detected.
+        release="$version_arg"
+        patch_number=""
+    else
+        die "Invalid VERSION format: $version_arg (expected X.Y or X.Y.Z, e.g., 2.36 or 2.36.7)"
     fi
 
     if [[ "$DRY_RUN" == "true" ]]; then
