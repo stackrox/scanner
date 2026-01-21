@@ -6,7 +6,22 @@ FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 
 COPY bundle.tar.gz /
 WORKDIR /bundle
-RUN microdnf install -y tar gzip && tar -zxf /bundle.tar.gz
+RUN microdnf install -y tar gzip && \
+    echo "=== UBI9 DIAGNOSTIC: tar version ===" && \
+    tar --version && \
+    echo "=== UBI9 DIAGNOSTIC: filesystem type ===" && \
+    df -T /bundle && \
+    echo "=== UBI9 DIAGNOSTIC: extracting bundle ===" && \
+    tar -zxvf /bundle.tar.gz 2>&1 | tee /tmp/tar-extract.log | tail -50 && \
+    echo "=== UBI9 DIAGNOSTIC: tar exit code: $? ===" && \
+    echo "=== UBI9 DIAGNOSTIC: checking THIRD_PARTY_NOTICES ===" && \
+    ls -la /bundle/ | grep -i third || echo "THIRD_PARTY_NOTICES not found at top level" && \
+    find /bundle -name "*THIRD_PARTY*" -type d -ls 2>&1 | head -20 || echo "No THIRD_PARTY dirs found" && \
+    echo "=== UBI9 DIAGNOSTIC: testing problematic directory name ===" && \
+    mkdir -p /tmp/test-dir/cloud.google.com-go-errorreporting && echo "Test dir created successfully" || echo "Test dir creation FAILED" && \
+    echo "=== UBI9 DIAGNOSTIC: bundle contents summary ===" && \
+    ls -la /bundle/ && \
+    echo "=== END UBI9 DIAGNOSTICS ==="
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
