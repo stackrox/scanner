@@ -67,7 +67,11 @@ jobs:
 
   pre-build-scanner:
     needs: define-scanner-job-matrix
-    runs-on: ubuntu-latest
+    # Pin to ubuntu-22.04 due to QEMU regression in ubuntu-24.04 that breaks UBI9 builds
+    # UBI9 glibc uses fchmodat2 syscall which fails under QEMU emulation on ubuntu-24.04
+    # causing tar extraction failures for arm64 (THIRD_PARTY_NOTICES becomes empty)
+    # Track: https://github.com/actions/runner-images/issues/11662
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
@@ -248,7 +252,11 @@ jobs:
     if: |
       always() &&
       (needs.generate-genesis-dump.result == 'success' || needs.generate-genesis-dump.result == 'skipped')
-    runs-on: ubuntu-latest
+    # Pin to ubuntu-22.04 due to QEMU regression in ubuntu-24.04 that breaks UBI9 builds
+    # UBI9 glibc uses fchmodat2 syscall which fails under QEMU emulation on ubuntu-24.04
+    # causing tar extraction failures for arm64 (THIRD_PARTY_NOTICES becomes empty)
+    # Track: https://github.com/actions/runner-images/issues/11662
+    runs-on: ubuntu-22.04
     needs:
       - define-scanner-job-matrix
       - pre-build-scanner
@@ -356,7 +364,11 @@ jobs:
       QUAY_RHACS_ENG_RW_PASSWORD: ${{ secrets.QUAY_RHACS_ENG_RW_PASSWORD }}
       QUAY_STACKROX_IO_RW_USERNAME: ${{ secrets.QUAY_STACKROX_IO_RW_USERNAME }}
       QUAY_STACKROX_IO_RW_PASSWORD: ${{ secrets.QUAY_STACKROX_IO_RW_PASSWORD }}
-    runs-on: ubuntu-latest
+    # Pin to ubuntu-22.04 due to QEMU regression in ubuntu-24.04 that breaks UBI9 builds
+    # UBI9 glibc uses fchmodat2 syscall which fails under QEMU emulation on ubuntu-24.04
+    # causing tar extraction failures for arm64 (THIRD_PARTY_NOTICES becomes empty)
+    # Track: https://github.com/actions/runner-images/issues/11662
+    runs-on: ubuntu-22.04
     needs:
       - define-scanner-job-matrix
       - generate-scanner-bundle
