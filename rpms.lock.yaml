@@ -11,7 +11,13 @@ arches:
     name: xz
     evr: 5.2.5-8.el9_0
     sourcerpm: xz-5.2.5-8.el9_0.src.rpm
-  source: []
+  source:
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_0.src.rpm
+    repoid: rhel-9-for-aarch64-baseos-source-rpms
+    size: 1168293
+    checksum: sha256:bce98f3a307e75a8ac28f909e29b41d64b15461fa9ddf0bf4ef3c2f6de946b46
+    name: xz
+    evr: 5.2.5-8.el9_0
   module_metadata: []
 - arch: ppc64le
   packages:
@@ -22,7 +28,13 @@ arches:
     name: xz
     evr: 5.2.5-8.el9_0
     sourcerpm: xz-5.2.5-8.el9_0.src.rpm
-  source: []
+  source:
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_0.src.rpm
+    repoid: rhel-9-for-ppc64le-baseos-source-rpms
+    size: 1168293
+    checksum: sha256:bce98f3a307e75a8ac28f909e29b41d64b15461fa9ddf0bf4ef3c2f6de946b46
+    name: xz
+    evr: 5.2.5-8.el9_0
   module_metadata: []
 - arch: s390x
   packages:
@@ -33,7 +45,13 @@ arches:
     name: xz
     evr: 5.2.5-8.el9_0
     sourcerpm: xz-5.2.5-8.el9_0.src.rpm
-  source: []
+  source:
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_0.src.rpm
+    repoid: rhel-9-for-s390x-baseos-source-rpms
+    size: 1168293
+    checksum: sha256:bce98f3a307e75a8ac28f909e29b41d64b15461fa9ddf0bf4ef3c2f6de946b46
+    name: xz
+    evr: 5.2.5-8.el9_0
   module_metadata: []
 - arch: x86_64
   packages:
@@ -44,5 +62,11 @@ arches:
     name: xz
     evr: 5.2.5-8.el9_0
     sourcerpm: xz-5.2.5-8.el9_0.src.rpm
-  source: []
+  source:
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_0.src.rpm
+    repoid: rhel-9-for-x86_64-baseos-source-rpms
+    size: 1168293
+    checksum: sha256:bce98f3a307e75a8ac28f909e29b41d64b15461fa9ddf0bf4ef3c2f6de946b46
+    name: xz
+    evr: 5.2.5-8.el9_0
   module_metadata: []
