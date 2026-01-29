@@ -6,26 +6,8 @@ ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi9-minimal
 ARG BASE_TAG=latest
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
-COPY bundle.tar.gz /
-
-WORKDIR /bundle
-RUN microdnf install -y tar gzip && \
-    echo "=== UBI9 DIAGNOSTIC: tar version ===" && \
-    tar --version && \
-    echo "=== UBI9 DIAGNOSTIC: filesystem type ===" && \
-    df -T /bundle && \
-    echo "=== UBI9 DIAGNOSTIC: extracting bundle ===" && \
-    tar -zxvf /bundle.tar.gz 2>&1 | tee /tmp/tar-extract.log | tail -50 && \
-    echo "=== UBI9 DIAGNOSTIC: tar exit code: $? ===" && \
-    echo "=== UBI9 DIAGNOSTIC: checking THIRD_PARTY_NOTICES ===" && \
-    ls -la /bundle/ | grep -i third || echo "THIRD_PARTY_NOTICES not found at top level" && \
-    find /bundle -name "*THIRD_PARTY*" -type d -ls 2>&1 | head -20 || echo "No THIRD_PARTY dirs found" && \
-    echo "=== UBI9 DIAGNOSTIC: testing problematic directory name ===" && \
-    mkdir -p /tmp/test-dir/cloud.google.com-go-errorreporting && echo "Test dir created successfully" || echo "Test dir creation FAILED" && \
-    echo "=== UBI9 DIAGNOSTIC: bundle contents summary ===" && \
-    ls -la /bundle/ && \
-    echo "=== END UBI9 DIAGNOSTICS ==="
+# Bundle is pre-extracted on the host to avoid tar issues under QEMU emulation.
+# The bundle/ directory should contain: etc/
 
 FROM ${RPMS_REGISTRY}/${RPMS_BASE_IMAGE}:${RPMS_BASE_TAG} AS postgres_rpms
 
@@ -53,7 +35,7 @@ ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
 
 COPY signatures/PGDG-RPM-GPG-KEY-RHEL /
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
-COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
+COPY bundle/etc/postgresql.conf bundle/etc/pg_hba.conf /etc/
 COPY --from=postgres_rpms /rpms/postgres.rpm /rpms/postgres-libs.rpm /rpms/postgres-server.rpm /rpms/postgres-contrib.rpm /tmp/
 
 RUN microdnf upgrade -y --nobest && \

@@ -2,26 +2,8 @@ ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi9-minimal
 ARG BASE_TAG=latest
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
-
-COPY bundle.tar.gz /
-WORKDIR /bundle
-RUN microdnf install -y tar gzip && \
-    echo "=== UBI9 DIAGNOSTIC: tar version ===" && \
-    tar --version && \
-    echo "=== UBI9 DIAGNOSTIC: filesystem type ===" && \
-    df -T /bundle && \
-    echo "=== UBI9 DIAGNOSTIC: extracting bundle ===" && \
-    tar -zxvf /bundle.tar.gz 2>&1 | tee /tmp/tar-extract.log | tail -50 && \
-    echo "=== UBI9 DIAGNOSTIC: tar exit code: $? ===" && \
-    echo "=== UBI9 DIAGNOSTIC: checking THIRD_PARTY_NOTICES ===" && \
-    ls -la /bundle/ | grep -i third || echo "THIRD_PARTY_NOTICES not found at top level" && \
-    find /bundle -name "*THIRD_PARTY*" -type d -ls 2>&1 | head -20 || echo "No THIRD_PARTY dirs found" && \
-    echo "=== UBI9 DIAGNOSTIC: testing problematic directory name ===" && \
-    mkdir -p /tmp/test-dir/cloud.google.com-go-errorreporting && echo "Test dir created successfully" || echo "Test dir creation FAILED" && \
-    echo "=== UBI9 DIAGNOSTIC: bundle contents summary ===" && \
-    ls -la /bundle/ && \
-    echo "=== END UBI9 DIAGNOSTICS ==="
+# Bundle is pre-extracted on the host to avoid tar issues under QEMU emulation.
+# The bundle/ directory should contain: scanner, THIRD_PARTY_NOTICES/, nvd_definitions/, etc.
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
@@ -42,9 +24,9 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 COPY scripts /
 
-COPY --from=extracted_bundle /bundle/scanner ./
+COPY bundle/scanner ./
 
-COPY --from=extracted_bundle /bundle/THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
+COPY bundle/THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
 RUN microdnf upgrade -y --nobest && \
     microdnf install -y xz && \
@@ -66,11 +48,11 @@ ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV ISTIO_DEFINITIONS_DIR="/istio_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${ISTIO_DEFINITIONS_DIR}/" ".${ISTIO_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle /bundle/genesis_manifests.json ./
+COPY --chown=65534:65534 "bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 "bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 "bundle${ISTIO_DEFINITIONS_DIR}/" ".${ISTIO_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 "bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
+COPY --chown=65534:65534 bundle/genesis_manifests.json ./
 
 # This is equivalent to nobody:nobody.
 USER 65534:65534
