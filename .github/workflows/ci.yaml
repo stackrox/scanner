@@ -396,14 +396,7 @@ jobs:
           name: scanner-db-bundle
           path: image/db/rhel
 
-      - name: Build scanner image
-        run: |
-          docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} image-build-args) -f image/scanner/rhel/Dockerfile image/scanner/rhel
-
-      - name: Build scanner-slim image
-        run: |
-          docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner-slim:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} image-build-args) -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
-
+      # Build scanner-db images first (smaller bundles) to avoid QEMU resource exhaustion on arm64
       - name: Build scanner-db image
         run: |
           docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner-db:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} db-image-build-args) -f image/db/rhel/Dockerfile image/db/rhel
@@ -411,6 +404,22 @@ jobs:
       - name: Build scanner-db-slim image
         run: |
           docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner-db-slim:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} db-image-build-args) -f image/db/rhel/Dockerfile.slim image/db/rhel
+
+      # Reset buildx state for arm64 to prevent QEMU resource exhaustion
+      - name: Reset buildx for arm64
+        if: matrix.goarch == 'arm64'
+        run: |
+          docker buildx prune -f
+          docker buildx rm default || true
+          docker buildx create --use --name fresh-builder
+
+      - name: Build scanner image
+        run: |
+          docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} image-build-args) -f image/scanner/rhel/Dockerfile image/scanner/rhel
+
+      - name: Build scanner-slim image
+        run: |
+          docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner-slim:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} image-build-args) -f image/scanner/rhel/Dockerfile.slim image/scanner/rhel
 
       - name: Docker login
         # Skip for external contributions.
