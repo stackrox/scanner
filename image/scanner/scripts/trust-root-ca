@@ -5,5 +5,14 @@ set -euo pipefail
 CA_PATH="/run/secrets/stackrox.io/certs/ca.pem"
 
 # For RHEL
-cp "${CA_PATH}" /etc/pki/ca-trust/source/anchors/root-ca.pem
-update-ca-trust
+cp --update "${CA_PATH}" /etc/pki/ca-trust/source/anchors/root-ca.pem
+
+# update-ca-trust runs `chmod u-w "$DEST/pem/directory-hash"` at the end. Add
+# it back before running update-ca-trust again.
+if [ -d "/etc/pki/ca-trust/extracted/pem/directory-hash" ]; then
+    chmod u+w /etc/pki/ca-trust/extracted/pem/directory-hash
+fi
+
+# Though /etc/pki/ca-trust/extracted is the default output, update-ca-trust
+# will create the necessary directories if the `--output` flag is used.
+update-ca-trust extract --output /etc/pki/ca-trust/extracted

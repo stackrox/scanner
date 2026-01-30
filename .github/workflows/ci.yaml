@@ -396,6 +396,16 @@ jobs:
           name: scanner-db-bundle
           path: image/db/rhel
 
+      # Extract bundles on the host to avoid tar issues under QEMU emulation for arm64
+      - name: Extract bundles on host
+        run: |
+          # Extract scanner bundle
+          mkdir -p image/scanner/rhel/bundle
+          tar -xzf image/scanner/rhel/bundle.tar.gz -C image/scanner/rhel/bundle
+          # Extract scanner-db bundle
+          mkdir -p image/db/rhel/bundle
+          tar -xzf image/db/rhel/bundle.tar.gz -C image/db/rhel/bundle
+
       - name: Build scanner image
         run: |
           docker buildx build --platform "${{ matrix.goos }}/${{ matrix.goarch }}" --load -t stackrox/scanner:"$(make --no-print-directory --quiet tag)" $(make GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} image-build-args) -f image/scanner/rhel/Dockerfile image/scanner/rhel

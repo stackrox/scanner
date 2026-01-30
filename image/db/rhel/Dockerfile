@@ -1,16 +1,13 @@
 ARG RPMS_REGISTRY=registry.access.redhat.com
-ARG RPMS_BASE_IMAGE=ubi8
+ARG RPMS_BASE_IMAGE=ubi9
 ARG RPMS_BASE_TAG=latest
 
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8-minimal
+ARG BASE_IMAGE=ubi9-minimal
 ARG BASE_TAG=latest
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
-COPY bundle.tar.gz /
-
-WORKDIR /bundle
-RUN microdnf install -y tar gzip && tar -zxf /bundle.tar.gz
+# Bundle is pre-extracted on the host to avoid tar issues under QEMU emulation.
+# The bundle/ directory should contain: etc/, docker-entrypoint-initdb.d/
 
 FROM ${RPMS_REGISTRY}/${RPMS_BASE_IMAGE}:${RPMS_BASE_TAG} AS postgres_rpms
 
@@ -38,7 +35,7 @@ ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
 
 COPY signatures/PGDG-RPM-GPG-KEY-RHEL /
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
-COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
+COPY bundle/etc/postgresql.conf bundle/etc/pg_hba.conf /etc/
 COPY --from=postgres_rpms /rpms/postgres.rpm /rpms/postgres-libs.rpm /rpms/postgres-server.rpm /rpms/postgres-contrib.rpm /tmp/
 
 RUN microdnf upgrade -y --nobest && \
@@ -78,7 +75,7 @@ RUN microdnf upgrade -y --nobest && \
 # This is equivalent to postgres:postgres.
 USER 70:70
 
-COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
+COPY bundle/docker-entrypoint-initdb.d/definitions.sql.gz /docker-entrypoint-initdb.d/
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

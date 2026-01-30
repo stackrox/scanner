@@ -1,12 +1,9 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8-minimal
+ARG BASE_IMAGE=ubi9-minimal
 ARG BASE_TAG=latest
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
-
-COPY bundle.tar.gz /
-WORKDIR /bundle
-RUN microdnf install -y tar gzip && tar -zxf /bundle.tar.gz
+# Bundle is pre-extracted on the host to avoid tar issues under QEMU emulation.
+# The bundle/ directory should contain: scanner, THIRD_PARTY_NOTICES/, nvd_definitions/, etc.
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
 
@@ -27,9 +24,9 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 COPY scripts /
 
-COPY --from=extracted_bundle /bundle/scanner ./
+COPY bundle/scanner ./
 
-COPY --from=extracted_bundle /bundle/THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
+COPY bundle/THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
 RUN microdnf upgrade -y --nobest && \
     microdnf install -y xz && \
@@ -51,11 +48,11 @@ ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
 ENV ISTIO_DEFINITIONS_DIR="/istio_definitions"
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${ISTIO_DEFINITIONS_DIR}/" ".${ISTIO_DEFINITIONS_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle "/bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
-COPY --chown=65534:65534 --from=extracted_bundle /bundle/genesis_manifests.json ./
+COPY --chown=65534:65534 "bundle${NVD_DEFINITIONS_DIR}/" ".${NVD_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 "bundle${K8S_DEFINITIONS_DIR}/" ".${K8S_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 "bundle${ISTIO_DEFINITIONS_DIR}/" ".${ISTIO_DEFINITIONS_DIR}/"
+COPY --chown=65534:65534 "bundle${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
+COPY --chown=65534:65534 bundle/genesis_manifests.json ./
 
 # This is equivalent to nobody:nobody.
 USER 65534:65534
