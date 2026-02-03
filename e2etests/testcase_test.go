@@ -991,7 +991,7 @@ var testCases = []testCase{
 					{
 						Name:          "CVE-2018-1125",
 						NamespaceName: "centos:7",
-						Description:   "DOCUMENTATION: If a process inspected by pgrep has an argument longer than INT_MAX bytes, \"int bytes\" could wrap around back to a large positive int (rather than approaching zero), leading to a stack buffer overflow via strncat().                          MITIGATION: The procps suite on Red Hat Enterprise Linux is built with FORTIFY, which limits the impact of this stack overflow (and others like it) to a crash.",
+						Description:   "DOCUMENTATION: If a process inspected by pgrep has an argument longer than INT_MAX bytes, \"int bytes\" could wrap around back to a large positive int (rather than approaching zero), leading to a stack buffer overflow via strncat().                           MITIGATION: The procps suite on Red Hat Enterprise Linux is built with FORTIFY, which limits the impact of this stack overflow (and others like it) to a crash.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2018-1125",
 						Severity:      "Low",
 						Metadata: map[string]interface{}{
@@ -3032,10 +3032,33 @@ var testCases = []testCase{
 						},
 						FixedBy: "2.12.3",
 					},
+					{
+						Name:        "CVE-2025-68161",
+						Description: "The Socket Appender in Apache Log4j Core versions 2.0-beta9 through 2.25.2 does not perform TLS hostname verification of the peer certificate, even when the  verifyHostName https://logging.apache.org/log4j/2.x/manual/appenders/network.html#SslConfiguration-attr-verifyHostName  configuration attribute or the  log4j2.sslVerifyHostName https://logging.apache.org/log4j/2.x/manual/systemproperties.html#log4j2.sslVerifyHostName  system property is set to true.\n\nThis issue may allow a man-in-the-middle attacker to intercept or redirect log traffic under the following conditions:\n\n  *  The attacker is able to intercept or redirect network traffic between the client and the log receiver.\n  *  The attacker can present a server certificate issued by a certification authority trusted by the Socket Appender’s configured trust store (or by the default Java trust store if no custom trust store is configured).\n\n\nUsers are advised to upgrade to Apache Log4j Core version 2.25.3, which addresses this issue.\n\nAs an alternative mitigation, the Socket Appender may be configured to use a private or restricted trust root to limit the set of trusted certificates.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2025-68161",
+						Severity:    "Moderate",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         2.5,
+									"Score":               4.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.3",
+					},
 				},
 				AddedBy:  "sha256:477d0b4ccc14566aec80c3360aba6c84208c9d337727434c3914bd87b023dab3",
 				Location: "usr/share/logstash/vendor/bundle/jruby/2.5.0/gems/logstash-input-tcp-6.0.10-java/vendor/jar-dependencies/org/logstash/inputs/logstash-input-tcp/6.0.10/logstash-input-tcp-6.0.10.jar:log4j-core",
-				FixedBy:  "2.12.4",
+				FixedBy:  "2.25.3",
 			},
 			{
 				Name:          "log4j",
@@ -3134,10 +3157,33 @@ var testCases = []testCase{
 						},
 						FixedBy: "2.17.0",
 					},
+					{
+						Name:        "CVE-2025-68161",
+						Description: "The Socket Appender in Apache Log4j Core versions 2.0-beta9 through 2.25.2 does not perform TLS hostname verification of the peer certificate, even when the  verifyHostName https://logging.apache.org/log4j/2.x/manual/appenders/network.html#SslConfiguration-attr-verifyHostName  configuration attribute or the  log4j2.sslVerifyHostName https://logging.apache.org/log4j/2.x/manual/systemproperties.html#log4j2.sslVerifyHostName  system property is set to true.\n\nThis issue may allow a man-in-the-middle attacker to intercept or redirect log traffic under the following conditions:\n\n  *  The attacker is able to intercept or redirect network traffic between the client and the log receiver.\n  *  The attacker can present a server certificate issued by a certification authority trusted by the Socket Appender’s configured trust store (or by the default Java trust store if no custom trust store is configured).\n\n\nUsers are advised to upgrade to Apache Log4j Core version 2.25.3, which addresses this issue.\n\nAs an alternative mitigation, the Socket Appender may be configured to use a private or restricted trust root to limit the set of trusted certificates.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2025-68161",
+						Severity:    "Moderate",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         2.5,
+									"Score":               4.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.3",
+					},
 				},
 				AddedBy:  "sha256:477d0b4ccc14566aec80c3360aba6c84208c9d337727434c3914bd87b023dab3",
 				Location: "usr/share/logstash/logstash-core/lib/jars/log4j-core-2.14.0.jar",
-				FixedBy:  "2.17.1",
+				FixedBy:  "2.25.3",
 			},
 		},
 	},
@@ -3223,10 +3269,33 @@ var testCases = []testCase{
 						},
 						FixedBy: "2.12.3",
 					},
+					{
+						Name:        "CVE-2025-68161",
+						Description: "The Socket Appender in Apache Log4j Core versions 2.0-beta9 through 2.25.2 does not perform TLS hostname verification of the peer certificate, even when the  verifyHostName https://logging.apache.org/log4j/2.x/manual/appenders/network.html#SslConfiguration-attr-verifyHostName  configuration attribute or the  log4j2.sslVerifyHostName https://logging.apache.org/log4j/2.x/manual/systemproperties.html#log4j2.sslVerifyHostName  system property is set to true.\n\nThis issue may allow a man-in-the-middle attacker to intercept or redirect log traffic under the following conditions:\n\n  *  The attacker is able to intercept or redirect network traffic between the client and the log receiver.\n  *  The attacker can present a server certificate issued by a certification authority trusted by the Socket Appender’s configured trust store (or by the default Java trust store if no custom trust store is configured).\n\n\nUsers are advised to upgrade to Apache Log4j Core version 2.25.3, which addresses this issue.\n\nAs an alternative mitigation, the Socket Appender may be configured to use a private or restricted trust root to limit the set of trusted certificates.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2025-68161",
+						Severity:    "Moderate",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         2.5,
+									"Score":               4.8,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.3",
+					},
 				},
 				AddedBy:  "sha256:d84ba7ea7803fa43fca06730523d264b31c562968cfd7020f0584f5ec1b26225",
 				Location: "log4j-core-2.12.2.jar",
-				FixedBy:  "2.12.4",
+				FixedBy:  "2.25.3",
 			},
 		},
 	},
