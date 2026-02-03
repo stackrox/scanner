@@ -22,7 +22,7 @@ yq eval ".data[\"cert.pem\"] = \"${SCANNER_CERT}\"" tmp.yaml > tmp2.yaml
 yq eval ".data[\"key.pem\"] = \"${SCANNER_KEY}\"" tmp2.yaml > tmp3.yaml
 mv tmp3.yaml "${SCANNER_TLS_FILE}"
 
-rm *.yaml
+rm -f tmp.yaml tmp2.yaml
 
 echo "Generating Cert/Key pair for Scanner DB"
 cfssl gencert -ca ca.pem -ca-key ca-key.pem -hostname scanner-db.stackrox "$ROOT/scripts/cert/csr.json" | cfssljson -bare
@@ -33,4 +33,4 @@ yq eval ".data[\"cert.pem\"] = \"${SCANNER_DB_CERT}\"" tmp.yaml > tmp2.yaml
 yq eval ".data[\"key.pem\"] = \"${SCANNER_DB_KEY}\"" tmp2.yaml > tmp3.yaml
 mv tmp3.yaml "${SCANNER_DB_TLS_FILE}"
 
-rm -f *.pem *.csr *.yaml
+rm -f *.pem *.csr tmp.yaml tmp2.yaml
