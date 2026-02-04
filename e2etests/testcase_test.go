@@ -991,7 +991,7 @@ var testCases = []testCase{
 					{
 						Name:          "CVE-2018-1125",
 						NamespaceName: "centos:7",
-						Description:   "DOCUMENTATION: If a process inspected by pgrep has an argument longer than INT_MAX bytes, \"int bytes\" could wrap around back to a large positive int (rather than approaching zero), leading to a stack buffer overflow via strncat().                          MITIGATION: The procps suite on Red Hat Enterprise Linux is built with FORTIFY, which limits the impact of this stack overflow (and others like it) to a crash.",
+						Description:   "DOCUMENTATION: If a process inspected by pgrep has an argument longer than INT_MAX bytes, \"int bytes\" could wrap around back to a large positive int (rather than approaching zero), leading to a stack buffer overflow via strncat().                           MITIGATION: The procps suite on Red Hat Enterprise Linux is built with FORTIFY, which limits the impact of this stack overflow (and others like it) to a crash.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2018-1125",
 						Severity:      "Low",
 						Metadata: map[string]interface{}{
