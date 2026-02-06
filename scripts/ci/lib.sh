@@ -911,6 +911,22 @@ generate_db_dump() {
     # The PATH is not completely preserved, so set the PATH here to ensure postgres-related commands can be found.
     runuser -l pg -c "PATH=$PATH $SCRIPTS_ROOT/scripts/ci/postgres.sh start_postgres"
 
+    # Configure PostgreSQL for bulk loading performance
+    # These settings are safe for CI because:
+    # - The database is temporary (destroyed after dump creation)
+    # - Transaction commits ensure data visibility regardless of disk sync
+    # - Any failure causes the entire CI job to fail
+    info "Configuring PostgreSQL for bulk loading"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET fsync = off;"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET synchronous_commit = off;"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET full_page_writes = off;"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET maintenance_work_mem = '1GB';"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET max_wal_size = '2GB';"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET checkpoint_timeout = '30min';"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET autovacuum = off;"
+    psql -U postgres -h 127.0.0.1 -c "SELECT pg_reload_conf();"
+    info "PostgreSQL configured for bulk loading"
+
     bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file /tmp/genesis-dump/genesis-dump.zip
 
     mkdir /tmp/postgres
