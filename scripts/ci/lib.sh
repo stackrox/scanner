@@ -921,11 +921,15 @@ generate_db_dump() {
     psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET synchronous_commit = off;"
     psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET full_page_writes = off;"
     psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET maintenance_work_mem = '1GB';"
-    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET max_wal_size = '2GB';"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET max_wal_size = '6GB';"
     psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET checkpoint_timeout = '30min';"
     psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET autovacuum = off;"
     psql -U postgres -h 127.0.0.1 -c "SELECT pg_reload_conf();"
     info "PostgreSQL configured for bulk loading"
+
+    # Enable batched inserts for CI performance (loads into empty database)
+    export SCANNER_BATCH_INSERT=true
+    export SCANNER_BATCH_SIZE=1000
 
     bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file /tmp/genesis-dump/genesis-dump.zip
 
