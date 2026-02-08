@@ -911,7 +911,48 @@ generate_db_dump() {
     # The PATH is not completely preserved, so set the PATH here to ensure postgres-related commands can be found.
     runuser -l pg -c "PATH=$PATH $SCRIPTS_ROOT/scripts/ci/postgres.sh start_postgres"
 
+    # Configure PostgreSQL for bulk loading performance
+    # These settings are safe for CI because:
+    # - The database is temporary (destroyed after dump creation)
+    # - Transaction commits ensure data visibility regardless of disk sync
+    # - Any failure causes the entire CI job to fail
+    info "Configuring PostgreSQL for bulk loading"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET fsync = off;"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET synchronous_commit = off;"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET full_page_writes = off;"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET maintenance_work_mem = '1GB';"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET max_wal_size = '6GB';"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET checkpoint_timeout = '30min';"
+    psql -U postgres -h 127.0.0.1 -c "ALTER SYSTEM SET autovacuum = off;"
+    psql -U postgres -h 127.0.0.1 -c "SELECT pg_reload_conf();"
+    info "PostgreSQL configured for bulk loading"
+
+    # Drop indexes before bulk loading to avoid index bloat during inserts
+    # This provides ~5-10x speedup for large vulnerability datasets (340k+)
+    # Indexes will be recreated after loading (faster to build in one pass)
+    info "Dropping indexes for bulk loading"
+    psql -U postgres -h 127.0.0.1 -c "DROP INDEX IF EXISTS vulnerability_name_idx;"
+    psql -U postgres -h 127.0.0.1 -c "DROP INDEX IF EXISTS vulnerability_namespace_id_name_idx;"
+    psql -U postgres -h 127.0.0.1 -c "DROP INDEX IF EXISTS vulnerability_fixedin_feature_feature_id_vulnerability_id_idx;"
+    psql -U postgres -h 127.0.0.1 -c "DROP INDEX IF EXISTS vulnerability_affects_featureversion_fixedin_id_idx;"
+    psql -U postgres -h 127.0.0.1 -c "DROP INDEX IF EXISTS vulnerability_affects_featureversion_featureversion_id_vulnera_idx;"
+    info "Indexes dropped"
+
+    # Enable batched inserts for CI performance (loads into empty database)
+    export SCANNER_BATCH_INSERT=true
+    export SCANNER_BATCH_SIZE=1000
+
     bin/updater load-dump --postgres-host 127.0.0.1 --postgres-port 5432 --dump-file /tmp/genesis-dump/genesis-dump.zip
+
+    # Recreate indexes after bulk loading
+    # Building indexes on complete data is much faster than maintaining them during inserts
+    info "Recreating indexes after bulk load"
+    psql -U postgres -h 127.0.0.1 -c "CREATE INDEX vulnerability_name_idx ON Vulnerability (name);"
+    psql -U postgres -h 127.0.0.1 -c "CREATE INDEX vulnerability_namespace_id_name_idx ON Vulnerability (namespace_id, name);"
+    psql -U postgres -h 127.0.0.1 -c "CREATE INDEX ON Vulnerability_FixedIn_Feature (feature_id, vulnerability_id);"
+    psql -U postgres -h 127.0.0.1 -c "CREATE INDEX ON Vulnerability_Affects_FeatureVersion (fixedin_id);"
+    psql -U postgres -h 127.0.0.1 -c "CREATE INDEX ON Vulnerability_Affects_FeatureVersion (featureversion_id, vulnerability_id);"
+    info "Indexes recreated"
 
     mkdir /tmp/postgres
     pg_dump -U postgres postgres://127.0.0.1:5432 > /tmp/postgres/pg-definitions.sql
