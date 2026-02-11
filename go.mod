@@ -37,7 +37,7 @@ require (
 	github.com/quay/goval-parser v0.8.8
 	github.com/remind101/migrate v0.0.0-20170729031349-52c1edff7319
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/stackrox/dotnet-scraper v0.0.0-20201023051640-72ef543323dd
 	github.com/stackrox/istio-cves v0.0.0-20221007013142-0bde9b541ec8
 	github.com/stackrox/k8s-cves v0.0.0-20220818200547-7d0d1420c58d
