@@ -447,10 +447,10 @@ main() {
     log_info "Creating release commit and tag..."
     if [[ "$DRY_RUN" == "true" ]]; then
         log_dry_run "git commit --allow-empty -m \"Release ${version}\""
-        log_dry_run "git tag --no-sign ${version}"
+        log_dry_run "git tag --annotate --no-sign ${version}"
     else
         git commit --allow-empty -m "Release ${version}"
-        git tag --no-sign "${version}"
+        git tag --annotate --no-sign "${version}" -m "${version}"
     fi
     echo
 
