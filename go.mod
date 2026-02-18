@@ -48,7 +48,7 @@ require (
 	go.uber.org/ratelimit v0.3.1
 	go.yaml.in/yaml/v3 v3.0.4
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
-	golang.org/x/sys v0.40.0
+	golang.org/x/sys v0.41.0
 	google.golang.org/api v0.259.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b
 	google.golang.org/grpc v1.78.0
