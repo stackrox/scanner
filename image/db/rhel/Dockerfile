@@ -1,9 +1,9 @@
 ARG RPMS_REGISTRY=registry.access.redhat.com
-ARG RPMS_BASE_IMAGE=ubi8
+ARG RPMS_BASE_IMAGE=ubi9
 ARG RPMS_BASE_TAG=latest
 
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8-minimal
+ARG BASE_IMAGE=ubi9-minimal
 ARG BASE_TAG=latest
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
