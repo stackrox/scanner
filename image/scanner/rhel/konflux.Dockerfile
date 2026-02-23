@@ -1,5 +1,5 @@
 # Compiling scanner binaries and staging repo2cpe and genesis manifests
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_golang_1.25@sha256:aa03597ee8c7594ffecef5cbb6a0f059d362259d2a41225617b27ec912a3d0d3 AS builder
+FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_golang_1.25@sha256:bd531796aacb86e4f97443797262680fbf36ca048717c00b6f4248465e1a7c0c AS builder
 
 ARG SCANNER_TAG
 RUN if [[ "$SCANNER_TAG" == "" ]]; then >&2 echo "error: required SCANNER_TAG arg is unset"; exit 6; fi
@@ -28,7 +28,7 @@ COPY .konflux/scanner-data/blob-genesis_manifests.json image/scanner/dump/genesi
 
 
 # Common base for scanner slim and full
-FROM registry.access.redhat.com/ubi8-minimal:latest@sha256:48adecc91f276734fa51987bc2203a31db9ba87a512c436c0a3fcac53135378d AS scanner-common
+FROM registry.access.redhat.com/ubi9-minimal:latest@sha256:c7d44146f826037f6873d99da479299b889473492d3c1ab8af86f08af04ec8a0 AS scanner-common
 
 ARG SCANNER_TAG
 
@@ -59,7 +59,7 @@ COPY --chown=65534:65534 --from=builder /src/image/scanner/dump/genesis_manifest
 
 COPY LICENSE /licenses/LICENSE
 
-RUN microdnf install xz && \
+RUN microdnf install -y xz && \
     microdnf clean all && \
     # (Optional) Remove line below to keep package management utilities
     # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
@@ -85,7 +85,7 @@ FROM scanner-common AS scanner-slim
 LABEL \
     com.redhat.component="rhacs-scanner-slim-container" \
     io.k8s.display-name="scanner-slim" \
-    name="advanced-cluster-security/rhacs-scanner-slim-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-slim-rhel9"
 
 ENV ROX_SLIM_MODE="true"
 
@@ -96,7 +96,7 @@ FROM scanner-common AS scanner
 LABEL \
     com.redhat.component="rhacs-scanner-container" \
     io.k8s.display-name="scanner" \
-    name="advanced-cluster-security/rhacs-scanner-rhel8"
+    name="advanced-cluster-security/rhacs-scanner-rhel9"
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
 ENV K8S_DEFINITIONS_DIR="/k8s_definitions"
