@@ -22,6 +22,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -194,10 +195,14 @@ func (u *updater) getUpdateInfoURI() (string, error) {
 	if !success {
 		log.WithError(err).Error("could not parse mirror list")
 	}
-	mirrorURI := scanner.Text()
+	mirrorURL, err := url.Parse(scanner.Text())
+	if err != nil {
+		log.WithError(err).Error("invalid url returned from mirror list")
+		return "", commonerr.ErrCouldNotDownload
+	}
 
 	// Download repomd.xml.
-	repoMdURI := mirrorURI + "/repodata/repomd.xml"
+	repoMdURI := mirrorURL.JoinPath("repodata", "repomd.xml").String()
 	repoMdResponse, err := httputil.GetWithUserAgent(repoMdURI)
 	if err != nil {
 		log.WithError(err).Error("could not download repomd.xml")
@@ -222,7 +227,7 @@ func (u *updater) getUpdateInfoURI() (string, error) {
 	var updateInfoURI string
 	for _, repo := range repoMd.RepoList {
 		if repo.Type == "updateinfo" {
-			updateInfoURI = mirrorURI + "/" + repo.Location.Href
+			updateInfoURI = mirrorURL.JoinPath(repo.Location.Href).String()
 			break
 		}
 	}
