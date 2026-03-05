@@ -6,4 +6,7 @@ CA_PATH="/run/secrets/stackrox.io/certs/ca.pem"
 
 # For RHEL
 cp "${CA_PATH}" /etc/pki/ca-trust/source/anchors/root-ca.pem
-update-ca-trust
+
+# The -o flag is required for running as an unprivileged user in containers.
+# See: https://bugzilla.redhat.com/show_bug.cgi?id=2241240
+update-ca-trust extract -o /etc/pki/ca-trust/extracted
