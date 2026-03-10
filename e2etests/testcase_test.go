@@ -1351,7 +1351,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:        "CVE-2020-1045",
-						Description: "<p>A security feature bypass vulnerability exists in the way Microsoft ASP.NET Core parses encoded cookie names.</p>\n<p>The ASP.NET Core cookie parser decodes entire cookie strings which could allow a malicious attacker to set a second cookie with the name being percent encoded.</p>\n<p>The security update addresses the vulnerability by fixing the way the ASP.NET Core cookie parser handles encoded names.</p>\n",
+						Description: "<p>A security feature bypass vulnerability exists in the way Microsoft ASP.NET Core parses encoded cookie names.</p>\n<p>The ASP.NET Core cookie parser decodes entire cookie strings which could allow a malicious attacker to set a second cookie with the name being percent encoded.</p>\n<p>The security update addresses the vulnerability by fixing the way the ASP.NET Core cookie parser handles encoded names.</p>",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1045",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
@@ -1402,7 +1402,7 @@ var testCases = []testCase{
 					},
 					{
 						Name:        "CVE-2020-1597",
-						Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests. An attacker who successfully exploited this vulnerability could cause a denial of service against an ASP.NET Core web application. The vulnerability can be exploited remotely, without authentication.\nA remote unauthenticated attacker could exploit this vulnerability by issuing specially crafted requests to the ASP.NET Core application.\nThe update addresses the vulnerability by correcting how the ASP.NET Core web application handles web requests.\n",
+						Description: "A denial of service vulnerability exists when ASP.NET Core improperly handles web requests. An attacker who successfully exploited this vulnerability could cause a denial of service against an ASP.NET Core web application. The vulnerability can be exploited remotely, without authentication.\nA remote unauthenticated attacker could exploit this vulnerability by issuing specially crafted requests to the ASP.NET Core application.\nThe update addresses the vulnerability by correcting how the ASP.NET Core web application handles web requests.",
 						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2020-1597",
 						Metadata: map[string]interface{}{
 							"NVD": map[string]interface{}{
