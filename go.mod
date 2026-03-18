@@ -1,13 +1,11 @@
 module github.com/stackrox/scanner
 
-go 1.24.0
-
-toolchain go1.24.4
+go 1.25.0
 
 require (
 	cloud.google.com/go/storage v1.60.0
 	github.com/NYTimes/gziphandler v1.1.1
-	github.com/PuerkitoBio/goquery v1.9.3
+	github.com/PuerkitoBio/goquery v1.12.0
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
 	github.com/containers/image/v5 v5.36.2
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
@@ -48,7 +46,7 @@ require (
 	go.uber.org/ratelimit v0.3.1
 	go.yaml.in/yaml/v3 v3.0.4
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
-	golang.org/x/sys v0.41.0
+	golang.org/x/sys v0.42.0
 	google.golang.org/api v0.267.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57
 	google.golang.org/grpc v1.79.1
@@ -72,7 +70,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
-	github.com/andybalholm/cascadia v1.3.2 // indirect
+	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -167,12 +165,12 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
-	golang.org/x/crypto v0.47.0 // indirect
-	golang.org/x/net v0.49.0 // indirect
+	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/oauth2 v0.35.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/term v0.39.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/term v0.41.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	golang.stackrox.io/grpc-http1 v0.3.12 // indirect
 	google.golang.org/genproto v0.0.0-20260128011058-8636f8732409 // indirect
