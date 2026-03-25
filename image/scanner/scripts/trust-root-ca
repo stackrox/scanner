@@ -7,6 +7,10 @@ CA_PATH="/run/secrets/stackrox.io/certs/ca.pem"
 # For RHEL
 cp "${CA_PATH}" /etc/pki/ca-trust/source/anchors/root-ca.pem
 
-# The -o flag is required for running as an unprivileged user in containers.
-# See: https://bugzilla.redhat.com/show_bug.cgi?id=2241240
-update-ca-trust extract -o /etc/pki/ca-trust/extracted
+# Though /etc/pki/ca-trust/extracted is the default output, update-ca-trust
+# will create the necessary directories with the required permissions if the `--output` flag is used.
+# See https://bugzilla.redhat.com/show_bug.cgi?id=2241240 for background.
+#
+# tl,dr: update-ca-trust extract, when giving the `--output` flag behaves differently with respect
+# to filesystem permissions and this is the behaviour we need for containerized environments.
+update-ca-trust extract --output /etc/pki/ca-trust/extracted
