@@ -274,7 +274,7 @@ ensure_supported_cluster_version() {
     GKE_CLUSTER_VERSION=$(sed -e 's/^"//' -e 's/"$//' <<<"${match}")
 }
 
-refresh_gke_toke() {
+refresh_gke_token() {
     info "Starting a GKE token refresh loop"
 
     require_environment "ZONE"
