@@ -153,9 +153,6 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 			feature.FixedBy = ""
 			matching.FixedBy = ""
 
-			feature.Description = normalizeString(feature.Description)
-			matching.Description = normalizeString(matching.Description)
-
 			// Ensure the parts of the feature aside from the provided executables and vulnerabilities are equal, too.
 			assert.Equal(t, feature, *matching)
 		})
