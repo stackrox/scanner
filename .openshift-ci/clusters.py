@@ -3,7 +3,7 @@
 """
 Clusters used in test
 
-Copied from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/clusters.py
+Adapted from https://github.com/stackrox/stackrox/blob/master/.openshift-ci/clusters.py
 """
 
 import os
@@ -25,35 +25,42 @@ class NullCluster:
 class GKECluster:
     # Provisioning timeout is tightly coupled to the time it may take gke.sh to
     # create a cluster.
-    PROVISION_TIMEOUT = 90 * 60
+    PROVISION_TIMEOUT = 140 * 60
     WAIT_TIMEOUT = 20 * 60
     TEARDOWN_TIMEOUT = 5 * 60
+    # separate script names used for testability - test_clusters.py
     PROVISION_PATH = "scripts/ci/gke.sh"
     WAIT_PATH = "scripts/ci/gke.sh"
     REFRESH_PATH = "scripts/ci/gke.sh"
     TEARDOWN_PATH = "scripts/ci/gke.sh"
 
-    def __init__(self, cluster_id, num_nodes=3, machine_type="e2-standard-4"):
+    def __init__(self, cluster_id, num_nodes=None, machine_type=None, disk_gb=None):
         self.cluster_id = cluster_id
         self.num_nodes = num_nodes
         self.machine_type = machine_type
+        self.disk_gb = disk_gb
         self.refresh_token_cmd = None
 
     def provision(self):
+        if self.num_nodes is not None:
+            os.environ["NUM_NODES"] = str(self.num_nodes)
+        if self.machine_type is not None:
+            os.environ["MACHINE_TYPE"] = str(self.machine_type)
+        if self.disk_gb is not None:
+            os.environ["DISK_SIZE_GB"] = str(self.disk_gb)
         with subprocess.Popen(
                 [
-                    GKECluster.PROVISION_PATH,
+                    self.PROVISION_PATH,
                     "provision_gke_cluster",
                     self.cluster_id,
-                    str(self.num_nodes),
-                    self.machine_type,
                 ]
         ) as cmd:
 
             try:
-                exitstatus = cmd.wait(GKECluster.PROVISION_TIMEOUT)
+                exitstatus = cmd.wait(self.PROVISION_TIMEOUT)
                 if exitstatus != 0:
-                    raise RuntimeError(f"Cluster provision failed: exit {exitstatus}")
+                    raise RuntimeError(
+                        f"Cluster provision failed: exit {exitstatus}")
             except subprocess.TimeoutExpired as err:
                 popen_graceful_kill(cmd)
                 raise err
@@ -62,38 +69,41 @@ class GKECluster:
         signal.signal(signal.SIGINT, self.sigint_handler)
 
         subprocess.run(
-            [GKECluster.WAIT_PATH, "wait_for_cluster"],
+            [self.WAIT_PATH, "wait_for_cluster"],
             check=True,
-            timeout=GKECluster.WAIT_TIMEOUT,
+            timeout=self.WAIT_TIMEOUT,
         )
 
         # pylint: disable=consider-using-with
         self.refresh_token_cmd = subprocess.Popen(
-            [GKECluster.REFRESH_PATH, "refresh_gke_token"]
+            [self.REFRESH_PATH, "refresh_gke_token"]
         )
 
         return self
 
-    def teardown(self):
+    def teardown(self, canceled=False):
         while os.path.exists("/tmp/hold-cluster"):
             print("Pausing teardown because /tmp/hold-cluster exists")
             time.sleep(60)
 
-        if self.refresh_token_cmd is not None:
+        if self.refresh_token_cmd is not None and not canceled:
             print("Terminating GKE token refresh")
             try:
                 popen_graceful_kill(self.refresh_token_cmd)
             except Exception as err:
                 print(f"Could not terminate the token refresh: {err}")
 
+        args = [self.TEARDOWN_PATH, "teardown_gke_cluster"]
+        if canceled:
+            args.append("true")
         subprocess.run(
-            [GKECluster.TEARDOWN_PATH, "teardown_gke_cluster"],
+            args,
             check=True,
-            timeout=GKECluster.TEARDOWN_TIMEOUT,
+            timeout=self.TEARDOWN_TIMEOUT,
         )
 
         return self
 
     def sigint_handler(self, signum, frame):
         print("Tearing down the cluster due to SIGINT", signum, frame)
-        self.teardown()
+        self.teardown(canceled=True)
