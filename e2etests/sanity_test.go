@@ -58,6 +58,10 @@ func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulne
 	}
 	expectedVuln.Metadata = nil
 	matchingVuln.Metadata = nil
+
+	expectedVuln.Description = normalizeString(expectedVuln.Description)
+	matchingVuln.Description = normalizeString(matchingVuln.Description)
+
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
@@ -149,6 +153,9 @@ func verifyImageHasExpectedFeatures(t *testing.T, client *client.Clairify, test 
 			feature.FixedBy = ""
 			matching.FixedBy = ""
 
+			feature.Description = normalizeString(feature.Description)
+			matching.Description = normalizeString(matching.Description)
+
 			// Ensure the parts of the feature aside from the provided executables and vulnerabilities are equal, too.
 			assert.Equal(t, feature, *matching)
 		})
@@ -182,4 +189,9 @@ func deepGet(m map[string]interface{}, keys ...string) interface{} {
 		currVal = asMap[k]
 	}
 	return currVal
+}
+
+// normalize strings: removes newlines and collapses multiple spaces into one.
+func normalizeString(s string) string {
+	return strings.Join(strings.Fields(s), " ")
 }
