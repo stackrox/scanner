@@ -64,11 +64,11 @@ spec:
   taskRunTemplate:
     serviceAccountName: build-pipeline-scanner-db-4-8
 
-  # Tagged builds wait for blobs to be published which takes about 1h.
+  # Tagged builds wait for blobs to be published, which takes about 1h30m.
   timeouts:
-    tasks: 2h30m
+    tasks: 3h0m
     finally: 10m
-    pipeline: 2h40m
+    pipeline: 3h10m
 
 
   pipelineRef:
