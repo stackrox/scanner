@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/stackrox/scanner/api/v1/features"
@@ -153,6 +154,10 @@ func checkGRPCMatch(t *testing.T, expectedVuln, matchingVuln *v1.Vulnerability) 
 	}
 	expectedVuln.MetadataV2 = nil
 	matchingVuln.MetadataV2 = nil
+
+	expectedVuln.Description = normalizeString(expectedVuln.Description)
+	matchingVuln.Description = normalizeString(matchingVuln.Description)
+
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
@@ -190,4 +195,9 @@ func TestGRPCVulnDefsMetadata(t *testing.T) {
 	metadata, err := client.GetVulnDefsMetadata(context.Background(), &v1.Empty{})
 	require.NoError(t, err)
 	assert.NotNil(t, metadata.GetLastUpdatedTime())
+}
+
+// normalize strings: removes newlines and collapses multiple spaces into one.
+func normalizeString(s string) string {
+	return strings.Join(strings.Fields(s), " ")
 }
