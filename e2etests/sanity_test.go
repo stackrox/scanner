@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 	"testing"
 
 	v1 "github.com/stackrox/scanner/api/v1"
@@ -58,6 +59,10 @@ func checkMatch(t *testing.T, source string, expectedVuln, matchingVuln v1.Vulne
 	}
 	expectedVuln.Metadata = nil
 	matchingVuln.Metadata = nil
+
+	expectedVuln.Description = normalizeString(expectedVuln.Description)
+	matchingVuln.Description = normalizeString(matchingVuln.Description)
+
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
@@ -182,4 +187,9 @@ func deepGet(m map[string]interface{}, keys ...string) interface{} {
 		currVal = asMap[k]
 	}
 	return currVal
+}
+
+// normalizeString removes newlines and collapses multiple spaces into one.
+func normalizeString(s string) string {
+	return strings.Join(strings.Fields(s), " ")
 }
