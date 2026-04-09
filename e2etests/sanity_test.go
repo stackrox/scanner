@@ -189,7 +189,7 @@ func deepGet(m map[string]interface{}, keys ...string) interface{} {
 	return currVal
 }
 
-// normalize strings: removes newlines and collapses multiple spaces into one.
+// normalizeString removes newlines and collapses multiple spaces into one.
 func normalizeString(s string) string {
 	return strings.Join(strings.Fields(s), " ")
 }
