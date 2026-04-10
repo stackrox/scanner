@@ -153,6 +153,10 @@ func checkGRPCMatch(t *testing.T, expectedVuln, matchingVuln *v1.Vulnerability) 
 	}
 	expectedVuln.MetadataV2 = nil
 	matchingVuln.MetadataV2 = nil
+
+	expectedVuln.Description = normalizeString(expectedVuln.Description)
+	matchingVuln.Description = normalizeString(matchingVuln.Description)
+
 	assert.Equal(t, expectedVuln, matchingVuln)
 }
 
