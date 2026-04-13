@@ -15,15 +15,19 @@ class BaseTest:
     def __init__(self):
         self.test_output_dirs = []
 
-    def run_with_graceful_kill(self, args, timeout, post_start_hook=None):
+    def run_with_graceful_kill(self, args, timeout):
         with subprocess.Popen(args) as cmd:
-            if post_start_hook is not None:
-                post_start_hook()
             try:
                 exitstatus = cmd.wait(timeout)
                 if exitstatus != 0:
                     raise RuntimeError(f"Test failed: exit {exitstatus}")
             except subprocess.TimeoutExpired as err:
+                # Kill child processes as we cannot rely on bash scripts to
+                # handle signals and stop tests
+                subprocess.run(
+                    ["/usr/bin/pkill", "-P", str(cmd.pid)], check=True, timeout=5
+                )
+                # Then kill the test command
                 popen_graceful_kill(cmd)
                 raise err
 
@@ -41,7 +45,7 @@ class E2ETest(BaseTest):
 
         self.run_with_graceful_kill(
             ["scripts/ci/jobs/e2etests/e2e-tests.sh"],
-            E2ETest.TEST_TIMEOUT,
+            self.TEST_TIMEOUT,
         )
 
 
@@ -55,10 +59,10 @@ class ScaleTest(BaseTest):
 
         self.run_with_graceful_kill(
             ["scripts/ci/jobs/e2etests/scale-tests.sh"],
-            ScaleTest.TEST_TIMEOUT,
+            self.TEST_TIMEOUT,
         )
 
-        self.test_output_dirs.append(ScaleTest.OUTPUT_DIR)
+        self.test_output_dirs.append(self.OUTPUT_DIR)
 
 
 class SlimE2ETest(BaseTest):
@@ -69,5 +73,5 @@ class SlimE2ETest(BaseTest):
 
         self.run_with_graceful_kill(
             ["scripts/ci/jobs/e2etests/slim-e2e-tests.sh"],
-            SlimE2ETest.TEST_TIMEOUT,
+            self.TEST_TIMEOUT,
         )
