@@ -2,13 +2,36 @@ ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi9-minimal
 ARG BASE_TAG=latest
 
+FROM ${BASE_REGISTRY}/ubi9-micro:${BASE_TAG} AS ubi-micro-base
+
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 
 COPY bundle.tar.gz /
 WORKDIR /bundle
 RUN microdnf install -y tar gzip && tar -zxf /bundle.tar.gz
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
+FROM ${BASE_REGISTRY}/ubi9:${BASE_TAG} AS package_installer
+
+COPY --from=ubi-micro-base / /out/
+
+RUN dnf install -y \
+    --installroot=/out/ \
+    --releasever=9 \
+    --setopt=install_weak_deps=0 \
+    --nodocs \
+    bash \
+    coreutils \
+    findutils \
+    util-linux \
+    ca-certificates \
+    xz \
+    gzip \
+    less \
+    tar && \
+    dnf clean all --installroot=/out/ && \
+    rm -rf /out/var/cache/dnf /out/var/cache/yum
+
+FROM ubi-micro-base AS base
 
 ARG LABEL_VERSION
 ARG LABEL_RELEASE
@@ -25,20 +48,15 @@ LABEL name="scanner" \
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
+COPY --from=package_installer /out/ /
+
 COPY scripts /
 
 COPY --from=extracted_bundle /bundle/scanner ./
 
 COPY --from=extracted_bundle /bundle/THIRD_PARTY_NOTICES/ /THIRD_PARTY_NOTICES/
 
-RUN microdnf upgrade -y --nobest && \
-    microdnf install -y xz && \
-    microdnf clean -y all && \
-    # (Optional) Remove line below to keep package management utilities
-    # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
-    rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/dnf /var/cache/yum && \
-    chown -R 65534:65534 /tmp && \
+RUN chown -R 65534:65534 /tmp && \
     # The contents of paths mounted as emptyDir volumes in Kubernetes are saved
     # by the script `save-dir-contents` during the image build. The directory
     # contents are then restored by the script `restore-all-dir-contents`

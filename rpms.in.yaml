@@ -2,13 +2,31 @@
 # See our docs here: https://spaces.redhat.com/display/StackRox/How+to+prefetch+RPMs+for+ACS+Konflux+builds
 
 packages:
+# Scanner packages (for konflux.Dockerfile stage: package_installer)
+# These packages are installed on top of ubi9-micro base image
+# Note: coreutils is excluded - ubi9-micro has coreutils-single which provides the commands we need
+- bash
+- findutils
+- util-linux
+- ca-certificates
 - xz
+- gzip
+- less
+- tar
+
+# Note: Scanner-DB images don't need RPM prefetch because:
+# - konflux.Dockerfile uses registry.redhat.io/rhel9/postgresql-15 base (already has everything)
+# - Dockerfile and Dockerfile.slim use ubi9 (full) in dependency_builder stage (can install packages via dnf normally)
+
 contentOrigin:
   repofiles: [ "rpms.rhel.repo" ]
+
 context:
   containerfile:
     file: image/scanner/rhel/konflux.Dockerfile
-    stageName: scanner-common
+    stageName: package_installer
+    imagePattern: registry.access.redhat.com/ubi9/ubi-micro:latest
+
 arches:
 - aarch64
 - ppc64le

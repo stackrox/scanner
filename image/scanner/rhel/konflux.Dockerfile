@@ -27,8 +27,32 @@ RUN echo -n "version: " && make --quiet --no-print-directory tag && \
 COPY .konflux/scanner-data/blob-genesis_manifests.json image/scanner/dump/genesis_manifests.json
 
 
+FROM registry.access.redhat.com/ubi9/ubi-micro:latest@sha256:093a704be0eaef9bb52d9bc0219c67ee9db13c2e797da400ddb5d5ae6849fa10 AS ubi-micro-base
+
+FROM registry.access.redhat.com/ubi9/ubi:latest@sha256:6ed9f6f637fe731d93ec60c065dbced79273f1e0b5f512951f2c0b0baedb16ad AS package_installer
+
+COPY --from=ubi-micro-base / /out/
+
+RUN dnf install -y \
+    --installroot=/out/ \
+    --releasever=9 \
+    --setopt=install_weak_deps=0 \
+    --setopt=reposdir=/etc/yum.repos.d \
+    --nodocs \
+    bash \
+    coreutils \
+    findutils \
+    util-linux \
+    ca-certificates \
+    xz \
+    gzip \
+    less \
+    tar && \
+    dnf clean all --installroot=/out/ && \
+    rm -rf /out/var/cache/dnf /out/var/cache/yum
+
 # Common base for scanner slim and full
-FROM registry.access.redhat.com/ubi9-minimal:latest@sha256:c7d44146f826037f6873d99da479299b889473492d3c1ab8af86f08af04ec8a0 AS scanner-common
+FROM ubi-micro-base AS scanner-common
 
 ARG SCANNER_TAG
 
@@ -52,6 +76,8 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV REPO_TO_CPE_DIR="/repo2cpe"
 
+COPY --from=package_installer /out/ /
+
 COPY --from=builder /src/image/scanner/scripts /
 COPY --from=builder /src/image/scanner/bin/scanner ./
 COPY --chown=65534:65534 --from=builder "/src/image/scanner/dump${REPO_TO_CPE_DIR}/" ".${REPO_TO_CPE_DIR}/"
@@ -59,13 +85,7 @@ COPY --chown=65534:65534 --from=builder /src/image/scanner/dump/genesis_manifest
 
 COPY LICENSE /licenses/LICENSE
 
-RUN microdnf install -y xz && \
-    microdnf clean all && \
-    # (Optional) Remove line below to keep package management utilities
-    # We don't uninstall rpm because scanner uses it to get packages installed in scanned images.
-    rpm -e --nodeps $(rpm -qa curl '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/dnf /var/cache/yum && \
-    chown -R 65534:65534 /tmp && \
+RUN chown -R 65534:65534 /tmp && \
     # The contents of paths mounted as emptyDir volumes in Kubernetes are saved
     # by the script `save-dir-contents` during the image build. The directory
     # contents are then restored by the script `restore-all-dir-contents`

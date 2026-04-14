@@ -6,6 +6,8 @@ ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi9-minimal
 ARG BASE_TAG=latest
 
+FROM ${BASE_REGISTRY}/ubi9-micro:${BASE_TAG} AS ubi-micro-base
+
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 COPY bundle.tar.gz /
 
@@ -17,7 +19,73 @@ FROM ${RPMS_REGISTRY}/${RPMS_BASE_IMAGE}:${RPMS_BASE_TAG} AS postgres_rpms
 COPY scripts/download.sh /download.sh
 RUN /download.sh
 
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS base
+FROM ${RPMS_REGISTRY}/${RPMS_BASE_IMAGE}:${RPMS_BASE_TAG} AS dependency_builder
+
+ENV PG_MAJOR=15
+
+COPY --from=ubi-micro-base / /out/
+
+RUN dnf install -y \
+    --installroot=/out/ \
+    --releasever=9 \
+    --setopt=install_weak_deps=0 \
+    --nodocs \
+    bash \
+    coreutils \
+    findutils \
+    util-linux \
+    shadow-utils \
+    ca-certificates \
+    openldap \
+    glibc-langpack-en \
+    glibc-locale-source \
+    libicu \
+    libxslt \
+    lz4 \
+    perl-libs \
+    python3 \
+    systemd-sysv \
+    zstd \
+    uuid \
+    gzip \
+    less \
+    tar && \
+    dnf clean all --installroot=/out/ && \
+    rm -rf /out/var/cache/dnf /out/var/cache/yum
+
+COPY --from=postgres_rpms /rpms/postgres.rpm /rpms/postgres-libs.rpm /rpms/postgres-server.rpm /rpms/postgres-contrib.rpm /tmp/
+COPY signatures/PGDG-RPM-GPG-KEY-RHEL /tmp/
+
+RUN rpm --root=/out/ --import /tmp/PGDG-RPM-GPG-KEY-RHEL && \
+    rpm --root=/out/ -ivh --nodeps /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
+    rm -rf /tmp/*.rpm /tmp/PGDG-RPM-GPG-KEY-RHEL
+
+RUN chroot /out /bin/sh -c " \
+    if getent group postgres >/dev/null; then \
+        current_gid=\$(getent group postgres | cut -d: -f3); \
+        if [ \$current_gid -ne 70 ]; then \
+            groupmod -g 70 postgres; \
+        fi; \
+    else \
+        groupadd -g 70 postgres; \
+    fi && \
+    if id -u postgres &>/dev/null; then \
+        current_uid=\$(id -u postgres); \
+        if [ \$current_uid -ne 70 ]; then \
+            usermod -u 70 -g 70 postgres; \
+        fi; \
+    else \
+        useradd postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh; \
+    fi \
+    "
+
+RUN chroot /out /bin/sh -c "localedef -f UTF-8 -i en_US en_US.UTF-8"
+
+RUN mkdir -p /out/docker-entrypoint-initdb.d \
+             /out/var/run/postgresql && \
+    chroot /out /bin/sh -c "chown postgres:postgres /var/run/postgresql && chmod 03775 /var/run/postgresql"
+
+FROM ubi-micro-base AS base
 
 ARG LABEL_VERSION
 ARG LABEL_RELEASE
@@ -36,44 +104,10 @@ ENV PG_MAJOR=15
 ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
     PGDATA="/var/lib/postgresql/data/pgdata"
 
-COPY signatures/PGDG-RPM-GPG-KEY-RHEL /
+COPY --from=dependency_builder /out/ /
+
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
-COPY --from=postgres_rpms /rpms/postgres.rpm /rpms/postgres-libs.rpm /rpms/postgres-server.rpm /rpms/postgres-contrib.rpm /tmp/
-
-RUN microdnf upgrade -y --nobest && \
-    microdnf install -y shadow-utils && \
-    groupadd -g 70 postgres && \
-    adduser postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh && \
-    rpm --import PGDG-RPM-GPG-KEY-RHEL && \
-    microdnf install -y \
-        ca-certificates \
-        glibc-langpack-en \
-        glibc-locale-source \
-        libicu \
-        libxslt \
-        lz4 \
-        perl-libs \
-        python3 \
-        systemd-sysv \
-        zstd \
-        && \
-    if [[ $(awk -F'=' '/VERSION_ID/{ gsub(/"/,""); print substr($2,1,1)}' /etc/os-release) -gt 8 ]]; then \
-        microdnf install -y uuid; \
-    fi && \
-    rpm -i /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
-    # The removal of /usr/share/zoneinfo from UBI minimal images is intentional.
-    # After building the image, the image is reduced in size as much as possible,
-    # and the /usr/share/zoneinfo directory is purged as it saves space
-    # in the final distribution of the image.
-    # https://access.redhat.com/solutions/5616681
-    microdnf reinstall -y tzdata && \
-    microdnf clean all && \
-    # (Optional) Remove line below to keep package management utilities
-    rpm -e --nodeps $(rpm -qa shadow-utils curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
-    rm -rf /var/cache/dnf /var/cache/yum /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
-    localedef -f UTF-8 -i en_US en_US.UTF-8 && \
-    mkdir /docker-entrypoint-initdb.d
 
 # This is equivalent to postgres:postgres.
 USER 70:70

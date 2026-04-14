@@ -42,7 +42,7 @@ spec:
     value: |
       [
         { "type": "gomod", "path": "." },
-        { "type": "rpm", "path": "." }
+        { "type": "rpm" }
       ]
   - name: build-source-image
     value: 'true'
@@ -58,6 +58,8 @@ spec:
     value:
     # X.Y in the cpe label must be adjusted for every version stream.
     - "cpe=cpe:/a:redhat:advanced_cluster_security:X.Y::el9"
+  - name: ACTIVATION_KEY
+    value: subscription-manager-activation-key-prod
 
   workspaces:
   - name: git-auth
