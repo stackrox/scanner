@@ -321,7 +321,41 @@ func Test_getContentManifestSets(t *testing.T) {
 			}),
 			wantErr: assert.Error,
 		},
-
+		{
+			name: "when labels.json without content sets and content-sets.json with content sets, then return content sets",
+			filesArg: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"root/buildinfo/content_manifests/labels.json": {
+					Contents: []byte(`{"name": "ubi9/ubi", "version": "9.7"}`),
+				},
+				"root/buildinfo/content_manifests/content-sets.json": {
+					Contents: []byte(`{
+    "content_sets": [
+        "rhel-9-for-x86_64-baseos-rpms",
+        "rhel-9-for-x86_64-appstream-rpms"
+    ]
+}`),
+				},
+			}),
+			want:    []string{"rhel-9-for-x86_64-baseos-rpms", "rhel-9-for-x86_64-appstream-rpms"},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "when invalid json alongside valid content sets, then return content sets",
+			filesArg: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
+				"root/buildinfo/content_manifests/broken.json": {
+					Contents: []byte("not json"),
+				},
+				"root/buildinfo/content_manifests/content-sets.json": {
+					Contents: []byte(`{
+    "content_sets": [
+        "rhel-8-for-x86_64-baseos-rpms"
+    ]
+}`),
+				},
+			}),
+			want:    []string{"rhel-8-for-x86_64-baseos-rpms"},
+			wantErr: assert.NoError,
+		},
 		{
 			name: "when rhel content sets found, then return",
 			filesArg: tarutil.CreateNewLayerFiles(map[string]analyzer.FileData{
