@@ -40,7 +40,6 @@ RUN dnf install -y \
     --setopt=reposdir=/etc/yum.repos.d \
     --nodocs \
     bash \
-    coreutils \
     findutils \
     util-linux \
     ca-certificates \
