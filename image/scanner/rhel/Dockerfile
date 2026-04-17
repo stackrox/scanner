@@ -19,7 +19,6 @@ RUN dnf install -y \
     --releasever=9 \
     --setopt=install_weak_deps=0 \
     --nodocs \
-    bash \
     findutils \
     util-linux \
     ca-certificates \
