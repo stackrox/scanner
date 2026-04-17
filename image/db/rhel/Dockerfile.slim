@@ -81,8 +81,9 @@ RUN chroot /out /bin/sh -c " \
 RUN chroot /out /bin/sh -c "localedef -f UTF-8 -i en_US en_US.UTF-8"
 
 RUN mkdir -p /out/docker-entrypoint-initdb.d \
-             /out/var/run/postgresql && \
-    chroot /out /bin/sh -c "chown postgres:postgres /var/run/postgresql && chmod 03775 /var/run/postgresql"
+             /out/var/run/postgresql \
+             /out/var/lib/postgresql && \
+    chroot /out /bin/sh -c "chown 70:70 /var/run/postgresql && chmod 03775 /var/run/postgresql && chown 70:70 /var/lib/postgresql && chmod 0700 /var/lib/postgresql"
 
 FROM ubi-micro-base AS base
 
