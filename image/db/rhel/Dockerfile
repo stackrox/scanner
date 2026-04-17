@@ -31,7 +31,6 @@ RUN dnf install -y \
     --setopt=install_weak_deps=0 \
     --nodocs \
     findutils \
-    util-linux \
     shadow-utils \
     ca-certificates \
     openldap \

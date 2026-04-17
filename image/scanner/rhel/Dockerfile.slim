@@ -20,7 +20,6 @@ RUN dnf install -y \
     --setopt=install_weak_deps=0 \
     --nodocs \
     findutils \
-    util-linux \
     ca-certificates \
     xz \
     gzip \
