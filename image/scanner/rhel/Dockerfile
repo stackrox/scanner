@@ -1,5 +1,5 @@
 ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi8-minimal
+ARG BASE_IMAGE=ubi9-minimal
 ARG BASE_TAG=latest
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
@@ -43,7 +43,7 @@ RUN microdnf upgrade -y --nobest && \
     # by the script `save-dir-contents` during the image build. The directory
     # contents are then restored by the script `restore-all-dir-contents`
     # during the container start.
-    chown -R 65534:65534 /etc/pki/ca-trust /etc/ssl && /save-dir-contents /etc/pki/ca-trust /etc/ssl && \
+    chown -R 65534:65534 /etc/pki/ca-trust && /save-dir-contents /etc/pki/ca-trust/source && \
     chmod +rx /scanner
 
 ENV NVD_DEFINITIONS_DIR="/nvd_definitions"
