@@ -39,9 +39,7 @@ RUN dnf install -y \
     --setopt=install_weak_deps=0 \
     --setopt=reposdir=/etc/yum.repos.d \
     --nodocs \
-    bash \
     findutils \
-    util-linux \
     ca-certificates \
     xz \
     gzip \
