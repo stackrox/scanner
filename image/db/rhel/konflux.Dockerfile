@@ -1,4 +1,4 @@
-FROM registry.redhat.io/rhel8/postgresql-15:latest@sha256:008728377c68cbc8c856f42e2c8e936c5b48d14d6ec2ce45b07aee3b8b99cc57 AS scanner-db-common
+FROM registry.redhat.io/rhel8/postgresql-15:latest@sha256:88f70918ffeeeffd77a96556468384a655fa93c10d29c913700938f2fd812727 AS scanner-db-common
 
 ARG SCANNER_TAG
 RUN if [[ "$SCANNER_TAG" == "" ]]; then >&2 echo "error: required SCANNER_TAG arg is unset"; exit 6; fi
