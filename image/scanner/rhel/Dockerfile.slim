@@ -21,6 +21,7 @@ RUN dnf install -y \
     --nodocs \
     findutils \
     ca-certificates \
+    rpm \
     xz \
     gzip \
     less \

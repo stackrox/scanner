@@ -5,8 +5,10 @@ packages:
 # Scanner packages (for konflux.Dockerfile stage: package_installer)
 # These packages are installed on top of ubi9-micro base image
 # Note: coreutils and bash are excluded - ubi9-micro already includes them
+# Note: rpm is required by scanner binary to query packages in scanned images
 - findutils
 - ca-certificates
+- rpm
 - xz
 - gzip
 - less
