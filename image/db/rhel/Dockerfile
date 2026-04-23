@@ -1,12 +1,9 @@
-ARG RPMS_REGISTRY=registry.access.redhat.com
-ARG RPMS_BASE_IMAGE=ubi9
-ARG RPMS_BASE_TAG=latest
+ARG PG_VERSION=15
+FROM quay.io/sclorg/postgresql-${PG_VERSION}-c9s:latest
 
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi9-minimal
 ARG BASE_TAG=latest
-
-FROM ${BASE_REGISTRY}/ubi9-micro:${BASE_TAG} AS ubi-micro-base
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
 COPY bundle.tar.gz /
@@ -14,76 +11,9 @@ COPY bundle.tar.gz /
 WORKDIR /bundle
 RUN microdnf install -y tar gzip && tar -zxf /bundle.tar.gz
 
-FROM ${RPMS_REGISTRY}/${RPMS_BASE_IMAGE}:${RPMS_BASE_TAG} AS postgres_rpms
+FROM quay.io/sclorg/postgresql-${PG_VERSION}-c9s:latest
 
-COPY scripts/download.sh /download.sh
-RUN /download.sh
-
-FROM ${RPMS_REGISTRY}/${RPMS_BASE_IMAGE}:${RPMS_BASE_TAG} AS dependency_builder
-
-ENV PG_MAJOR=15
-
-COPY --from=ubi-micro-base / /out/
-
-RUN dnf install -y \
-    --installroot=/out/ \
-    --releasever=9 \
-    --setopt=install_weak_deps=0 \
-    --nodocs \
-    findutils \
-    shadow-utils \
-    ca-certificates \
-    openldap \
-    glibc-langpack-en \
-    glibc-locale-source \
-    libicu \
-    libxslt \
-    lz4 \
-    perl-libs \
-    python3 \
-    systemd-sysv \
-    zstd \
-    uuid \
-    gzip \
-    less \
-    tar && \
-    dnf clean all --installroot=/out/ && \
-    rm -rf /out/var/cache/dnf /out/var/cache/yum
-
-COPY --from=postgres_rpms /rpms/postgres.rpm /rpms/postgres-libs.rpm /rpms/postgres-server.rpm /rpms/postgres-contrib.rpm /tmp/
-COPY signatures/PGDG-RPM-GPG-KEY-RHEL /tmp/
-
-RUN rpm --root=/out/ --import /tmp/PGDG-RPM-GPG-KEY-RHEL && \
-    rpm --root=/out/ -ivh --nodeps /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
-    rm -rf /tmp/*.rpm /tmp/PGDG-RPM-GPG-KEY-RHEL
-
-RUN chroot /out /bin/sh -c " \
-    if getent group postgres >/dev/null; then \
-        current_gid=\$(getent group postgres | cut -d: -f3); \
-        if [ \$current_gid -ne 70 ]; then \
-            groupmod -g 70 postgres; \
-        fi; \
-    else \
-        groupadd -g 70 postgres; \
-    fi && \
-    if id -u postgres &>/dev/null; then \
-        current_uid=\$(id -u postgres); \
-        if [ \$current_uid -ne 70 ]; then \
-            usermod -u 70 -g 70 postgres; \
-        fi; \
-    else \
-        useradd postgres -u 70 -g 70 -d /var/lib/postgresql -s /bin/sh; \
-    fi \
-    "
-
-RUN chroot /out /bin/sh -c "localedef -f UTF-8 -i en_US en_US.UTF-8"
-
-RUN mkdir -p /out/docker-entrypoint-initdb.d \
-             /out/var/run/postgresql \
-             /out/var/lib/postgresql && \
-    chroot /out /bin/sh -c "chown 70:70 /var/run/postgresql && chmod 03775 /var/run/postgresql && chown 70:70 /var/lib/postgresql && chmod 0700 /var/lib/postgresql"
-
-FROM ubi-micro-base AS base
+USER root
 
 ARG LABEL_VERSION
 ARG LABEL_RELEASE
@@ -98,14 +28,24 @@ LABEL name="scanner-db" \
       release="${LABEL_RELEASE}" \
       quay.expires-after="${QUAY_TAG_EXPIRATION}"
 
-ENV PG_MAJOR=15
-ENV PATH="$PATH:/usr/pgsql-$PG_MAJOR/bin/" \
-    PGDATA="/var/lib/postgresql/data/pgdata"
-
-COPY --from=dependency_builder /out/ /
+ENV LANG="en_US.utf8"
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
+
+RUN dnf upgrade -y --nobest && \
+    localedef -f UTF-8 -i en_US en_US.UTF-8 && \
+    mkdir -p /var/lib/postgresql && \
+    groupmod -g 70 postgres && \
+    usermod -u 70 postgres -d /var/lib/postgresql && \
+    chown -R postgres:postgres /var/lib/postgresql && \
+    chown -R postgres:postgres /var/run/postgresql && \
+    chown -R postgres /var/lib/pgsql && \
+    chown -R postgres /opt/app-root && \
+    dnf clean all && \
+    rpm --verbose -e --nodeps $(rpm -qa curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
+    rm -rf /var/cache/dnf /var/cache/yum && \
+    mkdir /docker-entrypoint-initdb.d
 
 # This is equivalent to postgres:postgres.
 USER 70:70
