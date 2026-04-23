@@ -20,7 +20,7 @@ ENV LANG="en_US.utf8"
 ENV ROX_SLIM_MODE="true"
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
-COPY ../postgresql.conf ../pg_hba.conf /etc/
+COPY postgresql.conf pg_hba.conf /etc/
 
 RUN dnf upgrade -y --nobest && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
