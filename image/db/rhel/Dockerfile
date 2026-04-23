@@ -1,3 +1,4 @@
+ARG PG_VERSION=15
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi9-minimal
 ARG BASE_TAG=latest
@@ -8,7 +9,6 @@ COPY bundle.tar.gz /
 WORKDIR /bundle
 RUN microdnf install -y tar gzip && tar -zxf /bundle.tar.gz
 
-ARG PG_VERSION=15
 FROM quay.io/sclorg/postgresql-${PG_VERSION}-c9s:latest
 
 USER root
