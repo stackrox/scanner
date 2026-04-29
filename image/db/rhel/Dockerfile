@@ -28,7 +28,7 @@ LABEL name="scanner-db" \
 
 ENV LANG="en_US.utf8"
 
-COPY scripts/docker-entrypoint.sh /usr/local/bin/
+COPY scripts/docker-entrypoint.sh scripts/init-entrypoint.sh /usr/local/bin/
 
 RUN dnf upgrade -y --nobest && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
