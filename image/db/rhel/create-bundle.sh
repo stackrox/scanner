@@ -22,7 +22,7 @@ OUTPUT_BUNDLE="${OUTPUT_DIR}/bundle.tar.gz"
 
 # Create tmp directory with stackrox directory structure
 bundle_root="$(mktemp -d)"
-mkdir -p "${bundle_root}/"{"usr/local/bin","docker-entrypoint-initdb.d"}
+mkdir -p "${bundle_root}/"{"usr/local/bin","etc","docker-entrypoint-initdb.d"}
 chmod -R 755 "${bundle_root}"
 
 # =============================================================================
@@ -32,6 +32,7 @@ chmod -R 755 "${bundle_root}"
 # Dockerfile.
 
 cp -p "${INPUT_ROOT}/dump/definitions.sql.gz" "${bundle_root}/docker-entrypoint-initdb.d/"
+cp -p "${INPUT_ROOT}"/*.conf "${bundle_root}/etc/"
 
 # =============================================================================
 
