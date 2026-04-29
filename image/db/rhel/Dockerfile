@@ -29,7 +29,6 @@ LABEL name="scanner-db" \
 ENV LANG="en_US.utf8"
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
-COPY --from=extracted_bundle /bundle/etc/postgresql.conf /bundle/etc/pg_hba.conf /etc/
 
 RUN dnf upgrade -y --nobest && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
@@ -53,4 +52,4 @@ COPY --from=extracted_bundle /bundle/docker-entrypoint-initdb.d/definitions.sql.
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
-CMD ["postgres", "-c", "config_file=/etc/postgresql.conf"]
+CMD ["postgres"]
