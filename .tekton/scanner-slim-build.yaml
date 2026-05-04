@@ -42,7 +42,7 @@ spec:
     value: |
       [
         { "type": "gomod", "path": "." },
-        { "type": "rpm" }
+        { "type": "rpm", "path": "." }
       ]
   - name: build-source-image
     value: 'true'
