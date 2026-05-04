@@ -38,11 +38,9 @@ spec:
     value: 'true'
   - name: hermetic
     value: "true"
+  # No dependencies are required for scanner-db-slim image.
   - name: prefetch-input
-    value: |
-      [
-        { "type": "rpm" }
-      ]
+    value: ''
   - name: build-source-image
     value: 'true'
   - name: build-target-stage
@@ -57,8 +55,6 @@ spec:
     value:
     # X.Y in the cpe label must be adjusted for every version stream.
     - "cpe=cpe:/a:redhat:advanced_cluster_security:X.Y::el9"
-  - name: ACTIVATION_KEY
-    value: subscription-manager-activation-key-prod
 
   workspaces:
   - name: git-auth
