@@ -26,7 +26,7 @@ endif
 
 # Set expiration on Quay.io for non-release tags.
 ifeq ($(findstring x,$(TAG)),x)
-QUAY_TAG_EXPIRATION=13w
+QUAY_TAG_EXPIRATION=52w
 else
 QUAY_TAG_EXPIRATION=never
 endif
