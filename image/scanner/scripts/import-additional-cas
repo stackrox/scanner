@@ -26,13 +26,9 @@ copy_existing /etc/pki/injected-ca-trust
 # Only copy ca.pem — the mount also contains server cert and key which
 # should not be added as trusted CA anchors.
 CA_PATH="/run/secrets/stackrox.io/certs/ca.pem"
-if [ -f "$CA_PATH" ]; then
-    echo "Copying StackRox root CA from '${CA_PATH}'"
-    # For RHEL
-    cp "${CA_PATH}" /etc/pki/ca-trust/source/anchors/root-ca.pem
-else
-    echo "No StackRox root CA found at '${CA_PATH}' - skipping"
-fi
+echo "Copying StackRox root CA from '${CA_PATH}'"
+# For RHEL
+cp "${CA_PATH}" /etc/pki/ca-trust/source/anchors/root-ca.pem
 
 echo "Updating CA trust"
 # Though /etc/pki/ca-trust/extracted is the default output, update-ca-trust
