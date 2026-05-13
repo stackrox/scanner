@@ -1,5 +1,5 @@
 # Compiling scanner binaries and staging repo2cpe and genesis manifests
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_golang_1.25@sha256:aa03597ee8c7594ffecef5cbb6a0f059d362259d2a41225617b27ec912a3d0d3 AS builder
+FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_golang_1.25@sha256:e3d5ba0efb0d3cbb5b8964f49ca199ed851ccf4a7f129a34e61cf91166b4e267 AS builder
 
 ARG SCANNER_TAG
 RUN if [[ "$SCANNER_TAG" == "" ]]; then >&2 echo "error: required SCANNER_TAG arg is unset"; exit 6; fi
@@ -28,7 +28,7 @@ COPY .konflux/scanner-data/blob-genesis_manifests.json image/scanner/dump/genesi
 
 
 # Common base for scanner slim and full
-FROM registry.access.redhat.com/ubi8-minimal:latest@sha256:1352e7792cd20b906b6f3326f2ce714ae9f2ccf6ba06e7132759afa5efe26e3b AS scanner-common
+FROM registry.access.redhat.com/ubi8-minimal:latest@sha256:03bcee28f6137a3103a9218d2d7e6a453658d04a084ec9a41d1501c0d28cff37 AS scanner-common
 
 ARG SCANNER_TAG
 
