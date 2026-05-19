@@ -3055,10 +3055,56 @@ var testCases = []testCase{
 						},
 						FixedBy: "2.25.3",
 					},
+					{
+						Name:        "CVE-2026-34479",
+						Description: "The Log4j1XmlLayout in the Apache Log4j 1-to-Log4j 2 bridge fails to escape characters forbidden by the XML 1.0 standard, producing malformed XML output. This causes conforming XML parsers to reject documents with fatal errors, potentially disrupting downstream log processing systems. Users employing Log4j1XmlLayout directly in Log4j Core 2 configuration or utilizing the Log4j 1 compatibility layer with org.apache.log4j.xml.XMLLayout are affected. Apache Log4j versions 2.7 through 2.25.3 (inclusive) and Log4j 3.0.0 alpha and beta releases are affected. This issue is fixed in Apache Log4j 2.25.4.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2026-34479",
+						Severity:    "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.4",
+					},
+					{
+						Name:        "CVE-2026-34480",
+						Description: "Apache Log4j Core’s XmlLayout fails to sanitize characters forbidden by XML 1.0 specification in versions up to 2.25.3. When log messages or MDC values contain such characters, invalid XML is produced. Impact varies by StAX implementation: JRE built-in StAX silently outputs malformed XML that conforming parsers must reject, while alternative implementations (e.g., Woodstox) throw exceptions, preventing log delivery. Apache Log4j versions 2.0 through 2.25.3 (inclusive) and Apache Log4j 3.0.0 alpha and beta releases are affected. This issue is fixed in Apache Log4j Core 2.25.4 which sanitizes forbidden characters before XML output.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2026-34480",
+						Severity:    "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.4",
+					},
 				},
 				AddedBy:  "sha256:477d0b4ccc14566aec80c3360aba6c84208c9d337727434c3914bd87b023dab3",
 				Location: "usr/share/logstash/vendor/bundle/jruby/2.5.0/gems/logstash-input-tcp-6.0.10-java/vendor/jar-dependencies/org/logstash/inputs/logstash-input-tcp/6.0.10/logstash-input-tcp-6.0.10.jar:log4j-core",
-				FixedBy:  "2.25.3",
+				FixedBy:  "2.25.4",
 			},
 			{
 				Name:          "log4j",
@@ -3180,10 +3226,102 @@ var testCases = []testCase{
 						},
 						FixedBy: "2.25.3",
 					},
+					{
+						Name:        "CVE-2026-34477",
+						Description: "This vulnerability represents an incomplete fix for CVE-2025-68161. The verifyHostName attribute in the <Ssl> element was silently ignored in all versions through 2.25.3, leaving TLS connections vulnerable to interception even when configured. This allows potential man-in-the-middle attacks on SMTP, Socket, or Syslog appenders using TLS when an attacker presents a trusted certificate. Only affects SMTP, Socket, or Syslog appenders with nested <Ssl> configuration. HTTP appender not affected (uses separate verifyHostname attribute). Apache Log4j versions 2.12.0 through 2.25.3 and Apache Log4j 3.0.0 alpha and beta releases are affected. This issue is fixed in Apache Log4j Core 2.25.4.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2026-34477",
+						Severity:    "Moderate",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         3.6,
+									"Score":               5.9,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.4",
+					},
+					{
+						Name:        "CVE-2026-34479",
+						Description: "The Log4j1XmlLayout in the Apache Log4j 1-to-Log4j 2 bridge fails to escape characters forbidden by the XML 1.0 standard, producing malformed XML output. This causes conforming XML parsers to reject documents with fatal errors, potentially disrupting downstream log processing systems. Users employing Log4j1XmlLayout directly in Log4j Core 2 configuration or utilizing the Log4j 1 compatibility layer with org.apache.log4j.xml.XMLLayout are affected. Apache Log4j versions 2.7 through 2.25.3 (inclusive) and Log4j 3.0.0 alpha and beta releases are affected. This issue is fixed in Apache Log4j 2.25.4.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2026-34479",
+						Severity:    "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.4",
+					},
+					{
+						Name:        "CVE-2026-34480",
+						Description: "Apache Log4j Core’s XmlLayout fails to sanitize characters forbidden by XML 1.0 specification in versions up to 2.25.3. When log messages or MDC values contain such characters, invalid XML is produced. Impact varies by StAX implementation: JRE built-in StAX silently outputs malformed XML that conforming parsers must reject, while alternative implementations (e.g., Woodstox) throw exceptions, preventing log delivery. Apache Log4j versions 2.0 through 2.25.3 (inclusive) and Apache Log4j 3.0.0 alpha and beta releases are affected. This issue is fixed in Apache Log4j Core 2.25.4 which sanitizes forbidden characters before XML output.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2026-34480",
+						Severity:    "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.4",
+					},
+					{
+						Name:        "CVE-2026-34481",
+						Description: "Apache Log4j’s JsonTemplateLayout produces invalid JSON when log events contain non-finite floating-point values (NaN, Infinity, or -Infinity), which violates RFC 8259. This can cause downstream log processing systems to reject or fail to index affected records. An attacker can exploit this only if the application uses JsonTemplateLayout and the application logs a MapMessage with attacker-controlled floating-point values. Apache Log4j versions 2.14.0 through 2.25.3 (inclusive) and Apache Log4j 3.0.0 alpha and beta releases are affected. This issue is fixed in Apache Log4j 2.25.4.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2026-34481",
+						Severity:    "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.4",
+					},
 				},
 				AddedBy:  "sha256:477d0b4ccc14566aec80c3360aba6c84208c9d337727434c3914bd87b023dab3",
 				Location: "usr/share/logstash/logstash-core/lib/jars/log4j-core-2.14.0.jar",
-				FixedBy:  "2.25.3",
+				FixedBy:  "2.25.4",
 			},
 		},
 	},
@@ -3292,10 +3430,79 @@ var testCases = []testCase{
 						},
 						FixedBy: "2.25.3",
 					},
+					{
+						Name:        "CVE-2026-34477",
+						Description: "This vulnerability represents an incomplete fix for CVE-2025-68161. The verifyHostName attribute in the <Ssl> element was silently ignored in all versions through 2.25.3, leaving TLS connections vulnerable to interception even when configured. This allows potential man-in-the-middle attacks on SMTP, Socket, or Syslog appenders using TLS when an attacker presents a trusted certificate. Only affects SMTP, Socket, or Syslog appenders with nested <Ssl> configuration. HTTP appender not affected (uses separate verifyHostname attribute). Apache Log4j versions 2.12.0 through 2.25.3 and Apache Log4j 3.0.0 alpha and beta releases are affected. This issue is fixed in Apache Log4j Core 2.25.4.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2026-34477",
+						Severity:    "Moderate",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 2.2,
+									"ImpactScore":         3.6,
+									"Score":               5.9,
+									"Vectors":             "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.4",
+					},
+					{
+						Name:        "CVE-2026-34479",
+						Description: "The Log4j1XmlLayout in the Apache Log4j 1-to-Log4j 2 bridge fails to escape characters forbidden by the XML 1.0 standard, producing malformed XML output. This causes conforming XML parsers to reject documents with fatal errors, potentially disrupting downstream log processing systems. Users employing Log4j1XmlLayout directly in Log4j Core 2 configuration or utilizing the Log4j 1 compatibility layer with org.apache.log4j.xml.XMLLayout are affected. Apache Log4j versions 2.7 through 2.25.3 (inclusive) and Log4j 3.0.0 alpha and beta releases are affected. This issue is fixed in Apache Log4j 2.25.4.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2026-34479",
+						Severity:    "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.4",
+					},
+					{
+						Name:        "CVE-2026-34480",
+						Description: "Apache Log4j Core’s XmlLayout fails to sanitize characters forbidden by XML 1.0 specification in versions up to 2.25.3. When log messages or MDC values contain such characters, invalid XML is produced. Impact varies by StAX implementation: JRE built-in StAX silently outputs malformed XML that conforming parsers must reject, while alternative implementations (e.g., Woodstox) throw exceptions, preventing log delivery. Apache Log4j versions 2.0 through 2.25.3 (inclusive) and Apache Log4j 3.0.0 alpha and beta releases are affected. This issue is fixed in Apache Log4j Core 2.25.4 which sanitizes forbidden characters before XML output.",
+						Link:        "https://nvd.nist.gov/vuln/detail/CVE-2026-34480",
+						Severity:    "Important",
+						Metadata: map[string]interface{}{
+							"NVD": map[string]interface{}{
+								"CVSSv3": map[string]interface{}{
+									"ExploitabilityScore": 3.9,
+									"ImpactScore":         3.6,
+									"Score":               7.5,
+									"Vectors":             "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+								},
+								"CVSSv2": map[string]interface{}{
+									"ExploitabilityScore": 0.0,
+									"ImpactScore":         0.0,
+									"Score":               0.0,
+									"Vectors":             "",
+								},
+							},
+						},
+						FixedBy: "2.25.4",
+					},
 				},
 				AddedBy:  "sha256:d84ba7ea7803fa43fca06730523d264b31c562968cfd7020f0584f5ec1b26225",
 				Location: "log4j-core-2.12.2.jar",
-				FixedBy:  "2.25.3",
+				FixedBy:  "2.25.4",
 			},
 		},
 	},
@@ -3507,7 +3714,7 @@ var testCases = []testCase{
 					{
 						Name:          "CVE-2017-10684",
 						NamespaceName: "centos:7",
-						Description:   "DOCUMENTATION: The MITRE CVE dictionary describes this issue as: In ncurses 6.0, there is a stack-based buffer overflow in the fmt_entry function. A crafted input will lead to a remote arbitrary code execution attack.              STATEMENT: Red Hat Product Security has rated this issue as having Moderate security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
+						Description:   "DOCUMENTATION: The CVE program describes this issue as: In ncurses 6.0, there is a stack-based buffer overflow in the fmt_entry function. A crafted input will lead to a remote arbitrary code execution attack.              STATEMENT: Red Hat Product Security has rated this issue as having Moderate security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2017-10684",
 						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
@@ -3530,7 +3737,7 @@ var testCases = []testCase{
 					{
 						Name:          "CVE-2017-10685",
 						NamespaceName: "centos:7",
-						Description:   "DOCUMENTATION: The MITRE CVE dictionary describes this issue as: In ncurses 6.0, there is a format string vulnerability in the fmt_entry function. A crafted input will lead to a remote arbitrary code execution attack.              STATEMENT: Red Hat considers this issue as a duplicate of CVE-2017-10684.",
+						Description:   "DOCUMENTATION: The CVE program describes this issue as: In ncurses 6.0, there is a format string vulnerability in the fmt_entry function. A crafted input will lead to a remote arbitrary code execution attack.              STATEMENT: Red Hat considers this issue as a duplicate of CVE-2017-10684.",
 						Link:          "https://access.redhat.com/security/cve/CVE-2017-10685",
 						Severity:      "Moderate",
 						Metadata: map[string]interface{}{
