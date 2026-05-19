@@ -46,6 +46,7 @@ RUN dnf install -y \
     gzip \
     less \
     tar && \
+    chroot /out rpm -e --nodeps curl && \
     dnf clean all --installroot=/out/ && \
     rm -rf /out/var/cache/dnf /out/var/cache/yum
 
