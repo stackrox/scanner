@@ -192,8 +192,11 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: genesis-dump
+          name: genesis-dump.zip
           path: /tmp/genesis-dump/genesis-dump.zip
+          # genesis-dump is already an archive; this will avoid creating a
+          # zip of a zip.
+          archive: false
 
       - uses: actions/upload-artifact@v7
         with:
@@ -229,8 +232,9 @@ jobs:
 
       - uses: actions/download-artifact@v8
         with:
-          name: genesis-dump
+          name: genesis-dump.zip
           path: /tmp/genesis-dump
+          skip-decompress: true
 
       - name: db-dump
         run: |
@@ -504,8 +508,9 @@ jobs:
 
       - uses: actions/download-artifact@v8
         with:
-          name: genesis-dump
+          name: genesis-dump.zip
           path: /tmp/genesis-dump
+          skip-decompress: true
 
       - name: diff-dumps
         run: ./scripts/ci/jobs/diff-dumps.sh
