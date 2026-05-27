@@ -74,6 +74,11 @@
       "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20260202152251.zip",
       "timestamp": "2026-02-02T15:22:51.029383584Z",
       "uuid": "3c72663e-a09e-4c74-87da-668bec7e08a8"
+    },
+    {
+      "dumpLocationInGS": "gs://stackrox-scanner-ci-vuln-dump/genesis-20260527132245.zip",
+      "timestamp": "2026-05-27T13:22:45.610756865Z",
+      "uuid": "1fe684d7-112d-421c-b96a-abf21c2338d5"
     }
   ]
 }
