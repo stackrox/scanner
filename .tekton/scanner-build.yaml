@@ -65,7 +65,7 @@ spec:
       secretName: '{{ git_auth_secret }}'
 
   taskRunTemplate:
-    serviceAccountName: build-pipeline-scanner-4.11
+    serviceAccountName: build-pipeline-scanner-4-11
 
   # Multiarch builds sometimes make the pipeline timeout after 1h.
   # Tagged builds wait for blobs to be published, which takes about 1h30m.

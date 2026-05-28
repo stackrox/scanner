@@ -62,7 +62,7 @@ spec:
       secretName: '{{ git_auth_secret }}'
 
   taskRunTemplate:
-    serviceAccountName: build-pipeline-scanner-db-4.11
+    serviceAccountName: build-pipeline-scanner-db-4-11
 
   # Tagged builds wait for blobs to be published, which takes about 1h30m.
   timeouts:
