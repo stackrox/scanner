@@ -45,8 +45,10 @@ RUN dnf install -y \
     xz \
     gzip \
     less \
-    tar && \
-    chroot /out rpm -e --nodeps curl && \
+    tar \
+    openssl && \
+    # curl is a transitive dependency of rpm but not needed in the scanner image
+    rpm --root=/out -e --nodeps curl && \
     dnf clean all --installroot=/out/ && \
     rm -rf /out/var/cache/dnf /out/var/cache/yum
 
