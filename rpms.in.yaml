@@ -12,17 +12,14 @@ packages:
 - gzip
 - less
 - tar
+- openssl
 
 contentOrigin:
   repofiles: [ "rpms.rhel.repo" ]
 
 context:
-  containerfile:
-    file: image/scanner/rhel/konflux.Dockerfile
-    stageName: package_installer
-    imagePattern: registry.access.redhat.com/ubi9/ubi-micro:latest
-context:
   bare: true
+
 arches:
 - aarch64
 - ppc64le
