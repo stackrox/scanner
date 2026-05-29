@@ -1,7 +1,3 @@
-ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi9-minimal
-ARG BASE_TAG=latest
-
 FROM registry.access.redhat.com/ubi9-micro:latest
 
 ARG LABEL_VERSION

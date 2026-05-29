@@ -1,16 +1,12 @@
-ARG BASE_REGISTRY=registry.access.redhat.com
-ARG BASE_IMAGE=ubi9-minimal
-ARG BASE_TAG=latest
+FROM registry.access.redhat.com/ubi9-micro:latest AS ubi-micro-base
 
-FROM ${BASE_REGISTRY}/ubi9-micro:${BASE_TAG} AS ubi-micro-base
-
-FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} AS extracted_bundle
+FROM registry.access.redhat.com/ubi9-minimal:latest AS extracted_bundle
 
 COPY bundle.tar.gz /
 WORKDIR /bundle
 RUN microdnf install -y tar gzip && tar -zxf /bundle.tar.gz
 
-FROM ${BASE_REGISTRY}/ubi9:${BASE_TAG} AS package_installer
+FROM registry.access.redhat.com/ubi9:latest AS package_installer
 
 COPY --from=ubi-micro-base / /out/
 
