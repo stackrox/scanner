@@ -61,6 +61,17 @@ spec:
     secret:
       secretName: '{{ git_auth_secret }}'
 
+  taskRunSpecs:
+  # The following are overrides to default step resources to prevent occasional or deterministic OOM kills.
+  - pipelineTaskName: rpms-signature-scan
+    stepSpecs:
+    - name: rpms-signature-scan
+      computeResources:
+        limits:
+          memory: 512Mi
+        requests:
+          memory: 512Mi
+
   taskRunTemplate:
     serviceAccountName: build-pipeline-scanner-db
 
