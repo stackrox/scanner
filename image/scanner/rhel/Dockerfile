@@ -21,8 +21,7 @@ RUN dnf install -y \
     xz \
     gzip \
     less \
-    tar \
-    openssl && \
+    tar && \
     # curl is a transitive dependency of rpm but not needed in the scanner image
     rpm --root=/out -e --nodeps curl && \
     dnf clean all --installroot=/out/ && \
