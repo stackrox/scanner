@@ -2,13 +2,24 @@
 # See our docs here: https://spaces.redhat.com/display/StackRox/How+to+prefetch+RPMs+for+ACS+Konflux+builds
 
 packages:
+# Scanner packages (for konflux.Dockerfile stage: package_installer)
+# These packages are installed on top of ubi9-micro base image
+# Note: rpm is required by scanner binary to query packages in scanned images
+- findutils
+- ca-certificates
+- rpm
 - xz
+- gzip
+- less
+- tar
+- openssl
+
 contentOrigin:
   repofiles: [ "rpms.rhel.repo" ]
+
 context:
-  containerfile:
-    file: image/scanner/rhel/konflux.Dockerfile
-    stageName: scanner-common
+  bare: true
+
 arches:
 - aarch64
 - ppc64le
