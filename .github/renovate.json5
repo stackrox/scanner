@@ -59,12 +59,6 @@
       // to have less PR noise.
       "**/*konflux*.Dockerfile",
     ],
-    "postUpgradeTasks": {
-      "commands": [
-        // Refresh the rpm lockfile after updating image references in the dockerfile.
-        "rpm-lockfile-prototype rpms.in.yaml",
-      ],
-    },
   },
   // Turns on automerge for the RPM updates coming with CVE fixes.
   // https://konflux-ci.dev/docs/mintmaker/rpm-lockfile/#how-to-enable-automerge-for-rpm-security-updates
