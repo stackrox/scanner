@@ -604,3 +604,23 @@ spec:
       - name: kind
         value: task
       resolver: bundles
+
+  - name: verify-pq-crypto-policies
+    params:
+    - name: IMAGE_URL
+      value: $(tasks.build-image-index.results.IMAGE_URL)
+    - name: IMAGE_DIGEST
+      value: $(tasks.build-image-index.results.IMAGE_DIGEST)
+    taskRef:
+      params:
+      - name: name
+        value: verify-pq-crypto-policies
+      - name: bundle
+        value: quay.io/rhacs-eng/konflux-tasks:pr-106@sha256:7ac792e1ff5bd02bf862e738d0a139c6575a2b8427f2da0e139ad1dfac8b74d4
+      - name: kind
+        value: task
+      resolver: bundles
+    when:
+    - input: $(params.skip-checks)
+      operator: in
+      values: ["false"]
