@@ -319,13 +319,13 @@ arches:
     name: libssh-config
     evr: 0.10.4-18.el9
     sourcerpm: libssh-0.10.4-18.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libtasn1-4.16.0-9.el9.aarch64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libtasn1-4.16.0-10.el9_8.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
-    size: 77910
-    checksum: sha256:64fca0d49523ffb182e8bad1b8d52e2c2b7b722ceb54e4fb03e118d07fb59db1
+    size: 80446
+    checksum: sha256:322524934c9b1f0714d2299705dbd41ec93451078e8144babc88c51bd19f6e07
     name: libtasn1
-    evr: 4.16.0-9.el9
-    sourcerpm: libtasn1-4.16.0-9.el9.src.rpm
+    evr: 4.16.0-10.el9_8
+    sourcerpm: libtasn1-4.16.0-10.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libtool-ltdl-2.4.6-46.el9.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
     size: 37581
@@ -354,13 +354,13 @@ arches:
     name: libxcrypt
     evr: 4.4.18-3.el9
     sourcerpm: libxcrypt-4.4.18-3.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libxml2-2.9.13-14.el9_7.aarch64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libxml2-2.9.13-14.el9_8.1.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
-    size: 747343
-    checksum: sha256:439834f9b140eb591dec0e23aa6f3d7353b412170d3bc6f729010080197e85e5
+    size: 754614
+    checksum: sha256:e8181f9adb0f39af82d5ec6065b9ccb9ca12a5db575f86d4479ef407689da811
     name: libxml2
-    evr: 2.9.13-14.el9_7
-    sourcerpm: libxml2-2.9.13-14.el9_7.src.rpm
+    evr: 2.9.13-14.el9_8.1
+    sourcerpm: libxml2-2.9.13-14.el9_8.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libzstd-1.5.5-1.el9.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
     size: 283159
@@ -814,12 +814,12 @@ arches:
     checksum: sha256:e012994887f4f4c4367bce98f2eb5589bfa5c7926d65471cefeee12bee636b1d
     name: libssh
     evr: 0.10.4-18.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/l/libtasn1-4.16.0-9.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/l/libtasn1-4.16.0-10.el9_8.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
-    size: 1895591
-    checksum: sha256:a3d9612fc631100fa0a528d7721bdee96acc33e35befb6a96544526eae169936
+    size: 1899881
+    checksum: sha256:be5c3a993282ecde81ad5d00dd4e7b2c293e97e47d28709aa0ea7292b80ba610
     name: libtasn1
-    evr: 4.16.0-9.el9
+    evr: 4.16.0-10.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/l/libtool-2.4.6-46.el9.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
     size: 1002417
@@ -844,12 +844,12 @@ arches:
     checksum: sha256:d18f72eb41ecd0370e2e47f1dc5774be54e9ff3b4dd333578017666c7c488f40
     name: libxcrypt
     evr: 4.4.18-3.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/l/libxml2-2.9.13-14.el9_7.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/l/libxml2-2.9.13-14.el9_8.1.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
-    size: 3287727
-    checksum: sha256:734596effcfb386afa2483354c318c31ea95b453f11a24e74158925c23b410bd
+    size: 3295611
+    checksum: sha256:0a6a1eb34801b5f583771ad141b7577385a64d9bd2fbfb56eccb39d5747fa65f
     name: libxml2
-    evr: 2.9.13-14.el9_7
+    evr: 2.9.13-14.el9_8.1
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/l/lua-5.4.4-4.el9.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
     size: 521629
@@ -1318,13 +1318,13 @@ arches:
     name: libssh-config
     evr: 0.10.4-18.el9
     sourcerpm: libssh-0.10.4-18.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libtasn1-4.16.0-9.el9.ppc64le.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libtasn1-4.16.0-10.el9_8.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
-    size: 84469
-    checksum: sha256:05d77fc16cb5888d298a1d57d419da59894e60eed3220f674f74d50337db167f
+    size: 87068
+    checksum: sha256:cbd7e8b7236d395a591ab0e0c28b8a3d37944d451c008aad4fa4063b9c62e825
     name: libtasn1
-    evr: 4.16.0-9.el9
-    sourcerpm: libtasn1-4.16.0-9.el9.src.rpm
+    evr: 4.16.0-10.el9_8
+    sourcerpm: libtasn1-4.16.0-10.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libtool-ltdl-2.4.6-46.el9.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
     size: 41941
@@ -1353,13 +1353,13 @@ arches:
     name: libxcrypt
     evr: 4.4.18-3.el9
     sourcerpm: libxcrypt-4.4.18-3.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libxml2-2.9.13-14.el9_7.ppc64le.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libxml2-2.9.13-14.el9_8.1.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
-    size: 842812
-    checksum: sha256:a946303620df2a718355c4ffcbcfd5bbf95d606a3458b806b8586343f7b31121
+    size: 849192
+    checksum: sha256:b5ba5cdda1341affdf84681955c95a09486d59bc868f077afc65c38028032275
     name: libxml2
-    evr: 2.9.13-14.el9_7
-    sourcerpm: libxml2-2.9.13-14.el9_7.src.rpm
+    evr: 2.9.13-14.el9_8.1
+    sourcerpm: libxml2-2.9.13-14.el9_8.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libzstd-1.5.5-1.el9.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
     size: 329280
@@ -1813,12 +1813,12 @@ arches:
     checksum: sha256:e012994887f4f4c4367bce98f2eb5589bfa5c7926d65471cefeee12bee636b1d
     name: libssh
     evr: 0.10.4-18.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/l/libtasn1-4.16.0-9.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/l/libtasn1-4.16.0-10.el9_8.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
-    size: 1895591
-    checksum: sha256:a3d9612fc631100fa0a528d7721bdee96acc33e35befb6a96544526eae169936
+    size: 1899881
+    checksum: sha256:be5c3a993282ecde81ad5d00dd4e7b2c293e97e47d28709aa0ea7292b80ba610
     name: libtasn1
-    evr: 4.16.0-9.el9
+    evr: 4.16.0-10.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/l/libtool-2.4.6-46.el9.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
     size: 1002417
@@ -1843,12 +1843,12 @@ arches:
     checksum: sha256:d18f72eb41ecd0370e2e47f1dc5774be54e9ff3b4dd333578017666c7c488f40
     name: libxcrypt
     evr: 4.4.18-3.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/l/libxml2-2.9.13-14.el9_7.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/l/libxml2-2.9.13-14.el9_8.1.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
-    size: 3287727
-    checksum: sha256:734596effcfb386afa2483354c318c31ea95b453f11a24e74158925c23b410bd
+    size: 3295611
+    checksum: sha256:0a6a1eb34801b5f583771ad141b7577385a64d9bd2fbfb56eccb39d5747fa65f
     name: libxml2
-    evr: 2.9.13-14.el9_7
+    evr: 2.9.13-14.el9_8.1
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/l/lua-5.4.4-4.el9.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
     size: 521629
@@ -2317,13 +2317,13 @@ arches:
     name: libssh-config
     evr: 0.10.4-18.el9
     sourcerpm: libssh-0.10.4-18.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libtasn1-4.16.0-9.el9.s390x.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libtasn1-4.16.0-10.el9_8.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
-    size: 78514
-    checksum: sha256:e074ad620eebba2c626d43762b9105f2cdb6b5cea5da3ae1d2751465be9377e7
+    size: 81089
+    checksum: sha256:af302cefa6d25b679f160d87f363b7fdf70756465e7ee8b8744fcef23a7d9da5
     name: libtasn1
-    evr: 4.16.0-9.el9
-    sourcerpm: libtasn1-4.16.0-9.el9.src.rpm
+    evr: 4.16.0-10.el9_8
+    sourcerpm: libtasn1-4.16.0-10.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libtool-ltdl-2.4.6-46.el9.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
     size: 38223
@@ -2352,13 +2352,13 @@ arches:
     name: libxcrypt
     evr: 4.4.18-3.el9
     sourcerpm: libxcrypt-4.4.18-3.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libxml2-2.9.13-14.el9_7.s390x.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libxml2-2.9.13-14.el9_8.1.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
-    size: 726738
-    checksum: sha256:a50220c3501846b0b2ca7c23619448b91cfe369477f15107989f4a0956b4d1b4
+    size: 733866
+    checksum: sha256:f0c7135f3d0d47c993aee9b02d1cf08595187593021db1a044f5d78076439700
     name: libxml2
-    evr: 2.9.13-14.el9_7
-    sourcerpm: libxml2-2.9.13-14.el9_7.src.rpm
+    evr: 2.9.13-14.el9_8.1
+    sourcerpm: libxml2-2.9.13-14.el9_8.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libzstd-1.5.5-1.el9.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
     size: 283786
@@ -2812,12 +2812,12 @@ arches:
     checksum: sha256:e012994887f4f4c4367bce98f2eb5589bfa5c7926d65471cefeee12bee636b1d
     name: libssh
     evr: 0.10.4-18.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/l/libtasn1-4.16.0-9.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/l/libtasn1-4.16.0-10.el9_8.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
-    size: 1895591
-    checksum: sha256:a3d9612fc631100fa0a528d7721bdee96acc33e35befb6a96544526eae169936
+    size: 1899881
+    checksum: sha256:be5c3a993282ecde81ad5d00dd4e7b2c293e97e47d28709aa0ea7292b80ba610
     name: libtasn1
-    evr: 4.16.0-9.el9
+    evr: 4.16.0-10.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/l/libtool-2.4.6-46.el9.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
     size: 1002417
@@ -2842,12 +2842,12 @@ arches:
     checksum: sha256:d18f72eb41ecd0370e2e47f1dc5774be54e9ff3b4dd333578017666c7c488f40
     name: libxcrypt
     evr: 4.4.18-3.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/l/libxml2-2.9.13-14.el9_7.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/l/libxml2-2.9.13-14.el9_8.1.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
-    size: 3287727
-    checksum: sha256:734596effcfb386afa2483354c318c31ea95b453f11a24e74158925c23b410bd
+    size: 3295611
+    checksum: sha256:0a6a1eb34801b5f583771ad141b7577385a64d9bd2fbfb56eccb39d5747fa65f
     name: libxml2
-    evr: 2.9.13-14.el9_7
+    evr: 2.9.13-14.el9_8.1
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/l/lua-5.4.4-4.el9.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
     size: 521629
@@ -3316,13 +3316,13 @@ arches:
     name: libssh-config
     evr: 0.10.4-18.el9
     sourcerpm: libssh-0.10.4-18.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libtasn1-4.16.0-9.el9.x86_64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libtasn1-4.16.0-10.el9_8.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
-    size: 78596
-    checksum: sha256:3c619506cf4283d4d30d9e681a3565f79c1009f5e4a47d71b0de78c5ee24c91d
+    size: 81418
+    checksum: sha256:f9473f322407f10205b0db98b89cf8f603e9c769e9977250734136df56cbb981
     name: libtasn1
-    evr: 4.16.0-9.el9
-    sourcerpm: libtasn1-4.16.0-9.el9.src.rpm
+    evr: 4.16.0-10.el9_8
+    sourcerpm: libtasn1-4.16.0-10.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libtool-ltdl-2.4.6-46.el9.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
     size: 38043
@@ -3351,13 +3351,13 @@ arches:
     name: libxcrypt
     evr: 4.4.18-3.el9
     sourcerpm: libxcrypt-4.4.18-3.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libxml2-2.9.13-14.el9_7.x86_64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libxml2-2.9.13-14.el9_8.1.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
-    size: 764632
-    checksum: sha256:c6a5c5b2d2d40fe50c93ee5166517d924f619ad59b99a5f9cebcfc649c80ddd7
+    size: 771862
+    checksum: sha256:52d0dac861b62454a7d798990298c9329715ecad9326f596dccefcd7afc53aad
     name: libxml2
-    evr: 2.9.13-14.el9_7
-    sourcerpm: libxml2-2.9.13-14.el9_7.src.rpm
+    evr: 2.9.13-14.el9_8.1
+    sourcerpm: libxml2-2.9.13-14.el9_8.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libzstd-1.5.5-1.el9.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
     size: 304135
@@ -3811,12 +3811,12 @@ arches:
     checksum: sha256:e012994887f4f4c4367bce98f2eb5589bfa5c7926d65471cefeee12bee636b1d
     name: libssh
     evr: 0.10.4-18.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/l/libtasn1-4.16.0-9.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/l/libtasn1-4.16.0-10.el9_8.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
-    size: 1895591
-    checksum: sha256:a3d9612fc631100fa0a528d7721bdee96acc33e35befb6a96544526eae169936
+    size: 1899881
+    checksum: sha256:be5c3a993282ecde81ad5d00dd4e7b2c293e97e47d28709aa0ea7292b80ba610
     name: libtasn1
-    evr: 4.16.0-9.el9
+    evr: 4.16.0-10.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/l/libtool-2.4.6-46.el9.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
     size: 1002417
@@ -3841,12 +3841,12 @@ arches:
     checksum: sha256:d18f72eb41ecd0370e2e47f1dc5774be54e9ff3b4dd333578017666c7c488f40
     name: libxcrypt
     evr: 4.4.18-3.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/l/libxml2-2.9.13-14.el9_7.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/l/libxml2-2.9.13-14.el9_8.1.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
-    size: 3287727
-    checksum: sha256:734596effcfb386afa2483354c318c31ea95b453f11a24e74158925c23b410bd
+    size: 3295611
+    checksum: sha256:0a6a1eb34801b5f583771ad141b7577385a64d9bd2fbfb56eccb39d5747fa65f
     name: libxml2
-    evr: 2.9.13-14.el9_7
+    evr: 2.9.13-14.el9_8.1
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/l/lua-5.4.4-4.el9.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
     size: 521629
