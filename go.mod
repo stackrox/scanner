@@ -1,8 +1,8 @@
 module github.com/stackrox/scanner
 
-go 1.24.0
+go 1.25.0
 
-toolchain go1.24.4
+toolchain go1.25.9
 
 require (
 	cloud.google.com/go/storage v1.56.1
