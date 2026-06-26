@@ -220,7 +220,7 @@ func updateRepoToCPE(outputDir string) (*repo2cpe.RHELv2MappingFile, error) {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Errorf("received status code %q querying mapping url", resp.StatusCode)
+		return nil, errors.Errorf("received status code %d querying mapping url", resp.StatusCode)
 	}
 
 	// We could just copy the contents over, but this acts a sanity check to ensure it is in the form we expect.
