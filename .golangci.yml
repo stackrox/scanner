@@ -1,65 +1,52 @@
 # Originally copied from github.com/stackrox/stackrox, and regularly kept in-sync manually.
 
+version: "2"
 run:
   timeout: 16m
-  modules-download-mode: readonly
   go: "1.23"
-
+  modules-download-mode: readonly
 output:
   formats:
-    - format: colored-line-number
-    - format: junit-xml
+    text:
+      path: stdout
+    junit-xml:
       path: report.xml
-
-issues:
-  exclude-use-default: false
-
-  exclude-rules:
-    - linters:
-        - revive
-      text: "should have a package comment, unless it's in another file for this package"
-    - linters:
-        - revive
-      text: "should not use dot imports"
-    - linters:
-        - revive
-      text: "returns unexported type .* which can be annoying to use"
-    - linters:
-        - revive
-      text: "error strings should not be capitalized or end with punctuation or a newline"
-    - linters:
-        - revive
-      text: "should omit type int from declaration"
-    - linters:
-        - revive
-      text: "don't use leading k in Go names"
-    - linters:
-        - revive
-      text: "package-comments: should have a package comment"
-    - linters:
-        - gocritic
-      path: _test\.go
-
-linters-settings:
-  gosec:
-    includes:
-      - G601 # Implicit memory aliasing of items from a range statement
-  revive:
-    rules:
-      - name: package-comments
-        disabled: true
-      - name: error-strings
-        disabled: true
-      - name: unexported-return
-        disabled: true
-  govet:
-    enable-all: true
-    disable:
+linters:
+  # please, do not use `enable-all`: it's deprecated and will be removed soon.
+  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
+  default: none
+  enable:
+  - asciicheck
+  - copyloopvar
+  # - errcheck
+  # - forbidigo
+  - gocritic
+  # - exptostd
+  - gosec
+  - govet
+  - ineffassign
+  # - modernize
+  - nolintlint
+  # - protogetter
+  - revive # replaces golint
+  - rowserrcheck
+  - staticcheck
+  # - wrapcheck
+  # - nakedret TODO: add in follow-up
+  - unconvert
+  # - unparam TODO: add in follow-up
+  settings:
+    gosec:
+      includes:
+      - G601
+    govet:
+      disable:
       - shadow
       - fieldalignment
-    settings:
-      printf: # analyzer name, run `go tool vet help` to see all analyzers
-        funcs: # run `go tool vet help printf` to see available settings for `printf` analyzer
+      enable-all: true
+      settings:
+        printf:
+          funcs:
           - Print
           - Printf
           - Println
@@ -71,69 +58,72 @@ linters-settings:
           - Warnf
           - Error
           - Errorf
-  gocritic:
-    enabled-checks:
-      - commentFormatting
-  nolintlint:
-    allow-leading-space: false # require machine-readable nolint directives (i.e. with no leading space)
-    allow-unused: false # report any unused nolint directives
-    require-explanation: false # don't require an explanation for nolint directives
-    require-specific: true # require nolint directives to be specific about which linter is being skipped
-  staticcheck:
-    checks: [ all,-ST1000,-ST1001,-ST1003,-ST1005,-SA1019,-SA4001,-ST1016 ]
-
-linters:
-  # please, do not use `enable-all`: it's deprecated and will be removed soon.
-  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
-  disable-all: true
+    nolintlint:
+      require-explanation: false
+      require-specific: true
+      allow-unused: false
+    revive:
+      rules:
+      - name: package-comments
+        disabled: true
+      - name: error-strings
+        disabled: true
+      - name: unexported-return
+        disabled: true
+    staticcheck:
+      checks:
+      - all
+      - -QF1001
+      - -QF1002
+      - -QF1003
+      - -QF1008
+      - -SA1019
+      - -SA4001
+      - -ST1000
+      - -ST1001
+      - -ST1003
+      - -ST1005
+  exclusions:
+    generated: lax
+    rules:
+    - linters:
+      - revive
+      text: should have a package comment, unless it's in another file for this package
+    - linters:
+      - revive
+      text: should not use dot imports
+    - linters:
+      - revive
+      text: returns unexported type .* which can be annoying to use
+    - linters:
+      - revive
+      text: error strings should not be capitalized or end with punctuation or a newline
+    - linters:
+      - revive
+      text: should omit type int from declaration
+    - linters:
+      - revive
+      text: don't use leading k in Go names
+    - linters:
+      - revive
+      text: 'package-comments: should have a package comment'
+    - linters:
+      - gocritic
+      path: _test\.go
+    paths:
+    - third_party$
+    - builtin$
+    - examples$
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+formatters:
   enable:
-    - asciicheck
-    # - bodyclose
-    - copyloopvar
-    # - deadcode
-    # - depguard
-    # - dogsled
-    # - dupl
-    # - errcheck
-    # - funlen
-    # - forbidigo
-    # - gochecknoglobals
-    # - gochecknoinits
-    # - gocognit
-    # - goconst
-    - gocritic
-    # - gocyclo
-    # - godot
-    # - godox
-    # - goerr113
-    - gofmt
-    - goimports
-    - revive # replaces golint
-    # - gomnd
-    # - goprintffuncname
-    - gosec
-    - gosimple
-    - govet
-    - ineffassign
-    # - interfacer
-    # - lll
-    # - maligned
-    # - misspell
-    # - nakedret TODO: add in follow-up
-    # - nestif
-    - nolintlint
-    # - prealloc
-    - rowserrcheck
-    # - scopelint
-    - staticcheck
-    # - structcheck
-    # - stylecheck
-    # - testpackage
-    # - typecheck
-    # - unconvert TODO: add in follow-up
-    # - unparam TODO: add in follow-up
-    # - unused
-    # - varcheck
-    # - whitespace
-    # - wrapcheck TODO: add in follow-up
-    # - wsl
+  - gofmt
+  - goimports
+  exclusions:
+    generated: lax
+    paths:
+    - third_party$
+    - builtin$
+    - examples$
