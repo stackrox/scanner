@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         ref: ${{ github.event.pull_request.head.sha }}
 
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -71,7 +71,7 @@ jobs:
       matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -115,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -134,7 +134,7 @@ jobs:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -160,7 +160,7 @@ jobs:
       - pre-build-updater
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -203,7 +203,7 @@ jobs:
       - generate-genesis-dump
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -250,7 +250,7 @@ jobs:
       matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -305,7 +305,7 @@ jobs:
       - generate-db-dump
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -354,7 +354,7 @@ jobs:
       matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -430,7 +430,7 @@ jobs:
       QUAY_STACKROX_IO_RW_PASSWORD: ${{ secrets.QUAY_STACKROX_IO_RW_PASSWORD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -469,7 +469,7 @@ jobs:
       - generate-genesis-dump
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -519,7 +519,7 @@ jobs:
     steps:
       # Required for making the tag
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -586,7 +586,7 @@ jobs:
       - generate-db-dump
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: master
@@ -612,7 +612,7 @@ jobs:
       - generate-db-dump
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -644,7 +644,7 @@ jobs:
       - generate-db-dump
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
