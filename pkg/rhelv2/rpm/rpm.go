@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stackrox/rox/pkg/set"
 	"github.com/stackrox/rox/pkg/utils"
 	"github.com/stackrox/scanner/database"
@@ -89,28 +90,24 @@ func AddToDependencyMap(filename string, fileData analyzer.FileData, execToDeps,
 // getContentManifestSets returns the list of content sets defined in the content
 // manifest, if found in the files. Otherwise, `nil` or empty slice is returned.
 func getContentManifestSets(files analyzer.Files) ([]string, error) {
-	var contents []byte
+	var lastErr error
 	for _, prefix := range contentManifestDirs.AsSlice() {
 		for name, file := range files.GetFilesPrefix(prefix) {
-			if strings.HasSuffix(name, ".json") {
-				// Return the first one found, as we are currently assuming there is only one per
-				// layer/node.
-				contents = file.Contents
-				break
+			if !strings.HasSuffix(name, ".json") {
+				continue
+			}
+			var contentManifest database.ContentManifest
+			if err := json.Unmarshal(file.Contents, &contentManifest); err != nil {
+				log.WithFields(log.Fields{"prefix": prefix, "file": name}).WithError(err).Warn("failed to parse content manifest, skipping")
+				lastErr = err
+				continue
+			}
+			if len(contentManifest.ContentSets) > 0 {
+				return contentManifest.ContentSets, nil
 			}
 		}
-		if contents != nil {
-			break
-		}
 	}
-	if contents == nil {
-		return nil, nil
-	}
-	var contentManifest database.ContentManifest
-	if err := json.Unmarshal(contents, &contentManifest); err != nil {
-		return nil, err
-	}
-	return contentManifest.ContentSets, nil
+	return nil, lastErr
 }
 
 func getFeaturesFromRPMDatabase(files analyzer.Files, testing bool) ([]*database.RHELv2Package, error) {
