@@ -91,7 +91,7 @@ $(EASYJSON_BIN): deps
 GOLANGCILINT_BIN := $(GOBIN)/golangci-lint
 $(GOLANGCILINT_BIN): deps
 	@echo "+ $@"
-	@cd tools/linters/ && $(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint
+	@cd tools/linters/ && $(GOINSTALL) github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 
 OSSLS_BIN := $(GOBIN)/ossls
 $(OSSLS_BIN): deps
