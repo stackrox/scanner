@@ -50,7 +50,7 @@ func (l *feedLoader) DownloadFeedsToPath(outputDir string) error {
 func (l *feedLoader) downloadFeedForYear(enrichments map[string]*FileFormatWrapper, outputDir string, year int) error {
 	url := fmt.Sprintf("https://nvd.nist.gov/feeds/json/cve/2.0/nvdcve-2.0-%d.json.gz", year)
 
-	const maxRetries = 5
+	const maxRetries = 10
 	backoff := 10 * time.Second
 	var apiFeed *apischema.CVEAPIJSON20
 	for attempt := 1; ; attempt++ {
