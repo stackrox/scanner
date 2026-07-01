@@ -51,6 +51,7 @@ func (l *feedLoader) downloadFeedForYear(enrichments map[string]*FileFormatWrapp
 	url := fmt.Sprintf("https://nvd.nist.gov/feeds/json/cve/2.0/nvdcve-2.0-%d.json.gz", year)
 
 	const maxRetries = 10
+	const maxBackoff = 5 * time.Minute
 	backoff := 10 * time.Second
 	var apiFeed *apischema.CVEAPIJSON20
 	for attempt := 1; ; attempt++ {
@@ -65,6 +66,9 @@ func (l *feedLoader) downloadFeedForYear(enrichments map[string]*FileFormatWrapp
 		log.Warnf("Feed year %d: attempt %d failed: %v; retrying in %s", year, attempt, err, backoff)
 		time.Sleep(backoff)
 		backoff *= 2
+		if backoff > maxBackoff {
+			backoff = maxBackoff
+		}
 	}
 
 	cveItems, err := toJSON10(apiFeed.Vulnerabilities)
