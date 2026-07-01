@@ -22,7 +22,7 @@ import (
 const urlFmt = `https://services.nvd.nist.gov/rest/json/cves/2.0?noRejected&startIndex=%d`
 
 var client = http.Client{
-	Timeout:   5 * time.Minute,
+	Timeout:   10 * time.Minute,
 	Transport: proxy.RoundTripper(),
 }
 
