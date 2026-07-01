@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -48,26 +49,27 @@ func (l *feedLoader) DownloadFeedsToPath(outputDir string) error {
 
 func (l *feedLoader) downloadFeedForYear(enrichments map[string]*FileFormatWrapper, outputDir string, year int) error {
 	url := fmt.Sprintf("https://nvd.nist.gov/feeds/json/cve/2.0/nvdcve-2.0-%d.json.gz", year)
-	resp, err := client.Get(url)
-	if err != nil {
-		return errors.Wrapf(err, "failed to download feed for year %d", year)
-	}
-	defer utils.IgnoreError(resp.Body.Close)
 
-	// Un-gzip it.
-	gr, err := gzip.NewReader(resp.Body)
-	if err != nil {
-		return errors.Wrapf(err, "couldn't read resp body for year %d", year)
-	}
-
-	apiFeed := new(apischema.CVEAPIJSON20)
-	if err := json.NewDecoder(gr).Decode(apiFeed); err != nil {
-		return errors.Wrapf(err, "decoding feed response")
+	const maxRetries = 10
+	backoff := 10 * time.Second
+	var apiFeed *apischema.CVEAPIJSON20
+	for attempt := 1; ; attempt++ {
+		var err error
+		apiFeed, err = fetchFeed(url, year)
+		if err == nil {
+			break
+		}
+		if attempt >= maxRetries {
+			return errors.Wrapf(err, "failed to download feed for year %d after %d attempts", year, attempt)
+		}
+		log.Warnf("Feed year %d: attempt %d failed: %v; retrying in %s", year, attempt, err, backoff)
+		time.Sleep(backoff)
+		backoff *= 2
 	}
 
 	cveItems, err := toJSON10(apiFeed.Vulnerabilities)
 	if err != nil {
-		return fmt.Errorf("failed to convert feed vulns to JSON: %w", err)
+		return fmt.Errorf("failed to convert feed vulns to JSON for year %d: %w", year, err)
 	}
 
 	enrichCVEItems(&cveItems, enrichments)
@@ -76,8 +78,45 @@ func (l *feedLoader) downloadFeedForYear(enrichments map[string]*FileFormatWrapp
 		CVEItems: cveItems,
 	}
 	if err := writeFile(filepath.Join(outputDir, fmt.Sprintf("%d.json", year)), feed); err != nil {
-		return errors.Wrapf(err, "writing to file")
+		return errors.Wrapf(err, "writing to file for year %d", year)
 	}
 
+	log.Infof("Feed year %d: completed with %d vulnerabilities", year, len(cveItems))
 	return nil
+}
+
+func fetchFeed(url string, year int) (*apischema.CVEAPIJSON20, error) {
+	log.Infof("Downloading NVD feed for year %d from %s", year, url)
+
+	start := time.Now()
+	resp, err := client.Get(url)
+	if err != nil {
+		return nil, errors.Wrapf(err, "HTTP request failed (elapsed: %s)", time.Since(start))
+	}
+	defer utils.IgnoreError(resp.Body.Close)
+
+	log.Infof("Feed year %d: HTTP %d, Content-Length: %d, Proto: %s (connect took %s)",
+		year, resp.StatusCode, resp.ContentLength, resp.Proto, time.Since(start))
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status code %d", resp.StatusCode)
+	}
+
+	gr, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return nil, errors.Wrapf(err, "creating gzip reader")
+	}
+
+	body, err := io.ReadAll(gr)
+	if err != nil {
+		return nil, errors.Wrapf(err, "reading feed body (read %d bytes, elapsed: %s)", len(body), time.Since(start))
+	}
+	log.Infof("Feed year %d: read %d decompressed bytes (elapsed: %s)", year, len(body), time.Since(start))
+
+	apiFeed := new(apischema.CVEAPIJSON20)
+	if err := json.Unmarshal(body, apiFeed); err != nil {
+		return nil, errors.Wrapf(err, "decoding feed JSON (%d bytes)", len(body))
+	}
+
+	return apiFeed, nil
 }
