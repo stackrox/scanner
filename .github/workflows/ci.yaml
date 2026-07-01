@@ -53,7 +53,10 @@ jobs:
       - uses: ./.github/actions/handle-tagged-build
 
       - name: Build updater (amd64)
-        run: make build-updater
+        # CGO_ENABLED is set to 0 here so the other steps aren't required to have a particular version of glibc
+        # (or any other dynamically linked libraries). This will only affect the updater isn't included in any images,
+        # so this build variance should be fine.
+        run: CGO_ENABLED=0 make build-updater
 
       - name: Archive the build to preserve permissions
         run: tar -cvzf updater-build.tgz bin/updater
@@ -199,6 +202,8 @@ jobs:
       github.event_name != 'pull_request' ||
       contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr')
     runs-on: ubuntu-latest
+    container:
+      image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
     needs:
       - generate-genesis-dump
     steps:
