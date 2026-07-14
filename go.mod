@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	cloud.google.com/go/storage v1.63.1
 	github.com/NYTimes/gziphandler v1.1.1
-	github.com/PuerkitoBio/goquery v1.9.3
+	github.com/PuerkitoBio/goquery v1.12.0
 	github.com/ckaznocha/protoc-gen-lint v0.3.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/distribution/reference v0.6.0
@@ -70,7 +70,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
-	github.com/andybalholm/cascadia v1.3.2 // indirect
+	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
