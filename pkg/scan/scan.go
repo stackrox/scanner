@@ -6,7 +6,7 @@ import (
 	"io"
 	"runtime"
 
-	imageManifest "github.com/containers/image/v5/manifest"
+	imageManifest "go.podman.io/image/v5/manifest"
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/manifestlist"
 	manifestV1 "github.com/docker/distribution/manifest/schema1"
