@@ -6,7 +6,6 @@ import (
 	"io"
 	"runtime"
 
-	imageManifest "go.podman.io/image/v5/manifest"
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/manifestlist"
 	manifestV1 "github.com/docker/distribution/manifest/schema1"
@@ -19,6 +18,7 @@ import (
 	"github.com/stackrox/scanner/database"
 	"github.com/stackrox/scanner/pkg/clairify/types"
 	"github.com/stackrox/scanner/pkg/tarutil"
+	imageManifest "go.podman.io/image/v5/manifest"
 )
 
 const (
