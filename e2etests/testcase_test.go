@@ -3344,7 +3344,7 @@ var testCases = []testCase{
 				},
 				AddedBy:  "sha256:477d0b4ccc14566aec80c3360aba6c84208c9d337727434c3914bd87b023dab3",
 				Location: "usr/share/logstash/logstash-core/lib/jars/log4j-core-2.14.0.jar",
-				FixedBy:  "2.25.4",
+				FixedBy:  "2.25.5",
 			},
 		},
 	},
