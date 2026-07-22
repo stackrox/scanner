@@ -28,7 +28,7 @@ COPY .konflux/scanner-data/blob-genesis_manifests.json image/scanner/dump/genesi
 
 
 # Common base for scanner slim and full
-FROM registry.access.redhat.com/ubi8-minimal:latest@sha256:578b238953144445a9b5bb2487eb1d95df4886f98d1f73c4a070b27535f51688 AS scanner-common
+FROM registry.access.redhat.com/ubi8-minimal:latest@sha256:eb2beada3e04ca894aee14cfae54c795ddb27af3193bf4a57e94ff767a69f07a AS scanner-common
 
 ARG SCANNER_TAG
 
