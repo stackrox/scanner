@@ -557,13 +557,13 @@ arches:
     name: tar
     evr: 2:1.34-11.el9
     sourcerpm: tar-1.34-11.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/t/tzdata-2026b-1.el9.noarch.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/t/tzdata-2026c-1.el9_8.noarch.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
-    size: 933841
-    checksum: sha256:09908fa480ac8a56488cde728503cd47a01ed0b717ee00b4233d386784f62793
+    size: 933286
+    checksum: sha256:8d6196e02853c0900c3c2e2367665beffb62cb2d0ff5f465ea2d00848a9a35dc
     name: tzdata
-    evr: 2026b-1.el9
-    sourcerpm: tzdata-2026b-1.el9.src.rpm
+    evr: 2026c-1.el9_8
+    sourcerpm: tzdata-2026c-1.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/x/xz-5.2.5-8.el9_0.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
     size: 235798
@@ -976,12 +976,12 @@ arches:
     checksum: sha256:13204f7499944b3fe773cbdf0b9bb2de31eaa9a4c69f31830fb9e54506bcb9b6
     name: tar
     evr: 2:1.34-11.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/t/tzdata-2026b-1.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/t/tzdata-2026c-1.el9_8.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
-    size: 929993
-    checksum: sha256:d549fc081c8cb2eec6c8273acfdd1b24023897c09fff24117fe2c2532d4bf085
+    size: 933774
+    checksum: sha256:4cc10832b19807c03a30bd9317fb37dc811d2f13c11b1ed35af8d2efa481622f
     name: tzdata
-    evr: 2026b-1.el9
+    evr: 2026c-1.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_0.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
     size: 1168293
@@ -1556,13 +1556,13 @@ arches:
     name: tar
     evr: 2:1.34-11.el9
     sourcerpm: tar-1.34-11.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/t/tzdata-2026b-1.el9.noarch.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/t/tzdata-2026c-1.el9_8.noarch.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
-    size: 933841
-    checksum: sha256:09908fa480ac8a56488cde728503cd47a01ed0b717ee00b4233d386784f62793
+    size: 933286
+    checksum: sha256:8d6196e02853c0900c3c2e2367665beffb62cb2d0ff5f465ea2d00848a9a35dc
     name: tzdata
-    evr: 2026b-1.el9
-    sourcerpm: tzdata-2026b-1.el9.src.rpm
+    evr: 2026c-1.el9_8
+    sourcerpm: tzdata-2026c-1.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/x/xz-5.2.5-8.el9_0.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
     size: 243215
@@ -1975,12 +1975,12 @@ arches:
     checksum: sha256:13204f7499944b3fe773cbdf0b9bb2de31eaa9a4c69f31830fb9e54506bcb9b6
     name: tar
     evr: 2:1.34-11.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/t/tzdata-2026b-1.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/t/tzdata-2026c-1.el9_8.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
-    size: 929993
-    checksum: sha256:d549fc081c8cb2eec6c8273acfdd1b24023897c09fff24117fe2c2532d4bf085
+    size: 933774
+    checksum: sha256:4cc10832b19807c03a30bd9317fb37dc811d2f13c11b1ed35af8d2efa481622f
     name: tzdata
-    evr: 2026b-1.el9
+    evr: 2026c-1.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_0.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
     size: 1168293
@@ -2555,13 +2555,13 @@ arches:
     name: tar
     evr: 2:1.34-11.el9
     sourcerpm: tar-1.34-11.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/t/tzdata-2026b-1.el9.noarch.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/t/tzdata-2026c-1.el9_8.noarch.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
-    size: 933841
-    checksum: sha256:09908fa480ac8a56488cde728503cd47a01ed0b717ee00b4233d386784f62793
+    size: 933286
+    checksum: sha256:8d6196e02853c0900c3c2e2367665beffb62cb2d0ff5f465ea2d00848a9a35dc
     name: tzdata
-    evr: 2026b-1.el9
-    sourcerpm: tzdata-2026b-1.el9.src.rpm
+    evr: 2026c-1.el9_8
+    sourcerpm: tzdata-2026c-1.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/x/xz-5.2.5-8.el9_0.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
     size: 234632
@@ -2974,12 +2974,12 @@ arches:
     checksum: sha256:13204f7499944b3fe773cbdf0b9bb2de31eaa9a4c69f31830fb9e54506bcb9b6
     name: tar
     evr: 2:1.34-11.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/t/tzdata-2026b-1.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/t/tzdata-2026c-1.el9_8.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
-    size: 929993
-    checksum: sha256:d549fc081c8cb2eec6c8273acfdd1b24023897c09fff24117fe2c2532d4bf085
+    size: 933774
+    checksum: sha256:4cc10832b19807c03a30bd9317fb37dc811d2f13c11b1ed35af8d2efa481622f
     name: tzdata
-    evr: 2026b-1.el9
+    evr: 2026c-1.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_0.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
     size: 1168293
@@ -3554,13 +3554,13 @@ arches:
     name: tar
     evr: 2:1.34-11.el9
     sourcerpm: tar-1.34-11.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/t/tzdata-2026b-1.el9.noarch.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/t/tzdata-2026c-1.el9_8.noarch.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
-    size: 933841
-    checksum: sha256:09908fa480ac8a56488cde728503cd47a01ed0b717ee00b4233d386784f62793
+    size: 933286
+    checksum: sha256:8d6196e02853c0900c3c2e2367665beffb62cb2d0ff5f465ea2d00848a9a35dc
     name: tzdata
-    evr: 2026b-1.el9
-    sourcerpm: tzdata-2026b-1.el9.src.rpm
+    evr: 2026c-1.el9_8
+    sourcerpm: tzdata-2026c-1.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/x/xz-5.2.5-8.el9_0.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
     size: 235693
@@ -3973,12 +3973,12 @@ arches:
     checksum: sha256:13204f7499944b3fe773cbdf0b9bb2de31eaa9a4c69f31830fb9e54506bcb9b6
     name: tar
     evr: 2:1.34-11.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/t/tzdata-2026b-1.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/t/tzdata-2026c-1.el9_8.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
-    size: 929993
-    checksum: sha256:d549fc081c8cb2eec6c8273acfdd1b24023897c09fff24117fe2c2532d4bf085
+    size: 933774
+    checksum: sha256:4cc10832b19807c03a30bd9317fb37dc811d2f13c11b1ed35af8d2efa481622f
     name: tzdata
-    evr: 2026b-1.el9
+    evr: 2026c-1.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_0.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
     size: 1168293
