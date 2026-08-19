@@ -44,7 +44,7 @@ require (
 	go.podman.io/image/v5 v5.40.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/ratelimit v0.3.1
-	go.yaml.in/yaml/v3 v3.0.4
+	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
 	golang.org/x/sys v0.47.0
 	google.golang.org/api v0.291.0
