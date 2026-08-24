@@ -671,7 +671,8 @@ jobs:
       - upload-dumps-for-embedding
       - push-manifests
     runs-on: ubuntu-latest
-    if: failure()
+    # Only notify on failures from scheduled runs or tag pushes, not PRs or branch pushes.
+    if: failure() && (github.event_name == 'schedule' || startsWith(github.ref, 'refs/tags/'))
     steps:
       - name: Send Slack notification on workflow failure
         run: |
