@@ -71,7 +71,7 @@ RUN microdnf upgrade -y --nobest && \
     microdnf clean all && \
     rpm -e --nodeps $(rpm -qa shadow-utils \
         # Not needed by postgres, carry unfixable CVEs
-        'libcurl*' 'vim*' \
+        'libcurl*' 'vim*' 'rsync*' \
         # Flagged by "Curl in Image" and "Red Hat Package Manager in Image" default policies
         'curl*' '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     rm -rf /var/cache/dnf /var/cache/yum /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
