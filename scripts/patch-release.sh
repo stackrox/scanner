@@ -45,7 +45,6 @@ Examples:
 
 Prerequisites:
   - GitHub CLI (gh) must be installed and authenticated
-  - User must have "bypass branch protection" permissions on release branches
 EOF
 }
 
@@ -335,24 +334,12 @@ main() {
     fi
     echo
 
-    # Step 4: Check if release is necessary.
+    # Step 4: Determine branch ref and validate patch number.
     # In dry-run mode, use the remote branch ref since we didn't create the worktree.
     local branch_ref="HEAD"
     if [[ "$DRY_RUN" == "true" ]]; then
         branch_ref="origin/${release_branch}"
         log_info "(Using origin/${release_branch} for dry-run checks)"
-    fi
-
-    local head_commit_msg
-    head_commit_msg=$(git log -1 --format='%s' "$branch_ref")
-
-    if [[ "$head_commit_msg" =~ ^Release\ [0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        log_warn "Tip of $release_branch is already a release commit: $head_commit_msg"
-        if ! confirm "Create another release commit on top?"; then
-            log_info "Aborted by user."
-            exit 0
-        fi
-        echo
     fi
 
     if [[ "$patch_number" != "$expected_patch" ]]; then
@@ -443,13 +430,14 @@ main() {
         echo
     fi
 
-    # Step 8: Create release commit and tag.
-    log_info "Creating release commit and tag..."
+    # Step 8: Create release tag on the current HEAD of the release branch.
+    # Note: this intentionally does NOT create a new commit. Tagging HEAD directly
+    # avoids pushing a commit to the protected release branch, so no "bypass branch
+    # protection" permission is required (see ROX-36649).
+    log_info "Creating release tag..."
     if [[ "$DRY_RUN" == "true" ]]; then
-        log_dry_run "git commit --allow-empty -m \"Release ${version}\""
         log_dry_run "git tag --annotate --no-sign ${version}"
     else
-        git commit --allow-empty -m "Release ${version}"
         git tag --annotate --no-sign "${version}" -m "${version}"
     fi
     echo
@@ -473,13 +461,12 @@ main() {
         echo
     fi
 
-    # Step 10: Push.
-    if ! confirm "Push tag and commits to origin? (Requires bypass branch protection)" "y"; then
+    # Step 10: Push the tag.
+    if ! confirm "Push tag to origin?" "y"; then
         log_info "Aborted by user."
         log_info "To push manually, run from the worktree directory:"
         log_info "  cd ${WORKTREE_DIR}"
         log_info "  git push origin ${version}"
-        log_info "  git push --set-upstream origin ${release_branch}"
         log_info ""
         log_info "To clean up the worktree afterwards:"
         log_info "  cd ${ORIGINAL_REPO_ROOT}"
@@ -490,13 +477,11 @@ main() {
         exit 0
     fi
 
-    log_info "Pushing tag and commits..."
+    log_info "Pushing tag..."
     if [[ "$DRY_RUN" == "true" ]]; then
         log_dry_run "git push origin ${version}"
-        log_dry_run "git push --set-upstream origin ${release_branch}"
     else
         git push origin "${version}"
-        git push --set-upstream origin "${release_branch}"
     fi
     echo
 
