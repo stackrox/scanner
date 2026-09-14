@@ -69,8 +69,11 @@ RUN microdnf upgrade -y --nobest && \
     # https://access.redhat.com/solutions/5616681
     microdnf reinstall -y tzdata && \
     microdnf clean all && \
-    # (Optional) Remove line below to keep package management utilities
-    rpm -e --nodeps $(rpm -qa shadow-utils curl '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
+    rpm -e --nodeps $(rpm -qa shadow-utils \
+        # Not needed by postgres, carry unfixable CVEs
+        'libcurl*' 'vim*' 'rsync*' \
+        # Flagged by "Curl in Image" and "Red Hat Package Manager in Image" default policies
+        'curl*' '*rpm*' '*dnf*' '*libsolv*' '*hawkey*' 'yum*') && \
     rm -rf /var/cache/dnf /var/cache/yum /tmp/postgres-libs.rpm /tmp/postgres-server.rpm /tmp/postgres.rpm /tmp/postgres-contrib.rpm && \
     localedef -f UTF-8 -i en_US en_US.UTF-8 && \
     mkdir /docker-entrypoint-initdb.d
