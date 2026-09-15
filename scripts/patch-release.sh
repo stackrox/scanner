@@ -430,10 +430,7 @@ main() {
         echo
     fi
 
-    # Step 8: Create release tag on the current HEAD of the release branch.
-    # Note: this intentionally does NOT create a new commit. Tagging HEAD directly
-    # avoids pushing a commit to the protected release branch, so no "bypass branch
-    # protection" permission is required (see ROX-36649).
+    # Step 8: Create release tag.
     log_info "Creating release tag..."
     if [[ "$DRY_RUN" == "true" ]]; then
         log_dry_run "git tag --annotate --no-sign ${version}"
