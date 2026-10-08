@@ -200,13 +200,13 @@ arches:
     name: libattr
     evr: 2.6.0-1.el9_8
     sourcerpm: attr-2.6.0-1.el9_8.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libbrotli-1.0.9-9.el9_7.aarch64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libbrotli-1.0.9-10.el9_8.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
-    size: 325179
-    checksum: sha256:f5237abc90191238333c1214da97b5202c8a15c2be3ab401ee10d95343cfdf17
+    size: 325419
+    checksum: sha256:04d157b138153dcd27c04d81ae985e8190ddc542d63620f3d1ae0a690a1041b7
     name: libbrotli
-    evr: 1.0.9-9.el9_7
-    sourcerpm: brotli-1.0.9-9.el9_7.src.rpm
+    evr: 1.0.9-10.el9_8
+    sourcerpm: brotli-1.0.9-10.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libcap-2.48-10.el9_8.1.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
     size: 78021
@@ -616,12 +616,12 @@ arches:
     checksum: sha256:5d7bbbf2538361be1a11846602862c3a56809b3ea43b69b86bcf407538e9e260
     name: bash
     evr: 5.1.8-9.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/b/brotli-1.0.9-9.el9_7.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/b/brotli-1.0.9-10.el9_8.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
-    size: 517498
-    checksum: sha256:814868e0bec831c79d3e12ff76d31e06e5e62c462a1a4b6607b1f3cab7014438
+    size: 519221
+    checksum: sha256:c833ffbd6c6555543472ef4034a958cf4b8b8dee35b8661b2144ca6fc38908c7
     name: brotli
-    evr: 1.0.9-9.el9_7
+    evr: 1.0.9-10.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/b/bzip2-1.0.8-11.el9.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
     size: 828199
@@ -1199,13 +1199,13 @@ arches:
     name: libattr
     evr: 2.6.0-1.el9_8
     sourcerpm: attr-2.6.0-1.el9_8.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libbrotli-1.0.9-9.el9_7.ppc64le.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libbrotli-1.0.9-10.el9_8.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
-    size: 349508
-    checksum: sha256:ff72df4a441c2f8ee8e1bcde8dcbd5bbd89250db9caf8792ff253b7af3e1c51c
+    size: 349850
+    checksum: sha256:42e896518cf1eafcacb3de33fc0bd827d574413543166a218ee69b22653ccea9
     name: libbrotli
-    evr: 1.0.9-9.el9_7
-    sourcerpm: brotli-1.0.9-9.el9_7.src.rpm
+    evr: 1.0.9-10.el9_8
+    sourcerpm: brotli-1.0.9-10.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libcap-2.48-10.el9_8.1.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
     size: 82771
@@ -1615,12 +1615,12 @@ arches:
     checksum: sha256:5d7bbbf2538361be1a11846602862c3a56809b3ea43b69b86bcf407538e9e260
     name: bash
     evr: 5.1.8-9.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/b/brotli-1.0.9-9.el9_7.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/b/brotli-1.0.9-10.el9_8.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
-    size: 517498
-    checksum: sha256:814868e0bec831c79d3e12ff76d31e06e5e62c462a1a4b6607b1f3cab7014438
+    size: 519221
+    checksum: sha256:c833ffbd6c6555543472ef4034a958cf4b8b8dee35b8661b2144ca6fc38908c7
     name: brotli
-    evr: 1.0.9-9.el9_7
+    evr: 1.0.9-10.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/b/bzip2-1.0.8-11.el9.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
     size: 828199
@@ -2198,13 +2198,13 @@ arches:
     name: libattr
     evr: 2.6.0-1.el9_8
     sourcerpm: attr-2.6.0-1.el9_8.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libbrotli-1.0.9-9.el9_7.s390x.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libbrotli-1.0.9-10.el9_8.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
-    size: 329308
-    checksum: sha256:ea47c24d8670923c31472fac1c2887ee8124b0a142ffb8a3c4953da8bf65c238
+    size: 329468
+    checksum: sha256:1d94d6401d4dd4c75b96b810046f1918c82460e0c3e9651e98d0e0c810ba0e22
     name: libbrotli
-    evr: 1.0.9-9.el9_7
-    sourcerpm: brotli-1.0.9-9.el9_7.src.rpm
+    evr: 1.0.9-10.el9_8
+    sourcerpm: brotli-1.0.9-10.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libcap-2.48-10.el9_8.1.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
     size: 77818
@@ -2614,12 +2614,12 @@ arches:
     checksum: sha256:5d7bbbf2538361be1a11846602862c3a56809b3ea43b69b86bcf407538e9e260
     name: bash
     evr: 5.1.8-9.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/b/brotli-1.0.9-9.el9_7.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/b/brotli-1.0.9-10.el9_8.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
-    size: 517498
-    checksum: sha256:814868e0bec831c79d3e12ff76d31e06e5e62c462a1a4b6607b1f3cab7014438
+    size: 519221
+    checksum: sha256:c833ffbd6c6555543472ef4034a958cf4b8b8dee35b8661b2144ca6fc38908c7
     name: brotli
-    evr: 1.0.9-9.el9_7
+    evr: 1.0.9-10.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/b/bzip2-1.0.8-11.el9.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
     size: 828199
@@ -3197,13 +3197,13 @@ arches:
     name: libattr
     evr: 2.6.0-1.el9_8
     sourcerpm: attr-2.6.0-1.el9_8.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libbrotli-1.0.9-9.el9_7.x86_64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libbrotli-1.0.9-10.el9_8.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
-    size: 326278
-    checksum: sha256:81096e6aed022489306e2fe1d1496b2b689d8f0bf6c70a94b5bddb82356eeda1
+    size: 326501
+    checksum: sha256:ecf2cda794cb9f68a7f67742ce0aeef4c3480795cce0e9bc8f49634072fd2e07
     name: libbrotli
-    evr: 1.0.9-9.el9_7
-    sourcerpm: brotli-1.0.9-9.el9_7.src.rpm
+    evr: 1.0.9-10.el9_8
+    sourcerpm: brotli-1.0.9-10.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libcap-2.48-10.el9_8.1.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
     size: 78928
@@ -3613,12 +3613,12 @@ arches:
     checksum: sha256:5d7bbbf2538361be1a11846602862c3a56809b3ea43b69b86bcf407538e9e260
     name: bash
     evr: 5.1.8-9.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/b/brotli-1.0.9-9.el9_7.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/b/brotli-1.0.9-10.el9_8.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
-    size: 517498
-    checksum: sha256:814868e0bec831c79d3e12ff76d31e06e5e62c462a1a4b6607b1f3cab7014438
+    size: 519221
+    checksum: sha256:c833ffbd6c6555543472ef4034a958cf4b8b8dee35b8661b2144ca6fc38908c7
     name: brotli
-    evr: 1.0.9-9.el9_7
+    evr: 1.0.9-10.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/b/bzip2-1.0.8-11.el9.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
     size: 828199
