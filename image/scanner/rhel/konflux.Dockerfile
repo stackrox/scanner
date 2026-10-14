@@ -27,9 +27,9 @@ RUN echo -n "version: " && make --quiet --no-print-directory tag && \
 COPY .konflux/scanner-data/blob-genesis_manifests.json image/scanner/dump/genesis_manifests.json
 
 
-FROM registry.access.redhat.com/ubi9/ubi-micro:latest@sha256:ff30602252a3e92706585c7c34cd3c74028eaac4ab815e6b19f8b27562bdd7e3 AS ubi-micro-base
+FROM registry.access.redhat.com/ubi9/ubi-micro:latest@sha256:5be877a2a280ae36eb9ab80ca4efb28bbf77c57abbba38137cdc37a03b8465e6 AS ubi-micro-base
 
-FROM registry.access.redhat.com/ubi9/ubi:latest@sha256:beba9460df08acc9f2d5a99f61b8544d5367b05e02c945ca726c6f07ca5963a7 AS package_installer
+FROM registry.access.redhat.com/ubi9/ubi:latest@sha256:16e9e43d99e181463513cc84a514859b1abb9460f1c4d9e208da4b4e51cd5cc3 AS package_installer
 
 COPY --from=ubi-micro-base / /out/
 
