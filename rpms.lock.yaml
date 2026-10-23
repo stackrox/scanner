@@ -39,13 +39,13 @@ arches:
     name: bzip2-libs
     evr: 1.0.8-11.el9
     sourcerpm: bzip2-1.0.8-11.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/c/ca-certificates-2025.2.80_v9.0.305-91.el9.noarch.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/c/ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.noarch.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
-    size: 1072208
-    checksum: sha256:0554bf65d573950e7d550a07bf7d0b3def85ca3b45a7fbde4cce7cadd9a476a7
+    size: 1071812
+    checksum: sha256:5d29ecb5c3b2958308700381a119d623741d07e313d870dedfaf84e5c9df85cb
     name: ca-certificates
-    evr: 2025.2.80_v9.0.305-91.el9
-    sourcerpm: ca-certificates-2025.2.80_v9.0.305-91.el9.src.rpm
+    evr: 2026.2.92_v9.0.319-90.3.el9_8
+    sourcerpm: ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/c/coreutils-8.32-41.el9_8.1.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
     size: 1175876
@@ -628,12 +628,12 @@ arches:
     checksum: sha256:ba58283fc4ef85911f20a8e45ffa00497775858102d48f2a32ebf1010a1abefc
     name: bzip2
     evr: 1.0.8-11.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/c/ca-certificates-2025.2.80_v9.0.305-91.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/c/ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
-    size: 711648
-    checksum: sha256:d3193e155ddd297042a944729fe54c1b90c17bdbd1876fc68e4f66d7857f9e81
+    size: 742327
+    checksum: sha256:9a94bace1164db931a0fec5214deef662649ef846f5be13769a76de52891bfe5
     name: ca-certificates
-    evr: 2025.2.80_v9.0.305-91.el9
+    evr: 2026.2.92_v9.0.319-90.3.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/c/chkconfig-1.24-2.el9.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
     size: 214658
@@ -1038,13 +1038,13 @@ arches:
     name: bzip2-libs
     evr: 1.0.8-11.el9
     sourcerpm: bzip2-1.0.8-11.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/c/ca-certificates-2025.2.80_v9.0.305-91.el9.noarch.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/c/ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.noarch.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
-    size: 1072208
-    checksum: sha256:0554bf65d573950e7d550a07bf7d0b3def85ca3b45a7fbde4cce7cadd9a476a7
+    size: 1071812
+    checksum: sha256:5d29ecb5c3b2958308700381a119d623741d07e313d870dedfaf84e5c9df85cb
     name: ca-certificates
-    evr: 2025.2.80_v9.0.305-91.el9
-    sourcerpm: ca-certificates-2025.2.80_v9.0.305-91.el9.src.rpm
+    evr: 2026.2.92_v9.0.319-90.3.el9_8
+    sourcerpm: ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/c/coreutils-8.32-41.el9_8.1.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
     size: 1262204
@@ -1627,12 +1627,12 @@ arches:
     checksum: sha256:ba58283fc4ef85911f20a8e45ffa00497775858102d48f2a32ebf1010a1abefc
     name: bzip2
     evr: 1.0.8-11.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/c/ca-certificates-2025.2.80_v9.0.305-91.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/c/ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
-    size: 711648
-    checksum: sha256:d3193e155ddd297042a944729fe54c1b90c17bdbd1876fc68e4f66d7857f9e81
+    size: 742327
+    checksum: sha256:9a94bace1164db931a0fec5214deef662649ef846f5be13769a76de52891bfe5
     name: ca-certificates
-    evr: 2025.2.80_v9.0.305-91.el9
+    evr: 2026.2.92_v9.0.319-90.3.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/c/chkconfig-1.24-2.el9.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
     size: 214658
@@ -2037,13 +2037,13 @@ arches:
     name: bzip2-libs
     evr: 1.0.8-11.el9
     sourcerpm: bzip2-1.0.8-11.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/c/ca-certificates-2025.2.80_v9.0.305-91.el9.noarch.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/c/ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.noarch.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
-    size: 1072208
-    checksum: sha256:0554bf65d573950e7d550a07bf7d0b3def85ca3b45a7fbde4cce7cadd9a476a7
+    size: 1071812
+    checksum: sha256:5d29ecb5c3b2958308700381a119d623741d07e313d870dedfaf84e5c9df85cb
     name: ca-certificates
-    evr: 2025.2.80_v9.0.305-91.el9
-    sourcerpm: ca-certificates-2025.2.80_v9.0.305-91.el9.src.rpm
+    evr: 2026.2.92_v9.0.319-90.3.el9_8
+    sourcerpm: ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/c/coreutils-8.32-41.el9_8.1.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
     size: 1206694
@@ -2626,12 +2626,12 @@ arches:
     checksum: sha256:ba58283fc4ef85911f20a8e45ffa00497775858102d48f2a32ebf1010a1abefc
     name: bzip2
     evr: 1.0.8-11.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/c/ca-certificates-2025.2.80_v9.0.305-91.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/c/ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
-    size: 711648
-    checksum: sha256:d3193e155ddd297042a944729fe54c1b90c17bdbd1876fc68e4f66d7857f9e81
+    size: 742327
+    checksum: sha256:9a94bace1164db931a0fec5214deef662649ef846f5be13769a76de52891bfe5
     name: ca-certificates
-    evr: 2025.2.80_v9.0.305-91.el9
+    evr: 2026.2.92_v9.0.319-90.3.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/c/chkconfig-1.24-2.el9.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
     size: 214658
@@ -3036,13 +3036,13 @@ arches:
     name: bzip2-libs
     evr: 1.0.8-11.el9
     sourcerpm: bzip2-1.0.8-11.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/c/ca-certificates-2025.2.80_v9.0.305-91.el9.noarch.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/c/ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.noarch.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
-    size: 1072208
-    checksum: sha256:0554bf65d573950e7d550a07bf7d0b3def85ca3b45a7fbde4cce7cadd9a476a7
+    size: 1071812
+    checksum: sha256:5d29ecb5c3b2958308700381a119d623741d07e313d870dedfaf84e5c9df85cb
     name: ca-certificates
-    evr: 2025.2.80_v9.0.305-91.el9
-    sourcerpm: ca-certificates-2025.2.80_v9.0.305-91.el9.src.rpm
+    evr: 2026.2.92_v9.0.319-90.3.el9_8
+    sourcerpm: ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/c/coreutils-8.32-41.el9_8.1.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
     size: 1222083
@@ -3625,12 +3625,12 @@ arches:
     checksum: sha256:ba58283fc4ef85911f20a8e45ffa00497775858102d48f2a32ebf1010a1abefc
     name: bzip2
     evr: 1.0.8-11.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/c/ca-certificates-2025.2.80_v9.0.305-91.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/c/ca-certificates-2026.2.92_v9.0.319-90.3.el9_8.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
-    size: 711648
-    checksum: sha256:d3193e155ddd297042a944729fe54c1b90c17bdbd1876fc68e4f66d7857f9e81
+    size: 742327
+    checksum: sha256:9a94bace1164db931a0fec5214deef662649ef846f5be13769a76de52891bfe5
     name: ca-certificates
-    evr: 2025.2.80_v9.0.305-91.el9
+    evr: 2026.2.92_v9.0.319-90.3.el9_8
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/c/chkconfig-1.24-2.el9.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
     size: 214658
