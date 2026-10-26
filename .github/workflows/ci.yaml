@@ -18,7 +18,7 @@ jobs:
   define-scanner-job-matrix:
     outputs:
       matrix: ${{ steps.define-scanner-job-matrix.outputs.matrix }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout
       uses: actions/checkout@v7
@@ -37,7 +37,7 @@ jobs:
         echo "matrix=$condensed" >> "$GITHUB_OUTPUT"
 
   pre-build-updater:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -68,7 +68,7 @@ jobs:
 
   pre-build-scanner:
     needs: define-scanner-job-matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.define-scanner-job-matrix.outputs.matrix).build_and_push }}
@@ -98,7 +98,7 @@ jobs:
           path: scanner-build-${{ matrix.goos }}-${{ matrix.goarch }}.tgz
 
   style-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -115,7 +115,7 @@ jobs:
         run: ./scripts/ci/jobs/style-checks.sh
 
   unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -132,7 +132,7 @@ jobs:
         run: ./scripts/ci/jobs/unit-tests.sh
 
   db-integration-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
     steps:
@@ -158,7 +158,7 @@ jobs:
     env:
       NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
       ROX_NVD_FEED_LOADER: true
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - pre-build-updater
     steps:
@@ -201,7 +201,7 @@ jobs:
     if: |
       github.event_name != 'pull_request' ||
       contains(github.event.pull_request.labels.*.name, 'generate-dumps-on-pr')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: quay.io/stackrox-io/apollo-ci:scanner-test-0.4.9
     needs:
@@ -245,7 +245,7 @@ jobs:
     if: |
       always() &&
       (needs.generate-genesis-dump.result == 'success' || needs.generate-genesis-dump.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - define-scanner-job-matrix
       - pre-build-scanner
@@ -305,7 +305,7 @@ jobs:
     if: |
       always() &&
       (needs.generate-db-dump.result == 'success' || needs.generate-db-dump.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - generate-db-dump
     steps:
@@ -349,7 +349,7 @@ jobs:
       QUAY_RHACS_ENG_RW_PASSWORD: ${{ secrets.QUAY_RHACS_ENG_RW_PASSWORD }}
       QUAY_STACKROX_IO_RW_USERNAME: ${{ secrets.QUAY_STACKROX_IO_RW_USERNAME }}
       QUAY_STACKROX_IO_RW_PASSWORD: ${{ secrets.QUAY_STACKROX_IO_RW_PASSWORD }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - define-scanner-job-matrix
       - generate-scanner-bundle
@@ -427,7 +427,7 @@ jobs:
       - generate-scanner-bundle
       - generate-scanner-db-bundle
       - build-images
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       QUAY_RHACS_ENG_RW_USERNAME: ${{ secrets.QUAY_RHACS_ENG_RW_USERNAME }}
       QUAY_RHACS_ENG_RW_PASSWORD: ${{ secrets.QUAY_RHACS_ENG_RW_PASSWORD }}
@@ -469,7 +469,7 @@ jobs:
       GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER: ${{ secrets.GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER }}
       SCANNER_GCP_SERVICE_ACCOUNT_CREDS: ${{ secrets.SCANNER_GCP_SERVICE_ACCOUNT_CREDS }}
       GOOGLE_SA_CIRCLECI_SCANNER: ${{ secrets.GOOGLE_SA_CIRCLECI_SCANNER }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - generate-genesis-dump
     steps:
@@ -516,7 +516,7 @@ jobs:
     env:
       QUAY_STACKROX_IO_RW_USERNAME: ${{ secrets.QUAY_STACKROX_IO_RW_USERNAME }}
       QUAY_STACKROX_IO_RW_PASSWORD: ${{ secrets.QUAY_STACKROX_IO_RW_PASSWORD }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Only run on master branch
     if: github.ref == 'refs/heads/master'
     needs:
@@ -586,7 +586,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     env:
       GOOGLE_SA_CIRCLECI_SCANNER: ${{ secrets.GOOGLE_SA_CIRCLECI_SCANNER }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - generate-db-dump
     steps:
@@ -612,7 +612,7 @@ jobs:
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
     env:
       GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER: ${{ secrets.GOOGLE_SA_STACKROX_HUB_VULN_DUMP_UPLOADER }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - generate-db-dump
     steps:
@@ -644,7 +644,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     env:
       GOOGLE_SA_CIRCLECI_SCANNER: ${{ secrets.GOOGLE_SA_CIRCLECI_SCANNER }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - generate-db-dump
     steps:
@@ -670,7 +670,7 @@ jobs:
       - upload-dumps-for-downstream
       - upload-dumps-for-embedding
       - push-manifests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Only notify on failures from scheduled runs or tag pushes, not PRs or branch pushes.
     if: failure() && (github.event_name == 'schedule' || startsWith(github.ref, 'refs/tags/'))
     steps:
