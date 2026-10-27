@@ -36,7 +36,7 @@ spec:
       - name: name
         value: post-bigquery-metrics
       - name: bundle
-        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:d8ec333294a25c0567bdd12befcc2a4350b248c3f21935dab7d33db084ea0d04
+        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:48cf64993928085331f0bd5171bc87ec2fd488cfbf4ca2b66627ea6040e011ef
       - name: kind
         value: task
       resolver: bundles
@@ -220,7 +220,7 @@ spec:
       - name: name
         value: determine-image-expiration
       - name: bundle
-        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:d8ec333294a25c0567bdd12befcc2a4350b248c3f21935dab7d33db084ea0d04
+        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:48cf64993928085331f0bd5171bc87ec2fd488cfbf4ca2b66627ea6040e011ef
       - name: kind
         value: task
       resolver: bundles
@@ -236,7 +236,7 @@ spec:
       - name: name
         value: determine-image-tag
       - name: bundle
-        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:d8ec333294a25c0567bdd12befcc2a4350b248c3f21935dab7d33db084ea0d04
+        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:48cf64993928085331f0bd5171bc87ec2fd488cfbf4ca2b66627ea6040e011ef
       - name: kind
         value: task
       resolver: bundles
@@ -258,7 +258,7 @@ spec:
       - name: name
         value: fetch-scanner-v2-data
       - name: bundle
-        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:d8ec333294a25c0567bdd12befcc2a4350b248c3f21935dab7d33db084ea0d04
+        value: quay.io/rhacs-eng/konflux-tasks:latest@sha256:48cf64993928085331f0bd5171bc87ec2fd488cfbf4ca2b66627ea6040e011ef
       - name: kind
         value: task
       resolver: bundles
@@ -586,7 +586,7 @@ spec:
       - name: name
         value: rpms-signature-scan
       - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-rpms-signature-scan:0.2.2@sha256:b01333d3ee423a05b98fb9ff1f621e4b3d8a481f7e4e797d50bd384f0e9abedf
+        value: quay.io/konflux-ci/tekton-catalog/task-rpms-signature-scan:0.2.2@sha256:a09426471bb6300723ccca8f212cd71621db60ce1acf22bc0eef4e3ba17034de
       - name: kind
         value: task
       resolver: bundles
