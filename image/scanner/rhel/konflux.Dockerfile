@@ -1,5 +1,5 @@
 # Compiling scanner binaries and staging repo2cpe and genesis manifests
-FROM registry.redhat.io/openshift/golang-builder:golang-builder-v1.26-rhel9@sha256:0a93368c78345f50b59d0cd1733505015b9b6d532d060bf097b59c8a2c0b85dc AS builder
+FROM registry.redhat.io/openshift/golang-builder:golang-builder-v1.26-rhel9@sha256:78bd08b0aa5520dec6f388f5d17c5da6e44ee9b8f826aebc8f3264738e9532e2 AS builder
 
 ARG SCANNER_TAG
 RUN if [[ "$SCANNER_TAG" == "" ]]; then >&2 echo "error: required SCANNER_TAG arg is unset"; exit 6; fi
