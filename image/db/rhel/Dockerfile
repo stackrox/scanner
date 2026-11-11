@@ -1,6 +1,6 @@
 ARG RPMS_REGISTRY=registry.access.redhat.com
 ARG RPMS_BASE_IMAGE=ubi9
-ARG RPMS_BASE_TAG=latest
+ARG RPMS_BASE_TAG=latest@sha256:87f66688da4e206d5a1877088626c542288a5ccd97898cf363b588d57817e6be
 
 ARG BASE_REGISTRY=registry.access.redhat.com
 ARG BASE_IMAGE=ubi9-minimal
