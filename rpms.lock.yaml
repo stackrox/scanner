@@ -4,97 +4,97 @@ lockfileVendor: redhat
 arches:
 - arch: aarch64
   packages:
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/x/xz-5.2.5-8.el9_8.1.aarch64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/x/xz-5.2.5-8.el9_9.1.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
-    size: 237074
-    checksum: sha256:741ae717b43d19f9e37ed948d3aea7df69c1c7d76c9a0b1748428ee7130b06c6
+    size: 237195
+    checksum: sha256:2123a7ae7004f8b7d89788ac7d0c8cf1e4b3395a5b1ccaed2dcb87bf0140b73d
     name: xz
-    evr: 5.2.5-8.el9_8.1
-    sourcerpm: xz-5.2.5-8.el9_8.1.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/x/xz-libs-5.2.5-8.el9_8.1.aarch64.rpm
+    evr: 5.2.5-8.el9_9.1
+    sourcerpm: xz-5.2.5-8.el9_9.1.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/x/xz-libs-5.2.5-8.el9_9.1.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
-    size: 97519
-    checksum: sha256:676d05687218716506c26203552a5a4537e72c20928b03d5c245301feb936e5f
+    size: 97541
+    checksum: sha256:7e0276b53e6b210793750979f1c14a57e46f4e1a3dfbda9b020a4cc039f0e2c9
     name: xz-libs
-    evr: 5.2.5-8.el9_8.1
-    sourcerpm: xz-5.2.5-8.el9_8.1.src.rpm
+    evr: 5.2.5-8.el9_9.1
+    sourcerpm: xz-5.2.5-8.el9_9.1.src.rpm
   source:
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_8.1.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_9.1.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
-    size: 1173238
-    checksum: sha256:151d346a1a5d8f07489f0fe90d6aae9880cfc5e9b90162f615b6fbba285adc33
+    size: 1173239
+    checksum: sha256:b952209d331acc844f8175c3d9d7b9cfc136733a6caf45085a7f2d9c32f92f71
     name: xz
-    evr: 5.2.5-8.el9_8.1
+    evr: 5.2.5-8.el9_9.1
   module_metadata: []
 - arch: ppc64le
   packages:
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/x/xz-5.2.5-8.el9_8.1.ppc64le.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/x/xz-5.2.5-8.el9_9.1.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
-    size: 244011
-    checksum: sha256:5f826cb76408df063197914ae6f307800edad5120353f20a2d228c7852022907
+    size: 244185
+    checksum: sha256:4d8f24c9a082e1008ee01ff6839c6419a20cfe40714e0866285d26b42be925b9
     name: xz
-    evr: 5.2.5-8.el9_8.1
-    sourcerpm: xz-5.2.5-8.el9_8.1.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/x/xz-libs-5.2.5-8.el9_8.1.ppc64le.rpm
+    evr: 5.2.5-8.el9_9.1
+    sourcerpm: xz-5.2.5-8.el9_9.1.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/x/xz-libs-5.2.5-8.el9_9.1.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
-    size: 122235
-    checksum: sha256:109410d22fd59d2d2f98e72015f4e78bd18abd34e76a8259808a7df66321ea1f
+    size: 122234
+    checksum: sha256:f13ebcb588747e27f725bf76d8a705352cd3196f680a5c09d4aa0d8ff430f7eb
     name: xz-libs
-    evr: 5.2.5-8.el9_8.1
-    sourcerpm: xz-5.2.5-8.el9_8.1.src.rpm
+    evr: 5.2.5-8.el9_9.1
+    sourcerpm: xz-5.2.5-8.el9_9.1.src.rpm
   source:
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_8.1.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_9.1.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
-    size: 1173238
-    checksum: sha256:151d346a1a5d8f07489f0fe90d6aae9880cfc5e9b90162f615b6fbba285adc33
+    size: 1173239
+    checksum: sha256:b952209d331acc844f8175c3d9d7b9cfc136733a6caf45085a7f2d9c32f92f71
     name: xz
-    evr: 5.2.5-8.el9_8.1
+    evr: 5.2.5-8.el9_9.1
   module_metadata: []
 - arch: s390x
   packages:
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/x/xz-5.2.5-8.el9_8.1.s390x.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/x/xz-5.2.5-8.el9_9.1.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
-    size: 236087
-    checksum: sha256:1268afd3211c92ec94036eedbbd75688945a4b7b2cfe2ed44f33e60bd40d1385
+    size: 236171
+    checksum: sha256:86beccbb1e559395e9f0304b62dd883bcf8446c4446c445774494e929919a2e5
     name: xz
-    evr: 5.2.5-8.el9_8.1
-    sourcerpm: xz-5.2.5-8.el9_8.1.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/x/xz-libs-5.2.5-8.el9_8.1.s390x.rpm
+    evr: 5.2.5-8.el9_9.1
+    sourcerpm: xz-5.2.5-8.el9_9.1.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/x/xz-libs-5.2.5-8.el9_9.1.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
-    size: 98972
-    checksum: sha256:3cb80da19519a9c06821f54057fc6a69961c7fc064555d7b61066609a288b4f7
+    size: 98969
+    checksum: sha256:ecd66c4f8125f4aedf2e01e6788dd0ff3959932072bfc42415fe926b0d027b90
     name: xz-libs
-    evr: 5.2.5-8.el9_8.1
-    sourcerpm: xz-5.2.5-8.el9_8.1.src.rpm
+    evr: 5.2.5-8.el9_9.1
+    sourcerpm: xz-5.2.5-8.el9_9.1.src.rpm
   source:
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_8.1.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_9.1.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
-    size: 1173238
-    checksum: sha256:151d346a1a5d8f07489f0fe90d6aae9880cfc5e9b90162f615b6fbba285adc33
+    size: 1173239
+    checksum: sha256:b952209d331acc844f8175c3d9d7b9cfc136733a6caf45085a7f2d9c32f92f71
     name: xz
-    evr: 5.2.5-8.el9_8.1
+    evr: 5.2.5-8.el9_9.1
   module_metadata: []
 - arch: x86_64
   packages:
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/x/xz-5.2.5-8.el9_8.1.x86_64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/x/xz-5.2.5-8.el9_9.1.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
-    size: 237249
-    checksum: sha256:642e46f7fcc460ee7ec0984a63e9f68ecefbea115c9724c0bab53e885e07bf11
+    size: 237379
+    checksum: sha256:bbb1284b196846e20b3d2ceb43f795e5c8dfd6dc866196458107a68440ed410e
     name: xz
-    evr: 5.2.5-8.el9_8.1
-    sourcerpm: xz-5.2.5-8.el9_8.1.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/x/xz-libs-5.2.5-8.el9_8.1.x86_64.rpm
+    evr: 5.2.5-8.el9_9.1
+    sourcerpm: xz-5.2.5-8.el9_9.1.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/x/xz-libs-5.2.5-8.el9_9.1.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
-    size: 99498
-    checksum: sha256:0a0aed732d24942475761b6094842dd58c2eecf396f96556a1bdde0f890c97f9
+    size: 99482
+    checksum: sha256:39e0db9d5e4ca52fb7811013591f8e62b8ac2e5eecacd794539e9444a7c5774f
     name: xz-libs
-    evr: 5.2.5-8.el9_8.1
-    sourcerpm: xz-5.2.5-8.el9_8.1.src.rpm
+    evr: 5.2.5-8.el9_9.1
+    sourcerpm: xz-5.2.5-8.el9_9.1.src.rpm
   source:
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_8.1.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/x/xz-5.2.5-8.el9_9.1.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
-    size: 1173238
-    checksum: sha256:151d346a1a5d8f07489f0fe90d6aae9880cfc5e9b90162f615b6fbba285adc33
+    size: 1173239
+    checksum: sha256:b952209d331acc844f8175c3d9d7b9cfc136733a6caf45085a7f2d9c32f92f71
     name: xz
-    evr: 5.2.5-8.el9_8.1
+    evr: 5.2.5-8.el9_9.1
   module_metadata: []
