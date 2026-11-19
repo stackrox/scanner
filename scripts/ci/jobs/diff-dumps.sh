@@ -176,6 +176,7 @@ scanner_v4_create_and_add_bundles() {
 
               $curl \
                   --fail \
+                  --retry-all-errors \
                   -o "$v4_bundle" \
                   "https://definitions.stackrox.io/v4/offline-bundles/$v4_bundle"
               zip "$latest_bundle" "$v4_bundle"
