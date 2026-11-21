@@ -1,6 +1,7 @@
 package rhelv2
 
 import (
+	"bytes"
 	"compress/bzip2"
 	"io"
 	"net/http"
@@ -65,22 +66,11 @@ func doFetch(uri string) (string, io.ReadCloser, error) {
 		}
 	}
 
-	bodyToClose = nil
-	return res.Header.Get("last-modified"), newReadCloser(res.Body), nil
-}
-
-type readCloser struct {
-	io.Reader
-	body io.ReadCloser
-}
-
-func newReadCloser(body io.ReadCloser) io.ReadCloser {
-	return &readCloser{
-		Reader: bzip2.NewReader(body),
-		body:   body,
+	// The actual response body is compressed data. Read the compressed body
+	// first so the bzip2 and XML decoding aren't counted against the timeout.
+	buf, err := io.ReadAll(res.Body)
+	if err != nil {
+		return "", nil, retry.MakeRetryable(err)
 	}
-}
-
-func (rc *readCloser) Close() error {
-	return rc.body.Close()
+	return res.Header.Get("last-modified"), io.NopCloser(bzip2.NewReader(bytes.NewReader(buf))), nil
 }
