@@ -67,13 +67,13 @@ arches:
     name: crypto-policies
     evr: 20260714-1.git65b74f7.el9
     sourcerpm: crypto-policies-20260714-1.git65b74f7.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/c/curl-7.76.1-43.el9.aarch64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/c/curl-7.76.1-44.el9_9.1.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
-    size: 303520
-    checksum: sha256:748be3c077d4df82e25020ecae823e76a6a02275cd35f840f3ab2425574e1592
+    size: 304376
+    checksum: sha256:5c2971c4d1babfa4b414db496ae0c817149b3d31fc22aa9c082122c68e1a4389
     name: curl
-    evr: 7.76.1-43.el9
-    sourcerpm: curl-7.76.1-43.el9.src.rpm
+    evr: 7.76.1-44.el9_9.1
+    sourcerpm: curl-7.76.1-44.el9_9.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/c/cyrus-sasl-lib-2.1.27-22.el9.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
     size: 771760
@@ -228,13 +228,13 @@ arches:
     name: libcom_err
     evr: 1.46.5-8.el9
     sourcerpm: e2fsprogs-1.46.5-8.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libcurl-7.76.1-43.el9.aarch64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libcurl-7.76.1-44.el9_9.1.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
-    size: 292137
-    checksum: sha256:8d84b7887ca61d6a325074d04141ca8a125b276f068ca8b781e1b96a7847ddff
+    size: 293856
+    checksum: sha256:863f1091b8312fb2b3725bd76e94bb27892158bde29fb0cf8897404bbe71a4a7
     name: libcurl
-    evr: 7.76.1-43.el9
-    sourcerpm: curl-7.76.1-43.el9.src.rpm
+    evr: 7.76.1-44.el9_9.1
+    sourcerpm: curl-7.76.1-44.el9_9.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/Packages/l/libevent-2.1.13-1.el9_8.aarch64.rpm
     repoid: rhel-9-for-aarch64-baseos-rpms
     size: 268476
@@ -652,12 +652,12 @@ arches:
     checksum: sha256:13cf181788f4a15ae91dcc906f79c4f0f796c0534926b7938cf2a91f182e8b4f
     name: crypto-policies
     evr: 20260714-1.git65b74f7.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/c/curl-7.76.1-43.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/c/curl-7.76.1-44.el9_9.1.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
-    size: 2575013
-    checksum: sha256:dc13f59af93a5ab9d3db1490aa6719f3856e9f9a044ba8f41a33490e1ffd336e
+    size: 2593313
+    checksum: sha256:8c2c59213d494da5458115915f4ffdf23fdeacdf6556a8568c416e22eb7aaf86
     name: curl
-    evr: 7.76.1-43.el9
+    evr: 7.76.1-44.el9_9.1
   - url: https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/source/SRPMS/Packages/c/cyrus-sasl-2.1.27-22.el9.src.rpm
     repoid: rhel-9-for-aarch64-baseos-source-rpms
     size: 4025677
@@ -1066,13 +1066,13 @@ arches:
     name: crypto-policies
     evr: 20260714-1.git65b74f7.el9
     sourcerpm: crypto-policies-20260714-1.git65b74f7.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/c/curl-7.76.1-43.el9.ppc64le.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/c/curl-7.76.1-44.el9_9.1.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
-    size: 310306
-    checksum: sha256:83e78c892f51ef18096753563ee044e3aa00dbf1cfeb299e8b531a948151ba50
+    size: 311127
+    checksum: sha256:ea0fc969dbed07fe806284b63f2f21cb1dac4f0bf385ae2df041146e1a013e45
     name: curl
-    evr: 7.76.1-43.el9
-    sourcerpm: curl-7.76.1-43.el9.src.rpm
+    evr: 7.76.1-44.el9_9.1
+    sourcerpm: curl-7.76.1-44.el9_9.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/c/cyrus-sasl-lib-2.1.27-22.el9.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
     size: 876118
@@ -1227,13 +1227,13 @@ arches:
     name: libcom_err
     evr: 1.46.5-8.el9
     sourcerpm: e2fsprogs-1.46.5-8.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libcurl-7.76.1-43.el9.ppc64le.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libcurl-7.76.1-44.el9_9.1.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
-    size: 328970
-    checksum: sha256:84103da6759e6ca343ca452f6174eca8b6e168a90926fd215891b2f145475c9d
+    size: 330944
+    checksum: sha256:53d3159f590a208fc9b294b3fa755d66e11385e71ff0defe448be746767d68b0
     name: libcurl
-    evr: 7.76.1-43.el9
-    sourcerpm: curl-7.76.1-43.el9.src.rpm
+    evr: 7.76.1-44.el9_9.1
+    sourcerpm: curl-7.76.1-44.el9_9.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/os/Packages/l/libevent-2.1.13-1.el9_8.ppc64le.rpm
     repoid: rhel-9-for-ppc64le-baseos-rpms
     size: 290670
@@ -1651,12 +1651,12 @@ arches:
     checksum: sha256:13cf181788f4a15ae91dcc906f79c4f0f796c0534926b7938cf2a91f182e8b4f
     name: crypto-policies
     evr: 20260714-1.git65b74f7.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/c/curl-7.76.1-43.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/c/curl-7.76.1-44.el9_9.1.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
-    size: 2575013
-    checksum: sha256:dc13f59af93a5ab9d3db1490aa6719f3856e9f9a044ba8f41a33490e1ffd336e
+    size: 2593313
+    checksum: sha256:8c2c59213d494da5458115915f4ffdf23fdeacdf6556a8568c416e22eb7aaf86
     name: curl
-    evr: 7.76.1-43.el9
+    evr: 7.76.1-44.el9_9.1
   - url: https://cdn.redhat.com/content/dist/rhel9/9/ppc64le/baseos/source/SRPMS/Packages/c/cyrus-sasl-2.1.27-22.el9.src.rpm
     repoid: rhel-9-for-ppc64le-baseos-source-rpms
     size: 4025677
@@ -2065,13 +2065,13 @@ arches:
     name: crypto-policies
     evr: 20260714-1.git65b74f7.el9
     sourcerpm: crypto-policies-20260714-1.git65b74f7.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/c/curl-7.76.1-43.el9.s390x.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/c/curl-7.76.1-44.el9_9.1.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
-    size: 305022
-    checksum: sha256:da159834335abe3401ce83313c466e0d7f49ab550f3e8743891f1cae23a42fb1
+    size: 306125
+    checksum: sha256:730c95c221fef90e9dc356ce90229ee63013f058af78e1850058ae462727f498
     name: curl
-    evr: 7.76.1-43.el9
-    sourcerpm: curl-7.76.1-43.el9.src.rpm
+    evr: 7.76.1-44.el9_9.1
+    sourcerpm: curl-7.76.1-44.el9_9.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/c/cyrus-sasl-lib-2.1.27-22.el9.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
     size: 763345
@@ -2226,13 +2226,13 @@ arches:
     name: libcom_err
     evr: 1.46.5-8.el9
     sourcerpm: e2fsprogs-1.46.5-8.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libcurl-7.76.1-43.el9.s390x.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libcurl-7.76.1-44.el9_9.1.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
-    size: 291512
-    checksum: sha256:d11f1303f3af6ddb5af16b8d182ca75dfd7604b76d190ef256d6af193f69a540
+    size: 293688
+    checksum: sha256:3df69030a1becfcaad995abc95ba207fa49226143c707e56ccd054e6cf015cd9
     name: libcurl
-    evr: 7.76.1-43.el9
-    sourcerpm: curl-7.76.1-43.el9.src.rpm
+    evr: 7.76.1-44.el9_9.1
+    sourcerpm: curl-7.76.1-44.el9_9.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/os/Packages/l/libevent-2.1.13-1.el9_8.s390x.rpm
     repoid: rhel-9-for-s390x-baseos-rpms
     size: 267419
@@ -2650,12 +2650,12 @@ arches:
     checksum: sha256:13cf181788f4a15ae91dcc906f79c4f0f796c0534926b7938cf2a91f182e8b4f
     name: crypto-policies
     evr: 20260714-1.git65b74f7.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/c/curl-7.76.1-43.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/c/curl-7.76.1-44.el9_9.1.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
-    size: 2575013
-    checksum: sha256:dc13f59af93a5ab9d3db1490aa6719f3856e9f9a044ba8f41a33490e1ffd336e
+    size: 2593313
+    checksum: sha256:8c2c59213d494da5458115915f4ffdf23fdeacdf6556a8568c416e22eb7aaf86
     name: curl
-    evr: 7.76.1-43.el9
+    evr: 7.76.1-44.el9_9.1
   - url: https://cdn.redhat.com/content/dist/rhel9/9/s390x/baseos/source/SRPMS/Packages/c/cyrus-sasl-2.1.27-22.el9.src.rpm
     repoid: rhel-9-for-s390x-baseos-source-rpms
     size: 4025677
@@ -3064,13 +3064,13 @@ arches:
     name: crypto-policies
     evr: 20260714-1.git65b74f7.el9
     sourcerpm: crypto-policies-20260714-1.git65b74f7.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/c/curl-7.76.1-43.el9.x86_64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/c/curl-7.76.1-44.el9_9.1.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
-    size: 306670
-    checksum: sha256:4541fc2ae8a59ffac4ce6f56ed65b98e8b8732b80ec8dfc7b422eec264a9d7c0
+    size: 307519
+    checksum: sha256:a02e7c3153479802dcf968039d897854f684a93b36e6e8bceb27bea111a2c65e
     name: curl
-    evr: 7.76.1-43.el9
-    sourcerpm: curl-7.76.1-43.el9.src.rpm
+    evr: 7.76.1-44.el9_9.1
+    sourcerpm: curl-7.76.1-44.el9_9.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/c/cyrus-sasl-lib-2.1.27-22.el9.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
     size: 786202
@@ -3225,13 +3225,13 @@ arches:
     name: libcom_err
     evr: 1.46.5-8.el9
     sourcerpm: e2fsprogs-1.46.5-8.el9.src.rpm
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libcurl-7.76.1-43.el9.x86_64.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libcurl-7.76.1-44.el9_9.1.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
-    size: 296462
-    checksum: sha256:559f7860238ae58a0a73da9d0c0d8b133704be50539a904b91545a057fc4cc69
+    size: 298461
+    checksum: sha256:16b19a832972e7611eb1e9e5de3f9db7276f15afa9f98f8f3003b73849ccaf38
     name: libcurl
-    evr: 7.76.1-43.el9
-    sourcerpm: curl-7.76.1-43.el9.src.rpm
+    evr: 7.76.1-44.el9_9.1
+    sourcerpm: curl-7.76.1-44.el9_9.1.src.rpm
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/Packages/l/libevent-2.1.13-1.el9_8.x86_64.rpm
     repoid: rhel-9-for-x86_64-baseos-rpms
     size: 276162
@@ -3649,12 +3649,12 @@ arches:
     checksum: sha256:13cf181788f4a15ae91dcc906f79c4f0f796c0534926b7938cf2a91f182e8b4f
     name: crypto-policies
     evr: 20260714-1.git65b74f7.el9
-  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/c/curl-7.76.1-43.el9.src.rpm
+  - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/c/curl-7.76.1-44.el9_9.1.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
-    size: 2575013
-    checksum: sha256:dc13f59af93a5ab9d3db1490aa6719f3856e9f9a044ba8f41a33490e1ffd336e
+    size: 2593313
+    checksum: sha256:8c2c59213d494da5458115915f4ffdf23fdeacdf6556a8568c416e22eb7aaf86
     name: curl
-    evr: 7.76.1-43.el9
+    evr: 7.76.1-44.el9_9.1
   - url: https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/source/SRPMS/Packages/c/cyrus-sasl-2.1.27-22.el9.src.rpm
     repoid: rhel-9-for-x86_64-baseos-source-rpms
     size: 4025677
